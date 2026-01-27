@@ -22,7 +22,7 @@ cd student-app
 # Check Drift database files
 echo ""
 echo "Checking Drift database..."
-if [ -f "lib/database/database.dart" ] || [ -f "lib/src/database/database.dart" ]; then
+if [ -f "lib/database/database.dart" ] || [ -f "lib/src/database/database.dart" ] || [ -f "lib/src/core/database/database.dart" ]; then
   echo "  OK: Database file exists"
 else
   echo "  ERROR: database.dart not found"

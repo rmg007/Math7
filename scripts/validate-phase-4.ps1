@@ -37,13 +37,22 @@ if (Test-Path "student-app") {
     }
     
     # Run production build
-    Write-Host "  Building release APK..."
-    $buildResult = flutter build apk --release 2>&1
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "  OK: Release APK built successfully" -ForegroundColor Green
+    $androidSdkRoot = $env:ANDROID_SDK_ROOT
+    $androidHome = $env:ANDROID_HOME
+    $homeSdk = Join-Path $HOME "Android/Sdk"
+
+    if (($androidSdkRoot -and (Test-Path $androidSdkRoot)) -or ($androidHome -and (Test-Path $androidHome)) -or (Test-Path $homeSdk)) {
+        Write-Host "  Building release APK..."
+        $buildResult = flutter build apk --release 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "  OK: Release APK built successfully" -ForegroundColor Green
+        } else {
+            Write-Host "  ERROR: Release APK build failed" -ForegroundColor Red
+            $errors++
+        }
     } else {
-        Write-Host "  ERROR: Release APK build failed" -ForegroundColor Red
-        $errors++
+        Write-Host "  WARNING: Android SDK not found; skipping release APK build" -ForegroundColor Yellow
+        $warnings++
     }
     
     Set-Location $originalLocation

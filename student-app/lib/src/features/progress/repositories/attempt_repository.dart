@@ -38,7 +38,7 @@ class AttemptRepository {
 
     final attempt = AttemptsCompanion(
       id: Value(attemptId),
-      userId: Value(_userId!),
+      userId: Value(_userId),
       questionId: Value(questionId),
       response: Value(jsonEncode(response)),
       isCorrect: Value(isCorrect),
@@ -86,7 +86,7 @@ class AttemptRepository {
     }
 
     return (_database.select(_database.attempts)
-          ..where((a) => a.userId.equals(_userId!))
+          ..where((a) => a.userId.equals(_userId))
           ..orderBy([(a) => OrderingTerm.desc(a.createdAt)]))
         .watch();
   }
@@ -98,7 +98,7 @@ class AttemptRepository {
     }
 
     return (_database.select(_database.attempts)
-          ..where((a) => a.userId.equals(_userId!))
+          ..where((a) => a.userId.equals(_userId))
           ..where((a) => a.questionId.equals(questionId))
           ..orderBy([(a) => OrderingTerm.desc(a.createdAt)]))
         .get();

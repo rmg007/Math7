@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  flutter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Flutter pub get
+        run: cd student-app && flutter pub get
+      - name: Flutter analyze
+        run: cd student-app && flutter analyze
+      - name: Flutter test
+        run: cd student-app && flutter test
+
+  admin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: admin-panel/package-lock.json
+      - name: Install
+        run: cd admin-panel && npm ci
+      - name: Lint
+        run: cd admin-panel && npm run lint
+      - name: Build
+        run: cd admin-panel && npm run build

@@ -36,12 +36,33 @@ if [ -d "student-app" ]; then
   fi
   
   # Run production build
-  echo "  Building release APK..."
-  if flutter build apk --release; then
-    echo "  OK: Release APK built successfully"
+  if [ -n "${ANDROID_SDK_ROOT:-}" ] && [ -d "${ANDROID_SDK_ROOT}" ]; then
+    echo "  Building release APK..."
+    if flutter build apk --release; then
+      echo "  OK: Release APK built successfully"
+    else
+      echo "  ERROR: Release APK build failed"
+      ERRORS=$((ERRORS + 1))
+    fi
+  elif [ -n "${ANDROID_HOME:-}" ] && [ -d "${ANDROID_HOME}" ]; then
+    echo "  Building release APK..."
+    if flutter build apk --release; then
+      echo "  OK: Release APK built successfully"
+    else
+      echo "  ERROR: Release APK build failed"
+      ERRORS=$((ERRORS + 1))
+    fi
+  elif [ -d "${HOME}/Android/Sdk" ]; then
+    echo "  Building release APK..."
+    if flutter build apk --release; then
+      echo "  OK: Release APK built successfully"
+    else
+      echo "  ERROR: Release APK build failed"
+      ERRORS=$((ERRORS + 1))
+    fi
   else
-    echo "  ERROR: Release APK build failed"
-    ERRORS=$((ERRORS + 1))
+    echo "  WARNING: Android SDK not found; skipping release APK build"
+    WARNINGS=$((WARNINGS + 1))
   fi
   
   cd ..

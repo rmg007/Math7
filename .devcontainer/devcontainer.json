@@ -1,0 +1,4 @@
+{
+  "name": "Math7",
+  "postCreateCommand": "bash .devcontainer/setup-android.sh"
+}

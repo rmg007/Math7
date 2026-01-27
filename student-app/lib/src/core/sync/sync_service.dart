@@ -152,7 +152,7 @@ class SyncService extends StateNotifier<SyncState> {
         .gt('updated_at', lastSync.toIso8601String())
         .isFilter('deleted_at', null);
 
-    if (response is List && response.isNotEmpty) {
+    if (response.isNotEmpty) {
       final domains = response.map((json) {
         return DomainsCompanion(
           id: Value(json['id'] as String),
@@ -188,7 +188,7 @@ class SyncService extends StateNotifier<SyncState> {
         .gt('updated_at', lastSync.toIso8601String())
         .isFilter('deleted_at', null);
 
-    if (response is List && response.isNotEmpty) {
+    if (response.isNotEmpty) {
       final skills = response.map((json) {
         return SkillsCompanion(
           id: Value(json['id'] as String),
@@ -226,7 +226,7 @@ class SyncService extends StateNotifier<SyncState> {
         .gt('updated_at', lastSync.toIso8601String())
         .isFilter('deleted_at', null);
 
-    if (response is List && response.isNotEmpty) {
+    if (response.isNotEmpty) {
       final questions = response.map((json) {
         return QuestionsCompanion(
           id: Value(json['id'] as String),
