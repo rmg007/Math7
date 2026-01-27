@@ -2,7 +2,8 @@
 set -euo pipefail
 
 sudo apt-get update
-sudo apt-get install -y openjdk-17-jdk unzip curl
+# Java is installed via devcontainer Feature.
+sudo apt-get install -y unzip curl
 
 ANDROID_SDK_ROOT="${HOME}/android-sdk"
 

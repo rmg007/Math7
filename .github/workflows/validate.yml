@@ -1,0 +1,96 @@
+name: Validation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-phases-0-3:
+    runs-on: ubuntu-latest
+    env:
+      STRICT: 1
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          cache: true
+          
+      - name: Install dependencies
+        run: |
+          npm install -g supabase
+          cd admin-panel && npm ci
+          cd ../student-app && flutter pub get
+          # Pre-download web sdk for flutter to avoid timeout in Phase 2
+          flutter precache --web
+
+      - name: Validate Phase -1
+        run: ./scripts/validate-phase--1.sh
+        
+      - name: Validate Phase 0
+        run: ./scripts/validate-phase-0.sh
+        
+      - name: Validate Phase 1
+        # Expects Supabase CLI and Docker (present in ubuntu-latest)
+        run: ./scripts/validate-phase-1.sh
+        
+      - name: Validate Phase 2
+        # Tries web-server since no android device
+        run: ./scripts/validate-phase-2.sh
+        
+      - name: Validate Phase 3
+        run: ./scripts/validate-phase-3.sh
+        
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-phases-0-3
+          path: artifacts/validation/*.log
+
+  validate-phase-4-android:
+    runs-on: ubuntu-latest
+    env:
+      STRICT: 1
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          cache: true
+          
+      - name: Setup Android SDK
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platforms;android-34" "build-tools;34.0.0" "cmdline-tools;latest"
+          # Flutter doctor mentions API 36 sometimes, but 34 is stable. 
+          # We'll stick to 34 unless build fails.
+          
+      - name: Install Dependencies
+        run: |
+          # Sentry needs to be present for checks
+          cd student-app && flutter pub get
+          
+      - name: Validate Phase 4
+        # Requires Android SDK and builds APK with dummy Sentry tokens
+        run: ./scripts/validate-phase-4.sh
+        
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-phase-4
+          path: artifacts/validation/*.log

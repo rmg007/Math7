@@ -1,4 +1,36 @@
 {
   "name": "Math7",
-  "postCreateCommand": "bash .devcontainer/setup-android.sh"
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17",
+      "jdkDistro": "ms"
+    },
+    "ghcr.io/devcontainers-contrib/features/flutter:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers-contrib/features/supabase-cli:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": true
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "enableNonRootDocker": "true",
+      "moby": "true"
+    }
+  },
+  "mounts": [
+    "source=math7-pub-cache,target=/home/vscode/.pub-cache,type=volume",
+    "source=math7-npm-cache,target=/home/vscode/.npm,type=volume",
+    "source=math7-node-modules,target=${containerWorkspaceFolder}/admin-panel/node_modules,type=volume",
+    "source=math7-android-sdk,target=/home/vscode/android-sdk,type=volume",
+    "source=math7-docker-graph,target=/var/lib/docker,type=volume"
+  ],
+  "remoteUser": "vscode",
+  "postCreateCommand": "bash .devcontainer/setup-android.sh",
+  "postStartCommand": "bash scripts/cleanup_disk.sh"
 }

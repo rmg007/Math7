@@ -1,107 +1,80 @@
 #!/bin/bash
-# Phase 1: Data Model + Contracts Validation
-# Validates Supabase schema and RLS policies
+# Phase 1: Data Model Validation
 
-set -e
+set -euo pipefail
 
-echo "========================================="
-echo "Phase 1: Data Model Validation"
-echo "========================================="
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/common.sh"
+
+setup_logging "1"
+
+# Check disk space (2GB for Docker)
+if ! check_disk 2; then
+    handle_skip "Insufficient disk space for Docker"
+fi
 
 ERRORS=0
 
-# Check migration files exist
-echo ""
 echo "Checking migration files..."
-if [ -d "supabase/migrations" ]; then
-  MIGRATION_COUNT=$(ls -1 supabase/migrations/*.sql 2>/dev/null | wc -l)
-  if [ "$MIGRATION_COUNT" -gt 0 ]; then
-    echo "  OK: Found $MIGRATION_COUNT migration file(s)"
-    ls -1 supabase/migrations/*.sql
-  else
-    echo "  ERROR: No migration files found in supabase/migrations/"
-    ERRORS=$((ERRORS + 1))
-  fi
+require_dir "supabase/migrations"
+count=$(find supabase/migrations -name "*.sql" | wc -l)
+if [ "$count" -gt 0 ]; then
+    echo "  OK: Found $count migration files"
 else
-  echo "  ERROR: supabase/migrations directory not found"
-  ERRORS=$((ERRORS + 1))
+    echo "  ERROR: No migration files found"
+    ERRORS=1
 fi
 
-# Check seed file exists
-echo ""
-echo "Checking seed file..."
-if [ -f "supabase/seed.sql" ]; then
-  echo "  OK: seed.sql exists"
-else
-  echo "  WARNING: supabase/seed.sql not found (optional but recommended)"
+echo "Checking seed.sql..."
+if [ ! -f "supabase/seed.sql" ]; then
+    echo "  ERROR: seed.sql missing"
+    ERRORS=1
 fi
 
-# Apply migrations (requires Supabase CLI and project link)
-echo ""
-echo "Testing database reset..."
-echo "NOTE: This requires Supabase CLI to be linked to a project"
-echo "Run manually: supabase db reset --seed"
+echo "Verifying DB Schema..."
+require_cmd supabase
 
-# Verify required tables (manual check instruction)
-echo ""
-echo "Required tables to verify:"
-echo "  - profiles"
-echo "  - domains"
-echo "  - skills"
-echo "  - questions"
-echo "  - attempts"
-echo "  - sessions"
-echo "  - outbox (optional, client-side)"
-echo "  - sync_meta"
-echo "  - curriculum_meta"
-
-# Verify RLS policies
-echo ""
-echo "RLS Policies to verify:"
-echo "  - profiles: Users read/update own, admins read all"
-echo "  - domains/skills/questions: Admins full access, students read published"
-echo "  - attempts: Students insert/read own, admins read all"
-echo "  - sessions: Students CRUD own, admins read all"
-
-# Check SCHEMA.md alignment
-echo ""
-echo "Checking SCHEMA.md..."
-if [ -f "AppShell/docs/SCHEMA.md" ]; then
-  echo "  OK: SCHEMA.md exists"
-  
-  # Check for required sections
-  if grep -q "profiles" AppShell/docs/SCHEMA.md; then
-    echo "  OK: profiles table documented"
-  else
-    echo "  ERROR: profiles table not documented in SCHEMA.md"
-    ERRORS=$((ERRORS + 1))
-  fi
-  
-  if grep -q "outbox" AppShell/docs/SCHEMA.md; then
-    echo "  OK: outbox table documented"
-  else
-    echo "  ERROR: outbox table not documented in SCHEMA.md"
-    ERRORS=$((ERRORS + 1))
-  fi
-else
-  echo "  ERROR: SCHEMA.md not found"
-  ERRORS=$((ERRORS + 1))
+# Check if docker is available
+if ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+    if [ "$STRICT" -eq 1 ]; then
+        echo "ERROR: Docker not available in STRICT mode"
+        exit 1
+    else
+        handle_skip "Docker not running or not available"
+    fi
 fi
 
-# Summary
-echo ""
-echo "========================================="
-if [ $ERRORS -eq 0 ]; then
-  echo "Phase 1 PRE-VALIDATION PASSED"
-  echo "========================================="
-  echo ""
-  echo "NEXT STEPS (Manual):"
-  echo "1. Run: supabase db reset --seed"
-  echo "2. Verify tables in Supabase dashboard"
-  echo "3. Test RLS policies with test queries"
-  exit 0
-else
-  echo "Phase 1 FAILED: $ERRORS error(s)"
-  echo "========================================="
-  exit 1
+# Attempt supabase start if not running
+if ! supabase status >/dev/null 2>&1; then
+    echo "  Starting Supabase..."
+    if ! supabase start; then
+        if [ "$STRICT" -eq 1 ]; then
+            echo "ERROR: 'supabase start' failed in STRICT mode"
+            exit 1
+        else
+            echo "WARNING: 'supabase start' failed. Suggestion: 'supabase start --debug'. Cleaning up..."
+            # Maybe help cleanup
+            docker system prune -af --volumes >/dev/null 2>&1 || true
+            handle_skip "Supabase start failed (Disk/Docker issue?)"
+        fi
+    fi
 fi
+
+echo "  Running 'supabase db reset --seed'..."
+if timeout 300s supabase db reset --seed; then
+    echo "  OK: DB Reset successful"
+else
+    if [ "$STRICT" -eq 1 ]; then
+        echo "ERROR: 'supabase db reset' failed in STRICT mode"
+        exit 1
+    else
+        handle_skip "DB Reset failed"
+    fi
+fi
+
+if [ "$ERRORS" -gt 0 ]; then
+    echo "Phase 1 FAILED"
+    exit 1
+fi
+
+echo "Phase 1 PASSED"

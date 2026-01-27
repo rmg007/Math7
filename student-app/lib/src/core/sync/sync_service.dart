@@ -96,7 +96,7 @@ class SyncService extends StateNotifier<SyncState> {
             // Use batch_submit_attempts RPC for attempts
             if (item.table == 'attempts') {
               await _supabase.rpc('batch_submit_attempts', params: {
-                'attempts': [payload],
+                'attempts_json': [payload],
               });
             } else {
               await _supabase.from(item.table).upsert(payload);

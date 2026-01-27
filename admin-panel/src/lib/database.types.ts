@@ -119,6 +119,50 @@ export interface Database {
             deleted_at?: string | null
         }
       }
+      questions: {
+          Row: {
+            id: string
+            skill_id: string
+            type: Database['public']['Enums']['question_type']
+            content: string
+            options: Json
+            solution: Json
+            explanation: string | null
+            points: number
+            is_published: boolean
+            created_at: string
+            updated_at: string
+            deleted_at: string | null
+          }
+          Insert: {
+            id?: string
+            skill_id: string
+            type?: Database['public']['Enums']['question_type']
+            content: string
+            options?: Json
+            solution: Json
+            explanation?: string | null
+            points?: number
+            is_published?: boolean
+            created_at?: string
+            updated_at?: string
+            deleted_at?: string | null
+          }
+          Update: {
+            id?: string
+            skill_id?: string
+            type?: Database['public']['Enums']['question_type']
+            content?: string
+            options?: Json
+            solution?: Json
+            explanation?: string | null
+            points?: number
+            is_published?: boolean
+            created_at?: string
+            updated_at?: string
+            deleted_at?: string | null
+          }
+      }
     }
     Views: {
       [_: string]: {
