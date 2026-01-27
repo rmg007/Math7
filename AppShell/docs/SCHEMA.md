@@ -1,0 +1,749 @@
+# SCHEMA.md (Database Source of Truth)
+
+> **Executable Source of Truth**: The migrations in `supabase/migrations/*.sql` are the 
+> executable source of truth. This document is explanatory reference only.
+> If this file conflicts with the migrations, the migrations take precedence.
+
+## 1. Design Philosophy (Agent Instructions)
+
+* **Target Engine**: PostgreSQL 15+ (Supabase).
+* **Idempotency**: All migrations must be safe to run multiple times (`IF NOT EXISTS`).
+* **Offline-First Requirement**: Every table **MUST** have `updated_at` and `deleted_at` (Soft Delete) columns. This is non-negotiable for the differential sync engine.
+* **Security**: RLS is mandatory. No table is public.
+
+---
+
+## 2. Enum Types
+
+Define these first to enforce strict typing.
+
+```sql
+-- User Roles
+CREATE TYPE public.user_role AS ENUM ('admin', 'student');
+
+-- Question Types (Extensible)
+-- NOTE: Maps to AGENTS.md code patterns as follows:
+--   multiple_choice -> mcq_single
+--   mcq_multi -> multiple select
+--   text_input -> free text entry
+--   boolean -> true/false
+--   reorder_steps -> drag-and-drop ordering
+CREATE TYPE public.question_type AS ENUM (
+  'multiple_choice',  -- Single correct answer from options
+  'mcq_multi',        -- Multiple correct answers allowed
+  'text_input',       -- Free text entry
+  'boolean',          -- True/False
+  'reorder_steps'     -- Order items correctly
+);
+```
+
+---
+
+## 3. Table Definitions
+
+### A. User Management (`profiles`)
+
+*Extends Supabase `auth.users`. Handles user identity.*
+
+```sql
+CREATE TABLE public.profiles (
+  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  role user_role DEFAULT 'student'::user_role NOT NULL,
+  email TEXT NOT NULL,
+  full_name TEXT,
+  avatar_url TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  deleted_at TIMESTAMPTZ -- Null = Active
+);
+
+-- RLS: Users can read/update own profile. Admins can read all.
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+```
+
+### B. Curriculum Hierarchy (`domains`, `skills`)
+
+*The structural backbone of the learning content.*
+
+```sql
+-- Top level subjects (e.g., "Mathematics", "Physics")
+CREATE TABLE public.domains (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  slug TEXT UNIQUE NOT NULL,                    -- url-friendly-id (regex: ^[a-z0-9_]+$)
+  title TEXT NOT NULL,
+  description TEXT,
+  sort_order INTEGER DEFAULT 0 NOT NULL,
+  is_published BOOLEAN DEFAULT FALSE NOT NULL,  -- Only published content visible to students
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  deleted_at TIMESTAMPTZ
+);
+
+-- Specific topics within a domain (e.g., "Algebra I")
+CREATE TABLE public.skills (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  domain_id UUID REFERENCES public.domains(id) ON DELETE CASCADE NOT NULL,
+  slug TEXT NOT NULL,                           -- Unique within domain
+  title TEXT NOT NULL,
+  description TEXT,
+  difficulty_level INTEGER DEFAULT 1 CHECK (difficulty_level BETWEEN 1 AND 5),
+  sort_order INTEGER DEFAULT 0 NOT NULL,
+  is_published BOOLEAN DEFAULT FALSE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  deleted_at TIMESTAMPTZ,
+  UNIQUE(domain_id, slug)
+);
+
+-- RLS: Admins full access. Students read only published, non-deleted.
+ALTER TABLE public.domains ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.skills ENABLE ROW LEVEL SECURITY;
+```
+
+### C. Content (`questions`)
+
+*The actual quiz content. Uses JSONB for flexible answer structures.*
+
+```sql
+CREATE TABLE public.questions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  skill_id UUID REFERENCES public.skills(id) ON DELETE CASCADE NOT NULL,
+  type question_type DEFAULT 'multiple_choice'::question_type NOT NULL,
+  
+  -- The prompt/question text (supports Markdown)
+  content TEXT NOT NULL, 
+  
+  -- Structured data for choices. 
+  -- Schema for multiple_choice: { "options": [{ "id": "a", "text": "Option A" }, ...] }
+  -- Schema for text_input: { "placeholder": "Enter your answer" }
+  -- Schema for boolean: {} (no options needed)
+  options JSONB DEFAULT '{}'::jsonb NOT NULL, 
+  
+  -- The correct answer key. 
+  -- Schema for multiple_choice: { "correct_option_id": "a" }
+  -- Schema for text_input: { "exact_match": "Paris", "case_sensitive": false }
+  -- Schema for boolean: { "correct_value": true }
+  solution JSONB NOT NULL,
+  
+  explanation TEXT,                              -- Shown after answering
+  points INTEGER DEFAULT 1 NOT NULL,             -- Points awarded for correct answer
+  
+  is_published BOOLEAN DEFAULT FALSE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  deleted_at TIMESTAMPTZ
+);
+
+-- RLS: Admins full access. Students read only published, non-deleted.
+ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
+```
+
+### D. Student Progress (`attempts`)
+
+*Transactional data generated by students. NEVER DELETED - Union merge strategy.*
+
+```sql
+CREATE TABLE public.attempts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  -- IMPORTANT: user_id defaults to auth.uid() and should NOT be sent by clients
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL DEFAULT auth.uid(),
+  question_id UUID REFERENCES public.questions(id) ON DELETE CASCADE NOT NULL,
+  
+  -- The user's input (same schema as solution for comparison)
+  response JSONB NOT NULL, 
+  
+  is_correct BOOLEAN DEFAULT FALSE NOT NULL,
+  score_awarded INTEGER DEFAULT 0 NOT NULL,
+  time_spent_ms INTEGER,                         -- Milliseconds spent on question
+  
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  deleted_at TIMESTAMPTZ                         -- Usually null, but needed for sync consistency
+);
+
+-- Index for fast sync on high-volume table
+CREATE INDEX idx_attempts_user_updated ON public.attempts(user_id, updated_at);
+
+-- RLS: Students can insert/read own attempts. Admins can read all.
+ALTER TABLE public.attempts ENABLE ROW LEVEL SECURITY;
+```
+
+### E. Practice Sessions (`sessions`)
+
+*Tracks student practice sessions for analytics and resumption.*
+
+```sql
+CREATE TABLE public.sessions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  -- IMPORTANT: user_id defaults to auth.uid() and should NOT be sent by clients
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL DEFAULT auth.uid(),
+  skill_id UUID REFERENCES public.skills(id) ON DELETE SET NULL,
+  
+  started_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  ended_at TIMESTAMPTZ,                          -- Null = session still active
+  
+  questions_attempted INTEGER DEFAULT 0 NOT NULL,
+  questions_correct INTEGER DEFAULT 0 NOT NULL,
+  total_time_ms INTEGER DEFAULT 0 NOT NULL,      -- Accumulated time in session
+  
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  deleted_at TIMESTAMPTZ
+);
+
+-- Index for user session history
+CREATE INDEX idx_sessions_user_id ON public.sessions(user_id, started_at DESC);
+
+-- RLS: Students can manage their own sessions. Admins can read all.
+ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;
+```
+
+### F. Skill Progress Aggregates (`skill_progress`)
+
+*Pre-computed progress per student per skill. Updated on each attempt. Critical for mastery tracking.*
+
+```sql
+CREATE TABLE public.skill_progress (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  -- IMPORTANT: user_id defaults to auth.uid() and should NOT be sent by clients
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL DEFAULT auth.uid(),
+  skill_id UUID REFERENCES public.skills(id) ON DELETE CASCADE NOT NULL,
+  
+  total_attempts INTEGER DEFAULT 0 NOT NULL,
+  correct_attempts INTEGER DEFAULT 0 NOT NULL,
+  total_points INTEGER DEFAULT 0 NOT NULL,
+  
+  -- Mastery level: 0-100 percentage based on (correct_attempts / total_attempts) * 100
+  -- Updated via trigger or application logic
+  mastery_level INTEGER DEFAULT 0 NOT NULL CHECK (mastery_level BETWEEN 0 AND 100),
+  
+  -- Streak tracking for gamification
+  current_streak INTEGER DEFAULT 0 NOT NULL,
+  best_streak INTEGER DEFAULT 0 NOT NULL,
+  
+  last_attempt_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  deleted_at TIMESTAMPTZ,
+  
+  UNIQUE(user_id, skill_id)
+);
+
+-- Index for user progress queries
+CREATE INDEX idx_skill_progress_user_id ON public.skill_progress(user_id);
+CREATE INDEX idx_skill_progress_skill_id ON public.skill_progress(skill_id);
+CREATE INDEX idx_skill_progress_updated_at ON public.skill_progress(updated_at);
+
+-- RLS: Students can read/update own progress. Admins can read all.
+ALTER TABLE public.skill_progress ENABLE ROW LEVEL SECURITY;
+```
+
+### H. Offline Sync Support (`outbox`, `sync_meta`)
+
+*Critical for offline-first architecture. These tables exist both server-side (for reference) and client-side (Drift/SQLite).*
+
+```sql
+-- Outbox: Queue for pending sync operations (primarily client-side)
+-- Server-side version is for documentation/testing purposes
+CREATE TABLE public.outbox (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  table_name TEXT NOT NULL,
+  action TEXT NOT NULL CHECK (action IN ('INSERT', 'UPDATE', 'DELETE', 'UPSERT')),
+  record_id UUID NOT NULL,
+  payload JSONB NOT NULL,
+  
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  synced_at TIMESTAMPTZ,                         -- Null = not yet synced
+  error_message TEXT,                            -- Last sync error if any
+  retry_count INTEGER DEFAULT 0 NOT NULL
+);
+
+-- Sync Metadata: Track last sync timestamp per table
+CREATE TABLE public.sync_meta (
+  table_name TEXT PRIMARY KEY,
+  last_synced_at TIMESTAMPTZ NOT NULL DEFAULT '1970-01-01T00:00:00Z',
+  sync_version INTEGER DEFAULT 1 NOT NULL,       -- For breaking change detection
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Initialize sync_meta for all syncable tables
+INSERT INTO public.sync_meta (table_name) VALUES
+  ('domains'),
+  ('skills'),
+  ('questions'),
+  ('attempts'),
+  ('sessions'),
+  ('skill_progress')
+ON CONFLICT (table_name) DO NOTHING;
+```
+
+### I. Curriculum Metadata (`curriculum_meta`)
+
+*Singleton table for tracking curriculum version and publish state.*
+
+```sql
+CREATE TABLE public.curriculum_meta (
+  id TEXT PRIMARY KEY DEFAULT 'singleton' CHECK (id = 'singleton'),
+  version INTEGER DEFAULT 1 NOT NULL,
+  last_published_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Insert singleton row
+INSERT INTO public.curriculum_meta (id) VALUES ('singleton') ON CONFLICT DO NOTHING;
+```
+
+---
+
+## 4. Row Level Security (RLS) Policies
+
+### Helper Function (Check Admin)
+
+```sql
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+### Policy Definitions
+
+**1. Profiles Table**
+```sql
+-- Users can view their own profile
+CREATE POLICY "Users can view own profile" ON public.profiles
+  FOR SELECT USING (auth.uid() = id);
+
+-- Users can update their own profile
+CREATE POLICY "Users can update own profile" ON public.profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+-- Admins can view all profiles
+CREATE POLICY "Admins can view all profiles" ON public.profiles
+  FOR SELECT USING (is_admin());
+```
+
+**2. Content Tables (domains, skills, questions)**
+```sql
+-- Admins have full access
+CREATE POLICY "Admins full access to domains" ON public.domains
+  FOR ALL USING (is_admin());
+
+CREATE POLICY "Admins full access to skills" ON public.skills
+  FOR ALL USING (is_admin());
+
+CREATE POLICY "Admins full access to questions" ON public.questions
+  FOR ALL USING (is_admin());
+
+-- Students can read published, non-deleted content
+CREATE POLICY "Students can read published domains" ON public.domains
+  FOR SELECT USING (is_published = true AND deleted_at IS NULL);
+
+CREATE POLICY "Students can read published skills" ON public.skills
+  FOR SELECT USING (is_published = true AND deleted_at IS NULL);
+
+CREATE POLICY "Students can read published questions" ON public.questions
+  FOR SELECT USING (is_published = true AND deleted_at IS NULL);
+```
+
+**3. Attempts Table**
+```sql
+-- Students can insert their own attempts
+CREATE POLICY "Students can insert own attempts" ON public.attempts
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Students can view their own attempts
+CREATE POLICY "Students can view own attempts" ON public.attempts
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- Admins can view all attempts
+CREATE POLICY "Admins can view all attempts" ON public.attempts
+  FOR SELECT USING (is_admin());
+```
+
+**4. Sessions Table**
+```sql
+-- Students can create their own sessions
+CREATE POLICY "Students can insert own sessions" ON public.sessions
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Students can view their own sessions
+CREATE POLICY "Students can view own sessions" ON public.sessions
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- Students can update their own sessions (end session, update stats)
+CREATE POLICY "Students can update own sessions" ON public.sessions
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- Admins can view all sessions
+CREATE POLICY "Admins can view all sessions" ON public.sessions
+  FOR SELECT USING (is_admin());
+```
+
+**5. Skill Progress Table**
+```sql
+-- Students can insert their own progress
+CREATE POLICY "Students can insert own progress" ON public.skill_progress
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Students can view their own progress
+CREATE POLICY "Students can view own progress" ON public.skill_progress
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- Students can update their own progress
+CREATE POLICY "Students can update own progress" ON public.skill_progress
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- Admins can view all progress
+CREATE POLICY "Admins can view all progress" ON public.skill_progress
+  FOR SELECT USING (is_admin());
+```
+
+---
+
+## 5. Performance Indexes
+
+*Critical for the synchronization engine.*
+
+```sql
+-- Sync Optimization: "Give me everything changed since X"
+CREATE INDEX idx_domains_updated_at ON public.domains(updated_at);
+CREATE INDEX idx_skills_updated_at ON public.skills(updated_at);
+CREATE INDEX idx_questions_updated_at ON public.questions(updated_at);
+CREATE INDEX idx_attempts_updated_at ON public.attempts(updated_at);
+CREATE INDEX idx_sessions_updated_at ON public.sessions(updated_at);
+
+-- Foreign Key Lookups
+CREATE INDEX idx_skills_domain_id ON public.skills(domain_id);
+CREATE INDEX idx_questions_skill_id ON public.questions(skill_id);
+CREATE INDEX idx_attempts_question_id ON public.attempts(question_id);
+
+-- Published content queries
+CREATE INDEX idx_domains_published ON public.domains(is_published) WHERE deleted_at IS NULL;
+CREATE INDEX idx_skills_published ON public.skills(is_published) WHERE deleted_at IS NULL;
+CREATE INDEX idx_questions_published ON public.questions(is_published) WHERE deleted_at IS NULL;
+```
+
+---
+
+## 6. Database Triggers (Automatic Timestamping)
+
+*Every table must use this trigger to ensure `updated_at` is reliable.*
+
+```sql
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+   NEW.updated_at = NOW();
+   RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apply to all tables
+CREATE TRIGGER update_profiles_updated_at 
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_domains_updated_at 
+  BEFORE UPDATE ON public.domains
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_skills_updated_at 
+  BEFORE UPDATE ON public.skills
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_questions_updated_at 
+  BEFORE UPDATE ON public.questions
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_attempts_updated_at 
+  BEFORE UPDATE ON public.attempts
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_sessions_updated_at 
+  BEFORE UPDATE ON public.sessions
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_sync_meta_updated_at 
+  BEFORE UPDATE ON public.sync_meta
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_skill_progress_updated_at 
+  BEFORE UPDATE ON public.skill_progress
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+```
+
+### Auto-Create Profile for New Users (Including Anonymous)
+
+*Critical for anonymous auth: When a new user signs up (including via `signInAnonymously()`), this trigger creates their profile row automatically.*
+
+```sql
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, role, email, full_name)
+  VALUES (
+    NEW.id,
+    'student',
+    COALESCE(NEW.email, 'anonymous-' || NEW.id::text || '@device.local'),
+    COALESCE(NEW.raw_user_meta_data->>'full_name', 'Student')
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- This trigger fires when a new row is inserted into auth.users
+-- It ensures every authenticated user (including anonymous) has a profiles row
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+```
+
+**Why This Matters**:
+- Anonymous students created via `signInAnonymously()` need a `profiles` row
+- Without it, the `user_id` FK constraint on `attempts`/`sessions`/`skill_progress` would fail
+- The trigger runs with `SECURITY DEFINER` to bypass RLS
+- Admin users created via Supabase Dashboard also get a profile (role can be updated manually)
+
+---
+
+## 7. RPC Functions
+
+### Atomic Publish Curriculum
+
+```sql
+CREATE OR REPLACE FUNCTION public.publish_curriculum()
+RETURNS void AS $$
+BEGIN
+  -- Verify caller is admin
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Unauthorized: Only admins can publish';
+  END IF;
+
+  -- Validate: No orphaned skills
+  IF EXISTS (
+    SELECT 1 FROM public.skills s
+    LEFT JOIN public.domains d ON s.domain_id = d.id
+    WHERE d.id IS NULL OR d.deleted_at IS NOT NULL
+  ) THEN
+    RAISE EXCEPTION 'Cannot publish: orphaned skills detected';
+  END IF;
+
+  -- Validate: No orphaned questions
+  IF EXISTS (
+    SELECT 1 FROM public.questions q
+    LEFT JOIN public.skills s ON q.skill_id = s.id
+    WHERE s.id IS NULL OR s.deleted_at IS NOT NULL
+  ) THEN
+    RAISE EXCEPTION 'Cannot publish: orphaned questions detected';
+  END IF;
+
+  -- Validate: All published domains have at least one skill
+  IF EXISTS (
+    SELECT 1 FROM public.domains d
+    WHERE d.is_published = true AND d.deleted_at IS NULL
+    AND NOT EXISTS (
+      SELECT 1 FROM public.skills s 
+      WHERE s.domain_id = d.id AND s.deleted_at IS NULL
+    )
+  ) THEN
+    RAISE EXCEPTION 'Cannot publish: empty domains detected';
+  END IF;
+
+  -- Bump curriculum version
+  UPDATE public.curriculum_meta SET 
+    version = version + 1,
+    last_published_at = NOW(),
+    updated_at = NOW()
+  WHERE id = 'singleton';
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+### Batch Submit Attempts (for offline sync)
+
+*This is the PRIMARY and ONLY way students submit attempts. Do NOT use REST `/attempts` for student submissions.*
+
+```sql
+CREATE OR REPLACE FUNCTION public.batch_submit_attempts(
+  attempts_json JSONB
+)
+RETURNS SETOF public.attempts AS $$
+DECLARE
+  attempt_item JSONB;
+  result_record public.attempts;
+BEGIN
+  -- Verify user is authenticated
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Authentication required';
+  END IF;
+
+  FOR attempt_item IN SELECT * FROM jsonb_array_elements(attempts_json)
+  LOOP
+    -- IMPORTANT: user_id is ALWAYS set from auth.uid(), never from client payload
+    -- This prevents users from submitting attempts as other users
+    INSERT INTO public.attempts (
+      id,
+      user_id,           -- Enforced server-side, ignores any client-supplied value
+      question_id,
+      response,
+      is_correct,
+      score_awarded,
+      time_spent_ms,
+      created_at,
+      updated_at
+    ) VALUES (
+      (attempt_item->>'id')::UUID,
+      auth.uid(),        -- <-- ALWAYS from authenticated session
+      (attempt_item->>'question_id')::UUID,
+      attempt_item->'response',
+      (attempt_item->>'is_correct')::BOOLEAN,
+      COALESCE((attempt_item->>'score_awarded')::INTEGER, 0),
+      (attempt_item->>'time_spent_ms')::INTEGER,
+      COALESCE((attempt_item->>'created_at')::TIMESTAMPTZ, NOW()),
+      NOW()
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      response = EXCLUDED.response,
+      is_correct = EXCLUDED.is_correct,
+      score_awarded = EXCLUDED.score_awarded,
+      time_spent_ms = EXCLUDED.time_spent_ms,
+      updated_at = NOW()
+    -- Only allow update if the attempt belongs to the current user
+    WHERE public.attempts.user_id = auth.uid()
+    RETURNING * INTO result_record;
+    
+    -- Only return if insert/update succeeded
+    IF result_record.id IS NOT NULL THEN
+      RETURN NEXT result_record;
+    END IF;
+  END LOOP;
+  
+  RETURN;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+**Client Usage**:
+```typescript
+// Student App MUST use this RPC, NOT REST /attempts
+const { data, error } = await supabase.rpc('batch_submit_attempts', {
+  attempts_json: [
+    {
+      id: 'client-generated-uuid',
+      question_id: 'question-uuid',
+      response: { selected_option_id: 'b' },
+      is_correct: true,
+      score_awarded: 1,
+      time_spent_ms: 5432,
+      created_at: '2026-01-26T10:00:00Z'
+    }
+    // NOTE: Do NOT include user_id - server assigns it from auth.uid()
+  ]
+});
+```
+
+---
+
+## 8. Seed Data Template
+
+```sql
+-- Admin user (link to auth.users entry created via Supabase dashboard)
+-- INSERT INTO public.profiles (id, role, email, full_name)
+-- VALUES ('ADMIN_AUTH_UID_HERE', 'admin', 'admin@example.com', 'Admin User');
+
+-- Sample Domain
+INSERT INTO public.domains (id, slug, title, description, sort_order, is_published)
+VALUES (
+  'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+  'mathematics',
+  'Mathematics',
+  'Fundamental mathematical concepts and problem-solving skills.',
+  1,
+  true
+);
+
+-- Sample Skill
+INSERT INTO public.skills (id, domain_id, slug, title, description, difficulty_level, sort_order, is_published)
+VALUES (
+  'b2c3d4e5-f6a7-8901-bcde-f12345678901',
+  'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+  'basic_algebra',
+  'Basic Algebra',
+  'Introduction to algebraic expressions and equations.',
+  1,
+  1,
+  true
+);
+
+-- Sample Questions
+INSERT INTO public.questions (skill_id, type, content, options, solution, explanation, points, is_published)
+VALUES 
+(
+  'b2c3d4e5-f6a7-8901-bcde-f12345678901',
+  'multiple_choice',
+  'What is the value of x in the equation: 2x + 4 = 10?',
+  '{"options": [{"id": "a", "text": "2"}, {"id": "b", "text": "3"}, {"id": "c", "text": "4"}, {"id": "d", "text": "5"}]}',
+  '{"correct_option_id": "b"}',
+  'Subtract 4 from both sides: 2x = 6. Divide by 2: x = 3.',
+  1,
+  true
+),
+(
+  'b2c3d4e5-f6a7-8901-bcde-f12345678901',
+  'text_input',
+  'Simplify the expression: 3(x + 2) - x',
+  '{"placeholder": "Enter simplified expression"}',
+  '{"exact_match": "2x + 6", "case_sensitive": false}',
+  'Distribute: 3x + 6 - x = 2x + 6',
+  2,
+  true
+),
+(
+  'b2c3d4e5-f6a7-8901-bcde-f12345678901',
+  'boolean',
+  'True or False: The equation x + 5 = 5 has the solution x = 0.',
+  '{}',
+  '{"correct_value": true}',
+  'Subtracting 5 from both sides gives x = 0.',
+  1,
+  true
+);
+```
+
+---
+
+## 9. Migration File Naming Convention
+
+Migrations must follow this strict naming pattern:
+
+```
+supabase/migrations/YYYYMMDDHHMMSS_description.sql
+```
+
+**Example sequence**:
+```
+20240127000001_create_enums.sql
+20240127000002_create_profiles.sql
+20240127000003_create_domains.sql
+20240127000004_create_skills.sql
+20240127000005_create_questions.sql
+20240127000006_create_attempts.sql
+20240127000007_create_sessions.sql
+20240127000008_create_skill_progress.sql
+20240127000009_create_outbox.sql
+20240127000010_create_sync_meta.sql
+20240127000011_create_curriculum_meta.sql
+20240127000012_create_indexes.sql
+20240127000013_create_triggers.sql
+20240127000014_create_rls_policies.sql
+20240127000015_create_rpc_functions.sql
+20240127000016_seed_data.sql
+```
+
+Each migration must be idempotent and include appropriate `IF NOT EXISTS` or `CREATE OR REPLACE` clauses.
