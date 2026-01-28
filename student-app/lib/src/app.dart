@@ -9,7 +9,8 @@ class Math7App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authStateProvider);
+    final session = ref.watch(currentSessionProvider);
+    ref.listen(authStateProvider, (previous, next) {});
 
     return MaterialApp(
       title: 'Math7',
@@ -27,20 +28,7 @@ class Math7App extends ConsumerWidget {
         ),
         useMaterial3: true,
       ),
-      home: authState.when(
-        data: (state) {
-          if (state.session != null) {
-            return const DomainsScreen();
-          }
-          return const LoginScreen();
-        },
-        loading: () => const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
-        ),
-        error: (error, stack) => const LoginScreen(),
-      ),
+      home: session != null ? const DomainsScreen() : const LoginScreen(),
     );
   }
 }

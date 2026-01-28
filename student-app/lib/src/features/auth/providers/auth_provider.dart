@@ -60,6 +60,12 @@ final authStateProvider = StreamProvider<AuthState>((ref) {
   return authService.authStateChanges;
 });
 
+final currentSessionProvider = Provider<Session?>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  ref.watch(authStateProvider);
+  return authService.currentSession;
+});
+
 final isAuthenticatedProvider = Provider<bool>((ref) {
   final authState = ref.watch(authStateProvider);
   return authState.whenOrNull(
