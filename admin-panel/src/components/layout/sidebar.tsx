@@ -116,20 +116,18 @@ export function Sidebar() {
       <div className="px-4 py-4 border-t border-white/10">
         {userInfo && (
           <div className="mb-4 px-4 py-3 bg-white/5 rounded-xl">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm font-medium text-white truncate">
-                {userInfo.fullName || userInfo.email.split('@')[0]}
-              </span>
-              <span className={cn(
-                "px-2 py-0.5 text-xs font-medium rounded-full",
-                userInfo.role === 'super_admin' 
-                  ? "bg-purple-500/30 text-purple-200" 
-                  : "bg-blue-500/30 text-blue-200"
-              )}>
-                {userInfo.role === 'super_admin' ? 'Super Admin' : 'Admin'}
-              </span>
-            </div>
-            <p className="text-xs text-purple-300 truncate">{userInfo.email}</p>
+            <p className="text-sm font-medium text-white truncate">
+              {userInfo.fullName || userInfo.email.split('@')[0]}
+            </p>
+            <span className={cn(
+              "inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full",
+              userInfo.role === 'super_admin' 
+                ? "bg-purple-500/30 text-purple-200" 
+                : "bg-blue-500/30 text-blue-200"
+            )}>
+              {userInfo.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+            </span>
+            <p className="text-xs text-purple-300 truncate mt-1">{userInfo.email}</p>
           </div>
         )}
         <button
