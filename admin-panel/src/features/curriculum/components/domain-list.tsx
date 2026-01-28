@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Plus, Book, CheckSquare, Square, Eye, EyeOff, Search, X, Trash } from 'lucide-react'
+import { Plus, CheckSquare, Square, Eye, EyeOff, Search, X, Trash, Book } from 'lucide-react'
 import { usePaginatedDomains, useDeleteDomain, useBulkDeleteDomains, useBulkUpdateDomainsStatus } from '../hooks/use-domains'
 import { useState, useEffect } from 'react'
 import { useToast } from '@/components/ui/toast'
@@ -342,12 +342,7 @@ export function DomainList() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-purple-50">
-                          <Book className="w-5 h-5 text-purple-600" />
-                        </div>
-                        <span className="font-medium text-gray-900">{domain.title}</span>
-                      </div>
+                      <span className="font-medium text-gray-900">{domain.title}</span>
                     </td>
                     <td className="px-6 py-4">
                       <code className="px-2 py-1 bg-gray-100 rounded text-sm text-gray-600">{domain.slug}</code>

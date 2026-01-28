@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/toast';
 import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
-import { Plus, FileText, CheckSquare, Square, Eye, EyeOff, Search, X, Trash } from 'lucide-react';
+import { Plus, CheckSquare, Square, Eye, EyeOff, Search, X, Trash, FileText } from 'lucide-react';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -359,12 +359,7 @@ export function QuestionList() {
                                             </button>
                                         </td>
                                         <td className="px-6 py-4 max-w-[300px]">
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-green-50 flex-shrink-0">
-                                                    <FileText className="w-5 h-5 text-green-600" />
-                                                </div>
-                                                <span className="font-medium text-gray-900 truncate">{question.content}</span>
-                                            </div>
+                                            <span className="font-medium text-gray-900 truncate block">{question.content}</span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium capitalize">

@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/toast';
 import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
-import { Plus, Layers, CheckSquare, Square, Eye, EyeOff, Search, X, Trash } from 'lucide-react';
+import { Plus, CheckSquare, Square, Eye, EyeOff, Search, X, Trash, Layers } from 'lucide-react';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -348,14 +348,9 @@ export function SkillList() {
                                             </button>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50">
-                                                    <Layers className="w-5 h-5 text-blue-600" />
-                                                </div>
-                                                <div>
-                                                    <span className="font-medium text-gray-900">{skill.title}</span>
-                                                    <p className="text-sm text-gray-500">{skill.slug}</p>
-                                                </div>
+                                            <div>
+                                                <span className="font-medium text-gray-900">{skill.title}</span>
+                                                <p className="text-sm text-gray-500">{skill.slug}</p>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
