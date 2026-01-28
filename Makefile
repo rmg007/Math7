@@ -9,7 +9,7 @@
 #   admin-panel/   (React + Vite + TS + TanStack Query + shadcn/ui)
 #   supabase/      (Supabase project: migrations, config, scripts)
 
-SHELL := /usr/bin/env bash
+SHELL := /bin/bash
 .ONESHELL:
 .SILENT:
 
