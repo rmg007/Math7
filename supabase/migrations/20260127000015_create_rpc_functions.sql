@@ -105,3 +105,49 @@ BEGIN
   RETURN;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Delete own account (soft delete profile, user must be re-created to login again)
+CREATE OR REPLACE FUNCTION public.delete_own_account()
+RETURNS void AS $$
+BEGIN
+  -- Verify user is authenticated
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Authentication required';
+  END IF;
+
+  -- Soft delete the profile
+  UPDATE public.profiles 
+  SET deleted_at = NOW(),
+      email = 'deleted-' || auth.uid()::text || '@deleted.local',
+      full_name = 'Deleted User'
+  WHERE id = auth.uid();
+  
+  -- Delete related data (attempts, sessions, skill_progress)
+  UPDATE public.attempts SET deleted_at = NOW() WHERE user_id = auth.uid();
+  UPDATE public.sessions SET deleted_at = NOW() WHERE user_id = auth.uid();
+  UPDATE public.skill_progress SET deleted_at = NOW() WHERE user_id = auth.uid();
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Deactivate own account (sets deleted_at, can be reactivated by admin)
+CREATE OR REPLACE FUNCTION public.deactivate_own_account()
+RETURNS void AS $$
+BEGIN
+  -- Verify user is authenticated
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Authentication required';
+  END IF;
+
+  -- Set deleted_at to mark as deactivated
+  UPDATE public.profiles 
+  SET deleted_at = NOW()
+  WHERE id = auth.uid();
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Restrict RPC execution to authenticated users only
+REVOKE EXECUTE ON FUNCTION public.delete_own_account() FROM public, anon;
+GRANT EXECUTE ON FUNCTION public.delete_own_account() TO authenticated;
+
+REVOKE EXECUTE ON FUNCTION public.deactivate_own_account() FROM public, anon;
+GRANT EXECUTE ON FUNCTION public.deactivate_own_account() TO authenticated;

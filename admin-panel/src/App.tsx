@@ -13,6 +13,7 @@ import { QuestionsPage } from './features/curriculum/pages/questions-page'
 import { QuestionCreatePage } from './features/curriculum/pages/question-create-page'
 import { QuestionEditPage } from './features/curriculum/pages/question-edit-page'
 import { PublishPage } from './features/curriculum/pages/publish-page'
+import { AccountSettingsPage } from './features/auth/pages/AccountSettingsPage'
 
 const queryClient = new QueryClient()
 
@@ -140,6 +141,7 @@ function App() {
             <Route path="/questions/:id/edit" element={<QuestionEditPage />} />
             
             <Route path="/publish" element={<PublishPage />} />
+            <Route path="/settings" element={<AccountSettingsPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

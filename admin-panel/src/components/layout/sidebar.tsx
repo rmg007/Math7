@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Book, Layers, FileText, Upload, LogOut } from 'lucide-react'
+import { LayoutDashboard, Book, Layers, FileText, Upload, LogOut, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 
@@ -9,6 +9,7 @@ const navigation = [
   { name: 'Skills', href: '/skills', icon: Layers },
   { name: 'Questions', href: '/questions', icon: FileText },
   { name: 'Publish', href: '/publish', icon: Upload },
+  { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
 export function Sidebar() {

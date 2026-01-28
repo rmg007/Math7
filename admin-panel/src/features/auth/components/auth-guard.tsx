@@ -8,17 +8,35 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        navigate('/login')
+        return
+      }
+      
       try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (!session) {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles' as never)
+          .select('deleted_at')
+          .eq('id', session.user.id)
+          .single()
+        
+        if (profileError) {
+          console.warn('Could not fetch profile, allowing access:', profileError)
+          setLoading(false)
+          return
+        }
+        
+        if (profile && (profile as { deleted_at: string | null }).deleted_at) {
+          await supabase.auth.signOut()
           navigate('/login')
           return
         }
-        setLoading(false)
       } catch (e) {
-        console.error(e)
-        navigate('/login')
+        console.warn('Profile check failed, allowing access:', e)
       }
+      
+      setLoading(false)
     }
 
     checkSession()
