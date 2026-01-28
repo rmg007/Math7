@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/toast';
 import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
-import { Plus, Pencil, Trash, Layers, CheckSquare, Square, Eye, EyeOff, Search, X, Copy } from 'lucide-react';
+import { Plus, Layers, CheckSquare, Square, Eye, EyeOff, Search, X } from 'lucide-react';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -383,24 +383,22 @@ export function SkillList() {
                                             <div className="flex items-center justify-end gap-2">
                                                 <Link
                                                     to={`/skills/${skill.id}/edit`}
-                                                    className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
+                                                    className="px-3 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
                                                 >
-                                                    <Pencil className="h-4 w-4" />
                                                     Edit
                                                 </Link>
                                                 <button
                                                     onClick={() => handleDuplicate(skill.id)}
                                                     disabled={duplicateSkill.isPending}
-                                                    className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                                                    title="Duplicate"
+                                                    className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                                                 >
-                                                    <Copy className="h-4 w-4" />
+                                                    Duplicate
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(skill.id)}
-                                                    className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                                                    className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                                                 >
-                                                    <Trash className="h-4 w-4" />
+                                                    Delete
                                                 </button>
                                             </div>
                                         </td>

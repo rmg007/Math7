@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Plus, Edit, Book, Trash, CheckSquare, Square, Eye, EyeOff, Search, X } from 'lucide-react'
+import { Plus, Book, CheckSquare, Square, Eye, EyeOff, Search, X } from 'lucide-react'
 import { usePaginatedDomains, useDeleteDomain, useBulkDeleteDomains, useBulkUpdateDomainsStatus } from '../hooks/use-domains'
 import { useState, useEffect } from 'react'
 import { useToast } from '@/components/ui/toast'
@@ -367,16 +367,15 @@ export function DomainList() {
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           to={`/domains/${domain.id}/edit`}
-                          className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
+                          className="px-3 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
                         >
-                          <Edit className="h-4 w-4" />
                           Edit
                         </Link>
                         <button
                           onClick={() => handleDelete(domain.id)}
-                          className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                          className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                         >
-                          <Trash className="h-4 w-4" />
+                          Delete
                         </button>
                       </div>
                     </td>
