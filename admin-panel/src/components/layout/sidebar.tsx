@@ -20,23 +20,44 @@ const bottomNavigation = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
+interface UserInfo {
+  email: string
+  fullName: string | null
+  role: string
+}
+
 export function Sidebar() {
   const location = useLocation()
   const navigate = useNavigate()
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
 
   useEffect(() => {
     const checkRole = async () => {
       const { data: { user } } = await supabase.auth.getUser()
+      console.log('Sidebar: Current user:', user?.email)
+      
       if (user) {
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from('profiles' as never)
-          .select('role')
+          .select('role, full_name, email')
           .eq('id', user.id)
           .single()
         
-        if (profile && (profile as { role: string }).role === 'super_admin') {
-          setIsSuperAdmin(true)
+        console.log('Sidebar: Profile data:', profile, 'Error:', error)
+        
+        if (profile) {
+          const profileData = profile as { role: string; full_name: string | null; email: string }
+          setUserInfo({
+            email: profileData.email || user.email || '',
+            fullName: profileData.full_name,
+            role: profileData.role
+          })
+          
+          if (profileData.role === 'super_admin') {
+            console.log('Sidebar: User is super_admin, showing invitation codes')
+            setIsSuperAdmin(true)
+          }
         }
       }
     }
@@ -92,7 +113,25 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="px-4 py-6 border-t border-white/10">
+      <div className="px-4 py-4 border-t border-white/10">
+        {userInfo && (
+          <div className="mb-4 px-4 py-3 bg-white/5 rounded-xl">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm font-medium text-white truncate">
+                {userInfo.fullName || userInfo.email.split('@')[0]}
+              </span>
+              <span className={cn(
+                "px-2 py-0.5 text-xs font-medium rounded-full",
+                userInfo.role === 'super_admin' 
+                  ? "bg-purple-500/30 text-purple-200" 
+                  : "bg-blue-500/30 text-blue-200"
+              )}>
+                {userInfo.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+              </span>
+            </div>
+            <p className="text-xs text-purple-300 truncate">{userInfo.email}</p>
+          </div>
+        )}
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 w-full rounded-xl px-4 py-3 text-sm font-medium text-purple-200 hover:bg-white/10 hover:text-white transition-all duration-200"
