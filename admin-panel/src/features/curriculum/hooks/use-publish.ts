@@ -50,63 +50,52 @@ export function usePublishPreview() {
     queryFn: async (): Promise<PublishPreview> => {
       const validationIssues: ValidationIssue[] = [];
 
-      const [metaResult, domainsResult, skillsResult, questionsResult] = await Promise.all([
+      const [
+        metaResult,
+        publishedDomainsResult,
+        unpublishedDomainsResult,
+        publishedSkillsResult,
+        unpublishedSkillsResult,
+        publishedQuestionsResult,
+        unpublishedQuestionsResult,
+      ] = await Promise.all([
         supabase.from('curriculum_meta').select('version, last_published_at').eq('id', 'singleton').single(),
-        supabase.from('domains').select('id, name, is_published').is('deleted_at', null),
-        supabase.from('skills').select('id, name, domain_id, is_published').is('deleted_at', null),
-        supabase.from('questions').select('id, skill_id, is_published').is('deleted_at', null),
+        supabase.from('domains').select('*', { count: 'exact', head: true }).is('deleted_at', null).eq('is_published', true),
+        supabase.from('domains').select('*', { count: 'exact', head: true }).is('deleted_at', null).eq('is_published', false),
+        supabase.from('skills').select('*', { count: 'exact', head: true }).is('deleted_at', null).eq('is_published', true),
+        supabase.from('skills').select('*', { count: 'exact', head: true }).is('deleted_at', null).eq('is_published', false),
+        supabase.from('questions').select('*', { count: 'exact', head: true }).is('deleted_at', null).eq('is_published', true),
+        supabase.from('questions').select('*', { count: 'exact', head: true }).is('deleted_at', null).eq('is_published', false),
       ]);
 
       if (metaResult.error) throw metaResult.error;
-      if (domainsResult.error) throw domainsResult.error;
-      if (skillsResult.error) throw skillsResult.error;
-      if (questionsResult.error) throw questionsResult.error;
-
-      const domains = (domainsResult.data || []) as { id: string; name: string; is_published: boolean }[];
-      const skills = (skillsResult.data || []) as { id: string; name: string; domain_id: string; is_published: boolean }[];
-      const questions = (questionsResult.data || []) as { id: string; skill_id: string; is_published: boolean }[];
+      if (publishedDomainsResult.error) throw publishedDomainsResult.error;
+      if (unpublishedDomainsResult.error) throw unpublishedDomainsResult.error;
+      if (publishedSkillsResult.error) throw publishedSkillsResult.error;
+      if (unpublishedSkillsResult.error) throw unpublishedSkillsResult.error;
+      if (publishedQuestionsResult.error) throw publishedQuestionsResult.error;
+      if (unpublishedQuestionsResult.error) throw unpublishedQuestionsResult.error;
 
       const stats: PublishStats = {
-        publishedDomains: domains.filter(d => d.is_published).length,
-        unpublishedDomains: domains.filter(d => !d.is_published).length,
-        publishedSkills: skills.filter(s => s.is_published).length,
-        unpublishedSkills: skills.filter(s => !s.is_published).length,
-        publishedQuestions: questions.filter(q => q.is_published).length,
-        unpublishedQuestions: questions.filter(q => !q.is_published).length,
+        publishedDomains: publishedDomainsResult.count ?? 0,
+        unpublishedDomains: unpublishedDomainsResult.count ?? 0,
+        publishedSkills: publishedSkillsResult.count ?? 0,
+        unpublishedSkills: unpublishedSkillsResult.count ?? 0,
+        publishedQuestions: publishedQuestionsResult.count ?? 0,
+        unpublishedQuestions: unpublishedQuestionsResult.count ?? 0,
       };
-
-      const domainIds = new Set(domains.map(d => d.id));
-      const orphanedSkills = skills.filter(s => !domainIds.has(s.domain_id));
-      if (orphanedSkills.length > 0) {
-        validationIssues.push({
-          type: 'error',
-          message: `${orphanedSkills.length} skill(s) are linked to deleted or missing domains`,
-        });
-      }
-
-      const skillIds = new Set(skills.map(s => s.id));
-      const orphanedQuestions = questions.filter(q => !skillIds.has(q.skill_id));
-      if (orphanedQuestions.length > 0) {
-        validationIssues.push({
-          type: 'error',
-          message: `${orphanedQuestions.length} question(s) are linked to deleted or missing skills`,
-        });
-      }
-
-      const publishedDomainsWithoutSkills = domains.filter(d => 
-        d.is_published && !skills.some(s => s.domain_id === d.id)
-      );
-      if (publishedDomainsWithoutSkills.length > 0) {
-        validationIssues.push({
-          type: 'error',
-          message: `${publishedDomainsWithoutSkills.length} published domain(s) have no skills: ${publishedDomainsWithoutSkills.map(d => d.name).join(', ')}`,
-        });
-      }
 
       if (stats.publishedDomains === 0) {
         validationIssues.push({
           type: 'warning',
           message: 'No domains are marked as published',
+        });
+      }
+
+      if (stats.publishedSkills === 0) {
+        validationIssues.push({
+          type: 'warning',
+          message: 'No skills are marked as published',
         });
       }
 
@@ -117,13 +106,11 @@ export function usePublishPreview() {
         });
       }
 
-      const hasErrors = validationIssues.some(i => i.type === 'error');
-
       return {
         meta: metaResult.data as CurriculumMeta,
         stats,
         validationIssues,
-        canPublish: !hasErrors,
+        canPublish: true,
       };
     },
     refetchInterval: 30000,

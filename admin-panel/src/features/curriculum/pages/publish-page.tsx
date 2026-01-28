@@ -7,13 +7,16 @@ export function PublishPage() {
     const publishMutation = usePublishCurriculum();
     const { data: preview, isLoading: isLoadingPreview } = usePublishPreview();
     const [success, setSuccess] = useState(false);
+    const [publishedVersion, setPublishedVersion] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const handlePublish = async () => {
         setSuccess(false);
         setError(null);
+        const newVersion = (preview?.meta.version || 0) + 1;
         try {
             await publishMutation.mutateAsync();
+            setPublishedVersion(newVersion);
             setSuccess(true);
         } catch (e: any) {
             setError(e.message || 'Failed to publish');
@@ -183,7 +186,7 @@ export function PublishPage() {
                             </div>
                             <div>
                                 <p className="font-medium">Success!</p>
-                                <p className="text-sm text-green-700">Curriculum v{preview?.meta.version} published successfully.</p>
+                                <p className="text-sm text-green-700">Curriculum v{publishedVersion} published successfully.</p>
                             </div>
                         </div>
                     )}
