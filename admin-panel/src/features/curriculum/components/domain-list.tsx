@@ -54,6 +54,7 @@ export function DomainList() {
               <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Order</th>
               <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Title</th>
               <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Slug</th>
+              <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Status</th>
               <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
             </tr>
           </thead>
@@ -76,6 +77,17 @@ export function DomainList() {
                 <td className="px-6 py-4">
                   <code className="px-2 py-1 bg-gray-100 rounded text-sm text-gray-600">{domain.slug}</code>
                 </td>
+                <td className="px-6 py-4">
+                  {domain.is_published ? (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Published
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                      Draft
+                    </span>
+                  )}
+                </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
                     <Link
@@ -97,7 +109,7 @@ export function DomainList() {
             ))}
             {domains?.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-6 py-12 text-center">
+                <td colSpan={5} className="px-6 py-12 text-center">
                   <div className="flex flex-col items-center">
                     <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
                       <Book className="w-8 h-8 text-gray-400" />
