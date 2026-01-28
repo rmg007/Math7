@@ -81,3 +81,21 @@ export function useUpdateDomain() {
         },
     });
 }
+
+export function useDeleteDomain() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const { error } = await (supabase
+                .from('domains') as any)
+                .update({ deleted_at: new Date().toISOString() })
+                .eq('id', id);
+            
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['domains'] });
+        },
+    });
+}

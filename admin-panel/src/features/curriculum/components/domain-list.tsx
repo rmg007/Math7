@@ -1,9 +1,16 @@
 import { Link } from 'react-router-dom'
-import { Plus, Edit, Book } from 'lucide-react'
-import { useDomains } from '../hooks/use-domains'
+import { Plus, Edit, Book, Trash } from 'lucide-react'
+import { useDomains, useDeleteDomain } from '../hooks/use-domains'
 
 export function DomainList() {
   const { data: domains, isLoading, error } = useDomains()
+  const deleteDomain = useDeleteDomain()
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this domain?')) {
+      await deleteDomain.mutateAsync(id)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -70,13 +77,21 @@ export function DomainList() {
                   <code className="px-2 py-1 bg-gray-100 rounded text-sm text-gray-600">{domain.slug}</code>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <Link
-                    to={`/domains/${domain.id}/edit`}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
-                  >
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </Link>
+                  <div className="flex items-center justify-end gap-2">
+                    <Link
+                      to={`/domains/${domain.id}/edit`}
+                      className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
+                    >
+                      <Edit className="h-4 w-4" />
+                      Edit
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(domain.id)}
+                      className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
