@@ -1,22 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from 'react-router-dom';
-import { useQuestions, useDeleteQuestion, useBulkDeleteQuestions, useBulkUpdateQuestionsStatus, useDuplicateQuestion } from '../hooks/use-questions';
+import { usePaginatedQuestions, useDeleteQuestion, useBulkDeleteQuestions, useBulkUpdateQuestionsStatus, useDuplicateQuestion } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
-import { useDomains } from '../hooks/use-domains';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/toast';
+import { Pagination } from '@/components/ui/pagination';
 import { Plus, Pencil, Trash, FileText, CheckSquare, Square, Eye, EyeOff, Search, X, Copy } from 'lucide-react';
 
-export function QuestionList() {
-    const [selectedSkillId, setSelectedSkillId] = useState<string>("all");
-    const [selectedDomainId, setSelectedDomainId] = useState<string>("all");
-    const [statusFilter, setStatusFilter] = useState<string>("all");
-    const [searchQuery, setSearchQuery] = useState<string>("");
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+const DEFAULT_PAGE_SIZE = 10;
 
+export function QuestionList() {
+    const [selectedSkillId, setSelectedSkillId] = useState<string>('all');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
+    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [debouncedSearch, setDebouncedSearch] = useState<string>('');
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+
+    const { data: paginatedData, isLoading } = usePaginatedQuestions({
+        page,
+        pageSize,
+        search: debouncedSearch,
+        status: statusFilter,
+        skillId: selectedSkillId,
+    });
     const { data: skills } = useSkills();
-    const { data: domains } = useDomains();
-    const { data: questions, isLoading } = useQuestions(selectedSkillId === "all" ? undefined : selectedSkillId);
     const deleteQuestion = useDeleteQuestion();
     const bulkDelete = useBulkDeleteQuestions();
     const bulkUpdateStatus = useBulkUpdateQuestionsStatus();
@@ -24,30 +33,27 @@ export function QuestionList() {
     const { showToast } = useToast();
 
     useEffect(() => {
-        setSelectedIds(new Set());
-    }, [selectedSkillId, selectedDomainId, statusFilter, searchQuery]);
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+            setPage(1);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
-    const filteredQuestions = useMemo(() => {
-        if (!questions) return [];
-        return questions.filter((q: any) => {
-            if (searchQuery && !q.content.toLowerCase().includes(searchQuery.toLowerCase())) {
-                return false;
-            }
-            if (statusFilter === "published" && !q.is_published) return false;
-            if (statusFilter === "draft" && q.is_published) return false;
-            if (selectedDomainId !== "all") {
-                const skill = skills?.find(s => s.id === q.skill_id);
-                if (skill && (skill as any).domain_id !== selectedDomainId) return false;
-            }
-            return true;
-        });
-    }, [questions, searchQuery, statusFilter, selectedDomainId, skills]);
+    useEffect(() => {
+        setSelectedIds(new Set());
+        setPage(1);
+    }, [selectedSkillId, statusFilter]);
+
+    const questions = paginatedData?.data ?? [];
+    const totalCount = paginatedData?.totalCount ?? 0;
+    const totalPages = paginatedData?.totalPages ?? 1;
 
     const handleSelectAll = () => {
-        if (selectedIds.size === filteredQuestions.length) {
+        if (selectedIds.size === questions.length) {
             setSelectedIds(new Set());
         } else {
-            setSelectedIds(new Set(filteredQuestions.map((q: any) => q.id)));
+            setSelectedIds(new Set(questions.map((q: any) => q.id)));
         }
     };
 
@@ -96,17 +102,6 @@ export function QuestionList() {
         }
     };
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-r-transparent"></div>
-                    <p className="mt-4 text-gray-500">Loading questions...</p>
-                </div>
-            </div>
-        );
-    }
-
     const handleDelete = async (id: string) => {
         if (confirm('Are you sure you want to delete this question?')) {
             try {
@@ -127,15 +122,37 @@ export function QuestionList() {
         }
     };
 
-    const isAllSelected = filteredQuestions.length ? selectedIds.size === filteredQuestions.length : false;
-    const hasActiveFilters = searchQuery || statusFilter !== "all" || selectedSkillId !== "all" || selectedDomainId !== "all";
+    const handlePageChange = (newPage: number) => {
+        setPage(newPage);
+        setSelectedIds(new Set());
+    };
+
+    const handlePageSizeChange = (newPageSize: number) => {
+        setPageSize(newPageSize);
+        setPage(1);
+        setSelectedIds(new Set());
+    };
+
+    const isAllSelected = questions.length ? selectedIds.size === questions.length : false;
+    const hasActiveFilters = searchQuery || statusFilter !== 'all' || selectedSkillId !== 'all';
 
     const clearFilters = () => {
-        setSearchQuery("");
-        setStatusFilter("all");
-        setSelectedSkillId("all");
-        setSelectedDomainId("all");
+        setSearchQuery('');
+        setStatusFilter('all');
+        setSelectedSkillId('all');
+        setPage(1);
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-r-transparent"></div>
+                    <p className="mt-4 text-gray-500">Loading questions...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -179,19 +196,6 @@ export function QuestionList() {
 
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="flex items-center gap-2">
-                            <label className="text-sm font-medium text-gray-600">Domain:</label>
-                            <select
-                                value={selectedDomainId}
-                                onChange={(e) => setSelectedDomainId(e.target.value)}
-                                className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-sm"
-                            >
-                                <option value="all">All Domains</option>
-                                {domains?.map(domain => (
-                                    <option key={domain.id} value={domain.id}>{domain.title}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="flex items-center gap-2">
                             <label className="text-sm font-medium text-gray-600">Skill:</label>
                             <select
                                 value={selectedSkillId}
@@ -199,7 +203,7 @@ export function QuestionList() {
                                 className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-sm min-w-[200px]"
                             >
                                 <option value="all">All Skills</option>
-                                {skills?.map(skill => (
+                                {skills?.map((skill: any) => (
                                     <option key={skill.id} value={skill.id}>
                                         {skill.title}
                                     </option>
@@ -210,7 +214,7 @@ export function QuestionList() {
                             <label className="text-sm font-medium text-gray-600">Status:</label>
                             <select
                                 value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
+                                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'published' | 'draft')}
                                 className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-sm"
                             >
                                 <option value="all">All Status</option>
@@ -257,7 +261,7 @@ export function QuestionList() {
                             <tr className="bg-gray-50 border-b border-gray-100">
                                 <th className="text-left px-4 py-4 w-10">
                                     <button onClick={handleSelectAll} className="text-gray-400 hover:text-gray-600">
-                                        {isAllSelected && filteredQuestions.length > 0 ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
+                                        {isAllSelected && questions.length > 0 ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
                                     </button>
                                 </th>
                                 <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Content</th>
@@ -269,7 +273,7 @@ export function QuestionList() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {!filteredQuestions.length ? (
+                            {!questions.length ? (
                                 <tr>
                                     <td colSpan={7} className="px-6 py-12 text-center">
                                         <div className="flex flex-col items-center">
@@ -277,7 +281,7 @@ export function QuestionList() {
                                                 <FileText className="w-8 h-8 text-gray-400" />
                                             </div>
                                             <p className="text-gray-500 mb-4">
-                                                {hasActiveFilters ? "No questions match your filters." : "No questions found. Create one to get started."}
+                                                {hasActiveFilters ? 'No questions match your filters.' : 'No questions found. Create one to get started.'}
                                             </p>
                                             {hasActiveFilters ? (
                                                 <button
@@ -300,7 +304,7 @@ export function QuestionList() {
                                     </td>
                                 </tr>
                             ) : (
-                                filteredQuestions.map((question: any) => (
+                                questions.map((question: any) => (
                                     <tr key={question.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-4 py-4">
                                             <button onClick={() => handleSelectOne(question.id)} className="text-gray-400 hover:text-gray-600">
@@ -370,12 +374,15 @@ export function QuestionList() {
                         </tbody>
                     </table>
                 </div>
-                
-                {filteredQuestions.length > 0 && (
-                    <div className="mt-4 text-sm text-gray-500">
-                        Showing {filteredQuestions.length} of {questions?.length ?? 0} questions
-                    </div>
-                )}
+
+                <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    totalCount={totalCount}
+                    pageSize={pageSize}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
+                />
             </div>
         </div>
     );

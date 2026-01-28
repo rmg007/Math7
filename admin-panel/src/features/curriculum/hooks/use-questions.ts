@@ -7,6 +7,22 @@ type Question = Database['public']['Tables']['questions']['Row'];
 type QuestionInsert = Database['public']['Tables']['questions']['Insert'];
 type QuestionUpdate = Database['public']['Tables']['questions']['Update'];
 
+export interface PaginationParams {
+  page: number;
+  pageSize: number;
+  search?: string;
+  status?: 'all' | 'published' | 'draft';
+  skillId?: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export function useQuestions(skillId?: string) {
   return useQuery({
     queryKey: ['questions', skillId],
@@ -31,6 +47,60 @@ export function useQuestions(skillId?: string) {
       
       if (error) throw error;
       return data as unknown as (Question & { skills: { title: string, domains: { title: string } | null } | null })[];
+    },
+  });
+}
+
+export function usePaginatedQuestions(params: PaginationParams) {
+  return useQuery({
+    queryKey: ['questions-paginated', params],
+    queryFn: async (): Promise<PaginatedResponse<Question & { skills: { title: string, domains: { title: string } | null } | null }>> => {
+      const { page, pageSize, search, status, skillId } = params;
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      let query = supabase
+        .from('questions')
+        .select(`
+          *,
+          skills (
+            title,
+            domains ( title )
+          )
+        `, { count: 'exact' })
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false });
+
+      if (search) {
+        query = query.ilike('content', `%${search}%`);
+      }
+
+      if (status === 'published') {
+        query = query.eq('is_published', true);
+      } else if (status === 'draft') {
+        query = query.eq('is_published', false);
+      }
+
+      if (skillId && skillId !== 'all') {
+        query = query.eq('skill_id', skillId);
+      }
+
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
+
+      if (error) throw error;
+
+      const totalCount = count ?? 0;
+      const totalPages = Math.ceil(totalCount / pageSize);
+
+      return {
+        data: data as unknown as (Question & { skills: { title: string, domains: { title: string } | null } | null })[],
+        totalCount,
+        page,
+        pageSize,
+        totalPages,
+      };
     },
   });
 }
@@ -68,6 +138,7 @@ export function useCreateQuestion() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['questions'] });
+      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
     },
   });
 }
@@ -89,6 +160,7 @@ export function useUpdateQuestion() {
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['questions'] });
+            queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
             queryClient.invalidateQueries({ queryKey: ['question', data.id] });
         },
     });
@@ -108,6 +180,7 @@ export function useDeleteQuestion() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['questions'] });
+            queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
         },
     });
 }
@@ -126,6 +199,7 @@ export function useBulkDeleteQuestions() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['questions'] });
+            queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
             queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
         },
     });
@@ -145,6 +219,7 @@ export function useBulkUpdateQuestionsStatus() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['questions'] });
+            queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
             queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
         },
     });
@@ -182,6 +257,7 @@ export function useDuplicateQuestion() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['questions'] });
+            queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
             queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
         },
     });

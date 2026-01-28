@@ -1,41 +1,54 @@
 import { Link } from 'react-router-dom'
 import { Plus, Edit, Book, Trash, CheckSquare, Square, Eye, EyeOff, Search, X } from 'lucide-react'
-import { useDomains, useDeleteDomain, useBulkDeleteDomains, useBulkUpdateDomainsStatus } from '../hooks/use-domains'
-import { useState, useMemo, useEffect } from 'react'
+import { usePaginatedDomains, useDeleteDomain, useBulkDeleteDomains, useBulkUpdateDomainsStatus } from '../hooks/use-domains'
+import { useState, useEffect } from 'react'
 import { useToast } from '@/components/ui/toast'
+import { Pagination } from '@/components/ui/pagination'
+
+const DEFAULT_PAGE_SIZE = 10
 
 export function DomainList() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [searchQuery, setSearchQuery] = useState<string>("")
+  const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all')
+  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
 
-  const { data: domains, isLoading, error } = useDomains()
+  const { data: paginatedData, isLoading, error } = usePaginatedDomains({
+    page,
+    pageSize,
+    search: debouncedSearch,
+    status: statusFilter,
+  })
+
   const deleteDomain = useDeleteDomain()
   const bulkDelete = useBulkDeleteDomains()
   const bulkUpdateStatus = useBulkUpdateDomainsStatus()
   const { showToast } = useToast()
 
   useEffect(() => {
-    setSelectedIds(new Set())
-  }, [statusFilter, searchQuery])
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+      setPage(1)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
-  const filteredDomains = useMemo(() => {
-    if (!domains) return []
-    return domains.filter((d) => {
-      if (searchQuery && !d.title.toLowerCase().includes(searchQuery.toLowerCase()) && !d.slug.toLowerCase().includes(searchQuery.toLowerCase())) {
-        return false
-      }
-      if (statusFilter === "published" && !d.is_published) return false
-      if (statusFilter === "draft" && d.is_published) return false
-      return true
-    })
-  }, [domains, searchQuery, statusFilter])
+  useEffect(() => {
+    setSelectedIds(new Set())
+    setPage(1)
+  }, [statusFilter])
+
+  const domains = paginatedData?.data ?? []
+  const totalCount = paginatedData?.totalCount ?? 0
+  const totalPages = paginatedData?.totalPages ?? 1
 
   const handleSelectAll = () => {
-    if (selectedIds.size === filteredDomains.length) {
+    if (selectedIds.size === domains.length) {
       setSelectedIds(new Set())
     } else {
-      setSelectedIds(new Set(filteredDomains.map(d => d.id)))
+      setSelectedIds(new Set(domains.map(d => d.id)))
     }
   }
 
@@ -95,11 +108,23 @@ export function DomainList() {
     }
   }
 
-  const hasActiveFilters = searchQuery || statusFilter !== "all"
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage)
+    setSelectedIds(new Set())
+  }
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize)
+    setPage(1)
+    setSelectedIds(new Set())
+  }
+
+  const hasActiveFilters = searchQuery || statusFilter !== 'all'
 
   const clearFilters = () => {
-    setSearchQuery("")
-    setStatusFilter("all")
+    setSearchQuery('')
+    setStatusFilter('all')
+    setPage(1)
   }
 
   if (isLoading) {
@@ -121,7 +146,7 @@ export function DomainList() {
     )
   }
 
-  const isAllSelected = filteredDomains.length ? selectedIds.size === filteredDomains.length : false
+  const isAllSelected = domains.length ? selectedIds.size === domains.length : false
 
   return (
     <div className="space-y-6">
@@ -168,7 +193,7 @@ export function DomainList() {
               <label className="text-sm font-medium text-gray-600">Status:</label>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'published' | 'draft')}
                 className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-sm"
               >
                 <option value="all">All Status</option>
@@ -215,7 +240,7 @@ export function DomainList() {
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="text-left px-4 py-4 w-10">
                   <button onClick={handleSelectAll} className="text-gray-400 hover:text-gray-600">
-                    {isAllSelected && filteredDomains.length > 0 ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
+                    {isAllSelected && domains.length > 0 ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
                   </button>
                 </th>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Order</th>
@@ -226,7 +251,7 @@ export function DomainList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {!filteredDomains.length ? (
+              {!domains.length ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center">
@@ -234,7 +259,7 @@ export function DomainList() {
                         <Book className="w-8 h-8 text-gray-400" />
                       </div>
                       <p className="text-gray-500 mb-4">
-                        {hasActiveFilters ? "No domains match your filters." : "No domains found. Create one to get started."}
+                        {hasActiveFilters ? 'No domains match your filters.' : 'No domains found. Create one to get started.'}
                       </p>
                       {hasActiveFilters ? (
                         <button
@@ -257,7 +282,7 @@ export function DomainList() {
                   </td>
                 </tr>
               ) : (
-                filteredDomains.map((domain) => (
+                domains.map((domain) => (
                   <tr key={domain.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-4">
                       <button onClick={() => handleSelectOne(domain.id)} className="text-gray-400 hover:text-gray-600">
@@ -315,11 +340,14 @@ export function DomainList() {
           </table>
         </div>
 
-        {filteredDomains.length > 0 && (
-          <div className="mt-4 text-sm text-gray-500">
-            Showing {filteredDomains.length} of {domains?.length ?? 0} domains
-          </div>
-        )}
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </div>
     </div>
   )

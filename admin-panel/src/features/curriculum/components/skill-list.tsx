@@ -1,18 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from 'react-router-dom';
-import { useSkills, useDeleteSkill, useBulkDeleteSkills, useBulkUpdateSkillsStatus, useDuplicateSkill } from '../hooks/use-skills';
+import { usePaginatedSkills, useDeleteSkill, useBulkDeleteSkills, useBulkUpdateSkillsStatus, useDuplicateSkill } from '../hooks/use-skills';
 import { useDomains } from '../hooks/use-domains';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/toast';
+import { Pagination } from '@/components/ui/pagination';
 import { Plus, Pencil, Trash, Layers, CheckSquare, Square, Eye, EyeOff, Search, X, Copy } from 'lucide-react';
 
-export function SkillList() {
-    const [selectedDomainId, setSelectedDomainId] = useState<string>("all");
-    const [statusFilter, setStatusFilter] = useState<string>("all");
-    const [searchQuery, setSearchQuery] = useState<string>("");
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+const DEFAULT_PAGE_SIZE = 10;
 
-    const { data: skills, isLoading } = useSkills(selectedDomainId === "all" ? undefined : selectedDomainId);
+export function SkillList() {
+    const [selectedDomainId, setSelectedDomainId] = useState<string>('all');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
+    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [debouncedSearch, setDebouncedSearch] = useState<string>('');
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+
+    const { data: paginatedData, isLoading } = usePaginatedSkills({
+        page,
+        pageSize,
+        search: debouncedSearch,
+        status: statusFilter,
+        domainId: selectedDomainId,
+    });
     const { data: domains } = useDomains();
     const deleteSkill = useDeleteSkill();
     const bulkDelete = useBulkDeleteSkills();
@@ -21,26 +33,27 @@ export function SkillList() {
     const { showToast } = useToast();
 
     useEffect(() => {
-        setSelectedIds(new Set());
-    }, [selectedDomainId, statusFilter, searchQuery]);
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+            setPage(1);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
-    const filteredSkills = useMemo(() => {
-        if (!skills) return [];
-        return skills.filter((s: any) => {
-            if (searchQuery && !s.title.toLowerCase().includes(searchQuery.toLowerCase()) && !s.slug.toLowerCase().includes(searchQuery.toLowerCase())) {
-                return false;
-            }
-            if (statusFilter === "published" && !s.is_published) return false;
-            if (statusFilter === "draft" && s.is_published) return false;
-            return true;
-        });
-    }, [skills, searchQuery, statusFilter]);
+    useEffect(() => {
+        setSelectedIds(new Set());
+        setPage(1);
+    }, [selectedDomainId, statusFilter]);
+
+    const skills = paginatedData?.data ?? [];
+    const totalCount = paginatedData?.totalCount ?? 0;
+    const totalPages = paginatedData?.totalPages ?? 1;
 
     const handleSelectAll = () => {
-        if (selectedIds.size === filteredSkills.length) {
+        if (selectedIds.size === skills.length) {
             setSelectedIds(new Set());
         } else {
-            setSelectedIds(new Set(filteredSkills.map((s: any) => s.id)));
+            setSelectedIds(new Set(skills.map((s: any) => s.id)));
         }
     };
 
@@ -89,17 +102,6 @@ export function SkillList() {
         }
     };
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-r-transparent"></div>
-                    <p className="mt-4 text-gray-500">Loading skills...</p>
-                </div>
-            </div>
-        );
-    }
-
     const handleDelete = async (id: string) => {
         if (confirm('Are you sure you want to delete this skill?')) {
             try {
@@ -120,14 +122,37 @@ export function SkillList() {
         }
     };
 
-    const isAllSelected = filteredSkills.length ? selectedIds.size === filteredSkills.length : false;
-    const hasActiveFilters = searchQuery || statusFilter !== "all" || selectedDomainId !== "all";
+    const handlePageChange = (newPage: number) => {
+        setPage(newPage);
+        setSelectedIds(new Set());
+    };
+
+    const handlePageSizeChange = (newPageSize: number) => {
+        setPageSize(newPageSize);
+        setPage(1);
+        setSelectedIds(new Set());
+    };
+
+    const isAllSelected = skills.length ? selectedIds.size === skills.length : false;
+    const hasActiveFilters = searchQuery || statusFilter !== 'all' || selectedDomainId !== 'all';
 
     const clearFilters = () => {
-        setSearchQuery("");
-        setStatusFilter("all");
-        setSelectedDomainId("all");
+        setSearchQuery('');
+        setStatusFilter('all');
+        setSelectedDomainId('all');
+        setPage(1);
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-r-transparent"></div>
+                    <p className="mt-4 text-gray-500">Loading skills...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -187,7 +212,7 @@ export function SkillList() {
                             <label className="text-sm font-medium text-gray-600">Status:</label>
                             <select
                                 value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
+                                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'published' | 'draft')}
                                 className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-sm"
                             >
                                 <option value="all">All Status</option>
@@ -234,7 +259,7 @@ export function SkillList() {
                             <tr className="bg-gray-50 border-b border-gray-100">
                                 <th className="text-left px-4 py-4 w-10">
                                     <button onClick={handleSelectAll} className="text-gray-400 hover:text-gray-600">
-                                        {isAllSelected && filteredSkills.length > 0 ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
+                                        {isAllSelected && skills.length > 0 ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
                                     </button>
                                 </th>
                                 <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Title</th>
@@ -245,7 +270,7 @@ export function SkillList() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {!filteredSkills.length ? (
+                            {!skills.length ? (
                                 <tr>
                                     <td colSpan={6} className="px-6 py-12 text-center">
                                         <div className="flex flex-col items-center">
@@ -253,7 +278,7 @@ export function SkillList() {
                                                 <Layers className="w-8 h-8 text-gray-400" />
                                             </div>
                                             <p className="text-gray-500 mb-4">
-                                                {hasActiveFilters ? "No skills match your filters." : "No skills found. Create one to get started."}
+                                                {hasActiveFilters ? 'No skills match your filters.' : 'No skills found. Create one to get started.'}
                                             </p>
                                             {hasActiveFilters ? (
                                                 <button
@@ -276,7 +301,7 @@ export function SkillList() {
                                     </td>
                                 </tr>
                             ) : (
-                                filteredSkills.map((skill: any) => (
+                                skills.map((skill: any) => (
                                     <tr key={skill.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-4 py-4">
                                             <button onClick={() => handleSelectOne(skill.id)} className="text-gray-400 hover:text-gray-600">
@@ -347,11 +372,14 @@ export function SkillList() {
                     </table>
                 </div>
 
-                {filteredSkills.length > 0 && (
-                    <div className="mt-4 text-sm text-gray-500">
-                        Showing {filteredSkills.length} of {skills?.length ?? 0} skills
-                    </div>
-                )}
+                <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    totalCount={totalCount}
+                    pageSize={pageSize}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
+                />
             </div>
         </div>
     );

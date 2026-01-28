@@ -7,6 +7,22 @@ type Skill = Database['public']['Tables']['skills']['Row'];
 type SkillInsert = Database['public']['Tables']['skills']['Insert'];
 type SkillUpdate = Database['public']['Tables']['skills']['Update'];
 
+export interface PaginationParams {
+  page: number;
+  pageSize: number;
+  search?: string;
+  status?: 'all' | 'published' | 'draft';
+  domainId?: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export function useSkills(domainId?: string) {
   return useQuery({
     queryKey: ['skills', domainId],
@@ -30,6 +46,59 @@ export function useSkills(domainId?: string) {
       
       if (error) throw error;
       return data as unknown as (Skill & { domains: { title: string } | null })[];
+    },
+  });
+}
+
+export function usePaginatedSkills(params: PaginationParams) {
+  return useQuery({
+    queryKey: ['skills-paginated', params],
+    queryFn: async (): Promise<PaginatedResponse<Skill & { domains: { title: string } | null }>> => {
+      const { page, pageSize, search, status, domainId } = params;
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      let query = supabase
+        .from('skills')
+        .select(`
+          *,
+          domains (
+            title
+          )
+        `, { count: 'exact' })
+        .is('deleted_at', null)
+        .order('sort_order', { ascending: true });
+
+      if (search) {
+        query = query.or(`title.ilike.%${search}%,slug.ilike.%${search}%`);
+      }
+
+      if (status === 'published') {
+        query = query.eq('is_published', true);
+      } else if (status === 'draft') {
+        query = query.eq('is_published', false);
+      }
+
+      if (domainId && domainId !== 'all') {
+        query = query.eq('domain_id', domainId);
+      }
+
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
+
+      if (error) throw error;
+
+      const totalCount = count ?? 0;
+      const totalPages = Math.ceil(totalCount / pageSize);
+
+      return {
+        data: data as unknown as (Skill & { domains: { title: string } | null })[],
+        totalCount,
+        page,
+        pageSize,
+        totalPages,
+      };
     },
   });
 }
@@ -67,6 +136,7 @@ export function useCreateSkill() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['skills'] });
+      queryClient.invalidateQueries({ queryKey: ['skills-paginated'] });
     },
   });
 }
@@ -88,6 +158,7 @@ export function useUpdateSkill() {
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['skills'] });
+            queryClient.invalidateQueries({ queryKey: ['skills-paginated'] });
             queryClient.invalidateQueries({ queryKey: ['skill', data.id] });
         },
     });
@@ -107,6 +178,7 @@ export function useDeleteSkill() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['skills'] });
+            queryClient.invalidateQueries({ queryKey: ['skills-paginated'] });
         },
     });
 }
@@ -125,6 +197,7 @@ export function useBulkDeleteSkills() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['skills'] });
+            queryClient.invalidateQueries({ queryKey: ['skills-paginated'] });
             queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
         },
     });
@@ -144,6 +217,7 @@ export function useBulkUpdateSkillsStatus() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['skills'] });
+            queryClient.invalidateQueries({ queryKey: ['skills-paginated'] });
             queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
         },
     });
@@ -182,6 +256,7 @@ export function useDuplicateSkill() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['skills'] });
+            queryClient.invalidateQueries({ queryKey: ['skills-paginated'] });
             queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
         },
     });
