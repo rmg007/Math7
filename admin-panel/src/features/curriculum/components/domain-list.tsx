@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Plus, Book, CheckSquare, Square, Eye, EyeOff, Search, X } from 'lucide-react'
+import { Plus, Book, CheckSquare, Square, Eye, EyeOff, Search, X, Trash } from 'lucide-react'
 import { usePaginatedDomains, useDeleteDomain, useBulkDeleteDomains, useBulkUpdateDomainsStatus } from '../hooks/use-domains'
 import { useState, useEffect } from 'react'
 import { useToast } from '@/components/ui/toast'

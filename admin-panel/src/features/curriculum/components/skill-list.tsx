@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/toast';
 import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
-import { Plus, Layers, CheckSquare, Square, Eye, EyeOff, Search, X } from 'lucide-react';
+import { Plus, Layers, CheckSquare, Square, Eye, EyeOff, Search, X, Trash } from 'lucide-react';
 
 const DEFAULT_PAGE_SIZE = 10;
 
