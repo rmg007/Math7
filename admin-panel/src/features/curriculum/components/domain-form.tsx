@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { useCreateDomain, useDomains } from '../hooks/use-domains' 
+import { useCreateDomain, useUpdateDomain, useDomains } from '../hooks/use-domains' 
 
 // We can extend this as needed, simplified for MVP
 const domainSchema = z.object({
@@ -23,6 +23,7 @@ export function DomainForm() {
   const { id } = useParams()
   const navigate = useNavigate()
   const createDomain = useCreateDomain()
+  const updateDomain = useUpdateDomain()
   const { data: domains } = useDomains()
   
   // If editing, find the existing domain
@@ -58,10 +59,8 @@ export function DomainForm() {
 
   const onSubmit = async (data: DomainFormData) => {
     try {
-      if (isEditing) {
-        // We'll add update capability later, for now MVP focus on create or mock update
-        // await updateDomain.mutateAsync({ id, ...data })
-        console.log('Update not implemented yet', data)
+      if (isEditing && id) {
+        await updateDomain.mutateAsync({ id, ...data })
       } else {
         await createDomain.mutateAsync(data)
       }
