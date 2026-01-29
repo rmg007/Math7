@@ -42,6 +42,9 @@ Preferred communication style: Simple, everyday language.
   - User Management page (super admin only) for managing admin accounts
   - Toast notification system for success/error feedback
   - Content duplication for questions and skills
+  - Drag-and-drop reordering for domains, skills, and questions (via @dnd-kit)
+  - Responsive mobile design with collapsible sidebar and card layouts
+  - Touch-friendly UI with 48px minimum touch targets
 
 ### Backend Architecture
 
