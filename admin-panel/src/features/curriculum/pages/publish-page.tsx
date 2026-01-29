@@ -224,7 +224,7 @@ export function PublishPage() {
                     </button>
                     {preview && !preview.canPublish && (
                         <p className="mt-3 text-sm text-red-600">
-                            Fix the errors above before publishing.
+                            Nothing to publish. Mark content as published first.
                         </p>
                     )}
                 </div>

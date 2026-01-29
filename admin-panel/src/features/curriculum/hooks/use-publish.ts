@@ -106,11 +106,20 @@ export function usePublishPreview() {
         });
       }
 
+      // Check if there's nothing to publish
+      const hasContent = stats.publishedDomains > 0 || stats.publishedSkills > 0 || stats.publishedQuestions > 0;
+      if (!hasContent) {
+        validationIssues.unshift({
+          type: 'error',
+          message: 'Nothing to publish. Mark at least one domain, skill, or question as published first.',
+        });
+      }
+
       return {
         meta: metaResult.data as CurriculumMeta,
         stats,
         validationIssues,
-        canPublish: true,
+        canPublish: hasContent,
       };
     },
     refetchInterval: 30000,
