@@ -387,7 +387,7 @@ export function QuestionList() {
                                             )}
                                         </td>
                                         <td className="px-6 py-4">
-                                            {!question.skill_id ? (
+                                            {!question.skills ? (
                                                 <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
                                                     Yes
                                                 </span>
