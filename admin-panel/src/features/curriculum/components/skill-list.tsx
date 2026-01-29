@@ -1,14 +1,154 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from 'react-router-dom';
-import { usePaginatedSkills, useDeleteSkill, useBulkDeleteSkills, useBulkUpdateSkillsStatus, useDuplicateSkill } from '../hooks/use-skills';
+import { usePaginatedSkills, useDeleteSkill, useBulkDeleteSkills, useBulkUpdateSkillsStatus, useDuplicateSkill, useUpdateSkillOrder } from '../hooks/use-skills';
 import { useDomains } from '../hooks/use-domains';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '@/components/ui/toast';
 import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
-import { Plus, CheckSquare, Square, Search, X, Trash, Layers } from 'lucide-react';
+import { Plus, CheckSquare, Square, Search, X, Trash, Layers, GripVertical } from 'lucide-react';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const DEFAULT_PAGE_SIZE = 10;
+
+interface Skill {
+    id: string;
+    title: string;
+    slug: string;
+    sort_order: number;
+    status?: string;
+    difficulty_level?: number;
+    domain_id?: string;
+    domains?: { title: string } | null;
+}
+
+interface SortableRowProps {
+    skill: Skill;
+    isSelected: boolean;
+    onSelect: (id: string) => void;
+    onDelete: (id: string) => void;
+    onDuplicate: (id: string) => void;
+    renderStatusBadge: (status: string) => JSX.Element;
+    isDragDisabled: boolean;
+    isDuplicating: boolean;
+}
+
+function SortableRow({ skill, isSelected, onSelect, onDelete, onDuplicate, renderStatusBadge, isDragDisabled, isDuplicating }: SortableRowProps) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: skill.id, disabled: isDragDisabled });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        boxShadow: isDragging ? '0 4px 12px rgba(0, 0, 0, 0.15)' : undefined,
+        backgroundColor: isDragging ? '#f9fafb' : undefined,
+        position: 'relative' as const,
+        zIndex: isDragging ? 10 : undefined,
+    };
+
+    return (
+        <tr ref={setNodeRef} style={style} className="hover:bg-gray-50 transition-colors">
+            <td className="px-2 py-4 w-10">
+                {!isDragDisabled ? (
+                    <button
+                        {...attributes}
+                        {...listeners}
+                        className="p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing touch-none"
+                        aria-label="Drag to reorder"
+                    >
+                        <GripVertical className="h-5 w-5" />
+                    </button>
+                ) : (
+                    <div className="p-2 text-gray-200">
+                        <GripVertical className="h-5 w-5" />
+                    </div>
+                )}
+            </td>
+            <td className="px-4 py-4">
+                <button onClick={() => onSelect(skill.id)} className="text-gray-400 hover:text-gray-600">
+                    {isSelected ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
+                </button>
+            </td>
+            <td className="px-6 py-4">
+                <div>
+                    <span className="font-medium text-gray-900">{skill.title}</span>
+                    <p className="text-sm text-gray-500">{skill.slug}</p>
+                </div>
+            </td>
+            <td className="px-6 py-4">
+                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                    {skill.domains?.title}
+                </span>
+            </td>
+            <td className="px-6 py-4">
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 text-gray-700 font-semibold text-sm">
+                    {skill.difficulty_level}
+                </span>
+            </td>
+            <td className="px-6 py-4">
+                {renderStatusBadge(skill.status || 'draft')}
+            </td>
+            <td className="px-6 py-4">
+                {!skill.domains ? (
+                    <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
+                        Yes
+                    </span>
+                ) : (
+                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+                        No
+                    </span>
+                )}
+            </td>
+            <td className="px-6 py-4 text-right">
+                <div className="flex items-center justify-end gap-2">
+                    <Link
+                        to={`/skills/${skill.id}/edit`}
+                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
+                    >
+                        Edit
+                    </Link>
+                    <button
+                        onClick={() => onDuplicate(skill.id)}
+                        disabled={isDuplicating}
+                        className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium hover:bg-purple-200 transition-colors disabled:opacity-50"
+                    >
+                        Duplicate
+                    </button>
+                    <button
+                        onClick={() => onDelete(skill.id)}
+                        className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium hover:bg-red-200 transition-colors"
+                    >
+                        Delete
+                    </button>
+                </div>
+            </td>
+        </tr>
+    );
+}
 
 export function SkillList() {
     const [selectedDomainId, setSelectedDomainId] = useState<string>('all');
@@ -35,7 +175,25 @@ export function SkillList() {
     const bulkDelete = useBulkDeleteSkills();
     const bulkUpdateStatus = useBulkUpdateSkillsStatus();
     const duplicateSkill = useDuplicateSkill();
+    const updateSkillOrder = useUpdateSkillOrder();
     const { showToast } = useToast();
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 200,
+                tolerance: 5,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -53,6 +211,35 @@ export function SkillList() {
     const skills = paginatedData?.data ?? [];
     const totalCount = paginatedData?.totalCount ?? 0;
     const totalPages = paginatedData?.totalPages ?? 1;
+
+    const skillIds = useMemo(() => skills.map((s: any) => s.id), [skills]);
+
+    const isDragDisabled = Boolean(debouncedSearch) || statusFilter !== 'all' || selectedDomainId !== 'all' || sortBy !== 'sort_order';
+
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const oldIndex = skills.findIndex((s: any) => s.id === active.id);
+            const newIndex = skills.findIndex((s: any) => s.id === over.id);
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const reorderedSkills = arrayMove(skills, oldIndex, newIndex);
+
+                const updates = reorderedSkills.map((skill: any, index: number) => ({
+                    id: skill.id,
+                    sort_order: index + 1 + (page - 1) * pageSize,
+                }));
+
+                try {
+                    await updateSkillOrder.mutateAsync(updates);
+                    showToast('Skill order updated', 'success');
+                } catch {
+                    showToast('Failed to update skill order', 'error');
+                }
+            }
+        }
+    };
 
     const handleSort = (column: string) => {
         if (sortBy === column) {
@@ -253,6 +440,12 @@ export function SkillList() {
                             </select>
                         </div>
 
+                        {isDragDisabled && sortBy === 'sort_order' && (
+                            <span className="text-sm text-amber-600 bg-amber-50 px-3 py-1 rounded-lg">
+                                Clear filters to enable drag reordering
+                            </span>
+                        )}
+
                         {selectedIds.size > 0 && (
                             <div className="flex items-center gap-2 ml-auto">
                                 <span className="text-sm text-gray-600">{selectedIds.size} selected</span>
@@ -283,145 +476,108 @@ export function SkillList() {
                     </div>
                 </div>
 
-                <div className="overflow-hidden rounded-xl border border-gray-100">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="bg-gray-50 border-b border-gray-100">
-                                <th className="text-left px-4 py-4 w-10">
-                                    <button onClick={handleSelectAll} className="text-gray-400 hover:text-gray-600">
-                                        {isAllSelected && skills.length > 0 ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
-                                    </button>
-                                </th>
-                                <th className="text-left px-6 py-4">
-                                    <SortableHeader
-                                        label="Title"
-                                        column="title"
-                                        currentSortBy={sortBy}
-                                        currentSortOrder={sortOrder}
-                                        onSort={handleSort}
-                                    />
-                                </th>
-                                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Domain</th>
-                                <th className="text-left px-6 py-4">
-                                    <SortableHeader
-                                        label="Difficulty"
-                                        column="difficulty_level"
-                                        currentSortBy={sortBy}
-                                        currentSortOrder={sortOrder}
-                                        onSort={handleSort}
-                                    />
-                                </th>
-                                <th className="text-left px-6 py-4">
-                                    <SortableHeader
-                                        label="Status"
-                                        column="status"
-                                        currentSortBy={sortBy}
-                                        currentSortOrder={sortOrder}
-                                        onSort={handleSort}
-                                    />
-                                </th>
-                                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Orphan</th>
-                                <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {!skills.length ? (
-                                <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center">
-                                        <div className="flex flex-col items-center">
-                                            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                                                <Layers className="w-8 h-8 text-gray-400" />
-                                            </div>
-                                            <p className="text-gray-500 mb-4">
-                                                {hasActiveFilters ? 'No skills match your filters.' : 'No skills found. Create one to get started.'}
-                                            </p>
-                                            {hasActiveFilters ? (
-                                                <button
-                                                    onClick={clearFilters}
-                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-                                                >
-                                                    <X className="h-4 w-4" />
-                                                    Clear filters
-                                                </button>
-                                            ) : (
-                                                <Link
-                                                    to="/skills/new"
-                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
-                                                >
-                                                    <Plus className="h-4 w-4" />
-                                                    Create Skill
-                                                </Link>
-                                            )}
-                                        </div>
-                                    </td>
+                {/* @ts-expect-error - React types version mismatch with @dnd-kit */}
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                >
+                    <div className="overflow-hidden rounded-xl border border-gray-100">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-gray-50 border-b border-gray-100">
+                                    <th className="text-left px-2 py-4 w-10">
+                                        <span className="sr-only">Drag handle</span>
+                                    </th>
+                                    <th className="text-left px-4 py-4 w-10">
+                                        <button onClick={handleSelectAll} className="text-gray-400 hover:text-gray-600">
+                                            {isAllSelected && skills.length > 0 ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
+                                        </button>
+                                    </th>
+                                    <th className="text-left px-6 py-4">
+                                        <SortableHeader
+                                            label="Title"
+                                            column="title"
+                                            currentSortBy={sortBy}
+                                            currentSortOrder={sortOrder}
+                                            onSort={handleSort}
+                                        />
+                                    </th>
+                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Domain</th>
+                                    <th className="text-left px-6 py-4">
+                                        <SortableHeader
+                                            label="Difficulty"
+                                            column="difficulty_level"
+                                            currentSortBy={sortBy}
+                                            currentSortOrder={sortOrder}
+                                            onSort={handleSort}
+                                        />
+                                    </th>
+                                    <th className="text-left px-6 py-4">
+                                        <SortableHeader
+                                            label="Status"
+                                            column="status"
+                                            currentSortBy={sortBy}
+                                            currentSortOrder={sortOrder}
+                                            onSort={handleSort}
+                                        />
+                                    </th>
+                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Orphan</th>
+                                    <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
                                 </tr>
-                            ) : (
-                                skills.map((skill: any) => (
-                                    <tr key={skill.id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-4 py-4">
-                                            <button onClick={() => handleSelectOne(skill.id)} className="text-gray-400 hover:text-gray-600">
-                                                {selectedIds.has(skill.id) ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
-                                            </button>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div>
-                                                <span className="font-medium text-gray-900">{skill.title}</span>
-                                                <p className="text-sm text-gray-500">{skill.slug}</p>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-                                                {skill.domains?.title}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 text-gray-700 font-semibold text-sm">
-                                                {skill.difficulty_level}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {renderStatusBadge(skill.status || 'draft')}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {!skill.domains ? (
-                                                <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
-                                                    Yes
-                                                </span>
-                                            ) : (
-                                                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
-                                                    No
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Link
-                                                    to={`/skills/${skill.id}/edit`}
-                                                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
-                                                >
-                                                    Edit
-                                                </Link>
-                                                <button
-                                                    onClick={() => handleDuplicate(skill.id)}
-                                                    disabled={duplicateSkill.isPending}
-                                                    className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium hover:bg-purple-200 transition-colors disabled:opacity-50"
-                                                >
-                                                    Duplicate
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(skill.id)}
-                                                    className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium hover:bg-red-200 transition-colors"
-                                                >
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <SortableContext items={skillIds} strategy={verticalListSortingStrategy}>
+                                <tbody className="divide-y divide-gray-100">
+                                    {!skills.length ? (
+                                        <tr>
+                                            <td colSpan={8} className="px-6 py-12 text-center">
+                                                <div className="flex flex-col items-center">
+                                                    <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                                                        <Layers className="w-8 h-8 text-gray-400" />
+                                                    </div>
+                                                    <p className="text-gray-500 mb-4">
+                                                        {hasActiveFilters ? 'No skills match your filters.' : 'No skills found. Create one to get started.'}
+                                                    </p>
+                                                    {hasActiveFilters ? (
+                                                        <button
+                                                            onClick={clearFilters}
+                                                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
+                                                        >
+                                                            <X className="h-4 w-4" />
+                                                            Clear filters
+                                                        </button>
+                                                    ) : (
+                                                        <Link
+                                                            to="/skills/new"
+                                                            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
+                                                        >
+                                                            <Plus className="h-4 w-4" />
+                                                            Create Skill
+                                                        </Link>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        skills.map((skill: any) => (
+                                            <SortableRow
+                                                key={skill.id}
+                                                skill={skill}
+                                                isSelected={selectedIds.has(skill.id)}
+                                                onSelect={handleSelectOne}
+                                                onDelete={handleDelete}
+                                                onDuplicate={handleDuplicate}
+                                                renderStatusBadge={renderStatusBadge}
+                                                isDragDisabled={isDragDisabled}
+                                                isDuplicating={duplicateSkill.isPending}
+                                            />
+                                        ))
+                                    )}
+                                </tbody>
+                            </SortableContext>
+                        </table>
+                    </div>
+                </DndContext>
 
                 <Pagination
                     currentPage={page}
