@@ -389,11 +389,11 @@ export function QuestionList() {
                                         <td className="px-6 py-4">
                                             {!question.skill_id ? (
                                                 <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
-                                                    Orphan
+                                                    Yes
                                                 </span>
                                             ) : (
-                                                <span className="px-3 py-1 bg-gray-50 text-gray-400 rounded-full text-sm font-medium">
-                                                    -
+                                                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+                                                    No
                                                 </span>
                                             )}
                                         </td>
@@ -408,7 +408,7 @@ export function QuestionList() {
                                                 <button
                                                     onClick={() => handleDuplicate(question.id)}
                                                     disabled={duplicateQuestion.isPending}
-                                                    className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium hover:bg-indigo-200 transition-colors disabled:opacity-50"
+                                                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors disabled:opacity-50"
                                                 >
                                                     Duplicate
                                                 </button>
