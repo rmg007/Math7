@@ -7,13 +7,13 @@ type Question = Database['public']['Tables']['questions']['Row'];
 type QuestionInsert = Database['public']['Tables']['questions']['Insert'];
 type QuestionUpdate = Database['public']['Tables']['questions']['Update'];
 
-export type CurriculumStatus = 'draft' | 'live';
+export type CurriculumStatus = 'draft' | 'published' | 'live';
 
 export interface PaginationParams {
   page: number;
   pageSize: number;
   search?: string;
-  status?: 'all' | 'draft' | 'live';
+  status?: 'all' | 'draft' | 'published' | 'live';
   skillId?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';

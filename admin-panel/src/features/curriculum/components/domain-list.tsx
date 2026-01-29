@@ -209,7 +209,7 @@ function SortableCard({ domain, isSelected, onSelect, onDelete, renderStatusBadg
 
 export function DomainList() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'live'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'live'>('all')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [debouncedSearch, setDebouncedSearch] = useState<string>('')
   const [page, setPage] = useState(1)
@@ -358,6 +358,17 @@ export function DomainList() {
     }
   }
 
+  const handleMarkPublished = async () => {
+    if (selectedIds.size === 0) return
+    try {
+      await bulkUpdateStatus.mutateAsync({ ids: Array.from(selectedIds), status: 'published' })
+      showToast(`${selectedIds.size} domain(s) marked as published (ready for release)`, 'success')
+      setSelectedIds(new Set())
+    } catch {
+      showToast('Failed to update domains', 'error')
+    }
+  }
+
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this domain?')) {
       try {
@@ -394,6 +405,12 @@ export function DomainList() {
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
             Live
+          </span>
+        )
+      case 'published':
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+            Published
           </span>
         )
       default:
@@ -480,11 +497,12 @@ export function DomainList() {
               <label className="text-sm font-medium text-gray-600">Status:</label>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'live')}
+                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'published' | 'live')}
                 className="px-3 py-3 min-h-[48px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-base w-full sm:w-auto"
               >
                 <option value="all">All Status</option>
                 <option value="draft">Draft</option>
+                <option value="published">Published</option>
                 <option value="live">Live</option>
               </select>
             </div>
@@ -498,6 +516,13 @@ export function DomainList() {
             {selectedIds.size > 0 && (
               <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
                 <span className="text-sm text-gray-600 w-full sm:w-auto">{selectedIds.size} selected</span>
+                <button
+                  onClick={handleMarkPublished}
+                  disabled={bulkUpdateStatus.isPending}
+                  className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors flex-1 sm:flex-none"
+                >
+                  Mark Published
+                </button>
                 <button
                   onClick={handleMarkLive}
                   disabled={bulkUpdateStatus.isPending}

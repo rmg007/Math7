@@ -260,7 +260,7 @@ function SortableCard({ skill, isSelected, onSelect, onDelete, onDuplicate, rend
 
 export function SkillList() {
     const [selectedDomainId, setSelectedDomainId] = useState<string>('all');
-    const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'live'>('all');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'live'>('all');
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [debouncedSearch, setDebouncedSearch] = useState<string>('');
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -412,6 +412,17 @@ export function SkillList() {
         }
     };
 
+    const handleMarkPublished = async () => {
+        if (selectedIds.size === 0) return;
+        try {
+            await bulkUpdateStatus.mutateAsync({ ids: Array.from(selectedIds), status: 'published' });
+            showToast(`${selectedIds.size} skill(s) marked as published (ready for release)`, 'success');
+            setSelectedIds(new Set());
+        } catch {
+            showToast('Failed to update skills', 'error');
+        }
+    };
+
     const handleDelete = async (id: string) => {
         if (confirm('Are you sure you want to delete this skill?')) {
             try {
@@ -459,6 +470,12 @@ export function SkillList() {
                 return (
                     <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
                         Live
+                    </span>
+                );
+            case 'published':
+                return (
+                    <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
+                        Published
                     </span>
                 );
             default:
@@ -548,11 +565,12 @@ export function SkillList() {
                             <label className="text-sm font-medium text-gray-600">Status:</label>
                             <select
                                 value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'live')}
+                                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'published' | 'live')}
                                 className="px-3 py-3 min-h-[48px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-base w-full sm:w-auto"
                             >
                                 <option value="all">All Status</option>
                                 <option value="draft">Draft</option>
+                                <option value="published">Published</option>
                                 <option value="live">Live</option>
                             </select>
                         </div>
@@ -566,6 +584,13 @@ export function SkillList() {
                         {selectedIds.size > 0 && (
                             <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
                                 <span className="text-sm text-gray-600 w-full sm:w-auto">{selectedIds.size} selected</span>
+                                <button
+                                    onClick={handleMarkPublished}
+                                    disabled={bulkUpdateStatus.isPending}
+                                    className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors flex-1 sm:flex-none"
+                                >
+                                    Mark Published
+                                </button>
                                 <button
                                     onClick={handleMarkLive}
                                     disabled={bulkUpdateStatus.isPending}

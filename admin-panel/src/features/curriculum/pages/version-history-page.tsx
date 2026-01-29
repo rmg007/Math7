@@ -30,7 +30,7 @@ export function VersionHistoryPage() {
         .from('curriculum_snapshots')
         .select('version, published_at, domains_count, skills_count, questions_count')
         .order('version', { ascending: false })
-        .limit(50);
+        .limit(10);
 
       if (error) {
         console.warn('No publish history table found or error:', error);
