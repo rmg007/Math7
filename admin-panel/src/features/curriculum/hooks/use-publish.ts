@@ -138,6 +138,7 @@ export function usePublishCurriculum() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['curriculum-meta'] });
       queryClient.invalidateQueries({ queryKey: ['publish-preview'] });
+      queryClient.invalidateQueries({ queryKey: ['publish-history'] });
     },
   });
 }

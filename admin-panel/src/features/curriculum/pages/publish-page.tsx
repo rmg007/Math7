@@ -207,7 +207,7 @@ export function PublishPage() {
                 <div className="p-6 bg-gray-50 border-t border-gray-100">
                     <button 
                         onClick={handlePublish} 
-                        disabled={publishMutation.isPending || (preview && !preview.canPublish)}
+                        disabled={publishMutation.isPending || isLoadingPreview || !preview?.canPublish}
                         className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {publishMutation.isPending ? (
