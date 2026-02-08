@@ -19,6 +19,11 @@ If two sources conflict, follow the highest-ranked source.
 1. **NEVER PUBLISH LANDING-PAGES**: Deployment of the `landing-pages` directory is strictly prohibited.
 2. **NEVER DEPLOY TO questerix.com**: Do not ever attempt to deploy or publish anything to the root domain `https://questerix.com/`. 
 3. **DEVELOPMENT ONLY**: The project is currently in the development & testing phase. Any automated or manual deployment script MUST skip landing page tasks.
+4. **ROOT DIRECTORY LOCK**: Do NOT create new files in the root directory without explicit user permission.
+    - Exceptions: Updates to `README.md`, `ROADMAP.md`, `task.md` (in `.agent`), or specific config files.
+    - **Documentation**: MUST go into `docs/` subdirectories (`docs/technical`, `docs/strategy`, `docs/reports`).
+    - **Temporary Files**: MUST go into `artifacts/` or `.agent/logs/`.
+
 
 ## AI Performance Protocol (Database First)
 

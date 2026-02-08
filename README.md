@@ -32,6 +32,7 @@ The project consists of:
 - **`docs/specs/*`**: Detailed blueprints for UI, Data, and API.
 - **`.mcp_config.json`**: Ready-to-use MCP server configuration.
 - **`MCP_SETUP_COMPLETE.md`**: MCP installation summary and next steps.
+- **`docs/technical/SECRETS_LOCATIONS.md`**: Map of all secret file locations.
 
 ## 🧑‍💻 For Humans (Development)
 
