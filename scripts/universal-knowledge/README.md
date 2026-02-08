@@ -18,32 +18,17 @@ When switching between IDEs, AI agents lose context and understanding of your pr
 │  │             │  │   (RAG)      │  │   registry/metrics) │   │
 │  └─────────────┘  └──────────────┘  └─────────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    IDE ADAPTER LAYER                            │
-├─────────────────────────────────────────────────────────────────┤
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌───────┐  │
-│  │ Cursor   │ │ Qodo     │ │ Codesp   │ │ Antigrav │ │ MCP   │  │
-│  │ Adapter  │ │ Adapter  │ │ Adapter  │ │ Adapter  │ │ Bridge│  │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘ └───────┘  │
-└─────────────────────────────────────────────────────────────────┘
-```
-
 ## 🚀 Quick Start
 
 ### 1. Installation
-
 ```bash
 cd scripts/universal-knowledge
-chmod +x setup.sh
-./setup.sh
+npm install
+npm run build
 ```
 
 ### 2. Configuration
-
 Copy `env.example` to `.env` and add your credentials:
-
 ```bash
 # Supabase Configuration
 SUPABASE_URL=https://your-project.supabase.co
@@ -55,13 +40,6 @@ OPENAI_API_KEY=sk-your-openai-api-key
 ```
 
 ### 3. Usage
-
-#### Command Line
-```bash
-npm start "How does offline sync work?"
-```
-
-#### Programmatic
 ```typescript
 import { UniversalKnowledgeSystem } from './dist/index.js';
 
@@ -70,48 +48,47 @@ await system.initialize();
 const results = await system.search("Flutter testing patterns");
 ```
 
-## 🔧 IDE Integration
+## 🏗️ Architecture
 
-### Cursor
-- Automatically detected via `.cursorrules` and `AI_CODING_INSTRUCTIONS.md`
-- No additional configuration required
-
-### Qodo
-- Set environment variable: `export QODO_ENV=true`
-- Integrates with `QODO_GUIDE.md`
-
-### GitHub Codespaces
-- Automatically detected via `CODESPACES=true`
-- Uses `.devcontainer/devcontainer.json` configuration
-
-### Antigravity IDE
-- Set environment variable: `export ANTIGRAVITY_ENV=true`
-- Integrates with `.agent/workflows/`
+- **Universal Knowledge Client**: Core search functionality with caching
+- **IDE Adapters**: Specific integrations for Cursor, Qodo, Codespaces, Antigravity
+- **Supabase Integration**: Uses existing Project Oracle knowledge base
+- **OpenAI Embeddings**: Semantic search powered by text-embedding-3-small
+- **Intelligent Caching**: LRU cache with configurable TTL
+- **Fallback Mechanisms**: File system search when database unavailable
 
 ## 📊 Features
 
-### ✅ Core Features
-- **Universal Search**: Same search results across all IDEs
-- **Semantic Search**: Powered by OpenAI embeddings and Supabase pgvector
-- **Intelligent Caching**: LRU cache with configurable TTL
-- **Fallback Mechanisms**: File system search when database is unavailable
-- **Health Monitoring**: Real-time system health checks
+✅ Universal Search: Same results across all IDEs
+✅ Semantic Search: Powered by OpenAI embeddings and Supabase pgvector
+✅ Intelligent Caching: LRU cache with configurable TTL
+✅ Fallback Mechanisms: File system search when database is unavailable
+✅ Health Monitoring: Real-time system health checks
+✅ Cross-Platform: Works on Windows, macOS, and Linux
 
-### 🛡️ Safety & Reliability
-- **Error Handling**: Comprehensive error handling with retries
-- **Rate Limiting**: Respects OpenAI API rate limits
-- **Security**: Secure credential management
-- **Performance**: Optimized for low-latency responses
+## 🔧 IDE Integration
 
-### 🔄 Sync & Updates
-- **Automatic Sync**: Keeps knowledge base up-to-date
-- **Change Detection**: Only re-indexes modified content
-- **Version Control**: Tracks knowledge base versions
+### Automatic Detection
+The system automatically detects the current IDE and loads appropriate configuration:
 
-## 📈 Performance Metrics
+- **Cursor**: `.cursorrules` and `AI_CODING_INSTRUCTIONS.md`
+- **Qodo**: `QODO_GUIDE.md` and `.qodo/` directory
+- **Codespaces**: `.devcontainer/devcontainer.json`
+- **Antigravity**: `.agent/workflows/` and `.cursorrules`
 
-| Metric | Target | Current |
-|---------|---------|----------|
+### Manual Activation
+Set environment variables to force specific IDE detection:
+```bash
+export CURSOR_ENV=true          # Force Cursor mode
+export QODO_ENV=true            # Force Qodo mode
+export CODESPACES=true          # Force Codespaces mode
+export ANTIGRAVITY_ENV=true     # Force Antigravity mode
+```
+
+## 📈 Performance
+
+| Metric | Target | Implementation |
+|---------|---------|----------------|
 | Search Latency | < 2 seconds | ~1.2 seconds |
 | Cache Hit Rate | > 80% | ~85% |
 | Sync Success Rate | > 99% | ~99.5% |
@@ -120,7 +97,6 @@ const results = await system.search("Flutter testing patterns");
 ## 🔍 API Reference
 
 ### UniversalKnowledgeClient
-
 ```typescript
 const client = UniversalKnowledgeClient.getInstance();
 
@@ -145,44 +121,12 @@ const health = await client.getHealthStatus();
 const stats = await client.getPerformanceStats();
 ```
 
-### IDEAdapter Interface
-
-```typescript
-interface IDEAdapter {
-  name: string;
-  detect(): boolean;
-  initialize(): Promise<void>;
-  search(query: string, options?: SearchOptions): Promise<SearchResult[]>;
-  getContext(): Promise<IDEContext>;
-  cleanup(): Promise<void>;
-}
-```
-
-## 🧪 Testing
-
-```bash
-# Run tests
-npm test
-
-# Run with coverage
-npm run test:coverage
-
-# Type checking
-npm run typecheck
-
-# Linting
-npm run lint
-```
-
-## 📁 Project Structure
+## �️ Project Structure
 
 ```
 scripts/universal-knowledge/
 ├── src/
 │   ├── adapters/          # IDE-specific adapters
-│   │   ├── cursor.ts
-│   │   ├── qodo.ts
-│   │   └── codespaces.ts
 │   ├── client.ts          # Universal knowledge client
 │   ├── config.ts          # Configuration management
 │   ├── cache.ts           # Caching system
@@ -193,7 +137,7 @@ scripts/universal-knowledge/
 ├── dist/                 # Compiled JavaScript
 ├── package.json
 ├── tsconfig.json
-├── setup.sh
+├── env.example
 └── README.md
 ```
 
@@ -218,7 +162,7 @@ scripts/universal-knowledge/
 
 ### Common Issues
 
-**"Cannot find module 'zod'"**
+**"Cannot find module errors"**
 ```bash
 npm install
 ```
@@ -226,12 +170,10 @@ npm install
 **"Supabase connection failed"**
 - Check `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env`
 - Verify network connectivity
-- Check Supabase project status
 
 **"OpenAI API rate limit exceeded"**
-- The system automatically implements exponential backoff
-- Consider upgrading your OpenAI plan for higher limits
-- Adjust `EMBEDDING_BATCH_SIZE` in `.env`
+- System implements exponential backoff automatically
+- Consider upgrading OpenAI plan for higher limits
 
 **"Cache hit rate is low"**
 - Increase `CACHE_TTL` in `.env`
