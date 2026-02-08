@@ -16,7 +16,16 @@ The Admin Panel for Math7, built with React, Vite, TypeScript, and **shadcn/ui**
 
 ### Prerequisites
 - Node.js (v18+)
-- Supabase project credentials (in `.env`)
+- Supabase project credentials (in `.env` - see below)
+
+### Environment Setup (Crucial!)
+
+Before running the app, you **must** generate the local environment file. This script pulls configuration from `master-config.json` and ensures all necessary variables are present.
+
+```powershell
+# From the project root
+.\scripts\deploy\generate-env.ps1
+```
 
 ### Installation
 
