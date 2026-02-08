@@ -25,9 +25,12 @@
     "@tiptap/extension-underline": "^3.18.0",
     "@tiptap/react": "^3.18.0",
     "@tiptap/starter-kit": "^3.18.0",
+    "autoprefixer": "^10.4.24",
     "dotenv": "^17.2.3",
     "katex": "^0.16.28",
-    "pg": "^8.18.0"
+    "pg": "^8.18.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "dependency-cruiser": "^17.3.7"

@@ -83,7 +83,7 @@ This document captures lessons learned during development to prevent repeated mi
 
 **Resolution**: Updated feature sources to `ghcr.io/devcontainers-extra/` for Flutter and Supabase CLI.
 
-**Prevention**: 
+**Prevention**:
 - Use verified and well-maintained feature repositories (`devcontainers-extra` is currently more reliable for Flutter).
 - Always include a `setup-tool.sh` or post-create script as a fallback for complex toolchain configurations (like Android SDK).
 
@@ -93,7 +93,7 @@ This document captures lessons learned during development to prevent repeated mi
 
 **Root Cause**: Scripts were saved with Windows-style CRLF (`\r\n`) line endings instead of Unix-style LF (`\n`). Bash misinterprets the carriage return (`\r`) as part of the command or argument.
 
-**Prevention**: 
+**Prevention**:
 - Configure `.gitattributes` to enforce LF for shell scripts: `*.sh text eol=lf`.
 - Use a cross-platform conversion method (like PowerShell's `ReadAllText`/`WriteAllText`) to strip `\r` before deployment.
 - Proactively check script encoding when building for containers.
@@ -393,7 +393,7 @@ error - The getter 'desktop' isn't defined for the type 'Breakpoints'
 
 **Fix**: Made the constant names match their semantic meaning OR used the technical names consistently.
 
-**Future Prevention**: 
+**Future Prevention**:
 - When generating code, document the exact constant names
 - Use the same names in implementation as defined in generators
 - Consider adding semantic aliases like:
@@ -1691,3 +1691,45 @@ Get-ChildItem -Path admin-panel\src -Recurse -Include *.ts,*.tsx |
 3. **Feature Isolation**: Monitor `feature-to-feature-isolation` warnings as codebase grows
 4. **Monthly Reports**: Run code health analysis monthly and track trends
 
+
+## 2026-02-08: Cost-Reduction Pivot & Certification Value
+
+### Session Context
+- **Objective**: Simplify the error tracking system by removing the "Smart Suggest" (AI) feature to reduce complexity and potential costs, while enhancing manual triage capabilities.
+- **Technologies**: React, Supabase, Edge Functions (Removed).
+
+---
+
+### Key Learnings
+
+#### 1. Strategic Feature Pruning (Kill Your Darlings)
+**Decision**: Removed the `analyze-error` Edge Function and Gemini integration just days after implementation.
+**Reasoning**: 
+- **Cost/Compexity**: Maintaining a dedicated AI pipeline for *every* error log is overkill when most errors are repetitive or obvious.
+- **Quota Management**: The free tier of Gemini Flash has limits; spamming it with raw error logs risks exhaustion for critical user-facing features.
+- **Manual Control**: Developers often prefer raw stack traces and context over AI summaries for initial triage.
+**Lesson**: Don't let "Cool Factor" drive architecture. If a feature adds dependency weight without proportionate value (like AI for simple error logs), cut it early. The code you *don't* ship is the easiest to maintain.
+
+#### 2. The Hidden Value of `/certify` Workflow
+**Observation**: The manual `/certify` audit caught two subtle issues that automated CI might miss:
+- **Non-null assertions (`!`)**: ESLint flagged `selectedError.stack_trace!` and `user_id!`. While "safe" in context, these are technical debt landmines.
+- **RLS verification**: The audit forced a manual check of RLS policies for the new *Delete* functionality, ensuring that even though the UI allows deletion, the backend enforces permissions.
+**Lesson**: The `/certify` workflow isn't just bureaucracy—it's a "Second Pair of Eyes" that acts as a forcing function for code quality and security review.
+
+#### 3. Verification when Tooling Fails (RLS via Docs)
+**Challenge**: The `supabase-mcp-server` failed to query RLS policies due to token permission limits.
+**Workaround**: Instead of skipping the check, we verified the RLS logic by reading the *Source of Truth* documentation (`database_layer.md` in Knowledge Base) which documented the `SECURITY DEFINER` implementation.
+**Lesson**: When live verification (Tool A) fails, cross-reference with documentation (Source B) or code (Source C). Never just "assume it works" because the tool broke.
+
+---
+
+### Files Modified/Created
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `admin-panel/.../ErrorLogsPage.tsx` | Modified | Removed AI UI, added Delete, enhanced Detail Dialog |
+| `admin-panel/.../KnownIssuesPage.tsx` | Modified | Added Delete, Detail Dialog, removed Sentry links |
+| `supabase/functions/analyze-error/` | Deleted | Removed unused Edge Function |
+| `docs/LEARNING_LOG.md` | Updated | This entry |
+
+---
