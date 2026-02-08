@@ -119,7 +119,7 @@ export function SubjectsPage() {
                   <TableCell className="font-medium">{s.name}</TableCell>
                   <TableCell className="font-mono text-xs">{s.slug}</TableCell>
                   <TableCell>
-                    <span className="text-xs">{s.icon_name || 'No icon'}</span>
+                    <span className="text-xs">{s.icon_url || 'No icon'}</span>
                   </TableCell>
                   <TableCell>{s.display_order ?? 0}</TableCell>
                   <TableCell className="text-right">

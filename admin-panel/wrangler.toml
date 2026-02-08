@@ -8,7 +8,7 @@ name = "questerix-admin"
 routes = ["questerix.com/*"]
 compatibility_flags = ["nodejs_compat"]
 
-[env.staging]
+[env.preview]
 name = "questerix-admin-staging"
 routes = ["staging-questerix.pages.dev/*"]
 compatibility_flags = ["nodejs_compat"]
@@ -24,6 +24,6 @@ compatibility_flags = ["nodejs_compat"]
 ENVIRONMENT = "production"
 APP_VERSION = "1.0.0"
 
-[env.staging.vars]
+[env.preview.vars]
 ENVIRONMENT = "staging"
 APP_VERSION = "1.0.0-staging"
