@@ -1,0 +1,7 @@
+[
+  {
+    "description": "Run Unified Deployment Orchestrator",
+    "command": ".\\orchestrator.ps1",
+    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
+  }
+]

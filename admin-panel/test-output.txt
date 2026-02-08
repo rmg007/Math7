@@ -1,0 +1,59 @@
+
+> admin-panel@0.0.0 test
+> vitest run
+
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mC:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel[39m
+
+ [32mΓ£ô[39m src/utils/math.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/env.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [33mΓ¥»[39m src/__tests__/env.arch.test.ts [2m ([22m[2m1 test[22m [2m|[22m [31m1 failed[39m[2m)[22m[33m 3648[2mms[22m[39m
+[31m   [33mΓ¥»[31m src/__tests__/env.arch.test.ts[2m > [22mEnv module layering[2m > [22menv loader must not be imported by components[39m
+[31m     ΓåÆ [1m[31mArchitecture rule failed with 1 violation:[0m
+
+[1m[31m1.[0m [31mEmpty test violation[0m:
+   [33mNo files found matching the specified pattern(s)[0m
+   Patterns: [36m^src\/lib\/env\.ts$[0m
+
+   [33mThis usually indicates:[0m
+   [2mΓÇó Pattern is too restrictive or incorrect[0m
+   [2mΓÇó Files might not exist in the expected location[0m
+   [2mΓÇó Test is not actually testing anything[0m
+
+   [36mTo fix:[0m
+   [2mΓÇó Verify the patterns match existing files[0m
+   [2mΓÇó Use .check({ allowEmptyTests: true }) to disable this check[0m[39m
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts [2m ([22m[2m13 tests[22m[2m)[22m[33m 3705[2mms[22m[39m
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 1 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  src/__tests__/env.arch.test.ts > Env module layering > env loader must not be imported by components
+Error: Architecture rule failed with 1 violation:
+
+1. Empty test violation:
+   No files found matching the specified pattern(s)
+   Patterns: ^src\/lib\/env\.ts$
+
+   This usually indicates:
+   ΓÇó Pattern is too restrictive or incorrect
+   ΓÇó Files might not exist in the expected location
+   ΓÇó Test is not actually testing anything
+
+   To fix:
+   ΓÇó Verify the patterns match existing files
+   ΓÇó Use .check({ allowEmptyTests: true }) to disable this check
+ Γ¥» src/__tests__/env.arch.test.ts:14:5
+     12|       .dependOnFiles()
+     13|       .inFolder('src/lib/env.ts');
+     14|     await expect(rule).toPassAsync();
+       |     ^
+     15|   });
+     16| });
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/1]ΓÄ»
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m17 passed[39m[22m[90m (18)[39m
+[2m   Start at [22m 15:25:05
+[2m   Duration [22m 10.92s[2m (transform 144ms, setup 1ms, collect 1.54s, tests 7.37s, environment 21.50s, prepare 1.96s)[22m
+

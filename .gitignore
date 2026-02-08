@@ -1,0 +1,85 @@
+# General
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+
+# Node.js (Admin Panel)
+node_modules/
+dist/
+build/
+.env
+.env.test
+.env.local
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+playwright-report/
+test-results/
+
+# Flutter (Student App)
+.dart_tool/
+.packages
+.pub/
+build/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Generated.xcconfig
+ios/Flutter/app.flx
+ios/Flutter/app.zip
+ios/Flutter/db/
+ios/Flutter/flutter_assets/
+ios/ServiceDefinitions.json
+ios/Runner/GeneratedPluginRegistrant.*
+android/GradleWrapper/
+android/.gradle/
+android/app/src/main/assets/
+android/app/src/main/res/
+pubspec.lock
+
+# Environment files
+.env
+.env.local
+.env.test
+.env.test.local
+.env.development.local
+.env.production.local
+*.env
+*.env.*
+
+# Temporary Scrub Scripts (Local only)
+scrub.ps1
+scrub.js
+replacements.txt
+
+# =============================================================================
+# DEPLOYMENT PIPELINE SECURITY
+# =============================================================================
+# Secrets file (CRITICAL - contains API tokens)
+.secrets
+.secrets.backup
+.secrets.backup.*
+temp-secrets-*.json
+
+# Generated environment files (recreated each deploy)
+.flutter-defines.tmp
+admin-panel/.env.local
+admin-panel/.env.production.local
+
+# Deployment logs
+deploy-*.log
+
+# Build artifacts (regenerated each deploy)
+admin-panel/dist/
+student-app/build/
+
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md
+
+dependency-report.html
+dependency-graph.dot
+architecture-graph.dot
+deps-output.txt

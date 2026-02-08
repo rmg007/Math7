@@ -1,0 +1,18 @@
+---
+engines:
+  rubocop:
+    enabled: true
+  eslint:
+    enabled: true
+  csslint:
+    enabled: true
+  pylint:
+    enabled: true
+exclude_paths:
+  - "node_modules/**"
+  - "build/**"
+  - "**/*.g.dart"
+  - "**/*.freezed.dart"
+  - "**/generated/**"
+  - "coverage/**"
+  - "dist/**"

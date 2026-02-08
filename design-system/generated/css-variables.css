@@ -1,0 +1,85 @@
+/* GENERATED CODE - DO NOT MODIFY BY HAND */
+/* Generated from design-system/tokens/*.json */
+/* Run: pwsh design-system/generators/generate-tailwind.ps1 */
+
+:root {
+  /* Brand Colors */
+  --color-primary: #319795;
+  --color-secondary: #6B46C1;
+  --color-accent: #ED8936;
+
+  /* Semantic Colors */
+  --color-success: #38A169;
+  --color-warning: #D69E2E;
+  --color-error: #E53E3E;
+  --color-info: #3182CE;
+
+  /* Neutral Colors */
+  --color-neutral-50: #F7FAFC;
+  --color-neutral-100: #EDF2F7;
+  --color-neutral-200: #E2E8F0;
+  --color-neutral-300: #CBD5E0;
+  --color-neutral-400: #A0AEC0;
+  --color-neutral-500: #718096;
+  --color-neutral-600: #4A5568;
+  --color-neutral-700: #2D3748;
+  --color-neutral-800: #1A202C;
+  --color-neutral-900: #171923;
+
+  /* Light Theme */
+  --theme-background: #F7FAFC;
+  --theme-surface: #FFFFFF;
+  --theme-surface-variant: #EDF2F7;
+  --theme-text: #1A202C;
+  --theme-text-secondary: #4A5568;
+  --theme-text-muted: #718096;
+  --theme-border: #E2E8F0;
+  --theme-border-focus: #319795;
+
+  /* Typography */
+  --font-sans: Inter, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  /* Border Radius */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #319795 0%, #6B46C1 100%);
+  --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Dark Theme */
+.dark, [data-theme="dark"] {
+  --theme-background: #171923;
+  --theme-surface: #1A202C;
+  --theme-surface-variant: #2D3748;
+  --theme-text: #F7FAFC;
+  --theme-text-secondary: #CBD5E0;
+  --theme-text-muted: #A0AEC0;
+  --theme-border: #4A5568;
+  --theme-border-focus: #4FD1C5;
+}

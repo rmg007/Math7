@@ -1,0 +1,11 @@
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\components\domain-list.tsx: line 272, col 9, Warning - The 'domains' logical expression could make the dependencies of useMemo Hook (at line 276) change on every render. To fix this, wrap the initialization of 'domains' in its own useMemo() Hook. (react-hooks/exhaustive-deps)
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\components\skill-form.tsx: line 70, col 31, Error - Unexpected any. Specify a different type. (@typescript-eslint/no-explicit-any)
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\components\skill-list.tsx: line 326, col 11, Warning - The 'skills' logical expression could make the dependencies of useMemo Hook (at line 330) change on every render. To fix this, wrap the initialization of 'skills' in its own useMemo() Hook. (react-hooks/exhaustive-deps)
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\hooks\use-publish.ts: line 135, col 54, Error - Unexpected any. Specify a different type. (@typescript-eslint/no-explicit-any)
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\pages\ai-generator-page.tsx: line 44, col 48, Error - Unexpected any. Specify a different type. (@typescript-eslint/no-explicit-any)
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\pages\ai-generator-page.tsx: line 57, col 48, Error - Unexpected any. Specify a different type. (@typescript-eslint/no-explicit-any)
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\pages\ai-generator-page.tsx: line 88, col 43, Error - Unexpected any. Specify a different type. (@typescript-eslint/no-explicit-any)
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\pages\ai-generator-page.tsx: line 97, col 41, Error - Unexpected any. Specify a different type. (@typescript-eslint/no-explicit-any)
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\pages\ai-generator-page.tsx: line 198, col 58, Error - Unexpected any. Specify a different type. (@typescript-eslint/no-explicit-any)
+
+9 problems

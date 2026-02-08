@@ -1,0 +1,40 @@
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mC:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel[39m
+
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts[2m > [22mArchitecture Rules[2m > [22mLayer Dependencies[2m > [22mservices should not depend on components (UI layer)[33m 4202[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts[2m > [22mArchitecture Rules[2m > [22mLayer Dependencies[2m > [22mlib utilities should not depend on features
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts[2m > [22mArchitecture Rules[2m > [22mLayer Dependencies[2m > [22mtypes should not depend on runtime code
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts[2m > [22mArchitecture Rules[2m > [22mFeature Isolation[2m > [22mcurriculum feature should not import from mentorship
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts[2m > [22mArchitecture Rules[2m > [22mFeature Isolation[2m > [22mcurriculum feature should not import from auth
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts[2m > [22mArchitecture Rules[2m > [22mFeature Isolation[2m > [22mmentorship feature should not import from curriculum
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts[2m > [22mArchitecture Rules[2m > [22mFeature Isolation[2m > [22mplatform feature should not import from curriculum
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts[2m > [22mArchitecture Rules[2m > [22mFeature Isolation[2m > [22mai-assistant should be isolated from other features
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts[2m > [22mArchitecture Rules[2m > [22mNaming Conventions[2m > [22mhooks should follow use-*.ts naming pattern
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts[2m > [22mArchitecture Rules[2m > [22mNaming Conventions[2m > [22mfeature hooks should follow use-*.ts naming pattern
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts[2m > [22mArchitecture Rules[2m > [22mCircular Dependencies[2m > [22mcomponents should be free of cycles
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts[2m > [22mArchitecture Rules[2m > [22mCircular Dependencies[2m > [22mlib utilities should be free of cycles
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts[2m > [22mArchitecture Rules[2m > [22mCircular Dependencies[2m > [22mhooks should be free of cycles
+ [31m├ù[39m src/__tests__/architecture.test.ts[2m > [22mArchitecture Rules[2m > [22mCode Metrics[2m > [22mshould not contain too large files
+[31m   ΓåÆ (0 , common_1.guessLocationOfTsconfig) is not a function[39m
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 1 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  src/__tests__/architecture.test.ts > Architecture Rules > Code Metrics > should not contain too large files
+TypeError: (0 , common_1.guessLocationOfTsconfig) is not a function
+ Γ¥» FileCountThresholdBuilder.check node_modules/archunit/src/metrics/fluentapi/metrics/count-metrics.ts:509:67
+ Γ¥» Object.toPassAsync node_modules/archunit/src/testing/vitest/vitest-adapter.ts:58:39
+ Γ¥» src/__tests__/architecture.test.ts:159:26
+    157|     it('should not contain too large files', async () => {
+    158|       const rule = metrics().count().linesOfCode().shouldBeBelow(1000);
+    159|       await expect(rule).toPassAsync();
+       |                          ^
+    160|     });
+    161|   });
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/1]ΓÄ»
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m13 passed[39m[22m[90m (14)[39m
+[2m   Start at [22m 17:07:02
+[2m   Duration [22m 6.41s[2m (transform 45ms, setup 0ms, collect 367ms, tests 4.27s, environment 900ms, prepare 139ms)[22m
+

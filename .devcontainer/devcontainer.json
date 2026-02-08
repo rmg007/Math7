@@ -1,0 +1,44 @@
+{
+  "name": "Questerix Web Development",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:0-20",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "enableNonRootDocker": "true",
+      "moby": "true"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-typescript-next",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-vscode.vscode-json",
+        "supabase.supabase"
+      ],
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/zsh",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "typescript.preferences.importModuleSpecifier": "relative"
+      }
+    }
+  },
+  "mounts": [
+    "source=questerix-npm-cache,target=/home/vscode/.npm,type=volume",
+    "source=questerix-node-modules,target=${containerWorkspaceFolder}/admin-panel/node_modules,type=volume"
+  ],
+  "forwardPorts": [
+    3000,
+    5173,
+    4000
+  ],
+  "remoteUser": "vscode",
+  "postCreateCommand": "bash .devcontainer/setup-web.sh",
+  "postStartCommand": "cd admin-panel && npm run dev"
+}

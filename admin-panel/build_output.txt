@@ -1,0 +1,32 @@
+
+> admin-panel@0.0.0 build
+> tsc && vite build
+
+src/features/auth/pages/LoginPage.tsx(60,42): error TS2339: Property 'setUser' does not exist on type 'typeof import("C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel/src/lib/monitoring")'.
+src/features/auth/pages/LoginPage.tsx(118,45): error TS2339: Property 'setUser' does not exist on type 'typeof import("C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel/src/lib/monitoring")'.
+src/features/curriculum/pages/version-history-page.tsx(30,15): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(relation: "profiles" | "skills" | "source_documents" | "apps" | "subjects" | "groups" | "questions" | "domains" | "ai_generation_sessions" | "app_landing_pages" | "assignments" | ... 6 more ... | "student_recovery_keys"): PostgrestQueryBuilder<...>', gave the following error.
+    Argument of type '"curriculum_snapshots"' is not assignable to parameter of type '"profiles" | "skills" | "source_documents" | "apps" | "subjects" | "groups" | "questions" | "domains" | "ai_generation_sessions" | "app_landing_pages" | "assignments" | "attempts" | ... 5 more ... | "student_recovery_keys"'.
+  Overload 2 of 2, '(relation: never): PostgrestQueryBuilder<{ PostgrestVersion: "14.1"; }, { Tables: { ai_generation_sessions: { Row: { created_at: string; created_by: string; deleted_at: string | null; difficulty_distribution: Json; ... 13 more ...; updated_at: string; }; Insert: { ...; }; Update: { ...; }; Relationships: [...]; }; ... 16 more ...; subjects: { ...; }; }; Views: {}; Functions: { ...; }; Enums: { ...; }; CompositeTypes: {}; }, never, never, never>', gave the following error.
+    Argument of type '"curriculum_snapshots"' is not assignable to parameter of type 'never'.
+src/features/curriculum/pages/version-history-page.tsx(60,15): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(relation: "profiles" | "skills" | "source_documents" | "apps" | "subjects" | "groups" | "questions" | "domains" | "ai_generation_sessions" | "app_landing_pages" | "assignments" | ... 6 more ... | "student_recovery_keys"): PostgrestQueryBuilder<...>', gave the following error.
+    Argument of type '"curriculum_snapshots"' is not assignable to parameter of type '"profiles" | "skills" | "source_documents" | "apps" | "subjects" | "groups" | "questions" | "domains" | "ai_generation_sessions" | "app_landing_pages" | "assignments" | "attempts" | ... 5 more ... | "student_recovery_keys"'.
+  Overload 2 of 2, '(relation: never): PostgrestQueryBuilder<{ PostgrestVersion: "14.1"; }, { Tables: { ai_generation_sessions: { Row: { created_at: string; created_by: string; deleted_at: string | null; difficulty_distribution: Json; ... 13 more ...; updated_at: string; }; Insert: { ...; }; Update: { ...; }; Relationships: [...]; }; ... 16 more ...; subjects: { ...; }; }; Views: {}; Functions: { ...; }; Enums: { ...; }; CompositeTypes: {}; }, never, never, never>', gave the following error.
+    Argument of type '"curriculum_snapshots"' is not assignable to parameter of type 'never'.
+src/features/curriculum/pages/version-history-page.tsx(66,18): error TS2339: Property 'content' does not exist on type 'SelectQueryError<"column 'content' does not exist on 'profiles'."> | SelectQueryError<"column 'content' does not exist on 'skills'."> | ... 15 more ... | SelectQueryError<...>'.
+  Property 'content' does not exist on type 'SelectQueryError<"column 'content' does not exist on 'profiles'.">'.
+src/features/curriculum/pages/version-history-page.tsx(71,50): error TS2339: Property 'content' does not exist on type 'SelectQueryError<"column 'content' does not exist on 'profiles'."> | SelectQueryError<"column 'content' does not exist on 'skills'."> | ... 15 more ... | SelectQueryError<...>'.
+  Property 'content' does not exist on type 'SelectQueryError<"column 'content' does not exist on 'profiles'.">'.
+src/features/platform/pages/AppsPage.tsx(41,9): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/features/platform/pages/LandingsPage.tsx(28,27): error TS2339: Property 'meta_title' does not exist on type '{ app_id: string; content: Json; created_at: string; features: Json; hero_headline: string | null; hero_subtext: string | null; is_published: boolean | null; landing_page_id: string; updated_at: string; }'.
+src/features/platform/pages/LandingsPage.tsx(29,33): error TS2339: Property 'meta_description' does not exist on type '{ app_id: string; content: Json; created_at: string; features: Json; hero_headline: string | null; hero_subtext: string | null; is_published: boolean | null; landing_page_id: string; updated_at: string; }'.
+src/features/platform/pages/LandingsPage.tsx(30,7): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/features/platform/pages/LandingsPage.tsx(31,33): error TS2551: Property 'hero_subheadline' does not exist on type '{ app_id: string; content: Json; created_at: string; features: Json; hero_headline: string | null; hero_subtext: string | null; is_published: boolean | null; landing_page_id: string; updated_at: string; }'. Did you mean 'hero_headline'?
+src/features/platform/pages/LandingsPage.tsx(150,63): error TS2339: Property 'meta_title' does not exist on type '{ app_id: string; content: Json; created_at: string; features: Json; hero_headline: string | null; hero_subtext: string | null; is_published: boolean | null; landing_page_id: string; updated_at: string; } & { ...; }'.
+src/features/platform/pages/SubjectsPage.tsx(169,41): error TS2339: Property 'color_hex' does not exist on type '{ name: string; slug: string; display_order: number; }'.
+src/features/platform/pages/SubjectsPage.tsx(170,69): error TS2353: Object literal may only specify known properties, and 'color_hex' does not exist in type 'SetStateAction<{ name: string; slug: string; display_order: number; }>'.
+src/features/platform/pages/SubjectsPage.tsx(173,41): error TS2339: Property 'color_hex' does not exist on type '{ name: string; slug: string; display_order: number; }'.
+src/features/platform/pages/SubjectsPage.tsx(174,69): error TS2353: Object literal may only specify known properties, and 'color_hex' does not exist in type 'SetStateAction<{ name: string; slug: string; display_order: number; }>'.

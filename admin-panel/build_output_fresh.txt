@@ -1,0 +1,19 @@
+
+> admin-panel@0.0.0 build
+> tsc && vite build
+
+src/features/mentorship/pages/GroupDetailPage.tsx(165,34): error TS2345: Argument of type '(m: Member) => string | null' is not assignable to parameter of type '(value: { group_id: string; is_anonymous: boolean | null; joined_at: string; nickname: string | null; user_id: string; profiles: { id: string; email: string; full_name: string | null; }; }, index: number, array: { ...; }[]) => string | null'.
+  Types of parameters 'm' and 'value' are incompatible.
+    Type '{ group_id: string; is_anonymous: boolean | null; joined_at: string; nickname: string | null; user_id: string; profiles: { id: string; email: string; full_name: string | null; }; }' is missing the following properties from type 'Member': id, anonymous_device_id
+src/features/mentorship/pages/GroupDetailPage.tsx(342,23): error TS2551: Property 'allow_anonymous' does not exist on type '{ allow_anonymous_join: boolean | null; app_id: string | null; code_expires_at: string | null; created_at: string; id: string; join_code: string; name: string; owner_id: string; requires_approval: boolean; settings: Json; type: "class" | "family"; updated_at: string; }'. Did you mean 'allow_anonymous_join'?
+src/features/mentorship/pages/GroupDetailPage.tsx(344,24): error TS2551: Property 'allow_anonymous' does not exist on type '{ allow_anonymous_join: boolean | null; app_id: string | null; code_expires_at: string | null; created_at: string; id: string; join_code: string; name: string; owner_id: string; requires_approval: boolean; settings: Json; type: "class" | "family"; updated_at: string; }'. Did you mean 'allow_anonymous_join'?
+src/features/mentorship/pages/GroupDetailPage.tsx(366,30): error TS2345: Argument of type '(member: Member) => JSX.Element' is not assignable to parameter of type '(value: { group_id: string; is_anonymous: boolean | null; joined_at: string; nickname: string | null; user_id: string; profiles: { id: string; email: string; full_name: string | null; }; }, index: number, array: { ...; }[]) => Element'.
+  Types of parameters 'member' and 'value' are incompatible.
+    Type '{ group_id: string; is_anonymous: boolean | null; joined_at: string; nickname: string | null; user_id: string; profiles: { id: string; email: string; full_name: string | null; }; }' is missing the following properties from type 'Member': id, anonymous_device_id
+src/features/mentorship/pages/GroupDetailPage.tsx(560,36): error TS2345: Argument of type '(member: Member) => JSX.Element' is not assignable to parameter of type '(value: { group_id: string; is_anonymous: boolean | null; joined_at: string; nickname: string | null; user_id: string; profiles: { id: string; email: string; full_name: string | null; }; }, index: number, array: { ...; }[]) => Element'.
+  Types of parameters 'member' and 'value' are incompatible.
+    Type '{ group_id: string; is_anonymous: boolean | null; joined_at: string; nickname: string | null; user_id: string; profiles: { id: string; email: string; full_name: string | null; }; }' is missing the following properties from type 'Member': id, anonymous_device_id
+src/features/platform/pages/AppsPage.tsx(38,9): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/features/platform/pages/AppsPage.tsx(43,9): error TS2322: Type 'boolean | null' is not assignable to type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.

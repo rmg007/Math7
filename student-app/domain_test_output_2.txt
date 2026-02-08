@@ -1,0 +1,7 @@
+00:00 +0: loading C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/domains_screen_test.dart
+00:00 +0: DomainsScreen Widget Tests displays loading indicator when loading
+00:01 +1: DomainsScreen Widget Tests displays domains list when data is loaded
+00:01 +2: DomainsScreen Widget Tests displays empty state when no domains
+00:01 +3: DomainsScreen Widget Tests navigates to skills screen when domain is tapped
+00:01 +4: DomainsScreen Widget Tests displays error message when loading fails
+00:01 +5: All tests passed!

@@ -1,0 +1,76 @@
+{
+  "$schema": "https://questerix.com/design-tokens.schema.json",
+  "version": "1.0.0",
+  "description": "Questerix Unified Color System",
+
+  "brand": {
+    "primary": {
+      "value": "#319795",
+      "description": "Teal - Primary brand color for CTAs, links, active states"
+    },
+    "secondary": {
+      "value": "#6B46C1",
+      "description": "Purple - Secondary accent for gradients and highlights"
+    },
+    "accent": {
+      "value": "#ED8936",
+      "description": "Orange - Points, rewards, badges, attention"
+    }
+  },
+
+  "semantic": {
+    "success": { "value": "#38A169" },
+    "warning": { "value": "#D69E2E" },
+    "error": { "value": "#E53E3E" },
+    "info": { "value": "#3182CE" }
+  },
+
+  "neutral": {
+    "50": { "value": "#F7FAFC" },
+    "100": { "value": "#EDF2F7" },
+    "200": { "value": "#E2E8F0" },
+    "300": { "value": "#CBD5E0" },
+    "400": { "value": "#A0AEC0" },
+    "500": { "value": "#718096" },
+    "600": { "value": "#4A5568" },
+    "700": { "value": "#2D3748" },
+    "800": { "value": "#1A202C" },
+    "900": { "value": "#171923" }
+  },
+
+  "themes": {
+    "light": {
+      "background": "#F7FAFC",
+      "surface": "#FFFFFF",
+      "surfaceVariant": "#EDF2F7",
+      "text": "#1A202C",
+      "textSecondary": "#4A5568",
+      "textMuted": "#718096",
+      "border": "#E2E8F0",
+      "borderFocus": "#319795"
+    },
+    "dark": {
+      "background": "#171923",
+      "surface": "#1A202C",
+      "surfaceVariant": "#2D3748",
+      "text": "#F7FAFC",
+      "textSecondary": "#CBD5E0",
+      "textMuted": "#A0AEC0",
+      "border": "#4A5568",
+      "borderFocus": "#4FD1C5"
+    }
+  },
+
+  "gradients": {
+    "primary": {
+      "start": "#319795",
+      "end": "#6B46C1",
+      "angle": 135
+    },
+    "hero": {
+      "start": "#667eea",
+      "end": "#764ba2",
+      "angle": 135
+    }
+  }
+}

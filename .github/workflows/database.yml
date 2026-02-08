@@ -1,0 +1,45 @@
+name: Database Safety
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  db-safety:
+    name: Migration Safety Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      
+      - name: Start Supabase (Ephemeral)
+        run: supabase start
+      
+      - name: Verify Migrations Apply Cleanly
+        run: supabase db reset --db-url postgresql://postgres:postgres@localhost:54322/postgres
+      
+      - name: Check for Destructive SQL Patterns
+        run: |
+          if grep -rE "DROP (TABLE|COLUMN)" ./supabase/migrations/*.sql 2>/dev/null; then
+            echo "⚠️  WARNING: Destructive changes detected in migrations."
+            echo "The following migrations contain DROP statements:"
+            grep -rlE "DROP (TABLE|COLUMN)" ./supabase/migrations/*.sql
+            echo ""
+            echo "Please ensure:"
+            echo "1. Data migration/backup is in place"
+            echo "2. This change has been reviewed by a senior engineer"
+            echo "3. Rollback plan is documented"
+            # Uncomment the line below to block destructive changes automatically:
+            # exit 1
+          else
+            echo "✅ No destructive SQL patterns detected."
+          fi
+      
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop

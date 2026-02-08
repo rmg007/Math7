@@ -1,0 +1,9 @@
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\ai-assistant\pages\GenerationPage.tsx
+  20:10  error  '_sourceFilename' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\components\question-list.tsx
+  351:11  warning  The 'questions' logical expression could make the dependencies of useMemo Hook (at line 355) change on every render. To fix this, wrap the initialization of 'questions' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+Γ£û 2 problems (1 error, 1 warning)
+

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://questerix.com/design-tokens.schema.json",
+  "version": "1.0.0",
+  "description": "Questerix Unified Border System",
+
+  "radius": {
+    "none": { "px": 0, "rem": "0" },
+    "sm": { "px": 4, "rem": "0.25rem" },
+    "md": { "px": 8, "rem": "0.5rem" },
+    "lg": { "px": 12, "rem": "0.75rem" },
+    "xl": { "px": 16, "rem": "1rem" },
+    "2xl": { "px": 24, "rem": "1.5rem" },
+    "full": { "px": 9999, "rem": "9999px" }
+  },
+
+  "width": {
+    "none": { "px": 0 },
+    "thin": { "px": 1 },
+    "medium": { "px": 2 },
+    "thick": { "px": 4 }
+  },
+
+  "semantic": {
+    "button": "lg",
+    "card": "xl",
+    "input": "md",
+    "modal": "2xl",
+    "avatar": "full",
+    "chip": "full"
+  }
+}
