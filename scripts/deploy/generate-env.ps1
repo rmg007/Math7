@@ -21,6 +21,24 @@ $RootDir = Split-Path -Parent (Split-Path -Parent $ScriptDir)
 # Load configuration
 $config = Get-Content $ConfigFile -Raw | ConvertFrom-Json
 
+# Load secrets override if present
+$secretsPath = Join-Path $RootDir '.secrets'
+if (Test-Path $secretsPath) {
+    Write-Host "Loading secrets from .secrets..." -ForegroundColor Cyan
+    Get-Content $secretsPath | ForEach-Object {
+        if ($_ -match '^([^=]+)=(.*)$') {
+            $key = $Matches[1].Trim()
+            $value = $Matches[2].Trim()
+            
+            # Map known secrets to global config
+            if ($config.global.$key) {
+                # Update global config directly
+                $config.global.$key = $value
+            }
+        }
+    }
+}
+
 # =============================================================================
 # TEMPLATE RESOLUTION
 # =============================================================================
