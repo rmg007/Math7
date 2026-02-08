@@ -4,6 +4,47 @@ This document captures lessons learned during development to prevent repeated mi
 
 ---
 
+## 2026-02-08: Environment Configuration & The "Blank Page" Syndrome
+
+### Session Context
+- **Objective**: Resolve "Blank Page" issue in Admin Panel and standardize environment setup across the repository.
+- **Scope**: `admin-panel`, `student-app`, `AI_CODING_INSTRUCTIONS.md`.
+- **Outcome**: ✅ Environment generation mandated via `generate-env.ps1`.
+
+---
+
+### Key Learnings
+
+#### 1. The "Blank Page" Syndrome in Vite/React
+**What Happened**: The Admin Panel rendered a completely blank page with no obvious console errors initially.
+**Root Cause**: Missing `.env` file. Vite requires environment variables (like `VITE_SUPABASE_URL`) to be present at build/runtime. If they are missing, the app fails silently or crashes in a way that isn't immediately obvious without deep inspection.
+**Lesson**: Connection params are not optional. In a monorepo, *never* assume the environment is set up. Always verify the existence of `.env` files before starting dev servers.
+
+#### 2. Environment Generation > Manual Configuration
+**Problem**: Documentation relied on "Create a .env file and paste these values". This is error-prone, leads to drift (values changing in `master-config.json` but not in local `.env`), and confuses AI agents.
+**Solution**: Enforce the use of `.\scripts\deploy\generate-env.ps1 -ConfigFile master-config.json`.
+**Why**:
+- **Single Source of Truth**: `master-config.json` rules everything.
+- **consistency**: Scripts don't make typos.
+- **Automation**: capable of being run by CI/CD and AI agents without human intervention.
+
+#### 3. Documentation for Agents
+**Insight**: AI agents (like Antigravity) read `AI_CODING_INSTRUCTIONS.md` first. If environment setup instructions are buried in sub-project READMEs, the agent will fail.
+**Fix**: Moved the "Mandatory Environment Setup" instruction to the top of `AI_CODING_INSTRUCTIONS.md` as a **CRITICAL** rule.
+
+---
+
+### Files Modified/Created
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `admin-panel/README.md` | Updated | Added `generate-env.ps1` command |
+| `student-app/README.md` | Updated | Replaced manual .env steps with script command |
+| `AI_CODING_INSTRUCTIONS.md` | Updated | Added mandatory environment setup section |
+| `docs/LEARNING_LOG.md` | Updated | This entry |
+
+---
+
 ## 2026-02-08: Repository Portability & Dev Container Resiliency
 
 ### Session Context

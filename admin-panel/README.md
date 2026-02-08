@@ -24,7 +24,7 @@ Before running the app, you **must** generate the local environment file. This s
 
 ```powershell
 # From the project root
-.\scripts\deploy\generate-env.ps1
+.\scripts\deploy\generate-env.ps1 -ConfigFile master-config.json
 ```
 
 ### Installation

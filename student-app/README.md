@@ -55,11 +55,11 @@ flutter run
 
 ### Environment Setup
 
-Create a `.env` file in the project root:
+Run the environment generation script to pull configuration from `master-config.json`:
 
-```env
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
+```powershell
+# From the project root
+.\scripts\deploy\generate-env.ps1 -ConfigFile master-config.json
 ```
 
 ## 🏗️ Architecture

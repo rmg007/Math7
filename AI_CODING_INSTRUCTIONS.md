@@ -41,6 +41,12 @@ To minimize latency and avoid expensive file system scans, the agent MUST follow
 - If a command fails due to permission, check if it matches a `// turbo` pattern in `autopilot.md` and adjust the syntax to match the whitelist exactly.
 - **IDE Requirement**: Antigravity IDE must have "Terminal execution policy" set to "Turbo" for autonomous execution to work. See `.agent/workflows/autopilot.md` for setup instructions.
 
+### Environment Setup (Mandatory)
+- **CRITICAL**: Before running ANY code, you MUST generate the environment files.
+- Command: `.\scripts\deploy\generate-env.ps1 -ConfigFile master-config.json`
+- This ensures `.env` files are synchronized with the master configuration.
+- **NEVER** manually create `.env` files or ask the user to do so.
+
 ### Autonomous Task Finalization
 - You must follow the **Autonomous Task Finalization** protocol defined in `docs/strategy/AGENTS.md` before marking any task as complete.
 - This includes mandatory testing, refactoring, and documentation updates without asking for permission.
