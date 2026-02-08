@@ -1,7 +1,7 @@
 [
   {
-    "description": "Test updated Edge Function v3",
-    "command": "python -c \"import json,urllib.request,urllib.error; login_data=json.dumps({'email':'testadmin@example.com','password':'testadmin@example.com'}).encode(); req=urllib.request.Request('https://qvslbiceoonrgjxzkotb.supabase.co/auth/v1/token?grant_type=password',data=login_data,headers={'Content-Type':'application/json','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2c2xiaWNlb29ucmdqeHprb3RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTE5NjksImV4cCI6MjA4NTA4Nzk2OX0.tksExuWD4OZyb4MoYRliQ71WQ8rywcaYMxbH2UXWe8s'}); resp=json.loads(urllib.request.urlopen(req).read()); token=resp['access_token']; print('GOT TOKEN'); ef_data=json.dumps({'error_type':'TypeError','error_message':'Cannot read properties of null','platform':'web'}).encode(); ef_req=urllib.request.Request('https://qvslbiceoonrgjxzkotb.supabase.co/functions/v1/analyze-error',data=ef_data,headers={'Content-Type':'application/json','Authorization':'Bearer '+token,'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2c2xiaWNlb29ucmdqeHprb3RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTE5NjksImV4cCI6MjA4NTA4Nzk2OX0.tksExuWD4OZyb4MoYRliQ71WQ8rywcaYMxbH2UXWe8s'}); ef_resp=urllib.request.urlopen(ef_req).read(); print('SUCCESS:', ef_resp.decode())\" 2>&1 | Out-File -FilePath ef_test_v3.txt -Encoding utf8; Get-Content ef_test_v3.txt",
+    "description": "Run Unified Deployment Orchestrator",
+    "command": ".\\orchestrator.ps1",
     "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
   }
 ]

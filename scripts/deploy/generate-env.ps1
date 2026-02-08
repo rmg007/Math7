@@ -14,10 +14,17 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$RootDir = Split-Path -Parent (Split-Path -Parent $ScriptDir)
+$ScriptDir = $PSScriptRoot
+if (-not $ScriptDir) { $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path }
+if (-not $ScriptDir) { $ScriptDir = Get-Location }
 
-$configPath = Join-Path $RootDir $ConfigFile
+$RootDir = Resolve-Path (Join-Path $ScriptDir '..\..')
+if (-not $RootDir) { $RootDir = (Get-Item $ScriptDir).Parent.Parent.FullName }
+
+$configPath = $ConfigFile
+if (-not [System.IO.Path]::IsPathRooted($configPath)) {
+    $configPath = Join-Path $RootDir $ConfigFile
+}
 $secretsPath = Join-Path $RootDir '.secrets'
 
 if (-not (Test-Path $configPath)) {

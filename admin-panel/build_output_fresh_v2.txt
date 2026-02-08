@@ -1,0 +1,24 @@
+
+> admin-panel@0.0.0 build
+> tsc && vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 2180 modules transformed.
+rendering chunks...
+[plugin:vite:reporter] [plugin vite:reporter] 
+(!) C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel/src/lib/monitoring.ts is dynamically imported by C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel/src/features/auth/pages/LoginPage.tsx but also statically imported by C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel/src/features/auth/pages/LoginPage.tsx, dynamic import will not move module into another chunk.
+
+computing gzip size...
+[2mdist/[22m[32mindex.html                       [39m[1m[2m    0.71 kB[22m[1m[22m[2m Γöé gzip:   0.37 kB[22m
+[2mdist/[22m[35massets/index-CrW5FSqJ.css        [39m[1m[2m   73.89 kB[22m[1m[22m[2m Γöé gzip:  12.47 kB[22m
+[2mdist/[22m[36massets/icons-ODBERh1n.js         [39m[1m[2m   34.60 kB[22m[1m[22m[2m Γöé gzip:   6.56 kB[22m
+[2mdist/[22m[36massets/ui-vendor-BWoKTdXV.js     [39m[1m[2m   77.85 kB[22m[1m[22m[2m Γöé gzip:  23.12 kB[22m
+[2mdist/[22m[36massets/react-vendor-B0cdsket.js  [39m[1m[33m  655.10 kB[39m[22m[2m Γöé gzip: 204.42 kB[22m
+[2mdist/[22m[36massets/index-B-I73A83.js         [39m[1m[33m1,617.03 kB[39m[22m[2m Γöé gzip: 435.77 kB[22m
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[32mΓ£ô built in 19.36s[39m

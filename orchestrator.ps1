@@ -35,7 +35,10 @@ $SkipLanding = $true
 # CONFIGURATION
 # =============================================================================
 $ErrorActionPreference = 'Stop'
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ScriptDir = $PSScriptRoot
+if (-not $ScriptDir) { $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path }
+if (-not $ScriptDir) { $ScriptDir = Get-Location }
+
 $LogFile = Join-Path $ScriptDir "deploy-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
 
 # =============================================================================
@@ -173,7 +176,12 @@ function Invoke-PhaseValidation {
 function Invoke-PhaseGenerateEnv {
     Write-Phase "PHASE 2: ENVIRONMENT GENERATION"
     
-    & (Join-Path $ScriptDir 'scripts\deploy\generate-env.ps1') -ConfigFile $script:ConfigFile
+    $genScript = Join-Path $ScriptDir 'scripts\deploy\generate-env.ps1'
+    powershell -NoProfile -ExecutionPolicy Bypass -File $genScript -ConfigFile $script:ConfigFile
+    if ($LASTEXITCODE -ne 0) {
+        Write-Err "Environment generation failed. Exit code: $LASTEXITCODE"
+        exit 1
+    }
     
     Write-Success "Environment files generated"
 }
