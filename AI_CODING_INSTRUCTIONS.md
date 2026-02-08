@@ -38,6 +38,15 @@ To minimize latency and avoid expensive file system scans, the agent MUST follow
 - **ALWAYS** reference `.cursorrules` and `.agent/workflows/autopilot.md` for approved command patterns.
 - Command whitelists are defined in `.cursorrules`.
 - You are authorized to use any command pattern defined in these files.
+- **Missing Tools & PATH Issues**:
+    - **Node.js Tools**: ALWAYS prefer `npx <command>` over global installs to avoid Windows PATH issues.
+        - `wrangler` -> `npx wrangler`
+        - `supabase` -> `npx supabase`
+        - `tsc` -> `npx tsc`
+        - `eslint` -> `npx eslint`
+    - **Install if Missing**: If `npx` fails, install locally or globally, then retry with `npx`.
+        - `npm install -g wrangler` -> then `npx wrangler`
+    - **Flutter**: Ensure `flutter` is in PATH. If not, check `C:\src\flutter\bin` or similar standard paths.
 - If a command fails due to permission, check if it matches a `// turbo` pattern in `autopilot.md` and adjust the syntax to match the whitelist exactly.
 - **IDE Requirement**: Antigravity IDE must have "Terminal execution policy" set to "Turbo" for autonomous execution to work. See `.agent/workflows/autopilot.md` for setup instructions.
 

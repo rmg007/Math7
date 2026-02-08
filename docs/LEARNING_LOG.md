@@ -4,6 +4,25 @@ This document captures lessons learned during development to prevent repeated mi
 
 ---
 
+## 2026-02-08: Tooling Dependencies & The "Wrangler" Blocker
+
+### Session Context
+- **Objective**: Ensure agents can handle missing CLI tools without stalling.
+- **Scope**: `wrangler`, `AI_CODING_INSTRUCTIONS.md`.
+- **Outcome**: ✅ Mandated automatic installation of missing tools.
+
+---
+
+### Key Learnings
+
+#### 1. The "Missing Tool" & Windows PATH Trap
+**What Happened**: Agent installed `wrangler` globally but failed to run it because the global bin folder wasn't in the system PATH.
+**Impact**: Agent got stuck in a loop of "installing" then "command not found".
+**Lesson**: On Windows (and generally for CI/CD), **`npx` is superior to global installs**. It resolves binaries from local `node_modules` or downloads them temporarily, bypassing system PATH issues entirely.
+**Rule**: Always use `npx wrangler`, `npx supabase`, etc. instead of relying on global PATHs.
+
+---
+
 ## 2026-02-08: Environment Configuration & The "Blank Page" Syndrome
 
 ### Session Context
