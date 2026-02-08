@@ -32,16 +32,16 @@ export function useKnownIssues() {
       return (data as KnownIssueRow[]).map((row) => ({
         id: row.id,
         title: row.title,
-        description: (row.metadata as { description?: string })?.description,
-        error_message: (row.metadata as { error_message?: string })?.error_message,
+        description: row.description || undefined,
+        error_message: row.error_message || undefined,
         root_cause: row.root_cause,
         resolution: row.resolution,
         status: (row.status as KnownIssue['status']) ?? null,
         severity: (row.severity as KnownIssue['severity']) ?? null,
         sentry_link: row.sentry_link,
-        created_at: row.created_at ?? '',
-        updated_at: row.updated_at ?? '',
-      })) ?? [];
+        created_at: row.created_at || null,
+        updated_at: row.updated_at || null,
+      }));
     },
   });
 }

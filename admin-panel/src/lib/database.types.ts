@@ -598,8 +598,10 @@ export type Database = {
       known_issues: {
         Row: {
           created_at: string | null
+          created_by: string | null
+          description: string | null
+          error_message: string | null
           id: string
-          metadata: Json | null
           resolution: string | null
           root_cause: string | null
           sentry_link: string | null
@@ -610,8 +612,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          error_message?: string | null
           id?: string
-          metadata?: Json | null
           resolution?: string | null
           root_cause?: string | null
           sentry_link?: string | null
@@ -622,8 +626,10 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          error_message?: string | null
           id?: string
-          metadata?: Json | null
           resolution?: string | null
           root_cause?: string | null
           sentry_link?: string | null
