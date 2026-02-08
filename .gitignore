@@ -59,6 +59,9 @@ replacements.txt
 # =============================================================================
 # Secrets file (CRITICAL - contains API tokens)
 .secrets
+.secrets.backup*
+*.backup
+
 
 # Generated environment files (recreated each deploy)
 .flutter-defines.tmp
