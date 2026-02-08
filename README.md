@@ -7,7 +7,7 @@
 > **The "Golden Command" to start development:**
 > 
 > ```text
-> "Follow the instructions in AGENTS.md. Start with Phase 0."
+> "Start with docs/strategy/QUICKSTART_AGENTS.md. Then follow AGENTS.md."
 > ```
 
 ---

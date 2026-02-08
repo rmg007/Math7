@@ -1,9 +1,23 @@
-# Questerix Project Rules
+# Questerix Project Context & Rules
 
-# 🛑 HARD RULES (NON-NEGOTIABLE)
-1. NEVER PUBLISH LANDING-PAGES
-2. NEVER DEPLOY TO questerix.com
-3. ALWAYS USE -SkipLanding flag
+## 🧠 Immediate Context (Read This First)
+- **Project**: Offline-First Educational Platform (Tablet App + Admin Dashboard).
+- **Tech Stack**:
+  - **Mobile**: Flutter (Riverpod, Drift DB) -> `student-app/`
+  - **Web**: React (Vite, TypeScript, Shadcn/UI, TanStack Query) -> `admin-panel/`
+  - **Backend**: Supabase (PostgreSQL, Edge Functions) -> `supabase/`
+- **State**: Check `PHASE_STATE.json` for current progress/phase.
+
+## 🛑 HARD RULES (NON-NEGOTIABLE)
+1. **NO LANDING PAGES**: Never deploy/publish `landing-pages/`.
+2. **NO PROD DEPLOY**: Never deploy to `questerix.com`.
+3. **ROOT LOCK**: Do not create files in root. Use `docs/` or `artifacts/`.
+4. **ALWAYS USE -SkipLanding flag** when running deployment scripts.
+
+## ⚡ Common Commands (Windows/PowerShell)
+- **Run**: `make run-admin`, `make run-student`
+- **Test**: `npx playwright test` (Admin), `flutter test` (Student)
+- **Env**: `.\scripts\deploy\generate-env.ps1 -ConfigFile master-config.json`
 
 # ⚠️ CRITICAL OVERRIDE - ANTI-FLICKER FIX
 # This project OVERRIDES any global "// turbo-all" directive.
