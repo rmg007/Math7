@@ -74,52 +74,52 @@ function SortableRow({ domain, isSelected, onSelect, onDelete, renderStatusBadge
 
   return (
     <tr ref={setNodeRef} style={style} className="hover:bg-gray-50 transition-colors">
-      <td className="px-2 py-4 w-10">
+      <td className="px-2 py-2 w-10">
         {!isDragDisabled ? (
           <button
             {...attributes}
             {...listeners}
-            className="p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing touch-none"
+            className="p-1.5 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing touch-none"
             aria-label="Drag to reorder"
           >
-            <GripVertical className="h-5 w-5" />
+            <GripVertical className="h-4 w-4" />
           </button>
         ) : (
-          <div className="p-2 text-gray-200">
-            <GripVertical className="h-5 w-5" />
+          <div className="p-1.5 text-gray-200">
+            <GripVertical className="h-4 w-4" />
           </div>
         )}
       </td>
-      <td className="px-4 py-4">
+      <td className="px-3 py-2">
         <button onClick={() => onSelect(domain.domain_id)} className="text-gray-400 hover:text-gray-600">
-          {isSelected ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
+          {isSelected ? <CheckSquare className="h-4 w-4 text-purple-600" /> : <Square className="h-4 w-4" />}
         </button>
       </td>
-      <td className="px-6 py-4">
-        <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-purple-100 text-purple-700 font-semibold text-sm">
+      <td className="px-4 py-2">
+        <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-purple-100 text-purple-700 font-semibold text-sm">
           {domain.sort_order ?? 0}
         </span>
       </td>
-      <td className="px-6 py-4">
+      <td className="px-4 py-2">
         <span className="font-medium text-gray-900">{domain.title}</span>
       </td>
-      <td className="px-6 py-4">
-        <code className="px-2 py-1 bg-gray-100 rounded text-sm text-gray-600">{domain.slug}</code>
+      <td className="px-4 py-2">
+        <code className="px-2 py-0.5 bg-gray-100 rounded text-sm text-gray-600">{domain.slug}</code>
       </td>
-      <td className="px-6 py-4">
+      <td className="px-4 py-2">
         {renderStatusBadge(domain.status || 'draft')}
       </td>
-      <td className="px-6 py-4 text-right">
+      <td className="px-4 py-2 text-right">
         <div className="flex items-center justify-end gap-2">
           <Link
             to={`/domains/${domain.domain_id}/edit`}
-            className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
+            className="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
           >
             Edit
           </Link>
           <button
             onClick={() => onDelete(domain.domain_id)}
-            className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium hover:bg-red-200 transition-colors"
+            className="px-2.5 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium hover:bg-red-200 transition-colors"
           >
             Delete
           </button>
@@ -456,17 +456,19 @@ export function DomainList() {
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Domains</h2>
           <p className="mt-1 text-sm md:text-base text-gray-500">Manage curriculum domains</p>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <DataToolbar
-            data={domains}
-            columns={DOMAIN_COLUMNS}
-            entityName="Domains"
-            importDisabled={true}
-            importDisabledMessage="Domain import is not available. Please create domains manually."
-          />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex gap-2">
+            <DataToolbar
+              data={domains}
+              columns={DOMAIN_COLUMNS}
+              entityName="Domains"
+              importDisabled={true}
+              importDisabledMessage="Domain import is not available. Please create domains manually."
+            />
+          </div>
           <Link
             to="/domains/new"
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 min-h-[48px] bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 min-h-[52px] bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto"
           >
             <Plus className="h-5 w-5" />
             <span>New Domain</span>
@@ -566,15 +568,15 @@ export function DomainList() {
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="text-left px-2 py-4 w-10">
+                  <th className="text-left px-2 py-3 w-10">
                     <span className="sr-only">Drag handle</span>
                   </th>
-                  <th className="text-left px-4 py-4 w-10">
+                  <th className="text-left px-3 py-3 w-10">
                     <button onClick={handleSelectAll} className="text-gray-400 hover:text-gray-600">
-                      {isAllSelected && domains.length > 0 ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
+                      {isAllSelected && domains.length > 0 ? <CheckSquare className="h-4 w-4 text-purple-600" /> : <Square className="h-4 w-4" />}
                     </button>
                   </th>
-                  <th className="text-left px-6 py-4">
+                  <th className="text-left px-4 py-3">
                     <SortableHeader
                       label="Order"
                       column="sort_order"
@@ -583,7 +585,7 @@ export function DomainList() {
                       onSort={handleSort}
                     />
                   </th>
-                  <th className="text-left px-6 py-4">
+                  <th className="text-left px-4 py-3">
                     <SortableHeader
                       label="Title"
                       column="title"
@@ -592,7 +594,7 @@ export function DomainList() {
                       onSort={handleSort}
                     />
                   </th>
-                  <th className="text-left px-6 py-4">
+                  <th className="text-left px-4 py-3">
                     <SortableHeader
                       label="Slug"
                       column="slug"
@@ -601,7 +603,7 @@ export function DomainList() {
                       onSort={handleSort}
                     />
                   </th>
-                  <th className="text-left px-6 py-4">
+                  <th className="text-left px-4 py-3">
                     <SortableHeader
                       label="Status"
                       column="status"
@@ -610,7 +612,7 @@ export function DomainList() {
                       onSort={handleSort}
                     />
                   </th>
-                  <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
+                  <th className="text-right px-4 py-3 text-sm font-semibold text-gray-600">Actions</th>
                 </tr>
               </thead>
               <SortableContext items={domainIds} strategy={verticalListSortingStrategy}>

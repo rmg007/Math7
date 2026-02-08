@@ -418,7 +418,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
       )}
 
       {/* ============ Grouped Navigation (collapsible sections) ============ */}
-      <nav className="flex-1 py-1.5 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 py-1.5 overflow-y-auto custom-scrollbar scrollbar-hide-hover">
         {visibleGroups.map((group) => (
           <NavSection
             key={group.id}

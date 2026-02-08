@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Users, Shield, ShieldAlert, UserX, Search } from 'lucide-react';
+import { Users, Shield, ShieldAlert, UserX, Search, UserPlus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface AdminUser {
   id: string;
@@ -50,11 +51,11 @@ export function UserManagementPage() {
 
   const fetchUsers = async () => {
     setLoading(true);
-    
+
     // Get current profile for role check
     const { data: { user: authUser } } = await supabase.auth.getUser();
     let userRole = currentUserRole;
-    
+
     if (authUser && !userRole) {
       const { data: profile } = await supabase
         .from('profiles')
@@ -66,7 +67,7 @@ export function UserManagementPage() {
     }
 
     let query = supabase.from('profiles').select('id, email, full_name, role, created_at, deleted_at');
-    
+
     // Super admins should only see regular admins (and themselves)
     // Admins seeing this page is technically a violation of current design, but if they reach it, 
     // they shouldn't see anyone higher than them.
@@ -128,11 +129,20 @@ export function UserManagementPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
-        <p className="text-muted-foreground">
-          Manage admin users and their access.
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
+          <p className="text-muted-foreground">
+            Manage admin users and their access.
+          </p>
+        </div>
+        <Link
+          to="/invitation-codes"
+          className="inline-flex items-center justify-center gap-2 px-6 py-3 min-h-[52px] bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+        >
+          <UserPlus className="h-5 w-5" />
+          <span>Add User</span>
+        </Link>
       </div>
 
       <div className="flex items-center gap-4">
@@ -164,11 +174,11 @@ export function UserManagementPage() {
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">User</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Role</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Joined</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Status</th>
-                <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
+                <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600">User</th>
+                <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600">Role</th>
+                <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600">Joined</th>
+                <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600">Status</th>
+                <th className="text-right px-6 py-3 text-sm font-semibold text-gray-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -186,7 +196,7 @@ export function UserManagementPage() {
               ) : (
                 filteredUsers.map((user) => (
                   <tr key={user.id} className={`hover:bg-gray-50 transition-colors ${user.deleted_at ? 'opacity-60' : ''}`}>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-3">
                       <div className="flex items-center gap-3">
                         <div className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100">
                           <span className="text-purple-700 font-semibold">
@@ -204,7 +214,7 @@ export function UserManagementPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-3">
                       <div className="flex items-center gap-2">
                         {user.role === 'super_admin' ? (
                           <>
@@ -223,10 +233,10 @@ export function UserManagementPage() {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">
+                    <td className="px-6 py-3 text-gray-600">
                       {formatDate(user.created_at)}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-3">
                       {user.deleted_at ? (
                         <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
                           Deactivated
@@ -237,19 +247,20 @@ export function UserManagementPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-3 text-right">
                       {user.id !== currentUserId && (
                         user.deleted_at ? (
                           <button
                             onClick={() => handleReactivate(user.id)}
-                            className="px-3 py-2 text-sm font-medium text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors min-h-[44px]"
                           >
+                            <UserPlus className="h-4 w-4" />
                             Reactivate
                           </button>
                         ) : (
                           <button
                             onClick={() => handleDeactivate(user.id)}
-                            className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors min-h-[44px]"
                           >
                             <UserX className="h-4 w-4" />
                             Deactivate

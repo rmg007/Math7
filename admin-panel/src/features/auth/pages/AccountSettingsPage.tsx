@@ -31,7 +31,7 @@ export function AccountSettingsPage() {
           .select('*')
           .eq('id', authUser.id)
           .single()
-        
+
         if (profile) {
           setUser(profile as unknown as UserProfile)
         } else {
@@ -52,14 +52,14 @@ export function AccountSettingsPage() {
   const handleDeactivateAccount = async () => {
     setActionLoading(true)
     setError(null)
-    
+
     try {
       const { error: rpcError } = await supabase.rpc('deactivate_own_account' as never)
-      
+
       if (rpcError) {
         throw rpcError
       }
-      
+
       await supabase.auth.signOut()
       navigate('/login')
     } catch (err) {
@@ -74,17 +74,17 @@ export function AccountSettingsPage() {
       setError('Please type DELETE to confirm')
       return
     }
-    
+
     setActionLoading(true)
     setError(null)
-    
+
     try {
       const { error: rpcError } = await supabase.rpc('delete_own_account' as never)
-      
+
       if (rpcError) {
         throw rpcError
       }
-      
+
       await supabase.auth.signOut()
       navigate('/login')
     } catch (err) {
@@ -142,91 +142,98 @@ export function AccountSettingsPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">Deactivate Account</h2>
-        <p className="text-gray-500 text-sm mb-4">
-          Temporarily disable your account. You can reactivate it later by contacting support.
-        </p>
-        
-        {!showDeactivateConfirm ? (
-          <Button
-            onClick={() => setShowDeactivateConfirm(true)}
-            variant="outline"
-            className="border-orange-300 text-orange-600 hover:bg-orange-50"
-          >
-            Deactivate Account
-          </Button>
-        ) : (
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 space-y-4">
-            <p className="text-sm text-orange-800">
-              Are you sure you want to deactivate your account? You will be logged out immediately.
-            </p>
-            <div className="flex gap-3">
-              <Button
-                onClick={handleDeactivateAccount}
-                disabled={actionLoading}
-                className="bg-orange-600 hover:bg-orange-700 text-white"
-              >
-                {actionLoading ? 'Deactivating...' : 'Yes, Deactivate'}
-              </Button>
-              <Button
-                onClick={() => setShowDeactivateConfirm(false)}
-                variant="outline"
-                disabled={actionLoading}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-red-100">
-        <h2 className="text-lg font-semibold text-red-600 mb-2">Delete Account</h2>
-        <p className="text-gray-500 text-sm mb-4">
-          Permanently delete your account and all associated data. This action cannot be undone.
-        </p>
-        
-        {!showDeleteConfirm ? (
-          <Button
-            onClick={() => setShowDeleteConfirm(true)}
-            variant="outline"
-            className="border-red-300 text-red-600 hover:bg-red-50"
-          >
-            Delete Account
-          </Button>
-        ) : (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-4">
-            <p className="text-sm text-red-800">
-              This will permanently delete your account. Type <strong>DELETE</strong> to confirm.
+        <h2 className="text-lg font-semibold text-red-600 mb-4">Danger Zone</h2>
+        <div className="space-y-6">
+          {/* Deactivate Section */}
+          <div className="pb-6 border-b border-red-50">
+            <h3 className="font-medium text-gray-900 mb-2">Deactivate Account</h3>
+            <p className="text-gray-500 text-sm mb-4">
+              Temporarily disable your account. You can reactivate it later by contacting support.
             </p>
-            <Input
-              value={deleteConfirmText}
-              onChange={(e) => setDeleteConfirmText(e.target.value)}
-              placeholder="Type DELETE to confirm"
-              className="max-w-xs"
-            />
-            <div className="flex gap-3">
+
+            {!showDeactivateConfirm ? (
               <Button
-                onClick={handleDeleteAccount}
-                disabled={actionLoading || deleteConfirmText !== 'DELETE'}
-                className="bg-red-600 hover:bg-red-700 text-white"
-              >
-                {actionLoading ? 'Deleting...' : 'Delete My Account'}
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowDeleteConfirm(false)
-                  setDeleteConfirmText('')
-                }}
+                onClick={() => setShowDeactivateConfirm(true)}
                 variant="outline"
-                disabled={actionLoading}
+                className="border-orange-300 text-orange-600 hover:bg-orange-50"
               >
-                Cancel
+                Deactivate Account
               </Button>
-            </div>
+            ) : (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 space-y-4">
+                <p className="text-sm text-orange-800">
+                  Are you sure you want to deactivate your account? You will be logged out immediately.
+                </p>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleDeactivateAccount}
+                    disabled={actionLoading}
+                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                  >
+                    {actionLoading ? 'Deactivating...' : 'Yes, Deactivate'}
+                  </Button>
+                  <Button
+                    onClick={() => setShowDeactivateConfirm(false)}
+                    variant="outline"
+                    disabled={actionLoading}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Delete Section */}
+          <div>
+            <h3 className="font-medium text-red-600 mb-2">Delete Account</h3>
+            <p className="text-gray-500 text-sm mb-4">
+              Permanently delete your account and all associated data. This action cannot be undone.
+            </p>
+
+            {!showDeleteConfirm ? (
+              <Button
+                onClick={() => setShowDeleteConfirm(true)}
+                variant="outline"
+                className="border-red-300 text-red-600 hover:bg-red-50"
+              >
+                Delete Account
+              </Button>
+            ) : (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-4">
+                <p className="text-sm text-red-800">
+                  This will permanently delete your account. Type <strong>DELETE</strong> to confirm.
+                </p>
+                <Input
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="Type DELETE to confirm"
+                  className="max-w-xs"
+                />
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleDeleteAccount}
+                    disabled={actionLoading || deleteConfirmText !== 'DELETE'}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    {actionLoading ? 'Deleting...' : 'Delete My Account'}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowDeleteConfirm(false)
+                      setDeleteConfirmText('')
+                    }}
+                    variant="outline"
+                    disabled={actionLoading}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )

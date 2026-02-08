@@ -3,6 +3,73 @@ import { usePublishCurriculum, usePublishPreview } from '../hooks/use-publish';
 import { CheckCircle, AlertTriangle, Upload, BookOpen, Layers, HelpCircle, AlertCircle, Info, Rocket } from 'lucide-react';
 import { useState } from 'react';
 
+// Simple Doughnut Chart Component
+function DoughnutChart({ draft, live }: { draft: number; live: number }) {
+    const total = draft + live;
+    const livePercentage = total > 0 ? (live / total) * 100 : 0;
+    const draftPercentage = total > 0 ? (draft / total) * 100 : 0;
+
+    const radius = 40;
+    const strokeWidth = 8;
+    const normalizedRadius = radius - strokeWidth / 2;
+    const circumference = normalizedRadius * 2 * Math.PI;
+    const liveStrokeDasharray = `${(livePercentage / 100) * circumference} ${circumference}`;
+    const draftStrokeDasharray = `${(draftPercentage / 100) * circumference} ${circumference}`;
+
+    return (
+        <div className="relative w-24 h-24">
+            <svg
+                height={radius * 2}
+                width={radius * 2}
+                className="transform -rotate-90"
+            >
+                {/* Background circle */}
+                <circle
+                    stroke="#e5e7eb"
+                    fill="transparent"
+                    strokeWidth={strokeWidth}
+                    r={normalizedRadius}
+                    cx={radius}
+                    cy={radius}
+                />
+                {/* Live segment */}
+                {live > 0 && (
+                    <circle
+                        stroke="#10b981"
+                        fill="transparent"
+                        strokeWidth={strokeWidth}
+                        strokeDasharray={liveStrokeDasharray}
+                        r={normalizedRadius}
+                        cx={radius}
+                        cy={radius}
+                        className="transition-all duration-500 ease-out"
+                    />
+                )}
+                {/* Draft segment */}
+                {draft > 0 && (
+                    <circle
+                        stroke="#6b7280"
+                        fill="transparent"
+                        strokeWidth={strokeWidth}
+                        strokeDasharray={draftStrokeDasharray}
+                        strokeDashoffset={-(livePercentage / 100) * circumference}
+                        r={normalizedRadius}
+                        cx={radius}
+                        cy={radius}
+                        className="transition-all duration-500 ease-out"
+                    />
+                )}
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                    <span className="text-lg font-bold text-gray-900">{live}</span>
+                    <span className="text-xs text-gray-500 block">Live</span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export function PublishPage() {
     const publishMutation = usePublishCurriculum();
     const { data: preview, isLoading: isLoadingPreview } = usePublishPreview();
@@ -94,14 +161,22 @@ export function PublishPage() {
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-100">
-                        <Layers className="w-5 h-5 text-blue-600" />
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-100">
+                            <Layers className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-gray-900">Content Status Overview</h3>
+                            <p className="text-sm text-gray-500">Current state of all curriculum content</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="font-semibold text-gray-900">Content Status Overview</h3>
-                        <p className="text-sm text-gray-500">Current state of all curriculum content</p>
-                    </div>
+                    {!isLoadingPreview && (
+                        <DoughnutChart
+                            draft={(preview?.stats.draftDomains || 0) + (preview?.stats.draftSkills || 0) + (preview?.stats.draftQuestions || 0)}
+                            live={(preview?.stats.liveDomains || 0) + (preview?.stats.liveSkills || 0) + (preview?.stats.liveQuestions || 0)}
+                        />
+                    )}
                 </div>
                 {isLoadingPreview ? (
                     <div className="animate-pulse h-20 bg-gray-100 rounded"></div>
@@ -177,13 +252,12 @@ export function PublishPage() {
                     </div>
                     <div className="p-4 space-y-3">
                         {preview.validationIssues.map((issue, index) => (
-                            <div 
-                                key={index} 
-                                className={`flex items-start gap-3 p-3 rounded-xl ${
-                                    issue.type === 'error' 
-                                        ? 'bg-red-50 border border-red-100' 
-                                        : 'bg-amber-50 border border-amber-100'
-                                }`}
+                            <div
+                                key={index}
+                                className={`flex items-start gap-3 p-3 rounded-xl ${issue.type === 'error'
+                                    ? 'bg-red-50 border border-red-100'
+                                    : 'bg-amber-50 border border-amber-100'
+                                    }`}
                             >
                                 {issue.type === 'error' ? (
                                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
@@ -218,7 +292,7 @@ export function PublishPage() {
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="p-6 space-y-4">
                     <p className="text-gray-600">
                         Mark content as "Live" from the domains, skills, or questions lists to make it visible to students. The curriculum version will be incremented when you publish.
@@ -235,7 +309,7 @@ export function PublishPage() {
                             </div>
                         </div>
                     )}
-                    
+
                     {error && (
                         <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl flex items-center gap-3">
                             <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-100">
@@ -248,10 +322,10 @@ export function PublishPage() {
                         </div>
                     )}
                 </div>
-                
+
                 <div className="p-6 bg-gray-50 border-t border-gray-100">
-                    <button 
-                        onClick={handlePublish} 
+                    <button
+                        onClick={handlePublish}
                         disabled={publishMutation.isPending || isLoadingPreview || !preview?.canPublish}
                         className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -263,7 +337,7 @@ export function PublishPage() {
                         ) : (
                             <>
                                 <Upload className="h-5 w-5" />
-                                {preview?.canPublish 
+                                {preview?.canPublish
                                     ? `Publish ${preview.readyToPublishCount} items as v${(preview?.meta.version || 0) + 1}`
                                     : 'Nothing to publish'
                                 }
