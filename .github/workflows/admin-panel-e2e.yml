@@ -1,0 +1,168 @@
+name: Admin Panel E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'admin-panel/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'admin-panel/**'
+  workflow_dispatch:
+
+env:
+  VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+  VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+jobs:
+  test-e2e:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    env:
+      TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+      TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+      TEST_SUPER_ADMIN_EMAIL: ${{ secrets.TEST_SUPER_ADMIN_EMAIL }}
+      TEST_SUPER_ADMIN_PASSWORD: ${{ secrets.TEST_SUPER_ADMIN_PASSWORD }}
+
+    defaults:
+      run:
+        working-directory: admin-panel
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: admin-panel/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Create test environment file
+        run: |
+          cat > .env.test.local <<EOF
+          TEST_ADMIN_EMAIL=$TEST_ADMIN_EMAIL
+          TEST_ADMIN_PASSWORD=$TEST_ADMIN_PASSWORD
+          TEST_SUPER_ADMIN_EMAIL=$TEST_SUPER_ADMIN_EMAIL
+          TEST_SUPER_ADMIN_PASSWORD=$TEST_SUPER_ADMIN_PASSWORD
+          VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+          VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+          VITE_SENTRY_ENABLED=false
+          VITE_ENABLE_ANALYTICS=false
+          VITE_ENABLE_DEBUG_LOGGING=false
+          EOF
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          CI: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: admin-panel/playwright-report/
+          retention-days: 30
+
+      - name: Upload test screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-screenshots
+          path: admin-panel/test-results/
+          retention-days: 7
+
+      - name: Upload test videos
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-videos
+          path: admin-panel/test-results/**/*.webm
+          retention-days: 7
+
+      - name: Comment PR with test results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const resultsPath = 'admin-panel/test-results/results.json';
+            
+            if (fs.existsSync(resultsPath)) {
+              const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+              const { stats } = results;
+              
+              const passed = stats.expected || 0;
+              const failed = stats.unexpected || 0;
+              const skipped = stats.skipped || 0;
+              const total = passed + failed + skipped;
+              
+              const emoji = failed === 0 ? '✅' : '❌';
+              const status = failed === 0 ? 'All tests passed!' : `${failed} test(s) failed`;
+              
+              const comment = `## ${emoji} E2E Test Results
+              
+              **Status**: ${status}
+              
+              | Metric | Count |
+              |--------|-------|
+              | Total Tests | ${total} |
+              | ✅ Passed | ${passed} |
+              | ❌ Failed | ${failed} |
+              | ⏭️ Skipped | ${skipped} |
+              
+              ${failed > 0 ? '⚠️ Please check the test artifacts for details.' : ''}
+              
+              [View full report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+
+  # Optional: Deploy preview if tests pass
+  deploy-preview:
+    name: Deploy Preview
+    needs: test-e2e
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: admin-panel
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: admin-panel/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Deploy to preview
+        run: echo "Deploy to your preview environment here"
+        # Add your deployment steps here (e.g., Vercel, Netlify, etc.)

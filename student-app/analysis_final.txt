@@ -1,0 +1,12 @@
+Analyzing student-app...                                        
+
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\src\app.dart:96:9 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\src\app.dart:120:11 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\src\core\database\database.dart:50:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\src\core\database\database.dart:51:11 - avoid_print
+warning - Unused import: 'package:supabase_flutter/supabase_flutter.dart' - lib\src\core\database\providers.dart:2:8 - unused_import
+   info - The import of 'package:student_app/src/features/curriculum/repositories/local/drift_domain_repository.dart' is unnecessary because all of the used elements are also provided by the import of 'package:student_app/src/features/curriculum/repositories/domain_repository.dart' - lib\src\core\sync\sync_service.dart:11:8 - unnecessary_import
+   info - The import of 'package:student_app/src/features/curriculum/repositories/local/drift_skill_repository.dart' is unnecessary because all of the used elements are also provided by the import of 'package:student_app/src/features/curriculum/repositories/skill_repository.dart' - lib\src\core\sync\sync_service.dart:12:8 - unnecessary_import
+   info - The import of 'package:student_app/src/features/curriculum/repositories/local/drift_question_repository.dart' is unnecessary because all of the used elements are also provided by the import of 'package:student_app/src/features/curriculum/repositories/question_repository.dart' - lib\src\core\sync\sync_service.dart:13:8 - unnecessary_import
+
+8 issues found. (ran in 2.3s)

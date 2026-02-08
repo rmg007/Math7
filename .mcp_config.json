@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "flutter": {
+      "command": "dart",
+      "args": ["pub", "global", "run", "dart_mcp_server"]
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server"],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "YOUR_ACCESS_TOKEN",
+        "SUPABASE_PROJECT_ID": "[YOUR-PROJECT-ID]"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-playwright"],
+      "env": {
+        "PLAYWRIGHT_CONFIG_PATH": "c:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\playwright.config.ts"
+      }
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "code-scalpel": {
+      "command": "C:\\Users\\mhali\\AppData\\Roaming\\Python\\Python313\\Scripts\\uvx.exe",
+      "args": ["code-scalpel", "mcp"],
+      "env": {
+        "CODE_SCALPEL_ROOT": "c:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix"
+      }
+    },
+    "codescene": {
+      "command": "cs-mcp",
+      "env": {
+        "CS_ACCESS_TOKEN": "${CS_ACCESS_TOKEN}"
+      }
+    }
+  }
+}

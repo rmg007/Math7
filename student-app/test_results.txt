@@ -1,0 +1,102 @@
+00:00 +0: loading C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/domains_screen_test.dart
+00:00 +0: C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/domains_screen_test.dart: DomainsScreen Widget Tests displays loading indicator when loading
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "CircularProgressIndicator": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Math7/student-app/test/features/curriculum/screens/domains_screen_test.dart:67:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Math7/student-app/test/features/curriculum/screens/domains_screen_test.dart line 67
+The test description was:
+  displays loading indicator when loading
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:01 +0 -1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/skills_screen_test.dart: SkillsScreen Widget Tests displays loading indicator initially
+00:01 +0 -1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/domains_screen_test.dart: DomainsScreen Widget Tests displays loading indicator when loading [E]
+  Test failed. See exception logs above.
+  The test description was: displays loading indicator when loading
+  
+00:01 +0 -1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/skills_screen_test.dart: SkillsScreen Widget Tests displays loading indicator initially
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "CircularProgressIndicator": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Math7/student-app/test/features/curriculum/screens/skills_screen_test.dart:73:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Math7/student-app/test/features/curriculum/screens/skills_screen_test.dart line 73
+The test description was:
+  displays loading indicator initially
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:01 +0 -2: C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/domains_screen_test.dart: DomainsScreen Widget Tests displays domains list when data is loaded
+00:01 +0 -2: C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/skills_screen_test.dart: SkillsScreen Widget Tests displays loading indicator initially [E]
+  Test failed. See exception logs above.
+  The test description was: displays loading indicator initially
+  
+00:01 +1 -2: C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/skills_screen_test.dart: SkillsScreen Widget Tests displays skills list when loaded
+00:01 +2 -2: C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/skills_screen_test.dart: SkillsScreen Widget Tests displays skills list when loaded
+00:02 +3 -2: C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/domains_screen_test.dart: DomainsScreen Widget Tests navigates to skills screen when domain is tapped
+00:02 +4 -2: C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/skills_screen_test.dart: SkillsScreen Widget Tests displays error message when loading fails
+00:02 +5 -2: C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/skills_screen_test.dart: SkillsScreen Widget Tests displays error message when loading fails
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 2 widgets with text "Error loading skills": [
+            Text("Error loading skills", debugLabel: (englishLike titleLarge
+2021).merge((blackMountainView titleLarge).apply), inherit: false, color: Color(alpha: 1.0000, red:
+0.1137, green: 0.1059, blue: 0.1255, colorSpace: ColorSpace.sRGB), family: Roboto, size: 22.0,
+weight: 400, letterSpacing: 0.0, baseline: alphabetic, height: 1.3x, leadingDistribution: even,
+decoration: Color(alpha: 1.0000, red: 0.1137, green: 0.1059, blue: 0.1255, colorSpace:
+ColorSpace.sRGB) TextDecoration.none, dependencies: [DefaultSelectionStyle, DefaultTextStyle,
+MediaQuery]),
+            Text("Error loading skills", debugLabel: (englishLike bodySmall
+2021).merge((blackMountainView bodySmall).apply), inherit: false, color: Color(alpha: 1.0000, red:
+0.1137, green: 0.1059, blue: 0.1255, colorSpace: ColorSpace.sRGB), family: Roboto, size: 12.0,
+weight: 400, letterSpacing: 0.4, baseline: alphabetic, height: 1.3x, leadingDistribution: even,
+decoration: Color(alpha: 1.0000, red: 0.1137, green: 0.1059, blue: 0.1255, colorSpace:
+ColorSpace.sRGB) TextDecoration.none, textAlign: center, dependencies: [DefaultSelectionStyle,
+DefaultTextStyle, MediaQuery]),
+          ]>
+   Which: is too many
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Math7/student-app/test/features/curriculum/screens/skills_screen_test.dart:119:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Math7/student-app/test/features/curriculum/screens/skills_screen_test.dart line 119
+The test description was:
+  displays error message when loading fails
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:02 +5 -3: C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/skills_screen_test.dart: SkillsScreen Widget Tests displays error message when loading fails [E]
+  Test failed. See exception logs above.
+  The test description was: displays error message when loading fails
+  
+00:02 +5 -3: C:/Users/mhali/OneDrive/Desktop/Important Projects/Math7/student-app/test/features/curriculum/screens/skills_screen_test.dart: SkillsScreen Widget Tests navigates to practice screen when skill is selected
+00:02 +6 -3: Some tests failed.

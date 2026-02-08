@@ -1,0 +1,4 @@
+00:00 +0: loading C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart
+00:00 +0: Student App UI Flows Onboarding Flow (Under 13)
+00:03 +1: Student App UI Flows Authenticated Home Screen Flow
+00:03 +1 ~1: All tests passed!

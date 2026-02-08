@@ -1,0 +1,108 @@
+name: Security Governance
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    # Run weekly to catch new vulnerabilities in old code
+    - cron: '30 1 * * 0'
+
+jobs:
+  # 1. SAST: Semantic Code Analysis
+  codeql-analysis:
+    name: CodeQL Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript', 'typescript' ]
+        # Note: CodeQL support for Dart is in beta; use standard analysis for now.
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # "security-and-quality" adds strict linting to the security queries
+          queries: security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+  # 2. SCA: Supply Chain Analysis
+  dependency-review:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          # Block any pull request that introduces a high/critical vulnerability
+          fail-on-severity: high
+          # Block licenses that jeopardize your IP (e.g., GPL if you are closed source)
+          deny-licenses: GPL-3.0, AGPL-3.0
+
+  # 3. Fail-Fast Audit (Immediate checks)
+  audit-check:
+    name: NPM & Flutter Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Audit Admin Panel (NPM)
+        run: |
+          cd admin-panel
+          # Fails if vulnerabilities are found
+          npm audit --audit-level=high
+
+      - name: Audit Student App (Flutter)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: |
+          cd student-app
+          flutter pub get
+          # Check for outdated packages that might pose a risk
+          # Note: flutter pub outdated is currently informational and does not return a non-zero exit code
+          flutter pub outdated --transitive --no-dev-dependencies
+
+  # 4. Infrastructure Security (Container Scanning)
+  container-scan:
+    name: Docker Image Vulnerabilities
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build Docker Image
+        run: docker build -t questerix-admin:latest ./admin-panel
+      
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'questerix-admin:latest'
+          format: 'table'
+          # Fail if Critical or High OS vulnerabilities are found
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'

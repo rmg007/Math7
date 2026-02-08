@@ -1,0 +1,38 @@
+{
+  "$schema": "https://questerix.com/design-tokens.schema.json",
+  "version": "1.0.0",
+  "description": "Questerix Unified Responsive Breakpoints",
+
+  "breakpoints": {
+    "xs": { "min": 0, "max": 479, "description": "Small phones" },
+    "sm": { "min": 480, "max": 639, "description": "Large phones" },
+    "md": { "min": 640, "max": 767, "description": "Small tablets" },
+    "lg": { "min": 768, "max": 1023, "description": "Tablets" },
+    "xl": { "min": 1024, "max": 1279, "description": "Small laptops" },
+    "2xl": { "min": 1280, "max": 1535, "description": "Desktops" },
+    "3xl": { "min": 1536, "max": null, "description": "Large screens" }
+  },
+
+  "containerMaxWidths": {
+    "xs": 480,
+    "sm": 640,
+    "md": 768,
+    "lg": 1024,
+    "xl": 1280,
+    "2xl": 1536,
+    "full": null
+  },
+
+  "contentMaxWidths": {
+    "narrow": 480,
+    "default": 680,
+    "wide": 900,
+    "full": 1200
+  },
+
+  "navigation": {
+    "bottomNav": { "max": 767, "description": "Use BottomNavigationBar" },
+    "rail": { "min": 768, "max": 1023, "description": "Use NavigationRail" },
+    "drawer": { "min": 1024, "description": "Use NavigationDrawer" }
+  }
+}

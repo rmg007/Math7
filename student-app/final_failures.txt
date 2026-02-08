@@ -1,0 +1,233 @@
+00:00 +0: loading C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart
+00:00 +0: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: AccessibilityService detects high contrast mode
+00:00 +1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: AccessibilityService detects screen reader status
+00:00 +2: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/database/mappers_test.dart: DriftMappers Domain toDomain maps correctly
+00:00 +3: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: AccessibilityService detects reduced motion preference
+00:00 +4: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: AccessibilityService detects reduced motion preference
+00:00 +5: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: AccessibilityService detects reduced motion preference
+00:00 +6: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: AccessibilityService detects reduced motion preference
+00:00 +7: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/database/mappers_test.dart: DriftMappers Question toQuestion maps correctly
+00:00 +8: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: AccessibilityService returns zero duration for reduced motion
+00:00 +9: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: AccessibilityService returns zero duration for reduced motion
+00:00 +10: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: AccessibilityService returns zero duration for reduced motion
+00:00 +11: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: AccessibilityService returns zero duration for reduced motion
+00:00 +12: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: AccessibilityService returns normal duration when motion enabled
+00:00 +13: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: SemanticButton has proper semantic labels
+00:00 +14: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: SemanticButton renders when onPressed is null
+00:01 +15: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: SemanticIcon has semantic label
+00:01 +16: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: SemanticIcon excludes decorative icons from semantics
+00:01 +17: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: SemanticImage has image semantic label
+00:01 +18: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: SemanticImage excludes decorative images from semantics
+00:01 +19: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: SemanticProgressIndicator announces progress value
+00:01 +20: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: AccessibilitySettings equality works correctly
+00:01 +21: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/accessibility/accessibility_test.dart: AccessibilitySettings inequality works correctly
+00:01 +22: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/security/multi_tenant_isolation_test.dart: Multi-Tenant Isolation Security Policy Should enforce app_id in all queries
+00:01 +23: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/core/security/multi_tenant_isolation_test.dart: Multi-Tenant Isolation Security Policy RLS Policy Description (Documentation Test)
+00:02 +24: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/auth/screens/login_screen_test.dart: LoginScreen Widget Tests displays email and password fields
+00:03 +25: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/auth/screens/welcome_screen_test.dart: WelcomeScreen Widget Tests displays app logo and welcome message
+00:03 +26: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/auth/screens/welcome_screen_test.dart: WelcomeScreen Widget Tests displays app logo and welcome message
+00:04 +27: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/auth/screens/welcome_screen_test.dart: WelcomeScreen Widget Tests displays app logo and welcome message
+00:04 +28: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/auth/screens/login_screen_test.dart: LoginScreen Widget Tests email field validates invalid format
+00:04 +29: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/auth/screens/login_screen_test.dart: LoginScreen Widget Tests email field validates invalid format
+00:04 +30: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/domains_screen_test.dart: DomainsScreen Widget Tests displays loading indicator when loading
+00:04 +31: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/domains_screen_test.dart: DomainsScreen Widget Tests displays loading indicator when loading
+00:04 +32: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/domains_screen_test.dart: DomainsScreen Widget Tests displays loading indicator when loading
+00:04 +33: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/domains_screen_test.dart: DomainsScreen Widget Tests displays loading indicator when loading
+00:04 +34: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/domains_screen_test.dart: DomainsScreen Widget Tests displays loading indicator when loading
+00:05 +35: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/domains_screen_test.dart: DomainsScreen Widget Tests displays loading indicator when loading
+00:05 +36: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/domains_screen_test.dart: DomainsScreen Widget Tests displays loading indicator when loading
+00:05 +37: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/domains_screen_test.dart: DomainsScreen Widget Tests displays loading indicator when loading
+00:05 +38: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/domains_screen_test.dart: DomainsScreen Widget Tests displays loading indicator when loading
+00:05 +39: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/domains_screen_test.dart: DomainsScreen Widget Tests displays loading indicator when loading
+00:05 +40: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/practice_screen_test.dart: PracticeScreen loads and displays questions
+00:06 +41: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/practice_screen_test.dart: PracticeScreen loads and displays questions
+00:06 +42: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/practice_screen_test.dart: PracticeScreen loads and displays questions
+00:06 +43: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/practice_screen_test.dart: PracticeScreen loads and displays questions
+00:06 +44: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/practice_screen_test.dart: PracticeScreen loads and displays questions
+00:06 +45: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/skills_screen_test.dart: SkillsScreen Widget Tests displays loading indicator initially
+00:06 +46: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/curriculum/screens/skills_screen_test.dart: SkillsScreen Widget Tests displays loading indicator initially
+00:07 +47: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests displays PageView with multiple pages
+00:07 +48: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests displays PageView with multiple pages
+00:07 +49: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests displays PageView with multiple pages
+00:07 +50: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests displays PageView with multiple pages
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "PageView": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart:16:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart line 16
+The test description was:
+  displays PageView with multiple pages
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:08 +50 -1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/practice/widgets/question_widgets_test.dart: MultipleChoiceWidget Tests displays all answer choices
+00:08 +50 -1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests displays PageView with multiple pages [E]
+  Test failed. See exception logs above.
+  The test description was: displays PageView with multiple pages
+  
+00:08 +51 -1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/practice/widgets/question_widgets_test.dart: MultipleChoiceWidget Tests displays all answer choices
+00:08 +52 -1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/practice/widgets/question_widgets_test.dart: MultipleChoiceWidget Tests displays all answer choices
+00:08 +53 -1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/practice/widgets/question_widgets_test.dart: MultipleChoiceWidget Tests displays all answer choices
+00:08 +54 -1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/practice/widgets/question_widgets_test.dart: MultipleChoiceWidget Tests displays all answer choices
+00:08 +55 -1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:08 +56 -1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:08 +57 -1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:09 +58 -1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:09 +58 -1: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests Get Started button appears on last page
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown running a test:
+The finder "Found 0 widgets with type "PageView": []" (used in a call to "drag()") could not find
+any matching widgets.
+
+When the exception was thrown, this was the stack:
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2013:7)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1865:12)
+#2      WidgetController.drag (package:flutter_test/src/controller.dart:1541:7)
+#3      main.<anonymous closure>.<anonymous closure> (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart:94:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  Get Started button appears on last page
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:09 +58 -2: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:09 +58 -2: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests Get Started button appears on last page [E]
+  Test failed. See exception logs above.
+  The test description was: Get Started button appears on last page
+  
+00:09 +59 -2: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:09 +60 -2: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:09 +60 -2: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests Get Started button completes onboarding
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown running a test:
+The finder "Found 0 widgets with type "PageView": []" (used in a call to "drag()") could not find
+any matching widgets.
+
+When the exception was thrown, this was the stack:
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2013:7)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1865:12)
+#2      WidgetController.drag (package:flutter_test/src/controller.dart:1541:7)
+#3      main.<anonymous closure>.<anonymous closure> (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart:115:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  Get Started button completes onboarding
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:09 +60 -3: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:09 +60 -3: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests Get Started button completes onboarding [E]
+  Test failed. See exception logs above.
+  The test description was: Get Started button completes onboarding
+  
+00:09 +61 -3: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:09 +62 -3: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:09 +62 -3: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests swipe gesture changes pages
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown running a test:
+The finder "Found 0 widgets with type "PageView": []" (used in a call to "drag()") could not find
+any matching widgets.
+
+When the exception was thrown, this was the stack:
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2013:7)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1865:12)
+#2      WidgetController.drag (package:flutter_test/src/controller.dart:1541:7)
+#3      main.<anonymous closure>.<anonymous closure> (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart:137:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  swipe gesture changes pages
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:09 +62 -4: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:09 +62 -4: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests swipe gesture changes pages [E]
+  Test failed. See exception logs above.
+  The test description was: swipe gesture changes pages
+  
+00:09 +63 -4: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:09 +63 -4: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests has proper page transitions
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown running a test:
+The finder "Found 0 widgets with type "PageView": []" (used in a call to "drag()") could not find
+any matching widgets.
+
+When the exception was thrown, this was the stack:
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2013:7)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1865:12)
+#2      WidgetController.drag (package:flutter_test/src/controller.dart:1541:7)
+#3      main.<anonymous closure>.<anonymous closure> (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart:152:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  has proper page transitions
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:09 +63 -5: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:09 +63 -5: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests has proper page transitions [E]
+  Test failed. See exception logs above.
+  The test description was: has proper page transitions
+  
+00:09 +64 -5: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:10 +64 -5: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests displays illustrations for each page
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: at least one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "Image": []>
+   Which: means none were found but some were expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart:169:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart line 169
+The test description was:
+  displays illustrations for each page
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:10 +64 -6: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:10 +64 -6: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/features/onboarding/screens/onboarding_screen_test.dart: OnboardingScreen Widget Tests displays illustrations for each page [E]
+  Test failed. See exception logs above.
+  The test description was: displays illustrations for each page
+  
+00:10 +65 -6: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:10 +66 -6: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:10 +67 -6: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:10 +68 -6: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Onboarding Flow (Under 13)
+00:11 +69 -6: C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app/test/ui/app_flow_test.dart: Student App UI Flows Authenticated Home Screen Flow
+00:11 +69 ~1 -6: Some tests failed.

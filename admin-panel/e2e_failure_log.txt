@@ -1,0 +1,72 @@
+
+> admin-panel@0.0.0 test:e2e
+> playwright test
+
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+
+Running 12 tests using 2 workers
+
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+Seeding test data...
+Seeding failed: Error: Failed to insert domain: TypeError: fetch failed
+    at seedTestData (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/admin-panel/tests/helpers/seed-test-data.ts:197:13)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/admin-panel/tests/admin-panel.e2e.spec.ts:61:7
+    at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\worker\testInfo.js:320:11
+    at TimeoutManager.withRunnable (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\worker\timeoutManager.js:67:14)
+    at TestInfoImpl._runWithTimeout (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\worker\testInfo.js:318:7)
+    at FixtureRunner.resolveParametersAndRunFunction (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\worker\fixtureRunner.js:232:5)
+    at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\worker\workerMain.js:442:13
+    at TestInfoImpl._runAsStep (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\worker\testInfo.js:309:7)
+    at WorkerMain._runAllHooksForSuite (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\worker\workerMain.js:437:9)
+    at WorkerMain._runBeforeAllHooksForSuite (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\worker\workerMain.js:431:5)
+    at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\worker\workerMain.js:313:11
+    at TestInfoImpl._runAsStep (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\worker\testInfo.js:309:7)
+    at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\worker\workerMain.js:311:7
+    at WorkerMain._runTest (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\worker\workerMain.js:296:5)
+    at WorkerMain.runTestGroup (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\worker\workerMain.js:196:11)
+    at process.<anonymous> (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\common\process.js:72:22)
+Cleaning up test data...
+  Γ£ÿ   2 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:78:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should load login page (0ms)
+  -   3 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:85:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should login with valid credentials
+  -   4 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:90:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should show error with invalid credentials
+  -   5 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:117:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should redirect to login when accessing protected route without auth
+  -   6 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:135:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Dashboard ΓÇ║ should navigate to different sections from dashboard
+  -   7 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:152:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should list all domains
+  -   8 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:227:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Skills Management ΓÇ║ should list all skills
+  -   9 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:233:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Skills Management ΓÇ║ should create a new skill
+  -  10 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:251:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Skills Management ΓÇ║ should filter skills by domain
+  -  11 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:271:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Questions Management ΓÇ║ should list all questions
+  -  12 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:278:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Questions Management ΓÇ║ should create a new MCQ question
+  Γ£ô   1 [chromium] ΓÇ║ tests\example.spec.ts:3:1 ΓÇ║ admin panel loads (13.5s)
+
+
+  1) [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:78:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should load login page 
+
+    Error: Failed to insert domain: TypeError: fetch failed
+
+       at helpers\seed-test-data.ts:197
+
+      195 |
+      196 |     if (error) {
+    > 197 |       throw new Error(`Failed to insert domain: ${error.message}`);
+          |             ^
+      198 |     }
+      199 |
+      200 |     domainIds[domain.name as string] = insertedDomain.id;
+        at seedTestData (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\helpers\seed-test-data.ts:197:13)
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\admin-panel.e2e.spec.ts:61:7
+
+  1 failed
+    [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:78:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should load login page 
+  10 did not run
+  1 passed (31.8s)
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m

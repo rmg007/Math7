@@ -1,0 +1,111 @@
+{
+  "$schema": "https://questerix.com/design-tokens.schema.json",
+  "version": "1.0.0",
+  "description": "Questerix Icon Mapping (Material Icons → Lucide)",
+
+  "library": "lucide",
+  "packages": {
+    "react": "lucide-react",
+    "flutter": "lucide_icons"
+  },
+
+  "mappings": {
+    "navigation": {
+      "home": { "lucide": "Home", "material": "Icons.home" },
+      "learn": { "lucide": "BookOpen", "material": "Icons.school" },
+      "practice": { "lucide": "Target", "material": "Icons.assignment" },
+      "settings": { "lucide": "Settings", "material": "Icons.settings" },
+      "profile": { "lucide": "User", "material": "Icons.person" },
+      "menu": { "lucide": "Menu", "material": "Icons.menu" },
+      "back": { "lucide": "ArrowLeft", "material": "Icons.arrow_back" },
+      "forward": { "lucide": "ArrowRight", "material": "Icons.arrow_forward" },
+      "close": { "lucide": "X", "material": "Icons.close" }
+    },
+
+    "actions": {
+      "add": { "lucide": "Plus", "material": "Icons.add" },
+      "edit": { "lucide": "Pencil", "material": "Icons.edit" },
+      "delete": { "lucide": "Trash2", "material": "Icons.delete" },
+      "save": { "lucide": "Save", "material": "Icons.save" },
+      "search": { "lucide": "Search", "material": "Icons.search" },
+      "filter": { "lucide": "Filter", "material": "Icons.filter_list" },
+      "sort": { "lucide": "ArrowUpDown", "material": "Icons.sort" },
+      "refresh": { "lucide": "RefreshCw", "material": "Icons.refresh" },
+      "download": { "lucide": "Download", "material": "Icons.download" },
+      "upload": { "lucide": "Upload", "material": "Icons.upload" },
+      "share": { "lucide": "Share2", "material": "Icons.share" },
+      "copy": { "lucide": "Copy", "material": "Icons.content_copy" }
+    },
+
+    "feedback": {
+      "check": { "lucide": "Check", "material": "Icons.check" },
+      "checkCircle": { "lucide": "CheckCircle", "material": "Icons.check_circle" },
+      "error": { "lucide": "AlertCircle", "material": "Icons.error" },
+      "warning": { "lucide": "AlertTriangle", "material": "Icons.warning" },
+      "info": { "lucide": "Info", "material": "Icons.info" },
+      "help": { "lucide": "HelpCircle", "material": "Icons.help" }
+    },
+
+    "media": {
+      "play": { "lucide": "Play", "material": "Icons.play_arrow" },
+      "pause": { "lucide": "Pause", "material": "Icons.pause" },
+      "stop": { "lucide": "Square", "material": "Icons.stop" },
+      "volume": { "lucide": "Volume2", "material": "Icons.volume_up" },
+      "mute": { "lucide": "VolumeX", "material": "Icons.volume_off" }
+    },
+
+    "curriculum": {
+      "domain": { "lucide": "FolderOpen", "material": "Icons.folder" },
+      "skill": { "lucide": "Layers", "material": "Icons.layers" },
+      "topic": { "lucide": "FileText", "material": "Icons.description" },
+      "question": { "lucide": "HelpCircle", "material": "Icons.quiz" },
+      "quiz": { "lucide": "ClipboardList", "material": "Icons.assignment" },
+      "progress": { "lucide": "TrendingUp", "material": "Icons.trending_up" },
+      "mastery": { "lucide": "Award", "material": "Icons.emoji_events" },
+      "streak": { "lucide": "Flame", "material": "Icons.local_fire_department" },
+      "points": { "lucide": "Star", "material": "Icons.star" }
+    },
+
+    "ui": {
+      "chevronDown": { "lucide": "ChevronDown", "material": "Icons.expand_more" },
+      "chevronUp": { "lucide": "ChevronUp", "material": "Icons.expand_less" },
+      "chevronLeft": { "lucide": "ChevronLeft", "material": "Icons.chevron_left" },
+      "chevronRight": { "lucide": "ChevronRight", "material": "Icons.chevron_right" },
+      "moreHorizontal": { "lucide": "MoreHorizontal", "material": "Icons.more_horiz" },
+      "moreVertical": { "lucide": "MoreVertical", "material": "Icons.more_vert" },
+      "eye": { "lucide": "Eye", "material": "Icons.visibility" },
+      "eyeOff": { "lucide": "EyeOff", "material": "Icons.visibility_off" },
+      "lock": { "lucide": "Lock", "material": "Icons.lock" },
+      "unlock": { "lucide": "Unlock", "material": "Icons.lock_open" },
+      "calendar": { "lucide": "Calendar", "material": "Icons.calendar_today" },
+      "clock": { "lucide": "Clock", "material": "Icons.access_time" },
+      "mail": { "lucide": "Mail", "material": "Icons.email" },
+      "phone": { "lucide": "Phone", "material": "Icons.phone" },
+      "link": { "lucide": "Link", "material": "Icons.link" },
+      "externalLink": { "lucide": "ExternalLink", "material": "Icons.open_in_new" }
+    },
+
+    "auth": {
+      "login": { "lucide": "LogIn", "material": "Icons.login" },
+      "logout": { "lucide": "LogOut", "material": "Icons.logout" },
+      "user": { "lucide": "User", "material": "Icons.person" },
+      "users": { "lucide": "Users", "material": "Icons.people" },
+      "key": { "lucide": "Key", "material": "Icons.vpn_key" }
+    },
+
+    "theme": {
+      "sun": { "lucide": "Sun", "material": "Icons.light_mode" },
+      "moon": { "lucide": "Moon", "material": "Icons.dark_mode" },
+      "laptop": { "lucide": "Laptop", "material": "Icons.computer" }
+    }
+  },
+
+  "sizes": {
+    "xs": 12,
+    "sm": 16,
+    "md": 20,
+    "lg": 24,
+    "xl": 32,
+    "2xl": 48
+  }
+}

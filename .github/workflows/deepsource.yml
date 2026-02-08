@@ -1,0 +1,77 @@
+name: Scan with dart-analyze
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies (questerix_domain)
+        run: |
+          cd questerix_domain
+          flutter pub get
+
+      - name: Install Dependencies (student-app)
+        run: |
+          cd student-app
+          flutter pub get
+
+      - name: Run Tests with Coverage (questerix_domain)
+        run: |
+          cd questerix_domain
+          flutter test --coverage
+
+      - name: Run Tests with Coverage (student-app)
+        run: |
+          cd student-app
+          flutter test --coverage
+
+      - name: Install DeepSource CLI
+        run: curl https://deepsource.io/cli | sh
+
+      - name: Run Dart Analyze
+        run: |
+          cd student-app
+          flutter analyze > dart_analyze.txt || true
+
+      - name: Dart Analyze to SARIF
+        uses: advanced-security/dart-analyzer-sarif@main
+        with:
+          input: student-app/dart_analyze.txt
+          output: student-app/dart_analyze.sarif
+
+      - name: Report SARIF to DeepSource
+        run: |
+          ./bin/deepsource report --analyzer dart-analyze --analyzer-type community --value-file student-app/dart_analyze.sarif
+        env:
+          DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
+
+      - name: Report Coverage to DeepSource (questerix_domain)
+        run: |
+          ./bin/deepsource report --analyzer test-coverage --key dart --value-file questerix_domain/coverage/lcov.info
+        env:
+          DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
+
+      - name: Report Coverage to DeepSource (student-app)
+        run: |
+          ./bin/deepsource report --analyzer test-coverage --key dart --value-file student-app/coverage/lcov.info
+        env:
+          DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}

@@ -1,0 +1,66 @@
+
+> admin-panel@0.0.0 lint
+> eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0
+
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\components\ui\button.tsx
+  57:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\components\ui\form.tsx
+  168:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\contexts\AppContext.tsx
+  68:10  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\ai-assistant\api\governedGeneration.ts
+  23:102  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  23:126  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  23:138  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  47:88   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  47:112  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  47:124  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\ai-assistant\api\validateContent.ts
+   6:11  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  10:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\ai-assistant\components\DocumentUploader.tsx
+  38:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\ai-assistant\pages\GovernancePage.tsx
+  23:6   warning  React Hook useEffect has a missing dependency: 'fetchQuotas'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  30:50  error    Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  45:42  error    Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\auth\pages\UserManagementPage.tsx
+  34:6  warning  React Hook useEffect has a missing dependency: 'fetchUsers'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\components\domain-list.tsx
+  272:9  warning  The 'domains' logical expression could make the dependencies of useMemo Hook (at line 276) change on every render. To fix this, wrap the initialization of 'domains' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\components\skill-list.tsx
+  326:11  warning  The 'skills' logical expression could make the dependencies of useMemo Hook (at line 330) change on every render. To fix this, wrap the initialization of 'skills' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\monitoring\hooks\use-known-issues.ts
+  23:84  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\lib\error-tracker.ts
+  69:25  error  '_userId' is defined but never used  @typescript-eslint/no-unused-vars
+  69:42  error  '_email' is defined but never used   @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\lib\file-parsers.ts
+   2:1   error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+   4:1   error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  53:55  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\services\SecurityLogger.ts
+  19:7  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\admin-panel.e2e.spec.ts
+   3:10  error  'generateTestUser' is defined but never used      @typescript-eslint/no-unused-vars
+   3:28  error  'generateTestDomain' is defined but never used    @typescript-eslint/no-unused-vars
+   3:67  error  'generateTestQuestion' is defined but never used  @typescript-eslint/no-unused-vars
+  30:17  error  Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+
+Γ£û 29 problems (22 errors, 7 warnings)
+

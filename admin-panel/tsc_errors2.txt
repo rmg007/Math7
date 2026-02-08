@@ -1,0 +1,2 @@
+src/features/curriculum/hooks/use-domains.ts(7,6): error TS6196: 'DomainInsert' is declared but never used.
+src/features/curriculum/hooks/use-skills.ts(7,6): error TS6196: 'SkillInsert' is declared but never used.

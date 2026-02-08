@@ -1,0 +1,12 @@
+{
+  "description": "Reference documentation archive for Questerix project",
+  "repository": "https://github.com/rmg007/Questerix-Docs-Backup",
+  "local_path": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix-Docs-Backup",
+  "purpose": "archival",
+  "priority_docs": [
+    "prompts/antigravity-rules.md",
+    "security/rls-policies.md",
+    "infrastructure/deployment-pipeline.md"
+  ],
+  "note": "Primary source of truth is this repository (Math7). Docs repo is supplementary reference only."
+}

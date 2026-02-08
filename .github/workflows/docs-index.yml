@@ -1,0 +1,48 @@
+name: Reindex Documentation (Manual)
+
+# Manual trigger only - run via GitHub Actions UI or workflow_dispatch API
+# This prevents automatic indexing on every push (cost control)
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for reindexing (optional)'
+        required: false
+        type: string
+
+jobs:
+  index-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Log reindex reason
+        run: |
+          echo "🔄 Manual reindex triggered"
+          echo "Reason: ${{ github.event.inputs.reason || 'No reason provided' }}"
+          echo "Triggered by: ${{ github.actor }}"
+          
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: scripts/knowledge-base/package-lock.json
+
+      - name: Install dependencies
+        working-directory: scripts/knowledge-base
+        run: npm ci
+
+      - name: Index documentation
+        working-directory: scripts/knowledge-base
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: npm run index
+
+      - name: Report results
+        if: success()
+        run: echo "✅ Documentation index updated successfully"
