@@ -56,6 +56,7 @@ help:
 	@echo "  make db_verify_rls    Run RLS verification"
 	@echo ""
 	@echo "CI/Validation:"
+	@echo "  make setup            Unified environment setup"
 	@echo "  make ci               Run all lint/test/build gates"
 	@echo "  make validate_phase_0 Run Phase 0 validation script"
 	@echo "  make validate_phase_1 Run Phase 1 validation script"
@@ -209,6 +210,11 @@ validate_phase_2:
 validate_phase_3:
 	@echo "Running Phase 3 validation..."
 	bash ./scripts/validate-phase-3.sh
+
+.PHONY: setup
+setup:
+	@echo "Running unified setup..."
+	bash setup.sh
 
 .PHONY: validate_phase_4
 validate_phase_4:

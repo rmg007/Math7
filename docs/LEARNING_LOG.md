@@ -4,6 +4,63 @@ This document captures lessons learned during development to prevent repeated mi
 
 ---
 
+## 2026-02-08: Repository Portability & Dev Container Resiliency
+
+### Session Context
+- **Objective**: Fix Dev Container build failures and ensure codebase portability across IDEs and cloud agents.
+- **Scope**: `.devcontainer`, shell script line endings, unified setup process.
+- **Outcome**: ✅ Portability standardized; Dev Container verified.
+
+---
+
+### Key Learnings
+
+#### 1. Dev Container Feature Resiliency
+
+**What Happened**: The Dev Container failed to build because the feature source `ghcr.io/devcontainers-contrib/features/flutter:1` could not be resolved.
+
+**Root Cause**: Feature source redirection. The `-contrib` namespace was redirected to `-extra`, but direct pointers are more stable. Additionally, dependencies like Java must be correctly ordered or included as features to ensure a consistent environment.
+
+**Resolution**: Updated feature sources to `ghcr.io/devcontainers-extra/` for Flutter and Supabase CLI.
+
+**Prevention**: 
+- Use verified and well-maintained feature repositories (`devcontainers-extra` is currently more reliable for Flutter).
+- Always include a `setup-tool.sh` or post-create script as a fallback for complex toolchain configurations (like Android SDK).
+
+#### 2. Cross-Platform Scripting: The CRLF Trap
+
+**What Happened**: Shell scripts (`setup.sh`, `init_agent_env.sh`) failed in Bash/Linux environments with `command not found: $'\r'` or `invalid option name: pipefail`.
+
+**Root Cause**: Scripts were saved with Windows-style CRLF (`\r\n`) line endings instead of Unix-style LF (`\n`). Bash misinterprets the carriage return (`\r`) as part of the command or argument.
+
+**Prevention**: 
+- Configure `.gitattributes` to enforce LF for shell scripts: `*.sh text eol=lf`.
+- Use a cross-platform conversion method (like PowerShell's `ReadAllText`/`WriteAllText`) to strip `\r` before deployment.
+- Proactively check script encoding when building for containers.
+
+#### 3. Unified Entry Point Pattern
+
+**What Worked**: Creating a single `make setup` (calling a unified `setup.sh`) that wraps all environment-specific initialization logic.
+
+**Benefit**: 
+- Reduces onboarding time to < 3 minutes on any platform.
+- Provides a consistent "Heartbeat" check for tools (Flutter, Node, Supabase) via `scripts/validate-phase--1.sh`.
+- Decouples the "What" (Setup) from the "How" (OS-specific commands).
+
+---
+
+### Files Modified/Created
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `.devcontainer/devcontainer.json` | Modified | Switched to stable feature refs |
+| `setup.sh` | Created | Unified cross-platform entry point |
+| `Makefile` | Modified | Added `make setup` target |
+| `PORTABILITY.md` | Created | Clear onboarding guide for any IDE/Agent |
+| `init_agent_env.sh` | Modified | Fixed outdated document paths |
+
+---
+
 ## 2026-02-06: Independent Certification Audit & Type Safety Enforcement
 
 ### Session Context

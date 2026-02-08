@@ -9,10 +9,10 @@
       "version": "17",
       "jdkDistro": "ms"
     },
-    "ghcr.io/devcontainers-contrib/features/flutter:1": {
+    "ghcr.io/devcontainers-extra/features/flutter:1": {
       "version": "latest"
     },
-    "ghcr.io/devcontainers-contrib/features/supabase-cli:1": {
+    "ghcr.io/devcontainers-extra/features/supabase-cli:1": {
       "version": "latest"
     },
     "ghcr.io/devcontainers/features/common-utils:2": {

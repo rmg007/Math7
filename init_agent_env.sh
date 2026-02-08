@@ -23,10 +23,10 @@ echo "  ✓ Directory topology created"
 # 2. Verify AGENTS.md exists
 echo ""
 echo "[2/4] Verifying AGENTS.md..."
-if [ -f "AppShell/docs/AGENTS.md" ]; then
+if [ -f "docs/strategy/AGENTS.md" ]; then
   echo "  ✓ AGENTS.md exists"
 else
-  echo "  ✗ ERROR: AppShell/docs/AGENTS.md not found"
+  echo "  ✗ ERROR: docs/strategy/AGENTS.md not found"
   echo "    Please ensure AGENTS.md is present before continuing."
   exit 1
 fi
@@ -34,10 +34,10 @@ fi
 # 3. Verify SCHEMA.md exists
 echo ""
 echo "[3/4] Verifying SCHEMA.md..."
-if [ -f "AppShell/docs/SCHEMA.md" ]; then
+if [ -f "docs/technical/SCHEMA.md" ]; then
   echo "  ✓ SCHEMA.md exists"
 else
-  echo "  ✗ ERROR: AppShell/docs/SCHEMA.md not found"
+  echo "  ✗ ERROR: docs/technical/SCHEMA.md not found"
   echo "    Please ensure SCHEMA.md is present before continuing."
   exit 1
 fi
