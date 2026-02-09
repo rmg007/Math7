@@ -57,3 +57,6 @@ outputType = "webview"
 task = "shell.exec"
 args = "cd student-app && flutter pub get && flutter run -d web-server --web-port=5000 --web-hostname=0.0.0.0"
 waitForPort = 5000
+
+[agent]
+expertMode = true
