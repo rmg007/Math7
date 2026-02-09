@@ -35,6 +35,10 @@
       "env": {
         "CS_ACCESS_TOKEN": "${CS_ACCESS_TOKEN}"
       }
+    },
+    "browser": {
+      "command": "npx",
+      "args": ["-y", "@browsermcp/mcp@latest"]
     }
   }
 }

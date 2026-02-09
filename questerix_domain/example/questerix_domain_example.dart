@@ -9,7 +9,8 @@ void main() {
     description: 'Core mathematics curriculum',
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
-    isActive: true,
+    sortOrder: 1,
+    isPublished: true,
   );
 
   print('Domain: ${domain.title}');
