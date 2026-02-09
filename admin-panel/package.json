@@ -8,6 +8,8 @@
     "build": "tsc && vite build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,json}\"",
     "test": "vitest run",
     "test:quick": "vitest run --changed HEAD~1 --reporter=json --outputFile=test-results.json",
     "test:full": "vitest run --coverage --reporter=json --outputFile=test-results.json",
@@ -19,7 +21,8 @@
     "test:e2e:report": "playwright show-report",
     "test:setup": "node tests/setup-test-users.js",
     "preview": "vite preview",
-    "update-types": "supabase gen types typescript --project-id [YOUR-PROJECT-ID] > src/lib/database.types.ts"
+    "update-types": "supabase gen types typescript --project-id [YOUR-PROJECT-ID] > src/lib/database.types.ts",
+    "prepare": "husky"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -82,11 +85,23 @@
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.26",
+    "husky": "^9.1.7",
     "jsdom": "^27.4.0",
+    "lint-staged": "^16.2.7",
     "postcss": "^8.4.32",
+    "prettier": "^3.8.1",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.3.0",
     "vite": "^5.0.0",
     "vitest": "^1.1.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }

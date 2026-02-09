@@ -17,8 +17,7 @@ export function LandingsPage() {
   const [editingLanding, setEditingLanding] = useState<LandingPage | null>(null);
   const [formData, setFormData] = useState({
     hero_headline: '',
-
-    hero_subtext: '',
+    hero_subheadline: '',
     meta_title: '',
     meta_description: ''
   });
@@ -27,7 +26,7 @@ export function LandingsPage() {
     setEditingLanding(landing);
     setFormData({
       hero_headline: landing.hero_headline || '',
-      hero_subtext: landing.hero_subtext || '',
+      hero_subheadline: landing.hero_subheadline || '',
       meta_title: landing.meta_title || '',
       meta_description: landing.meta_description || ''
     });
@@ -74,8 +73,8 @@ export function LandingsPage() {
                 <Label>Hero Subtext</Label>
                 <Textarea 
                   rows={4}
-                  value={formData.hero_subtext} 
-                  onChange={(e) => setFormData({ ...formData, hero_subtext: e.target.value })} 
+                  value={formData.hero_subheadline} 
+                  onChange={(e) => setFormData({ ...formData, hero_subheadline: e.target.value })} 
                 />
               </div>
             </CardContent>

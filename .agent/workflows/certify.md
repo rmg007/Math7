@@ -89,42 +89,38 @@ description: Independent post-implementation audit and certification
 
 ---
 
-## 🛡️ Phase 3: Security & Multi-Tenant Audit
-**Estimated Time**: 6-8 minutes  
-**Applies If**: Security-sensitive features were added
+## 🧠 Phase 2.5: IDD Protocol Compliance Audit
+**Estimated Time**: 5-7 minutes  
+**Applies If**: New features or bug fixes were implemented
 
 ### Checklist
 
-- [ ] **RLS Policy Coverage**
-  - Query: `SELECT tablename FROM pg_policies` to list all policies
-  - Verify: Every table with `app_id` has RLS policy
-  - **Proof**: SQL query results
+- [ ] **Test Path Coverage Verification**
+  - For each new feature/bug fix, verify all 4 test paths exist:
+    - ✅ Happy Path (2-3 normal cases)
+    - 💥 Destructive Path (all 5 threat vectors: Input Abuse, State Corruption, Dependency Failure, Resource Exhaustion, Security Surface)
+    - ⏱️ Boundary Path (min/max/empty/edge cases)
+    - 🔄 Idempotent Path (repeated calls produce same result)
+  - **Proof**: List test file names and count of each path type
 
-- [ ] **Session Isolation Test**
-  - Log in as User A (tenant 1) and User B (tenant 2)
-  - Verify: Each sees only their own data
-  - **Proof**: Screenshots or API response logs
+- [ ] **Silent Failure Hunt Results**
+  - Verify `/process` Phase 4 documented silent failure scan
+  - Check: No empty catch blocks, no ambiguous null returns, no swallowed errors
+  - **Proof**: "Silent failures found: [N]. All resolved." statement from verification
 
-- [ ] **API Key Exposure Check**
-  - Run: `grep -r "supabase" . --include="*.dart" --include="*.ts" --include="*.tsx"`
-  - Verify: No hardcoded anon keys or URLs outside `env.dart`/`env.ts`
-  - **Proof**: Command output showing safe usage
+- [ ] **Threat Model Documentation**
+  - Verify implementation plan includes exactly 5 threat vectors (one per category)
+  - Check: Each threat has a concrete scenario, not generic descriptions
+  - **Proof**: Screenshot or excerpt from plan showing 5 threats
 
-- [ ] **Input Validation Check**
-  - Identify user input fields (forms, API endpoints)
-  - Verify: Validation exists (Zod schemas, Dart validators)
-  - **Proof**: Code snippets showing validation logic
+- [ ] **Forbidden Pattern Scan**
+  - Search for:
+    - Empty `catch`/`except` blocks: `grep -r "catch.*{.*}" --include="*.ts" --include="*.dart"`
+    - Hardcoded secrets: `grep -ri "api.*key.*=.*\"" --include="*.ts" --include="*.dart"`
+    - Functions >40 lines: Use code analysis or manual spot-check
+  - **Proof**: "0 forbidden patterns found" OR list of exceptions with justification
 
-- [ ] **Vulnerability Taxonomy Audit**
-  - Read: `knowledge/questerix_governance/artifacts/security/vulnerability_taxonomy.md`
-  - For each OPEN VUL-XXX pattern relevant to changed files:
-    - Run the detection method from the taxonomy
-    - If pattern found → Mark as FAIL with evidence
-    - If pattern not found → Mark as PASS
-  - **Proof**: Results for each checked VUL-XXX pattern
-  - Update taxonomy: If fix verified, mark pattern as ✅ RESOLVED with commit hash
-
-**Exit Gate**: Security posture verified OR vulnerabilities documented.
+**Exit Gate**: IDD compliance confirmed OR violations documented for remediation.
 
 ---
 
@@ -235,7 +231,10 @@ description: Independent post-implementation audit and certification
 
 - [ ] **README Updated**
   - If APIs changed: README must reflect new endpoints/methods
-  - **Proof**: Git diff of README OR "No changes needed"
+- [ ] **Runbook Validation**
+  - Execute steps exactly as written in the guides (e.g., "Run X to do Y")
+  - Verify: Commands work, outputs match descriptions, no missing prerequisites
+  - **Proof**: Terminal output of the executed documented steps OR "No runbook steps to verify"
 
 **Exit Gate**: Documentation is complete and accurate.
 

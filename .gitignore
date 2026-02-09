@@ -60,6 +60,7 @@ replacements.txt
 # Secrets files (CRITICAL - contains API tokens)
 .secrets*
 *.backup
+temp-secrets-*.json
 
 
 # Generated environment files (recreated each deploy)

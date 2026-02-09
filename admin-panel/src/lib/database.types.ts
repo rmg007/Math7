@@ -108,43 +108,67 @@ export type Database = {
       }
       app_landing_pages: {
         Row: {
-          app_id: string
-          content: Json | null
-          created_at: string
-          features: Json | null
-          hero_headline: string | null
-          hero_subtext: string | null
-          meta_title: string | null
-          meta_description: string | null
+          app_id: string | null
+          benefits_json: Json | null
+          canonical_url: string | null
+          created_at: string | null
+          hero_cta_text: string | null
+          hero_headline: string
+          hero_image_url: string | null
+          hero_subheadline: string | null
           is_published: boolean | null
           landing_page_id: string
-          updated_at: string
+          meta_description: string
+          meta_title: string
+          og_image_url: string | null
+          pricing_json: Json | null
+          published_at: string | null
+          schema_org_json: Json | null
+          syllabus_json: Json | null
+          testimonials_json: Json | null
+          updated_at: string | null
         }
         Insert: {
-          app_id: string
-          content?: Json | null
-          created_at?: string
-          features?: Json | null
-          hero_headline?: string | null
-          hero_subtext?: string | null
-          meta_title?: string | null
-          meta_description?: string | null
+          app_id?: string | null
+          benefits_json?: Json | null
+          canonical_url?: string | null
+          created_at?: string | null
+          hero_cta_text?: string | null
+          hero_headline: string
+          hero_image_url?: string | null
+          hero_subheadline?: string | null
           is_published?: boolean | null
           landing_page_id?: string
-          updated_at?: string
+          meta_description: string
+          meta_title: string
+          og_image_url?: string | null
+          pricing_json?: Json | null
+          published_at?: string | null
+          schema_org_json?: Json | null
+          syllabus_json?: Json | null
+          testimonials_json?: Json | null
+          updated_at?: string | null
         }
         Update: {
-          app_id?: string
-          content?: Json | null
-          created_at?: string
-          features?: Json | null
-          hero_headline?: string | null
-          hero_subtext?: string | null
-          meta_title?: string | null
-          meta_description?: string | null
+          app_id?: string | null
+          benefits_json?: Json | null
+          canonical_url?: string | null
+          created_at?: string | null
+          hero_cta_text?: string | null
+          hero_headline?: string
+          hero_image_url?: string | null
+          hero_subheadline?: string | null
           is_published?: boolean | null
           landing_page_id?: string
-          updated_at?: string
+          meta_description?: string
+          meta_title?: string
+          og_image_url?: string | null
+          pricing_json?: Json | null
+          published_at?: string | null
+          schema_org_json?: Json | null
+          syllabus_json?: Json | null
+          testimonials_json?: Json | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -156,42 +180,96 @@ export type Database = {
           },
         ]
       }
-      apps: {
+      approval_workflows: {
         Row: {
-          app_id: string
-          color_hex: string | null
+          assigned_to: string | null
+          comments: string | null
           created_at: string
-          display_name: string
-          grade_level: string | null
-          grade_number: number | null
-          is_active: boolean
-          subject_id: string
-          subdomain: string
+          id: string
+          metadata: Json
+          session_id: string
+          stage: string
+          status: string
           updated_at: string
         }
         Insert: {
-          app_id?: string
-          color_hex?: string | null
+          assigned_to?: string | null
+          comments?: string | null
           created_at?: string
-          display_name: string
-          grade_level?: string | null
-          grade_number?: number | null
-          is_active?: boolean
-          subject_id: string
-          subdomain: string
+          id?: string
+          metadata?: Json
+          session_id: string
+          stage: string
+          status?: string
           updated_at?: string
         }
         Update: {
-          app_id?: string
-          color_hex?: string | null
+          assigned_to?: string | null
+          comments?: string | null
           created_at?: string
-          display_name?: string
-          grade_level?: string | null
-          grade_number?: number | null
-          is_active?: boolean
-          subject_id?: string
-          subdomain?: string
+          id?: string
+          metadata?: Json
+          session_id?: string
+          stage?: string
+          status?: string
           updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_workflows_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_workflows_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ai_generation_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apps: {
+        Row: {
+          app_id: string
+          created_at: string | null
+          display_name: string
+          full_domain: string | null
+          grade_level: string
+          grade_number: number | null
+          is_active: boolean | null
+          launch_date: string | null
+          subdomain: string
+          subject_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          app_id?: string
+          created_at?: string | null
+          display_name: string
+          full_domain?: string | null
+          grade_level: string
+          grade_number?: number | null
+          is_active?: boolean | null
+          launch_date?: string | null
+          subdomain: string
+          subject_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          app_id?: string
+          created_at?: string | null
+          display_name?: string
+          full_domain?: string | null
+          grade_level?: string
+          grade_number?: number | null
+          is_active?: boolean | null
+          launch_date?: string | null
+          subdomain?: string
+          subject_id?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -262,42 +340,42 @@ export type Database = {
       }
       attempts: {
         Row: {
-          answered: Json
           app_id: string | null
           created_at: string
+          deleted_at: string | null
           id: string
           is_correct: boolean
-          points_earned: number
           question_id: string
+          response: Json
           score_awarded: number
-          session_id: string | null
           time_spent_ms: number | null
+          updated_at: string
           user_id: string
         }
         Insert: {
-          answered: Json
           app_id?: string | null
           created_at?: string
-          id?: string
-          is_correct: boolean
-          points_earned?: number
-          question_id: string
-          score_awarded?: number
-          session_id?: string | null
-          time_spent_ms?: number | null
-          user_id: string
-        }
-        Update: {
-          answered?: Json
-          app_id?: string | null
-          created_at?: string
+          deleted_at?: string | null
           id?: string
           is_correct?: boolean
-          points_earned?: number
-          question_id?: string
+          question_id: string
+          response: Json
           score_awarded?: number
-          session_id?: string | null
           time_spent_ms?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          app_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_correct?: boolean
+          question_id?: string
+          response?: Json
+          score_awarded?: number
+          time_spent_ms?: number | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -324,28 +402,66 @@ export type Database = {
           },
         ]
       }
+      content_validation_rules: {
+        Row: {
+          app_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          params: Json
+          rule_type: string
+          updated_at: string
+        }
+        Insert: {
+          app_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          params?: Json
+          rule_type: string
+          updated_at?: string
+        }
+        Update: {
+          app_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          params?: Json
+          rule_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_validation_rules_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+        ]
+      }
       curriculum_meta: {
         Row: {
           app_id: string
-          created_at: string
+          id: string
           last_published_at: string | null
-          published_by: string | null
           updated_at: string
           version: number
         }
         Insert: {
           app_id: string
-          created_at?: string
+          id?: string
           last_published_at?: string | null
-          published_by?: string | null
           updated_at?: string
           version?: number
         }
         Update: {
           app_id?: string
-          created_at?: string
+          id?: string
           last_published_at?: string | null
-          published_by?: string | null
           updated_at?: string
           version?: number
         }
@@ -353,53 +469,56 @@ export type Database = {
           {
             foreignKeyName: "curriculum_meta_app_id_fkey"
             columns: ["app_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "apps"
             referencedColumns: ["app_id"]
-          },
-          {
-            foreignKeyName: "curriculum_meta_published_by_fkey"
-            columns: ["published_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
           },
         ]
       }
       curriculum_snapshots: {
         Row: {
-          id: string
-          version: number
-          content: Json
-          domains_count: number
-          skills_count: number
-          questions_count: number
-          published_at: string
+          app_id: string
+          content: Json | null
           created_at: string
+          domains_count: number
+          id: string
+          published_at: string
+          questions_count: number
+          skills_count: number
+          version: number
         }
         Insert: {
-          id?: string
-          version: number
-          content: Json
-          domains_count?: number
-          skills_count?: number
-          questions_count?: number
-          published_at?: string
+          app_id: string
+          content?: Json | null
           created_at?: string
+          domains_count?: number
+          id?: string
+          published_at?: string
+          questions_count?: number
+          skills_count?: number
+          version: number
         }
         Update: {
-          id?: string
-          version?: number
-          content?: Json
-          domains_count?: number
-          skills_count?: number
-          questions_count?: number
-          published_at?: string
+          app_id?: string
+          content?: Json | null
           created_at?: string
+          domains_count?: number
+          id?: string
+          published_at?: string
+          questions_count?: number
+          skills_count?: number
+          version?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_snapshots_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+        ]
       }
-
       domains: {
         Row: {
           app_id: string
@@ -407,11 +526,12 @@ export type Database = {
           deleted_at: string | null
           description: string | null
           domain_id: string
-          title: string
+          is_published: boolean
           slug: string
-          sort_order: number | null
-          status: Database["public"]["Enums"]["curriculum_status"] | null
+          sort_order: number
+          status: Database["public"]["Enums"]["curriculum_status"]
           subject_id: string | null
+          title: string
           updated_at: string
         }
         Insert: {
@@ -420,11 +540,12 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           domain_id?: string
-          title: string
+          is_published?: boolean
           slug: string
-          sort_order?: number | null
-          status?: Database["public"]["Enums"]["curriculum_status"] | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["curriculum_status"]
           subject_id?: string | null
+          title: string
           updated_at?: string
         }
         Update: {
@@ -433,11 +554,12 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           domain_id?: string
-          title?: string
+          is_published?: boolean
           slug?: string
-          sort_order?: number | null
-          status?: Database["public"]["Enums"]["curriculum_status"] | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["curriculum_status"]
           subject_id?: string | null
+          title?: string
           updated_at?: string
         }
         Relationships: [
@@ -454,6 +576,110 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "subjects"
             referencedColumns: ["subject_id"]
+          },
+        ]
+      }
+      error_logs: {
+        Row: {
+          alert_sent: boolean | null
+          app_id: string | null
+          app_version: string | null
+          created_at: string | null
+          error_message: string
+          error_type: string
+          extra_context: Json | null
+          id: string
+          occurred_at: string | null
+          platform: string
+          promoted_to_issue_id: string | null
+          stack_trace: string | null
+          status: string
+          url: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          alert_sent?: boolean | null
+          app_id?: string | null
+          app_version?: string | null
+          created_at?: string | null
+          error_message: string
+          error_type: string
+          extra_context?: Json | null
+          id?: string
+          occurred_at?: string | null
+          platform: string
+          promoted_to_issue_id?: string | null
+          stack_trace?: string | null
+          status?: string
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          alert_sent?: boolean | null
+          app_id?: string | null
+          app_version?: string | null
+          created_at?: string | null
+          error_message?: string
+          error_type?: string
+          extra_context?: Json | null
+          id?: string
+          occurred_at?: string | null
+          platform?: string
+          promoted_to_issue_id?: string | null
+          stack_trace?: string | null
+          status?: string
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "error_logs_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+          {
+            foreignKeyName: "error_logs_promoted_to_issue_id_fkey"
+            columns: ["promoted_to_issue_id"]
+            isOneToOne: false
+            referencedRelation: "known_issues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      generation_audit_log: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generation_audit_log_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ai_generation_sessions"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -501,28 +727,25 @@ export type Database = {
       }
       group_members: {
         Row: {
-          anonymous_device_id: string | null
           group_id: string
-          id: string
-          joined_at: string | null
+          is_anonymous: boolean | null
+          joined_at: string
           nickname: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
-          anonymous_device_id?: string | null
           group_id: string
-          id?: string
-          joined_at?: string | null
+          is_anonymous?: boolean | null
+          joined_at?: string
           nickname?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
-          anonymous_device_id?: string | null
           group_id?: string
-          id?: string
-          joined_at?: string | null
+          is_anonymous?: boolean | null
+          joined_at?: string
           nickname?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -543,40 +766,46 @@ export type Database = {
       }
       groups: {
         Row: {
-          allow_anonymous: boolean | null
+          allow_anonymous_join: boolean | null
           app_id: string | null
-          created_at: string | null
+          code_expires_at: string | null
+          created_at: string
           id: string
           join_code: string
           name: string
           owner_id: string
           requires_approval: boolean
+          settings: Json | null
           type: Database["public"]["Enums"]["group_type"]
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
-          allow_anonymous?: boolean | null
+          allow_anonymous_join?: boolean | null
           app_id?: string | null
-          created_at?: string | null
+          code_expires_at?: string | null
+          created_at?: string
           id?: string
           join_code: string
           name: string
           owner_id: string
           requires_approval?: boolean
-          type?: Database["public"]["Enums"]["group_type"]
-          updated_at?: string | null
+          settings?: Json | null
+          type: Database["public"]["Enums"]["group_type"]
+          updated_at?: string
         }
         Update: {
-          allow_anonymous?: boolean | null
+          allow_anonymous_join?: boolean | null
           app_id?: string | null
-          created_at?: string | null
+          code_expires_at?: string | null
+          created_at?: string
           id?: string
           join_code?: string
           name?: string
           owner_id?: string
           requires_approval?: boolean
+          settings?: Json | null
           type?: Database["public"]["Enums"]["group_type"]
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -595,6 +824,169 @@ export type Database = {
           },
         ]
       }
+      invitation_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+          times_used: number | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          times_used?: number | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          times_used?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitation_codes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_metrics: {
+        Row: {
+          complexity_score: number | null
+          file_count: number | null
+          id: string
+          language: string
+          last_analyzed_at: string | null
+          lines_of_code: number | null
+          project_name: string
+        }
+        Insert: {
+          complexity_score?: number | null
+          file_count?: number | null
+          id?: string
+          language: string
+          last_analyzed_at?: string | null
+          lines_of_code?: number | null
+          project_name: string
+        }
+        Update: {
+          complexity_score?: number | null
+          file_count?: number | null
+          id?: string
+          language?: string
+          last_analyzed_at?: string | null
+          lines_of_code?: number | null
+          project_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_metrics_project_name_fkey"
+            columns: ["project_name"]
+            isOneToOne: false
+            referencedRelation: "kb_registry"
+            referencedColumns: ["name"]
+          },
+        ]
+      }
+      kb_registry: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          error_message: string | null
+          id: string
+          last_deployed_at: string | null
+          live_url: string | null
+          name: string
+          platform: string
+          status: string | null
+          tech_stack: Json | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          error_message?: string | null
+          id?: string
+          last_deployed_at?: string | null
+          live_url?: string | null
+          name: string
+          platform: string
+          status?: string | null
+          tech_stack?: Json | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          error_message?: string | null
+          id?: string
+          last_deployed_at?: string | null
+          live_url?: string | null
+          name?: string
+          platform?: string
+          status?: string | null
+          tech_stack?: Json | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      knowledge_chunks: {
+        Row: {
+          breadcrumb: string | null
+          content: string
+          content_hash: string
+          created_at: string | null
+          file_path: string
+          id: string
+          metadata: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          breadcrumb?: string | null
+          content: string
+          content_hash: string
+          created_at?: string | null
+          file_path: string
+          id?: string
+          metadata?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          breadcrumb?: string | null
+          content?: string
+          content_hash?: string
+          created_at?: string | null
+          file_path?: string
+          id?: string
+          metadata?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       known_issues: {
         Row: {
           created_at: string | null
@@ -605,8 +997,8 @@ export type Database = {
           resolution: string | null
           root_cause: string | null
           sentry_link: string | null
-          severity: string | null
-          status: string | null
+          severity: string
+          status: string
           title: string
           updated_at: string | null
         }
@@ -619,8 +1011,8 @@ export type Database = {
           resolution?: string | null
           root_cause?: string | null
           sentry_link?: string | null
-          severity?: string | null
-          status?: string | null
+          severity?: string
+          status?: string
           title: string
           updated_at?: string | null
         }
@@ -633,10 +1025,46 @@ export type Database = {
           resolution?: string | null
           root_cause?: string | null
           sentry_link?: string | null
-          severity?: string | null
-          status?: string | null
+          severity?: string
+          status?: string
           title?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      outbox: {
+        Row: {
+          action: string
+          created_at: string
+          error_message: string | null
+          id: string
+          payload: Json
+          record_id: string
+          retry_count: number
+          synced_at: string | null
+          table_name: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payload: Json
+          record_id: string
+          retry_count?: number
+          synced_at?: string | null
+          table_name: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payload?: Json
+          record_id?: string
+          retry_count?: number
+          synced_at?: string | null
+          table_name?: string
         }
         Relationships: []
       }
@@ -687,48 +1115,52 @@ export type Database = {
       questions: {
         Row: {
           app_id: string
+          content: string
           created_at: string
           deleted_at: string | null
           explanation: string | null
-          metadata: Json | null
-          options: Json | null
+          is_published: boolean
+          options: Json
           points: number
           question_id: string
-          content: string
           skill_id: string
-          solution: Json | null
+          solution: Json
           sort_order: number | null
-          status: Database["public"]["Enums"]["curriculum_status"] | null
+          status: Database["public"]["Enums"]["curriculum_status"]
           type: Database["public"]["Enums"]["question_type"]
           updated_at: string
         }
         Insert: {
           app_id: string
+          content: string
           created_at?: string
           deleted_at?: string | null
           explanation?: string | null
-          metadata?: Json | null
-          options?: Json | null
+          is_published?: boolean
+          options?: Json
+          points?: number
           question_id?: string
-          content: string
           skill_id: string
+          solution: Json
           sort_order?: number | null
-          status?: Database["public"]["Enums"]["curriculum_status"] | null
-          type: Database["public"]["Enums"]["question_type"]
+          status?: Database["public"]["Enums"]["curriculum_status"]
+          type?: Database["public"]["Enums"]["question_type"]
           updated_at?: string
         }
         Update: {
           app_id?: string
+          content?: string
           created_at?: string
           deleted_at?: string | null
           explanation?: string | null
-          metadata?: Json | null
-          options?: Json | null
+          is_published?: boolean
+          options?: Json
+          points?: number
           question_id?: string
-          content?: string
           skill_id?: string
+          solution?: Json
           sort_order?: number | null
-          status?: Database["public"]["Enums"]["curriculum_status"] | null
+          status?: Database["public"]["Enums"]["curriculum_status"]
           type?: Database["public"]["Enums"]["question_type"]
           updated_at?: string
         }
@@ -749,46 +1181,150 @@ export type Database = {
           },
         ]
       }
-      skill_progress: {
+      security_logs: {
         Row: {
-          correct_attempts: number | null
-          created_at: string
-          current_streak: number | null
+          app_id: string | null
+          created_at: string | null
+          event_type: string
           id: string
-          last_attempt_at: string | null
-          longest_streak: number | null
-          mastery_level: number | null
-          skill_id: string
-          total_attempts: number | null
-          total_points: number | null
+          ip_address: string | null
+          metadata: Json | null
+          severity: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          app_id?: string | null
+          created_at?: string | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          severity?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          app_id?: string | null
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          severity?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_logs_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+        ]
+      }
+      sessions: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          ended_at: string | null
+          id: string
+          questions_attempted: number
+          questions_correct: number
+          skill_id: string | null
+          started_at: string
+          total_time_ms: number
           updated_at: string
           user_id: string
         }
         Insert: {
-          correct_attempts?: number | null
           created_at?: string
-          current_streak?: number | null
+          deleted_at?: string | null
+          ended_at?: string | null
           id?: string
-          last_attempt_at?: string | null
-          longest_streak?: number | null
-          mastery_level?: number | null
-          skill_id: string
-          total_attempts?: number | null
-          total_points?: number | null
+          questions_attempted?: number
+          questions_correct?: number
+          skill_id?: string | null
+          started_at?: string
+          total_time_ms?: number
           updated_at?: string
-          user_id: string
+          user_id?: string
         }
         Update: {
-          correct_attempts?: number | null
           created_at?: string
-          current_streak?: number | null
+          deleted_at?: string | null
+          ended_at?: string | null
+          id?: string
+          questions_attempted?: number
+          questions_correct?: number
+          skill_id?: string | null
+          started_at?: string
+          total_time_ms?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["skill_id"]
+          },
+          {
+            foreignKeyName: "sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skill_progress: {
+        Row: {
+          correct_attempts: number
+          created_at: string
+          current_streak: number
+          deleted_at: string | null
+          id: string
+          last_attempt_at: string | null
+          longest_streak: number
+          mastery_level: number
+          skill_id: string
+          total_attempts: number
+          total_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          correct_attempts?: number
+          created_at?: string
+          current_streak?: number
+          deleted_at?: string | null
           id?: string
           last_attempt_at?: string | null
-          longest_streak?: number | null
-          mastery_level?: number | null
+          longest_streak?: number
+          mastery_level?: number
+          skill_id: string
+          total_attempts?: number
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          correct_attempts?: number
+          created_at?: string
+          current_streak?: number
+          deleted_at?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          longest_streak?: number
+          mastery_level?: number
           skill_id?: string
-          total_attempts?: number | null
-          total_points?: number | null
+          total_attempts?: number
+          total_points?: number
           updated_at?: string
           user_id?: string
         }
@@ -816,12 +1352,13 @@ export type Database = {
           deleted_at: string | null
           description: string | null
           difficulty_level: number | null
-          domain_id: string | null
-          title: string
+          domain_id: string
+          is_published: boolean
           skill_id: string
           slug: string
-          sort_order: number | null
-          status: Database["public"]["Enums"]["curriculum_status"] | null
+          sort_order: number
+          status: Database["public"]["Enums"]["curriculum_status"]
+          title: string
           updated_at: string
         }
         Insert: {
@@ -829,12 +1366,14 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           description?: string | null
-          domain_id?: string | null
-          title: string
+          difficulty_level?: number | null
+          domain_id: string
+          is_published?: boolean
           skill_id?: string
           slug: string
-          sort_order?: number | null
-          status?: Database["public"]["Enums"]["curriculum_status"] | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["curriculum_status"]
+          title: string
           updated_at?: string
         }
         Update: {
@@ -842,12 +1381,14 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           description?: string | null
-          domain_id?: string | null
-          title?: string
+          difficulty_level?: number | null
+          domain_id?: string
+          is_published?: boolean
           skill_id?: string
           slug?: string
-          sort_order?: number | null
-          status?: Database["public"]["Enums"]["curriculum_status"] | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["curriculum_status"]
+          title?: string
           updated_at?: string
         }
         Relationships: [
@@ -869,44 +1410,203 @@ export type Database = {
       }
       source_documents: {
         Row: {
-          app_id: string
-          content_extraction_status: string | null
+          app_id: string | null
           created_at: string
-          file_name: string
-          file_path: string
-          file_size: number | null
+          deleted_at: string | null
+          error_message: string | null
+          extracted_text: string | null
+          file_size: number
+          filename: string
           id: string
-          metadata: Json | null
-          mime_type: string | null
+          mime_type: string
+          page_count: number | null
+          status: string | null
+          storage_path: string
           updated_at: string
+          uploaded_by: string
         }
         Insert: {
-          app_id: string
-          content_extraction_status?: string | null
+          app_id?: string | null
           created_at?: string
-          file_name: string
-          file_path: string
-          file_size?: number | null
+          deleted_at?: string | null
+          error_message?: string | null
+          extracted_text?: string | null
+          file_size: number
+          filename: string
           id?: string
-          metadata?: Json | null
-          mime_type?: string | null
+          mime_type: string
+          page_count?: number | null
+          status?: string | null
+          storage_path: string
           updated_at?: string
+          uploaded_by: string
         }
         Update: {
-          app_id?: string
-          content_extraction_status?: string | null
+          app_id?: string | null
           created_at?: string
-          file_name?: string
-          file_path?: string
-          file_size?: number | null
+          deleted_at?: string | null
+          error_message?: string | null
+          extracted_text?: string | null
+          file_size?: number
+          filename?: string
           id?: string
-          metadata?: Json | null
-          mime_type?: string | null
+          mime_type?: string
+          page_count?: number | null
+          status?: string | null
+          storage_path?: string
           updated_at?: string
+          uploaded_by?: string
         }
         Relationships: [
           {
             foreignKeyName: "source_documents_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+          {
+            foreignKeyName: "source_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spec_validations: {
+        Row: {
+          app_id: string
+          created_at: string | null
+          failed_checks: number | null
+          findings: Json | null
+          git_branch: string | null
+          git_commit: string | null
+          id: string
+          passed_checks: number | null
+          pr_number: number | null
+          scope: string | null
+          severity: string | null
+          spec_id: string | null
+          status: string
+          target_entity: string
+          total_checks: number | null
+          triggered_by: string | null
+          triggered_by_user: string | null
+          validation_type: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string | null
+          failed_checks?: number | null
+          findings?: Json | null
+          git_branch?: string | null
+          git_commit?: string | null
+          id?: string
+          passed_checks?: number | null
+          pr_number?: number | null
+          scope?: string | null
+          severity?: string | null
+          spec_id?: string | null
+          status: string
+          target_entity: string
+          total_checks?: number | null
+          triggered_by?: string | null
+          triggered_by_user?: string | null
+          validation_type: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string | null
+          failed_checks?: number | null
+          findings?: Json | null
+          git_branch?: string | null
+          git_commit?: string | null
+          id?: string
+          passed_checks?: number | null
+          pr_number?: number | null
+          scope?: string | null
+          severity?: string | null
+          spec_id?: string | null
+          status?: string
+          target_entity?: string
+          total_checks?: number | null
+          triggered_by?: string | null
+          triggered_by_user?: string | null
+          validation_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spec_validations_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+          {
+            foreignKeyName: "spec_validations_spec_id_fkey"
+            columns: ["spec_id"]
+            isOneToOne: false
+            referencedRelation: "specifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      specifications: {
+        Row: {
+          app_id: string
+          author: string | null
+          created_at: string | null
+          deleted_at: string | null
+          embedding: string | null
+          entity_name: string
+          entity_type: string
+          id: string
+          requirements: Json | null
+          scope: string | null
+          source_file: string | null
+          spec_content: string
+          status: string | null
+          updated_at: string | null
+          version: number | null
+        }
+        Insert: {
+          app_id: string
+          author?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          embedding?: string | null
+          entity_name: string
+          entity_type: string
+          id?: string
+          requirements?: Json | null
+          scope?: string | null
+          source_file?: string | null
+          spec_content: string
+          status?: string | null
+          updated_at?: string | null
+          version?: number | null
+        }
+        Update: {
+          app_id?: string
+          author?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          embedding?: string | null
+          entity_name?: string
+          entity_type?: string
+          id?: string
+          requirements?: Json | null
+          scope?: string | null
+          source_file?: string | null
+          spec_content?: string
+          status?: string | null
+          updated_at?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "specifications_app_id_fkey"
             columns: ["app_id"]
             isOneToOne: false
             referencedRelation: "apps"
@@ -951,68 +1651,354 @@ export type Database = {
       }
       subjects: {
         Row: {
-          created_at: string
+          color_hex: string | null
+          created_at: string | null
           description: string | null
           display_order: number | null
-          icon_name: string | null
+          icon_url: string | null
+          launch_date: string | null
           name: string
           slug: string
+          status: string | null
           subject_id: string
-          color_hex: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          color_hex?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon_url?: string | null
+          launch_date?: string | null
+          name: string
+          slug: string
+          status?: string | null
+          subject_id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          color_hex?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon_url?: string | null
+          launch_date?: string | null
+          name?: string
+          slug?: string
+          status?: string | null
+          subject_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      sync_meta: {
+        Row: {
+          last_synced_at: string
+          sync_version: number
+          table_name: string
           updated_at: string
         }
         Insert: {
-          created_at?: string
-          description?: string | null
-          display_order?: number | null
-          icon_name?: string | null
-          name: string
-          slug: string
-          subject_id?: string
-          color_hex?: string | null
+          last_synced_at?: string
+          sync_version?: number
+          table_name: string
           updated_at?: string
         }
         Update: {
-          created_at?: string
-          description?: string | null
-          display_order?: number | null
-          icon_name?: string | null
-          name?: string
-          slug?: string
-          subject_id?: string
-          color_hex?: string | null
+          last_synced_at?: string
+          sync_version?: number
+          table_name?: string
           updated_at?: string
         }
         Relationships: []
       }
+      tenant_quotas: {
+        Row: {
+          app_id: string
+          created_at: string
+          current_token_usage: number
+          id: string
+          is_throttled: boolean
+          last_reset_date: string
+          monthly_token_limit: number
+          updated_at: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          current_token_usage?: number
+          id?: string
+          is_throttled?: boolean
+          last_reset_date?: string
+          monthly_token_limit?: number
+          updated_at?: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          current_token_usage?: number
+          id?: string
+          is_throttled?: boolean
+          last_reset_date?: string
+          monthly_token_limit?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_quotas_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: true
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+        ]
+      }
+      user_subscriptions: {
+        Row: {
+          access_level: string | null
+          app_id: string | null
+          enrolled_at: string | null
+          expires_at: string | null
+          last_accessed_at: string | null
+          subscription_id: string
+          user_id: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          app_id?: string | null
+          enrolled_at?: string | null
+          expires_at?: string | null
+          last_accessed_at?: string | null
+          subscription_id?: string
+          user_id?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          app_id?: string | null
+          enrolled_at?: string | null
+          expires_at?: string | null
+          last_accessed_at?: string | null
+          subscription_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      critical_spec_failures: {
+        Row: {
+          app_id: string | null
+          app_name: string | null
+          created_at: string | null
+          entity_name: string | null
+          entity_type: string | null
+          findings: Json | null
+          git_commit: string | null
+          id: string | null
+          pr_number: number | null
+          severity: string | null
+          status: string | null
+          target_entity: string | null
+          validation_type: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spec_validations_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+        ]
+      }
     }
     Functions: {
-      consume_tenant_tokens: {
-        Args: {
-          p_app_id: string
-          p_token_count: number
+      batch_submit_attempts: {
+        Args: { attempts_json: Json }
+        Returns: {
+          app_id: string | null
+          created_at: string
+          deleted_at: string | null
+          id: string
+          is_correct: boolean
+          question_id: string
+          response: Json
+          score_awarded: number
+          time_spent_ms: number | null
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "attempts"
+          isOneToOne: false
+          isSetofReturn: true
         }
+      }
+      consume_tenant_tokens: {
+        Args: { p_app_id: string; p_token_count: number }
         Returns: Json
+      }
+      current_app_id: { Args: never; Returns: string }
+      custom_access_token_hook: { Args: { event: Json }; Returns: Json }
+      deactivate_invitation_code: {
+        Args: { p_code_id: string }
+        Returns: boolean
+      }
+      deactivate_own_account: { Args: never; Returns: undefined }
+      delete_chunks_by_file: {
+        Args: { target_file_path: string }
+        Returns: number
+      }
+      delete_own_account: { Args: never; Returns: undefined }
+      end_session: {
+        Args: { session_id: string }
+        Returns: {
+          created_at: string
+          deleted_at: string | null
+          ended_at: string | null
+          id: string
+          questions_attempted: number
+          questions_correct: number
+          skill_id: string | null
+          started_at: string
+          total_time_ms: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "sessions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      generate_invitation_code: {
+        Args: { p_expires_days?: number; p_max_uses?: number }
+        Returns: string
+      }
+      get_ai_system_summary: {
+        Args: never
+        Returns: {
+          active_projects: string[]
+          platform_distribution: Json
+          total_apps: number
+          total_loc: number
+        }[]
+      }
+      get_my_group_memberships: { Args: never; Returns: string[] }
+      get_table_schema: { Args: { p_table_name: string }; Returns: Json }
+      get_user_progress_summary: { Args: never; Returns: Json }
+      is_admin: { Args: never; Returns: boolean }
+      is_tenant_admin: { Args: never; Returns: boolean }
+      join_group_by_code: { Args: { code: string }; Returns: Json }
+      join_group_via_code: { Args: { join_code_input: string }; Returns: Json }
+      jwt_is_admin: { Args: never; Returns: boolean }
+      jwt_is_mentor: { Args: never; Returns: boolean }
+      jwt_is_super_admin: { Args: never; Returns: boolean }
+      log_error: {
+        Args: {
+          p_app_id?: string
+          p_app_version?: string
+          p_error_message: string
+          p_error_type: string
+          p_extra_context?: Json
+          p_platform: string
+          p_stack_trace?: string
+          p_url?: string
+          p_user_agent?: string
+        }
+        Returns: string
       }
       log_security_event: {
         Args: {
+          p_app_id?: string
           p_event_type: string
+          p_location?: string
+          p_metadata?: Json
           p_severity: string
-          p_metadata: Json
-          p_app_id: string | null
-          p_location: string | null
         }
-        Returns: boolean
+        Returns: undefined
       }
-      publish_curriculum: {
+      mark_session_imported: {
+        Args: { p_imported_count: number; p_session_id: string }
+        Returns: undefined
+      }
+      promote_error_to_issue: {
         Args: {
-          p_app_id: string
+          p_error_id: string
+          p_resolution?: string
+          p_root_cause?: string
+          p_title: string
         }
+        Returns: string
+      }
+      prune_old_error_logs: { Args: never; Returns: number }
+      publish_curriculum: { Args: { p_app_id?: string }; Returns: Json }
+      pull_changes: {
+        Args: { last_sync_time: string; table_name: string }
         Returns: Json
       }
+      recover_student_identity: {
+        Args: { recovery_phrase: string }
+        Returns: string
+      }
+      start_session: {
+        Args: { session_type?: string }
+        Returns: {
+          created_at: string
+          deleted_at: string | null
+          ended_at: string | null
+          id: string
+          questions_attempted: number
+          questions_correct: number
+          skill_id: string | null
+          started_at: string
+          total_time_ms: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "sessions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      submit_attempt_and_update_progress: {
+        Args: { attempts_json: Json }
+        Returns: {
+          correct_attempts: number
+          created_at: string
+          current_streak: number
+          deleted_at: string | null
+          id: string
+          last_attempt_at: string | null
+          longest_streak: number
+          mastery_level: number
+          skill_id: string
+          total_attempts: number
+          total_points: number
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "skill_progress"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      use_invitation_code: { Args: { p_code: string }; Returns: boolean }
+      validate_invitation_code: { Args: { p_code: string }; Returns: boolean }
     }
     Enums: {
       assignment_scope: "mandatory" | "suggested"
@@ -1034,24 +2020,33 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
-type DefaultSchema = DatabaseWithoutInternals["public"]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
-  TableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends TableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-    ? keyof DatabaseWithoutInternals[TableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = TableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? DatabaseWithoutInternals[TableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : TableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][TableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -1059,20 +2054,24 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  TableNameOrOptions extends
+  DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends TableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-    ? keyof DatabaseWithoutInternals[TableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = TableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? DatabaseWithoutInternals[TableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : TableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][TableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -1080,20 +2079,24 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  TableNameOrOptions extends
+  DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends TableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-    ? keyof DatabaseWithoutInternals[TableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = TableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? DatabaseWithoutInternals[TableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : TableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][TableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U

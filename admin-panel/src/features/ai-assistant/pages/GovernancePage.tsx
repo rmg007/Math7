@@ -28,6 +28,8 @@ interface TenantUsage {
   total_questions: number;
   session_count: number;
   last_active: string;
+  is_throttled?: boolean; // Added from codescene-init context
+  monthly_token_limit?: number; // Added from codescene-init context
 }
 
 export const GovernancePage: React.FC = () => {
@@ -45,7 +47,6 @@ export const GovernancePage: React.FC = () => {
     setIsLoading(true);
     try {
       // Fetch sessions with creator info to link to apps
-      // We need to know which app generated the content
       const { data, error } = await supabase
         .from('ai_generation_sessions')
         .select(`
@@ -63,15 +64,11 @@ export const GovernancePage: React.FC = () => {
       if (error) throw error;
 
       // Aggregate data by App ID
-       
       const aggMap = new Map<string, TenantUsage>();
-
       const sessions = (data as unknown) as AIGenerationSession[];
 
       sessions.forEach(session => {
-        // Safe navigation for deep nested optional properties
         const profile = session.created_by_profile;
-        // The type definition might be slightly off due to the join, casting for simplicity in this MVP
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const appName = (profile as any)?.apps?.display_name || 'Unknown App';
         const appId = profile?.app_id || 'unknown';
@@ -91,7 +88,7 @@ export const GovernancePage: React.FC = () => {
         entry.total_tokens += session.token_count || 0;
         entry.total_questions += session.questions_generated || 0;
         entry.session_count += 1;
-        // Since we ordered by desc, the first one encountered is the latest (or we can compare)
+        
         if (new Date(session.created_at) > new Date(entry.last_active)) {
           entry.last_active = session.created_at;
         }
@@ -186,9 +183,12 @@ export const GovernancePage: React.FC = () => {
                          </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="flex items-center gap-1.5 px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase">
+                        <span className={cn(
+                          "flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold rounded-full uppercase",
+                          usage.is_throttled ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
+                        )}>
                            <Activity className="w-3 h-3" />
-                           Active
+                           {usage.is_throttled ? 'Throttled' : 'Active'}
                         </span>
                       </div>
                     </div>
@@ -239,9 +239,7 @@ export const GovernancePage: React.FC = () => {
             </p>
           </div>
         </div>
-
       </div>
     </div>
   );
 };
-

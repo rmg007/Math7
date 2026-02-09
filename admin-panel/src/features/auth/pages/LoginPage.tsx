@@ -10,6 +10,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Label } from "@/components/ui/label"
 import { Rocket, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react"
 import { SecurityLogger } from "@/services/SecurityLogger"
+import { setUser } from "@/lib/monitoring"
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -58,10 +59,8 @@ export function LoginPage() {
     } else {
       await SecurityLogger.logLogin(authData.user.id);
       
-      // Sync Sentry User (Lazy)
-      import('@/lib/monitoring').then(({ setUser }) => {
-        setUser(authData.user.id, data.email);
-      });
+      // Sync Sentry User
+      setUser(authData.user.id, data.email);
 
       navigate("/")
     }

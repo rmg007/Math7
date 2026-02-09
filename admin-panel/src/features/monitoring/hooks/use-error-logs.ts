@@ -23,7 +23,6 @@ export function useErrorLogs(status?: string) {
   return useQuery({
     queryKey: ['error-logs', status],
     queryFn: async () => {
-      // Use type assertion until database types are regenerated
       let query = supabase
         .from('error_logs' as never)
         .select('*')
@@ -75,6 +74,25 @@ export function useUpdateErrorStatus() {
       const { error } = await supabase
         .from('error_logs' as never)
         .update({ status } as never)
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['error-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['error-log-stats'] });
+    },
+  });
+}
+
+export function useDeleteErrorLog() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('error_logs' as never)
+        .delete()
         .eq('id', id);
 
       if (error) throw error;

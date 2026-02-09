@@ -7,21 +7,21 @@ INSERT INTO kb_registry (name, type, platform, tech_stack)
                 tech_stack = EXCLUDED.tech_stack,
                 updated_at = NOW();
 INSERT INTO kb_registry (name, type, platform, tech_stack) 
-             VALUES ('questerix-student', 'app', 'cloudflare-pages', '{"target":"web","framework":"flutter"}') 
+             VALUES ('questerix-student', 'app', 'cloudflare-pages', '{"framework":"flutter","target":"web"}') 
              ON CONFLICT (name) DO UPDATE SET 
                 type = EXCLUDED.type, 
                 platform = EXCLUDED.platform, 
                 tech_stack = EXCLUDED.tech_stack,
                 updated_at = NOW();
 INSERT INTO kb_registry (name, type, platform, tech_stack) 
-             VALUES ('questerix-landing', 'app', 'cloudflare-pages', '{"framework":"react","build":"vite"}') 
+             VALUES ('questerix-landing (DISABLED - NEVER DEPLOY)', 'app', 'cloudflare-pages', '{"framework":"react","build":"vite"}') 
              ON CONFLICT (name) DO UPDATE SET 
                 type = EXCLUDED.type, 
                 platform = EXCLUDED.platform, 
                 tech_stack = EXCLUDED.tech_stack,
                 updated_at = NOW();
 INSERT INTO kb_registry (name, type, platform, tech_stack) 
-             VALUES ('questerix-backend', 'service', 'supabase', '{"database":"postgresql","rls":"enabled"}') 
+             VALUES ('questerix-backend', 'service', 'supabase', '{"rls":"enabled","database":"postgresql"}') 
              ON CONFLICT (name) DO UPDATE SET 
                 type = EXCLUDED.type, 
                 platform = EXCLUDED.platform, 
@@ -42,43 +42,37 @@ INSERT INTO kb_registry (name, type, platform, tech_stack)
                 tech_stack = EXCLUDED.tech_stack,
                 updated_at = NOW();
 INSERT INTO kb_metrics (project_name, language, lines_of_code, file_count)
-                     VALUES ('questerix-admin', 'sql', 65, 1)
+                     VALUES ('questerix-admin', 'sql', 35, 1)
                      ON CONFLICT (project_name, language) DO UPDATE SET
                         lines_of_code = EXCLUDED.lines_of_code,
                         file_count = EXCLUDED.file_count,
                         last_analyzed_at = NOW();
 INSERT INTO kb_metrics (project_name, language, lines_of_code, file_count)
-                     VALUES ('questerix-admin', 'typescript', 14144, 94)
+                     VALUES ('questerix-admin', 'typescript', 18153, 116)
                      ON CONFLICT (project_name, language) DO UPDATE SET
                         lines_of_code = EXCLUDED.lines_of_code,
                         file_count = EXCLUDED.file_count,
                         last_analyzed_at = NOW();
 INSERT INTO kb_metrics (project_name, language, lines_of_code, file_count)
-                     VALUES ('questerix-student', 'dart', 17051, 69)
+                     VALUES ('questerix-student', 'dart', 18284, 77)
                      ON CONFLICT (project_name, language) DO UPDATE SET
                         lines_of_code = EXCLUDED.lines_of_code,
                         file_count = EXCLUDED.file_count,
                         last_analyzed_at = NOW();
 INSERT INTO kb_metrics (project_name, language, lines_of_code, file_count)
-                     VALUES ('questerix-landing', 'typescript', 3345, 21)
+                     VALUES ('questerix-landing (DISABLED - NEVER DEPLOY)', 'typescript', 3345, 21)
                      ON CONFLICT (project_name, language) DO UPDATE SET
                         lines_of_code = EXCLUDED.lines_of_code,
                         file_count = EXCLUDED.file_count,
                         last_analyzed_at = NOW();
 INSERT INTO kb_metrics (project_name, language, lines_of_code, file_count)
-                     VALUES ('questerix-backend', 'sql', 3533, 46)
+                     VALUES ('questerix-backend', 'sql', 5855, 64)
                      ON CONFLICT (project_name, language) DO UPDATE SET
                         lines_of_code = EXCLUDED.lines_of_code,
                         file_count = EXCLUDED.file_count,
                         last_analyzed_at = NOW();
 INSERT INTO kb_metrics (project_name, language, lines_of_code, file_count)
-                     VALUES ('questerix-backend', 'typescript', 215, 2)
-                     ON CONFLICT (project_name, language) DO UPDATE SET
-                        lines_of_code = EXCLUDED.lines_of_code,
-                        file_count = EXCLUDED.file_count,
-                        last_analyzed_at = NOW();
-INSERT INTO kb_metrics (project_name, language, lines_of_code, file_count)
-                     VALUES ('project-oracle', 'typescript', 498, 8)
+                     VALUES ('questerix-backend', 'typescript', 748, 6)
                      ON CONFLICT (project_name, language) DO UPDATE SET
                         lines_of_code = EXCLUDED.lines_of_code,
                         file_count = EXCLUDED.file_count,
@@ -90,7 +84,13 @@ INSERT INTO kb_metrics (project_name, language, lines_of_code, file_count)
                         file_count = EXCLUDED.file_count,
                         last_analyzed_at = NOW();
 INSERT INTO kb_metrics (project_name, language, lines_of_code, file_count)
-                     VALUES ('questerix-domain', 'dart', 1654, 21)
+                     VALUES ('project-oracle', 'typescript', 659, 9)
+                     ON CONFLICT (project_name, language) DO UPDATE SET
+                        lines_of_code = EXCLUDED.lines_of_code,
+                        file_count = EXCLUDED.file_count,
+                        last_analyzed_at = NOW();
+INSERT INTO kb_metrics (project_name, language, lines_of_code, file_count)
+                     VALUES ('questerix-domain', 'dart', 1648, 21)
                      ON CONFLICT (project_name, language) DO UPDATE SET
                         lines_of_code = EXCLUDED.lines_of_code,
                         file_count = EXCLUDED.file_count,

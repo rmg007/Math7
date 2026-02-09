@@ -1,17 +1,7 @@
 [
   {
-    "description": "Stage all changes",
-    "command": "git add .",
-    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
-  },
-  {
-    "description": "Commit changes",
-    "command": "git commit -m \"docs: optimize agent documentation architecture (Context Map, Constitution)\"",
-    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
-  },
-  {
-    "description": "Push changes to remote",
-    "command": "git push",
+    "description": "Consolidated merge of codescene-init",
+    "command": "echo 'Merge completed'",
     "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
   }
 ]

@@ -45,8 +45,49 @@ export function useCurriculumMeta() {
         .eq('app_id', currentApp.app_id)  // FIX: Tenant-scoped
         .single();
       
-      if (error && error.code !== 'PGRST116') throw error; // Ignore not found
+      if (error && error.code !== 'PGRST116') {
+        console.warn('Error fetching curriculum meta:', error.message || error);
+        throw error;
+      }
       return data as CurriculumMeta ?? { version: 0, last_published_at: null };
+    },
+    enabled: Boolean(currentApp?.app_id),
+  });
+}
+
+export function usePaginatedPublishHistory(params: {
+  page: number;
+  pageSize: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}) {
+  const { currentApp } = useApp();
+
+  return useQuery({
+    queryKey: ['publish-history-paginated', params, currentApp?.app_id],
+    queryFn: async () => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
+
+      const { page, pageSize, sortBy = 'version', sortOrder = 'desc' } = params;
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      const { data, error, count } = await supabase
+        .from('curriculum_snapshots')
+        .select('version, published_at, domains_count, skills_count, questions_count', { count: 'exact' })
+        .eq('app_id', currentApp.app_id)
+        .order(sortBy, { ascending: sortOrder === 'asc' })
+        .range(from, to);
+
+      if (error) throw error;
+
+      return {
+        data: data || [],
+        totalCount: count ?? 0,
+        page,
+        pageSize,
+        totalPages: Math.ceil((count ?? 0) / pageSize),
+      };
     },
     enabled: Boolean(currentApp?.app_id),
   });
@@ -81,7 +122,10 @@ export function usePublishPreview() {
         supabase.from('questions').select('*', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'live'),
       ]);
 
-      if (metaResult.error && metaResult.error.code !== 'PGRST116') throw metaResult.error;
+      if (metaResult.error && metaResult.error.code !== 'PGRST116') {
+        console.warn('Error fetching curriculum meta preview:', metaResult.error.message || metaResult.error);
+        throw metaResult.error;
+      }
 
       const stats: PublishStats = {
         draftDomains: draftDomainsResult.count ?? 0,

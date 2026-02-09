@@ -10,12 +10,19 @@
 > ```
 
 ---
+## 🔗 Essential Links
 
+- **🔥 Start Development**: Follow instructions in `AGENTS.md` (Phase 0)
+- **🧠 Coding Standards**: [docs/standards/ORACLE_COGNITION.md](./docs/standards/ORACLE_COGNITION.md) - IDD Protocol & language patterns
+- **🐛 Best Practices**: [best_practices.md](./best_practices.md)
+- **🔒 Security Model**: [SECURITY.md](./SECURITY.md)
+
+---
 ## 🚀 Overview
 
 This repository contains the complete **Executive Specification** for **Questerix** - an offline-first educational platform. It is designed to be consumed by AI Coding Agents (Cursor, Antigravity, etc.) to autonomously build the application.
 
-The project consists of:
+The project consists:
 1.  **Student App** (`student-app/`): A Flutter tablet app (offline-first, Drift DB).
 2.  **Admin Panel** (`admin-panel/`): A React dashboard (shadcn/ui, Supabase Auth).
 3.  **Landing Pages** (`landing-pages/`): Marketing site (React/Vite, Tailwind CSS).
@@ -55,3 +62,7 @@ The project consists of:
 - **`/test`**: Runs the recommended "Enterprise QA" suite (Offline-Sync integration, E2E, Lint).
 - **`/map`**: Displays the Context Map.
 - **`/oracle`**: Queries the Knowledge Index.
+- **`/certify`**: Runs high-integrity auditing (IDD protocol).
+
+*See `docs/technical/DEVELOPMENT.md` for full command details.*
+

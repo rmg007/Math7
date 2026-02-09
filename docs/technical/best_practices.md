@@ -1,4 +1,7 @@
-# 📘 Project Best Practices
+# 📚 Project Best Practices
+
+> ⚠️ **For Implementation Details**: This document provides high-level conventions. For comprehensive coding standards, test patterns, and the IDD Protocol, see **[docs/standards/ORACLE_COGNITION.md](./standards/ORACLE_COGNITION.md)**.
+
 
 ## 1. Project Purpose
 Questerix is a multi-app learning platform combining:

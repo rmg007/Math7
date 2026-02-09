@@ -1,13 +1,15 @@
 
+// Convention: password == email (for all test accounts)
 export const TEST_CREDENTIALS = {
-  email: process.env.TEST_SUPER_ADMIN_EMAIL || process.env.TEST_ADMIN_EMAIL || 'test@example.com',
-  password: process.env.TEST_SUPER_ADMIN_PASSWORD || process.env.TEST_ADMIN_PASSWORD || 'testpassword123',
+  email: process.env.TEST_SUPER_ADMIN_EMAIL || process.env.TEST_ADMIN_EMAIL || 'testadmin@example.com',
+  password: process.env.TEST_SUPER_ADMIN_PASSWORD || process.env.TEST_ADMIN_PASSWORD || 'testadmin@example.com',
 };
 
 export function generateTestUser() {
+  const email = `test-${Date.now()}@example.com`;
   return {
-    email: `test-${Date.now()}@example.com`,
-    password: 'password123',
+    email,
+    password: email, // password == email convention
   };
 }
 

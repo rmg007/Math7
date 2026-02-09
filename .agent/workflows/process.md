@@ -44,11 +44,16 @@ Before Phase 1, create `.agent/artifacts/TASK_STATE.json`:
 
 1.  **Explore & Audit**: Analyze the request against the current repository state and existing legacy patterns.
 2.  **Expert Consultation (Team Mode)**: Communicate as a senior technical partner. Do not just "listen and obey"—Proactively challenge assumptions, suggest better architectural alternatives, and warn about potential downstream risks. Discuss until a "Gold Standard" plan is reached.
-3.  **Threat Modeling** (Security-by-Design):
-    *   Read `knowledge/questerix_governance/artifacts/security/vulnerability_taxonomy.md`
-    *   For each pattern, check: Do "Introduction Triggers" match this change?
-    *   If yes → Add "Prevention Checklist" items to implementation plan
-    *   Document in plan: "Relevant vulnerability patterns: VUL-XXX, VUL-YYY"
+3.  **Threat Modeling** (IDD Protocol - Phase 2):
+    *   **Generate exactly 5 failure vectors** (one from each category):
+        1. **Input Abuse** (null, overflow, type coercion, Unicode)
+        2. **State Corruption** (race conditions, stale data, partial writes)
+        3. **Dependency Failure** (API timeout, 500, empty response, schema drift)
+        4. **Resource Exhaustion** (memory leak, CPU spike, disk full, recursion depth)
+        5. **Security Surface** (injection, auth bypass, data leakage in logs/errors)
+    *   Document each as a **concrete scenario** in the implementation plan
+    *   Cross-reference with `vulnerability_taxonomy.md` for known patterns
+    *   See `docs/standards/ORACLE_COGNITION.md` for IDD Protocol details
 4.  **Architectural Lockdown**: Explicitly identify the Design Patterns (e.g., Repository, Bloc, Factory) and SOLID principles. Justify why these patterns are the best choice for this specific feature.
 5.  **Structural Map**: Define the file structure and strict module boundaries to prevent spaghetti growth.
 6.  **Impact Analysis**: Explicitly state the impact on existing systems (Database, API, UI).
@@ -96,8 +101,16 @@ Before Phase 1, create `.agent/artifacts/TASK_STATE.json`:
 ## 🛠️ Phase 3: Implementation & Quality Loop (Recursive)
 **Goal**: Deliver clean, functional code that matches the plan.
 
-1.  **Execute**: Implement the approved plan in small, logical chunks.
-2.  **Dependency & Bundle Hygiene**:
+1.  **IDD Test-First Protocol** (Before ANY Implementation):
+    *   Write tests covering all 4 paths:
+        ✅ **Happy Path** (2-3 normal use cases)
+        💥 **Destructive Path** (all 5 threat vectors from Phase 1)
+        ⏱️ **Boundary Path** (min/max/empty/single-element edge cases)
+        🔄 **Idempotent Path** (repeated calls produce same result)
+    *   Test naming: `test_<behavior>_when_<condition>_should_<outcome>`
+    *   All tests MUST pass before moving to implementation
+2.  **Execute**: Implement the approved plan in small, logical chunks.
+3.  **Dependency & Bundle Hygiene**:
     *   Evaluate if the logic can be written in vanilla code before adding a new package.
     *   If a new dependency is added, verify its size and impact on build time/bundle size.
 3.  **Quality Enforcement**:
@@ -132,21 +145,32 @@ Before Phase 1, create `.agent/artifacts/TASK_STATE.json`:
 2.  **Multi-Tenant & Security Isolation**:
     *   **Data Leakage Check**: Verify that RLS policies explicitly filter data by `app_id` or `tenant_id`.
     *   **Session Isolation**: Test with different user sessions to ensure one tenant cannot see another's data.
-3.  **Architectural Vulnerability Check**:
+3.  **IDD Silent Failure Hunt** (Phase 5 of IDD Protocol):
+    *   **Scan for ambiguous error handling**:
+        - Empty `catch`/`except` blocks (must log + rethrow OR return typed error)
+        - Functions returning `null`/`undefined` where a typed error is more appropriate
+        - Returning `0`, `''`, or `false` for both "not found" AND "actual zero/empty/false"
+        - Missing input validation at public API boundaries
+    *   **For each silent failure found**:
+        a. Write a test that exposes the failure
+        b. Fix the code (add logging, rethrow, or return typed error)
+        c. Re-run all tests
+    *   **Document**: "Silent failures found: [N]. All resolved."
+4.  **Architectural Vulnerability Check**:
     *   Read `vulnerability_taxonomy.md` for patterns relevant to changed files
     *   Run detection methods for each applicable VUL-XXX pattern
     *   If new vulnerability discovered → Append to taxonomy with VUL-XXX ID
     *   Document results: "Verified: VUL-002 (Subject Leakage) - PASS"
-4.  **Performance & Jank Audit**:
+5.  **Performance & Jank Audit**:
     *   Check for unnecessary re-renders (React) or frame drops (Flutter).
     *   Ensure expensive operations are run in background threads (Isolates/Workers).
     *   Verify virtualization/pagination for large lists.
-5.  **Dependency Hygiene Check** (TypeScript/React only):
+6.  **Dependency Hygiene Check** (TypeScript/React only):
     *   Run: `npm run deps:validate` (from workspace root)
     *   Verify: No circular dependencies introduced by new code
     *   Verify: Feature isolation maintained (no cross-feature imports)
     *   **Proof**: Command output showing "no dependency violations found"
-6.  **QA Loop**: Run tests. If any fail, fix the code and re-run.
+7.  **QA Loop**: Run tests. If any fail, fix the code and re-run.
     *   **Micro-Postmortem**: For every test failure fixed, **IMMEDIATELY** add an entry to `docs/LEARNING_LOG.md`.
 7.  **Visual Design Audit (If UI changed)**:
     *   **Visual Inspection**: Use `browser_subagent` to capture screenshots of all modified screens.

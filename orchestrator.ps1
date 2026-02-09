@@ -213,7 +213,7 @@ function Invoke-PhaseBuild {
         $defines = Get-Content $DefinesFile -Raw
         flutter clean 2>&1
         flutter pub get 2>&1
-        Invoke-Expression "flutter build web --release --web-renderer canvaskit $defines" 2>&1
+        Invoke-Expression "flutter build web --release $defines" 2>&1
     } -ArgumentList $ScriptDir, (Join-Path $ScriptDir '.flutter-defines.tmp')
     
     Write-Info "Waiting for parallel builds to complete..."

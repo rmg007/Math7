@@ -19,6 +19,7 @@ const INCLUDE_PATTERNS = [
   'docs/**/*.md',
   'README.md',
   'AI_CODING_INSTRUCTIONS.md',
+  'AGENT_QUICKSTART.md',
   'ROADMAP.md',
   '.agent/workflows/*.md',
   'student-app/README.md',

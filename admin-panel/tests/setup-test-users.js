@@ -3,6 +3,8 @@
  * 
  * This script creates test users in Supabase for E2E testing.
  * Run with: node tests/setup-test-users.js
+ * 
+ * Convention: password == email (for all test accounts)
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -35,10 +37,11 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   },
 });
 
+// Verified working test accounts (password == email convention)
 const TEST_USERS = [
   {
-    email: 'test@example.com',
-    password: 'testpassword123',
+    email: 'testadmin@example.com',
+    password: 'testadmin@example.com',
     role: 'admin',
     metadata: {
       name: 'Test Admin',
@@ -46,12 +49,12 @@ const TEST_USERS = [
     },
   },
   {
-    email: 'superadmin@example.com',
-    password: 'superadminpassword123',
-    role: 'super_admin',
+    email: 'admin1@example.com',
+    password: 'admin1@example.com',
+    role: 'admin',
     metadata: {
-      name: 'Test Super Admin',
-      role: 'super_admin',
+      name: 'Admin One',
+      role: 'admin',
     },
   },
 ];
@@ -92,18 +95,6 @@ async function createTestUser(userData) {
     console.log(`✅ User created successfully: ${userData.email}`);
     console.log(`   User ID: ${data.user.id}`);
 
-    // If you have a user_roles table, insert the role here
-    // Example:
-    // const { error: roleError } = await supabase
-    //   .from('user_roles')
-    //   .insert({ user_id: data.user.id, role: userData.role });
-    // 
-    // if (roleError) {
-    //   console.error(`❌ Error assigning role: ${roleError.message}`);
-    // } else {
-    //   console.log(`✅ Role assigned: ${userData.role}`);
-    // }
-
     return true;
   } catch (error) {
     console.error(`❌ Unexpected error: ${error.message}`);
@@ -138,9 +129,7 @@ async function setupTestUsers() {
     process.exit(1);
   } else {
     console.log('\n✨ All test users created successfully!');
-    console.log('\n📝 Next steps:');
-    console.log('   1. Update .env.test.local with the test credentials');
-    console.log('   2. Run: npm run test:e2e');
+    console.log('\n📝 Password convention: password == email');
   }
 }
 

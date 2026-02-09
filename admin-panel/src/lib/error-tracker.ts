@@ -66,7 +66,7 @@ export async function captureMessage(
  * Sets user context for future error reports.
  * This is a no-op in our system since we use auth.uid() server-side.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 export function setUser(_userId: string, _email?: string): void {
   // User context is automatically captured via Supabase auth
   // This function exists for API compatibility

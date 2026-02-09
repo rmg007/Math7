@@ -2,10 +2,11 @@
   "$schema": "./config-schema.json",
   "version": "1.0.0",
   "environment": "production",
+  "_secrets_note": "Sensitive keys (GEMINI_API_KEY, SENTRY_DSN, etc.) should be left empty here and defined in the root .secrets file.",
   
   "global": {
     "SUPABASE_URL": "https://qvslbiceoonrgjxzkotb.supabase.co",
-    "SUPABASE_ANON_KEY": "YOUR_SUPABASE_ANON_KEY",
+    "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2c2xiaWNlb29ucmdqeHprb3RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTE5NjksImV4cCI6MjA4NTA4Nzk2OX0.tksExuWD4OZyb4MoYRliQ71WQ8rywcaYMxbH2UXWe8s",
     "API_BASE_URL": "https://api.questerix.com"
   },
   
@@ -16,7 +17,7 @@
     "VITE_SUPABASE_ANON_KEY": "${global.SUPABASE_ANON_KEY}",
     "VITE_ENABLE_OFFLINE_MODE": "true",
     "VITE_ANALYTICS_ID": "",
-    "VITE_GEMINI_API_KEY": ""
+    "VITE_GEMINI_API_KEY": "${global.GEMINI_API_KEY}"
   },
   
   "student": {
@@ -27,8 +28,8 @@
     "THEME_PRIMARY_COLOR": "0xFF319795",
     "ENABLE_OFFLINE_FIRST": "true",
     "DRIFT_DB_VERSION": "1",
-    "SENTRY_ENABLED": "false",
-    "SENTRY_DSN": ""
+    "SENTRY_ENABLED": "true",
+    "SENTRY_DSN": "${global.SENTRY_DSN}"
   },
   
   "cloudflare": {

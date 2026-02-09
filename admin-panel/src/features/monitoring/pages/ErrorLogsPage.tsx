@@ -11,12 +11,16 @@ import {
   Monitor,
   Smartphone,
   Globe,
-  Clock
+  Clock,
+  Trash2,
+  Info,
+  Copy
 } from 'lucide-react';
 import { 
   useErrorLogs, 
   useErrorLogStats, 
   useUpdateErrorStatus,
+  useDeleteErrorLog,
   usePromoteToIssue,
   ErrorLog 
 } from '../hooks/use-error-logs';
@@ -60,6 +64,7 @@ export function ErrorLogsPage() {
   const { data: errors, isLoading, refetch } = useErrorLogs(statusFilter);
   const { data: stats } = useErrorLogStats();
   const updateStatus = useUpdateErrorStatus();
+  const deleteError = useDeleteErrorLog();
   const promoteToIssue = usePromoteToIssue();
 
   const filteredErrors = errors?.filter(error => 
@@ -87,7 +92,7 @@ export function ErrorLogsPage() {
       case 'resolved':
         return <Badge className="bg-green-100 text-green-700 hover:bg-green-200 text-xs border-none">Resolved</Badge>;
       case 'promoted':
-        return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 text-xs border-none">Documented</Badge>;
+        return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 text-xs border-none">Issue Created</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -95,7 +100,7 @@ export function ErrorLogsPage() {
 
   const handlePromote = (error: ErrorLog) => {
     setPromoteData({
-      title: `[${error.error_type}] ${error.error_message.slice(0, 50)}...`,
+      title: `[${error.error_type}] ${error.error_message.slice(0, 60)}`,
       rootCause: '',
       resolution: '',
     });
@@ -115,6 +120,18 @@ export function ErrorLogsPage() {
     
     setPromoteDialogOpen(false);
     setSelectedError(null);
+  };
+
+  const handleDelete = (error: ErrorLog, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (window.confirm('Delete this error log? This cannot be undone.')) {
+      deleteError.mutate(error.id);
+      setSelectedError(null);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
   };
 
   return (
@@ -188,7 +205,7 @@ export function ErrorLogsPage() {
           <CardContent className="pt-4 pb-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-purple-900">Documented</p>
+                <p className="text-xs font-medium text-purple-900">Issues</p>
                 <p className="text-2xl font-bold text-purple-700">{stats?.promoted ?? 0}</p>
               </div>
               <ArrowUpRight className="w-5 h-5 text-purple-400" />
@@ -203,7 +220,7 @@ export function ErrorLogsPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <CardTitle className="text-lg">Recent Errors</CardTitle>
-              <CardDescription>Click an error to view details and take action.</CardDescription>
+              <CardDescription>Click an error to view full details.</CardDescription>
             </div>
             <div className="flex items-center gap-2">
               <div className="relative w-64">
@@ -226,7 +243,7 @@ export function ErrorLogsPage() {
                   <SelectItem value="seen">Seen</SelectItem>
                   <SelectItem value="ignored">Ignored</SelectItem>
                   <SelectItem value="resolved">Resolved</SelectItem>
-                  <SelectItem value="promoted">Documented</SelectItem>
+                  <SelectItem value="promoted">Issues</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -290,6 +307,7 @@ export function ErrorLogsPage() {
                           <Button 
                             variant="ghost" 
                             size="sm"
+                            title="Mark as seen"
                             onClick={(e) => {
                               e.stopPropagation();
                               updateStatus.mutate({ id: error.id, status: 'seen' });
@@ -303,6 +321,7 @@ export function ErrorLogsPage() {
                             variant="ghost" 
                             size="sm"
                             className="text-purple-600"
+                            title="Create issue"
                             onClick={(e) => {
                               e.stopPropagation();
                               handlePromote(error);
@@ -311,6 +330,15 @@ export function ErrorLogsPage() {
                             <ArrowUpRight className="w-4 h-4" />
                           </Button>
                         )}
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          title="Delete error"
+                          onClick={(e) => handleDelete(error, e)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -326,15 +354,19 @@ export function ErrorLogsPage() {
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-mono text-red-600">{selectedError?.error_type}</DialogTitle>
-            <DialogDescription>{selectedError?.error_message}</DialogDescription>
+            <DialogDescription className="break-words">{selectedError?.error_message}</DialogDescription>
           </DialogHeader>
           
           {selectedError && (
             <div className="space-y-4">
+              {/* Metadata Grid */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <Label className="text-muted-foreground">Platform</Label>
-                  <p className="font-medium capitalize">{selectedError.platform}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    {getPlatformIcon(selectedError.platform)}
+                    <span className="font-medium capitalize">{selectedError.platform}</span>
+                  </div>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">App Version</Label>
@@ -342,28 +374,102 @@ export function ErrorLogsPage() {
                 </div>
                 <div>
                   <Label className="text-muted-foreground">User ID</Label>
-                  <p className="font-mono text-xs">{selectedError.user_id || 'Anonymous'}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="font-mono text-xs">{selectedError.user_id || 'Anonymous'}</p>
+                    {selectedError.user_id && (
+                      <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => copyToClipboard(selectedError.user_id ?? '')}>
+                        <Copy className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">URL</Label>
-                  <p className="font-mono text-xs truncate">{selectedError.url || 'N/A'}</p>
+                  <Label className="text-muted-foreground">Status</Label>
+                  <div className="mt-1">{getStatusBadge(selectedError.status)}</div>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Occurred At</Label>
+                  <p className="text-xs">{new Date(selectedError.occurred_at || selectedError.created_at).toLocaleString()}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Logged At</Label>
+                  <p className="text-xs">{new Date(selectedError.created_at).toLocaleString()}</p>
                 </div>
               </div>
 
+              {/* URL */}
+              {selectedError.url && (
+                <div>
+                  <Label className="text-muted-foreground">URL</Label>
+                  <p className="font-mono text-xs bg-gray-50 p-2 rounded mt-1 break-all">{selectedError.url}</p>
+                </div>
+              )}
+
+              {/* User Agent */}
+              {selectedError.user_agent && (
+                <div>
+                  <Label className="text-muted-foreground">User Agent</Label>
+                  <p className="font-mono text-xs bg-gray-50 p-2 rounded mt-1 break-all">{selectedError.user_agent}</p>
+                </div>
+              )}
+
+              {/* Stack Trace */}
               {selectedError.stack_trace && (
                 <div>
-                  <Label className="text-muted-foreground">Stack Trace</Label>
-                  <pre className="mt-2 p-3 bg-gray-900 text-gray-100 rounded-lg text-xs overflow-auto max-h-60">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-muted-foreground">Stack Trace</Label>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 text-xs"
+                      onClick={() => copyToClipboard(selectedError.stack_trace ?? '')}
+                    >
+                      <Copy className="w-3 h-3 mr-1" /> Copy
+                    </Button>
+                  </div>
+                  <pre className="mt-1 p-3 bg-gray-900 text-gray-100 rounded-lg text-xs overflow-auto max-h-60">
                     {selectedError.stack_trace}
+                  </pre>
+                </div>
+              )}
+
+              {/* Extra Context */}
+              {selectedError.extra_context && Object.keys(selectedError.extra_context).length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-muted-foreground flex items-center gap-1">
+                      <Info className="w-3 h-3" /> Extra Context
+                    </Label>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 text-xs"
+                      onClick={() => copyToClipboard(JSON.stringify(selectedError.extra_context, null, 2))}
+                    >
+                      <Copy className="w-3 h-3 mr-1" /> Copy
+                    </Button>
+                  </div>
+                  <pre className="mt-1 p-3 bg-slate-800 text-emerald-300 rounded-lg text-xs overflow-auto max-h-40">
+                    {JSON.stringify(selectedError.extra_context, null, 2)}
                   </pre>
                 </div>
               )}
             </div>
           )}
 
-          <DialogFooter className="gap-2">
+          <DialogFooter className="gap-2 flex-wrap">
             <Button 
-              variant="outline" 
+              variant="outline"
+              size="sm"
+              className="text-red-600 hover:bg-red-50"
+              onClick={() => selectedError && handleDelete(selectedError)}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </Button>
+            <Button 
+              variant="outline"
+              size="sm"
               onClick={() => {
                 if (selectedError) {
                   updateStatus.mutate({ id: selectedError.id, status: 'ignored' });
@@ -376,6 +482,7 @@ export function ErrorLogsPage() {
             </Button>
             <Button 
               variant="outline"
+              size="sm"
               onClick={() => {
                 if (selectedError) {
                   updateStatus.mutate({ id: selectedError.id, status: 'resolved' });
@@ -386,24 +493,27 @@ export function ErrorLogsPage() {
               <CheckCircle2 className="w-4 h-4 mr-2" />
               Mark Resolved
             </Button>
-            <Button 
-              className="bg-purple-600 hover:bg-purple-700"
-              onClick={() => selectedError && handlePromote(selectedError)}
-            >
-              <ArrowUpRight className="w-4 h-4 mr-2" />
-              Create Post-Mortem
-            </Button>
+            {selectedError?.status !== 'promoted' && (
+              <Button 
+                size="sm"
+                className="bg-purple-600 hover:bg-purple-700"
+                onClick={() => selectedError && handlePromote(selectedError)}
+              >
+                <ArrowUpRight className="w-4 h-4 mr-2" />
+                Create Issue
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Promote to Issue Dialog */}
+      {/* Create Issue Dialog */}
       <Dialog open={promoteDialogOpen} onOpenChange={setPromoteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create Post-Mortem</DialogTitle>
+            <DialogTitle>Create Known Issue</DialogTitle>
             <DialogDescription>
-              Document this error as a Known Issue for future reference.
+              Document this error as a Known Issue for tracking and resolution.
             </DialogDescription>
           </DialogHeader>
           
@@ -417,19 +527,19 @@ export function ErrorLogsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="rootCause">Root Cause (Why did this happen?)</Label>
+              <Label htmlFor="rootCause">Root Cause (optional)</Label>
               <Textarea 
                 id="rootCause"
-                placeholder="The user was able to submit the form without a valid email because..."
+                placeholder="Why did this happen?"
                 value={promoteData.rootCause}
                 onChange={(e) => setPromoteData(p => ({ ...p, rootCause: e.target.value }))}
               />
             </div>
             <div>
-              <Label htmlFor="resolution">Resolution (How did we fix it?)</Label>
+              <Label htmlFor="resolution">Resolution (optional)</Label>
               <Textarea 
                 id="resolution"
-                placeholder="Added validation in auth_provider.dart line 42..."
+                placeholder="How was it fixed?"
                 value={promoteData.resolution}
                 onChange={(e) => setPromoteData(p => ({ ...p, resolution: e.target.value }))}
               />
@@ -445,7 +555,7 @@ export function ErrorLogsPage() {
               onClick={submitPromote}
               disabled={promoteToIssue.isPending}
             >
-              {promoteToIssue.isPending ? 'Creating...' : 'Create Known Issue'}
+              {promoteToIssue.isPending ? 'Creating...' : 'Create Issue'}
             </Button>
           </DialogFooter>
         </DialogContent>

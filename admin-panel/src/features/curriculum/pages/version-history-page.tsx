@@ -3,17 +3,12 @@ import { supabase } from '@/lib/supabase';
 import { Database } from '@/lib/database.types';
 import { useApp } from '@/hooks/use-app';
 import { History, Calendar, Package, Download } from 'lucide-react';
+import { useState } from 'react';
+import { usePaginatedPublishHistory } from '../hooks/use-publish';
+import { Pagination } from '@/components/ui/pagination';
+import { SortableHeader } from '@/components/ui/sortable-header';
 
-type CurriculumSnapshot = Database['public']['Tables']['curriculum_snapshots']['Row'];
 type CurriculumMeta = Database['public']['Tables']['curriculum_meta']['Row'];
-
-interface PublishHistory {
-  version: number;
-  published_at: string;
-  domains_count: number;
-  skills_count: number;
-  questions_count: number;
-}
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -29,31 +24,21 @@ function formatDate(dateString: string): string {
 export function VersionHistoryPage() {
   const { currentApp } = useApp();
 
-  const { data: history, isLoading } = useQuery({
-    queryKey: ['publish-history', currentApp?.app_id],
-    queryFn: async (): Promise<PublishHistory[]> => {
-      if (!currentApp?.app_id) return [];
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [sortBy, setSortBy] = useState('version');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-      const { data, error } = await supabase
-        .from('curriculum_snapshots')
-        .select('version, published_at, domains_count, skills_count, questions_count')
-        .order('version', { ascending: false })
-        .limit(10);
-
-      if (error) {
-        console.warn('No publish history table found or error:', error);
-        return [];
-      }
-      return (data as CurriculumSnapshot[]).map(snapshot => ({
-        version: snapshot.version,
-        published_at: snapshot.published_at,
-        domains_count: snapshot.domains_count,
-        skills_count: snapshot.skills_count,
-        questions_count: snapshot.questions_count,
-      })) || [];
-    },
-    enabled: Boolean(currentApp?.app_id),
+  const { data: paginatedHistory, isLoading } = usePaginatedPublishHistory({
+    page,
+    pageSize,
+    sortBy,
+    sortOrder,
   });
+
+  const history = paginatedHistory?.data || [];
+  const totalCount = paginatedHistory?.totalCount || 0;
+  const totalPages = paginatedHistory?.totalPages || 1;
 
   const { data: currentMeta } = useQuery({
     queryKey: ['curriculum-meta', currentApp?.app_id],
@@ -67,7 +52,7 @@ export function VersionHistoryPage() {
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
-        console.warn('Error fetching curriculum meta:', error);
+        console.warn('Error fetching curriculum meta:', error.message || error);
         return null;
       }
       return data as CurriculumMeta | null;
@@ -75,11 +60,23 @@ export function VersionHistoryPage() {
     enabled: Boolean(currentApp?.app_id),
   });
 
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+    setPage(1);
+  };
+
   const handleExport = async (version: number) => {
+    if (!currentApp?.app_id) return;
     try {
       const { data, error } = await supabase
         .from('curriculum_snapshots')
         .select('content')
+        .eq('app_id', currentApp.app_id)
         .eq('version', version)
         .single();
 
@@ -107,7 +104,7 @@ export function VersionHistoryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Version History</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Version History (V{currentMeta?.version ?? 0})</h1>
         <p className="text-muted-foreground">
           View past published versions of the curriculum.
         </p>
@@ -149,47 +146,88 @@ export function VersionHistoryPage() {
             <p className="text-sm text-gray-400">Publish your curriculum to create the first version.</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-100">
-            {history.map((item: PublishHistory) => (
-              <div key={item.version} className="p-6 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-purple-100">
-                      <span className="text-purple-700 font-bold">v{item.version}</span>
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <Calendar className="w-4 h-4" />
-                        {formatDate(item.published_at)}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-6 text-sm mr-4">
-                      <div className="text-center">
-                        <p className="font-semibold text-gray-900">{item.domains_count}</p>
-                        <p className="text-gray-500">Domains</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="font-semibold text-gray-900">{item.skills_count}</p>
-                        <p className="text-gray-500">Skills</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="font-semibold text-gray-900">{item.questions_count}</p>
-                        <p className="text-gray-500">Questions</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleExport(item.version)}
-                      className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
-                      title="Export JSON"
-                    >
-                      <Download className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-100">
+                    <th className="text-left px-6 py-4">
+                      <SortableHeader
+                        label="Version"
+                        column="version"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                      />
+                    </th>
+                    <th className="text-left px-6 py-4">
+                      <SortableHeader
+                        label="Published At"
+                        column="published_at"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                      />
+                    </th>
+                    <th className="text-center px-6 py-4 font-semibold text-gray-600 text-sm">Domains</th>
+                    <th className="text-center px-6 py-4 font-semibold text-gray-600 text-sm">Skills</th>
+                    <th className="text-center px-6 py-4 font-semibold text-gray-600 text-sm">Questions</th>
+                    <th className="text-right px-6 py-4 font-semibold text-gray-600 text-sm">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {history?.map((snapshot, index) => (
+                  <tr 
+                    key={snapshot.version} 
+                    className="group hover:bg-purple-50/30 transition-colors animate-slide-up"
+                    style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'both' }}
+                  >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-purple-100">
+                          <span className="text-purple-700 font-bold">v{snapshot.version}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2 text-sm text-gray-700">
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                          {formatDate(snapshot.published_at)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="font-semibold text-gray-900">{snapshot.domains_count}</span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="font-semibold text-gray-900">{snapshot.skills_count}</span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="font-semibold text-gray-900">{snapshot.questions_count}</span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => handleExport(snapshot.version)}
+                          className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
+                          title="Export JSON"
+                        >
+                          <Download className="w-5 h-5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={pageSize}
+              onPageChange={(p) => setPage(p)}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setPage(1);
+              }}
+            />
           </div>
         )}
       </div>

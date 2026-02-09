@@ -1,8 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { Database } from '@/lib/database.types';
-
-type KnownIssueRow = Database['public']['Tables']['known_issues']['Row'];
 
 export interface KnownIssue {
   id: string;
@@ -13,9 +10,27 @@ export interface KnownIssue {
   resolution?: string | null;
   status: 'open' | 'closed' | 'recurring' | null;
   severity: 'low' | 'medium' | 'high' | 'critical' | null;
+  category?: string | null;
   sentry_link?: string | null;
   created_at: string | null;
   updated_at: string | null;
+  promoted_from_id?: string | null;
+}
+
+interface KnownIssueRow {
+  id: string;
+  title: string;
+  description: string | null;
+  error_message: string | null;
+  root_cause: string | null;
+  resolution: string | null;
+  status: string | null;
+  severity: string | null;
+  category: string | null;
+  sentry_link: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  promoted_from_id: string | null;
 }
 
 export function useKnownIssues() {
@@ -23,13 +38,13 @@ export function useKnownIssues() {
     queryKey: ['known-issues'],
     queryFn: async (): Promise<KnownIssue[]> => {
       const { data, error } = await supabase
-        .from('known_issues')
+        .from('known_issues' as never)
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      return (data as KnownIssueRow[]).map((row) => ({
+      return ((data ?? []) as unknown as KnownIssueRow[]).map((row) => ({
         id: row.id,
         title: row.title,
         description: row.description || undefined,
@@ -38,10 +53,32 @@ export function useKnownIssues() {
         resolution: row.resolution,
         status: (row.status as KnownIssue['status']) ?? null,
         severity: (row.severity as KnownIssue['severity']) ?? null,
+        category: row.category ?? null,
         sentry_link: row.sentry_link,
         created_at: row.created_at || null,
         updated_at: row.updated_at || null,
+        promoted_from_id: row.promoted_from_id || null,
       }));
+    },
+  });
+}
+
+export function useDeleteKnownIssue() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('known_issues' as never)
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['known-issues'] });
+      queryClient.invalidateQueries({ queryKey: ['error-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['error-log-stats'] });
     },
   });
 }

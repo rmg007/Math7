@@ -3,14 +3,15 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
-  ExternalLink,
-  Plus,
   Search,
   Filter,
   Shield,
   LifeBuoy,
+  Plus,
   Pencil,
-  Trash2
+  Trash2,
+  X,
+  ExternalLink
 } from 'lucide-react';
 import { useKnownIssues, type KnownIssue } from '../hooks/use-known-issues';
 import { useCreateKnownIssue, useUpdateKnownIssue, useDeleteKnownIssue } from '../hooks/use-known-issues-mutations';
@@ -51,14 +52,13 @@ type KnownIssueUpdate = Database['public']['Tables']['known_issues']['Update'];
 
 export function KnownIssuesPage() {
   const { data: issues, isLoading } = useKnownIssues();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  
   const createIssue = useCreateKnownIssue();
   const updateIssue = useUpdateKnownIssue();
   const deleteIssue = useDeleteKnownIssue();
   const { toast } = useToast();
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingIssue, setEditingIssue] = useState<KnownIssue | null>(null);
   const [formData, setFormData] = useState<KnownIssueInsert>({
@@ -74,10 +74,12 @@ export function KnownIssuesPage() {
   const filteredIssues = issues?.filter(issue => {
     const matchesSearch = 
       issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (issue.description?.toLowerCase() ?? '').includes(searchTerm.toLowerCase());
+      (issue.description?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+      (issue.root_cause?.toLowerCase() ?? '').includes(searchTerm.toLowerCase());
     
-    if (statusFilter === 'all') return matchesSearch;
-    return matchesSearch && issue.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || issue.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
   });
 
   const handleOpenDialog = (issue?: KnownIssue) => {
@@ -178,10 +180,10 @@ export function KnownIssuesPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-            Known Issues & Post-Mortems
+            Known Issues
           </h2>
           <p className="text-muted-foreground mt-1">
-            Documentation of technical crashes, business logic bugs, and their resolutions.
+            Tracked bugs, their root causes, and resolutions.
           </p>
         </div>
         <Button 
@@ -245,7 +247,7 @@ export function KnownIssuesPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <CardTitle className="text-lg">Issue Library</CardTitle>
-              <CardDescription>Search and filter identified system issues.</CardDescription>
+              <CardDescription>Click an issue to view details. Search by title, description, or root cause.</CardDescription>
             </div>
             <div className="flex items-center gap-2 max-w-md w-full">
               <div className="relative w-full">
@@ -279,7 +281,7 @@ export function KnownIssuesPage() {
                 <TableHead className="w-[40%]">Issue Details</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Severity</TableHead>
-                <TableHead>Date Identified</TableHead>
+                <TableHead>Date</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -461,7 +463,7 @@ export function KnownIssuesPage() {
 
             <DialogFooter className="pt-4 gap-2">
               <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-              <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">
+              <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white">
                 {editingIssue ? 'Save Changes' : 'Record Issue'}
               </Button>
             </DialogFooter>
@@ -471,4 +473,3 @@ export function KnownIssuesPage() {
     </div>
   );
 }
-

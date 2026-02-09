@@ -178,6 +178,38 @@ grep -r "MATERIALIZED VIEW\|app.claim\|jwt.*claim" supabase/migrations/*.sql
 
 ---
 
+## 🧠 Phase 3.5: IDD Protocol Compliance Audit
+
+**Goal**: Verify all code follows the Integrity-Driven Development protocol.
+
+### Test Path Coverage Check
+```powershell
+# Search for test files and verify 4 paths exist
+find . -name "*test.*" -type f | xargs grep -l "Happy\|Destructive\|Boundary\|Idempotent"
+```
+- **Pass if**: All new features have ✅💥⏱️🔄 test coverage
+- **Fail if**: Missing any of the 4 required test paths
+
+### Silent Failure Detection
+```powershell
+# Empty catch blocks
+grep -r "catch.*{[\s]*}" --include="*.ts" --include="*.dart" --include="*.py"
+
+# Null returns where error is appropriate
+grep -r "return null;.*error\|return null;.*fail" --include="*.ts" --include="*.dart"
+```
+- **Pass if**: All catch blocks have log + rethrow OR typed error
+- **Fail if**: Silent failures found (empty catch, ambiguous null)
+
+### Threat Model Verification
+- Check implementation plans for explicit 5-vector threat models
+- **Pass if**: All features document the 5 categories explicitly
+- **Fail if**: Generic threats or missing categories
+
+**Exit Gate**: IDD compliance verified. Document violations.
+
+---
+
 ## 🔬 Phase 4: Exploratory Analysis (Unknown Unknowns)
 
 **Goal**: Hunt for NEW vulnerability patterns not yet documented.

@@ -1,6 +1,9 @@
 # Security
 
 > Security context for AI agents and code reviewers.
+>
+> ⚠️ **For Implementation Details**: This document provides security context. For threat modeling, security checklists, and IDD Protocol compliance, see **[docs/standards/ORACLE_COGNITION.md](./docs/standards/ORACLE_COGNITION.md)**.
+
 
 ## 🛡️ Security Model
 

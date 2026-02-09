@@ -1,18 +1,38 @@
 # AI Coding Instructions
 
+> **New agent?** Start with [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) for fast knowledge discovery, then return here for the full rules.
+
 This repository is contract-driven. Use the repo’s contracts (Makefile, CI workflows, validation scripts, migrations/RLS checks) as the primary source of truth for “how to work here.”
 
 ## Authority order (highest to lowest)
 
 1. `docs/strategy/AGENTS.md`
 2. `kb_registry` (Supabase AI Performance Registry - Highest technical truth)
-3. `docs/technical/SCHEMA.md` (explanatory reference; migrations are executable truth)
-4. `PHASE_STATE.json`
-5. `docs/specs/*`
-6. Everything else (README, ad-hoc notes)
-
+3. **`docs/standards/ORACLE_COGNITION.md`** - IDD Protocol & coding standards
+4. `AI_CODING_INSTRUCTIONS.md` (this file) - Agent rules & workflows
+5. `docs/technical/SCHEMA.md` (explanatory reference; migrations are executable truth)
+6. `PHASE_STATE.json`
+7. `docs/specs/*`
+8. `best_practices.md`
+9. `SECURITY.md`
+10. `README.md`
+11. Everything else
 
 If two sources conflict, follow the highest-ranked source.
+
+## IDD Protocol Compliance (MANDATORY)
+
+**All code written by AI agents MUST follow the Integrity-Driven Development (IDD) Protocol** defined in `docs/standards/ORACLE_COGNITION.md`.
+
+### Quick IDD Reference:
+1. **Contract Analysis** → Define purpose, contracts, failure boundary
+2. **Threat Modeling** → List 5 failure vectors (Input Abuse, State Corruption, Dependency Failure, Resource Exhaustion, Security Surface)
+3. **Test-First** → Write ✅💥⏱️🔄 tests before implementation
+4. **Strategy Selection** → Evaluate 2+ approaches, choose resilient over clever
+5. **Silent Failure Hunt** → No empty catches, ambiguous nulls, or swallowed errors
+
+See `.cursorrules` for the complete IDD constitution.
+
 
 ## HARD RULES (NON-NEGOTIABLE)
 
