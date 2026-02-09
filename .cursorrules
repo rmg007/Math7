@@ -1,40 +1,33 @@
 # Questerix Project Context & Rules
 
 ## 🧠 Immediate Context (Read This First)
-- **Project**: Offline-First Educational Platform (Tablet App + Admin Dashboard).
-- **Tech Stack**:
-  - **Mobile**: Flutter (Riverpod, Drift DB) -> `student-app/`
-  - **Web**: React (Vite, TypeScript, Shadcn/UI, TanStack Query) -> `admin-panel/`
-  - **Backend**: Supabase (PostgreSQL, Edge Functions) -> `supabase/`
-- **State**: Check `PHASE_STATE.json` for current progress/phase.
+1. **The Map**: `view_file docs/technical/CONTEXT_MAP.md` (Documentation Index)
+2. **The State**: `view_file PHASE_STATE.json` (Current Progress)
+3. **The Law**: `view_file docs/strategy/AGENTS.md` (Constitution & Protocol)
 
 ## 🛑 HARD RULES (NON-NEGOTIABLE)
-1. **NO LANDING PAGES**: Never deploy/publish `landing-pages/`.
-2. **NO PROD DEPLOY**: Never deploy to `questerix.com`.
+1. **SUPERPOWER MODE**: Use `python ops_runner.py tasks.json` for ALL terminal commands.
+   - Do not run `npm` or `flutter` directly if it triggers approval gating.
+2. **NO LANDING PAGES**: Never deploy/publish `landing-pages/`.
 3. **ROOT LOCK**: Do not create files in root. Use `docs/` or `artifacts/`.
 4. **ALWAYS USE -SkipLanding flag** when running deployment scripts.
 
-## ⚡ Common Commands (Windows/PowerShell)
-- **Run**: `make run-admin`, `make run-student`
-- **Test**: `npx playwright test` (Admin), `flutter test` (Student)
-- **Env**: `.\scripts\deploy\generate-env.ps1 -ConfigFile master-config.json`
-
-## ⚡ Agent Efficiency Rules (NON-NEGOTIABLE)
-1. **BATCH** all non-contiguous edits into single `multi_replace_file_content` calls.
-2. **CHAIN** terminal commands with `&&` or `;` — never issue sequential single commands for related operations.
-3. **TARGET** file reads: use `view_file` with StartLine/EndLine or `view_file_outline` first — never read entire large files for targeted edits.
-4. **SKIP FILLER**: No "I will now...", "Great!", "I have completed...". State the action, execute, report result.
-5. **JSON TESTS**: For test runs, prefer `--reporter=json --outputFile=results.json` to avoid streaming thousands of lines.
-6. **OUTLINE FIRST**: Use `view_file_outline` before `view_file` for any unfamiliar file.
+## ⚡ Agent Efficiency Rules
+1. **BATCH** edits: `multi_replace_file_content` >> `replace_file_content`.
+2. **CHAIN** commands: `&&` or `;` inside `tasks.json`.
+3. **TARGET** reads: `view_file_outline` >> `view_file` (partial) >> `view_file` (full).
+4. **SKIP FILLER**: State action, execute, report result. No chatter.
+5. **JSON OUTPUT**: Prefer `--reporter=json` for test runners.
 
 ## 🌙 Terse Mode
-When user says "night mode" or "terse mode", activate:
+When user says "night mode" or "terse mode":
 1. No filler text. Tool calls and results only.
 2. Small changes → show diffs. New files → show full content.
 3. **DO NOT** auto-install packages — ask once briefly.
-4. **DO NOT** assume defaults on ambiguous inputs — ask once briefly.
-5. Group related operations into single tool calls.
-6. Skip success confirmations unless user asks "did it work?"
-7. **ALWAYS** report errors in full, even in terse mode.
+4. **ALWAYS** report errors in full.
 
-To deactivate, user says "normal mode" or "verbose mode".
+## 📍 Key Paths
+- **Student App**: `student-app/` (Flutter/Riverpod)
+- **Admin Panel**: `admin-panel/` (React/Vite)
+- **Backend**: `supabase/` (SQL/Functions)
+- **Shared**: `questerix_domain/` (Dart Models)

@@ -3,11 +3,10 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/ca061805934446349d970335029a9937)](https://app.codacy.com/gh/[YOUR_ORG]/Questerix/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/ca061805934446349d970335029a9937)](https://app.codacy.com/gh/[YOUR_ORG]/Questerix/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 
-
 > **The "Golden Command" to start development:**
 > 
 > ```text
-> "Start with docs/strategy/QUICKSTART_AGENTS.md. Then follow AGENTS.md."
+> "Start with docs/strategy/QUICKSTART_AGENTS.md. Then check docs/technical/CONTEXT_MAP.md."
 > ```
 
 ---
@@ -25,15 +24,11 @@ The project consists of:
 
 ## 📂 Key Files
 
-- **`docs/strategy/AGENTS.md`**: The Supreme Law. The execution protocol every agent must follow.
-- **`docs/status/ROADMAP.md`**: The visual timeline of the project phases.
-- **`docs/security/SECURITY.md`**: Core security constraints and vulnerability patterns.
-- **`docs/technical/best_practices.md`**: Comprehensive tech stack standards.
-- **`PHASE_STATE.json`**: The state file tracking the agent's progress.
-- **`docs/specs/*`**: Detailed blueprints for UI, Data, and API.
-- **`.mcp_config.json`**: Ready-to-use MCP server configuration.
-- **`docs/technical/MCP_SETUP_GUIDE.md`**: MCP installation summary and next steps.
-- **`docs/technical/SECRETS_LOCATIONS.md`**: Map of all secret file locations.
+- **`docs/strategy/AGENTS.md`**: The Constitution. Core rules and behavioral protocols.
+- **`docs/strategy/QUICKSTART_AGENTS.md`**: The Session Startup Checklist.
+- **`docs/technical/CONTEXT_MAP.md`**: The Map. Use this to find technical documentation.
+- **`PHASE_STATE.json`**: The Live State. Tracks validation status and current phase.
+- **`docs/technical/KNOWLEDGE_INDEX.md`**: The Knowledge Base (Project Oracle).
 
 ## 🧑‍💻 For Humans (Development)
 
@@ -45,14 +40,16 @@ The project consists of:
 
 ## 🤖 For AI Agents
 
-1.  **Read `docs/strategy/AGENTS.md`** immediately.
-2.  **Check `PHASE_STATE.json`** to see where to begin.
-3.  **Execute** the current phase strictly according to the specs.
-4.  **Validate** using the provided scripts (e.g., `scripts/validate-phase-0.ps1`).
+1.  **Read `docs/strategy/QUICKSTART_AGENTS.md`** immediately to ground yourself.
+2.  **Consult `docs/technical/CONTEXT_MAP.md`** to navigate the documentation.
+3.  **Check `PHASE_STATE.json`** to identify the active phase.
+4.  **Execute Phase Tasks** using the `ops_runner.py` pattern (Superpower Mode).
+5.  **Validate** using `scripts/validate-phase-X.ps1`.
 
-**Do not deviate from the specifications.**
+**Do not deviate from the Phase State.**
 
 ### 🦾 Agent Commands
 - **`/autopilot`**: Triggers full autonomous build & maintenance capability.
 - **`/test`**: Runs the recommended "Enterprise QA" suite (Offline-Sync integration, E2E, Lint).
-*See `docs/technical/DEVELOPMENT.md` for full command details.*
+- **`/map`**: Displays the Context Map.
+- **`/oracle`**: Queries the Knowledge Index.

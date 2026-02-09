@@ -15,6 +15,7 @@ import shlex
 import subprocess
 import sys
 import time
+import datetime
 from pathlib import Path
 
 # Fix Windows console encoding for Unicode
@@ -42,6 +43,9 @@ def execute_manifest(manifest_path: str) -> bool:
     Returns:
         True if all commands executed successfully, False otherwise
     """
+    path_obj = Path(manifest_path)
+    status_path = path_obj.parent / 'tasks.status.json'
+    
     try:
         with open(manifest_path, 'r', encoding='utf-8') as f:
             manifest = json.load(f)
@@ -56,7 +60,12 @@ def execute_manifest(manifest_path: str) -> bool:
         print("Error: Manifest must be a JSON array of command objects")
         return False
     
-    success = True
+    execution_results = []
+    overall_success = True
+    start_time_global = time.time()
+    
+    print(f"\n🚀 Executing {len(manifest)} tasks from {path_obj.name}...")
+
     for idx, task in enumerate(manifest, 1):
         if not isinstance(task, dict):
             print(f"Warning: Task {idx} is not a dictionary, skipping")
@@ -75,45 +84,89 @@ def execute_manifest(manifest_path: str) -> bool:
         if cwd:
             print(f"  Working directory: {cwd}")
         
+        task_start = time.time()
+        result_entry = {
+            'index': idx,
+            'description': description,
+            'command': command,
+            'cwd': cwd,
+            'timestamp': datetime.datetime.now().isoformat(),
+            'status': 'pending'
+        }
+
         try:
             # SECURITY: Use shell=False to prevent shell injection attacks
-            # Parse command string into arguments safely using shlex
-            # This prevents malicious commands like: "npm install; rm -rf /"
             if isinstance(command, str):
-                # Parse string command into argument list
-                # On Windows, shlex.split() doesn't handle paths with backslashes well
-                # So we use platform-specific parsing
                 if sys.platform == 'win32':
-                    # On Windows, keep as string but use shell=False with PowerShell
                     cmd_args = ['powershell.exe', '-NoProfile', '-Command', command]
                 else:
-                    # On Unix, use shlex for safe parsing
                     cmd_args = shlex.split(command)
             elif isinstance(command, list):
-                # Already a list of arguments (safest form)
                 cmd_args = command
             else:
                 print(f"  ✗ Invalid command type: {type(command)}")
-                success = False
+                result_entry['status'] = 'error'
+                result_entry['error'] = 'Invalid command type'
+                overall_success = False
+                execution_results.append(result_entry)
                 continue
             
-            subprocess.run(
+            # Use subprocess.run to capture output for the log
+            proc = subprocess.run(
                 cmd_args,
-                shell=False,  # SECURITY: Never use shell=True
+                shell=False,
                 cwd=cwd if cwd else None,
-                check=True,
-                capture_output=False,
-                text=True
+                capture_output=True,
+                text=True,
+                encoding='utf-8' # Ensure encoding is handled
             )
-            print("  ✓ Completed successfully")
-        except subprocess.CalledProcessError as e:
-            print(f"  ✗ Failed with exit code {e.returncode}")
-            success = False
+            
+            # Print output to console for the user to see in real-time (if watching)
+            if proc.stdout:
+                print(f"  > {proc.stdout.strip()[:200]}..." if len(proc.stdout) > 200 else f"  > {proc.stdout.strip()}")
+            if proc.stderr:
+                print(f"  ! {proc.stderr.strip()[:200]}..." if len(proc.stderr) > 200 else f"  ! {proc.stderr.strip()}")
+
+            result_entry['exit_code'] = proc.returncode
+            result_entry['stdout'] = proc.stdout
+            result_entry['stderr'] = proc.stderr
+            result_entry['duration_ms'] = int((time.time() - task_start) * 1000)
+
+            if proc.returncode == 0:
+                print("  ✓ Completed successfully")
+                result_entry['status'] = 'success'
+            else:
+                print(f"  ✗ Failed with exit code {proc.returncode}")
+                result_entry['status'] = 'failed'
+                overall_success = False
+
         except Exception as e:
             print(f"  ✗ Error executing command: {e}")
-            success = False
+            result_entry['status'] = 'error'
+            result_entry['error'] = str(e)
+            entry_duration = int((time.time() - task_start) * 1000)
+            result_entry['duration_ms'] = entry_duration
+            overall_success = False
+        
+        execution_results.append(result_entry)
+
+    # Write status file
+    status_report = {
+        'manifest_path': str(manifest_path),
+        'timestamp': datetime.datetime.now().isoformat(),
+        'total_duration_ms': int((time.time() - start_time_global) * 1000),
+        'overall_success': overall_success,
+        'results': execution_results
+    }
     
-    return success
+    try:
+        with open(status_path, 'w', encoding='utf-8') as f:
+            json.dump(status_report, f, indent=2)
+        print(f"\n📝 Status written to: {status_path.name}")
+    except Exception as e:
+        print(f"\n⚠️ Failed to write status file: {e}")
+
+    return overall_success
 
 
 class TaskFileHandler(FileSystemEventHandler):

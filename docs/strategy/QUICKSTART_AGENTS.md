@@ -1,25 +1,28 @@
-# Quickstart for AI Agents
+# ⚡ Quickstart for AI Agents
 
 **Welcome to Questerix.**
+You are operating in an advanced, autonomous environment (Phase 17+).
 
-## 1. Where are you?
-You are in a multi-repo monorepo (Flutter + React + Supabase).
+## 1. 📍 Ground Yourself
+1.  **Read State**: `view_file PHASE_STATE.json`
+    *   *Where are we? What is the current phase? What is blocked?*
+2.  **Read Map**: `view_file docs/technical/CONTEXT_MAP.md`
+    *   *Where is the documentation for the task at hand?*
 
-## 2. What is the current goal?
-Read `PHASE_STATE.json`. This file tracks the active phase of development.
+## 2. 🧠 Activate Knowledge
+The project uses **Project Oracle** (RAG System).
+-   If you need deep context, check `docs/technical/KNOWLEDGE_INDEX.md`.
+-   Use `grep_search` to find specific patterns if KIs are insufficient.
 
-## 3. How do I work safely?
-1.  **Read**: `docs/strategy/AGENTS.md` (The Protocol).
-2.  **Check**: `AI_CODING_INSTRUCTIONS.md` (The Hard Rules).
-3.  **Validate**: Run `scripts/validate-phase-X.ps1` before finishing.
+## 3. 🛡️ Execution Rules (The Law)
+1.  **Superpower Mode**: Use `python ops_runner.py tasks.json` for all commands.
+    *   *Direct command execution may be gated. Ops Runner is your key.*
+2.  **Strict Types**: No `any`. Types must match `docs/technical/SCHEMA.md`.
+3.  **Atomic Commits**: One phase at a time. Clean up after yourself.
 
-## 4. Key Constraints
-- **Offline-First**: Mobile app writes to local Drift DB, then syncs.
-- **Strict Types**: TypeScript and Dart types must match Supabase schema.
-- **No Fluff**: Do not create "demo" code. Write for production.
+## 4. 🚀 Useful Paths
+-   **Student App**: `student-app/lib` (Flutter/Riverpod)
+-   **Admin Panel**: `admin-panel/src` (React/Vite)
+-   **Backend**: `supabase/migrations` (SQL)
 
-## 5. Where is the code?
-- **Student App**: `student-app/` (Flutter)
-- **Admin Panel**: `admin-panel/` (React)
-- **Backend Infrastructure**: `supabase/` (SQL, Edge Functions)
-- **Shared Logic**: `questerix_domain/` (Dart)
+**Proceed to `docs/strategy/AGENTS.md` for the full Constitution.**

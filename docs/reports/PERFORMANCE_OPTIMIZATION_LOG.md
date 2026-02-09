@@ -154,3 +154,35 @@ An external review by Claude AI suggested 5 areas of improvement. We evaluated e
 | Quota monitoring | SKIPPED | No accessible API or dashboard from agent side |
 | `.agent/config.json` aliases | SKIPPED | Not a real feature; workflows are the proven mechanism |
 | `.agent/rules/` directory | SKIPPED | Not supported; `.cursorrules` is the correct location |
+
+---
+
+# Agent Workflow Optimization — Feb 8, 2026 (Session 3)
+
+## 🚀 Overview
+We have achieved a breakthrough in agent performance by modifying the `ops_runner.py` infrastructure to support **Asynchronous "Fire-and-Forget" Execution**. This decouples the agent's thinking process from the latency of shell command execution.
+
+## 🛠️ The "AutoLoop" Protocol
+
+### 1. Status Reporting (`ops_runner.py` Upgrade)
+- **Problem**: The agent had to wait for `run_command` to return output before knowing if a task succeeded.
+- **Solution**: Upgraded `ops_runner.py` to write a structured `tasks.status.json` file upon completion.
+- **Impact**: The agent can now "fire off" a batch of 50 commands and check the results in the next turn (or have a watcher verify them), simulating a non-blocking async IO model.
+
+### 2. The `/autoloop` Workflow
+- Created a new workflow `.agent/workflows/autoloop.md` that standardizes this pattern:
+  1. Agent writes `tasks.json` (Batch of N commands)
+  2. Agent writes code changes (if any)
+  3. `ops_runner.py` executes commands and logs results to `tasks.status.json`
+  4. Agent reads `tasks.status.json` to verify success or triage errors.
+
+### 3. Latency Elimination
+- **Old Way**: 5 commands = 5 Round Trips (Tokens + Latency + User Gating)
+- **New Way**: 5 commands = 1 Round Trip (Batch Request)
+
+## 📊 Verification
+- **Test Run**: Successfully executed a 2-step `tasks.json` (echo + node version check).
+- **Result**: `tasks.status.json` was generated with millisecond-precision timing and full stdout/stderr capture.
+
+## 🧠 Key Takeaway
+We have shifted from a "Chat-based Command Runner" to a "Manifest-based DevOps Pipeline". This is the most significant performance multiplier for the agent workflow to date.

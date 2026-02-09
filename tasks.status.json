@@ -1,0 +1,20 @@
+{
+  "manifest_path": "tasks.json",
+  "timestamp": "2026-02-08T19:31:52.324070",
+  "total_duration_ms": 659,
+  "overall_success": true,
+  "results": [
+    {
+      "index": 1,
+      "description": "Cleanup temporary task files",
+      "command": "powershell -Command \"Remove-Item -Force tasks.json, tasks.status.json -ErrorAction SilentlyContinue\"",
+      "cwd": "c:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix",
+      "timestamp": "2026-02-08T19:31:51.665668",
+      "status": "success",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Set-Alias : The AllScope option cannot be removed from the \nalias 'rm'.\nAt C:\\Users\\mhali\\OneDrive\\Documents\\WindowsPowerShell\\Micros\noft.PowerShell_profile.ps1:35 char:5\n+     Set-Alias rm Remove-Item -Force -Scope Global\n+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : WriteError: (rm:String) [Set-A \n   lias], SessionStateUnauthorizedAccessException\n    + FullyQualifiedErrorId : AliasAllScopeOptionCannotBeRem \n   oved,Microsoft.PowerShell.Commands.SetAliasCommand\n \nSet-Alias : The AllScope option cannot be removed from the \nalias 'cp'.\nAt C:\\Users\\mhali\\OneDrive\\Documents\\WindowsPowerShell\\Micros\noft.PowerShell_profile.ps1:36 char:5\n+     Set-Alias cp Copy-Item -Force -Scope Global\n+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : WriteError: (cp:String) [Set-A \n   lias], SessionStateUnauthorizedAccessException\n    + FullyQualifiedErrorId : AliasAllScopeOptionCannotBeRem \n   oved,Microsoft.PowerShell.Commands.SetAliasCommand\n \nSet-Alias : The AllScope option cannot be removed from the \nalias 'mv'.\nAt C:\\Users\\mhali\\OneDrive\\Documents\\WindowsPowerShell\\Micros\noft.PowerShell_profile.ps1:37 char:5\n+     Set-Alias mv Move-Item -Force -Scope Global\n+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : WriteError: (mv:String) [Set-A \n   lias], SessionStateUnauthorizedAccessException\n    + FullyQualifiedErrorId : AliasAllScopeOptionCannotBeRem \n   oved,Microsoft.PowerShell.Commands.SetAliasCommand\n \n",
+      "duration_ms": 658
+    }
+  ]
+}
