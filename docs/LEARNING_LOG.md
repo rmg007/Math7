@@ -1,3 +1,62 @@
+## 2026-02-09: Universal Intelligence & The Hybrid Oracle Architecture
+
+### Session Context
+- **Objective**: Consolidate conflicting architecture documents and move project knowledge from local files to a governed database SSoT.
+- **Scope**: Knowledge Management, Supabase, Agent Memory, Architectural Standards.
+- **Outcome**: ✅ Created `knowledge_base` schema. Implemented `knowledge:sync` and `knowledge:seed`. Reduced "Sync Hell" by ignoring local knowledge in Git.
+
+---
+
+### Key Learnings
+
+#### 1. Knowledge Portability is the "Agent Agnostic" Barrier
+**What Happened**: Project intelligence was trapped in the `.gemini/` folder. If a different agent (or a different developer) joined the project, they lacked the "Institutional Memory" of past architectural decisions.
+**Solution**: Implemented the **Hybrid Oracle**. All Knowledge Items (KIs) are now stored in Supabase (`Verified` vs `Draft`).
+**Lesson**: AI agents shouldn't own project intelligence; the project should own its intelligence. Local files are just a "Read-ahead Cache."
+**Rule**: "The Database is the Soul; the local folder is just the L1 Cache."
+
+#### 2. The Triple SSoT Paradox (Git vs DB vs Local)
+**What Happened**: Tracking knowledge files in Git created "Sync Hell" where database updates, Git pushes, and local edits would conflict.
+**Fix**: Added `.gemini/antigravity/knowledge/` to `.gitignore`. 
+**Lesson**: Once you move to a Database-driven knowledge system, Git becomes a liability for those files. The project's "Brain" should be loaded via a sync script after `git clone`.
+**Rule**: "Version the code in Git; version the knowledge in the DB."
+
+#### 3. Deterministic Pruning Prevents "Zombie Context"
+**What Happened**: Old architecture documents related to "Phase 1" were still on the disk even after being superceded. These were "poisoning" the agent's context.
+**Solution**: The `PULL` script now includes a **Pruning Phase**. It deletes any local file that isn't present in the Supabase "Registry."
+**Impact**: The agent's memory is always a 1:1 reflection of the current "Gold Standard."
+**Rule**: "If it's not in the DB, it shouldn't be in the brain."
+
+#### 4. The "Metadata Re-Hydration" Requirement
+**What Happened**: Antigravity (the agent) doesn't just read single files; it looks for the KI folder structure (`metadata.json` + `artifacts/`).
+**Solution**: The sync script was designed to **Reconstruct** the folder hierarchy from the DB's `ki_slug` and `file_path` columns.
+**Lesson**: When moving file systems to tables, preserve the *relationships* and *structure*, not just the raw text.
+
+---
+
+### Operations & Commands
+
+| Script | Command | Purpose |
+| :--- | :--- | :--- |
+| **Sync** | `npm run knowledge:sync` | Pull Verified knowledge, Prune local zombies |
+| **Seed** | `npm run knowledge:seed` | Perform initial "Big Bang" upload of local brain |
+| **Push** | `npm run knowledge:push` | Propose local edits to the global brain (Draft status) |
+
+---
+
+### Files Modified/Created
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `scripts/knowledge-manager.ts` | Created | The Hybrid Oracle Sync/Push Engine |
+| `scripts/seed-knowledge.ts` | Created | One-time population script |
+| `docs/technical/HYBRID_ORACLE_ARCHITECTURE.md` | Created | Technical SSoT for this system |
+| `.gitignore` | Modified | Ignored knowledge directory (L1 Cache strategy) |
+| `package.json` | Modified | Added knowledge sync/push/seed scripts |
+| `artifacts/architecture/admin_panel_architecture_ssot.md` | Created | Consolidated Admin Panel SSoT |
+
+---
+
 ## 2026-02-08: Agent Memory Hygiene & Knowledge Optimization (SKOA)
 
 ### Session Context

@@ -1,3 +1,6 @@
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs/promises';
+import path from 'path';
 import os from 'os';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
@@ -37,9 +40,7 @@ async function getLocalFiles(dir: string): Promise<string[]> {
         files.push(fullPath);
       }
     }
-  } catch (e) {
-    // Directory might not exist
-  }
+  } catch (e) {}
   return files;
 }
 
@@ -83,11 +84,10 @@ async function pullKnowledge() {
     }
   }
 
-  // Pruning
   console.log('🧹 Pruning obsolete local knowledge...');
   const allLocalFiles = await getLocalFiles(ROOT_KNOWLEDGE_DIR);
   for (const localFile of allLocalFiles) {
-    if (localFile.endsWith('.keep')) continue;
+    if (localFile.endsWith('.lock') || localFile.endsWith('.keep')) continue;
     if (!validLocalPaths.has(localFile)) {
       if (!DRY_RUN) {
         await fs.unlink(localFile);
@@ -110,23 +110,12 @@ async function pushKnowledge() {
     const kiSlug = kiFolder.name;
     const kiPath = path.join(ROOT_KNOWLEDGE_DIR, kiSlug);
     
-    // Process metadata.json
-    const metadataPath = path.join(kiPath, 'metadata.json');
-    try {
-      const metadataContent = await fs.readFile(metadataPath, 'utf-8');
-      await uploadFile(kiSlug, 'metadata.json', metadataContent);
-    } catch (e) {}
-    
-    // Process artifacts
-    const artifactsDir = path.join(kiPath, 'artifacts');
-    try {
-      const artifactFiles = await getLocalFiles(artifactsDir);
-      for (const artifactFile of artifactFiles) {
-        const relativePath = path.relative(kiPath, artifactFile).replace(/\\/g, '/');
-        const content = await fs.readFile(artifactFile, 'utf-8');
-        await uploadFile(kiSlug, relativePath, content);
-      }
-    } catch (e) {}
+    const allFiles = await getLocalFiles(kiPath);
+    for (const file of allFiles) {
+      const relativePath = path.relative(kiPath, file).replace(/\\/g, '/');
+      const content = await fs.readFile(file, 'utf-8');
+      await uploadFile(kiSlug, relativePath, content);
+    }
   }
 }
 
@@ -139,7 +128,7 @@ async function uploadFile(kiSlug: string, filePath: string, content: string) {
       file_path: filePath,
       content: content,
       content_hash: hash,
-      status: 'draft', // Always push as draft
+      status: 'draft',
       last_updated_by: 'Antigravity'
     }, { onConflict: 'ki_slug,file_path' });
 

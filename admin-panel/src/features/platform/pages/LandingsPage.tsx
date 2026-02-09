@@ -76,7 +76,6 @@ export function LandingsPage() {
         app_id: selectedAppId,
         hero_headline: 'Welcome to our platform',
         hero_subheadline: 'Learn something new today with our curated curriculum.',
-        slug: apps?.find(a => a.app_id === selectedAppId)?.subdomain || '',
         meta_title: apps?.find(a => a.app_id === selectedAppId)?.display_name || 'Landing Page',
         meta_description: 'Discover the best learning experience.'
       });

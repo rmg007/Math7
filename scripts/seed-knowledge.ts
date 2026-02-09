@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import fs from 'fs/promises';
 import path from 'path';
+import os from 'os';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 
@@ -9,9 +10,14 @@ dotenv.config();
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
-const ROOT_KNOWLEDGE_DIR = path.join(process.cwd(), '.gemini/antigravity/knowledge');
+const ROOT_KNOWLEDGE_DIR = path.join(os.homedir(), '.gemini/antigravity/knowledge');
 
-const supabase = createClient(SUPABASE_URL!, SUPABASE_KEY!);
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  console.error('❌ Missing SUPABASE_URL or SUPABASE_SERVICE_KEY in environment.');
+  process.exit(1);
+}
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function calculateHash(content: string): string {
   return crypto.createHash('sha256').update(content).digest('hex');
@@ -44,10 +50,10 @@ async function seed() {
     const kiSlug = kiFolder.name;
     const kiPath = path.join(ROOT_KNOWLEDGE_DIR, kiSlug);
     
-    // Process all files in the KI folder
     const allFiles = await getLocalFiles(kiPath);
     
     for (const file of allFiles) {
+        if (file.endsWith('.lock')) continue;
         const relativePath = path.relative(kiPath, file).replace(/\\/g, '/');
         const content = await fs.readFile(file, 'utf-8');
         const hash = calculateHash(content);

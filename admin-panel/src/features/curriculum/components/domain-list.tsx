@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Plus, CheckSquare, Square, Search, X, GripVertical, Pencil, Trash2, ChevronRight, Filter, Book } from 'lucide-react'
+import { Plus, CheckSquare, Square, Search, GripVertical, Pencil, Trash2, ChevronRight, Filter, Book } from 'lucide-react'
 import { usePaginatedDomains, useDeleteDomain, useBulkDeleteDomains, useUpdateDomainOrder } from '../hooks/use-domains'
 import { useState, useEffect, useMemo } from 'react'
 import { useToast } from '@/hooks/use-toast';
@@ -561,23 +561,13 @@ export function DomainList() {
                           title={hasActiveFilters ? 'No matches found' : 'No domains yet'}
                           description={hasActiveFilters ? 'Try adjusting your search or filters to find what you are looking for.' : 'Get started by creating your first domain to organize your curriculum.'}
                           action={
-                            hasActiveFilters ? (
-                              <button
-                                onClick={clearFilters}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-                              >
-                                <X className="h-4 w-4" />
-                                Clear filters
-                              </button>
-                            ) : (
-                              <Link
-                                to="/domains/new"
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
-                              >
-                                <Plus className="h-4 w-4" />
-                                Create Domain
-                              </Link>
-                            )
+                            hasActiveFilters ? {
+                              label: "Clear filters",
+                              onClick: clearFilters
+                            } : {
+                              label: "Create Domain",
+                              onClick: () => (window.location.href = "/domains/new")
+                            }
                           }
                         />
                       </td>
@@ -610,23 +600,13 @@ export function DomainList() {
                     title={hasActiveFilters ? 'No matches found' : 'No domains yet'}
                     description={hasActiveFilters ? 'Try adjusting your search or filters.' : 'Get started by creating your first domain.'}
                     action={
-                      hasActiveFilters ? (
-                        <button
-                          onClick={clearFilters}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-                        >
-                          <X className="h-4 w-4" />
-                          Clear filters
-                        </button>
-                      ) : (
-                        <Link
-                          to="/domains/new"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Create Domain
-                        </Link>
-                      )
+                      hasActiveFilters ? {
+                        label: "Clear filters",
+                        onClick: clearFilters
+                      } : {
+                        label: "Create Domain",
+                        onClick: () => (window.location.href = "/domains/new")
+                      }
                     }
                   />
                 </div>
