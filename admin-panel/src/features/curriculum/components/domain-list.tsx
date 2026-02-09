@@ -6,13 +6,24 @@ import { useToast } from '@/hooks/use-toast';
 import { Pagination } from '@/components/ui/pagination'
 import { SortableHeader } from '@/components/ui/sortable-header'
 import { DataToolbar } from '@/components/ui/data-toolbar'
+import { EmptyState } from '@/components/ui/empty-state'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import type { DataColumn } from '@/lib/data-utils'
 
 const DOMAIN_COLUMNS: DataColumn[] = [
-  { key: 'title', header: 'title' },
-  { key: 'slug', header: 'slug' },
-  { key: 'sort_order', header: 'sort_order' },
-  { key: 'status', header: 'status' },
+  { key: 'title', header: 'Title' },
+  { key: 'updated_at', header: 'Last Modified' },
+  { key: 'sort_order', header: 'Order' },
+  { key: 'status', header: 'Status' },
 ]
 import {
   DndContext,
@@ -41,6 +52,7 @@ interface Domain {
   slug: string
   sort_order: number | null
   status: 'draft' | 'published' | 'live' | null
+  updated_at: string
 }
 
 interface SortableRowProps {
@@ -102,9 +114,17 @@ function SortableRow({ domain, isSelected, onSelect, onDelete, renderStatusBadge
       </td>
       <td className="px-6 py-4">
         <span className="font-medium text-gray-900">{domain.title}</span>
+        {/* Slug moved to title context or tooltip if needed, removing dedicated column */}
       </td>
       <td className="px-6 py-4">
-        <code className="px-2 py-1 bg-gray-100 rounded text-sm text-gray-600">{domain.slug}</code>
+        <div className="flex flex-col">
+            <span className="text-sm text-gray-900">
+                {new Date(domain.updated_at).toLocaleDateString()}
+            </span>
+            <span className="text-xs text-gray-500">
+                {new Date(domain.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+        </div>
       </td>
       <td className="px-6 py-4">
         {renderStatusBadge(domain.status || 'draft')}
@@ -182,7 +202,9 @@ function SortableCard({ domain, isSelected, onSelect, onDelete, renderStatusBadg
             </span>
             <h3 className="font-medium text-gray-900 truncate">{domain.title}</h3>
           </div>
-          <code className="px-2 py-0.5 bg-gray-100 rounded text-xs text-gray-600">{domain.slug}</code>
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <span>Modified: {new Date(domain.updated_at).toLocaleDateString()}</span>
+          </div>
         </div>
         <div className="flex-shrink-0">
           {renderStatusBadge(domain.status || 'draft')}
@@ -215,6 +237,7 @@ export function DomainList() {
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
   const [sortBy, setSortBy] = useState<string>('sort_order')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ type: 'single' | 'bulk', id?: string } | null>(null)
 
   const { data: paginatedData, isLoading, error } = usePaginatedDomains({
     page,
@@ -329,17 +352,9 @@ export function DomainList() {
     setSelectedIds(newSelected)
   }
 
-  const handleBulkDelete = async () => {
+  const handleBulkDelete = () => {
     if (selectedIds.size === 0) return
-    if (confirm(`Are you sure you want to delete ${selectedIds.size} domain(s)?`)) {
-      try {
-        await bulkDelete.mutateAsync(Array.from(selectedIds))
-        showToast(`${selectedIds.size} domain(s) deleted`, 'success')
-        setSelectedIds(new Set())
-      } catch {
-        showToast('Failed to delete domains', 'error')
-      }
-    }
+    setDeleteConfirmation({ type: 'bulk' })
   }
 
   const handleMarkLive = async () => {
@@ -375,14 +390,26 @@ export function DomainList() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this domain?')) {
-      try {
-        await deleteDomain.mutateAsync(id)
+  const handleDelete = (id: string) => {
+    setDeleteConfirmation({ type: 'single', id })
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteConfirmation) return
+
+    try {
+      if (deleteConfirmation.type === 'bulk') {
+        await bulkDelete.mutateAsync(Array.from(selectedIds))
+        showToast(`${selectedIds.size} domain(s) deleted`, 'success')
+        setSelectedIds(new Set())
+      } else if (deleteConfirmation.type === 'single' && deleteConfirmation.id) {
+        await deleteDomain.mutateAsync(deleteConfirmation.id)
         showToast('Domain deleted', 'success')
-      } catch {
-        showToast('Failed to delete domain', 'error')
       }
+    } catch {
+      showToast('Failed to delete domain(s)', 'error')
+    } finally {
+      setDeleteConfirmation(null)
     }
   }
 
@@ -562,7 +589,7 @@ export function DomainList() {
           onDragEnd={handleDragEnd}
         >
           {/* Desktop Table View */}
-          <div className="hidden md:block overflow-hidden rounded-xl border border-gray-100">
+                  <div className="hidden md:block overflow-hidden rounded-xl border border-gray-100">
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
@@ -594,8 +621,8 @@ export function DomainList() {
                   </th>
                   <th className="text-left px-6 py-4">
                     <SortableHeader
-                      label="Slug"
-                      column="slug"
+                      label="Last Modified"
+                      column="updated_at"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
@@ -617,32 +644,31 @@ export function DomainList() {
                 <tbody className="divide-y divide-gray-100">
                   {!domains.length ? (
                     <tr>
-                      <td colSpan={7} className="px-6 py-12 text-center">
-                        <div className="flex flex-col items-center">
-                          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                            <Book className="w-8 h-8 text-gray-400" />
-                          </div>
-                          <p className="text-gray-500 mb-4">
-                            {hasActiveFilters ? 'No domains match your filters.' : 'No domains found. Create one to get started.'}
-                          </p>
-                          {hasActiveFilters ? (
-                            <button
-                              onClick={clearFilters}
-                              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-                            >
-                              <X className="h-4 w-4" />
-                              Clear filters
-                            </button>
-                          ) : (
-                            <Link
-                              to="/domains/new"
-                              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
-                            >
-                              <Plus className="h-4 w-4" />
-                              Create Domain
-                            </Link>
-                          )}
-                        </div>
+                      <td colSpan={7} className="px-6 py-12">
+                        <EmptyState
+                          icon={Book}
+                          title={hasActiveFilters ? 'No matches found' : 'No domains yet'}
+                          description={hasActiveFilters ? 'Try adjusting your search or filters to find what you are looking for.' : 'Get started by creating your first domain to organize your curriculum.'}
+                          action={
+                            hasActiveFilters ? (
+                              <button
+                                onClick={clearFilters}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
+                              >
+                                <X className="h-4 w-4" />
+                                Clear filters
+                              </button>
+                            ) : (
+                              <Link
+                                to="/domains/new"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
+                              >
+                                <Plus className="h-4 w-4" />
+                                Create Domain
+                              </Link>
+                            )
+                          }
+                        />
                       </td>
                     </tr>
                   ) : (
@@ -667,32 +693,31 @@ export function DomainList() {
           <div className="md:hidden">
             <SortableContext items={domainIds} strategy={verticalListSortingStrategy}>
               {!domains.length ? (
-                <div className="rounded-xl border border-gray-100 p-8 text-center">
-                  <div className="flex flex-col items-center">
-                    <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                      <Book className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <p className="text-gray-500 mb-4">
-                      {hasActiveFilters ? 'No domains match your filters.' : 'No domains found. Create one to get started.'}
-                    </p>
-                    {hasActiveFilters ? (
-                      <button
-                        onClick={clearFilters}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-                      >
-                        <X className="h-4 w-4" />
-                        Clear filters
-                      </button>
-                    ) : (
-                      <Link
-                        to="/domains/new"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Create Domain
-                      </Link>
-                    )}
-                  </div>
+                <div className="rounded-xl border border-gray-100 p-8">
+                  <EmptyState
+                    icon={Book}
+                    title={hasActiveFilters ? 'No matches found' : 'No domains yet'}
+                    description={hasActiveFilters ? 'Try adjusting your search or filters.' : 'Get started by creating your first domain.'}
+                    action={
+                      hasActiveFilters ? (
+                        <button
+                          onClick={clearFilters}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
+                        >
+                          <X className="h-4 w-4" />
+                          Clear filters
+                        </button>
+                      ) : (
+                        <Link
+                          to="/domains/new"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Create Domain
+                        </Link>
+                      )
+                    }
+                  />
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -722,6 +747,28 @@ export function DomainList() {
           onPageSizeChange={handlePageSizeChange}
         />
       </div>
+
+      <AlertDialog open={!!deleteConfirmation} onOpenChange={(open) => !open && setDeleteConfirmation(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteConfirmation?.type === 'bulk' 
+                ? `This will permanently delete ${selectedIds.size} selected domain(s).` 
+                : "This action cannot be undone. This will permanently delete the domain and remove it from our servers."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

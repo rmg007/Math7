@@ -74,7 +74,7 @@ export function usePaginatedDomains(params: PaginationParams) {
         .is('deleted_at', null);
 
       if (search) {
-        query = query.or(`title.ilike.%${search}%,slug.ilike.%${search}%`);
+        query = query.or(`title.ilike.%${search}%,slug.ilike.%${search}%,description.ilike.%${search}%`);
       }
 
       if (status && status !== 'all') {

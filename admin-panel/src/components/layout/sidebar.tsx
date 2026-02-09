@@ -1,10 +1,15 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Book, Layers, FileText, Upload, LogOut, Settings, Key, History, Users, UserCog, Shield, Bug, AlertTriangle, Globe, Boxes, Layout } from 'lucide-react'
+import { 
+  Book, Layers, FileText, Upload, LogOut, Settings, Key, History, 
+  Users, UserCog, Shield, Bug, AlertTriangle, Globe, Boxes, Layout,
+  ChevronDown, ChevronRight
+} from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { useState, useEffect } from 'react'
+// Separator removed as it was unused
 
 interface SidebarProps {
   isOpen?: boolean
@@ -12,32 +17,54 @@ interface SidebarProps {
   isMobile?: boolean
 }
 
-const baseNavigation = [
-  // Dashboard removed as per requirement
-  { name: 'My Groups', href: '/groups', icon: Users },
-  { name: 'Domains', href: '/domains', icon: Book },
-  { name: 'Skills', href: '/skills', icon: Layers },
-  { name: 'Questions', href: '/questions', icon: FileText },
-  { name: 'Publish', href: '/publish', icon: Upload },
-  { name: 'Version History', href: '/versions', icon: History },
-  { name: 'Error Logs', href: '/error-logs', icon: AlertTriangle },
-  { name: 'Known Issues', href: '/known-issues', icon: Bug },
-]
+type NavItem = {
+  name: string
+  href: string
+  icon: React.ElementType
+  superAdminOnly?: boolean
+}
 
-const superAdminNavigation = [
-  { name: 'Invitation Codes', href: '/invitation-codes', icon: Key },
-  { name: 'User Management', href: '/users', icon: UserCog },
-  { name: 'AI Governance', href: '/governance', icon: Shield },
-]
+type NavGroup = {
+  title: string
+  items: NavItem[]
+}
 
-const platformNavigation = [
-  { name: 'Subjects', href: '/platform/subjects', icon: Boxes },
-  { name: 'Apps', href: '/platform/apps', icon: Layout },
-  { name: 'Landing Pages', href: '/platform/landings', icon: Globe },
-]
-
-const bottomNavigation = [
-  { name: 'Settings', href: '/settings', icon: Settings },
+const navigationGroups: NavGroup[] = [
+  {
+    title: 'Curriculum',
+    items: [
+      { name: 'My Groups', href: '/groups', icon: Users }, // Context aware, usually first
+      { name: 'Domains', href: '/domains', icon: Book },
+      { name: 'Subjects', href: '/platform/subjects', icon: Boxes, superAdminOnly: true },
+      { name: 'Skills', href: '/skills', icon: Layers },
+      { name: 'Questions', href: '/questions', icon: FileText },
+    ]
+  },
+  {
+    title: 'Deployment',
+    items: [
+      { name: 'Publish', href: '/publish', icon: Upload },
+      { name: 'Version History', href: '/versions', icon: History },
+      { name: 'Apps', href: '/platform/apps', icon: Layout, superAdminOnly: true },
+      { name: 'Landing Pages', href: '/platform/landings', icon: Globe, superAdminOnly: true },
+    ]
+  },
+  {
+    title: 'System Health',
+    items: [
+      { name: 'Error Logs', href: '/error-logs', icon: AlertTriangle },
+      { name: 'Known Issues', href: '/known-issues', icon: Bug },
+      { name: 'AI Governance', href: '/governance', icon: Shield, superAdminOnly: true },
+    ]
+  },
+  {
+    title: 'Admin',
+    items: [
+      { name: 'User Management', href: '/users', icon: UserCog, superAdminOnly: true },
+      { name: 'Invitation Codes', href: '/invitation-codes', icon: Key, superAdminOnly: true },
+      { name: 'Settings', href: '/settings', icon: Settings },
+    ]
+  }
 ]
 
 interface UserInfo {
@@ -52,6 +79,17 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
   const { currentApp, setCurrentApp, apps, isLoading: appsLoading } = useApp()
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
+  
+  // State for collapsible groups - default all open
+  const [openGroups, setOpenGroups] = useState<string[]>(navigationGroups.map(g => g.title))
+
+  const toggleGroup = (title: string) => {
+    setOpenGroups(prev => 
+      prev.includes(title) 
+        ? prev.filter(t => t !== title)
+        : [...prev, title]
+    )
+  }
 
   const handleNavClick = () => {
     if (isMobile && onClose) {
@@ -62,16 +100,13 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
   useEffect(() => {
     const checkRole = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      console.log('Sidebar: Current user:', user?.email)
       
       if (user) {
-        const { data: profile, error } = await supabase
+        const { data: profile } = await supabase
           .from('profiles' as never)
           .select('role, full_name, email')
           .eq('id', user.id)
           .single()
-        
-        console.log('Sidebar: Profile data:', profile, 'Error:', error)
         
         if (profile) {
           const profileData = profile as { role: string; full_name: string | null; email: string }
@@ -81,27 +116,17 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
             role: profileData.role
           })
           
-          if (profileData.role === 'super_admin') {
-            console.log('Sidebar: User is super_admin, showing invitation codes')
-            setIsSuperAdmin(true)
-          } else {
-            console.log('Sidebar: User is NOT super_admin, resetting state')
-            setIsSuperAdmin(false)
-          }
+          setIsSuperAdmin(profileData.role === 'super_admin')
         }
       } else {
-        // No user, reset state
         setUserInfo(null)
         setIsSuperAdmin(false)
       }
     }
 
-    // Initial check
     checkRole()
 
-    // Subscribe to auth changes to handle session switching (Role Flickering Fix)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Sidebar: Auth state change:', event, session?.user?.email)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         checkRole()
       } else if (event === 'SIGNED_OUT') {
@@ -114,13 +139,6 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
       subscription.unsubscribe()
     }
   }, [])
-
-  const navigation = [
-    ...baseNavigation.filter(item => !(isSuperAdmin && item.name === 'My Groups')),
-    ...(isSuperAdmin ? platformNavigation : []),
-    ...(isSuperAdmin ? superAdminNavigation : []),
-    ...bottomNavigation,
-  ]
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -182,28 +200,58 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
       </div>
       
       {/* Navigation - Scrollable Area */}
-      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto custom-scrollbar">
-        {navigation.map((item) => {
-          const isActive = location.pathname === item.href || 
-            (item.href !== '/' && location.pathname.startsWith(item.href))
+      <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto custom-scrollbar">
+        {navigationGroups.map((group) => {
+          // Filter items based on role
+          const visibleItems = group.items.filter(item => !item.superAdminOnly || isSuperAdmin);
+          const matchGroupPath = visibleItems.some(item => location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href)));
+          const isOpen = openGroups.includes(group.title);
+
           return (
-            <Link
-              key={item.name}
-              to={item.href}
-              onClick={handleNavClick}
-              className={cn(
-                "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 group relative",
-                isActive 
-                  ? "bg-white/10 text-white shadow-inner border border-white/5" 
-                  : "text-purple-200 hover:bg-white/5 hover:text-white"
+            <div key={group.title} className="space-y-1">
+               <button 
+                onClick={() => toggleGroup(group.title)}
+                className={cn(
+                  "flex items-center justify-between w-full px-2 text-[10px] font-semibold uppercase tracking-wider transition-colors group",
+                  matchGroupPath ? "text-purple-200" : "text-purple-300/60 hover:text-purple-200"
+                )}
+              >
+                {group.title}
+                {isOpen ? (
+                  <ChevronDown className="h-3 w-3 opacity-50 group-hover:opacity-100" />
+                ) : (
+                  <ChevronRight className="h-3 w-3 opacity-50 group-hover:opacity-100" />
+                )}
+              </button>
+              
+              {isOpen && (
+                <div className="space-y-1 mt-1">
+                  {visibleItems.map((item) => {
+                    const isActive = location.pathname === item.href || 
+                      (item.href !== '/' && location.pathname.startsWith(item.href))
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        onClick={handleNavClick}
+                        className={cn(
+                          "flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 group relative",
+                          isActive 
+                            ? "bg-white/10 text-white shadow-inner border border-white/5" 
+                            : "text-purple-200 hover:bg-white/5 hover:text-white"
+                        )}
+                      >
+                        <item.icon className={cn("h-4 w-4 transition-colors", isActive ? "text-purple-300" : "text-purple-400 group-hover:text-purple-200")} />
+                        {item.name}
+                        {isActive && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-purple-400 rounded-r-full shadow-[0_0_8px_rgba(192,132,252,0.5)]" />
+                        )}
+                      </Link>
+                    )
+                  })}
+                </div>
               )}
-            >
-              <item.icon className={cn("h-5 w-5 transition-colors", isActive ? "text-purple-300" : "text-purple-400 group-hover:text-purple-200")} />
-              {item.name}
-              {isActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-purple-400 rounded-r-full shadow-[0_0_8px_rgba(192,132,252,0.5)]" />
-              )}
-            </Link>
+            </div>
           )
         })}
       </nav>
