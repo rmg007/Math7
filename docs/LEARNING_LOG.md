@@ -1944,3 +1944,50 @@ Get-ChildItem -Path admin-panel\src -Recurse -Include *.ts,*.tsx |
 | `docs/LEARNING_LOG.md` | Updated | This entry |
 
 ---
+## 2026-02-08: Cloud & IDE Environment Standardization
+
+### Session Context
+- **Objective**: Standardize development environments for Replit, Codespaces, and modern AI IDEs (Cursor, Windsurf, VS Code).
+- **Scope**: Root configuration files (`.vscode`, `.devcontainer`, `.replit`, `replit.nix`) and technical documentation.
+- **Outcome**: ✅ Created "One-Click" setup for Replit/Codespaces and optimized rules for 3 major AI IDEs.
+
+---
+
+### Key Learnings
+
+#### 1. Replit.nix is Mandatory for Modern Replit
+**What Happened**: The project relied on legacy `.replit` configuration. Modern Replit requires `replit.nix` to define system-level dependencies (Node, Java, Flutter).
+**Fix**: Created `replit.nix` explicitly listing `pkgs.flutter`, `pkgs.jdk17_headless`, and `pkgs.postgresql`.
+**Lesson**: Without `replit.nix`, the environment is ephemeral and missing core tools. Always define the environment declaratively.
+
+#### 2. AI IDEs Need Explicit Context Rules
+**Observation**: Different AI IDEs look for different rule files:
+- **Cursor**: Looks for `.cursorrules` (Already existed, optimized).
+- **Windsurf** (Codeium): Looks for `.windsurfrules` (Created).
+- **VS Code** (Copilot): Looks for `.github/copilot-instructions.md` (Already existed).
+**Strategy**: We duplicated the "Core Context" principles (Map, State, Law) across all these files to ensure consistent agent behavior regardless of the tool used. "Write once, distribute everywhere" applies to agent rules too.
+
+#### 3. Parallel Workflows in Replit
+**Pattern**: Used `[[workflows.workflow]]` in `.replit` to define a "Project" workflow that starts both Admin Panel and Student App in parallel.
+```toml
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+```
+**Benefit**: One click on "Run" starts the entire stack, mimicking `docker-compose` behavior but in Replit's native environment.
+
+---
+
+### Files Modified/Created
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `replit.nix` | Created | OS-level dependencies for Replit |
+| `.replit` | Updated | Parallel run configuration and port mapping |
+| `docs/technical/CLOUD_DEV.md` | Created | Guide for Replit/Codespaces |
+| `docs/technical/IDE_SETUP.md` | Created | Guide for Cursor/Windsurf/VS Code |
+| `.vscode/launch.json` | Created | Debug configurations for VS Code |
+| `.vscode/extensions.json` | Created | Recommended extension pack |
+| `.windsurfrules` | Created | Context rules for Windsurf AI |
+| `docs/technical/CONTEXT_MAP.md` | Updated | Added new documentation entries |
+| `README.md` | Updated | Added links to new guides |

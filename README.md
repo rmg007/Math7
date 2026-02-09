@@ -37,6 +37,8 @@ The project consists of:
 - `docs/operational/CI_CONTRACT.md`
 - `docs/technical/VALIDATION.md`
 - `docs/technical/MCP_SETUP_GUIDE.md`
+- `docs/technical/CLOUD_DEV.md` (Replit & Codespaces)
+- `docs/technical/IDE_SETUP.md` (Cursor, Windsurf, VS Code)
 
 ## 🤖 For AI Agents
 

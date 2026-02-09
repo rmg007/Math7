@@ -20,6 +20,8 @@
 | `docs/technical/ADMIN_PANEL_ARCHITECTURE.md` | React/Vite/TanStack architecture deep dive. |
 | `docs/technical/SECRETS_MANAGEMENT.md` | How to handle `.env`, Supabase keys, and CI secrets. |
 | `docs/technical/best_practices.md` | Code style, linting rules, and preferred patterns. |
+| `docs/technical/CLOUD_DEV.md` | **Cloud Setup**. Replit & GitHub Codespaces configuration. |
+| `docs/technical/IDE_SETUP.md` | **Editor Setup**. Cursor, Windsurf, & VS Code optimization. |
 
 ## ⚙️ Operational & CI/CD
 | File | Purpose |

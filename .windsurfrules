@@ -1,0 +1,23 @@
+# Questerix Context & Rules for Windsurf (Codeium)
+
+## 🧠 Core Context
+1. **The Map**: `view_file docs/technical/CONTEXT_MAP.md`
+2. **The State**: `view_file PHASE_STATE.json`
+3. **The Law**: `view_file docs/strategy/AGENTS.md`
+
+## 🛑 NON-NEGOTIABLE
+1. **SUPERPOWER MODE**: Always use `python ops_runner.py tasks.json` for shell commands.
+   - Do NOT run `npm` or `flutter` directly in the terminal if prompted for approval.
+2. **ROOT LOCK**: Do not create files in the root directory. Use `docs/` or `artifacts/`.
+3. **SKIP LANDING PAGES**: When running deployment scripts, use `-SkipLanding`.
+
+## ⚡ Efficiency
+- Batch edits whenever possible.
+- Chain commands in `tasks.json`.
+- Read file outlines before full content.
+- Be concise.
+
+## 📍 Nav
+- **Student App**: `student-app/`
+- **Admin Panel**: `admin-panel/`
+- **Backend**: `supabase/`
