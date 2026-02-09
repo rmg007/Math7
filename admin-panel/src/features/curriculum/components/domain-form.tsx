@@ -34,6 +34,7 @@ export function DomainForm() {
   const isEditing = Boolean(id)
   const existingDomain = domains?.find(d => d.domain_id === id)
 
+  const {
     register,
     handleSubmit,
     reset,

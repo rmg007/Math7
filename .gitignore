@@ -75,6 +75,9 @@ deploy-*.log
 admin-panel/dist/
 student-app/build/
 
+# Drizzle migrations (auto-generated)
+migrations/
+
 
 #Ignore vscode AI rules
 .github\instructions\codacy.instructions.md
