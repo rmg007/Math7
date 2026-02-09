@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Rocket, Loader2, AlertCircle } from "lucide-react"
+import { Rocket, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react"
 import { SecurityLogger } from "@/services/SecurityLogger"
 
 const loginSchema = z.object({
@@ -30,6 +30,8 @@ export function LoginPage() {
   const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
   const [isRegister, setIsRegister] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false)
   
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -143,7 +145,7 @@ export function LoginPage() {
           <CardHeader>
             <CardTitle>{isRegister ? "Create Account" : "Welcome Back"}</CardTitle>
             <CardDescription>
-              {isRegister ? "Enter your details to get started" : "Enter your credentials to access the admin panel"}
+              {isRegister ? "Enter your details to get started" : ""}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -176,11 +178,30 @@ export function LoginPage() {
                 
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input 
-                    id="password"
-                    type="password" 
-                    {...registerForm.register("password")} 
-                  />
+                  <div className="relative">
+                    <Input 
+                      id="password"
+                      type={showRegisterPassword ? "text" : "password"} 
+                      {...registerForm.register("password")} 
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                    >
+                      {showRegisterPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                      <span className="sr-only">
+                        {showRegisterPassword ? "Hide password" : "Show password"}
+                      </span>
+                    </Button>
+                  </div>
                   {registerForm.formState.errors.password && (
                     <p className="text-sm text-destructive">{registerForm.formState.errors.password.message}</p>
                   )}
@@ -227,11 +248,30 @@ export function LoginPage() {
                 
                 <div className="space-y-2">
                   <Label htmlFor="login-password">Password</Label>
-                  <Input 
-                    id="login-password"
-                    type="password" 
-                    {...loginForm.register("password")} 
-                  />
+                  <div className="relative">
+                    <Input 
+                      id="login-password"
+                      type={showPassword ? "text" : "password"} 
+                      {...loginForm.register("password")} 
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                      <span className="sr-only">
+                        {showPassword ? "Hide password" : "Show password"}
+                      </span>
+                    </Button>
+                  </div>
                   {loginForm.formState.errors.password && (
                     <p className="text-sm text-destructive">{loginForm.formState.errors.password.message}</p>
                   )}

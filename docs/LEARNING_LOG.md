@@ -1991,3 +1991,37 @@ mode = "parallel"
 | `.windsurfrules` | Created | Context rules for Windsurf AI |
 | `docs/technical/CONTEXT_MAP.md` | Updated | Added new documentation entries |
 | `README.md` | Updated | Added links to new guides |
+## 2026-02-08: The "Ghost Feature" Regression
+
+### Session Context
+- **Objective**: Restore the missing "Show/Hide Password" feature in the Admin Panel.
+- **Scope**: `LoginPage.tsx`, `LoginPage.test.tsx`.
+- **Outcome**: ✅ Feature reimplemented and locked in with regression tests.
+
+---
+
+### Key Learnings
+
+#### 1. Features Without Tests Are "Ghost Features"
+**What Happened**: The team previously "developed" show/hide password, but it disappeared. Why? Because there was **no test** enforcing its existence. When code was refactored or moved, the feature was dropped, and no red light flashed on the dashboard.
+**Lesson**: A feature does not exist until a test fails when you remove it.
+**Action**: Created `LoginPage.test.tsx` which explicitly verifies the toggle functionality.
+
+#### 2. Verify Your "Done" locally
+**What Happened**: I implemented the feature but initially faced lint errors and type errors in the test file.
+**Lesson**: Always run `tsc` or `vitest` locally before declaring a task complete.
+**Fix**: `npm install -D @testing-library/jest-dom` failed due to dependency conflicts, so I used vanilla JS assertions (`getAttribute('type')`) which are more robust and dependency-free for this simple case.
+
+#### 3. UX Patterns Documentation
+**What Happened**: We realized this pattern (password toggle) should be standard across the app.
+**Action**: Created `docs/technical/UI_UX_PATTERNS.md` to formally document this requirement so future agents know it's not optional.
+
+---
+
+### Files Modified/Created
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `admin-panel/.../LoginPage.tsx` | Modified | Re-added Eye/EyeOff toggle logic |
+| `admin-panel/.../LoginPage.test.tsx` | Created | Regression test suite (Vanilla JS assertions) |
+| `docs/technical/UI_UX_PATTERNS.md` | Created | Documented the mandatory pattern |

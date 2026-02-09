@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Plus, CheckSquare, Square, Search, X, Trash, Book, GripVertical } from 'lucide-react'
+import { Plus, CheckSquare, Square, Search, X, Trash, Book, GripVertical, Layout, Pencil, Trash2, ChevronRight, Filter } from 'lucide-react'
 import { usePaginatedDomains, useDeleteDomain, useBulkDeleteDomains, useBulkUpdateDomainsStatus, useUpdateDomainOrder } from '../hooks/use-domains'
 import { useState, useEffect, useMemo } from 'react'
 import { useToast } from '@/hooks/use-toast';
@@ -20,10 +20,10 @@ import {
 import type { DataColumn } from '@/lib/data-utils'
 
 const DOMAIN_COLUMNS: DataColumn[] = [
-  { key: 'title', header: 'Title' },
-  { key: 'updated_at', header: 'Last Modified' },
-  { key: 'sort_order', header: 'Order' },
-  { key: 'status', header: 'Status' },
+  { key: 'sort_order', header: 'ORD.' },
+  { key: 'title', header: 'DOMAIN TITLE & ID' },
+  { key: 'updated_at', header: 'MODIFIED' },
+  { key: 'status', header: 'STATUS' },
 ]
 import {
   DndContext,
@@ -91,7 +91,7 @@ function SortableRow({ domain, isSelected, onSelect, onDelete, renderStatusBadge
           <button
             {...attributes}
             {...listeners}
-            className="p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing touch-none"
+            className="p-2 text-gray-500 hover:text-gray-700 cursor-grab active:cursor-grabbing touch-none"
             aria-label="Drag to reorder"
           >
             <GripVertical className="h-5 w-5" />
@@ -102,19 +102,21 @@ function SortableRow({ domain, isSelected, onSelect, onDelete, renderStatusBadge
           </div>
         )}
       </td>
-      <td className="px-4 py-4">
+      <td className="px-4 py-3">
         <button onClick={() => onSelect(domain.domain_id)} className="text-gray-400 hover:text-gray-600">
           {isSelected ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
         </button>
       </td>
       <td className="px-6 py-4">
-        <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-purple-100 text-purple-700 font-semibold text-sm">
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-blue-50 text-blue-700 font-bold text-sm">
           {domain.sort_order ?? 0}
         </span>
       </td>
       <td className="px-6 py-4">
-        <span className="font-medium text-gray-900">{domain.title}</span>
-        {/* Slug moved to title context or tooltip if needed, removing dedicated column */}
+        <div className="flex flex-col gap-1">
+             <span className="font-bold text-gray-900 text-sm tracking-tight">{domain.title}</span>
+             <span className="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: {domain.domain_id.substring(0, 8)}...</span>
+        </div>
       </td>
       <td className="px-6 py-4">
         <div className="flex flex-col">
@@ -129,19 +131,21 @@ function SortableRow({ domain, isSelected, onSelect, onDelete, renderStatusBadge
       <td className="px-6 py-4">
         {renderStatusBadge(domain.status || 'draft')}
       </td>
-      <td className="px-6 py-4 text-right">
+      <td className="px-4 py-3 text-right">
         <div className="flex items-center justify-end gap-2">
           <Link
             to={`/domains/${domain.domain_id}/edit`}
-            className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
+            className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+            title="Edit Domain"
           >
-            Edit
+            <Pencil className="h-4 w-4" />
           </Link>
           <button
             onClick={() => onDelete(domain.domain_id)}
-            className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium hover:bg-red-200 transition-colors"
+            className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+            title="Delete Domain"
           >
-            Delete
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
       </td>
@@ -213,15 +217,15 @@ function SortableCard({ domain, isSelected, onSelect, onDelete, renderStatusBadg
       <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
         <Link
           to={`/domains/${domain.domain_id}/edit`}
-          className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
+          className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
         >
-          Edit
+          <Pencil className="h-4 w-4" />
         </Link>
         <button
           onClick={() => onDelete(domain.domain_id)}
-          className="px-4 py-2 bg-red-100 text-red-700 rounded-full text-sm font-medium hover:bg-red-200 transition-colors"
+          className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
         >
-          Delete
+          <Trash2 className="h-4 w-4" />
         </button>
       </div>
     </div>
@@ -432,28 +436,20 @@ export function DomainList() {
     setPage(1)
   }
 
-  const renderStatusBadge = (status: string) => {
-    switch (status) {
-      case 'live':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            Live
-          </span>
-        )
-      case 'published':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-            Published
-          </span>
-        )
-      default:
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-            Draft
-          </span>
-        )
-    }
-  }
+    const statusMapping = {
+      live: { label: 'LIVE', className: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+      published: { label: 'PUBLISHED', className: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
+      draft: { label: 'DRAFT', className: 'bg-orange-50 text-orange-600 border-orange-100' },
+      default: { label: 'UNKNOWN', className: 'bg-gray-100 text-gray-600 border-gray-200' }
+    };
+
+    const config = statusMapping[status as keyof typeof statusMapping] || statusMapping.default;
+
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide border ${config.className}`}>
+        {config.label}
+      </span>
+    )
 
   if (isLoading) {
     return (
@@ -477,171 +473,130 @@ export function DomainList() {
   const isAllSelected = domains.length ? selectedIds.size === domains.length : false
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Domains</h2>
-          <p className="mt-1 text-sm md:text-base text-gray-500">Manage curriculum domains</p>
+    <div className="space-y-6">
+      {/* Breadcrumbs & Header */}
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 text-xs font-semibold tracking-wider text-gray-500 uppercase">
+          <span>Curriculum</span>
+          <ChevronRight className="h-3 w-3" />
+          <span className="text-purple-600">Domains</span>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <DataToolbar
-            data={domains}
-            columns={DOMAIN_COLUMNS}
-            entityName="Domains"
-            importDisabled={true}
-            importDisabledMessage="Domain import is not available. Please create domains manually."
-          />
-          <Link
-            to="/domains/new"
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 min-h-[48px] bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto"
-          >
-            <Plus className="h-5 w-5" />
-            <span>New Domain</span>
-          </Link>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Curriculum Domains</h2>
+            <p className="text-gray-500 mt-1 text-sm md:text-base">Configure and organize the high-level educational areas.</p>
+          </div>
+          <div className="flex items-center gap-3">
+             <div className="hidden md:flex bg-gray-100 p-1 rounded-lg">
+                <button className="px-4 py-1.5 text-sm font-medium bg-white shadow-sm rounded-md text-gray-900">Active</button>
+                <button className="px-4 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-900">Archived</button>
+             </div>
+             <Link
+              to="/domains/new"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              <Plus className="h-4 w-4" />
+              <span>New Domain</span>
+            </Link>
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
-        <div className="space-y-3 md:space-y-4 mb-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Filter Bar */}
+        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-white">
+             <div className="relative flex-1 w-full md:max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search domains..."
+                placeholder="Search by domain title or unique ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 min-h-[48px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-base"
+                className="w-full pl-10 pr-4 py-2 text-sm rounded-lg border border-gray-200 bg-gray-50/50 text-gray-700 focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-200 transition-all placeholder:text-gray-400"
               />
             </div>
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <X className="h-4 w-4" />
-                <span>Clear filters</span>
-              </button>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2 w-full sm:w-auto">
-              <label className="text-sm font-medium text-gray-600">Status:</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'published' | 'live')}
-                className="px-3 py-3 min-h-[48px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-base w-full sm:w-auto"
-              >
-                <option value="all">All Status</option>
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-                <option value="live">Live</option>
-              </select>
+            
+             <div className="flex items-center gap-3 w-full md:w-auto">
+               <div className="relative w-full md:w-48">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'published' | 'live')}
+                    className="w-full appearance-none pl-4 pr-10 py-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors cursor-pointer"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                    <option value="live">Live</option>
+                  </select>
+                  <Filter className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+               </div>
             </div>
-
-            {isDragDisabled && sortBy === 'sort_order' && (
-              <span className="text-xs md:text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
-                Clear filters to enable drag reordering
-              </span>
-            )}
-
-            {selectedIds.size > 0 && (
-              <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-                <span className="text-sm text-gray-600 w-full sm:w-auto">{selectedIds.size} selected</span>
-                <button
-                  onClick={handleMarkPublished}
-                  disabled={bulkUpdateStatus.isPending}
-                  className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors flex-1 sm:flex-none"
-                >
-                  Mark Published
-                </button>
-                <button
-                  onClick={handleMarkLive}
-                  disabled={bulkUpdateStatus.isPending}
-                  className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors flex-1 sm:flex-none"
-                >
-                  Mark Live
-                </button>
-                <button
-                  onClick={handleMarkDraft}
-                  disabled={bulkUpdateStatus.isPending}
-                  className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex-1 sm:flex-none"
-                >
-                  Mark Draft
-                </button>
-                <button
-                  onClick={handleBulkDelete}
-                  disabled={bulkDelete.isPending}
-                  className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors flex-1 sm:flex-none"
-                >
-                  <Trash className="h-4 w-4" />
-                  <span>Delete</span>
-                </button>
-              </div>
-            )}
-          </div>
         </div>
 
+        <div className="p-0">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
           {/* Desktop Table View */}
-                  <div className="hidden md:block overflow-hidden rounded-xl border border-gray-100">
+                  <div className="hidden md:block overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="text-left px-2 py-4 w-10">
+                <tr className="bg-white border-b border-gray-100">
+                  <th className="text-left px-4 py-3 w-10">
                     <span className="sr-only">Drag handle</span>
                   </th>
-                  <th className="text-left px-4 py-4 w-10">
+                  <th className="text-left px-4 py-3 w-10">
                     <button onClick={handleSelectAll} className="text-gray-400 hover:text-gray-600">
                       {isAllSelected && domains.length > 0 ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
                     </button>
                   </th>
-                  <th className="text-left px-6 py-4">
+                  <th className="text-left px-6 py-3">
                     <SortableHeader
-                      label="Order"
-                      column="sort_order"
-                      currentSortBy={sortBy}
-                      currentSortOrder={sortOrder}
-                      onSort={handleSort}
+                        label="ORD."
+                        column="sort_order"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                        className="text-xs font-bold text-gray-400 uppercase tracking-wider"
                     />
                   </th>
-                  <th className="text-left px-6 py-4">
+                  <th className="text-left px-6 py-3">
                     <SortableHeader
-                      label="Title"
+                      label="DOMAIN TITLE & ID"
                       column="title"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
+                      className="text-xs font-bold text-gray-400 uppercase tracking-wider"
                     />
                   </th>
-                  <th className="text-left px-6 py-4">
+                  <th className="text-left px-6 py-3">
                     <SortableHeader
-                      label="Last Modified"
+                      label="MODIFIED"
                       column="updated_at"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
+                      className="text-xs font-bold text-gray-400 uppercase tracking-wider"
                     />
                   </th>
-                  <th className="text-left px-6 py-4">
+                  <th className="text-left px-6 py-3">
                     <SortableHeader
-                      label="Status"
+                      label="STATUS"
                       column="status"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
+                      className="text-xs font-bold text-gray-400 uppercase tracking-wider"
                     />
                   </th>
-                  <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
+                  <th className="text-right px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">ACTIONS</th>
                 </tr>
               </thead>
               <SortableContext items={domainIds} strategy={verticalListSortingStrategy}>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-50">
                   {!domains.length ? (
                     <tr>
                       <td colSpan={7} className="px-6 py-12">
@@ -737,6 +692,7 @@ export function DomainList() {
             </SortableContext>
           </div>
         </DndContext>
+        </div>
 
         <Pagination
           currentPage={page}

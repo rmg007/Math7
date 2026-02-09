@@ -34,7 +34,6 @@ export function DomainForm() {
   const isEditing = Boolean(id)
   const existingDomain = domains?.find(d => d.domain_id === id)
 
-  const {
     register,
     handleSubmit,
     reset,
@@ -49,6 +48,25 @@ export function DomainForm() {
       status: 'draft',
     }
   })
+
+  // Auto-set sort order for new domains
+  useEffect(() => {
+    if (!isEditing && domains) {
+      const maxOrder = domains.reduce((max, d) => Math.max(max, d.sort_order ?? 0), 0)
+      
+      // Only set if the user hasn't manually interacted with it (simplest check is if it's 0, 
+      // though this might overwrite if they typed 0 intentionally. 
+      // Better to just set it once. But React Hook Form defaultValues is static.)
+      // We will perform a reset with the calculated value.
+       reset({
+        title: '',
+        slug: '',
+        description: '',
+        sort_order: maxOrder + 1,
+        status: 'draft',
+      })
+    }
+  }, [domains, isEditing, reset])
 
   useEffect(() => {
     if (existingDomain) {
