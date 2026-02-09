@@ -72,8 +72,8 @@ export function LoginPage() {
     
     // Validate invitation code against database
     const { data: isValid, error: validateError } = await supabase.rpc(
-      'validate_invitation_code' as never,
-      { p_code: data.inviteCode } as never
+      'validate_invitation_code',
+      { p_code: data.inviteCode }
     )
     
     if (validateError || !isValid) {
@@ -123,7 +123,7 @@ export function LoginPage() {
     }
 
     // Mark invitation code as used
-    await supabase.rpc('use_invitation_code' as never, { p_code: data.inviteCode } as never)
+    await supabase.rpc('use_invitation_code', { p_code: data.inviteCode })
 
     navigate("/")
   }

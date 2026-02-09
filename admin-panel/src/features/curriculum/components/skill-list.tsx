@@ -36,24 +36,14 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+import type { Tables } from '@/lib/database.types';
+
 const DEFAULT_PAGE_SIZE = 10;
 
-//Type for skill list rows (API returns expanded data with joins)
-interface SkillListItem {
-    skill_id: string;
-    title: string;
-    slug: string;
-    sort_order: number | null;
-    status: 'draft' | 'published' | 'live' | null;
-    difficulty_level: number | null;
-    domain_id: string | null;
+// Skill list type — DB Row extended with the joined domain relation from the query
+type SkillListItem = Tables<'skills'> & {
     domains?: { title: string } | null;
-    app_id: string;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
-    description: string | null;
-}
+};
 
 interface SortableRowProps {
     skill: SkillListItem;

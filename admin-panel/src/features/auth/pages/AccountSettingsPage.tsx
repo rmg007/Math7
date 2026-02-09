@@ -4,14 +4,9 @@ import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { formatIdentifier } from "@/lib/format-utils"
+import type { Tables } from '@/lib/database.types'
 
-interface UserProfile {
-  id: string
-  email: string
-  full_name: string | null
-  role: string
-  created_at: string
-}
+type UserProfile = Tables<'profiles'>
 
 export function AccountSettingsPage() {
   const navigate = useNavigate()
@@ -28,20 +23,24 @@ export function AccountSettingsPage() {
       const { data: { user: authUser } } = await supabase.auth.getUser()
       if (authUser) {
         const { data: profile } = await supabase
-          .from('profiles' as never)
+          .from('profiles')
           .select('*')
           .eq('id', authUser.id)
           .single()
         
         if (profile) {
-          setUser(profile as unknown as UserProfile)
+          setUser(profile)
         } else {
           setUser({
             id: authUser.id,
             email: authUser.email || '',
             full_name: authUser.user_metadata?.full_name || null,
             role: 'admin',
-            created_at: authUser.created_at
+            created_at: authUser.created_at,
+            app_id: null,
+            avatar_url: null,
+            deleted_at: null,
+            updated_at: authUser.created_at,
           })
         }
       }
@@ -55,7 +54,7 @@ export function AccountSettingsPage() {
     setError(null)
     
     try {
-      const { error: rpcError } = await supabase.rpc('deactivate_own_account' as never)
+      const { error: rpcError } = await supabase.rpc('deactivate_own_account')
       
       if (rpcError) {
         throw rpcError
@@ -80,7 +79,7 @@ export function AccountSettingsPage() {
     setError(null)
     
     try {
-      const { error: rpcError } = await supabase.rpc('delete_own_account' as never)
+      const { error: rpcError } = await supabase.rpc('delete_own_account')
       
       if (rpcError) {
         throw rpcError

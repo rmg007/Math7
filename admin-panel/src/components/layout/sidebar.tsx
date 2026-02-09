@@ -104,20 +104,19 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
       
       if (user) {
         const { data: profile } = await supabase
-          .from('profiles' as never)
+          .from('profiles')
           .select('role, full_name, email')
           .eq('id', user.id)
           .single()
         
         if (profile) {
-          const profileData = profile as { role: string; full_name: string | null; email: string }
           setUserInfo({
-            email: profileData.email || user.email || '',
-            fullName: profileData.full_name,
-            role: profileData.role
+            email: profile.email || user.email || '',
+            fullName: profile.full_name,
+            role: profile.role
           })
           
-          setIsSuperAdmin(profileData.role === 'super_admin')
+          setIsSuperAdmin(profile.role === 'super_admin')
         }
       } else {
         setUserInfo(null)

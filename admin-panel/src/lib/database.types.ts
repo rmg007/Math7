@@ -909,9 +909,6 @@ export type Database = {
       kb_registry: {
         Row: {
           created_at: string | null
-          created_by: string | null
-          description: string | null
-          error_message: string | null
           id: string
           last_deployed_at: string | null
           live_url: string | null
@@ -924,9 +921,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          error_message?: string | null
           id?: string
           last_deployed_at?: string | null
           live_url?: string | null
@@ -939,9 +933,6 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          error_message?: string | null
           id?: string
           last_deployed_at?: string | null
           live_url?: string | null
@@ -950,6 +941,42 @@ export type Database = {
           status?: string | null
           tech_stack?: Json | null
           type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      knowledge_base: {
+        Row: {
+          content: string
+          content_hash: string
+          embedding: string | null
+          file_path: string
+          id: number
+          ki_slug: string
+          last_updated_by: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          content_hash: string
+          embedding?: string | null
+          file_path: string
+          id?: never
+          ki_slug: string
+          last_updated_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          content_hash?: string
+          embedding?: string | null
+          file_path?: string
+          id?: never
+          ki_slug?: string
+          last_updated_by?: string | null
+          status?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1065,6 +1092,60 @@ export type Database = {
           retry_count?: number
           synced_at?: string | null
           table_name?: string
+        }
+        Relationships: []
+      }
+      pr_audit_logs: {
+        Row: {
+          action_taken: string
+          confidence: number
+          created_at: string | null
+          file_path: string
+          id: string
+          line_number: number | null
+          llm_model: string | null
+          pr_number: number
+          pr_title: string | null
+          pr_url: string
+          raw_llm_response: Json | null
+          repo: string
+          rule_id: string
+          rule_name: string
+          violation_summary: string
+        }
+        Insert: {
+          action_taken?: string
+          confidence: number
+          created_at?: string | null
+          file_path: string
+          id?: string
+          line_number?: number | null
+          llm_model?: string | null
+          pr_number: number
+          pr_title?: string | null
+          pr_url: string
+          raw_llm_response?: Json | null
+          repo?: string
+          rule_id: string
+          rule_name: string
+          violation_summary: string
+        }
+        Update: {
+          action_taken?: string
+          confidence?: number
+          created_at?: string | null
+          file_path?: string
+          id?: string
+          line_number?: number | null
+          llm_model?: string | null
+          pr_number?: number
+          pr_title?: string | null
+          pr_url?: string
+          raw_llm_response?: Json | null
+          repo?: string
+          rule_id?: string
+          rule_name?: string
+          violation_summary?: string
         }
         Relationships: []
       }

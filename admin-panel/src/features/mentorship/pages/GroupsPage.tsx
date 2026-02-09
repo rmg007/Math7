@@ -4,14 +4,9 @@ import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import type { Tables } from '@/lib/database.types'
 
-
-interface Group {
-  id: string
-  name: string
-  type: 'class' | 'family'
-  join_code: string
-}
+type Group = Tables<'groups'>
 
 export function GroupsPage() {
   const { data: groups, isLoading } = useGroups()

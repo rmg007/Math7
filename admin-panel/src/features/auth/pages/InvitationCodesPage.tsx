@@ -2,17 +2,9 @@ import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import type { Tables } from '@/lib/database.types'
 
-interface InvitationCode {
-  id: string
-  code: string
-  created_by: string | null
-  expires_at: string | null
-  max_uses: number
-  times_used: number
-  is_active: boolean
-  created_at: string
-}
+type InvitationCode = Tables<'invitation_codes'>
 
 export function InvitationCodesPage() {
   const [codes, setCodes] = useState<InvitationCode[]>([])
@@ -27,7 +19,7 @@ export function InvitationCodesPage() {
   const fetchCodes = async () => {
     setLoading(true)
     const { data, error } = await supabase
-      .from('invitation_codes' as never)
+      .from('invitation_codes')
       .select('*')
       .order('created_at', { ascending: false })
 
@@ -51,11 +43,11 @@ export function InvitationCodesPage() {
 
     try {
       const { data: newCode, error: genError } = await supabase.rpc(
-        'generate_invitation_code' as never,
+        'generate_invitation_code',
         {
           p_max_uses: parseInt(maxUses) || 1,
-          p_expires_days: expiresDays ? parseInt(expiresDays) : null
-        } as never
+          p_expires_days: expiresDays ? parseInt(expiresDays) : undefined
+        }
       )
 
       if (genError) throw genError
@@ -75,8 +67,8 @@ export function InvitationCodesPage() {
   const handleDeactivateCode = async (codeId: string) => {
     try {
       const { error: deactError } = await supabase.rpc(
-        'deactivate_invitation_code' as never,
-        { p_code_id: codeId } as never
+        'deactivate_invitation_code',
+        { p_code_id: codeId }
       )
 
       if (deactError) throw deactError
@@ -200,7 +192,7 @@ export function InvitationCodesPage() {
               <tbody className="divide-y divide-gray-100">
                 {codes.map((code) => {
                   const isExpired = code.expires_at && new Date(code.expires_at) < new Date()
-                  const isExhausted = code.times_used >= code.max_uses
+                  const isExhausted = (code.times_used ?? 0) >= (code.max_uses ?? 1)
                   const isUsable = code.is_active && !isExpired && !isExhausted
 
                   return (

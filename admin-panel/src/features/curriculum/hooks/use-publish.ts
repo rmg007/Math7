@@ -2,11 +2,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useApp } from '@/hooks/use-app';
+import type { Tables } from '@/lib/database.types';
 
-interface CurriculumMeta {
-  version: number;
-  last_published_at: string | null;
-}
+type CurriculumMeta = Pick<Tables<'curriculum_meta'>, 'version' | 'last_published_at'>;
 
 interface PublishStats {
   draftDomains: number;

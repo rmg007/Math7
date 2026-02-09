@@ -23,7 +23,7 @@ export async function governedGenerateQuestions(
   const { error: quotaError } = await supabase.rpc('consume_tenant_tokens', {
     p_app_id: appId,
     p_token_count: 0,
-  } as never);
+  });
 
   if (quotaError) throw quotaError;
   // If no error, we are good to go.
@@ -45,7 +45,7 @@ export async function governedGenerateQuestions(
   const { error: finalQuotaError } = await supabase.rpc('consume_tenant_tokens', {
     p_app_id: appId,
     p_token_count: actualTokens,
-  } as never);
+  });
 
   if (finalQuotaError) console.error('Failed to log final token usage:', finalQuotaError);
 

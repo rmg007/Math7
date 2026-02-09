@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import type { Json } from '@/lib/database.types';
 
 export type SecurityEventSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical';
 
@@ -16,15 +17,13 @@ class SecurityLoggerService {
    */
   async log(data: SecurityEventData): Promise<void> {
     try {
-      // @ts-expect-error - RPC call types are dynamic
       const { error } = await supabase.rpc('log_security_event', {
         p_event_type: data.eventType,
         p_severity: data.severity,
-        p_metadata: data.metadata || {},
-        p_app_id: data.appId || null,
-        // Location is optional and often handled by the edge function/RPC via headers
-        p_location: null 
-      } as unknown as { error: unknown }); // RPC type casting workaround
+        p_metadata: (data.metadata || {}) as Json,
+        p_app_id: data.appId || undefined,
+        p_location: undefined,
+      });
 
       if (error) {
         if (import.meta.env.DEV) {

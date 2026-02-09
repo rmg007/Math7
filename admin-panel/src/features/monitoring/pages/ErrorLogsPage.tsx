@@ -298,7 +298,7 @@ export function ErrorLogsPage() {
                     <TableCell>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="w-3 h-3" />
-                        {new Date(error.created_at).toLocaleString()}
+                        {new Date(error.created_at ?? '').toLocaleString()}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
@@ -389,11 +389,11 @@ export function ErrorLogsPage() {
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Occurred At</Label>
-                  <p className="text-xs">{new Date(selectedError.occurred_at || selectedError.created_at).toLocaleString()}</p>
+                  <p className="text-xs">{new Date(selectedError.occurred_at || selectedError.created_at || '').toLocaleString()}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Logged At</Label>
-                  <p className="text-xs">{new Date(selectedError.created_at).toLocaleString()}</p>
+                  <p className="text-xs">{new Date(selectedError.created_at ?? '').toLocaleString()}</p>
                 </div>
               </div>
 

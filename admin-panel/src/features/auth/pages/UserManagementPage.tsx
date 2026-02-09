@@ -1,15 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Users, Shield, ShieldAlert, UserX, Search } from 'lucide-react';
+import type { Tables } from '@/lib/database.types';
 
-interface AdminUser {
-  id: string;
-  email: string;
-  full_name: string | null;
-  role: string;
-  created_at: string;
-  deleted_at: string | null;
-}
+type AdminUser = Tables<'profiles'>;
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);

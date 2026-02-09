@@ -36,16 +36,11 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
+import type { Tables } from '@/lib/database.types'
+
 const DEFAULT_PAGE_SIZE = 10
 
-interface Domain {
-  domain_id: string
-  title: string
-  slug: string
-  sort_order: number | null
-  status: 'draft' | 'published' | 'live' | null
-  updated_at: string
-}
+type Domain = Tables<'domains'>
 
 interface SortableRowProps {
   domain: Domain

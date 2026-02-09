@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import type { Json } from './database.types';
 
 interface ErrorContext {
   url?: string;
@@ -19,17 +20,17 @@ export async function captureException(
   try {
     const errorObj = error instanceof Error ? error : new Error(String(error));
 
-    const { data, error: rpcError } = await supabase.rpc('log_error' as never, {
+    const { data, error: rpcError } = await supabase.rpc('log_error', {
       p_platform: 'web',
       p_error_type: errorObj.name || 'Error',
       p_error_message: errorObj.message || String(error),
-      p_stack_trace: errorObj.stack || null,
+      p_stack_trace: errorObj.stack || undefined,
       p_url: context?.url || window.location.href,
       p_user_agent: context?.userAgent || navigator.userAgent,
       p_app_version: context?.appVersion || import.meta.env.VITE_APP_VERSION || '1.0.0',
-      p_app_id: context?.appId || null,
-      p_extra_context: context?.extra || {},
-    } as never);
+      p_app_id: context?.appId || undefined,
+      p_extra_context: (context?.extra || {}) as Json,
+    });
 
     if (rpcError) {
       console.error('[ErrorTracker] Failed to log error:', rpcError);

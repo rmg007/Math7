@@ -16,7 +16,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       
       try {
         const { data: profile, error: profileError } = await supabase
-          .from('profiles' as never)
+          .from('profiles')
           .select('deleted_at')
           .eq('id', session.user.id)
           .single()
@@ -27,7 +27,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           return
         }
         
-        if (profile && (profile as { deleted_at: string | null }).deleted_at) {
+        if (profile && profile.deleted_at) {
           await supabase.auth.signOut()
           navigate('/login')
           return

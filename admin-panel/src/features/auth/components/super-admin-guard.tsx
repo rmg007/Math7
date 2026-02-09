@@ -17,12 +17,12 @@ export function SuperAdminGuard({ children }: { children: React.ReactNode }) {
       }
 
       const { data: profile, error } = await supabase
-        .from('profiles' as never)
+        .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single()
 
-      if (error || !profile || (profile as { role: string }).role !== 'super_admin') {
+      if (error || !profile || profile.role !== 'super_admin') {
         navigate('/')
         return
       }
