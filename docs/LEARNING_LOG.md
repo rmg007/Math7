@@ -344,7 +344,7 @@
 #### 1. Strategic Feature Pruning (Kill Your Darlings)
 **Decision**: Removed the `analyze-error` Edge Function and Gemini integration just days after implementation.
 **Reasoning**: 
-- **Cost/Compexity**: Maintaining a dedicated AI pipeline for *every* error log is overkill when most errors are repetitive or obvious.
+- **Cost/Complexity**: Maintaining a dedicated AI pipeline for *every* error log is overkill when most errors are repetitive or obvious.
 - **Quota Management**: The free tier of Gemini Flash has limits; spamming it with raw error logs risks exhaustion for critical user-facing features.
 - **Manual Control**: Developers often prefer raw stack traces and context over AI summaries for initial triage.
 **Lesson**: Don't let "Cool Factor" drive architecture. If a feature adds dependency weight without proportionate value (like AI for simple error logs), cut it early. The code you *don't* ship is the easiest to maintain.
@@ -545,6 +545,101 @@ Alternatively, populate the GH_TOKEN environment variable...
 | `.secrets` | Modified | Added `GITHUB_TOKEN` |
 | `README.md` | Modified | Trivial change to create file diff |
 | `docs/LEARNING_LOG.md` | Updated | Documented this process |
+
+---
+
+## 2026-02-09: UI/UX Master Overhaul & Comprehensive QA Audit
+
+### Session Context
+- **Objective**: Standardize the Admin Panel UI, resolve critical display bugs, and verify system stability via autonomous QA.
+- **Scope**: `admin-panel/src/features/`, `src/components/ui/`, `src/lib/utils/`.
+- **Outcome**: ✅ 12+ pages standardized with `AdminHeader` and `EmptyState`. Table clipping bugs resolved. App certified stable via 17-point browser audit.
+
+---
+
+### Key Learnings
+
+#### 1. Component Standardization as a Velocity Multiplier
+**What Happened**: The Admin Panel was suffering from "Feature Drift," where newer pages looked and behaved differently than older ones. Ad-hoc headers, varying button styles, and plain text empty states made the app feel unpolished.
+**Solution**: 
+1.  Created `AdminHeader.tsx`: Centralized title, description, icons, and actions.
+2.  Created `EmptyState.tsx`: Replaced clinical "No data" messages with premium, actionable prompts.
+**Impact**: We were able to "upgrade" 5 different pages in minutes by swapping manual JSX for these standardized components.
+
+#### 2. The "Hidden Action" Table Bug
+**What Happened**: Several critical management tables (Questions, Error Logs, Invitation Codes) used `overflow-hidden` on parent containers. On standard screen sizes, the "Actions" column (Edit/Delete) was clipped and inaccessible.
+**Lesson**: Dashboards must prioritize horizontal accessibility over "clean" overflow cuts. 
+**Rule**: "All data tables must wrap in a container with `overflow-x-auto` and a minimum width to ensure actions are never hidden."
+
+#### 3. Data Humanization (User-Speak vs. Dev-Speak)
+**What Happened**: Raw database strings like `multiple_choice` and `super_admin` were appearing in the UI.
+**Solution**: Implemented a `formatIdentifier` utility in `@/lib/format-utils`.
+**Lesson**: A premium UI requires "User-speak." Every raw identifier should be passed through a formatter before rendering to ensure consistency and readability.
+
+#### 4. Browser-Subagent as a "Sanity Check"
+**What Happened**: After a large UI refactor, manual verification of 14+ routes is slow and error-prone.
+**Action**: Used an autonomous browser subagent to perform a "Full Click-Through."
+**Finding**: The subagent discovered that the app would occasionally hang on a "Loading..." spinner during login due to stale local state.
+**Fix**: Added a "Reset Auth State" step to the verification process (clearing localStorage/sessionStorage) which resolved the hang.
+**Lesson**: Automated UI verification is superior for finding race conditions and state-related hangs that "clean" dev environments might miss.
+
+#### 5. Breadcrumb Import Resilience
+**What Happened**: The `AdminHeader` component was initially implemented with a dependency on a non-existent `breadcrumb.tsx`. This caused lint and build errors across multiple pages.
+**Lesson**: When building core UI primitives, ensure all internal components are either implemented or stubbed before distributing the primitive to secondary pages.
+
+---
+
+### Files Modified/Created
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `admin-panel/src/components/ui/admin-header.tsx` | Created | Standardized page header primitive |
+| `admin-panel/src/components/ui/empty-state.tsx` | Created | Standardized empty state primitive |
+| `admin-panel/src/lib/format-utils.ts` | Created | String humanization utility |
+| `admin-panel/src/features/curriculum/components/question-list.tsx` | Modified | Integrated Header/EmptyState, fixed skill mapping |
+| `admin-panel/src/features/platform/pages/LandingsPage.tsx` | Modified | Switched to Header/EmptyState |
+| `admin-panel/src/features/platform/pages/SubjectsPage.tsx` | Modified | Switched to Header/EmptyState |
+| `admin-panel/src/features/monitoring/pages/ErrorLogsPage.tsx` | Modified | Fixed table clipping |
+| `admin-panel/src/features/auth/pages/InvitationCodesPage.tsx` | Modified | Fixed table clipping |
+| `docs/implementation_plan_ui_overhaul.md` | Modified | Updated progress to 75% |
+| `docs/LEARNING_LOG.md` | Updated | This entry |
+
+---
+
+## 2026-02-09: Replit Recovery & Cloud Sync Hardening
+
+### Session Context
+- **Objective**: Recover lost UI changes from Replit and harden the synchronization/deployment workflow.
+- **Scope**: Replit recovery, Git authentication, Environment standardization.
+- **Outcome**: ✅ UI code recovered from Replit; Git authentication resolved; Deployment workflow certified.
+
+---
+
+### Key Learnings
+
+#### 1. The "Hard Reset" Danger Zone
+**What Happened**: A `git reset --hard` command in Replit led to the loss of several hours of UI development because the changes had not been pushed upstream and the local Replit state was cleared.
+**Lesson**: Never perform destructive Git operations (`reset --hard`, `clean -fd`) in a cloud environment without first verifying that your "Deploy" or "Run" state is fully committed and pushed.
+**Rule**: "Push before you Reset. If the push fails, copy your files manually before trying to fix Git."
+
+#### 2. Git Authentication Drift in Cloud IDEs
+**What Happened**: Replit's internal Git authentication became stale, preventing pushes and leading to "Permission Denied" errors that triggered the troubleshooting spiral.
+**Lesson**: Cloud IDEs (Replit, Codespaces) often manage Git credentials via internal tokens. If authentication fails, re-running the IDE's auth-login command is safer than manual Git configuration.
+**Rule**: "Fix the IDE's auth, not just the Git config."
+
+#### 3. Environment Variable Precision
+**What Happened**: The `VITE_SUPABASE_URL` in some environment files was pointing to a stale project ID, causing silent failures in the recovered UI.
+**Lesson**: Environment variables are the nervous system of the app. A single character mismatch in the project ID disables the entire backend.
+**Rule**: "Always verify `.env` against the Supabase Dashboard project URL after a recovery operation."
+
+---
+
+### Files Modified/Created
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `admin-panel/...` | Recovered | Restored missing UI components from Replit history |
+| `docs/LEARNING_LOG.md` | Updated | This entry |
 
 ---
 

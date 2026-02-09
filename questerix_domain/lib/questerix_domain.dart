@@ -2,7 +2,7 @@
 ///
 /// This package provides core data models, repositories interfaces,
 /// and validation logic used across the Questerix ecosystem.
-library questerix_domain;
+library;
 
 // Export models
 export 'src/models/domain.dart';
