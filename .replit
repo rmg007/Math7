@@ -49,3 +49,9 @@ expertMode = true
 deploymentTarget = "autoscale"
 run = ["bash", "-c", "node -e \"const express=require('express');const path=require('path');const app=express();\" && npx tsx server/index.ts"]
 build = ["bash", "-c", "cd admin-panel && npm install --legacy-peer-deps && npx vite build"]
+
+[userenv]
+
+[userenv.shared]
+VITE_SUPABASE_URL = "https://qvslbiceoonnrgjxzkotb.supabase.co"
+VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2c2xiaWNlb29ucmdqeHprb3RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MTE5NjksImV4cCI6MjA4NTA4Nzk2OX0.tksExuWD4OZyb4MoYRliQ71WQ8rywcaYMxbH2UXWe8s"
