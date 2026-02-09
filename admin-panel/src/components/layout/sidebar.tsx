@@ -237,23 +237,28 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
           const isOpen = openGroups.includes(group.title);
 
           return (
-            <div key={group.title} className="space-y-1">
-               {!isSidebarCollapsed && (
-                 <button 
-                   onClick={() => toggleGroup(group.title)}
-                   className={cn(
-                     "flex items-center justify-between w-full px-2 text-[10px] font-semibold uppercase tracking-wider transition-colors group",
-                     matchGroupPath ? "text-purple-200" : "text-purple-300/60 hover:text-purple-200"
-                   )}
-                 >
-                   {group.title}
-                   {isOpen ? (
-                     <ChevronDown className="h-3 w-3 opacity-50 group-hover:opacity-100" />
-                   ) : (
-                     <ChevronRight className="h-3 w-3 opacity-50 group-hover:opacity-100" />
-                   )}
-                 </button>
-               )}
+            <div key={group.title} className="space-y-1 pt-2 border-t border-white/5 first:pt-0 first:border-0">
+                {!isSidebarCollapsed && (
+                  <button 
+                    onClick={() => toggleGroup(group.title)}
+                    className={cn(
+                      "flex items-center justify-between w-full px-3 py-2 text-xs font-bold uppercase tracking-widest transition-all rounded-lg group mb-1",
+                      matchGroupPath 
+                        ? "text-white bg-white/10" 
+                        : "text-purple-300/60 hover:text-white hover:bg-white/5"
+                    )}
+                  >
+                    <span>{group.title}</span>
+                    <div className="flex items-center gap-1">
+                      {matchGroupPath && !isOpen && <div className="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.8)]" />}
+                      {isOpen ? (
+                        <ChevronDown className="h-4 w-4 opacity-70 group-hover:opacity-100 transition-transform" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 opacity-70 group-hover:opacity-100 transition-transform" />
+                      )}
+                    </div>
+                  </button>
+                )}
               
               {isOpen && (
                 <div className="space-y-1 mt-1">

@@ -1,39 +1,42 @@
-import { LucideIcon } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { LucideIcon } from 'lucide-react';
+import { Button } from './button';
+import { cn } from '@/lib/utils';
 
 interface EmptyStateProps {
-  icon: LucideIcon
-  title?: string
-  description: string
-  action?: React.ReactNode
-  className?: string
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
+  className?: string;
 }
 
-export function EmptyState({ 
-  icon: Icon, 
-  title, 
-  description, 
+export function EmptyState({
+  icon: Icon,
+  title,
+  description,
   action,
-  className 
+  className
 }: EmptyStateProps) {
   return (
-    <div className={cn("flex flex-col items-center justify-center p-8 text-center animate-in fade-in-50 duration-500", className)}>
-      <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 border border-gray-100 mb-4 shadow-sm">
-        <Icon className="w-8 h-8 text-gray-400" />
+    <div className={cn(
+      "flex flex-col items-center justify-center p-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-500",
+      className
+    )}>
+      <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center mb-4 shadow-sm border border-white">
+        <Icon className="w-8 h-8 text-purple-600" />
       </div>
-      {title && (
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          {title}
-        </h3>
-      )}
-      <p className="text-sm text-gray-500 max-w-sm mb-6 leading-relaxed">
+      <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
+      <p className="text-gray-500 max-w-sm mb-6 leading-relaxed">
         {description}
       </p>
       {action && (
-        <div className="flex items-center gap-2">
-          {action}
-        </div>
+        <Button onClick={action.onClick} className="rounded-full px-8 shadow-md">
+          {action.label}
+        </Button>
       )}
     </div>
-  )
+  );
 }

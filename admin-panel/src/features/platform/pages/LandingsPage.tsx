@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Globe, Pencil, Save, ChevronLeft, Plus } from 'lucide-react';
+import { Globe, Pencil, Save, ChevronLeft, Plus, LayoutPanelTop } from 'lucide-react';
 import { useLandingPages, useUpdateLandingPage, useCreateLandingPage, type LandingPage } from '../hooks/use-landings';
 import { useApps } from '../hooks/use-apps';
 import { Button } from '@/components/ui/button';
@@ -9,8 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { AdminHeader } from '@/components/ui/admin-header';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export function LandingsPage() {
   const { data: landings, isLoading } = useLandingPages();
@@ -156,15 +158,16 @@ export function LandingsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Landing Pages</h2>
-          <p className="text-muted-foreground">Manage SEO and marketing content for each application</p>
-        </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
-          <Plus className="w-4 h-4" /> Add Landing Page
-        </Button>
-      </div>
+      <AdminHeader 
+        title="Landing Pages"
+        description="Manage SEO and marketing content for each application across your platform."
+        icon={Globe}
+        actions={
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
+            <Plus className="w-4 h-4" /> Add Landing Page
+          </Button>
+        }
+      />
 
       <Card>
         <CardHeader>
@@ -187,7 +190,19 @@ export function LandingsPage() {
               {isLoading ? (
                 <TableRow><TableCell colSpan={4} className="text-center py-8">Loading...</TableCell></TableRow>
               ) : landings?.length === 0 ? (
-                <TableRow><TableCell colSpan={4} className="text-center py-8">No landing pages found</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={4} className="py-12">
+                    <EmptyState 
+                      icon={LayoutPanelTop}
+                      title="No Landing Pages"
+                      description="You haven't created any landing pages yet. Landing pages help you manage marketing content for your applications."
+                      action={{
+                        label: "Create First Landing Page",
+                        onClick: () => setIsCreateDialogOpen(true)
+                      }}
+                    />
+                  </TableCell>
+                </TableRow>
               ) : landings?.map((l) => (
                 <TableRow key={l.landing_page_id}>
                   <TableCell className="font-medium">{l.apps?.display_name}</TableCell>

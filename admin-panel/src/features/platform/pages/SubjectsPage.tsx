@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { AdminHeader } from '@/components/ui/admin-header';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export function SubjectsPage() {
   const { data: subjects, isLoading } = useSubjects();
@@ -81,15 +83,16 @@ export function SubjectsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Subjects</h2>
-          <p className="text-muted-foreground">Manage high-level learning subjects</p>
-        </div>
-        <Button onClick={() => handleOpenDialog()} className="gap-2">
-          <Plus className="w-4 h-4" /> Add Subject
-        </Button>
-      </div>
+      <AdminHeader 
+        title="Subjects"
+        description="Manage the high-level subjects and learning categories available on your platform."
+        icon={Boxes}
+        actions={
+          <Button onClick={() => handleOpenDialog()} className="gap-2">
+            <Plus className="w-4 h-4" /> Add Subject
+          </Button>
+        }
+      />
 
       <Card>
         <CardHeader>
@@ -113,7 +116,19 @@ export function SubjectsPage() {
               {isLoading ? (
                 <TableRow><TableCell colSpan={6} className="text-center py-8">Loading...</TableCell></TableRow>
               ) : subjects?.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center py-8">No subjects found</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={6} className="py-12">
+                    <EmptyState 
+                      icon={Boxes}
+                      title="No Subjects"
+                      description="You haven't defined any subjects yet. Subjects are the core categories for your curriculum."
+                      action={{
+                        label: "Create First Subject",
+                        onClick: () => handleOpenDialog()
+                      }}
+                    />
+                  </TableCell>
+                </TableRow>
               ) : subjects?.map((s) => (
                 <TableRow key={s.subject_id}>
                   <TableCell className="font-medium">{s.name}</TableCell>

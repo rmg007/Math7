@@ -1,5 +1,5 @@
 import { useApp } from '@/contexts/AppContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
     usePaginatedQuestions, 
     useDeleteQuestion, 
@@ -15,7 +15,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { DataToolbar } from '@/components/ui/data-toolbar';
+import { EmptyState } from '@/components/ui/empty-state';
+import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
+import { formatIdentifier } from '@/lib/format-utils';
 import type { DataColumn } from '@/lib/data-utils';
 import type { QuestionListItem } from '@/types/common.types';
 import {
@@ -123,12 +126,12 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, re
                 />
             </td>
             <td className="px-6 py-4">
-                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium capitalize">
-                    {question.type}
+                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                    {formatIdentifier(question.type)}
                 </span>
             </td>
             <td className="px-6 py-4">
-                <span className="text-gray-700">{question.skills?.name}</span>
+                <span className="text-gray-700">{question.skills?.title}</span>
             </td>
             <td className="px-6 py-4">
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-orange-700 font-semibold text-sm">
@@ -233,12 +236,12 @@ function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, r
                 </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm">
-                <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium capitalize">
-                    {question.type}
+                <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                    {formatIdentifier(question.type)}
                 </span>
-                {question.skills?.name && (
+                {question.skills?.title && (
                     <span className="text-gray-600 text-xs">
-                        Skill: <span className="font-medium">{question.skills.name}</span>
+                        Skill: <span className="font-medium">{question.skills.title}</span>
                     </span>
                 )}
                 <span className="inline-flex items-center gap-1 text-gray-600">
@@ -279,6 +282,7 @@ function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, r
 }
 
 export function QuestionList() {
+    const navigate = useNavigate();
     const { currentApp } = useApp();
     const [selectedSkillId, setSelectedSkillId] = useState<string>('all');
     const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'live'>('all');
@@ -594,26 +598,27 @@ export function QuestionList() {
 
     return (
         <div className="space-y-4 md:space-y-6">
-            <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-between items-start sm:items-center">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Questions</h1>
-                    <p className="text-muted-foreground">Manage curriculum questions and assessments</p>
-                </div>
-                <div className="flex gap-2">
-                    <Link to="/ai-questions">
-                        <Button variant="outline" className="gap-2 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 text-purple-700 hover:bg-purple-100">
-                            <Sparkles className="h-4 w-4" />
-                            AI Generator
-                        </Button>
-                    </Link>
-                    <Link to="/questions/new">
-                        <Button>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Question
-                        </Button>
-                    </Link>
-                </div>
-            </div>
+            <AdminHeader 
+                title="Question Library"
+                description="Manage and organize your curriculum questions by type, skill, and difficulty."
+                icon={FileText}
+                actions={
+                    <>
+                        <Link to="/ai-questions">
+                            <Button variant="outline" className="gap-2 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 text-purple-700 hover:bg-purple-100">
+                                <Sparkles className="h-4 w-4" />
+                                AI Generator
+                            </Button>
+                        </Link>
+                        <Link to="/questions/new">
+                            <Button>
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Question
+                            </Button>
+                        </Link>
+                    </>
+                }
+            />
 
             <DataToolbar
                 data={questions as Record<string, unknown>[]}
@@ -722,8 +727,8 @@ export function QuestionList() {
                     onDragEnd={handleDragEnd}
                 >
                     {/* Desktop Table View */}
-                    <div className="hidden md:block overflow-hidden rounded-xl border border-gray-100">
-                        <table className="w-full">
+                    <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-100 bg-white">
+                        <table className="w-full min-w-[1000px]">
                             <thead>
                                 <tr className="bg-gray-50 border-b border-gray-100">
                                     <th className="text-left px-2 py-4 w-10">
@@ -782,32 +787,22 @@ export function QuestionList() {
                             <tbody className="divide-y divide-gray-100">
                                 {!questions.length ? (
                                     <tr>
-                                        <td colSpan={9} className="px-6 py-12 text-center">
-                                            <div className="flex flex-col items-center">
-                                                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                                                    <FileText className="w-8 h-8 text-gray-400" />
-                                                </div>
-                                                <p className="text-gray-500 mb-4">
-                                                    {hasActiveFilters ? 'No questions match your filters.' : 'No questions found. Create one to get started.'}
-                                                </p>
-                                                {hasActiveFilters ? (
-                                                    <button
-                                                        onClick={clearFilters}
-                                                        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-                                                    >
-                                                        <X className="h-4 w-4" />
-                                                        Clear filters
-                                                    </button>
-                                                ) : (
-                                                    <Link
-                                                        to="/questions/new"
-                                                        className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
-                                                    >
-                                                        <Plus className="h-4 w-4" />
-                                                        Create Question
-                                                    </Link>
-                                                )}
-                                            </div>
+                                        <td colSpan={9} className="px-6 py-12">
+                                            <EmptyState
+                                                icon={FileText}
+                                                title={hasActiveFilters ? "No matches found" : "No questions found"}
+                                                description={hasActiveFilters 
+                                                    ? "Try adjusting your filters or search terms to find what you're looking for." 
+                                                    : "Your curriculum library is empty. Start building it by adding your first question manually or using the AI generator."
+                                                }
+                                                action={hasActiveFilters ? {
+                                                    label: "Clear all filters",
+                                                    onClick: clearFilters
+                                                } : {
+                                                    label: "Create First Question",
+                                                    onClick: () => navigate('/questions/new')
+                                                }}
+                                            />
                                         </td>
                                     </tr>
                                 ) : (

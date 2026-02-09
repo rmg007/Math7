@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { formatIdentifier } from "@/lib/format-utils"
 
 interface UserProfile {
   id: string
@@ -130,7 +131,7 @@ export function AccountSettingsPage() {
             </div>
             <div>
               <label className="text-sm text-gray-500">Role</label>
-              <p className="text-gray-900 font-medium capitalize">{user?.role}</p>
+              <p className="text-gray-900 font-medium">{formatIdentifier(user?.role)}</p>
             </div>
             <div>
               <label className="text-sm text-gray-500">Member Since</label>

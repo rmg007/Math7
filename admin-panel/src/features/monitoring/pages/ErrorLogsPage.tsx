@@ -249,8 +249,8 @@ export function ErrorLogsPage() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
-          <Table>
+        <CardContent className="p-0 overflow-x-auto">
+          <Table className="min-w-[800px]">
             <TableHeader className="bg-gray-50/30">
               <TableRow>
                 <TableHead className="w-12">Platform</TableHead>
