@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { 
   Book, Layers, FileText, Upload, LogOut, Settings, Key, History, 
   Users, UserCog, Shield, Bug, AlertTriangle, Globe, Boxes, Layout,
-  ChevronDown, ChevronRight
+  ChevronDown, ChevronRight, ChevronLeft
 } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -22,6 +22,7 @@ type NavItem = {
   href: string
   icon: React.ElementType
   superAdminOnly?: boolean
+  hideForSuperAdmin?: boolean
 }
 
 type NavGroup = {
@@ -33,7 +34,7 @@ const navigationGroups: NavGroup[] = [
   {
     title: 'Curriculum',
     items: [
-      { name: 'My Groups', href: '/groups', icon: Users }, // Context aware, usually first
+      { name: 'My Groups', href: '/groups', icon: Users, hideForSuperAdmin: true }, // Hide from super admins
       { name: 'Domains', href: '/domains', icon: Book },
       { name: 'Subjects', href: '/platform/subjects', icon: Boxes, superAdminOnly: true },
       { name: 'Skills', href: '/skills', icon: Layers },
@@ -76,7 +77,7 @@ interface UserInfo {
 export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarProps) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { currentApp, setCurrentApp, apps, isLoading: appsLoading } = useApp()
+  const { currentApp, setCurrentApp, apps, isLoading: appsLoading, isSidebarCollapsed, toggleSidebar } = useApp()
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   
@@ -148,81 +149,111 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
   return (
     <div 
       className={cn(
-        "flex w-72 flex-col h-screen border-r border-white/5",
+        "flex flex-col h-screen border-r border-white/5",
         "bg-gradient-to-b from-[#1a1b4b] via-[#2e1065] to-[#1a1b4b]",
         isMobile && "fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out shadow-2xl",
         isMobile && !isOpen && "-translate-x-full",
-        isMobile && isOpen && "translate-x-0"
+        isMobile && isOpen && "translate-x-0",
+        isMobile ? "w-72" : isSidebarCollapsed ? "w-20" : "w-72",
+        "transition-all duration-300 ease-in-out"
       )}
     >
       {/* Header */}
-      <div className="flex h-20 items-center px-6 border-b border-white/10 bg-white/5 backdrop-blur-sm">
-        <div className="flex items-center gap-3 flex-1">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/20">
+      <div className={cn(
+        "flex h-20 items-center border-b border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden",
+        isSidebarCollapsed ? "px-0 justify-center" : "px-6"
+      )}>
+        <div className={cn(
+          "flex items-center gap-3",
+          isSidebarCollapsed ? "flex-col justify-center" : "flex-1"
+        )}>
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/20 flex-shrink-0">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
             </svg>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-white tracking-tight leading-none mb-1">Questerix</h1>
-            <p className="text-[10px] text-purple-300 font-medium uppercase tracking-widest">Admin Panel</p>
-          </div>
+          {!isSidebarCollapsed && (
+            <div className="animate-in fade-in duration-300">
+              <h1 className="text-lg font-bold text-white tracking-tight leading-none mb-1">Questerix</h1>
+              <p className="text-[10px] text-purple-300 font-medium uppercase tracking-widest">Admin Panel</p>
+            </div>
+          )}
         </div>
       </div>
       
       {/* App Selector */}
-      <div className="px-4 py-4 border-b border-white/5 bg-white/5 backdrop-blur-sm">
-        <label className="text-[10px] font-semibold text-purple-300/60 uppercase tracking-wider mb-2 block px-2">
-          Current Application
-        </label>
-        <Select
-          value={currentApp?.app_id}
-          onValueChange={(value) => {
-            const app = apps.find(a => a.app_id === value)
-            if (app) setCurrentApp(app)
-          }}
-        >
-          <SelectTrigger className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 transition-colors rounded-xl focus:ring-0">
-            <SelectValue placeholder={appsLoading ? "Loading apps..." : "Select app"} />
-          </SelectTrigger>
-          <SelectContent className="bg-[#1a1b4b] border-white/10 text-white">
-            {apps.map((app) => (
-              <SelectItem 
-                key={app.app_id} 
-                value={app.app_id}
-                className="focus:bg-purple-500/20 focus:text-white"
-              >
-                {app.display_name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className={cn(
+        "py-4 border-b border-white/5 bg-white/5 backdrop-blur-sm",
+        isSidebarCollapsed ? "px-0 flex justify-center" : "px-4"
+      )}>
+        {!isSidebarCollapsed ? (
+          <>
+            <label className="text-[10px] font-semibold text-purple-300/60 uppercase tracking-wider mb-2 block px-2">
+              Current Application
+            </label>
+            <Select
+              value={currentApp?.app_id}
+              onValueChange={(value) => {
+                const app = apps.find(a => a.app_id === value)
+                if (app) setCurrentApp(app)
+              }}
+            >
+              <SelectTrigger className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 transition-colors rounded-xl focus:ring-0">
+                <SelectValue placeholder={appsLoading ? "Loading apps..." : "Select app"} />
+              </SelectTrigger>
+              <SelectContent className="bg-[#1a1b4b] border-white/10 text-white">
+                {apps.map((app) => (
+                  <SelectItem 
+                    key={app.app_id} 
+                    value={app.app_id}
+                    className="focus:bg-purple-500/20 focus:text-white"
+                  >
+                    {app.display_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </>
+        ) : (
+          <div 
+            className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-purple-200 font-bold text-sm cursor-help hover:bg-white/10 transition-colors"
+            title={`Application: ${currentApp?.display_name || 'None'}`}
+          >
+            {currentApp?.display_name?.charAt(0).toUpperCase() || '?'}
+          </div>
+        )}
       </div>
       
       {/* Navigation - Scrollable Area */}
       <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto custom-scrollbar">
         {navigationGroups.map((group) => {
           // Filter items based on role
-          const visibleItems = group.items.filter(item => !item.superAdminOnly || isSuperAdmin);
+          const visibleItems = group.items.filter(item => {
+            if (item.superAdminOnly && !isSuperAdmin) return false;
+            if (item.hideForSuperAdmin && isSuperAdmin) return false;
+            return true;
+          });
           const matchGroupPath = visibleItems.some(item => location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href)));
           const isOpen = openGroups.includes(group.title);
 
           return (
             <div key={group.title} className="space-y-1">
-               <button 
-                onClick={() => toggleGroup(group.title)}
-                className={cn(
-                  "flex items-center justify-between w-full px-2 text-[10px] font-semibold uppercase tracking-wider transition-colors group",
-                  matchGroupPath ? "text-purple-200" : "text-purple-300/60 hover:text-purple-200"
-                )}
-              >
-                {group.title}
-                {isOpen ? (
-                  <ChevronDown className="h-3 w-3 opacity-50 group-hover:opacity-100" />
-                ) : (
-                  <ChevronRight className="h-3 w-3 opacity-50 group-hover:opacity-100" />
-                )}
-              </button>
+               {!isSidebarCollapsed && (
+                 <button 
+                   onClick={() => toggleGroup(group.title)}
+                   className={cn(
+                     "flex items-center justify-between w-full px-2 text-[10px] font-semibold uppercase tracking-wider transition-colors group",
+                     matchGroupPath ? "text-purple-200" : "text-purple-300/60 hover:text-purple-200"
+                   )}
+                 >
+                   {group.title}
+                   {isOpen ? (
+                     <ChevronDown className="h-3 w-3 opacity-50 group-hover:opacity-100" />
+                   ) : (
+                     <ChevronRight className="h-3 w-3 opacity-50 group-hover:opacity-100" />
+                   )}
+                 </button>
+               )}
               
               {isOpen && (
                 <div className="space-y-1 mt-1">
@@ -234,16 +265,23 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
                         key={item.name}
                         to={item.href}
                         onClick={handleNavClick}
+                        title={isSidebarCollapsed ? item.name : undefined}
                         className={cn(
                           "flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 group relative",
                           isActive 
                             ? "bg-white/10 text-white shadow-inner border border-white/5" 
-                            : "text-purple-200 hover:bg-white/5 hover:text-white"
+                            : "text-purple-200 hover:bg-white/5 hover:text-white",
+                          isSidebarCollapsed && "justify-center px-0 w-10 mx-auto"
                         )}
                       >
-                        <item.icon className={cn("h-4 w-4 transition-colors", isActive ? "text-purple-300" : "text-purple-400 group-hover:text-purple-200")} />
-                        {item.name}
-                        {isActive && (
+                        <item.icon className={cn(
+                          "h-4 w-4 transition-colors",
+                          isActive ? "text-purple-300" : "text-purple-400 group-hover:text-purple-200"
+                        )} />
+                        {!isSidebarCollapsed && (
+                          <span className="flex-1 text-sm font-medium">{item.name}</span>
+                        )}
+                        {isActive && !isSidebarCollapsed && (
                           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-purple-400 rounded-r-full shadow-[0_0_8px_rgba(192,132,252,0.5)]" />
                         )}
                       </Link>
@@ -257,9 +295,32 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
       </nav>
 
       {/* User Footer - Pinned to Bottom */}
-      <div className="px-4 py-4 border-t border-white/10 bg-black/20 backdrop-blur-md">
+      <div className="px-4 py-4 border-t border-white/10 bg-black/20 backdrop-blur-md space-y-3">
+        {/* Toggle Button */}
+        <button
+          onClick={toggleSidebar}
+          className={cn(
+            "flex items-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all duration-300 group overflow-hidden",
+            isSidebarCollapsed ? "w-10 h-10 justify-center mx-auto" : "w-full px-4 py-3 justify-between"
+          )}
+          title={isSidebarCollapsed ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"}
+        >
+          {!isSidebarCollapsed && <span className="text-sm font-medium truncate">Sidebar</span>}
+          <div className={cn("flex items-center", isSidebarCollapsed ? "" : "gap-2")}>
+            {!isSidebarCollapsed && (
+              <span className="text-[10px] text-purple-300/60 uppercase tracking-wider animate-in fade-in slide-in-from-right-2">
+                Collapse
+              </span>
+            )}
+            <ChevronLeft className={cn(
+              "h-4 w-4 transition-transform duration-300",
+              isSidebarCollapsed ? "rotate-180" : "rotate-0"
+            )} />
+          </div>
+        </button>
+
         {userInfo && (
-          <div className="mb-3 px-4 py-3 bg-white/5 rounded-xl border border-white/5">
+          <div className="px-4 py-3 bg-white/5 rounded-xl border border-white/5">
             <div className="flex items-center justify-between mb-2">
                  <p className="text-sm font-semibold text-white truncate">
                   {userInfo.fullName || userInfo.email.split('@')[0]}

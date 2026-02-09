@@ -6,11 +6,16 @@ import { AppContext } from './AppContextDefinition';
 export const useAppContext = () => useContext(AppContext);
 
 const STORAGE_KEY = 'questerix_admin_current_app_id';
+const SIDEBAR_COLLAPSE_KEY = 'questerix_admin_sidebar_collapsed';
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [currentApp, setCurrentApp] = useState<App | null>(null);
   const [apps, setApps] = useState<App[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem(SIDEBAR_COLLAPSE_KEY);
+    return saved ? JSON.parse(saved) : false;
+  });
 
   async function loadApps() {
     setIsLoading(true);
@@ -53,13 +58,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, app.app_id);
   };
 
+  const toggleSidebar = () => {
+    const newState = !isSidebarCollapsed;
+    setIsSidebarCollapsed(newState);
+    localStorage.setItem(SIDEBAR_COLLAPSE_KEY, JSON.stringify(newState));
+  };
+
   return (
     <AppContext.Provider value={{
       currentApp,
       setCurrentApp: handleSetCurrentApp,
       apps,
       isLoading,
-      refreshApps: loadApps
+      refreshApps: loadApps,
+      isSidebarCollapsed,
+      toggleSidebar
     }}>
       {children}
     </AppContext.Provider>

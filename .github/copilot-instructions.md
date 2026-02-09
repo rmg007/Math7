@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-You are working on the **Math7** offline-first educational platform. This project follows a strict **"Docs-Driven Development"** protocol.
+You are working on the **Questerix** offline-first educational platform. This project follows a strict **"Docs-Driven Development"** protocol.
 
 For the current short-form agent rules and repo contracts, read `AI_CODING_INSTRUCTIONS.md`.
 

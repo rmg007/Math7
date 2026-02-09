@@ -1,13 +1,29 @@
 import { Sidebar } from './sidebar'
 import { Outlet } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Menu } from 'lucide-react'
+import { useApp } from '@/contexts/AppContext'
+import { cn } from '@/lib/utils'
 
 export function AppLayout() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+  const { isSidebarCollapsed, toggleSidebar } = useApp()
 
   const openMobileSidebar = () => setIsMobileSidebarOpen(true)
   const closeMobileSidebar = () => setIsMobileSidebarOpen(false)
+
+  // Keyboard shortcut for toggling sidebar (Ctrl/Cmd + B)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault()
+        toggleSidebar()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [toggleSidebar])
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -30,7 +46,11 @@ export function AppLayout() {
         )}
       </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className={cn(
+        "flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out",
+        "md:ml-0",
+        isSidebarCollapsed ? "md:pl-20" : "md:pl-72"
+      )}>
         <header className="md:hidden flex items-center h-16 px-4 bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 border-b border-white/10">
           <button
             onClick={openMobileSidebar}

@@ -20,14 +20,29 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
+            // Heavy libraries for document processing
+            if (id.includes('pdfjs-dist') || id.includes('mammoth') || id.includes('papaparse')) {
+              return 'document-vendor';
+            }
+            // Math and rich text editor
+            if (id.includes('katex') || id.includes('@tiptap')) {
+              return 'editor-vendor';
+            }
+            // Lucide icons
             if (id.includes('lucide-react')) {
               return 'icons';
             }
+            // UI Components
             if (id.includes('@radix-ui')) {
               return 'ui-vendor';
             }
-            if (id.includes('react') || id.includes('react-dom')) {
+            // Core React
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
               return 'react-vendor';
+            }
+            // Tanstack Query and Supabase
+            if (id.includes('@tanstack') || id.includes('@supabase')) {
+              return 'core-vendor';
             }
           }
         },

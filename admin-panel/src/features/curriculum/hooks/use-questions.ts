@@ -124,13 +124,40 @@ export function useQuestion(question_id: string) {
 
              const { data, error } = await supabase
                 .from('questions')
-                .select('*')
+                .select(`
+                    *,
+                    skills (
+                        title,
+                        skill_id,
+                        domains (
+                            title,
+                            domain_id,
+                            subjects (
+                                title,
+                                subject_id
+                            )
+                        )
+                    )
+                `)
                 .eq('question_id', question_id)
                 .eq('app_id', currentApp.app_id)
                 .single();
 
             if (error) throw error;
-            return data as Question;
+            return data as unknown as Question & {
+                skills: {
+                    title: string;
+                    skill_id: string;
+                    domains: {
+                        title: string;
+                        domain_id: string;
+                        subjects: {
+                            title: string;
+                            subject_id: string;
+                        } | null;
+                    } | null;
+                } | null;
+            };
         },
         enabled: Boolean(question_id) && Boolean(currentApp?.app_id),
     });

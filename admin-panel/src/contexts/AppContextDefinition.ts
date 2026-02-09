@@ -7,6 +7,8 @@ export interface AppContextType {
   isLoading: boolean;
   setCurrentApp: (app: App) => void;
   refreshApps: () => void;
+  isSidebarCollapsed: boolean;
+  toggleSidebar: () => void;
 }
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);

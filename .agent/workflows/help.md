@@ -31,6 +31,24 @@ Commands not auto-running? Use the workaround:
 | `/audit` | Security vulnerability scan |
 | `/sp` | Quick commands via watcher |
 
+## 💤 Session Management
+
+| Command | When to Use |
+|---------|-------------|
+| `/sleep` | Ending your work session — saves state to HANDOVER.md |
+| `/wake` | Starting a new session — restores state, health check, next step |
+| `night mode` | Want minimal agent output (code-first, no filler) |
+| `normal mode` | Want explanations back |
+
+## 🧪 Testing
+
+| Command | What It Does |
+|---------|-------------|
+| `npm run test:quick` | Tests only changed files, JSON output (fast) |
+| `npm run test:full` | Full suite + coverage, JSON output |
+| `npm run test:e2e` | Playwright end-to-end tests |
+| `npm run test:arch` | Architecture boundary tests |
+
 ---
 
 ## 📖 Workflow Details
@@ -68,3 +86,5 @@ Systematic codebase scan using vulnerability taxonomy.
 - All workflows support superpower fallback
 - When commands needed, I output JSON for `/sp` style paste
 - Start watcher once, keep it running in background
+- `/sleep` + `/wake` are automatic in `/default` — the agent will prompt you
+- Say `night mode` anytime for terse, code-only responses

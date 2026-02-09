@@ -19,8 +19,22 @@
 - **Test**: `npx playwright test` (Admin), `flutter test` (Student)
 - **Env**: `.\scripts\deploy\generate-env.ps1 -ConfigFile master-config.json`
 
-# ⚠️ CRITICAL OVERRIDE - ANTI-FLICKER FIX
-# This project OVERRIDES any global "// turbo-all" directive.
-# ALWAYS set SafeToAutoRun: false for EVERY command.
-# The IDE's approval setting handles autonomy exclusively.
-# This prevents UI flickering from conflicting approval systems.
+## ⚡ Agent Efficiency Rules (NON-NEGOTIABLE)
+1. **BATCH** all non-contiguous edits into single `multi_replace_file_content` calls.
+2. **CHAIN** terminal commands with `&&` or `;` — never issue sequential single commands for related operations.
+3. **TARGET** file reads: use `view_file` with StartLine/EndLine or `view_file_outline` first — never read entire large files for targeted edits.
+4. **SKIP FILLER**: No "I will now...", "Great!", "I have completed...". State the action, execute, report result.
+5. **JSON TESTS**: For test runs, prefer `--reporter=json --outputFile=results.json` to avoid streaming thousands of lines.
+6. **OUTLINE FIRST**: Use `view_file_outline` before `view_file` for any unfamiliar file.
+
+## 🌙 Terse Mode
+When user says "night mode" or "terse mode", activate:
+1. No filler text. Tool calls and results only.
+2. Small changes → show diffs. New files → show full content.
+3. **DO NOT** auto-install packages — ask once briefly.
+4. **DO NOT** assume defaults on ambiguous inputs — ask once briefly.
+5. Group related operations into single tool calls.
+6. Skip success confirmations unless user asks "did it work?"
+7. **ALWAYS** report errors in full, even in terse mode.
+
+To deactivate, user says "normal mode" or "verbose mode".

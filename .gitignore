@@ -83,3 +83,11 @@ dependency-report.html
 dependency-graph.dot
 architecture-graph.dot
 deps-output.txt
+
+# Session management (local only)
+docs/HANDOVER.md
+.session/
+
+# Test output files
+test-results.json
+admin-panel/test-results.json

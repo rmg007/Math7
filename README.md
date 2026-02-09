@@ -26,17 +26,19 @@ The project consists of:
 ## 📂 Key Files
 
 - **`docs/strategy/AGENTS.md`**: The Supreme Law. The execution protocol every agent must follow.
-- **`AI_CODING_INSTRUCTIONS.md`**: Short-form, code-grounded AI instructions (contracts, authority order, non-negotiables).
-- **`ROADMAP.md`**: The visual timeline of the project phases.
+- **`docs/status/ROADMAP.md`**: The visual timeline of the project phases.
+- **`docs/security/SECURITY.md`**: Core security constraints and vulnerability patterns.
+- **`docs/technical/best_practices.md`**: Comprehensive tech stack standards.
 - **`PHASE_STATE.json`**: The state file tracking the agent's progress.
 - **`docs/specs/*`**: Detailed blueprints for UI, Data, and API.
 - **`.mcp_config.json`**: Ready-to-use MCP server configuration.
-- **`MCP_SETUP_COMPLETE.md`**: MCP installation summary and next steps.
+- **`docs/technical/MCP_SETUP_GUIDE.md`**: MCP installation summary and next steps.
 - **`docs/technical/SECRETS_LOCATIONS.md`**: Map of all secret file locations.
 
 ## 🧑‍💻 For Humans (Development)
 
 - `docs/technical/DEVELOPMENT.md`
+- `docs/technical/PORTABILITY.md` (Setup on any machine)
 - `docs/operational/CI_CONTRACT.md`
 - `docs/technical/VALIDATION.md`
 - `docs/technical/MCP_SETUP_GUIDE.md`

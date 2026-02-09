@@ -220,3 +220,17 @@ setup:
 validate_phase_4:
 	@echo "Running Phase 4 validation..."
 	bash ./scripts/validate-phase-4.sh
+
+# ==========================================================================
+# Maintenance
+# ==========================================================================
+
+.PHONY: cleanup
+cleanup:
+	@echo "Running agent memory cleanup (LIVE)..."
+	powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/maintenance/agent-memory-cleanup.ps1 -Verbose
+
+.PHONY: cleanup_dry
+cleanup_dry:
+	@echo "Running agent memory cleanup (DRY RUN)..."
+	powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/maintenance/agent-memory-cleanup.ps1 -DryRun -Verbose

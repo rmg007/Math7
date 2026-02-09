@@ -10,6 +10,24 @@ description: Default entry point for Questerix development
 
 You are operating in the **Questerix Unified Lifecycle**. 
 
+---
+
+## 🌅 Auto-Wake (Run on Every Session Start)
+
+**Before doing anything else**, check if a previous session left a handover:
+
+```powershell
+// turbo
+if (Test-Path "docs/HANDOVER.md") { Write-Output "HANDOVER_EXISTS" } else { Write-Output "NO_HANDOVER" }
+```
+
+- **If `HANDOVER_EXISTS`**: Execute the `/wake` workflow automatically. Do NOT ask the user — just restore context, run health check, and present the summary.
+- **If `NO_HANDOVER`**: Proceed normally with whatever the user asked.
+
+---
+
+## 🔧 Standard Process
+
 By default, any new feature or fix should follow the **`/process`** workflow steps:
 
 1.  **Planning** (Interactive, No Coding)
@@ -29,8 +47,20 @@ By default, any new feature or fix should follow the **`/process`** workflow ste
 
 ---
 
+## 💤 Auto-Sleep Reminder
+
+When the conversation naturally winds down (user says "thanks", "that's all", "done for now", or stops responding), **proactively suggest**:
+
+> 💤 Want me to run `/sleep` to save your session state before you go?
+
+Do NOT run `/sleep` without the user saying yes. Just offer.
+
+---
+
 ## 🆘 Troubleshooting
 
 - If stuck, run **`/blocked`**.
 - To see all workflows, run **`/help`**.
 - To resume work, run **`/resume`**.
+- To save session, run **`/sleep`**.
+- To restore session, run **`/wake`**.

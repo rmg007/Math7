@@ -1,17 +1,62 @@
 [
   {
-    "description": "Analyze admin-panel TypeScript code health",
-    "command": "echo 'Starting CodeScene analysis for admin-panel...' && C:\\Users\\mhali\\AppData\\Local\\Programs\\cs-mcp\\cs-mcp.exe analyze --path admin-panel/src --format json > docs/reports/codescene-admin-panel.json 2>&1 || echo 'Note: Run through IDE MCP for full analysis'",
-    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
+    "command": "powershell -Command \"& { .\\scripts\\deploy\\generate-env.ps1 -ConfigFile master-config.json }\"",
+    "cwd": "c:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix",
+    "description": "Phase 1: Generate environment configuration"
   },
   {
-    "description": "Analyze student-app Dart code health",
-    "command": "echo 'Starting CodeScene analysis for student-app...' && C:\\Users\\mhali\\AppData\\Local\\Programs\\cs-mcp\\cs-mcp.exe analyze --path student-app/lib --format json > docs/reports/codescene-student-app.json 2>&1 || echo 'Note: Run through IDE MCP for full analysis'",
-    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
+    "command": "flutter --version",
+    "cwd": "c:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix",
+    "description": "Phase 1: Verify Flutter installation"
   },
   {
-    "description": "Analyze content-engine Python code health", 
-    "command": "echo 'Starting CodeScene analysis for content-engine...' && C:\\Users\\mhali\\AppData\\Local\\Programs\\cs-mcp\\cs-mcp.exe analyze --path content-engine/src --format json > docs/reports/codescene-content-engine.json 2>&1 || echo 'Note: Run through IDE MCP for full analysis'",
-    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
+    "command": "node --version",
+    "cwd": "c:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix",
+    "description": "Phase 1: Verify Node.js installation"
+  },
+  {
+    "command": "supabase --version",
+    "cwd": "c:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix",
+    "description": "Phase 1: Verify Supabase CLI installation"
+  },
+  {
+    "command": "supabase projects list",
+    "cwd": "c:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix",
+    "description": "Phase 1: Verify Supabase authentication"
+  },
+  {
+    "command": "make run-admin",
+    "cwd": "c:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix",
+    "description": "Phase 1: Test admin panel build"
+  },
+  {
+    "command": "make run-student",
+    "cwd": "c:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix",
+    "description": "Phase 1: Test student app build"
+  },
+  {
+    "command": "supabase gen types typescript --project-id qvslbiceoonrgjxzkotb > admin-panel/src/types/supabase.ts",
+    "cwd": "c:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix",
+    "description": "Phase 2: Generate fresh Supabase types"
+  },
+  {
+    "command": "npm run lint -- --fix",
+    "cwd": "c:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel",
+    "description": "Phase 3: Auto-fix lint errors"
+  },
+  {
+    "command": "npx tsc --noEmit",
+    "cwd": "c:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel",
+    "description": "Phase 3: TypeScript type checking"
+  },
+  {
+    "command": "npm run build",
+    "cwd": "c:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel",
+    "description": "Phase 3: Build admin panel"
+  },
+  {
+    "command": "make db_verify_rls",
+    "cwd": "c:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix",
+    "description": "Phase 6: Verify RLS policies"
   }
 ]

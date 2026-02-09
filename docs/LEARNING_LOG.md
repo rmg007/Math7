@@ -1,8 +1,219 @@
-# Learning Log
+## 2026-02-08: Agent Memory Hygiene & Knowledge Optimization (SKOA)
 
-This document captures lessons learned during development to prevent repeated mistakes and improve future implementations.
+### Session Context
+- **Objective**: Optimize persistent agent memory and knowledge base for maximum performance and reduced cognitive load.
+- **Scope**: `.gemini/antigravity/brain/`, `.gemini/antigravity/knowledge/`, project root cleanup, automated maintenance.
+- **Outcome**: ✅ Memory reduced by 46% (921 MB → 493 MB). Knowledge restructured into 5-Domain Architecture. Automated weekly cleanup registered.
 
 ---
+
+### Key Learnings
+
+#### 1. Agent Memory Bloat is a Silent Performance Killer
+**What Happened**: The `.gemini/antigravity/brain/` directory had grown to **921 MB** across **102 sessions** with **3,100+ files** — most of them redundant `.png`, `.webp` visual verification screenshots and `.resolved.*` task state snapshots.
+**Impact**: Slower semantic search, wasted disk, unnecessary context noise when the agent tried to retrieve past work.
+**Lesson**: Agent memory accumulates like technical debt. Visual verification artifacts (screenshots, recordings) are useful _during_ a session but become dead weight after the session's learnings are distilled into Knowledge Items (KIs).
+**Rule**: "If a session's learnings are in a KI, its media artifacts can be pruned."
+
+#### 2. The 5-Domain Knowledge Architecture (SKOA)
+**What Happened**: With 16 Knowledge Items, the knowledge base lacked a clear hierarchy. An agent searching for "how to deploy" would need to decide between `questerix_deployment_pipeline`, `questerix_governance`, and `questerix_master_strategy` — all of which contain deployment-related info.
+**Solution**: Organized all 16 KIs into 5 semantic domains:
+
+| Domain | Role | Primary KI |
+| :--- | :--- | :--- |
+| **I. Intelligence & Vision** | Strategic direction, Oracle, Roadmap | `questerix_master_strategy` |
+| **II. Behavioral Protocol** | Security, Workflows, Superpower Mode | `questerix_governance` |
+| **III. Global Standards** | Database, Design System, Naming | `questerix_database_architecture` |
+| **IV. App Ecosystem** | Admin Panel, Student App, Landing Pages | `admin_panel_development` |
+| **V. SRE & Infrastructure** | Deployment, Observability, Error Tracking | `questerix_observability` |
+
+**Impact**: Metadata summaries were updated with `[Domain X: ...]` tags, enabling faster agent routing.
+**Rule**: "Every KI must belong to exactly one domain. If it belongs to two, it should be consolidated."
+
+#### 3. Automated Maintenance Prevents Accumulation
+**What Happened**: Without automated cleanup, the brain directory grew unchecked for weeks. Manual cleanup recovered 46% of space in one pass.
+**Solution**: Created `scripts/maintenance/agent-memory-cleanup.ps1` with:
+- **Phase 1**: Strip all `.tempmediaStorage` and image files from sessions
+- **Phase 2**: Prune `.resolved.*` intermediate state files
+- **Phase 3**: Delete sessions older than N days (configurable, default 3)
+- **Phase 4**: Clean root workspace temp files
+**Automation**: Registered as Windows Scheduled Task (`QuesterixAgentCleanup`) running every Sunday at 3:00 AM. Survives reboots via `StartWhenAvailable` flag.
+**Rule**: "If cleanup is manual, it won't happen. Schedule it."
+
+#### 4. Root Directory is Not a Junk Drawer
+**What Happened**: The project root contained 43 files including stale JIRA exports (`jira_*.json`), a 54 KB legacy `QODO_GUIDE.md` (replaced by Oracle Plus), and temporary build artifacts.
+**Fix**: Moved legacy docs to `docs/archive/`, deleted temp files.
+**Lesson**: AI agents (and humans) read the root directory to understand a project's structure. Every stale file adds noise and confusion.
+**Rule**: "If a root file hasn't been read in 2 weeks, it should be archived or deleted."
+
+#### 5. DryRun Mode is Non-Negotiable for Destructive Operations
+**What Happened**: Before running the live cleanup, we ran the script with `-DryRun -Verbose`. This revealed it would clean **3,045 files** and recover **316 MB** — without touching anything.
+**Lesson**: Any script that deletes files should have a `-DryRun` flag as the DEFAULT mode. Live execution should require an explicit opt-in.
+**Rule**: "Destructive operations must be preview-first. `-DryRun` is not optional; it's the default."
+
+#### 6. Metadata Summaries Drive Agent Performance
+**What Happened**: KI metadata summaries were written in a generic style ("This Knowledge Item centers on..."). After optimization, they include domain tags, key milestones, and pointed phrases.
+**Before**: `"This Knowledge Item centers on technical patterns for the Dashboard..."`
+**After**: `"[Domain IV: App Ecosystem] Technical patterns for the Admin Panel (React/Vite). Features the Feb 2026 Sidebar Polish and 100% type safety standards."`
+**Impact**: The optimized summary gives an agent _immediate_ routing context without needing to open the full KI.
+**Rule**: "Metadata summaries should answer: What domain? What's the latest milestone? When should I read this?"
+
+---
+
+### Automation Delivered
+
+| Asset | Location | Purpose |
+| :--- | :--- | :--- |
+| Cleanup Script | `scripts/maintenance/agent-memory-cleanup.ps1` | Weekly memory pruning engine |
+| Scheduler Setup | `scripts/maintenance/register-cleanup-task.ps1` | One-time Windows Task Scheduler registration |
+| Makefile Targets | `make cleanup` / `make cleanup_dry` | Developer-friendly access |
+| Cleanup Logs | `scripts/maintenance/cleanup-log.txt` | Audit trail of all cleanup operations |
+| SKOA Report | `.gemini/.../KNOWLEDGE_OPTIMIZATION_REPORT.md` | 5-Domain Architecture reference |
+| Hygiene Plan | `.gemini/.../MEM_HYGIENE_PLAN.md` | Governance artifact for memory management |
+
+---
+
+### Cleanup Results (This Session)
+
+| Metric | Before | After | Change |
+| :--- | :--- | :--- | :--- |
+| Memory Size | 921 MB | 493 MB | **-46%** |
+| File Count | 3,100+ | 2,224 | **-876 files** |
+| Sessions | 102 | 81 | **-21 stale sessions** |
+| Root Files | 43 | ~38 | **-5 legacy files** |
+
+---
+
+### Files Modified/Created
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `scripts/maintenance/agent-memory-cleanup.ps1` | Created | Automated cleanup engine |
+| `scripts/maintenance/register-cleanup-task.ps1` | Created | Scheduled Task registration |
+| `Makefile` | Modified | Added `cleanup` / `cleanup_dry` targets |
+| `.gemini/.../KNOWLEDGE_OPTIMIZATION_REPORT.md` | Created | 5-Domain SKOA documentation |
+| `.gemini/.../MEM_HYGIENE_PLAN.md` | Created | Memory governance plan |
+| `.gemini/.../questerix_master_strategy/metadata.json` | Modified | Domain I tag + SKOA reference |
+| `.gemini/.../admin_panel_development/metadata.json` | Modified | Domain IV tag + Sidebar Polish |
+| `QODO_GUIDE.md` | Archived → `docs/archive/` | Legacy (replaced by Oracle Plus) |
+| `ORACLE_DOCS.md` | Archived → `docs/archive/` | Consolidated into KIs |
+| `AI_CODING_INSTRUCTIONS.md` | Archived → `docs/archive/` | Consolidated into KIs |
+| `jira_*.json` | Deleted | Stale JIRA exports |
+| `.flutter-defines.tmp` | Deleted | Temp build artifact |
+| `dependency-report.html` | Deleted | One-off report |
+
+---
+
+## 2026-02-08: Agent Workflow Optimization & The "Verify Before Building" Principle
+
+### Session Context
+- **Objective**: Optimize AI agent efficiency, session persistence, and resolve contradictory rules — based on an external review by Claude AI.
+- **Scope**: `.cursorrules`, `.agent/workflows/`, `admin-panel/package.json`, `.gitignore`, `.github/copilot-instructions.md`.
+- **Outcome**: ✅ 8 files modified/created. 5 fabricated features identified and skipped. 6 confirmed features leveraged.
+
+---
+
+### Key Learnings
+
+#### 1. The "Verify Before Building" Principle
+**What Happened**: Claude AI recommended 5 features (`.agent/rules/`, `.agent/config.json` aliases, MCP Store "TestSprite", quota dashboard, cloud test runner). **4 of 5 don't exist in this IDE.**
+**Lesson**: AI agents (including Claude, Copilot, and this agent) will confidently recommend features that don't exist. Before implementing ANY recommendation from an external source:
+1. Check if the file/directory exists
+2. Create a minimal test to confirm the feature works
+3. Only then build on it
+**Rule**: "If you can't `ls` it, don't build on it."
+
+#### 2. Contradictory Rules Cause Unpredictable Behavior
+**What Happened**: `.cursorrules` contained "ALWAYS set SafeToAutoRun: false" while `MEMORY[user_global]` said "ALL COMMANDS ARE PRE-AUTHORIZED." Agents receiving both instructions would behave inconsistently.
+**Lesson**: When multiple configuration sources exist (`.cursorrules`, `MEMORY[user_global]`, `.github/copilot-instructions.md`), they must not contradict each other. Establish a single source of truth per concern:
+  - `MEMORY[user_global]`: Auto-run behavior
+  - `.cursorrules`: Project context + coding rules
+  - `.github/copilot-instructions.md`: GitHub Copilot-specific instructions
+**Rule**: "One authority per decision. If two files disagree, one must be deleted."
+
+#### 3. Reactive vs. Proactive Session Recovery
+**What Happened**: The project already had `/resume` (recover from unexpected breaks) and `/continue` (agent handoff). But neither was **proactive** — they required the user to remember to invoke them.
+**Lesson**: The best developer experience comes from making session management automatic:
+  - `/default` workflow checks for `HANDOVER.md` on every session start (auto-wake)
+  - `/default` workflow suggests `/sleep` when conversation winds down (auto-sleep)
+  - User never needs to remember either command
+**Rule**: "If the user has to remember to run it, they won't. Automate the trigger."
+
+#### 4. Don't Over-Engineer What Already Exists
+**What Happened**: Claude recommended building a custom Cloud Run Job for test offloading. The project already has a GitHub Actions CI pipeline (`ci.yml`) running Vitest, Flutter tests, Playwright, security scans, and architecture tests — all on every push.
+**Lesson**: Before building new infrastructure, check what's already wired:
+  - `npm run test` → Vitest (already exists)
+  - `.github/workflows/ci.yml` → Full cloud test pipeline (already exists)
+  - The only gap was JSON output for agent consumption → 2-line fix in `package.json`
+**Rule**: "Search the repo before building the feature. The 2-line fix beats the 200-line new system."
+
+#### 5. Test Output Format Matters for AI Agents
+**What Happened**: `npm run test` streams human-readable test output — thousands of lines of stdout that consume tokens trying to parse.
+**Lesson**: AI agents work better with structured output. `--reporter=json --outputFile=test-results.json` gives the agent a parseable file instead of a wall of text. This is a zero-cost optimization (Vitest's JSON reporter is built-in).
+**Rule**: "Always have a `test:quick` (changed files, JSON) and `test:full` (all files, JSON, coverage) script available."
+
+#### 6. Stale References Create Agent Confusion
+**What Happened**: `.github/copilot-instructions.md` still referenced "Math7" (the old project name). While harmless to humans, AI agents may not realize "Math7" and "Questerix" refer to the same project, leading to misaligned code generation.
+**Lesson**: When renaming a project, grep all config/instruction files for the old name. AI agents read these files literally.
+
+---
+
+### Files Modified/Created
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `.cursorrules` | Modified | Removed anti-flicker conflict, added efficiency rules + terse mode |
+| `.agent/workflows/sleep.md` | Created | Session save workflow |
+| `.agent/workflows/wake.md` | Created | Session restore workflow |
+| `.agent/workflows/default.md` | Modified | Auto-wake + auto-sleep automation |
+| `.agent/workflows/help.md` | Modified | Added new commands reference |
+| `admin-panel/package.json` | Modified | Added `test:quick` and `test:full` scripts |
+| `.gitignore` | Modified | Added HANDOVER.md, .session/, test-results.json |
+| `.github/copilot-instructions.md` | Modified | Fixed Math7 → Questerix |
+| `docs/PERFORMANCE_OPTIMIZATION_LOG.md` | Modified | Full technical breakdown |
+| `docs/LEARNING_LOG.md` | Modified | This entry |
+
+---
+
+## 2026-02-08: Rapid Performance Optimization & Process Hygiene
+
+
+### Session Context
+- **Objective**: Address massive performance lag and bloated bundle sizes.
+- **Scope**: `admin-panel` architecture, Node process management, Vite configuration.
+- **Outcome**: ✅ 1.3 MB initial bundle reduced; Node processes consolidated.
+
+---
+
+### Key Learnings
+
+#### 1. Static Imports as Technical Debt
+**What Happened**: The `admin-panel` had 30+ pages statically imported in `App.tsx`. This created a 1.3 MB initial JavaScript bundle that had to be downloaded before even the login screen could render.
+**Lesson**: In dashboard applications, **Route-based Lazy Loading must be the default pattern**.
+**Fix**: Converted all imports to `React.lazy()` with a `Suspense` wrapper.
+
+#### 2. The "Zombie Process" IDE Lag
+**What Happened**: 5 redundant instances of `npm run dev` were running in the background, consuming 500%+ CPU and gigabytes of RAM.
+**Lesson**: AI agents and IDE terminal integrations can leave "ghost" processes if not explicitly cleaned. Process hygiene is as important as code hygiene.
+**Rule**: Always check for and kill redundant node processes when starting a new session or encountering lag.
+
+#### 3. Granular Vendor Chunking
+**What Happened**: Heavy libraries (`pdfjs-dist`, `mammoth`) were being pulled into the main bundle or general vendor chunks.
+**Lesson**: Libraries used only in specific "side" features (like Document Import) should be isolated into their own chunks (`document-vendor`) via `vite.config.ts`. This preserves cache integrity for the main application when these heavy libraries change.
+
+---
+
+### Files Modified/Created
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `admin-panel/src/App.tsx` | Modified | Implemented `React.lazy` and `Suspense` |
+| `admin-panel/vite.config.ts` | Modified | Granular `manualChunks` strategy |
+| `docs/PERFORMANCE_OPTIMIZATION_LOG.md` | Created | Full technical breakdown |
+| `docs/LEARNING_LOG.md` | Updated | This entry |
+
+---
+
 
 ## 2026-02-08: Tooling Dependencies & The "Wrangler" Blocker
 
