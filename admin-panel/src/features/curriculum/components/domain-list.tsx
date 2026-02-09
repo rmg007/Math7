@@ -1,11 +1,10 @@
 import { Link } from 'react-router-dom'
-import { Plus, CheckSquare, Square, Search, X, Trash, Book, GripVertical, Layout, Pencil, Trash2, ChevronRight, Filter } from 'lucide-react'
-import { usePaginatedDomains, useDeleteDomain, useBulkDeleteDomains, useBulkUpdateDomainsStatus, useUpdateDomainOrder } from '../hooks/use-domains'
+import { Plus, CheckSquare, Square, Search, X, GripVertical, Pencil, Trash2, ChevronRight, Filter, Book } from 'lucide-react'
+import { usePaginatedDomains, useDeleteDomain, useBulkDeleteDomains, useUpdateDomainOrder } from '../hooks/use-domains'
 import { useState, useEffect, useMemo } from 'react'
 import { useToast } from '@/hooks/use-toast';
 import { Pagination } from '@/components/ui/pagination'
 import { SortableHeader } from '@/components/ui/sortable-header'
-import { DataToolbar } from '@/components/ui/data-toolbar'
 import { EmptyState } from '@/components/ui/empty-state'
 import {
   AlertDialog,
@@ -17,14 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import type { DataColumn } from '@/lib/data-utils'
 
-const DOMAIN_COLUMNS: DataColumn[] = [
-  { key: 'sort_order', header: 'ORD.' },
-  { key: 'title', header: 'DOMAIN TITLE & ID' },
-  { key: 'updated_at', header: 'MODIFIED' },
-  { key: 'status', header: 'STATUS' },
-]
 import {
   DndContext,
   closestCenter,
@@ -254,7 +246,6 @@ export function DomainList() {
 
   const deleteDomain = useDeleteDomain()
   const bulkDelete = useBulkDeleteDomains()
-  const bulkUpdateStatus = useBulkUpdateDomainsStatus()
   const updateDomainOrder = useUpdateDomainOrder()
   const { toast } = useToast()
 
@@ -356,43 +347,6 @@ export function DomainList() {
     setSelectedIds(newSelected)
   }
 
-  const handleBulkDelete = () => {
-    if (selectedIds.size === 0) return
-    setDeleteConfirmation({ type: 'bulk' })
-  }
-
-  const handleMarkLive = async () => {
-    if (selectedIds.size === 0) return
-    try {
-      await bulkUpdateStatus.mutateAsync({ ids: Array.from(selectedIds), status: 'live' })
-      showToast(`${selectedIds.size} domain(s) marked as live`, 'success')
-      setSelectedIds(new Set())
-    } catch {
-      showToast('Failed to update domains', 'error')
-    }
-  }
-
-  const handleMarkDraft = async () => {
-    if (selectedIds.size === 0) return
-    try {
-      await bulkUpdateStatus.mutateAsync({ ids: Array.from(selectedIds), status: 'draft' })
-      showToast(`${selectedIds.size} domain(s) marked as draft`, 'success')
-      setSelectedIds(new Set())
-    } catch {
-      showToast('Failed to update domains', 'error')
-    }
-  }
-
-  const handleMarkPublished = async () => {
-    if (selectedIds.size === 0) return
-    try {
-      await bulkUpdateStatus.mutateAsync({ ids: Array.from(selectedIds), status: 'published' })
-      showToast(`${selectedIds.size} domain(s) marked as published (ready for release)`, 'success')
-      setSelectedIds(new Set())
-    } catch {
-      showToast('Failed to update domains', 'error')
-    }
-  }
 
   const handleDelete = (id: string) => {
     setDeleteConfirmation({ type: 'single', id })

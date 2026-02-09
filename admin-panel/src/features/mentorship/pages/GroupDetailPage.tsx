@@ -19,12 +19,11 @@ interface Assignment {
 }
 
 interface Member {
-  id: string
   group_id: string
   user_id: string | null
   nickname: string | null
   joined_at: string | null
-  anonymous_device_id: string | null
+  is_anonymous: boolean | null
   profiles: {
     id: string
     email: string
@@ -339,9 +338,9 @@ export function GroupDetailPage() {
               </div>
               <div className={cn(
                 "text-2xl font-bold",
-                group.allow_anonymous ? "text-green-600" : "text-slate-400"
+                group.allow_anonymous_join ? "text-green-600" : "text-slate-400"
               )}>
-                {group.allow_anonymous ? 'Enabled' : 'Disabled'}
+                {group.allow_anonymous_join ? 'Enabled' : 'Disabled'}
               </div>
             </div>
           </div>
@@ -558,7 +557,7 @@ export function GroupDetailPage() {
                     </TableHeader>
                     <TableBody>
                       {members.map((member: Member) => (
-                        <TableRow key={member.id}>
+                        <TableRow key={member.user_id || `${member.group_id}-anon`}>
                           <TableCell className="font-medium">
                              {member.nickname || member.profiles?.full_name || member.profiles?.email || 'Anonymous'}
                           </TableCell>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Layout } from 'lucide-react';
+import { Plus, Layout } from 'lucide-react';
 import { useApps, useCreateApp, useUpdateApp, useDeleteApp, type App } from '../hooks/use-apps';
 import { useSubjects } from '../hooks/use-subjects';
 import { Button } from '@/components/ui/button';
@@ -35,12 +35,12 @@ export function AppsPage() {
     if (app) {
       setEditingApp(app);
       setFormData({
-        subject_id: app.subject_id,
+        subject_id: app.subject_id || '',
         display_name: app.display_name,
         subdomain: app.subdomain,
         grade_level: app.grade_level || '',
         grade_number: app.grade_number || 0,
-        is_active: app.is_active
+        is_active: app.is_active || false
       });
     } else {
       setEditingApp(null);

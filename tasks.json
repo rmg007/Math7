@@ -1,7 +1,22 @@
 [
   {
-    "description": "Consolidated merge of codescene-init",
-    "command": "echo 'Merge completed'",
+    "description": "Generate environment files",
+    "command": "powershell -NoProfile .\\scripts\\deploy\\generate-env.ps1 -ConfigFile master-config.json",
     "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
+  },
+  {
+    "description": "Install dependencies",
+    "command": "npm install",
+    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel"
+  },
+  {
+    "description": "Build Admin Panel",
+    "command": "npm run build",
+    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel"
+  },
+  {
+    "description": "Deploy Admin Panel to Cloudflare",
+    "command": "npx -y wrangler pages deploy dist --project-name questerix-admin --commit-dirty --branch main",
+    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel"
   }
 ]

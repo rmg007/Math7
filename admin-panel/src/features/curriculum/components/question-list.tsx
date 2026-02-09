@@ -131,7 +131,7 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, re
                 </span>
             </td>
             <td className="px-6 py-4">
-                <span className="text-gray-700">{question.skills?.title}</span>
+                <span className="text-gray-700">{question.skills?.name}</span>
             </td>
             <td className="px-6 py-4">
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-orange-700 font-semibold text-sm">
@@ -239,9 +239,9 @@ function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, r
                 <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                     {formatIdentifier(question.type)}
                 </span>
-                {question.skills?.title && (
+                {question.skills?.name && (
                     <span className="text-gray-600 text-xs">
-                        Skill: <span className="font-medium">{question.skills.title}</span>
+                        Skill: <span className="font-medium">{question.skills.name}</span>
                     </span>
                 )}
                 <span className="inline-flex items-center gap-1 text-gray-600">

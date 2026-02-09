@@ -91,3 +91,8 @@ docs/HANDOVER.md
 # Test output files
 test-results.json
 admin-panel/test-results.json
+
+# Antigravity Knowledge (Synced from Supabase)
+.gemini/antigravity/knowledge/
+!.gemini/antigravity/knowledge/.keep
+

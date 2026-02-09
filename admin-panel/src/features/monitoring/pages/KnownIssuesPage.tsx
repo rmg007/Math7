@@ -10,7 +10,6 @@ import {
   Plus,
   Pencil,
   Trash2,
-  X,
   ExternalLink
 } from 'lucide-react';
 import { useKnownIssues, type KnownIssue } from '../hooks/use-known-issues';
@@ -88,8 +87,8 @@ export function KnownIssuesPage() {
       setFormData({
         title: issue.title,
         description: issue.description || '',
-        status: issue.status,
-        severity: issue.severity,
+        status: issue.status || 'open',
+        severity: issue.severity || 'medium',
         root_cause: issue.root_cause || '',
         resolution: issue.resolution || '',
         sentry_link: issue.sentry_link || ''
