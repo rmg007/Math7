@@ -117,7 +117,10 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, re
                 </button>
             </td>
             <td className="px-6 py-4 max-w-[300px]">
-                <span className="font-medium text-gray-900 truncate block">{question.content}</span>
+                <span 
+                    className="font-medium text-gray-900 truncate block text-sm"
+                    dangerouslySetInnerHTML={{ __html: question.content }}
+                />
             </td>
             <td className="px-6 py-4">
                 <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium capitalize">
@@ -220,7 +223,10 @@ function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, r
                     {isSelected ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
                 </button>
                 <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 line-clamp-2">{question.content}</p>
+                    <div 
+                        className="font-medium text-gray-900 line-clamp-2 text-sm"
+                        dangerouslySetInnerHTML={{ __html: question.content }}
+                    />
                 </div>
                 <div className="flex-shrink-0">
                     {renderStatusBadge(question.status || 'draft')}

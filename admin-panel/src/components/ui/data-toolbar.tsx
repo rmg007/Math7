@@ -92,7 +92,7 @@ export function DataToolbar<T extends Record<string, unknown>>({
           className="flex items-center gap-2"
         >
           <Download className="h-4 w-4" />
-          <span className="hidden sm:inline">Download</span>
+          <span className="hidden sm:inline">Export</span>
           <ChevronDown className="h-3 w-3" />
         </Button>
         {showExportMenu && (

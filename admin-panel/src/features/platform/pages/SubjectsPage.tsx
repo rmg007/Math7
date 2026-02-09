@@ -119,7 +119,11 @@ export function SubjectsPage() {
                   <TableCell className="font-medium">{s.name}</TableCell>
                   <TableCell className="font-mono text-xs">{s.slug}</TableCell>
                   <TableCell>
-                    <span className="text-xs">{s.icon_url || 'No icon'}</span>
+                    {s.icon_url ? (
+                      <span className="text-xs">{s.icon_url}</span>
+                    ) : (
+                      <Boxes className="w-4 h-4 text-gray-300" />
+                    )}
                   </TableCell>
                   <TableCell>{s.display_order ?? 0}</TableCell>
                   <TableCell className="text-right">

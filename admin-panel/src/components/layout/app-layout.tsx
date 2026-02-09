@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 
 export function AppLayout() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
-  const { isSidebarCollapsed, toggleSidebar } = useApp()
+  const { toggleSidebar } = useApp()
 
   const openMobileSidebar = () => setIsMobileSidebarOpen(true)
   const closeMobileSidebar = () => setIsMobileSidebarOpen(false)
@@ -48,8 +48,7 @@ export function AppLayout() {
 
       <div className={cn(
         "flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out",
-        "md:ml-0",
-        isSidebarCollapsed ? "md:pl-20" : "md:pl-72"
+        "md:ml-0"
       )}>
         <header className="md:hidden flex items-center h-16 px-4 bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 border-b border-white/10">
           <button

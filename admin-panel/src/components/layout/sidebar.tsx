@@ -320,31 +320,54 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
         </button>
 
         {userInfo && (
-          <div className="px-4 py-3 bg-white/5 rounded-xl border border-white/5">
-            <div className="flex items-center justify-between mb-2">
-                 <p className="text-sm font-semibold text-white truncate">
-                  {userInfo.fullName || userInfo.email.split('@')[0]}
-                </p>
-                <button
+          <div className={cn(
+            "bg-white/5 rounded-xl border border-white/5 transition-all duration-300",
+            isSidebarCollapsed ? "p-1.5 flex flex-col items-center gap-2" : "px-4 py-3"
+          )}>
+            {!isSidebarCollapsed ? (
+              <>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-semibold text-white truncate">
+                    {userInfo.fullName || userInfo.email.split('@')[0]}
+                  </p>
+                  <button
                     onClick={handleLogout}
-                     className="text-purple-300 hover:text-white transition-colors p-1 hover:bg-white/10 rounded"
-                     title="Sign Out"
-                >
+                    className="text-purple-300 hover:text-white transition-colors p-1 hover:bg-white/10 rounded"
+                    title="Sign Out"
+                  >
                     <LogOut className="h-4 w-4" />
+                  </button>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <span className={cn(
+                    "inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full uppercase tracking-wider",
+                    userInfo.role === 'super_admin' 
+                      ? "bg-purple-500/20 text-purple-200 border border-purple-500/30" 
+                      : "bg-blue-500/20 text-blue-200 border border-blue-500/30"
+                  )}>
+                    {userInfo.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+                  </span>
+                  <p className="text-[10px] text-purple-300/60 truncate max-w-[100px]">{userInfo.email}</p>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center gap-3">
+                <div 
+                  className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center text-purple-200 text-xs font-bold"
+                  title={`${userInfo.fullName || userInfo.email}`}
+                >
+                  {(userInfo.fullName || userInfo.email).charAt(0).toUpperCase()}
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 text-purple-300 hover:text-white transition-colors hover:bg-white/10 rounded-lg"
+                  title="Sign Out"
+                >
+                  <LogOut className="h-4 w-4" />
                 </button>
-            </div>
-            
-            <div className="flex items-center justify-between">
-                <span className={cn(
-                  "inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full uppercase tracking-wider",
-                  userInfo.role === 'super_admin' 
-                    ? "bg-purple-500/20 text-purple-200 border border-purple-500/30" 
-                    : "bg-blue-500/20 text-blue-200 border border-blue-500/30"
-                )}>
-                  {userInfo.role === 'super_admin' ? 'Super Admin' : 'Admin'}
-                </span>
-                <p className="text-[10px] text-purple-300/60 truncate max-w-[100px]">{userInfo.email}</p>
-            </div>
+              </div>
+            )}
           </div>
         )}
         {!userInfo && (

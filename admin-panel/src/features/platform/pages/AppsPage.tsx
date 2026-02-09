@@ -138,12 +138,18 @@ export function AppsPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(app)}>
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(app.app_id)} className="text-red-500 hover:text-red-600 hover:bg-red-500/10">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                       <button 
+                        onClick={() => handleOpenDialog(app)}
+                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium hover:bg-blue-200 transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(app.app_id)}
+                        className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium hover:bg-red-200 transition-colors"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </TableCell>
                 </TableRow>

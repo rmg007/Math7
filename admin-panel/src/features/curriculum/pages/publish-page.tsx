@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 export function PublishPage() {
     const publishMutation = usePublishCurriculum();
-    const { data: preview, isLoading: isLoadingPreview } = usePublishPreview();
+    const { data: preview, isLoading: isLoadingPreview, isError: isErrorPreview, error: previewError } = usePublishPreview();
     const [success, setSuccess] = useState(false);
     const [publishedVersion, setPublishedVersion] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -169,6 +169,16 @@ export function PublishPage() {
                     </div>
                 )}
             </div>
+
+            {isErrorPreview && (
+                 <div className="bg-red-50 border border-red-200 text-red-800 p-6 rounded-2xl flex items-center gap-4">
+                    <AlertCircle className="w-8 h-8 text-red-600 flex-shrink-0" />
+                    <div>
+                        <p className="font-semibold text-lg">Failed to load preview</p>
+                        <p className="text-sm text-red-700">{(previewError as Error)?.message || 'Check your connection or app selection'}</p>
+                    </div>
+                </div>
+            )}
 
             {!isLoadingPreview && preview?.validationIssues && preview.validationIssues.length > 0 && (
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">

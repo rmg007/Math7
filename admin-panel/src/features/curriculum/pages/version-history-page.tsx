@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/lib/database.types';
 import { useApp } from '@/hooks/use-app';
-import { History, Calendar, Package, Download } from 'lucide-react';
+import { History, Calendar, Package, Download, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 import { usePaginatedPublishHistory } from '../hooks/use-publish';
 import { Pagination } from '@/components/ui/pagination';
@@ -29,7 +29,7 @@ export function VersionHistoryPage() {
   const [sortBy, setSortBy] = useState('version');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  const { data: paginatedHistory, isLoading } = usePaginatedPublishHistory({
+  const { data: paginatedHistory, isLoading, isError, error: historyError } = usePaginatedPublishHistory({
     page,
     pageSize,
     sortBy,
@@ -136,6 +136,12 @@ export function VersionHistoryPage() {
               <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-r-transparent"></div>
               <p className="mt-4 text-gray-500">Loading version history...</p>
             </div>
+          </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center py-16 text-red-500">
+            <AlertCircle className="w-12 h-12 mb-4" />
+            <p className="font-semibold">Error loading history</p>
+            <p className="text-sm opacity-80">{(historyError as Error)?.message || 'Unknown error'}</p>
           </div>
         ) : !history?.length ? (
           <div className="flex flex-col items-center justify-center py-16">

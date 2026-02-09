@@ -63,3 +63,23 @@ export function useUpdateLandingPage() {
     },
   });
 }
+
+export function useCreateLandingPage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (landingPage: Database['public']['Tables']['app_landing_pages']['Insert']) => {
+      const { data, error } = await supabase
+        .from('app_landing_pages')
+        .insert(landingPage)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as LandingPage;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['landing-pages'] });
+    },
+  });
+}

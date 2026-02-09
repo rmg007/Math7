@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { Globe, Pencil, Save, ChevronLeft } from 'lucide-react';
-import { useLandingPages, useUpdateLandingPage, type LandingPage } from '../hooks/use-landings';
+import { Globe, Pencil, Save, ChevronLeft, Plus } from 'lucide-react';
+import { useLandingPages, useUpdateLandingPage, useCreateLandingPage, type LandingPage } from '../hooks/use-landings';
+import { useApps } from '../hooks/use-apps';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,8 +14,13 @@ import { useToast } from '@/hooks/use-toast';
 
 export function LandingsPage() {
   const { data: landings, isLoading } = useLandingPages();
+  const { data: apps } = useApps();
   const updateLanding = useUpdateLandingPage();
+  const createLanding = useCreateLandingPage();
   const { toast } = useToast();
+
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [selectedAppId, setSelectedAppId] = useState<string>('');
 
   const [editingLanding, setEditingLanding] = useState<LandingPage | null>(null);
   const [formData, setFormData] = useState({
@@ -43,6 +51,38 @@ export function LandingsPage() {
       setEditingLanding(null);
     } catch (error) {
       toast({ title: "Error", description: "Failed to update landing page", variant: "destructive" });
+    }
+  };
+
+  const handleCreate = async () => {
+    if (!selectedAppId) {
+      toast({ title: "Error", description: "Please select an app", variant: "destructive" });
+      return;
+    }
+    
+    // Check if app already has a landing page
+    const existing = landings?.find(l => l.app_id === selectedAppId);
+    if (existing) {
+      toast({ title: "Notice", description: "This app already has a landing page. Editing existing one." });
+      handleEdit(existing);
+      setIsCreateDialogOpen(false);
+      return;
+    }
+
+    try {
+      const newLanding = await createLanding.mutateAsync({
+        app_id: selectedAppId,
+        hero_headline: 'Welcome to our platform',
+        hero_subheadline: 'Learn something new today with our curated curriculum.',
+        slug: apps?.find(a => a.app_id === selectedAppId)?.subdomain || '',
+        meta_title: apps?.find(a => a.app_id === selectedAppId)?.display_name || 'Landing Page',
+        meta_description: 'Discover the best learning experience.'
+      });
+      toast({ title: "Success", description: "Landing page created" });
+      setIsCreateDialogOpen(false);
+      handleEdit(newLanding);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to create landing page", variant: "destructive" });
     }
   };
 
@@ -116,9 +156,14 @@ export function LandingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Landing Pages</h2>
-        <p className="text-muted-foreground">Manage SEO and marketing content for each application</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Landing Pages</h2>
+          <p className="text-muted-foreground">Manage SEO and marketing content for each application</p>
+        </div>
+        <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
+          <Plus className="w-4 h-4" /> Add Landing Page
+        </Button>
       </div>
 
       <Card>
@@ -159,6 +204,37 @@ export function LandingsPage() {
           </Table>
         </CardContent>
       </Card>
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Landing Page</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label>Select Application</Label>
+              <Select value={selectedAppId} onValueChange={setSelectedAppId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select App" />
+                </SelectTrigger>
+                <SelectContent>
+                  {apps?.filter(app => !landings?.some(l => l.app_id === app.app_id)).map(app => (
+                    <SelectItem key={app.app_id} value={app.app_id}>{app.display_name}</SelectItem>
+                  ))}
+                  {apps?.filter(app => !landings?.some(l => l.app_id === app.app_id)).length === 0 && (
+                     <div className="p-2 text-xs text-center text-muted-foreground">No apps without landing pages available.</div>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setIsCreateDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreate} disabled={createLanding.isPending}>
+              {createLanding.isPending ? 'Creating...' : 'Create Landing Page'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
