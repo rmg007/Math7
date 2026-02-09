@@ -10,6 +10,8 @@ Questerix is a comprehensive multi-tenant educational platform featuring student
   - Ported Supabase Edge Functions to Express routes
   - Created Drizzle schema with 33 tables
   - Set up Vite proxy for API calls
+  - Added role-based access control for admin-only write operations
+  - Auth middleware applied to all data/rpc/functions endpoints
 
 ## Architecture
 
