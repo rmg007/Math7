@@ -57,9 +57,8 @@ replacements.txt
 # =============================================================================
 # DEPLOYMENT PIPELINE SECURITY
 # =============================================================================
-# Secrets file (CRITICAL - contains API tokens)
-.secrets
-.secrets.backup*
+# Secrets files (CRITICAL - contains API tokens)
+.secrets*
 *.backup
 
 
