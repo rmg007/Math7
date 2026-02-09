@@ -436,6 +436,7 @@ export function DomainList() {
     setPage(1)
   }
 
+  const renderStatusBadge = (status: string) => {
     const statusMapping = {
       live: { label: 'LIVE', className: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
       published: { label: 'PUBLISHED', className: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
@@ -450,6 +451,7 @@ export function DomainList() {
         {config.label}
       </span>
     )
+  }
 
   if (isLoading) {
     return (
