@@ -61,6 +61,7 @@ replacements.txt
 .secrets*
 *.backup
 temp-secrets-*.json
+.mcp_config.json
 
 
 # Generated environment files (recreated each deploy)
@@ -87,10 +88,17 @@ deps-output.txt
 # Session management (local only)
 docs/HANDOVER.md
 .session/
+logs/
+tasks.status.json
 
-# Test output files
-test-results.json
-admin-panel/test-results.json
+# Test and Research artifacts
+arch_test_output.txt
+test-output.txt
+*.test-output.txt
+dependency-report.html
+dependency-graph.dot
+architecture-graph.dot
+deps-output.txt
 
 # Antigravity Knowledge (Synced from Supabase)
 .gemini/antigravity/knowledge/

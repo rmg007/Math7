@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Clock, DollarSign, FileText, AlertCircle, Search, X } from 'lucide-react';
+import { Clock, DollarSign, FileText, AlertCircle, Search, X, CheckCircle2 } from 'lucide-react';
 
 import { Database } from '@/lib/database.types';
 import { AdminHeader } from '@/components/ui/admin-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
 
 type GenerationSession = Database['public']['Tables']['ai_generation_sessions']['Row'];
 
@@ -94,161 +94,178 @@ export const SessionsPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader 
-        title="AI Generation History"
-        description="Track and audit AI question generation sessions, token consumption, and model efficiency across applications."
+        title="Intelligence Telemetry"
+        description="Track and audit AI generation sessions, token consumption, and model efficiency."
         icon={Clock}
+        breadcrumbs={[
+          { label: 'Platform', href: '/apps' },
+          { label: 'Intelligence', href: '/sessions' },
+          { label: 'Telemetry', href: '/sessions' }
+        ]}
       />
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="border-purple-100 shadow-sm shadow-purple-500/5">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-bold text-gray-400 border-none uppercase tracking-widest flex items-center gap-2">
-                <FileText className="w-3.5 h-3.5 text-purple-600" />
-                Total Generated
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-gray-900 font-mono tracking-tight">{totalQuestionsGenerated}</p>
-            <p className="text-[10px] text-gray-500 mt-1 uppercase font-medium">{sessions.length} sessions executed</p>
-          </CardContent>
-        </Card>
+      {/* Summary Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/10 group-hover:scale-110 transition-transform">
+              <FileText className="h-6 w-6 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Total Artifacts</p>
+              <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">{totalQuestionsGenerated}</h3>
+            </div>
+          </div>
+          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-full bg-purple-500 w-[70%]" />
+          </div>
+          <p className="text-[10px] text-gray-400 mt-3 font-bold uppercase tracking-widest">{sessions.length} sessions executed</p>
+        </div>
 
-        <Card className="border-green-100 shadow-sm shadow-green-500/5">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-bold text-gray-400 border-none uppercase tracking-widest flex items-center gap-2">
-                <FileText className="w-3.5 h-3.5 text-green-600" />
-                Imported questions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-gray-900 font-mono tracking-tight">{totalQuestionsImported}</p>
-            <p className="text-[10px] text-green-600 mt-1 uppercase font-medium">
-              {totalQuestionsGenerated > 0
-                ? `${((totalQuestionsImported / totalQuestionsGenerated) * 100).toFixed(1)}% Conversion rate`
-                : 'Insufficient data'}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/10 group-hover:scale-110 transition-transform">
+              <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Import Rate</p>
+              <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
+                {totalQuestionsGenerated > 0
+                  ? `${((totalQuestionsImported / totalQuestionsGenerated) * 100).toFixed(1)}%`
+                  : '0%'}
+              </h3>
+            </div>
+          </div>
+          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-emerald-500" 
+              style={{ width: `${totalQuestionsGenerated > 0 ? (totalQuestionsImported / totalQuestionsGenerated) * 100 : 0}%` }} 
+            />
+          </div>
+          <p className="text-[10px] text-emerald-600 mt-3 font-bold uppercase tracking-widest">{totalQuestionsImported} synced to production</p>
+        </div>
 
-        <Card className="border-blue-100 shadow-sm shadow-blue-500/5">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-bold text-gray-400 border-none uppercase tracking-widest flex items-center gap-2">
-                <DollarSign className="w-3.5 h-3.5 text-blue-600" />
-                Total Estimated Cost
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-gray-900 font-mono tracking-tight">${totalCost.toFixed(3)}</p>
-            <p className="text-[10px] text-blue-600 mt-1 uppercase font-medium font-mono">
-              ~${(totalCost / totalQuestionsGenerated || 0).toFixed(6)} / Q
-            </p>
-          </CardContent>
-        </Card>
+        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/10 group-hover:scale-110 transition-transform">
+              <DollarSign className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Compute Cost</p>
+              <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">${totalCost.toFixed(3)}</h3>
+            </div>
+          </div>
+          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-full bg-blue-500 w-[45%]" />
+          </div>
+          <p className="text-[10px] text-blue-600 mt-3 font-bold uppercase tracking-widest">~${(totalCost / totalQuestionsGenerated || 0).toFixed(4)} Per Question</p>
+        </div>
 
-        <Card className="border-orange-100 shadow-sm shadow-orange-500/5">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-bold text-gray-400 border-none uppercase tracking-widest flex items-center gap-2">
-                <Clock className="w-3.5 h-3.5 text-orange-600" />
-                Avg Latency
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-gray-900 font-mono tracking-tight">
-              {sessions.length > 0
-                ? (sessions.reduce((sum, s) => sum + (s.generation_time_ms || 0), 0) / sessions.length / 1000).toFixed(1)
-                : 0}s
-            </p>
-            <p className="text-[10px] text-orange-600 mt-1 uppercase font-medium">Generation time / session</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 rounded-2xl bg-orange-500/10 border border-orange-500/10 group-hover:scale-110 transition-transform">
+              <Clock className="h-6 w-6 text-orange-600" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Avg Latency</p>
+              <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
+                {sessions.length > 0
+                  ? (sessions.reduce((sum, s) => sum + (s.generation_time_ms || 0), 0) / sessions.length / 1000).toFixed(1)
+                  : 0}s
+              </h3>
+            </div>
+          </div>
+          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-full bg-orange-500 w-[60%]" />
+          </div>
+          <p className="text-[10px] text-orange-600 mt-3 font-bold uppercase tracking-widest">Generation Velocity</p>
+        </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search by model or status..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all outline-none"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="text-xs font-medium text-gray-500 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
-              {filteredSessions.length} Sessions
-            </div>
+      {/* Intelligence Filter Bar */}
+      <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
+        <div className="relative flex-1 w-full group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+          <input
+            type="text"
+            placeholder="Search telemetry by model or status..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none text-sm font-medium"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
+             <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Sessions:</span>
+             <span className="text-sm font-black text-indigo-700 tracking-tight">{filteredSessions.length} TRACKED</span>
           </div>
         </div>
       </div>
 
       {/* Sessions Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 overflow-hidden hover:shadow-xl transition-all duration-500">
+        <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30">
+          <h3 className="text-xl font-black text-gray-900 tracking-tight italic">Execution Archive</h3>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1 italic">Historical Generation Events</p>
+        </div>
+        
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Model
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Generated
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Imported
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Time
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Cost
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Status
-                </th>
+            <thead>
+              <tr className="bg-gray-50/50 hover:bg-gray-50/50 border-b-2 border-gray-100">
+                <th className="px-8 py-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">Date</th>
+                <th className="px-4 py-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">Model Node</th>
+                <th className="px-4 py-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">Artifacts</th>
+                <th className="px-4 py-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">Synced</th>
+                <th className="px-4 py-4 text-right font-black text-[10px] uppercase tracking-widest text-gray-400">Latency</th>
+                <th className="px-4 py-4 text-right font-black text-[10px] uppercase tracking-widest text-gray-400">Cost</th>
+                <th className="px-8 py-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-50">
               {filteredSessions.map((session) => (
-                <tr key={session.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 text-sm text-gray-900">
-                    {new Date(session.created_at).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                <tr key={session.id} className="hover:bg-indigo-50/30 transition-colors group">
+                  <td className="px-8 py-5">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-gray-900 tracking-tight italic">
+                        {new Date(session.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </span>
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        {new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{session.model_used}</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 font-medium">
-                    {session.questions_generated}
+                  <td className="px-4 py-5 font-bold text-gray-700 text-sm truncate max-w-[150px] italic">
+                    {session.model_used}
                   </td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 font-medium">
-                    {session.questions_imported}
+                  <td className="px-4 py-5 text-center">
+                    <span className="px-3 py-1 rounded-full bg-gray-100 font-mono font-black text-gray-900 text-xs shadow-sm">
+                      {session.questions_generated}
+                    </span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-right text-gray-700">
+                  <td className="px-4 py-5 text-center">
+                    <span className="px-3 py-1 rounded-full bg-emerald-50 font-mono font-black text-emerald-700 text-xs shadow-sm">
+                      {session.questions_imported}
+                    </span>
+                  </td>
+                  <td className="px-4 py-5 text-right font-bold text-gray-500 text-xs">
                     {((session.generation_time_ms || 0) / 1000).toFixed(2)}s
                   </td>
-                  <td className="px-4 py-3 text-sm text-right text-gray-700 font-medium">
+                  <td className="px-4 py-5 text-right font-mono font-black text-blue-600 text-xs">
                     ${calculateCost(session).toFixed(4)}
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-8 py-5 text-center">
                     <StatusBadge 
                       status={getStatusType(session.status)} 
                       label={(session.status || 'reviewing').toUpperCase()}
@@ -261,10 +278,12 @@ export const SessionsPage: React.FC = () => {
         </div>
 
         {filteredSessions.length === 0 && (
-          <div className="py-12 text-center">
-            <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No generation sessions yet</p>
-            <p className="text-sm text-gray-400 mt-1">Create your first session to see it here</p>
+          <div className="py-24">
+            <EmptyState 
+              icon={Clock}
+              title="No Telemetry Detected"
+              description="Generation events will materialize here once the AI engine is engaged."
+            />
           </div>
         )}
       </div>

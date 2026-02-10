@@ -153,6 +153,12 @@ export function VersionHistoryPage() {
           </div>
         ) : (
           <div>
+            <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-gray-100 w-fit">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Results:</span>
+                <span className="text-xs font-bold text-gray-700">{totalCount}</span>
+              </div>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>

@@ -6,18 +6,14 @@ import {
   CheckCircle2, 
   ArrowUpRight,
   Search,
-  Filter,
   RefreshCw,
   Monitor,
   Smartphone,
   Globe,
-  Clock,
-  Trash2,
-  Info,
-  Copy,
-  Bug,
-  X
+  Clock
 } from 'lucide-react';
+import { Trash2, Info, Copy, Bug, X } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { AdminHeader } from '@/components/ui/admin-header';
 import { 
   useErrorLogs, 
@@ -58,6 +54,7 @@ import {
 } from '@/components/ui/select';
 
 export function ErrorLogsPage() {
+  const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedError, setSelectedError] = useState<ErrorLog | null>(null);
@@ -112,11 +109,14 @@ export function ErrorLogsPage() {
     setSelectedError(null);
   };
 
-  const handleDelete = (error: ErrorLog, e?: React.MouseEvent) => {
+  const handleDelete = async (error: ErrorLog, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (window.confirm('Delete this error log? This cannot be undone.')) {
-      deleteError.mutate(error.id);
+    try {
+      await deleteError.mutateAsync(error.id);
       setSelectedError(null);
+      toast({ title: "Trace Extinguished", description: "The diagnostic residue has been purged from the archive." });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to delete error log", variant: "destructive" });
     }
   };
 
@@ -125,121 +125,113 @@ export function ErrorLogsPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader 
-        title="Error Logs"
-        description="Monitor and triage application errors in real-time. Zero external dependencies."
+        title="System Diagnostics"
+        description="Monitor and triage application errors in real-time. Zero-cost observability."
         icon={Bug}
+        breadcrumbs={[
+          { label: 'Platform', href: '/apps' },
+          { label: 'Monitoring', href: '/errors' },
+          { label: 'Error Logs', href: '/errors' }
+        ]}
         actions={
           <Button 
             variant="outline" 
             onClick={() => refetch()}
-            className="gap-2 shadow-sm"
+            className="h-12 px-6 rounded-2xl border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-600 hover:bg-indigo-50 transition-all font-bold uppercase tracking-widest text-[10px] gap-2 shadow-sm"
           >
             <RefreshCw className="w-4 h-4" />
-            Refresh
+            Refresh Archive
           </Button>
         }
       />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card className="bg-red-50/50 border-red-100">
-          <CardContent className="pt-4 pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-red-900">New</p>
-                <p className="text-2xl font-bold text-red-700">{stats?.new ?? 0}</p>
-              </div>
-              <AlertTriangle className="w-5 h-5 text-red-400" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-blue-50/50 border-blue-100">
-          <CardContent className="pt-4 pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-blue-900">Seen</p>
-                <p className="text-2xl font-bold text-blue-700">{stats?.seen ?? 0}</p>
-              </div>
-              <Eye className="w-5 h-5 text-blue-400" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-gray-50/50 border-gray-200">
-          <CardContent className="pt-4 pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-900">Ignored</p>
-                <p className="text-2xl font-bold text-gray-700">{stats?.ignored ?? 0}</p>
-              </div>
-              <EyeOff className="w-5 h-5 text-gray-400" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-green-50/50 border-green-100">
-          <CardContent className="pt-4 pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-green-900">Resolved</p>
-                <p className="text-2xl font-bold text-green-700">{stats?.resolved ?? 0}</p>
-              </div>
-              <CheckCircle2 className="w-5 h-5 text-green-400" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-purple-50/50 border-purple-100">
-          <CardContent className="pt-4 pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-purple-900">Issues</p>
-                <p className="text-2xl font-bold text-purple-700">{stats?.promoted ?? 0}</p>
-              </div>
-              <ArrowUpRight className="w-5 h-5 text-purple-400" />
-            </div>
-          </CardContent>
-        </Card>
+      {/* Health Metrics */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-red-500/10 hover:border-red-500/20 transition-all group">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-black text-red-900/40 uppercase tracking-widest">Unseen</p>
+            <AlertTriangle className="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" />
+          </div>
+          <p className="text-3xl font-black text-red-600 tracking-tighter">{stats?.new ?? 0}</p>
+        </div>
+
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-blue-500/10 hover:border-blue-500/20 transition-all group">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest">Acknowledged</p>
+            <Eye className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
+          </div>
+          <p className="text-3xl font-black text-blue-600 tracking-tighter">{stats?.seen ?? 0}</p>
+        </div>
+
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-gray-500/10 hover:border-gray-500/20 transition-all group">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-black text-gray-900/40 uppercase tracking-widest">Suppressed</p>
+            <EyeOff className="w-4 h-4 text-gray-400 group-hover:scale-110 transition-transform" />
+          </div>
+          <p className="text-3xl font-black text-gray-600 tracking-tighter">{stats?.ignored ?? 0}</p>
+        </div>
+
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-emerald-500/10 hover:border-emerald-500/20 transition-all group">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-black text-emerald-900/40 uppercase tracking-widest">Resolved</p>
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+          </div>
+          <p className="text-3xl font-black text-emerald-600 tracking-tighter">{stats?.resolved ?? 0}</p>
+        </div>
+
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-purple-500/10 hover:border-purple-500/20 transition-all group">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-black text-purple-900/40 uppercase tracking-widest">Promoted</p>
+            <ArrowUpRight className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
+          </div>
+          <p className="text-3xl font-black text-purple-600 tracking-tighter">{stats?.promoted ?? 0}</p>
+        </div>
       </div>
 
-      {/* Error Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search errors by message, type or stack trace..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all outline-none"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
+      {/* Diagnostic Intelligence Bar */}
+      <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
+        <div className="relative flex-1 w-full group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-red-500 transition-colors" />
+          <input
+            type="text"
+            placeholder="Search diagnostic traces by type or message..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all outline-none text-sm font-medium"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded-xl transition-all"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-4 shrink-0">
+          <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl">
+             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Filter:</span>
+             <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-auto min-w-[120px] h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-gray-700 hover:text-red-600 transition-colors uppercase italic tracking-tight">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-gray-100 shadow-xl p-2">
+                  <SelectItem value="all" className="rounded-xl py-2 font-bold text-xs">ALL DIAGNOSTICS</SelectItem>
+                  <SelectItem value="new" className="rounded-xl py-2 font-bold text-xs">NEW TRACES</SelectItem>
+                  <SelectItem value="seen" className="rounded-xl py-2 font-bold text-xs">ACKNOWLEDGED</SelectItem>
+                  <SelectItem value="ignored" className="rounded-xl py-2 font-bold text-xs">SUPPRESSED</SelectItem>
+                  <SelectItem value="resolved" className="rounded-xl py-2 font-bold text-xs">RESOLVED</SelectItem>
+                  <SelectItem value="promoted" className="rounded-xl py-2 font-bold text-xs">PROMOTED ISSUES</SelectItem>
+                </SelectContent>
+              </Select>
           </div>
-          <div className="flex items-center gap-2">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[160px] rounded-xl border-gray-200">
-                <Filter className="w-4 h-4 mr-2 text-gray-400" />
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="seen">Seen</SelectItem>
-                <SelectItem value="ignored">Ignored</SelectItem>
-                <SelectItem value="resolved">Resolved</SelectItem>
-                <SelectItem value="promoted">Issues</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="text-xs font-medium text-gray-500 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
-              {filteredErrors?.length || 0} Logs
-            </div>
+
+          <div className="px-4 py-2 bg-red-500/10 border border-red-500/10 rounded-xl flex items-center gap-2">
+             <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">Traces:</span>
+             <span className="text-sm font-black text-red-700 tracking-tight">{filteredErrors?.length || 0}</span>
           </div>
         </div>
       </div>

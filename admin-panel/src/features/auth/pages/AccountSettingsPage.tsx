@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { formatIdentifier } from "@/lib/format-utils"
 import type { Tables } from '@/lib/database.types'
+import { AdminHeader } from "@/components/ui/admin-header"
+import { User, Shield, Calendar, Mail, AlertTriangle, Trash2, ShieldAlert, BadgeCheck } from "lucide-react"
 
 type UserProfile = Tables<'profiles'>
 
@@ -96,138 +98,203 @@ export function AccountSettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+      <div className="space-y-8 animate-pulse p-8 max-w-4xl mx-auto">
+        <div className="h-20 bg-gray-100/50 rounded-2xl w-2/3"></div>
+        <div className="h-48 bg-gray-100/50 rounded-2xl"></div>
+        <div className="h-48 bg-gray-100/50 rounded-2xl"></div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
-        <p className="text-gray-500 mt-1">Manage your account preferences and security</p>
-      </div>
+    <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
+      <AdminHeader 
+        title="Account Settings"
+        description="Manage your professional profile, security preferences, and account status"
+        icon={User}
+        breadcrumbs={[
+          { label: 'Platform', href: '/apps' },
+          { label: 'Security', href: '/settings' },
+          { label: 'Profile', href: '/settings' }
+        ]}
+      />
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="bg-red-500/10 border border-red-500/20 backdrop-blur-xl rounded-2xl p-4 flex items-center gap-3 animate-in shake duration-500">
+          <AlertTriangle className="h-5 w-5 text-red-600" />
+          <p className="text-sm text-red-700 font-bold tracking-tight">{error}</p>
         </div>
       )}
 
+      {/* Profile Information Section */}
+      <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-sm border border-white/20 hover:shadow-md transition-all">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/10">
+            <BadgeCheck className="h-6 w-6 text-indigo-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-gray-900 tracking-tight">Identity & Role</h2>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Verified profile details</p>
+          </div>
+        </div>
 
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Information</h2>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm text-gray-500">Full Name</label>
-              <p className="text-gray-900 font-medium">{user?.full_name || 'Not set'}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-gray-400">
+               <User className="w-3.5 h-3.5" />
+               <label className="text-[10px] font-black uppercase tracking-[0.2em]">Legal Name</label>
             </div>
-            <div>
-              <label className="text-sm text-gray-500">Email</label>
-              <p className="text-gray-900 font-medium">{user?.email}</p>
+            <p className="text-lg font-bold text-gray-900 tracking-tight ml-5.5">{user?.full_name || 'Anonymous Operator'}</p>
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-gray-400">
+               <Mail className="w-3.5 h-3.5" />
+               <label className="text-[10px] font-black uppercase tracking-[0.2em]">Contact Email</label>
             </div>
-            <div>
-              <label className="text-sm text-gray-500">Role</label>
-              <p className="text-gray-900 font-medium">{formatIdentifier(user?.role)}</p>
+            <p className="text-lg font-bold text-gray-900 tracking-tight ml-5.5">{user?.email}</p>
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-gray-400">
+               <Shield className="w-3.5 h-3.5" />
+               <label className="text-[10px] font-black uppercase tracking-[0.2em]">Access Authority</label>
             </div>
-            <div>
-              <label className="text-sm text-gray-500">Member Since</label>
-              <p className="text-gray-900 font-medium">
-                {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
-              </p>
+            <p className="text-lg font-black text-indigo-600 tracking-tight ml-5.5 uppercase italic">{formatIdentifier(user?.role)}</p>
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-gray-400">
+               <Calendar className="w-3.5 h-3.5" />
+               <label className="text-[10px] font-black uppercase tracking-[0.2em]">Enlistment Date</label>
             </div>
+            <p className="text-lg font-bold text-gray-900 tracking-tight ml-5.5">
+              {user?.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'Archive Initialized'}
+              {user?.created_at && (
+                <span className="text-xs text-gray-400 font-medium ml-2 font-mono tracking-tighter">
+                  ({new Date(user.created_at).toLocaleDateString()})
+                </span>
+              )}
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">Deactivate Account</h2>
-        <p className="text-gray-500 text-sm mb-4">
-          Temporarily disable your account. You can reactivate it later by contacting support.
-        </p>
-        
-        {!showDeactivateConfirm ? (
-          <Button
-            onClick={() => setShowDeactivateConfirm(true)}
-            variant="outline"
-            className="border-orange-300 text-orange-600 hover:bg-orange-50"
-          >
-            Deactivate Account
-          </Button>
-        ) : (
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 space-y-4">
-            <p className="text-sm text-orange-800">
-              Are you sure you want to deactivate your account? You will be logged out immediately.
-            </p>
-            <div className="flex gap-3">
-              <Button
-                onClick={handleDeactivateAccount}
-                disabled={actionLoading}
-                className="bg-orange-600 hover:bg-orange-700 text-white"
-              >
-                {actionLoading ? 'Deactivating...' : 'Yes, Deactivate'}
-              </Button>
-              <Button
-                onClick={() => setShowDeactivateConfirm(false)}
-                variant="outline"
-                disabled={actionLoading}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Danger Zone Sections */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3 px-2">
+            <ShieldAlert className="w-5 h-5 text-red-500/50" />
+            <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em]">Critical Guardrails (Danger Zone)</h3>
+        </div>
 
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-red-100">
-        <h2 className="text-lg font-semibold text-red-600 mb-2">Delete Account</h2>
-        <p className="text-gray-500 text-sm mb-4">
-          Permanently delete your account and all associated data. This action cannot be undone.
-        </p>
-        
-        {!showDeleteConfirm ? (
-          <Button
-            onClick={() => setShowDeleteConfirm(true)}
-            variant="outline"
-            className="border-red-300 text-red-600 hover:bg-red-50"
-          >
-            Delete Account
-          </Button>
-        ) : (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-4">
-            <p className="text-sm text-red-800">
-              This will permanently delete your account. Type <strong>DELETE</strong> to confirm.
-            </p>
-            <Input
-              value={deleteConfirmText}
-              onChange={(e) => setDeleteConfirmText(e.target.value)}
-              placeholder="Type DELETE to confirm"
-              className="max-w-xs"
-            />
-            <div className="flex gap-3">
-              <Button
-                onClick={handleDeleteAccount}
-                disabled={actionLoading || deleteConfirmText !== 'DELETE'}
-                className="bg-red-600 hover:bg-red-700 text-white"
-              >
-                {actionLoading ? 'Deleting...' : 'Delete My Account'}
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowDeleteConfirm(false)
-                  setDeleteConfirmText('')
-                }}
-                variant="outline"
-                disabled={actionLoading}
-              >
-                Cancel
-              </Button>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Deactivation Card */}
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-sm border border-amber-500/10 hover:border-amber-500/20 transition-all flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600">
+                  <BadgeCheck className="h-6 w-6 opacity-20" />
+                </div>
+                <h2 className="text-lg font-black text-gray-900 tracking-tight">Deactivate Access</h2>
+              </div>
+              <p className="text-sm text-gray-500 font-medium leading-relaxed mb-8">
+                Temporarily suspend your authority and access. Your data remains archived and can be restored via administrative override.
+              </p>
             </div>
+            
+            {!showDeactivateConfirm ? (
+              <Button
+                onClick={() => setShowDeactivateConfirm(true)}
+                variant="outline"
+                className="w-full h-12 rounded-2xl border-amber-500/20 text-amber-600 hover:bg-amber-50/50 font-black text-xs uppercase tracking-widest transition-all"
+              >
+                Request Deactivation
+              </Button>
+            ) : (
+              <div className="bg-amber-500/5 backdrop-blur-md border border-amber-500/20 rounded-2xl p-6 space-y-4 animate-in zoom-in-95 duration-300">
+                <p className="text-xs font-bold text-amber-800 leading-relaxed uppercase tracking-tight">
+                  CONFIRM ACCESS SUSPENSION? YOU WILL BE TERMINATED FROM THE ACTIVE SESSION IMMEDIATELY.
+                </p>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    onClick={handleDeactivateAccount}
+                    disabled={actionLoading}
+                    className="w-full bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest h-10 shadow-lg shadow-amber-600/20"
+                  >
+                    {actionLoading ? 'SUSPENDING...' : 'YES, TERMINATE ACCESS'}
+                  </Button>
+                  <Button
+                    onClick={() => setShowDeactivateConfirm(false)}
+                    variant="ghost"
+                    className="w-full py-2 text-xs font-black text-amber-400 hover:text-amber-600 uppercase tracking-widest"
+                    disabled={actionLoading}
+                  >
+                    Abort Action
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Delete Card */}
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-sm border border-red-500/10 hover:border-red-500/20 transition-all flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-2.5 rounded-xl bg-red-500/10 text-red-600">
+                  <Trash2 className="h-6 w-6 opacity-20" />
+                </div>
+                <h2 className="text-lg font-black text-gray-900 tracking-tight">Erase Identity</h2>
+              </div>
+              <p className="text-sm text-gray-500 font-medium leading-relaxed mb-8">
+                Permanently purge your digital signature and all associated telemetry. <span className="text-red-600 font-black">This execution is irreversible.</span>
+              </p>
+            </div>
+            
+            {!showDeleteConfirm ? (
+              <Button
+                onClick={() => setShowDeleteConfirm(true)}
+                variant="outline"
+                className="w-full h-12 rounded-2xl border-red-500/20 text-red-600 hover:bg-red-50/50 font-black text-xs uppercase tracking-widest transition-all"
+              >
+                Initialize Purge
+              </Button>
+            ) : (
+              <div className="bg-red-500/5 backdrop-blur-md border border-red-500/20 rounded-2xl p-6 space-y-4 animate-in zoom-in-95 duration-300">
+                <p className="text-[10px] font-black text-red-800 leading-relaxed uppercase tracking-widest">
+                   Type <span className="bg-red-600 text-white px-1.5 py-0.5 rounded italic">DELETE</span> to authorize absolute erasure.
+                </p>
+                <Input
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="AUTHORIZATION CODE"
+                  className="bg-white/50 border-red-200/50 rounded-xl h-10 font-mono font-black text-red-600 text-center tracking-[0.5em] focus:ring-red-500/20"
+                />
+                <div className="flex flex-col gap-2">
+                  <Button
+                    onClick={handleDeleteAccount}
+                    disabled={actionLoading || deleteConfirmText !== 'DELETE'}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest h-10 shadow-lg shadow-red-600/20 disabled:opacity-30"
+                  >
+                    {actionLoading ? 'EXECUTING...' : 'AUTHORIZE PURGE'}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowDeleteConfirm(false)
+                      setDeleteConfirmText('')
+                    }}
+                    variant="ghost"
+                    className="w-full py-2 text-xs font-black text-red-400 hover:text-red-600 uppercase tracking-widest"
+                    disabled={actionLoading}
+                  >
+                    Abort Execution
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )
 }
+

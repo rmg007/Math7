@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -26,17 +27,17 @@ export function AdminHeader({
             {breadcrumbs.map((crumb, index) => (
               <li key={crumb.href} className="inline-flex items-center">
                 {index > 0 && <span className="mx-2 text-gray-400">/</span>}
-                <a 
-                  href={crumb.href} 
+                <Link 
+                  to={crumb.href} 
                   className={cn(
                     "text-sm font-medium",
                     index === breadcrumbs.length - 1 
-                      ? "text-gray-900 cursor-default" 
+                      ? "text-gray-900 cursor-default pointer-events-none" 
                       : "text-gray-500 hover:text-purple-600 transition-colors"
                   )}
                 >
                   {crumb.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ol>

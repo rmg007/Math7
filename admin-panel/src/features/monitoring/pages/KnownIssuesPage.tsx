@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   Clock,
   Search,
-  Filter,
   Shield,
   LifeBuoy,
   Plus,
@@ -142,13 +141,11 @@ export function KnownIssuesPage() {
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this issue? This cannot be undone.')) {
-      try {
-        await deleteIssue.mutateAsync(id);
-        toast({ title: "Success", description: "Issue deleted" });
-      } catch (error) {
-        toast({ title: "Error", description: "Failed to delete issue", variant: "destructive" });
-      }
+    try {
+      await deleteIssue.mutateAsync(id);
+      toast({ title: "Issue Vaporized", description: "The vulnerability has been purged from history." });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to delete issue", variant: "destructive" });
     }
   };
 
@@ -171,105 +168,125 @@ export function KnownIssuesPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader 
-        title="Known Issues"
-        description="Tracked bugs, their root causes, and documented resolutions."
+        title="Stability Matrix"
+        description="Tracked vulnerabilities, root causes, and documented resolutions."
         icon={Bug}
+        breadcrumbs={[
+          { label: 'Platform', href: '/apps' },
+          { label: 'Stability', href: '/known-issues' },
+          { label: 'Matrix', href: '/known-issues' }
+        ]}
         actions={
           <Button 
             onClick={() => handleOpenDialog()}
-            className="bg-indigo-600 hover:bg-indigo-700 shadow-md transition-all hover:scale-105"
+            className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white transition-all hover:scale-105 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-indigo-200"
           >
-            <Plus className="w-4 h-4 mr-2" /> Record Issue
+            <Plus className="w-4 h-4" /> Record Issue
           </Button>
         }
       />
 
+      {/* Stability Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-indigo-50/50 border-indigo-100">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-indigo-100 rounded-xl">
-                <Shield className="w-6 h-6 text-indigo-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-indigo-900">Total Tracked</p>
-                <p className="text-2xl font-bold text-indigo-700">{issues?.length ?? 0}</p>
-              </div>
+        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/10 group-hover:scale-110 transition-transform">
+              <Shield className="h-6 w-6 text-indigo-600" />
             </div>
-          </CardContent>
-        </Card>
+            <div>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Total Tracked</p>
+              <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">{issues?.length ?? 0}</h3>
+            </div>
+          </div>
+          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-full bg-indigo-500 w-[100%]" />
+          </div>
+          <p className="text-[10px] text-gray-400 mt-3 font-bold uppercase tracking-widest">Global Stability Archive</p>
+        </div>
 
-        <Card className="bg-amber-50/50 border-amber-100">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-amber-100 rounded-xl">
-                <AlertCircle className="w-6 h-6 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-amber-900">Active Bugs</p>
-                <p className="text-2xl font-bold text-amber-700">
-                  {issues?.filter(i => i.status === 'open' || i.status === 'recurring').length ?? 0}
-                </p>
-              </div>
+        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/10 group-hover:scale-110 transition-transform">
+              <AlertCircle className="h-6 w-6 text-amber-600" />
             </div>
-          </CardContent>
-        </Card>
+            <div>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Active Bugs</p>
+              <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
+                {issues?.filter(i => i.status === 'open' || i.status === 'recurring').length ?? 0}
+              </h3>
+            </div>
+          </div>
+          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-amber-500" 
+              style={{ width: `${(issues?.filter(i => i.status === 'open' || i.status === 'recurring').length ?? 0) / (issues?.length || 1) * 100}%` }} 
+            />
+          </div>
+          <p className="text-[10px] text-amber-600 mt-3 font-bold uppercase tracking-widest font-mono">Requires Attention</p>
+        </div>
 
-        <Card className="bg-emerald-50/50 border-emerald-100">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-emerald-100 rounded-xl">
-                <CheckCircle2 className="w-6 h-6 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-emerald-900">Fixed & Documented</p>
-                <p className="text-2xl font-bold text-emerald-700">
-                  {issues?.filter(i => i.status === 'closed').length ?? 0}
-                </p>
-              </div>
+        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/10 group-hover:scale-110 transition-transform">
+              <CheckCircle2 className="h-6 w-6 text-emerald-600" />
             </div>
-          </CardContent>
-        </Card>
+            <div>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Resolved</p>
+              <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">{issues?.filter(i => i.status === 'closed').length ?? 0}</h3>
+            </div>
+          </div>
+          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-emerald-500" 
+              style={{ width: `${(issues?.filter(i => i.status === 'closed').length ?? 0) / (issues?.length || 1) * 100}%` }} 
+            />
+          </div>
+          <p className="text-[10px] text-emerald-600 mt-3 font-bold uppercase tracking-widest">Archived & Documented</p>
+        </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4 mb-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search issues by title, description or root cause..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
+      {/* Stability Filter Bar */}
+      <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
+        <div className="relative flex-1 w-full group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+          <input
+            type="text"
+            placeholder="Search vulnerabilities by title or root cause..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none text-sm font-medium"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-4 shrink-0">
+          <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl">
+             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Filter:</span>
+             <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-auto min-w-[120px] h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-gray-700 hover:text-indigo-600 transition-colors uppercase italic tracking-tight">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-gray-100 shadow-xl p-2">
+                  <SelectItem value="all" className="rounded-xl py-2 font-bold text-xs italic">ALL VULNERABILITIES</SelectItem>
+                  <SelectItem value="open" className="rounded-xl py-2 font-bold text-xs italic">ACTIVE BUGS</SelectItem>
+                  <SelectItem value="recurring" className="rounded-xl py-2 font-bold text-xs italic">RECURRING EVENTS</SelectItem>
+                  <SelectItem value="closed" className="rounded-xl py-2 font-bold text-xs italic">RESOLVED ISSUES</SelectItem>
+                </SelectContent>
+              </Select>
           </div>
-          <div className="flex items-center gap-2">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[160px] rounded-xl border-gray-200">
-                <Filter className="w-4 h-4 mr-2 text-gray-400" />
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="open">Open Issues</SelectItem>
-                <SelectItem value="recurring">Recurring</SelectItem>
-                <SelectItem value="closed">Resolved</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="text-xs font-medium text-gray-500 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
-              {filteredIssues?.length || 0} Issues
-            </div>
+
+          <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
+             <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Archive:</span>
+             <span className="text-sm font-black text-indigo-700 tracking-tight">{filteredIssues?.length || 0} ITEMS</span>
           </div>
         </div>
       </div>

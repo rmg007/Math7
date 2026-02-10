@@ -1,5 +1,5 @@
 import { useApp } from '@/contexts/AppContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { 
     usePaginatedQuestions, 
     useDeleteQuestion, 
@@ -21,9 +21,11 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { formatIdentifier } from '@/lib/format-utils';
 import type { DataColumn } from '@/lib/data-utils';
 import type { QuestionListItem } from '@/types/common.types';
+import { cn } from '@/lib/utils';
 import {
   Plus,
   Search,
@@ -32,10 +34,22 @@ import {
   Sparkles,
   CheckSquare,
   Square,
-  Trash,
+  Trash2,
   FileText,
-  Filter
+  Filter,
+  Pencil,
+  Copy
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import {
     DndContext,
     closestCenter,
@@ -92,19 +106,18 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, is
         transition,
         opacity: isDragging ? 0.5 : 1,
         boxShadow: isDragging ? '0 4px 12px rgba(0, 0, 0, 0.15)' : undefined,
-        backgroundColor: isDragging ? '#f9fafb' : undefined,
-        position: 'relative' as const,
         zIndex: isDragging ? 50 : undefined,
     };
 
     return (
-        <tr ref={setNodeRef} style={style} className="hover:bg-gray-50 transition-colors">
-            <td className="px-2 py-4 w-10">
+        <tr ref={setNodeRef} style={style} className="hover:bg-indigo-50/30 transition-all group/row border-b border-gray-50 last:border-0 relative">
+            <td className="pl-6 pr-2 py-4 w-12 relative overflow-hidden">
+                <div className="absolute inset-y-0 left-0 w-1 bg-indigo-600 opacity-0 group-hover/row:opacity-100 transition-opacity" />
                 {!isDragDisabled ? (
                     <button
                         {...attributes}
                         {...listeners}
-                        className="p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing touch-none"
+                        className="p-2 text-indigo-400/50 hover:text-indigo-600 cursor-grab active:cursor-grabbing touch-none transition-colors"
                         aria-label="Drag to reorder"
                     >
                         <GripVertical className="h-5 w-5" />
@@ -115,66 +128,62 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, is
                     </div>
                 )}
             </td>
-            <td className="px-4 py-4">
-                <button onClick={() => onSelect(question.question_id)} className="text-gray-400 hover:text-gray-600">
-                    {isSelected ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
+            <td className="px-4 py-3">
+                <button onClick={() => onSelect(question.question_id)} className="text-gray-300 hover:text-indigo-600 transition-colors">
+                    {isSelected ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
                 </button>
             </td>
-            <td className="px-6 py-4 max-w-[300px]">
-                <span 
-                    className="font-medium text-gray-900 truncate block text-sm"
+            <td className="px-6 py-4 max-w-[400px]">
+                <div 
+                    className="font-bold text-gray-900 text-sm tracking-tight line-clamp-2 group-hover/row:text-indigo-700 transition-colors prose-sm"
                     dangerouslySetInnerHTML={{ __html: question.content }}
                 />
             </td>
-            <td className="px-6 py-4">
-                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+            <td className="px-4 py-4">
+                <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-100/50 shadow-sm">
                     {formatIdentifier(question.type)}
                 </span>
             </td>
-            <td className="px-6 py-4">
-                <span className="text-gray-700">{question.skills?.title}</span>
+            <td className="px-4 py-4">
+                <div className="flex flex-col">
+                    <span className="text-sm font-bold text-gray-700 leading-tight truncate max-w-[150px]">{question.skills?.title || 'ORPHAN'}</span>
+                    <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest opacity-60">SKILL</span>
+                </div>
             </td>
-            <td className="px-6 py-4">
-                <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-orange-700 font-semibold text-sm">
+            <td className="px-4 py-4 text-center">
+                 <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg bg-orange-100 text-orange-700 font-black text-xs border border-orange-200 shadow-sm">
                     {question.points}
                 </span>
             </td>
-            <td className="px-6 py-4">
+            <td className="px-4 py-4">
                 <StatusBadge 
                     status={question.status?.toLowerCase() as StatusType || 'draft'} 
+                    label={question.status?.toUpperCase()}
                 />
             </td>
-            <td className="px-6 py-4">
-                {!question.skills ? (
-                    <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
-                        Yes
-                    </span>
-                ) : (
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
-                        No
-                    </span>
-                )}
-            </td>
-            <td className="px-6 py-4 text-right">
-                <div className="flex items-center justify-end gap-2">
+            <td className="pl-4 pr-8 py-3 text-right">
+                <div className="flex items-center justify-end gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity">
                     <Link
                         to={`/questions/${question.question_id}/edit`}
-                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
+                        className="p-2 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                        title="Edit Question"
                     >
-                        Edit
+                        <Pencil className="h-4 w-4" />
                     </Link>
                     <button
                         onClick={() => onDuplicate(question.question_id)}
                         disabled={isDuplicating}
-                        className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium hover:bg-purple-200 transition-colors disabled:opacity-50"
+                        className="p-2 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all disabled:opacity-50"
+                        title="Duplicate Question"
                     >
-                        Duplicate
+                        <Copy className="h-4 w-4" />
                     </button>
                     <button
                         onClick={() => onDelete(question.question_id)}
-                        className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium hover:bg-red-200 transition-colors"
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                        title="Delete Question"
                     >
-                        Delete
+                        <Trash2 className="h-4 w-4" />
                     </button>
                 </div>
             </td>
@@ -196,8 +205,6 @@ function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, i
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
-        boxShadow: isDragging ? '0 8px 16px rgba(0, 0, 0, 0.15)' : undefined,
-        position: 'relative' as const,
         zIndex: isDragging ? 50 : undefined,
     };
 
@@ -205,89 +212,93 @@ function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, i
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg-white rounded-xl border ${isSelected ? 'border-purple-300 bg-purple-50' : 'border-gray-200'} p-4 space-y-3 transition-colors`}
+            className={cn(
+                "bg-white/80 backdrop-blur-xl rounded-3xl border transition-all duration-300 group/card",
+                isSelected ? 'border-indigo-400 bg-indigo-50/50 shadow-md shadow-indigo-500/10' : 'border-white/40 hover:border-indigo-200 hover:shadow-lg'
+            )}
         >
-            <div className="flex items-start gap-3">
-                {!isDragDisabled ? (
-                    <button
-                        {...attributes}
-                        {...listeners}
-                        className="p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
-                        aria-label="Drag to reorder"
-                    >
-                        <GripVertical className="h-5 w-5" />
-                    </button>
-                ) : (
-                    <div className="p-2 text-gray-200 flex-shrink-0">
-                        <GripVertical className="h-5 w-5" />
+            <div className="p-6 space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                        {!isDragDisabled ? (
+                            <button
+                                {...attributes}
+                                {...listeners}
+                                className="p-2 text-indigo-300 hover:text-indigo-600 cursor-grab active:cursor-grabbing touch-none transition-colors"
+                                aria-label="Drag to reorder"
+                            >
+                                <GripVertical className="h-5 w-5" />
+                            </button>
+                        ) : (
+                            <div className="p-2 text-gray-200">
+                                <GripVertical className="h-5 w-5" />
+                            </div>
+                        )}
+                        <button
+                            onClick={() => onSelect(question.question_id)}
+                            className="p-2 text-gray-300 hover:text-indigo-600 transition-colors"
+                        >
+                            {isSelected ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
+                        </button>
                     </div>
-                )}
-                <button
-                    onClick={() => onSelect(question.question_id)}
-                    className="p-2 text-gray-400 hover:text-gray-600 flex-shrink-0"
-                >
-                    {isSelected ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
-                </button>
-                <div className="flex-1 min-w-0">
+                     <div className="flex gap-1.5 opacity-0 group-hover/card:opacity-100 transition-opacity">
+                        <Link
+                            to={`/questions/${question.question_id}/edit`}
+                            className="p-2.5 rounded-xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm"
+                        >
+                            <Pencil className="h-4 w-4" />
+                        </Link>
+                        <button
+                            onClick={() => onDuplicate(question.question_id)}
+                            disabled={isDuplicating}
+                            className="p-2.5 rounded-xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm disabled:opacity-50"
+                        >
+                            <Copy className="h-4 w-4" />
+                        </button>
+                        <button
+                            onClick={() => onDelete(question.question_id)}
+                            className="p-2.5 rounded-xl bg-white border border-gray-100 text-red-500 hover:bg-red-50 transition-all shadow-sm"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="min-w-0">
                     <div 
-                        className="font-medium text-gray-900 line-clamp-2 text-sm"
+                        className="font-bold text-gray-900 text-[15px] tracking-tight leading-relaxed mb-3 line-clamp-3 prose-sm"
                         dangerouslySetInnerHTML={{ __html: question.content }}
                     />
+                    <div className="flex flex-wrap items-center gap-2">
+                         <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-100/50">
+                            {formatIdentifier(question.type)}
+                        </span>
+                        {question.skills?.title && (
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest opacity-60">
+                                SKILL: {question.skills.title.substring(0, 15)}...
+                            </span>
+                        )}
+                    </div>
                 </div>
-                <div className="flex-shrink-0">
-                    <StatusBadge 
+
+                <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+                     <StatusBadge 
                         status={question.status?.toLowerCase() as StatusType || 'draft'} 
+                        label={question.status?.toUpperCase()}
                     />
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Points</span>
+                        <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg bg-orange-100 text-orange-700 font-black text-xs border border-orange-200">
+                             {question.points}
+                        </span>
+                    </div>
                 </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-                <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                    {formatIdentifier(question.type)}
-                </span>
-                {question.skills?.title && (
-                    <span className="text-gray-600 text-xs">
-                        Skill: <span className="font-medium">{question.skills.title}</span>
-                    </span>
-                )}
-                <span className="inline-flex items-center gap-1 text-gray-600">
-                    <span className="text-xs">Points:</span>
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-orange-100 text-orange-700 font-semibold text-xs">
-                        {question.points}
-                    </span>
-                </span>
-                {!question.skills && (
-                    <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
-                        Orphan
-                    </span>
-                )}
-            </div>
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
-                <Link
-                    to={`/questions/${question.question_id}/edit`}
-                    className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
-                >
-                    Edit
-                </Link>
-                <button
-                    onClick={() => onDuplicate(question.question_id)}
-                    disabled={isDuplicating}
-                    className="px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium hover:bg-purple-200 transition-colors disabled:opacity-50"
-                >
-                    Duplicate
-                </button>
-                <button
-                    onClick={() => onDelete(question.question_id)}
-                    className="px-4 py-2 bg-red-100 text-red-700 rounded-full text-sm font-medium hover:bg-red-200 transition-colors"
-                >
-                    Delete
-                </button>
             </div>
         </div>
     );
 }
 
 export function QuestionList() {
-    const navigate = useNavigate();
     const { currentApp } = useApp();
     const [selectedSkillId, setSelectedSkillId] = useState<string>('all');
     const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'live'>('all');
@@ -298,6 +309,7 @@ export function QuestionList() {
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
     const [sortBy, setSortBy] = useState<string>('sort_order');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+    const [deleteConfirmation, setDeleteConfirmation] = useState<{ type: 'single' | 'bulk', id?: string } | null>(null);
 
     const { data: paginatedData, isLoading, isError, error } = usePaginatedQuestions({
         page,
@@ -399,7 +411,7 @@ export function QuestionList() {
     };
 
     const handleSelectAll = () => {
-        if (selectedIds.size === questions.length) {
+        if (selectedIds.size === questions.length && questions.length > 0) {
             setSelectedIds(new Set());
         } else {
             setSelectedIds(new Set(questions.map((q: QuestionListItem) => q.question_id)));
@@ -414,19 +426,6 @@ export function QuestionList() {
             newSelected.add(id);
         }
         setSelectedIds(newSelected);
-    };
-
-    const handleBulkDelete = async () => {
-        if (selectedIds.size === 0) return;
-        if (confirm(`Are you sure you want to delete ${selectedIds.size} question(s)?`)) {
-            try {
-                await bulkDelete.mutateAsync(Array.from(selectedIds));
-                showToast(`${selectedIds.size} question(s) deleted`, 'success');
-                setSelectedIds(new Set());
-            } catch {
-                showToast('Failed to delete questions', 'error');
-            }
-        }
     };
 
     const handleMarkLive = async () => {
@@ -455,21 +454,32 @@ export function QuestionList() {
         if (selectedIds.size === 0) return;
         try {
             await bulkUpdateStatus.mutateAsync({ question_ids: Array.from(selectedIds), status: 'published' });
-            showToast(`${selectedIds.size} question(s) marked as published (ready for release)`, 'success');
+            showToast(`${selectedIds.size} question(s) marked as published`, 'success');
             setSelectedIds(new Set());
         } catch {
             showToast('Failed to update questions', 'error');
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (confirm('Are you sure you want to delete this question?')) {
-            try {
-                await deleteQuestion.mutateAsync(id);
-                showToast('Question deleted', 'success');
-            } catch {
-                showToast('Failed to delete question', 'error');
+    const handleDelete = (id: string) => {
+        setDeleteConfirmation({ type: 'single', id });
+    };
+
+    const confirmExecution = async () => {
+        if (!deleteConfirmation) return;
+        try {
+            if (deleteConfirmation.type === 'bulk') {
+                await bulkDelete.mutateAsync(Array.from(selectedIds));
+                showToast(`${selectedIds.size} question(s) purged`, 'success');
+                setSelectedIds(new Set());
+            } else if (deleteConfirmation.type === 'single' && deleteConfirmation.id) {
+                await deleteQuestion.mutateAsync(deleteConfirmation.id);
+                showToast('Question purged successfully', 'success');
             }
+        } catch {
+            showToast('Failed to execute purge operation', 'error');
+        } finally {
+            setDeleteConfirmation(null);
         }
     };
 
@@ -485,7 +495,11 @@ export function QuestionList() {
     const handleImport = async (data: Record<string, unknown>[]) => {
         if (!currentApp) return;
         if (selectedSkillId === 'all') {
-            alert('Please select a specific skill filter before importing to assign questions to that skill.');
+            toast({
+                title: 'Skill selection required',
+                description: 'Please select a specific skill filter before importing to assign questions to that skill.',
+                variant: 'destructive'
+            });
             return;
         }
 
@@ -505,9 +519,9 @@ export function QuestionList() {
                 return {
                     app_id: currentApp?.app_id || '',
                     content: String(item.content || ''),
-                    type: (item.type || 'multiple_choice') as 'boolean' | 'multiple_choice' | 'mcq_multi' | 'text_input' | 'reorder_steps',
+                    type: (item.type || 'multiple_choice') as QuestionInsert['type'],
                     points: parseInt(item.points as string) || 1,
-                    status: (item.status || 'draft') as 'draft' | 'published' | 'live',
+                    status: (item.status || 'draft') as QuestionInsert['status'],
                     options: parseField(item.options),
                     solution: parseField(item.solution),
                     explanation: String(item.explanation || ''),
@@ -548,8 +562,8 @@ export function QuestionList() {
     if (!currentApp) {
         return (
              <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                    <p className="text-gray-500">Please select an app to view questions.</p>
+                <div className="text-center bg-white/50 backdrop-blur-md rounded-[2.5rem] p-12 border border-white/20 shadow-xl">
+                    <p className="text-gray-500 font-black italic uppercase tracking-widest">Select an active app to access Question Registry</p>
                 </div>
             </div>
         );
@@ -557,248 +571,256 @@ export function QuestionList() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-r-transparent"></div>
-                    <p className="mt-4 text-gray-500">Loading questions...</p>
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <AdminHeader 
+                    title="Question Library"
+                    description="Manage and organize your curriculum questions by type, skill, and difficulty."
+                    icon={FileText}
+                    breadcrumbs={[
+                        { label: 'Curriculum', href: '/domains' },
+                        { label: 'Questions', href: '/questions' }
+                    ]}
+                />
+                <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 p-8 space-y-4">
+                    <Skeleton className="h-12 w-full rounded-2xl" />
+                    <Skeleton className="h-12 w-full rounded-2xl" />
+                    <Skeleton className="h-12 w-full rounded-2xl" />
+                    <Skeleton className="h-12 w-full rounded-2xl" />
+                    <Skeleton className="h-12 w-full rounded-2xl" />
                 </div>
             </div>
         );
     }
 
     if (isError) {
-        console.error("Error loading questions:", error);
          return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-center text-red-500">
-                    <p>Error loading questions.</p>
-                    <p className="text-sm text-gray-400 mt-2">{error instanceof Error ? error.message : 'Unknown error'}</p>
-                </div>
+            <div className="bg-red-500/10 border border-red-500/20 backdrop-blur-xl rounded-2xl p-8 text-center">
+                <p className="text-red-700 font-bold">Error loading questions: {error instanceof Error ? error.message : 'Unknown connectivity issue'}</p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-4 md:space-y-6">
+        <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <AdminHeader 
-                title="Question Library"
-                description="Manage and organize your curriculum questions by type, skill, and difficulty."
+                title="Question Registry"
+                description="Manage and optimize the high-availability curriculum questions and evaluation assets."
                 icon={FileText}
+                breadcrumbs={[
+                    { label: 'Curriculum', href: '/domains' },
+                    { label: 'Questions', href: '/questions' }
+                ]}
                 actions={
-                    <>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <Link to="/ai-questions">
-                            <Button variant="outline" className="gap-2 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 text-purple-700 hover:bg-purple-100">
-                                <Sparkles className="h-4 w-4" />
-                                AI Generator
+                            <Button variant="outline" className="h-12 px-6 rounded-2xl bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200 text-indigo-700 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-600/10 transition-all hover:-translate-y-0.5 gap-2 group">
+                                <Sparkles className="h-4 w-4 text-purple-500 group-hover:rotate-12 transition-transform" />
+                                <span>AI Generator</span>
                             </Button>
                         </Link>
+                        <DataToolbar
+                            data={questions as Record<string, unknown>[]}
+                            columns={QUESTION_COLUMNS}
+                            entityName="Questions"
+                            onImport={handleImport}
+                            importDisabled={false}
+                        />
                         <Link to="/questions/new">
-                            <Button>
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Question
+                            <Button className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 gap-2">
+                                <Plus className="h-4 w-4" />
+                                <span>New Question</span>
                             </Button>
                         </Link>
-                    </>
+                    </div>
                 }
             />
 
-            <DataToolbar
-                data={questions as Record<string, unknown>[]}
-                columns={QUESTION_COLUMNS}
-                entityName="Questions"
-                onImport={handleImport}
-                importDisabled={false}
-                importDisabledMessage="Question import is not available. Please create questions manually."
-            />
-
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
-                <div className="space-y-3 md:space-y-4 mb-4">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search questions..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-3 min-h-[48px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-base"
-                            />
-                        </div>
-                        {hasActiveFilters && (
-                            <button
-                                onClick={clearFilters}
-                                className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                            >
-                                <X className="h-4 w-4" />
-                                <span>Clear filters</span>
-                            </button>
-                        )}
+            {/* Premium Filter Bar */}
+            <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
+                <div className="relative flex-1 w-full group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                    <input
+                        type="text"
+                        placeholder="Search question content, solutions, or explanations..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none text-sm font-medium"
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={clearFilters}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    )}
+                </div>
+                
+                <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/5 border border-indigo-500/10 rounded-xl">
+                        <Filter className="h-3.5 w-3.5 text-indigo-400" />
+                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mr-2">Skill:</span>
+                        <Select
+                            value={selectedSkillId}
+                            onValueChange={setSelectedSkillId}
+                        >
+                            <SelectTrigger className="w-auto h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-700 hover:text-indigo-600 transition-colors uppercase tracking-tight">
+                                <SelectValue placeholder="All Skills" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-white/20 backdrop-blur-xl bg-white/90">
+                                <SelectItem value="all">ALL SKILLS</SelectItem>
+                                {skills?.map((skill: { skill_id: string; title: string }) => (
+                                    <SelectItem key={skill.skill_id} value={skill.skill_id}>{skill.title.toUpperCase()}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
-                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <Filter className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm font-medium text-gray-600">Skill</span>
-                            <Select
-                                value={selectedSkillId}
-                                onValueChange={setSelectedSkillId}
-                            >
-                                <SelectTrigger className="w-full sm:w-[200px] h-10">
-                                    <SelectValue placeholder="All Skills" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Skills</SelectItem>
-                                    {skills?.map((skill: { skill_id: string; title: string }) => (
-                                        <SelectItem key={skill.skill_id} value={skill.skill_id}>
-                                            {skill.title}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/5 border border-indigo-500/10 rounded-xl">
+                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mr-2">Status:</span>
+                        <Select
+                            value={statusFilter}
+                            onValueChange={(v) => setStatusFilter(v as 'all' | 'draft' | 'published' | 'live')}
+                        >
+                            <SelectTrigger className="w-auto h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-700 hover:text-indigo-600 transition-colors uppercase tracking-tight">
+                                <SelectValue placeholder="All Status" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-white/20 backdrop-blur-xl bg-white/90">
+                                <SelectItem value="all">ALL STATUS</SelectItem>
+                                <SelectItem value="draft">DRAFT</SelectItem>
+                                <SelectItem value="published">PUBLISHED</SelectItem>
+                                <SelectItem value="live">LIVE</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
 
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <span className="text-sm font-medium text-gray-600">Status</span>
-                            <Select
-                                value={statusFilter}
-                                onValueChange={(v) => setStatusFilter(v as 'all' | 'draft' | 'published' | 'live')}
-                            >
-                                <SelectTrigger className="w-full sm:w-[150px] h-10">
-                                    <SelectValue placeholder="All Status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Status</SelectItem>
-                                    <SelectItem value="draft">Draft</SelectItem>
-                                    <SelectItem value="published">Published</SelectItem>
-                                    <SelectItem value="live">Live</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {selectedIds.size > 0 && (
-                            <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-                                <span className="text-sm text-gray-600 w-full sm:w-auto">{selectedIds.size} selected</span>
-                                <button
-                                    onClick={handleMarkPublished}
-                                    disabled={bulkUpdateStatus.isPending}
-                                    className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors flex-1 sm:flex-none"
-                                >
-                                    Mark Published
-                                </button>
-                                <button
-                                    onClick={handleMarkLive}
-                                    disabled={bulkUpdateStatus.isPending}
-                                    className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors flex-1 sm:flex-none"
-                                >
-                                    Mark Live
-                                </button>
-                                <button
-                                    onClick={handleMarkDraft}
-                                    disabled={bulkUpdateStatus.isPending}
-                                    className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex-1 sm:flex-none"
-                                >
-                                    Mark Draft
-                                </button>
-                                <button
-                                    onClick={handleBulkDelete}
-                                    disabled={bulkDelete.isPending}
-                                    className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                                >
-                                    <Trash className="h-4 w-4" />
-                                    Delete
-                                </button>
-                            </div>
-                        )}
+                    <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
+                         <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Assets:</span>
+                         <span className="text-sm font-black text-indigo-700 tracking-tight">{totalCount} CLUSTERED</span>
                     </div>
                 </div>
+            </div>
 
-                {/* Desktop Table View */}
+            {/* Bulk Actions Bar */}
+            {selectedIds.size > 0 && (
+                <div className="flex items-center justify-between p-4 bg-indigo-600 rounded-[2rem] shadow-xl shadow-indigo-600/20 animate-in slide-in-from-top-4 duration-500">
+                    <div className="flex items-center gap-4 pl-4">
+                        <span className="text-white font-black text-xs uppercase tracking-[0.2em]">{selectedIds.size} SELECTED FOR BATCH OPERATIONS</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleMarkPublished}
+                             className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+                        >
+                            Publish
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleMarkLive}
+                             className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+                        >
+                            Go Live
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleMarkDraft}
+                             className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+                        >
+                            Draft
+                        </Button>
+                        <div className="w-px h-6 bg-white/20 mx-2" />
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDeleteConfirmation({ type: 'bulk' })}
+                            className="h-10 px-4 rounded-xl text-red-200 font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all gap-2"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                            Purge
+                        </Button>
+                    </div>
+                </div>
+            )}
+
+            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-xl border border-white/20 overflow-hidden">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={handleDragEnd}
                 >
-                    <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-100 bg-white">
-                        <table className="w-full min-w-[1000px]">
-                            <thead>
-                                <tr className="bg-gray-50 border-b border-gray-100">
-                                    <th className="text-left px-2 py-4 w-10">
-                                        {!isDragDisabled ? (
-                                            <span className="text-gray-400">
-                                                <GripVertical className="h-5 w-5" />
-                                            </span>
-                                        ) : null}
-                                    </th>
-                                    <th className="text-left px-4 py-4 w-10">
-                                        <button onClick={handleSelectAll} className="text-gray-400 hover:text-gray-600">
-                                            {isAllSelected && questions.length > 0 ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-hidden">
+                        <table className="w-full">
+                            <thead className="bg-gray-50/50 border-b-2 border-gray-100">
+                                <tr>
+                                    <th className="w-12 h-14 pl-6 pr-2 font-black text-[10px] uppercase tracking-widest text-gray-400"></th>
+                                    <th className="w-12 h-14 px-4">
+                                        <button onClick={handleSelectAll} className="text-gray-300 hover:text-indigo-600 transition-colors">
+                                            {isAllSelected && questions.length > 0 ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
                                         </button>
                                     </th>
-                                    <th className="text-left px-6 py-4">
+                                    <th className="h-14 px-6 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">
                                         <SortableHeader
-                                            label="Content"
+                                            label="Question Content"
                                             column="content"
                                             currentSortBy={sortBy}
                                             currentSortOrder={sortOrder}
                                             onSort={handleSort}
+                                            className="text-[10px]"
                                         />
                                     </th>
-                                    <th className="text-left px-6 py-4">
-                                        <SortableHeader
-                                            label="Type"
+                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">
+                                         <SortableHeader
+                                            label="Asset Type"
                                             column="type"
                                             currentSortBy={sortBy}
                                             currentSortOrder={sortOrder}
                                             onSort={handleSort}
+                                            className="text-[10px]"
                                         />
                                     </th>
-                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Skill</th>
-                                    <th className="text-left px-6 py-4">
+                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">Target Skill</th>
+                                    <th className="h-14 px-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">
                                         <SortableHeader
-                                            label="Points"
+                                            label="Weight"
                                             column="points"
                                             currentSortBy={sortBy}
                                             currentSortOrder={sortOrder}
                                             onSort={handleSort}
+                                            className="text-[10px] justify-center"
                                         />
                                     </th>
-                                    <th className="text-left px-6 py-4">
-                                        <SortableHeader
-                                            label="Status"
-                                            column="status"
-                                            currentSortBy={sortBy}
-                                            currentSortOrder={sortOrder}
-                                            onSort={handleSort}
-                                        />
-                                    </th>
-                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Orphan</th>
-                                    <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
+                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">Status</th>
+                                    <th className="h-14 pl-4 pr-8 text-right font-black text-[10px] uppercase tracking-widest text-gray-400">Execution</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {!questions.length ? (
-                                    <tr>
-                                        <td colSpan={9} className="px-6 py-12">
-                                            <EmptyState
-                                                icon={FileText}
-                                                title={hasActiveFilters ? "No matches found" : "No questions found"}
-                                                description={hasActiveFilters 
-                                                    ? "Try adjusting your filters or search terms to find what you're looking for." 
-                                                    : "Your curriculum library is empty. Start building it by adding your first question manually or using the AI generator."
-                                                }
-                                                action={hasActiveFilters ? {
-                                                    label: "Clear all filters",
-                                                    onClick: clearFilters
-                                                } : {
-                                                    label: "Create First Question",
-                                                    onClick: () => navigate('/questions/new')
-                                                }}
-                                            />
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>
-                                        {questions.map((question: QuestionListItem) => (
+                            <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>
+                                <tbody className="divide-y divide-gray-50">
+                                    {!questions.length ? (
+                                        <tr>
+                                            <td colSpan={8} className="px-6 py-24 text-center">
+                                                <EmptyState
+                                                    icon={FileText}
+                                                    title={hasActiveFilters ? 'No matches found' : 'Registry empty'}
+                                                    description={hasActiveFilters ? 'Adjust your search parameters or skill focus.' : 'The question cluster is empty. Use AI generation or manual creation to populate it.'}
+                                                    action={
+                                                        hasActiveFilters ? {
+                                                            label: "Clear filters",
+                                                            onClick: clearFilters
+                                                        } : {
+                                                            label: "New Question",
+                                                            onClick: () => (window.location.href = "/questions/new")
+                                                        }
+                                                    }
+                                                />
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        questions.map((question: QuestionListItem) => (
                                             <SortableRow
                                                 key={question.question_id}
                                                 question={question}
@@ -809,36 +831,26 @@ export function QuestionList() {
                                                 isDragDisabled={isDragDisabled}
                                                 isDuplicating={duplicateQuestion.isPending}
                                             />
-                                        ))}
-                                    </SortableContext>
-                                )}
-                            </tbody>
+                                        ))
+                                    )}
+                                </tbody>
+                            </SortableContext>
                         </table>
                     </div>
 
                     {/* Mobile Card View */}
-                    <div className="md:hidden">
-                        {!questions.length ? (
-                            <div className="bg-white rounded-xl border border-gray-100 p-8">
-                                <EmptyState
-                                    icon={FileText}
-                                    title={hasActiveFilters ? "No matches found" : "No questions found"}
-                                    description={hasActiveFilters 
-                                        ? "Try adjusting your filters or search terms." 
-                                        : "Your curriculum library is empty."
-                                    }
-                                    action={hasActiveFilters ? {
-                                        label: "Clear all filters",
-                                        onClick: clearFilters
-                                    } : {
-                                        label: "Create First Question",
-                                        onClick: () => navigate('/questions/new')
-                                    }}
-                                />
-                            </div>
-                        ) : (
-                            <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>
-                                <div className="space-y-3">
+                    <div className="md:hidden p-4">
+                        <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>
+                            {!questions.length ? (
+                                <div className="rounded-[2rem] border border-dashed border-gray-200 p-12 bg-white/30 backdrop-blur-md">
+                                    <EmptyState
+                                        icon={FileText}
+                                        title={hasActiveFilters ? 'No matches found' : 'Registry empty'}
+                                        description={hasActiveFilters ? 'Try adjusting your focus.' : 'Start adding assets to your library.'}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
                                     {questions.map((question: QuestionListItem) => (
                                         <SortableCard
                                             key={question.question_id}
@@ -852,20 +864,44 @@ export function QuestionList() {
                                         />
                                     ))}
                                 </div>
-                            </SortableContext>
-                        )}
+                            )}
+                        </SortableContext>
                     </div>
                 </DndContext>
 
-                <Pagination
-                    currentPage={page}
-                    totalPages={totalPages}
-                    totalCount={totalCount}
-                    pageSize={pageSize}
-                    onPageChange={handlePageChange}
-                    onPageSizeChange={handlePageSizeChange}
-                />
+                <div className="px-8 py-6 bg-gray-50/50 border-t border-gray-100">
+                    <Pagination
+                        currentPage={page}
+                        totalPages={totalPages}
+                        totalCount={totalCount}
+                        pageSize={pageSize}
+                        onPageChange={handlePageChange}
+                        onPageSizeChange={handlePageSizeChange}
+                    />
+                </div>
             </div>
+
+            <AlertDialog open={Boolean(deleteConfirmation)} onOpenChange={(open) => !open && setDeleteConfirmation(null)}>
+                <AlertDialogContent className="rounded-[2.5rem] border-none bg-white/90 backdrop-blur-2xl p-10 shadow-2xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-2xl font-black text-gray-900 tracking-tight italic">Confirm Purge</AlertDialogTitle>
+                        <AlertDialogDescription className="text-gray-500 font-medium">
+                            {deleteConfirmation?.type === 'bulk' 
+                                ? `You are about to permanently purge ${selectedIds.size} questions from the registry. This operation cannot be reversed.` 
+                                : "This asset will be permanently removed from the curriculum engine. Are you sure you want to proceed?"}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="mt-8 gap-3">
+                        <AlertDialogCancel className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest text-gray-400 hover:bg-gray-100 italic transition-all border-none">Abort</AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={confirmExecution}
+                            className="h-12 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-red-600/20 transition-all hover:-translate-y-0.5"
+                        >
+                            Confirm Purge
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

@@ -1,7 +1,7 @@
 # Questerix: Autonomous Agent Instruction Set
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/ca061805934446349d970335029a9937)](https://app.codacy.com/gh/[YOUR_ORG]/Questerix/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/ca061805934446349d970335029a9937)](https://app.codacy.com/gh/[YOUR_ORG]/Questerix/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/ca061805934446349d970335029a9937)](https://app.codacy.com/gh/rmg007/Questerix/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/ca061805934446349d970335029a9937)](https://app.codacy.com/gh/rmg007/Questerix/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 
 > **The "Golden Command" to start development:**
 > 

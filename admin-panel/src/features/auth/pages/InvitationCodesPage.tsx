@@ -6,7 +6,10 @@ import type { Tables } from '@/lib/database.types'
 import { StatusBadge, type StatusType } from '@/components/ui/status-badge'
 import { Pagination } from '@/components/ui/pagination'
 import { AdminHeader } from '@/components/ui/admin-header'
-import { Key, Search, X } from 'lucide-react'
+import { Key, Search, X, ShieldCheck, Zap, Copy, Power, Activity } from 'lucide-react'
+
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
 
 type InvitationCode = Tables<'invitation_codes'>
 
@@ -98,205 +101,242 @@ export function InvitationCodesPage() {
   }
 
   const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return 'Never'
+    if (!dateStr) return 'INF'
     return new Date(dateStr).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: 'numeric'
     })
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-      </div>
-    )
-  }
+  const filteredCodes = codes.filter(c => 
+    c.code.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const paginatedCodes = filteredCodes.slice((currentPage - 1) * pageSize, currentPage * pageSize)
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader 
-        title="Invitation Codes"
-        description="Generate and manage invitation codes for new admin users."
+        title="Admin Invitation Registry"
+        description="Provision and manage high-authority access tokens for new administrative operators."
         icon={Key}
+        breadcrumbs={[
+          { label: 'Admin', href: '/users' },
+          { label: 'Invitations', href: '/invitation-codes' }
+        ]}
       />
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="bg-red-500/10 border border-red-500/20 backdrop-blur-xl rounded-2xl p-4 flex items-center gap-3 animate-in shake duration-500">
+          <Activity className="h-5 w-5 text-red-600" />
+          <p className="text-sm text-red-700 font-bold tracking-tight">{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-sm text-green-600">{success}</p>
+        <div className="bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-xl rounded-2xl p-4 flex items-center gap-3 animate-in zoom-in-95 duration-500">
+          <ShieldCheck className="h-5 w-5 text-emerald-600" />
+          <p className="text-sm text-emerald-700 font-bold tracking-tight">{success}</p>
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Generate New Code</h2>
-        <div className="flex flex-wrap gap-4 items-end">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Max Uses</label>
+      {/* Generator Section */}
+      <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-sm border border-white/20 hover:shadow-md transition-all">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/10">
+            <Zap className="h-6 w-6 text-indigo-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-gray-900 tracking-tight">Provision Access</h2>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">Initialize new authorization signatures</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-8 items-end">
+          <div className="space-y-2 group">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Authority Uses</label>
             <Input
               type="number"
               min="1"
               value={maxUses}
               onChange={(e) => setMaxUses(e.target.value)}
-              className="w-32"
+              className="w-32 h-12 rounded-xl border-gray-100 bg-gray-50/50 font-black text-indigo-600 focus:bg-white transition-all ring-0 shadow-none border"
               placeholder="1"
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Expires In (days)</label>
+          <div className="space-y-2 group">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">TTL (Days)</label>
             <Input
               type="number"
               min="1"
               value={expiresDays}
               onChange={(e) => setExpiresDays(e.target.value)}
-              className="w-32"
-              placeholder="Never"
+              className="w-32 h-12 rounded-xl border-gray-100 bg-gray-50/50 font-black text-indigo-600 focus:bg-white transition-all ring-0 shadow-none border"
+              placeholder="INF"
             />
           </div>
           <Button
             onClick={handleGenerateCode}
             disabled={generating}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl px-10 h-12 shadow-lg shadow-indigo-600/20 font-black text-xs uppercase tracking-[0.2em] transition-all hover:-translate-y-0.5"
           >
-            {generating ? 'Generating...' : 'Generate Code'}
+            {generating ? 'EXECUTING...' : 'INITIATE SIGNATURE'}
           </Button>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search invitation codes..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
+      {/* Search & Stats Bar */}
+      <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
+        <div className="relative flex-1 w-full group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+          <input
+            type="text"
+            placeholder="Search active signatures by code value..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none text-sm font-medium"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => {
+                setSearchQuery('');
                 setCurrentPage(1);
               }}
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all outline-none"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setCurrentPage(1);
-                }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="text-xs font-medium text-gray-500 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
-              {codes.filter(c => c.code.toLowerCase().includes(searchQuery.toLowerCase())).length} Codes
-            </div>
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
+             <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Signatures:</span>
+             <span className="text-sm font-black text-indigo-700 tracking-tight">{filteredCodes.length} REGISTERED</span>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900">All Invitation Codes</h2>
+      <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 overflow-hidden hover:shadow-xl transition-all duration-500">
+        <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-black text-gray-900 tracking-tight">Access Registry</h3>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1 italic">Verified Invitation Signatures</p>
+          </div>
+          <Activity className="h-5 w-5 text-gray-200" />
         </div>
         
-        {codes.length === 0 ? (
-          <div className="px-6 py-12 text-center text-gray-500">
-            No invitation codes yet. Generate your first code above.
-          </div>
-        ) : (
-          <>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px]">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usage</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expires</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {codes
-                  .filter(c => c.code.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .slice((currentPage - 1) * pageSize, currentPage * pageSize).map((code) => {
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b-2 border-gray-100/50">
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 px-8 h-14">Signature Code</TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">Status</TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">Utilization</TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">Expiration</TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">Created</TableHead>
+                <TableHead className="text-right px-8 h-14 font-black text-[10px] uppercase tracking-widest text-gray-400">Execution</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell colSpan={6} className="px-8 py-6">
+                      <Skeleton className="h-10 w-full rounded-2xl" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : paginatedCodes.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-24 text-gray-400">
+                    <div className="flex flex-col items-center gap-3">
+                      <Key className="w-12 h-12 opacity-10" />
+                      <span className="font-black text-xs uppercase tracking-widest italic">No matching signatures identified</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedCodes.map((code) => {
                   const isExpired = code.expires_at && new Date(code.expires_at) < new Date()
                   const isExhausted = (code.times_used ?? 0) >= (code.max_uses ?? 1)
 
                   return (
-                    <tr key={code.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <code className="bg-gray-100 px-3 py-1 rounded font-mono text-sm">
-                          {code.code}
-                        </code>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                    <TableRow key={code.id} className="group hover:bg-indigo-50/30 transition-colors border-b border-gray-50/50 last:border-0">
+                      <TableCell className="px-8 py-5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+                             <Key className="w-5 h-5 text-indigo-600" />
+                          </div>
+                          <code className="px-4 py-2 rounded-xl bg-gray-100/50 text-indigo-600 font-mono text-sm font-black tracking-widest">
+                            {code.code}
+                          </code>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-5">
                         {(() => {
                           const status: StatusType = !code.is_active ? 'inactive' : isExpired ? 'error' : isExhausted ? 'exhausted' : 'active';
                           const label = !code.is_active ? 'Deactivated' : isExpired ? 'Expired' : isExhausted ? 'Exhausted' : 'Active';
                           return <StatusBadge status={status} label={label} />;
                         })()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      </TableCell>
+                      <TableCell className="py-5 font-black text-xs text-gray-600 tracking-tight">
                         {code.times_used} / {code.max_uses}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      </TableCell>
+                      <TableCell className="py-5 font-black text-xs text-gray-400 uppercase tracking-tighter">
                         {formatDate(code.expires_at)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      </TableCell>
+                      <TableCell className="py-5 font-black text-[10px] text-gray-400 uppercase tracking-widest">
                         {formatDate(code.created_at)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap space-x-2">
+                      </TableCell>
+                      <TableCell className="px-8 py-5 text-right space-x-2">
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => handleCopyCode(code.code, code.id)}
-                          className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                          className="h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 gap-2"
                         >
-                          {copiedId === code.id ? 'Copied!' : 'Copy'}
+                          <Copy className="h-3.5 w-3.5" />
+                          {copiedId === code.id ? 'VERIFIED' : 'EXTRACT'}
                         </Button>
                         {code.is_active && (
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
                             onClick={() => handleDeactivateCode(code.id)}
-                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            className="h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest text-red-400 hover:bg-red-50 hover:text-red-600 gap-2"
                           >
-                            Deactivate
+                            <Power className="h-3.5 w-3.5" />
+                            VOID
                           </Button>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   )
-                })}
-              </tbody>
-            </table>
-          </div>
-          {codes.length > 0 && (
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        
+        {filteredCodes.length > 0 && (
+          <div className="px-8 py-6 bg-gray-50/30 border-t border-gray-100/50">
              <Pagination
               currentPage={currentPage}
-              totalPages={Math.ceil(codes.filter(c => c.code.toLowerCase().includes(searchQuery.toLowerCase())).length / pageSize)}
-              totalCount={codes.filter(c => c.code.toLowerCase().includes(searchQuery.toLowerCase())).length}
+              totalPages={Math.ceil(filteredCodes.length / pageSize)}
+              totalCount={filteredCodes.length}
               pageSize={pageSize}
               onPageChange={setCurrentPage}
               onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
             />
-          )}
-          </>
+          </div>
         )}
       </div>
     </div>
   )
 }
+

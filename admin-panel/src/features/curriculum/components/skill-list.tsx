@@ -8,19 +8,24 @@ import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import type { DataColumn } from '@/lib/data-utils';
-import { Plus, CheckSquare, Square, Search, X, Trash, Layers, GripVertical, Filter } from 'lucide-react';
+import { Plus, CheckSquare, Square, Search, X, Trash2, Layers, GripVertical, Filter, Pencil, Copy } from 'lucide-react';
 import { AdminHeader } from '@/components/ui/admin-header';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
-const SKILL_COLUMNS: DataColumn[] = [
-    { key: 'title', header: 'title' },
-    { key: 'slug', header: 'slug' },
-    { key: 'domains', header: 'domain_title', transform: (v: unknown) => (v as { title?: string } | null)?.title ?? '' },
-    { key: 'difficulty_level', header: 'difficulty_level' },
-    { key: 'sort_order', header: 'sort_order' },
-    { key: 'status', header: 'status' },
-];
 import {
     DndContext,
     closestCenter,
@@ -44,10 +49,18 @@ import type { Tables } from '@/lib/database.types';
 
 const DEFAULT_PAGE_SIZE = 10;
 
-// Skill list type — DB Row extended with the joined domain relation from the query
 type SkillListItem = Tables<'skills'> & {
     domains?: { title: string } | null;
 };
+
+const SKILL_COLUMNS: DataColumn[] = [
+    { key: 'title', header: 'title' },
+    { key: 'slug', header: 'slug' },
+    { key: 'domains', header: 'domain_title', transform: (v: unknown) => (v as { title?: string } | null)?.title ?? '' },
+    { key: 'difficulty_level', header: 'difficulty_level' },
+    { key: 'sort_order', header: 'sort_order' },
+    { key: 'status', header: 'status' },
+];
 
 interface SortableRowProps {
     skill: SkillListItem;
@@ -75,19 +88,18 @@ function SortableRow({ skill, isSelected, onSelect, onDelete, onDuplicate, rende
         transition,
         opacity: isDragging ? 0.5 : 1,
         boxShadow: isDragging ? '0 4px 12px rgba(0, 0, 0, 0.15)' : undefined,
-        backgroundColor: isDragging ? '#f9fafb' : undefined,
-        position: 'relative' as const,
         zIndex: isDragging ? 50 : undefined,
     };
 
     return (
-        <tr ref={setNodeRef} style={style} className="hover:bg-gray-50 transition-colors">
-            <td className="px-2 py-4 w-10">
+        <tr ref={setNodeRef} style={style} className="hover:bg-indigo-50/30 transition-all group/row border-b border-gray-50 last:border-0 relative">
+            <td className="pl-6 pr-2 py-4 w-12 relative overflow-hidden">
+                <div className="absolute inset-y-0 left-0 w-1 bg-indigo-600 opacity-0 group-hover/row:opacity-100 transition-opacity" />
                 {!isDragDisabled ? (
                     <button
                         {...attributes}
                         {...listeners}
-                        className="p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing touch-none"
+                        className="p-2 text-indigo-400/50 hover:text-indigo-600 cursor-grab active:cursor-grabbing touch-none transition-colors"
                         aria-label="Drag to reorder"
                     >
                         <GripVertical className="h-5 w-5" />
@@ -98,61 +110,53 @@ function SortableRow({ skill, isSelected, onSelect, onDelete, onDuplicate, rende
                     </div>
                 )}
             </td>
-            <td className="px-4 py-4">
-                <button onClick={() => onSelect(skill.skill_id)} className="text-gray-400 hover:text-gray-600">
-                    {isSelected ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
+            <td className="px-4 py-3">
+                <button onClick={() => onSelect(skill.skill_id)} className="text-gray-300 hover:text-indigo-600 transition-colors">
+                    {isSelected ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
                 </button>
             </td>
-            <td className="px-6 py-4">
-                <div>
-                    <span className="font-medium text-gray-900">{skill.title}</span>
-                    <p className="text-sm text-gray-500">{skill.slug}</p>
+            <td className="px-4 py-4 min-w-[250px]">
+                <div className="flex flex-col">
+                    <span className="font-black text-gray-900 text-sm tracking-tight leading-none group-hover/row:text-indigo-700 transition-colors">{skill.title}</span>
+                    <span className="text-[10px] text-gray-400 font-black uppercase tracking-[0.1em] mt-1.5 opacity-70 italic truncate">/{skill.slug}</span>
                 </div>
             </td>
-            <td className="px-6 py-4">
-                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-                    {skill.domains?.title}
+            <td className="px-4 py-4">
+                <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-100/50 shadow-sm">
+                    {skill.domains?.title || 'ORPHAN'}
                 </span>
             </td>
-            <td className="px-6 py-4">
-                <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 text-gray-700 font-semibold text-sm">
+            <td className="px-4 py-4 text-center">
+                <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg bg-gray-100 text-gray-600 font-bold text-xs border border-gray-200 shadow-sm">
                     {skill.difficulty_level}
                 </span>
             </td>
-            <td className="px-6 py-4">
+            <td className="px-4 py-4">
                 {renderStatusBadge(skill.status || 'draft')}
             </td>
-            <td className="px-6 py-4">
-                {!skill.domains ? (
-                    <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
-                        Yes
-                    </span>
-                ) : (
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
-                        No
-                    </span>
-                )}
-            </td>
-            <td className="px-6 py-4 text-right">
-                <div className="flex items-center justify-end gap-2">
+            <td className="pl-4 pr-8 py-3 text-right">
+                <div className="flex items-center justify-end gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity">
                     <Link
                         to={`/skills/${skill.skill_id}/edit`}
-                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
+                        className="p-2 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                        title="Edit Skill"
                     >
-                        Edit
+                        <Pencil className="h-4 w-4" />
                     </Link>
                     <button
                         onClick={() => onDuplicate(skill.skill_id)}
                         disabled={isDuplicating}
-                        className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium hover:bg-purple-200 transition-colors disabled:opacity-50"
+                        className="p-2 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all disabled:opacity-50"
+                        title="Duplicate Skill"
                     >
-                        Duplicate
+                        <Copy className="h-4 w-4" />
                     </button>
                     <button
                         onClick={() => onDelete(skill.skill_id)}
-                        className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium hover:bg-red-200 transition-colors"
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                        title="Delete Skill"
                     >
-                        Delete
+                        <Trash2 className="h-4 w-4" />
                     </button>
                 </div>
             </td>
@@ -174,8 +178,6 @@ function SortableCard({ skill, isSelected, onSelect, onDelete, onDuplicate, rend
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
-        boxShadow: isDragging ? '0 8px 16px rgba(0, 0, 0, 0.15)' : undefined,
-        position: 'relative' as const,
         zIndex: isDragging ? 50 : undefined,
     };
 
@@ -183,75 +185,79 @@ function SortableCard({ skill, isSelected, onSelect, onDelete, onDuplicate, rend
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg-white rounded-xl border ${isSelected ? 'border-purple-300 bg-purple-50' : 'border-gray-200'} p-4 space-y-3 transition-colors`}
+            className={cn(
+                "bg-white/80 backdrop-blur-xl rounded-3xl border transition-all duration-300 group/card",
+                isSelected ? 'border-indigo-400 bg-indigo-50/50 shadow-md shadow-indigo-500/10' : 'border-white/40 hover:border-indigo-200 hover:shadow-lg'
+            )}
         >
-            <div className="flex items-start gap-3">
-                {!isDragDisabled ? (
-                    <button
-                        {...attributes}
-                        {...listeners}
-                        className="p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
-                        aria-label="Drag to reorder"
-                    >
-                        <GripVertical className="h-5 w-5" />
-                    </button>
-                ) : (
-                    <div className="p-2 text-gray-200 flex-shrink-0">
-                        <GripVertical className="h-5 w-5" />
+            <div className="p-6 space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                        {!isDragDisabled ? (
+                            <button
+                                {...attributes}
+                                {...listeners}
+                                className="p-2 text-indigo-300 hover:text-indigo-600 cursor-grab active:cursor-grabbing touch-none transition-colors"
+                                aria-label="Drag to reorder"
+                            >
+                                <GripVertical className="h-5 w-5" />
+                            </button>
+                        ) : (
+                            <div className="p-2 text-gray-200">
+                                <GripVertical className="h-5 w-5" />
+                            </div>
+                        )}
+                        <button
+                            onClick={() => onSelect(skill.skill_id)}
+                            className="p-2 text-gray-300 hover:text-indigo-600 transition-colors"
+                        >
+                            {isSelected ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
+                        </button>
                     </div>
-                )}
-                <button
-                    onClick={() => onSelect(skill.skill_id)}
-                    className="p-2 text-gray-400 hover:text-gray-600 flex-shrink-0"
-                >
-                    {isSelected ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
-                </button>
-                <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 truncate">{skill.title}</h3>
-                    <p className="text-sm text-gray-500 truncate">{skill.slug}</p>
+                    <div className="flex gap-1.5 opacity-0 group-hover/card:opacity-100 transition-opacity">
+                        <Link
+                            to={`/skills/${skill.skill_id}/edit`}
+                            className="p-2.5 rounded-xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm"
+                        >
+                            <Pencil className="h-4 w-4" />
+                        </Link>
+                        <button
+                            onClick={() => onDuplicate(skill.skill_id)}
+                            disabled={isDuplicating}
+                            className="p-2.5 rounded-xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm disabled:opacity-50"
+                        >
+                            <Copy className="h-4 w-4" />
+                        </button>
+                        <button
+                            onClick={() => onDelete(skill.skill_id)}
+                            className="p-2.5 rounded-xl bg-white border border-gray-100 text-red-500 hover:bg-red-50 transition-all shadow-sm"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </button>
+                    </div>
                 </div>
-                <div className="flex-shrink-0">
-                    {renderStatusBadge(skill.status || 'draft')}
+
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 shadow-sm transition-transform group-hover/card:scale-110">
+                        <Layers className="w-6 h-6" />
+                    </div>
+                    <div className="min-w-0">
+                        <h3 className="font-black text-gray-900 text-lg tracking-tight truncate leading-tight mb-1">{skill.title}</h3>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic opacity-60 truncate">/{skill.slug}</p>
+                    </div>
                 </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-                {skill.domains?.title && (
-                    <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
-                        {skill.domains.title}
+
+                <div className="flex items-center justify-between pt-2 border-t border-gray-50">
+                    <div className="flex items-center gap-3">
+                         <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-100/50">
+                            {skill.domains?.title?.substring(0, 12)}...
+                        </span>
+                        {renderStatusBadge(skill.status || 'draft')}
+                    </div>
+                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest bg-gray-100 px-2 py-1 rounded">
+                        LVL {skill.difficulty_level}
                     </span>
-                )}
-                <span className="inline-flex items-center gap-1 text-gray-600">
-                    <span className="text-xs">Difficulty:</span>
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-gray-700 font-semibold text-xs">
-                        {skill.difficulty_level}
-                    </span>
-                </span>
-                {!skill.domains && (
-                    <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
-                        Orphan
-                    </span>
-                )}
-            </div>
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
-                <Link
-                    to={`/skills/${skill.skill_id}/edit`}
-                    className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
-                >
-                    Edit
-                </Link>
-                <button
-                    onClick={() => onDuplicate(skill.skill_id)}
-                    disabled={isDuplicating}
-                    className="px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium hover:bg-purple-200 transition-colors disabled:opacity-50"
-                >
-                    Duplicate
-                </button>
-                <button
-                    onClick={() => onDelete(skill.skill_id)}
-                    className="px-4 py-2 bg-red-100 text-red-700 rounded-full text-sm font-medium hover:bg-red-200 transition-colors"
-                >
-                    Delete
-                </button>
+                </div>
             </div>
         </div>
     );
@@ -267,8 +273,9 @@ export function SkillList() {
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
     const [sortBy, setSortBy] = useState<string>('sort_order');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+    const [deleteConfirmation, setDeleteConfirmation] = useState<{ type: 'single' | 'bulk', id?: string } | null>(null);
 
-    const { data: paginatedData, isLoading } = usePaginatedSkills({
+    const { data: paginatedData, isLoading, error } = usePaginatedSkills({
         page,
         pageSize,
         search: debouncedSearch,
@@ -361,14 +368,13 @@ export function SkillList() {
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
         } else {
             setSortBy(column);
-            setSortBy(column);
             setSortOrder('asc');
         }
         setPage(1);
     };
 
     const handleSelectAll = () => {
-        if (selectedIds.size === skills.length) {
+        if (selectedIds.size === skills.length && skills.length > 0) {
             setSelectedIds(new Set());
         } else {
             setSelectedIds(new Set(skills.map((s: SkillListItem) => s.skill_id)));
@@ -383,19 +389,6 @@ export function SkillList() {
             newSelected.add(id);
         }
         setSelectedIds(newSelected);
-    };
-
-    const handleBulkDelete = async () => {
-        if (selectedIds.size === 0) return;
-        if (confirm(`Are you sure you want to delete ${selectedIds.size} skill(s)?`)) {
-            try {
-                await bulkDelete.mutateAsync(Array.from(selectedIds));
-                showToast(`${selectedIds.size} skill(s) deleted`, 'success');
-                setSelectedIds(new Set());
-            } catch {
-                showToast('Failed to delete skills', 'error');
-            }
-        }
     };
 
     const handleMarkLive = async () => {
@@ -424,21 +417,32 @@ export function SkillList() {
         if (selectedIds.size === 0) return;
         try {
             await bulkUpdateStatus.mutateAsync({ skill_ids: Array.from(selectedIds), status: 'published' });
-            showToast(`${selectedIds.size} skill(s) marked as published (ready for release)`, 'success');
+            showToast(`${selectedIds.size} skill(s) marked as published`, 'success');
             setSelectedIds(new Set());
         } catch {
             showToast('Failed to update skills', 'error');
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (confirm('Are you sure you want to delete this skill?')) {
-            try {
-                await deleteSkill.mutateAsync(id);
-                showToast('Skill deleted', 'success');
-            } catch {
-                showToast('Failed to delete skill', 'error');
+    const handleDelete = (id: string) => {
+        setDeleteConfirmation({ type: 'single', id });
+    };
+
+    const confirmExecution = async () => {
+        if (!deleteConfirmation) return;
+        try {
+            if (deleteConfirmation.type === 'bulk') {
+                await bulkDelete.mutateAsync(Array.from(selectedIds));
+                showToast(`${selectedIds.size} skill(s) purged`, 'success');
+                setSelectedIds(new Set());
+            } else if (deleteConfirmation.type === 'single' && deleteConfirmation.id) {
+                await deleteSkill.mutateAsync(deleteConfirmation.id);
+                showToast('Skill purged successfully', 'success');
             }
+        } catch {
+            showToast('Failed to execute purge operation', 'error');
+        } finally {
+            setDeleteConfirmation(null);
         }
     };
 
@@ -492,21 +496,45 @@ export function SkillList() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-r-transparent"></div>
-                    <p className="mt-4 text-gray-500">Loading skills...</p>
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <AdminHeader 
+                    title="Curriculum Skills"
+                    description="Configure and organize the detailed learning objectives for your curriculum."
+                    icon={Layers}
+                    breadcrumbs={[
+                        { label: 'Curriculum', href: '/domains' },
+                        { label: 'Skills', href: '/skills' }
+                    ]}
+                />
+                <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 p-8 space-y-4">
+                    <Skeleton className="h-12 w-full rounded-2xl" />
+                    <Skeleton className="h-12 w-full rounded-2xl" />
+                    <Skeleton className="h-12 w-full rounded-2xl" />
+                    <Skeleton className="h-12 w-full rounded-2xl" />
+                    <Skeleton className="h-12 w-full rounded-2xl" />
                 </div>
             </div>
         );
     }
 
+    if (error) {
+        return (
+            <div className="bg-red-500/10 border border-red-500/20 backdrop-blur-xl rounded-2xl p-8 text-center">
+                <p className="text-red-700 font-bold">Error loading skills. Please try again.</p>
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-4 md:space-y-6">
+        <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <AdminHeader 
-                title="Skills"
-                description="Manage and organize learning skills for your curriculum."
+                title="Curriculum Skills"
+                description="Manage and organize learning skills for your curriculum taxonomy."
                 icon={Layers}
+                breadcrumbs={[
+                    { label: 'Curriculum', href: '/domains' },
+                    { label: 'Skills', href: '/skills' }
+                ]}
                 actions={
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <DataToolbar
@@ -517,7 +545,7 @@ export function SkillList() {
                             importDisabled={false}
                         />
                         <Link to="/skills/new">
-                            <Button className="gap-2">
+                             <Button className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 gap-2">
                                 <Plus className="h-4 w-4" />
                                 <span>New Skill</span>
                             </Button>
@@ -526,214 +554,178 @@ export function SkillList() {
                 }
             />
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center mb-4">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Search skills..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all outline-none"
-                        />
-                        {searchQuery && (
-                            <button
-                                onClick={() => setSearchQuery('')}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        )}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
-                            <Filter className="h-3.5 w-3.5 text-gray-400" />
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Domain:</span>
-                            <Select
-                                value={selectedDomainId}
-                                onValueChange={setSelectedDomainId}
-                            >
-                                <SelectTrigger className="w-[140px] h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-bold text-gray-700">
-                                    <SelectValue placeholder="All Domains" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Domains</SelectItem>
-                                    {domains?.map(domain => (
-                                        <SelectItem key={domain.domain_id} value={domain.domain_id}>{domain.title}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status:</span>
-                            <Select
-                                value={statusFilter}
-                                onValueChange={(v) => setStatusFilter(v as 'all' | 'draft' | 'published' | 'live')}
-                            >
-                                <SelectTrigger className="w-[110px] h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-bold text-gray-700">
-                                    <SelectValue placeholder="All Status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Status</SelectItem>
-                                    <SelectItem value="draft">Draft</SelectItem>
-                                    <SelectItem value="published">Published</SelectItem>
-                                    <SelectItem value="live">Live</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {hasActiveFilters && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={clearFilters}
-                                className="h-9 px-3 gap-2 text-gray-500 hover:text-gray-900"
-                            >
-                                <X className="h-4 w-4" />
-                                <span>Clear All</span>
-                            </Button>
-                        )}
-                    </div>
-                </div>
-
-                {/* Bulk Actions & Information */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between mb-4 px-1">
-                    <div className="flex items-center gap-2">
-                        {isDragDisabled && sortBy === 'sort_order' && (
-                            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100 uppercase tracking-tight">
-                                Clear filters to enable drag reordering
-                            </span>
-                        )}
-                    </div>
-
-                    {selectedIds.size > 0 && (
-                        <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mr-2">{selectedIds.size} selected</span>
-                            <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-xl border border-gray-100">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={handleMarkPublished}
-                                    disabled={bulkUpdateStatus.isPending}
-                                    className="h-8 text-xs font-bold text-amber-600 hover:text-amber-700 hover:bg-white shadow-sm"
-                                >
-                                    Publish
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={handleMarkLive}
-                                    disabled={bulkUpdateStatus.isPending}
-                                    className="h-8 text-xs font-bold text-green-600 hover:text-green-700 hover:bg-white shadow-sm"
-                                >
-                                    Go Live
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={handleMarkDraft}
-                                    disabled={bulkUpdateStatus.isPending}
-                                    className="h-8 text-xs font-bold text-gray-500 hover:text-gray-700 hover:bg-white shadow-sm"
-                                >
-                                    Draft
-                                </Button>
-                                <div className="w-px h-4 bg-gray-200 mx-1" />
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={handleBulkDelete}
-                                    disabled={bulkDelete.isPending}
-                                    className="h-8 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-white shadow-sm gap-1.5"
-                                >
-                                    <Trash className="h-3.5 w-3.5" />
-                                    Delete
-                                </Button>
-                            </div>
-                        </div>
+            {/* Premium Filter Bar */}
+            <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
+                <div className="relative flex-1 w-full group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                    <input
+                        type="text"
+                        placeholder="Search skills by title, slug, or identifier..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none text-sm font-medium"
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={clearFilters}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
                     )}
                 </div>
+                
+                <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/5 border border-indigo-500/10 rounded-xl">
+                        <Filter className="h-3.5 w-3.5 text-indigo-400" />
+                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mr-2">Domain:</span>
+                        <Select
+                            value={selectedDomainId}
+                            onValueChange={setSelectedDomainId}
+                        >
+                            <SelectTrigger className="w-auto h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-700 hover:text-indigo-600 transition-colors uppercase tracking-tight">
+                                <SelectValue placeholder="All Domains" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-white/20 backdrop-blur-xl bg-white/90">
+                                <SelectItem value="all">ALL DOMAINS</SelectItem>
+                                {domains?.map(domain => (
+                                    <SelectItem key={domain.domain_id} value={domain.domain_id}>{domain.title.toUpperCase()}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
 
+                    <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/5 border border-indigo-500/10 rounded-xl">
+                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mr-2">Status:</span>
+                        <Select
+                            value={statusFilter}
+                            onValueChange={(v) => setStatusFilter(v as 'all' | 'draft' | 'published' | 'live')}
+                        >
+                            <SelectTrigger className="w-auto h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-700 hover:text-indigo-600 transition-colors uppercase tracking-tight">
+                                <SelectValue placeholder="All Status" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-white/20 backdrop-blur-xl bg-white/90">
+                                <SelectItem value="all">ALL STATUS</SelectItem>
+                                <SelectItem value="draft">DRAFT</SelectItem>
+                                <SelectItem value="published">PUBLISHED</SelectItem>
+                                <SelectItem value="live">LIVE</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
+                         <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Registry:</span>
+                         <span className="text-sm font-black text-indigo-700 tracking-tight">{totalCount} MAPPED</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Bulk Actions Bar */}
+            {selectedIds.size > 0 && (
+                <div className="flex items-center justify-between p-4 bg-indigo-600 rounded-[2rem] shadow-xl shadow-indigo-600/20 animate-in slide-in-from-top-4 duration-500">
+                    <div className="flex items-center gap-4 pl-4">
+                        <span className="text-white font-black text-xs uppercase tracking-[0.2em]">{selectedIds.size} SELECTED FOR BATCH PROCESSING</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleMarkPublished}
+                            className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+                        >
+                            Publish
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleMarkLive}
+                            className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+                        >
+                            Go Live
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleMarkDraft}
+                            className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+                        >
+                            Draft
+                        </Button>
+                        <div className="w-px h-6 bg-white/20 mx-2" />
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDeleteConfirmation({ type: 'bulk' })}
+                            className="h-10 px-4 rounded-xl text-red-200 font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all gap-2"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                            Purge
+                        </Button>
+                    </div>
+                </div>
+            )}
+
+            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-xl border border-white/20 overflow-hidden">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={handleDragEnd}
                 >
-                    <div className="hidden md:block overflow-hidden rounded-xl border border-gray-100">
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-hidden">
                         <table className="w-full">
-                            <thead>
-                                <tr className="bg-gray-50 border-b border-gray-100">
-                                    <th className="text-left px-2 py-4 w-10">
-                                        <span className="sr-only">Drag handle</span>
-                                    </th>
-                                    <th className="text-left px-4 py-4 w-10">
-                                        <button onClick={handleSelectAll} className="text-gray-400 hover:text-gray-600">
-                                            {isAllSelected && skills.length > 0 ? <CheckSquare className="h-5 w-5 text-purple-600" /> : <Square className="h-5 w-5" />}
+                            <thead className="bg-gray-50/50 border-b-2 border-gray-100">
+                                <tr>
+                                    <th className="w-12 h-14 pl-6 pr-2 font-black text-[10px] uppercase tracking-widest text-gray-400"></th>
+                                    <th className="w-12 h-14 px-4">
+                                        <button onClick={handleSelectAll} className="text-gray-300 hover:text-indigo-600 transition-colors">
+                                            {isAllSelected && skills.length > 0 ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
                                         </button>
                                     </th>
-                                    <th className="text-left px-6 py-4">
+                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">
                                         <SortableHeader
-                                            label="Title"
+                                            label="Identity & Skill"
                                             column="title"
                                             currentSortBy={sortBy}
                                             currentSortOrder={sortOrder}
                                             onSort={handleSort}
+                                            className="text-[10px]"
                                         />
                                     </th>
-                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Domain</th>
-                                    <th className="text-left px-6 py-4">
+                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">Parent Domain</th>
+                                    <th className="h-14 px-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">
                                         <SortableHeader
-                                            label="Difficulty"
+                                            label="LVL"
                                             column="difficulty_level"
                                             currentSortBy={sortBy}
                                             currentSortOrder={sortOrder}
                                             onSort={handleSort}
+                                            className="text-[10px] justify-center"
                                         />
                                     </th>
-                                    <th className="text-left px-6 py-4">
-                                        <SortableHeader
-                                            label="Status"
-                                            column="status"
-                                            currentSortBy={sortBy}
-                                            currentSortOrder={sortOrder}
-                                            onSort={handleSort}
-                                        />
-                                    </th>
-                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Orphan</th>
-                                    <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
+                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">Status</th>
+                                    <th className="h-14 pl-4 pr-8 text-right font-black text-[10px] uppercase tracking-widest text-gray-400">Execution</th>
                                 </tr>
                             </thead>
                             <SortableContext items={skillIds} strategy={verticalListSortingStrategy}>
-                                <tbody className="divide-y divide-gray-100">
+                                <tbody className="divide-y divide-gray-50">
                                     {!skills.length ? (
                                         <tr>
-                                            <td colSpan={8} className="px-6 py-12 text-center">
-                                                <div className="flex flex-col items-center">
-                                                    <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                                                        <Layers className="w-8 h-8 text-gray-400" />
-                                                    </div>
-                                                    <p className="text-gray-500 mb-4">
-                                                        {hasActiveFilters ? 'No skills match your filters.' : 'No skills found. Create one to get started.'}
-                                                    </p>
-                                                    {hasActiveFilters ? (
-                                                        <button
-                                                            onClick={clearFilters}
-                                                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-                                                        >
-                                                            <X className="h-4 w-4" />
-                                                            Clear filters
-                                                        </button>
-                                                    ) : (
-                                                        <Link
-                                                            to="/skills/new"
-                                                            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
-                                                        >
-                                                            <Plus className="h-4 w-4" />
-                                                            Create Skill
-                                                        </Link>
-                                                    )}
-                                                </div>
+                                            <td colSpan={7} className="px-6 py-24 text-center">
+                                                 <EmptyState
+                                                    icon={Layers}
+                                                    title={hasActiveFilters ? 'No matches found' : 'No skills yet'}
+                                                    description={hasActiveFilters ? 'Try adjusting your search or domain filter.' : 'Start building your curriculum by adding some learning objectives.'}
+                                                    action={
+                                                        hasActiveFilters ? {
+                                                            label: "Clear filters",
+                                                            onClick: clearFilters
+                                                        } : {
+                                                            label: "Create Skill",
+                                                            onClick: () => (window.location.href = "/skills/new")
+                                                        }
+                                                    }
+                                                />
                                             </td>
                                         </tr>
                                     ) : (
@@ -756,38 +748,28 @@ export function SkillList() {
                         </table>
                     </div>
 
-                    <div className="md:hidden">
+                    {/* Mobile Card View */}
+                    <div className="md:hidden p-4">
                         <SortableContext items={skillIds} strategy={verticalListSortingStrategy}>
                             {!skills.length ? (
-                                <div className="rounded-xl border border-gray-100 p-8 text-center">
-                                    <div className="flex flex-col items-center">
-                                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                                            <Layers className="w-8 h-8 text-gray-400" />
-                                        </div>
-                                        <p className="text-gray-500 mb-4">
-                                            {hasActiveFilters ? 'No skills match your filters.' : 'No skills found. Create one to get started.'}
-                                        </p>
-                                        {hasActiveFilters ? (
-                                            <button
-                                                onClick={clearFilters}
-                                                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-                                            >
-                                                <X className="h-4 w-4" />
-                                                Clear filters
-                                            </button>
-                                        ) : (
-                                            <Link
-                                                to="/skills/new"
-                                                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
-                                            >
-                                                <Plus className="h-4 w-4" />
-                                                Create Skill
-                                            </Link>
-                                        )}
-                                    </div>
+                                <div className="rounded-[2rem] border border-dashed border-gray-200 p-12 bg-white/30 backdrop-blur-md">
+                                    <EmptyState
+                                        icon={Layers}
+                                        title={hasActiveFilters ? 'No matches found' : 'No skills yet'}
+                                        description={hasActiveFilters ? 'Try adjusting your search or filters.' : 'Get started by creating your first skill.'}
+                                        action={
+                                            hasActiveFilters ? {
+                                                label: "Clear filters",
+                                                onClick: clearFilters
+                                            } : {
+                                                label: "Create Skill",
+                                                onClick: () => (window.location.href = "/skills/new")
+                                            }
+                                        }
+                                    />
                                 </div>
                             ) : (
-                                <div className="space-y-3">
+                                <div className="space-y-4">
                                     {skills.map((skill: SkillListItem) => (
                                         <SortableCard
                                             key={skill.skill_id}
@@ -807,15 +789,39 @@ export function SkillList() {
                     </div>
                 </DndContext>
 
-                <Pagination
-                    currentPage={page}
-                    totalPages={totalPages}
-                    totalCount={totalCount}
-                    pageSize={pageSize}
-                    onPageChange={handlePageChange}
-                    onPageSizeChange={handlePageSizeChange}
-                />
+                <div className="px-8 py-6 bg-gray-50/50 border-t border-gray-100">
+                    <Pagination
+                        currentPage={page}
+                        totalPages={totalPages}
+                        totalCount={totalCount}
+                        pageSize={pageSize}
+                        onPageChange={handlePageChange}
+                        onPageSizeChange={handlePageSizeChange}
+                    />
+                </div>
             </div>
+
+            <AlertDialog open={Boolean(deleteConfirmation)} onOpenChange={(open) => !open && setDeleteConfirmation(null)}>
+                <AlertDialogContent className="rounded-[2.5rem] border-none bg-white/90 backdrop-blur-2xl p-10 shadow-2xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-2xl font-black text-gray-900 tracking-tight italic">Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-gray-500 font-medium">
+                            {deleteConfirmation?.type === 'bulk' 
+                                ? `This will permanently purge ${selectedIds.size} selected skill(s). This action is irreversible.` 
+                                : "This action cannot be undone. This will permanently delete the skill and all associated questions from our high-availability clusters."}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="mt-8 gap-3">
+                        <AlertDialogCancel className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest text-gray-400 hover:bg-gray-100 italic transition-all border-none">Abort</AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={confirmExecution}
+                            className="h-12 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-red-600/20 transition-all hover:-translate-y-0.5"
+                        >
+                            Confirm Execution
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

@@ -163,7 +163,7 @@ export const GovernancePage: React.FC = () => {
                     placeholder="Search tenants by name or ID..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none"
+                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none text-sm"
                   />
                   {searchTerm && (
                     <button
@@ -174,9 +174,14 @@ export const GovernancePage: React.FC = () => {
                     </button>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="text-xs font-medium text-gray-500 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
-                    {filteredData.length} Tenants Listed
+              </div>
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Results:</span>
+                    <span className="text-xs font-bold text-gray-700">
+                      {filteredData.length}
+                    </span>
                   </div>
                 </div>
               </div>

@@ -1,0 +1,44 @@
+{
+  "mcpServers": {
+    "flutter": {
+      "command": "dart",
+      "args": ["pub", "global", "run", "dart_mcp_server"]
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server"],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "YOUR_ACCESS_TOKEN",
+        "SUPABASE_PROJECT_ID": "[YOUR_PROJECT_ID]"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-playwright"],
+      "env": {
+        "PLAYWRIGHT_CONFIG_PATH": "./admin-panel/playwright.config.ts"
+      }
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "code-scalpel": {
+      "command": "uvx",
+      "args": ["code-scalpel", "mcp"],
+      "env": {
+        "CODE_SCALPEL_ROOT": "."
+      }
+    },
+    "codescene": {
+      "command": "cs-mcp",
+      "env": {
+        "CS_ACCESS_TOKEN": "${CS_ACCESS_TOKEN}"
+      }
+    },
+    "browser": {
+      "command": "npx",
+      "args": ["-y", "@browsermcp/mcp@latest"]
+    }
+  }
+}

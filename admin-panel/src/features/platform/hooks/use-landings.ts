@@ -5,6 +5,8 @@ import { Database } from '@/lib/database.types';
 export type LandingPage = Database['public']['Tables']['app_landing_pages']['Row'];
 export type LandingPageUpdate = Database['public']['Tables']['app_landing_pages']['Update'];
 
+export type LandingPageWithApp = LandingPage & { apps: { display_name: string; subdomain: string } | null };
+
 export function useLandingPages() {
   return useQuery({
     queryKey: ['landing-pages'],
@@ -21,7 +23,7 @@ export function useLandingPages() {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as (LandingPage & { apps: { display_name: string; subdomain: string } | null })[];
+      return data as LandingPageWithApp[];
     },
   });
 }

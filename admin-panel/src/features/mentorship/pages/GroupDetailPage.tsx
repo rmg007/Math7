@@ -1,13 +1,15 @@
 import { useParams, Link } from 'react-router-dom'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Plus, Users, School, Home, Trash2, Edit3, UserPlus, Copy, Check, ClipboardList, CheckCircle, Circle, Clock } from 'lucide-react'
+import { ArrowLeft, Plus, Users, School, Home, Trash2, Edit3, UserPlus, Copy, Check, ClipboardList, CheckCircle, Circle, Clock, LayoutDashboard, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { AdminHeader } from '@/components/ui/admin-header'
 
 interface Assignment {
   id: string
@@ -121,9 +123,6 @@ export function GroupDetailPage() {
     }
   })
 
-  // Remove member mutation
-
-
   // Fetch assignments
   const { data: assignments, isLoading: assignmentsLoading } = useQuery({
     queryKey: ['assignments', id],
@@ -233,15 +232,28 @@ export function GroupDetailPage() {
   }
 
   if (groupLoading) {
-    return <div className="p-8 text-slate-500">Loading group...</div>
+    return (
+      <div className="p-8 space-y-8 animate-pulse">
+        <div className="h-20 bg-gray-100 rounded-2xl w-2/3"></div>
+        <div className="grid grid-cols-3 gap-6">
+          <div className="h-32 bg-gray-100 rounded-2xl"></div>
+          <div className="h-32 bg-gray-100 rounded-2xl"></div>
+          <div className="h-32 bg-gray-100 rounded-2xl"></div>
+        </div>
+        <div className="h-96 bg-gray-100 rounded-2xl"></div>
+      </div>
+    )
   }
 
   if (!group) {
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold text-slate-900 mb-4">Group not found</h1>
+      <div className="p-12 text-center bg-white rounded-2xl border border-gray-100 shadow-sm">
+        <h1 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">Group not found</h1>
+        <p className="text-gray-500 mb-8 font-medium">The group you're looking for doesn't exist or has been deleted.</p>
         <Link to="/groups">
-          <Button variant="outline">← Back to Groups</Button>
+          <Button variant="outline" className="rounded-xl px-8">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
+          </Button>
         </Link>
       </div>
     )
@@ -260,296 +272,316 @@ export function GroupDetailPage() {
   const memberCount = members?.length || 0
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Header with back button */}
-      <div className="flex items-center gap-4">
-        <Link to="/groups">
-          <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-600 hover:bg-slate-100">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <div className={cn(
-              "p-2 rounded-lg",
-              group.type === 'class' ? "bg-blue-100 text-blue-600" : "bg-purple-100 text-purple-600"
-            )}>
-              {group.type === 'class' ? <School className="h-5 w-5" /> : <Home className="h-5 w-5" />}
-            </div>
-            <h1 className="text-3xl font-bold text-slate-900">{group.name}</h1>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <AdminHeader 
+        title={group.name}
+        description="Manage members, assignments, and group settings"
+        icon={group.type === 'class' ? School : Home}
+        breadcrumbs={[
+          { label: 'Mentorship', href: '/groups' },
+          { label: 'Groups', href: '/groups' },
+          { label: group.name, href: `/groups/${id}` },
+        ]}
+        actions={
+          <div className="flex items-center gap-2">
             <span className={cn(
-              "text-xs uppercase font-bold px-3 py-1 rounded-full border",
+              "text-[10px] uppercase font-black px-3 py-1 rounded-full border tracking-widest",
               group.type === 'class'
-                ? "bg-blue-50 text-blue-600 border-blue-200"
-                : "bg-purple-50 text-purple-600 border-purple-200"
+                ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                : "bg-purple-500/10 text-purple-600 border-purple-500/20"
             )}>
               {group.type}
             </span>
           </div>
-          <p className="text-slate-500">Manage members, assignments, and group settings</p>
-        </div>
-      </div>
+        }
+      />
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="bg-slate-100 p-1 rounded-xl">
-          <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">Overview</TabsTrigger>
-          <TabsTrigger value="progress" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">Progress Matrix</TabsTrigger>
-          <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">Settings</TabsTrigger>
+        <TabsList className="bg-gray-100/50 backdrop-blur-md p-1 rounded-2xl border border-white/20">
+          <TabsTrigger value="overview" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-indigo-600 font-bold text-xs uppercase tracking-widest transition-all">
+            <LayoutDashboard className="w-4 h-4 mr-2" /> Overview
+          </TabsTrigger>
+          <TabsTrigger value="progress" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-indigo-600 font-bold text-xs uppercase tracking-widest transition-all">
+            <ClipboardList className="w-4 h-4 mr-2" /> Progress Matrix
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-indigo-600 font-bold text-xs uppercase tracking-widest transition-all">
+            <Settings className="w-4 h-4 mr-2" /> Settings
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-8">
-          {/* Stats Cards */}
+        <TabsContent value="overview" className="space-y-8 outline-none">
           <div className="grid gap-6 md:grid-cols-3">
-            {/* Member Count Card */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 hover:shadow-lg hover:border-purple-200 transition-all">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-purple-100">
+            <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 p-6 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/10">
                   <Users className="h-5 w-5 text-purple-600" />
                 </div>
-                <span className="text-sm text-slate-500 uppercase tracking-wider font-semibold">Members</span>
+                <span className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-black">Members</span>
               </div>
-              <div className="text-3xl font-bold text-slate-900">{memberCount}</div>
+              <div className="text-4xl font-black text-gray-900 tracking-tight">{memberCount}</div>
             </div>
 
-            {/* Join Code Card */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 hover:shadow-lg hover:border-purple-200 transition-all">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-slate-500 uppercase tracking-wider font-semibold">Join Code</span>
-                <button
-                  onClick={copyJoinCode}
-                  className="p-2 rounded-lg hover:bg-slate-100 transition-all text-slate-400 hover:text-slate-600"
-                  title="Copy Join Code"
-                >
-                  {copiedCode ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                </button>
-              </div>
-              <div className="text-2xl font-mono font-bold text-purple-600 tracking-widest">
-                {group.join_code}
-              </div>
-            </div>
-
-            {/* Anonymous Join Card */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 hover:shadow-lg hover:border-purple-200 transition-all">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-purple-100">
-                  <UserPlus className="h-5 w-5 text-purple-600" />
+            <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 p-6 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/10">
+                    <Copy className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <span className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-black">Join Code</span>
                 </div>
-                <span className="text-sm text-slate-500 uppercase tracking-wider font-semibold">Anonymous Join</span>
+              </div>
+              <div className="flex items-center gap-2 p-1 bg-gray-50 rounded-2xl border border-gray-100">
+                <div className="bg-white px-4 py-2.5 rounded-xl border border-gray-100 shadow-sm flex-1">
+                  <code className="text-indigo-600 font-mono text-xl font-black tracking-widest block text-center">
+                    {group.join_code}
+                  </code>
+                </div>
+                <Button
+                  onClick={() => copyJoinCode()}
+                  variant="ghost"
+                  size="icon"
+                  className="h-12 w-12 rounded-xl text-indigo-600 hover:bg-white hover:shadow-sm"
+                >
+                  {copiedCode ? <Check className="h-5 w-5 text-green-600" /> : <Copy className="h-5 w-5" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 p-6 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+               <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/10">
+                  <UserPlus className="h-5 w-5 text-emerald-600" />
+                </div>
+                <span className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-black">Public Join</span>
               </div>
               <div className={cn(
-                "text-2xl font-bold",
-                group.allow_anonymous_join ? "text-green-600" : "text-slate-400"
+                "text-2xl font-black tracking-tight",
+                group.allow_anonymous_join ? "text-emerald-600" : "text-gray-300"
               )}>
-                {group.allow_anonymous_join ? 'Enabled' : 'Disabled'}
+                {group.allow_anonymous_join ? 'ENABLED' : 'DISABLED'}
               </div>
             </div>
           </div>
 
-          {/* Members Section */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-slate-900">Group Members</h2>
-              <Button 
-                size="sm" 
-                className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-400 hover:to-blue-500 border-0"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Member
-              </Button>
-            </div>
-
-            {membersLoading ? (
-              <div className="text-slate-400 py-8 text-center">Loading members...</div>
-            ) : members && members.length > 0 ? (
-              <div className="space-y-3">
-                {members.map((member: Member) => {
-                  const displayName = member.nickname || member.profiles?.full_name || member.profiles?.email || 'Anonymous User'
-                  const isAnonymous = !member.user_id || !member.profiles?.email
-                  const isEditing = editingMemberId === member.user_id
-
-                  return (
-                    <div 
-                      key={member.user_id}
-                      className="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-all group"
-                    >
-                      <div className="flex items-center gap-4 flex-1">
-                        {/* Avatar */}
-                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                          {displayName.charAt(0).toUpperCase()}
-                        </div>
-
-                        {/* Member Info */}
-                        <div className="flex-1">
-                          {isEditing ? (
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="text"
-                                value={editNickname}
-                                onChange={(e) => setEditNickname(e.target.value)}
-                                className="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-                                placeholder="Enter nickname"
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter' && member.user_id) handleSaveNickname(member.user_id)
-                                  if (e.key === 'Escape') cancelEditing()
-                                }}
-                              />
-                              <Button 
-                                size="sm" 
-                                onClick={() => member.user_id && handleSaveNickname(member.user_id)}
-                                disabled={updateNicknameMutation.isPending || !member.user_id}
-                              >
-                                Save
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                onClick={cancelEditing}
-                              >
-                                Cancel
-                              </Button>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-semibold text-slate-900">{displayName}</h3>
-                                {isAnonymous && (
-                                  <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
-                                    Anonymous
-                                  </span>
-                                )}
-                              </div>
-                              {member.profiles?.email && (
-                                <p className="text-sm text-slate-500">{member.profiles.email}</p>
-                              )}
-                              <p className="text-xs text-slate-400">
-                                Joined {member.joined_at ? new Date(member.joined_at).toLocaleDateString() : 'Unknown'}
-                              </p>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      {!isEditing && (
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => member.user_id && startEditingNickname(member.user_id, member.nickname || '')}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 hover:text-slate-700"
-                          >
-                            <Edit3 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => {
-                              if (confirm('Are you sure you want to remove this member?') && member.user_id) {
-                                removeMemberMutation.mutate(member.user_id)
-                              }
-                            }}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <div className="h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-8 w-8 text-slate-300" />
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div>
+                   <h3 className="font-bold text-gray-900 tracking-tight text-lg">Members</h3>
+                   <p className="text-xs font-medium text-gray-500 uppercase tracking-widest">Enrollment roster</p>
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">No members yet</h3>
-                <p className="text-slate-500 mb-6">
-                  Share the join code <span className="font-mono font-bold text-purple-600">{group.join_code}</span> to add members
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Assignments Section */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-slate-900">Assignments</h2>
-              <Link to={`/groups/${id}/assignments/new`}>
                 <Button 
                   size="sm" 
-                  className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-400 hover:to-blue-500 border-0"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest h-9"
                 >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Assignment
+                  <Plus className="mr-2 h-4 w-4" /> Add
                 </Button>
-              </Link>
+              </div>
+
+              {membersLoading ? (
+                <div className="p-8 space-y-4">
+                  <Skeleton className="h-12 w-full rounded-xl" />
+                  <Skeleton className="h-12 w-full rounded-xl" />
+                  <Skeleton className="h-12 w-full rounded-xl" />
+                </div>
+              ) : members && members.length > 0 ? (
+                <div className="divide-y divide-gray-50 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
+                  {members.map((member: Member) => {
+                    const displayName = member.nickname || member.profiles?.full_name || member.profiles?.email || 'Anonymous User'
+                    const isAnonymous = !member.user_id || !member.profiles?.email
+                    const isEditing = editingMemberId === member.user_id
+
+                    return (
+                      <div 
+                        key={member.user_id}
+                        className="flex items-center justify-between p-4 hover:bg-gray-50/50 transition-all group"
+                      >
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-sm shadow-indigo-500/20 shadow-lg">
+                            {displayName.charAt(0).toUpperCase()}
+                          </div>
+
+                          <div className="flex-1">
+                            {isEditing ? (
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  value={editNickname}
+                                  onChange={(e) => setEditNickname(e.target.value)}
+                                  className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 w-full max-w-[200px]"
+                                  placeholder="Enter nickname"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && member.user_id) handleSaveNickname(member.user_id)
+                                    if (e.key === 'Escape') cancelEditing()
+                                  }}
+                                  autoFocus
+                                />
+                                <Button 
+                                  size="sm" 
+                                  className="h-8 rounded-lg font-bold text-[10px] uppercase tracking-widest"
+                                  onClick={() => member.user_id && handleSaveNickname(member.user_id)}
+                                  disabled={updateNicknameMutation.isPending || !member.user_id}
+                                >
+                                  Save
+                                </Button>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="flex items-center gap-2">
+                                  <h3 className="font-bold text-gray-900 text-sm leading-tight">{displayName}</h3>
+                                  {isAnonymous && (
+                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-black uppercase tracking-widest">
+                                      Anon
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                   {member.profiles?.email && (
+                                    <p className="text-[11px] text-gray-400 font-semibold">{member.profiles.email}</p>
+                                  )}
+                                  <span className="text-[11px] text-gray-300">•</span>
+                                  <p className="text-[11px] text-gray-400 font-semibold">
+                                     {member.joined_at ? new Date(member.joined_at).toLocaleDateString() : 'Active'}
+                                  </p>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        {!isEditing && (
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => member.user_id && startEditingNickname(member.user_id, member.nickname || '')}
+                              className="h-8 w-8 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                            >
+                              <Edit3 className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => {
+                                member.user_id && removeMemberMutation.mutate(member.user_id)
+                              }}
+                              className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="p-16 text-center">
+                  <div className="h-12 w-12 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-6 w-6 text-gray-300" />
+                  </div>
+                  <h3 className="font-bold text-gray-900 mb-1">Squad Empty</h3>
+                  <p className="text-xs text-gray-500 font-medium mb-6">
+                    Connect students using code <span className="font-black text-indigo-600 font-mono tracking-widest">{group.join_code}</span>
+                  </p>
+                </div>
+              )}
             </div>
 
-            
-            {assignmentsLoading ? (
-              <div className="text-slate-400 py-8 text-center">Loading assignments...</div>
-            ) : assignments && assignments.length > 0 ? (
-              <div className="space-y-3">
-                {assignments.map((assignment: Assignment) => (
-                  <div key={assignment.id} className="p-4 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-between hover:bg-slate-100 transition-all">
-                    <div className="flex items-center gap-4">
-                      <div className={cn(
-                        "p-2 rounded-lg",
-                        assignment.type === 'skill_mastery' ? "bg-blue-100 text-blue-600" : "bg-purple-100 text-purple-600"
-                      )}>
-                        <ClipboardList className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-slate-900 capitalize">{assignment.type.replace('_', ' ')}</h3>
-                        <p className="text-sm text-slate-500 flex items-center gap-2">
-                          <span className="capitalize px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 text-xs">{assignment.scope}</span>
-                          {assignment.due_date && (
-                             <span>Due: {new Date(assignment.due_date).toLocaleDateString()}</span>
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                    <div className={cn(
-                      "px-3 py-1 rounded-full text-xs font-bold uppercase border",
-                      assignment.status === 'pending' ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-green-50 text-green-700 border-green-200"
-                    )}>
-                      {assignment.status}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <div className="h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ClipboardList className="h-8 w-8 text-slate-300" />
+            <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 shadow-sm overflow-hidden">
+               <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-gray-900 tracking-tight text-lg">Curriculum</h3>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-widest">Active assignments</p>
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">No assignments yet</h3>
-                <p className="text-slate-500">Create assignments to track student progress on specific skills or domains.</p>
+                <Link to={`/groups/${id}/assignments/new`}>
+                  <Button 
+                    size="sm" 
+                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest h-9"
+                  >
+                    <Plus className="mr-2 h-4 w-4" /> Create
+                  </Button>
+                </Link>
               </div>
-            )}
+
+              {assignmentsLoading ? (
+                <div className="p-8 space-y-4">
+                  <Skeleton className="h-12 w-full rounded-xl" />
+                  <Skeleton className="h-12 w-full rounded-xl" />
+                  <Skeleton className="h-12 w-full rounded-xl" />
+                </div>
+              ) : assignments && assignments.length > 0 ? (
+                <div className="divide-y divide-gray-50 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
+                  {assignments.map((assignment: Assignment) => (
+                    <div key={assignment.id} className="p-4 flex items-center justify-between hover:bg-gray-50/50 transition-all group">
+                      <div className="flex items-center gap-4">
+                        <div className={cn(
+                          "p-2.5 rounded-xl border",
+                          assignment.type === 'skill_mastery' 
+                            ? "bg-blue-500/10 border-blue-500/10 text-blue-600" 
+                            : "bg-purple-500/10 border-purple-500/10 text-purple-600"
+                        )}>
+                          <ClipboardList className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-gray-900 text-sm leading-tight capitalize">{assignment.type.replace('_', ' ')}</h3>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">
+                               {assignment.scope}
+                            </span>
+                            {assignment.due_date && (
+                               <div className="flex items-center gap-1">
+                                 <span className="text-[10px] text-gray-300">•</span>
+                                 <Clock className="w-3 h-3 text-gray-300" />
+                                 <span className="text-[11px] text-gray-400 font-semibold">{new Date(assignment.due_date).toLocaleDateString()}</span>
+                               </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className={cn(
+                        "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.1em] border",
+                        assignment.status === 'pending' 
+                          ? "bg-amber-500/10 text-amber-600 border-amber-500/20" 
+                          : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                      )}>
+                        {assignment.status}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-16 text-center">
+                  <div className="h-12 w-12 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <ClipboardList className="h-6 w-6 text-gray-300" />
+                  </div>
+                  <h3 className="font-bold text-gray-900 mb-1">No Active Tasks</h3>
+                  <p className="text-xs text-gray-500 font-medium">Create assignments to start monitoring mastery loops.</p>
+                </div>
+              )}
+            </div>
           </div>
         </TabsContent>
 
-        <TabsContent value="progress">
-           <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-              <div className="p-6 border-b border-slate-200">
-                <h2 className="text-xl font-bold text-slate-900">Assignment Progress</h2>
-                <p className="text-sm text-slate-500">Track student mastery across assigned skills</p>
+        <TabsContent value="progress" className="outline-none">
+           <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                <h2 className="font-bold text-gray-900 text-lg tracking-tight">Assignment Matrix</h2>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Mastery tracking engine</p>
               </div>
               
               {!members || members.length === 0 ? (
-                 <div className="p-8 text-center text-slate-500">No members to track.</div>
+                 <div className="p-16 text-center text-gray-400 font-medium">No students enrolled.</div>
               ) : !assignmentSkillIds || assignmentSkillIds.length === 0 ? (
-                 <div className="p-8 text-center text-slate-500">No skill assignments created yet.</div>
+                 <div className="p-16 text-center text-gray-400 font-medium">No curricula tracked in this matrix.</div>
               ) : (
-                <div className="overflow-x-auto">
-                  <Table>
+                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-200">
+                  <Table className="border-collapse">
                     <TableHeader>
-                      <TableRow className="bg-slate-50 hover:bg-slate-50">
-                        <TableHead className="w-[200px]">Student</TableHead>
+                      <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b-2 border-gray-100">
+                        <TableHead className="w-[200px] font-bold text-[10px] uppercase tracking-widest text-gray-400 pl-6 h-12">Student</TableHead>
                         {assignmentSkillIds.map((skillId: string) => (
-                          <TableHead key={skillId} className="text-center min-w-[120px]">
+                          <TableHead key={skillId} className="text-center min-w-[140px] font-bold text-[10px] uppercase tracking-widest text-gray-400 h-12">
                             {getSkillTitle(skillId)}
                           </TableHead>
                         ))}
@@ -557,20 +589,35 @@ export function GroupDetailPage() {
                     </TableHeader>
                     <TableBody>
                       {members.map((member: Member) => (
-                        <TableRow key={member.user_id || `${member.group_id}-anon`}>
-                          <TableCell className="font-medium">
-                             {member.nickname || member.profiles?.full_name || member.profiles?.email || 'Anonymous'}
+                        <TableRow key={member.user_id || `${member.group_id}-anon`} className="hover:bg-gray-50/30 transition-colors">
+                          <TableCell className="font-bold text-gray-700 pl-6 py-4 text-sm whitespace-nowrap">
+                             <div className="flex items-center gap-3">
+                               <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-black text-gray-400">
+                                 {(member.nickname || member.profiles?.full_name || 'A').charAt(0)}
+                               </div>
+                               {member.nickname || member.profiles?.full_name || member.profiles?.email || 'Anonymous'}
+                             </div>
                           </TableCell>
                           {assignmentSkillIds.map((skillId: string) => {
                              const status = member.user_id ? getStatus(member.user_id, skillId) : 'not_started'
                              return (
-                               <TableCell key={skillId} className="text-center">
+                               <TableCell key={skillId} className="text-center py-4">
                                  {status === 'mastered' ? (
-                                   <div className="flex justify-center"><CheckCircle className="h-5 w-5 text-green-500" /></div>
+                                   <div className="flex justify-center">
+                                      <div className="p-1 bg-emerald-500/10 rounded-lg">
+                                        <CheckCircle className="h-4 w-4 text-emerald-600" />
+                                      </div>
+                                   </div>
                                  ) : status === 'in_progress' ? (
-                                   <div className="flex justify-center"><Clock className="h-5 w-5 text-amber-500" /></div>
+                                   <div className="flex justify-center">
+                                     <div className="p-1 bg-amber-500/10 rounded-lg">
+                                       <Clock className="h-4 w-4 text-amber-600 animate-pulse" />
+                                     </div>
+                                   </div>
                                  ) : (
-                                   <div className="flex justify-center"><Circle className="h-5 w-5 text-slate-200" /></div>
+                                   <div className="flex justify-center">
+                                     <Circle className="h-4 w-4 text-gray-100" />
+                                   </div>
                                  )}
                                </TableCell>
                              )
@@ -584,11 +631,17 @@ export function GroupDetailPage() {
            </div>
         </TabsContent>
 
-        <TabsContent value="settings">
-          <div className="text-center text-slate-500 py-12 bg-white rounded-2xl border border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-900">Group Settings</h3>
-            <p className="mb-4">Advanced configuration coming soon.</p>
-            <Button variant="outline" disabled>Archive Group</Button>
+        <TabsContent value="settings" className="outline-none">
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 p-16 shadow-sm text-center">
+            <div className="w-16 h-16 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-center mx-auto mb-6">
+               <Settings className="w-8 h-8 text-gray-200" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 tracking-tight mb-2">Advanced Engine Tuning</h3>
+            <p className="text-gray-500 font-medium mb-8 max-w-sm mx-auto leading-relaxed">Modify group parameters, synchronization protocols, and archival state. This interface is currently under development.</p>
+            <div className="flex items-center justify-center gap-4">
+              <Button variant="outline" className="rounded-xl px-8 border-gray-200 text-gray-400 grayscale" disabled>Manage Meta</Button>
+              <Button variant="outline" className="rounded-xl px-8 border-red-100 text-red-300 hover:text-red-600 hover:bg-red-50 hover:border-red-200" disabled>Archive Group</Button>
+            </div>
           </div>
         </TabsContent>
       </Tabs>

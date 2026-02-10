@@ -4,7 +4,28 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { useCreateDomain, useUpdateDomain, useDomains } from '../hooks/use-domains' 
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from '@/components/ui/form'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Card, CardContent } from '@/components/ui/card'
+import { Loader2, Book, Globe, ListOrdered, FileText, ShieldCheck } from 'lucide-react'
+import { useCreateDomain, useUpdateDomain, useDomains } from '../hooks/use-domains'
+import { AdminHeader } from '@/components/ui/admin-header'
 
 const STATUS_OPTIONS: { value: 'draft' | 'live'; label: string; description?: string }[] = [
   { value: 'draft', label: 'Draft', description: 'Not visible to students' },
@@ -18,7 +39,7 @@ const domainSchema = z.object({
     .max(100)
     .regex(/^[a-z0-9_]+$/, 'Slug must contain only lowercase letters, numbers, and underscores'),
   description: z.string().optional(),
-  sort_order: z.number().int().default(0),
+  sort_order: z.coerce.number().int().default(0),
   status: z.enum(['draft', 'live']).default('draft'),
 })
 
@@ -34,12 +55,7 @@ export function DomainForm() {
   const isEditing = Boolean(id)
   const existingDomain = domains?.find(d => d.domain_id === id)
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting }
-  } = useForm<DomainFormData>({
+  const form = useForm<DomainFormData>({
     resolver: zodResolver(domainSchema),
     defaultValues: {
       title: '',
@@ -54,12 +70,7 @@ export function DomainForm() {
   useEffect(() => {
     if (!isEditing && domains) {
       const maxOrder = domains.reduce((max, d) => Math.max(max, d.sort_order ?? 0), 0)
-      
-      // Only set if the user hasn't manually interacted with it (simplest check is if it's 0, 
-      // though this might overwrite if they typed 0 intentionally. 
-      // Better to just set it once. But React Hook Form defaultValues is static.)
-      // We will perform a reset with the calculated value.
-       reset({
+      form.reset({
         title: '',
         slug: '',
         description: '',
@@ -67,11 +78,11 @@ export function DomainForm() {
         status: 'draft',
       })
     }
-  }, [domains, isEditing, reset])
+  }, [domains, isEditing, form])
 
   useEffect(() => {
     if (existingDomain) {
-      reset({
+      form.reset({
         title: existingDomain.title,
         slug: existingDomain.slug,
         description: existingDomain.description || '',
@@ -79,7 +90,7 @@ export function DomainForm() {
         status: (existingDomain.status as 'draft' | 'live') || 'draft',
       })
     }
-  }, [existingDomain, reset])
+  }, [existingDomain, form])
 
   const onSubmit = async (data: DomainFormData) => {
     try {
@@ -94,96 +105,176 @@ export function DomainForm() {
     }
   }
 
+  const isSubmitting = createDomain.isPending || updateDomain.isPending
+
   return (
-    <div className="w-full max-w-2xl space-y-4 md:space-y-6 px-1">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-          {isEditing ? 'Edit Domain' : 'New Domain'}
-        </h2>
-      </div>
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <AdminHeader 
+        title={isEditing ? 'Modify Domain' : 'Create Domain'}
+        description={isEditing ? 'Update the structural parameters of this educational area.' : 'Initialize a new high-level educational category.'}
+        icon={Book}
+        breadcrumbs={[
+          { label: 'Curriculum', href: '/domains' },
+          { label: 'Domains', href: '/domains' },
+          { label: isEditing ? 'Edit' : 'New', href: '#' }
+        ]}
+      />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-5 rounded-lg border p-4 md:p-6">
-        <div className="space-y-2">
-          <label htmlFor="title" className="text-sm font-medium">Title</label>
-          <input
-            id="title"
-            {...register('title')}
-            className="flex min-h-[48px] w-full rounded-md border border-input bg-background px-3 py-3 text-base ring-offset-background focus:ring-2 focus:ring-purple-200 focus:border-purple-500"
-            placeholder="e.g. Mathematics"
-          />
-          {errors.title && (
-            <p className="text-sm text-red-500">{errors.title.message}</p>
-          )}
-        </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
+            <CardContent className="p-8 md:p-10 space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FileText className="w-4 h-4 text-purple-500" />
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Display Title</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g. Advanced Mathematics" 
+                          {...field} 
+                          className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-purple-500/10 transition-all border"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs font-bold text-red-500 italic" />
+                    </FormItem>
+                  )}
+                />
 
-        <div className="space-y-2">
-          <label htmlFor="slug" className="text-sm font-medium">Slug</label>
-          <input
-            id="slug"
-            {...register('slug')}
-            className="flex min-h-[48px] w-full rounded-md border border-input bg-background px-3 py-3 text-base ring-offset-background focus:ring-2 focus:ring-purple-200 focus:border-purple-500 disabled:opacity-50"
-            placeholder="e.g. basic_math"
-            disabled={isEditing} 
-          />
-          {errors.slug && (
-            <p className="text-sm text-red-500">{errors.slug.message}</p>
-          )}
-        </div>
+                <FormField
+                  control={form.control}
+                  name="slug"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Globe className="w-4 h-4 text-blue-500" />
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Unique Slug</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g. math_advanced" 
+                          {...field} 
+                          disabled={isEditing}
+                          className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all border disabled:opacity-50"
+                        />
+                      </FormControl>
+                      <FormDescription className="text-[10px] font-medium text-gray-400">Lowercase, numbers, and underscores only.</FormDescription>
+                      <FormMessage className="text-xs font-bold text-red-500 italic" />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-        <div className="space-y-2">
-            <label htmlFor="sort_order" className="text-sm font-medium">Sort Order</label>
-            <input
-                id="sort_order"
-                type="number"
-                {...register('sort_order', { valueAsNumber: true })}
-                className="flex min-h-[48px] w-full rounded-md border border-input bg-background px-3 py-3 text-base ring-offset-background focus:ring-2 focus:ring-purple-200 focus:border-purple-500"
-            />
-            {errors.sort_order && (
-                <p className="text-sm text-red-500">{errors.sort_order.message}</p>
-            )}
-        </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <FormField
+                  control={form.control}
+                  name="sort_order"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <ListOrdered className="w-4 h-4 text-amber-500" />
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Sort Priority</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          {...field} 
+                          className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-amber-500/10 transition-all border"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs font-bold text-red-500 italic" />
+                    </FormItem>
+                  )}
+                />
 
-        <div className="space-y-2">
-          <label htmlFor="description" className="text-sm font-medium">Description</label>
-          <textarea
-            id="description"
-            {...register('description')}
-            className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-3 text-base ring-offset-background focus:ring-2 focus:ring-purple-200 focus:border-purple-500"
-          />
-        </div>
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Protocol Status</FormLabel>
+                      </div>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all border">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
+                          {STATUS_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value} className="py-3 rounded-xl">
+                              <div className="flex flex-col">
+                                <span className="font-bold text-gray-900">{option.label}</span>
+                                {option.description && (
+                                  <span className="text-[10px] text-gray-400 uppercase tracking-widest">{option.description}</span>
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage className="text-xs font-bold text-red-500 italic" />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-        <div className="space-y-2">
-          <label htmlFor="status" className="text-sm font-medium">Status</label>
-          <select
-            id="status"
-            {...register('status')}
-            className="flex min-h-[48px] w-full rounded-md border border-input bg-background px-3 py-3 text-base ring-offset-background focus:ring-2 focus:ring-purple-200 focus:border-purple-500"
-          >
-            {STATUS_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}{option.description ? ` - ${option.description}` : ''}
-              </option>
-            ))}
-          </select>
-          {errors.status && (
-            <p className="text-sm text-red-500">{errors.status.message}</p>
-          )}
-        </div>
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <FileText className="w-4 h-4 text-indigo-500" />
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Comprehensive Description</FormLabel>
+                    </div>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Define the scope and objectives for this domain..." 
+                        className="min-h-[150px] rounded-[2rem] border-gray-100 bg-white/50 text-base font-medium leading-relaxed focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all border p-6" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage className="text-xs font-bold text-red-500 italic" />
+                  </FormItem>
+                )}
+              />
 
-        <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-end sm:gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate('/domains')}
-            className="w-full sm:w-auto min-h-[48px] px-6"
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto min-h-[48px] px-6">
-            {isEditing ? 'Update Domain' : 'Create Domain'}
-          </Button>
-        </div>
-      </form>
+              <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-4 pt-6">
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  onClick={() => navigate('/domains')}
+                  className="w-full sm:w-auto h-14 px-10 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-gray-400 hover:text-gray-900 hover:bg-gray-100/50 transition-all"
+                >
+                  Terminate
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto h-14 px-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all hover:-translate-y-0.5"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                      Executing...
+                    </>
+                  ) : (
+                    isEditing ? 'Update Signature' : 'Initiate Provision'
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
     </div>
   )
 }
