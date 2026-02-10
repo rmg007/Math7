@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Wand2, Download, AlertCircle, Save, CheckCircle2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Wand2, Download, AlertCircle, Save, CheckCircle2, FileUp } from 'lucide-react';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import { DocumentUploader } from '../components/DocumentUploader';
 import { QuestionReviewGrid, GeneratedQuestion } from '../components/QuestionReviewGrid';
@@ -202,6 +203,14 @@ export const GenerationPage: React.FC = () => {
         title="AI Question Generator"
         description="Extract curriculum content from documents and use advanced AI to generate high-quality assessment questions."
         icon={Wand2}
+        actions={
+          <Link to="/ai-import">
+            <Button variant="outline" className="gap-2 bg-white hover:bg-gray-50">
+              <FileUp className="w-4 h-4" />
+              Bulk Import CSV
+            </Button>
+          </Link>
+        }
       />
 
       {/* Step 1: Upload Document */}

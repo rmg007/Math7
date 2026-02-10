@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { 
   Book, Layers, FileText, Upload, LogOut, Settings, Key, History, 
   Users, UserCog, Shield, Bug, AlertTriangle, Globe, Boxes, Layout,
-  ChevronDown, ChevronRight, ChevronLeft
+  ChevronDown, ChevronRight, ChevronLeft, FileUp, MessageSquare
 } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -39,6 +39,7 @@ const navigationGroups: NavGroup[] = [
       { name: 'Subjects', href: '/platform/subjects', icon: Boxes, superAdminOnly: true },
       { name: 'Skills', href: '/skills', icon: Layers },
       { name: 'Questions', href: '/questions', icon: FileText },
+      { name: 'Bulk Import', href: '/ai-import', icon: FileUp },
     ]
   },
   {
@@ -383,6 +384,21 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
             Sign Out
             </button>
         )}
+        
+        {/* Feedback Link */}
+        <div className={cn("pt-2", isSidebarCollapsed && "flex justify-center")}>
+          <a 
+            href="mailto:support@questerix.com?subject=Admin%20Panel%20Feedback"
+            title="Send Feedback"
+            className={cn(
+              "flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium text-purple-300 hover:text-white hover:bg-white/10 transition-all duration-200",
+              isSidebarCollapsed && "justify-center px-0 w-10 mx-auto"
+            )}
+          >
+            <MessageSquare className="h-4 w-4" />
+            {!isSidebarCollapsed && <span>Feedback & Support</span>}
+          </a>
+        </div>
       </div>
     </div>
   )

@@ -38,6 +38,14 @@
 | `docs/specs/STUDENT_APP_SPEC.md` | Detailed UI/UX and logic spec for the Mobile App. |
 | `docs/specs/ADMIN_PANEL_SPEC.md` | Detailed UI/UX and logic spec for the Admin Dashboard. |
 
+## 🧭 Where to Document What? (Decision Tree)
+1. **Is it a Law/Rule?** -> `docs/strategy/AGENTS.md`
+2. **Is it a Process/Workflow?** -> `docs/operational/` (e.g., `DEPLOYMENT.md`)
+3. **Is it Architecture/Code Pattern?** -> `docs/technical/`
+4. **Is it a Product Feature Spec?** -> `docs/specs/`
+5. **Is it a Status Update/Report?** -> `docs/reports/` (e.g., `LEARNING_LOG.md`)
+6. **Is it a Post-Mortem?** -> `docs/reports/incidents/`
+
 ## 🗄️ Archive & Legacy
 | File | Purpose |
 |------|---------|

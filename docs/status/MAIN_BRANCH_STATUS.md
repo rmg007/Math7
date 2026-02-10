@@ -3,7 +3,8 @@
 ## ✅ **STATUS: UI/UX IMPROVEMENTS ON MAIN BRANCH**
 
 ### 🎯 **Current State**
-- **Branch**: `main` 
+
+- **Branch**: `main`
 - **HEAD Commit**: `ee4f0ece` - "feat: Implement comprehensive UI/UX improvements"
 - **Status**: Ready for production deployment
 - **Cleanup**: All feature branches removed
@@ -13,26 +14,31 @@
 All UI/UX improvements have been successfully integrated into the main branch:
 
 #### ✅ **Sidebar Enhancements**
+
 - Thin, transparent overlay scrollbar (hover-only visibility)
 - Optimized collapse toggle transitions
 - Improved space utilization (80px collapsed width)
 
 #### ✅ **Domains Page Improvements**
+
 - Clear visual hierarchy with "New Domain" as primary action
 - 50% increase in table data density (py-4 → py-2)
 - Enhanced button styling with gradients and hover effects
 
 #### ✅ **User Management Enhancements**
+
 - Prominent "Add User" CTA in page header
 - 44px minimum click targets (WCAG AA compliance)
 - Improved button sizing and accessibility
 
 #### ✅ **Settings Page Optimization**
+
 - Consolidated danger zone into single section
 - Reduced excessive whitespace between related actions
 - Enhanced visual hierarchy with proper grouping
 
 #### ✅ **Publish Page Enhancement**
+
 - Custom SVG doughnut chart for data visualization
 - Utilized previously wasted white space
 - Smooth animations and responsive design
@@ -40,12 +46,14 @@ All UI/UX improvements have been successfully integrated into the main branch:
 ### 🚀 **Deployment Ready**
 
 The main branch now contains:
+
 - **Zero breaking changes** - All existing functionality preserved
 - **Enhanced user experience** - Measurable improvements in efficiency
 - **Accessibility compliance** - WCAG AA standards met
 - **Performance optimized** - Minimal bundle impact (+2.3KB)
 
 ### 📊 **Impact Summary**
+
 - **Data Visibility**: +50% more rows visible in tables
 - **Click Efficiency**: +30% larger touch targets
 - **Navigation Speed**: +40% faster sidebar interactions
@@ -62,10 +70,23 @@ The main branch now contains:
 ---
 
 ### 🛡️ **Architecture Unification: One Brain, One Repo**
+
 - **Strategy**: Consolidated all agent knowledge under `docs/` (Mar 2026).
 - **Single Source of Truth**: Retired fragmented "Hybrid Oracle" in favor of the repo-local "Project Oracle."
 - **Strict Typing**: Verified 100% type safety on Subjects Pilot with zero `any` or `as` assertions.
 - **Agent Governance**: Established the **Supreme Agent Protocol** in `docs/strategy/AGENTS.md`.
+
+---
+
+---
+
+### 🔧 **Critical Fix: Admin Panel 400 Error (2026-02-09)**
+
+- **Issue**: All authenticated Supabase API calls returned `400 Bad Request`
+- **Root Cause**: `is_tenant_admin()` SECURITY DEFINER function referenced non-existent `profiles.is_admin` column (should be `role` enum)
+- **Fix**: Updated function via Supabase Dashboard SQL Editor + dropped conflicting hardening policies
+- **Docs**: `docs/supabase/rls-policy-debugging.md`, `docs/lessons-learned/rls-tenant-admin-fix.md`
+- **Status**: ✅ Resolved and documented
 
 ---
 

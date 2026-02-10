@@ -25,6 +25,7 @@ const GovernancePage = lazy(() => import('./features/ai-assistant/pages/Governan
 const SubjectsPage = lazy(() => import('./features/platform/pages/SubjectsPage').then(m => ({ default: m.SubjectsPage })))
 const AppsPage = lazy(() => import('./features/platform/pages/AppsPage').then(m => ({ default: m.AppsPage })))
 const LandingsPage = lazy(() => import('./features/platform/pages/LandingsPage').then(m => ({ default: m.LandingsPage })))
+const BulkImportPage = lazy(() => import('./features/ai-content/pages/BulkImportPage').then(m => ({ default: m.BulkImportPage })))
 const AccountSettingsPage = lazy(() => import('./features/auth/pages/AccountSettingsPage').then(m => ({ default: m.AccountSettingsPage })))
 const InvitationCodesPage = lazy(() => import('./features/auth/pages/InvitationCodesPage').then(m => ({ default: m.InvitationCodesPage })))
 const UserManagementPage = lazy(() => import('./features/auth/pages/UserManagementPage').then(m => ({ default: m.UserManagementPage })))
@@ -104,6 +105,7 @@ function App() {
                   } />
                   <Route path="/ai-questions" element={<GenerationPage />} />
                   <Route path="/ai-sessions" element={<SessionsPage />} />
+                  <Route path="/ai-import" element={<BulkImportPage />} />
                   <Route path="/users" element={
                     <SuperAdminGuard>
                       <UserManagementPage />

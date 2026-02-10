@@ -1,17 +1,7 @@
 [
   {
-    "description": "Stage all changes",
-    "command": "git add .",
-    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
-  },
-  {
-    "description": "Commit changes",
-    "command": "git commit -m \"docs: enforce Superpower Mode in DEVELOPMENT.md and CI_CONTRACT.md, add Phase 17.5\"",
-    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
-  },
-  {
-    "description": "Push changes to remote",
-    "command": "git push",
-    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
+    "description": "Verify Admin Panel Build",
+    "command": "Set-Location admin-panel; npm run build",
+    "cwd": "c:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix"
   }
 ]
