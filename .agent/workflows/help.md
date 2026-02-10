@@ -77,12 +77,11 @@ Enables all commands to auto-run (if IDE configured).
 Document what's stopping progress and partial achievements.
 
 ### `/forensics` - All-Seeing Auditor Protocol
-**The "Nuclear Option" for Quality Control.** Subsumes the old `/audit` command. Use this when the system feels "buggy" or unstable. Initially performs a taxonomy-based security sweep, then dives into structural rot (empty files), zombie tests (hangs), and historical security confessions in migrations.
+**The "Nuclear Option" for Quality Control.** Runs a highly optimized, single-pass autopsy of the codebase. Subsumes `/audit`. Use this to detect structural rot (hollow files), zombie tests (hangs), and historical security vulnerabilities. **Optimized for speed — never scans node_modules.**
 
 ---
 
-## 💡 Tips
-
+- **EFFICIENCY FIRST**: Never scan `node_modules`, `dist`, or `.git`. Always use surgicial search patterns (`-t`, `-g`).
 - All workflows support superpower fallback
 - When commands needed, I output JSON for `/sp` style paste
 - Start watcher once, keep it running in background

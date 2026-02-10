@@ -293,6 +293,7 @@ Lessons learned from bugs, incidents, and development discoveries.
   - **Greedy Search Anti-Pattern**: Attempting to scan a monorepo root without explicit exclusions is a critical inefficiency. It pollutes the AI's context with noise from dependencies and build artifacts.
   - **Rust Matcher Performance**: Using `ripgrep` (or its internal equivalent in `grep_search`) is only effective when guided; default recursive searches are "greedy" and dangerous for large directories.
   - **Placeholders vs. Features**: A file can have 500 lines of types and imports but 0 lines of executable logic. Forensics must strip structural noise to verify functional presence.
-- **Reference**: `.agent/workflows/forensics.md`, `LEARNING_LOG.md`
+- **Surgical Delegation**: Hectic tasks like full forensics should be delegated to centralized scripts or parallel cloud agents. The local agent should focus on the "Unified Strike" using pre-optimized engines rather than manual experimentation.
+- **Reference**: `.agent/workflows/forensics.md`, `scripts/maintenance/forensic_audit.ps1`
 
 ---
