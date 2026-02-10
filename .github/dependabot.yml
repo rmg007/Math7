@@ -1,0 +1,72 @@
+# Dependabot Configuration
+# Automatically creates PRs to update vulnerable dependencies
+# https://docs.github.com/en/code-security/dependabot
+
+version: 2
+
+updates:
+  # Admin Panel (React/Vite)
+  - package-ecosystem: "npm"
+    directory: "/admin-panel"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "admin-panel"
+    groups:
+      # Group minor/patch updates together to reduce PR noise
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Landing Pages (React/Vite)
+  - package-ecosystem: "npm"
+    directory: "/landing-pages"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "landing-pages"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Root workspace (dependency-cruiser, supabase CLI, etc.)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "tooling"
+
+  # Content Engine (Python)
+  - package-ecosystem: "pip"
+    directory: "/content-engine"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "content-engine"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ci"

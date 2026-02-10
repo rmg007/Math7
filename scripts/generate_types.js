@@ -2,9 +2,16 @@ const { Client } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
-// Credentials
-const dbPassword = 'QpJIzi2r6vaoghG5';
-const projectRef = '[YOUR-PROJECT-ID]';
+// Credentials — read from environment (never hardcode!)
+const dbPassword = process.env.SUPABASE_DB_PASSWORD;
+const projectRef = process.env.SUPABASE_PROJECT_REF || '[YOUR-PROJECT-ID]';
+
+if (!dbPassword) {
+  console.error('❌ SUPABASE_DB_PASSWORD environment variable is required.');
+  console.error('   Set it before running: $env:SUPABASE_DB_PASSWORD = "your-password"');
+  process.exit(1);
+}
+
 const dbUrl = `postgresql://postgres:${dbPassword}@db.${projectRef}.supabase.co:5432/postgres`;
 
 const outputFile = path.join(__dirname, '..', 'admin-panel', 'src', 'lib', 'database.types.ts');

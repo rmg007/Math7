@@ -1,0 +1,143 @@
+rules:
+  # ============================================================
+  # ACCESSIBILITY RULES
+  # Prevents the exact bugs we keep creating and then fixing.
+  # ============================================================
+
+  - id: icon-button-needs-aria-label
+    patterns:
+      - pattern: |
+          <button $...ATTRS>
+            <$ICON $...ICON_ATTRS />
+          </button>
+      - pattern-not: |
+          <button $...ATTRS aria-label="..." $...MORE_ATTRS>
+            <$ICON $...ICON_ATTRS />
+          </button>
+      - pattern-not: |
+          <button $...ATTRS aria-label={...} $...MORE_ATTRS>
+            <$ICON $...ICON_ATTRS />
+          </button>
+      - pattern-not: |
+          <button $...ATTRS title="..." $...MORE_ATTRS>
+            <$ICON $...ICON_ATTRS />
+          </button>
+    message: >
+      Icon-only button is missing an accessible label.
+      Add `aria-label="descriptive text"` to make this button accessible
+      to screen readers. This is a WCAG 2.1 AA requirement.
+    languages: [typescript, javascript]
+    severity: WARNING
+    metadata:
+      category: accessibility
+      confidence: HIGH
+      references:
+        - https://dequeuniversity.com/rules/axe/4.11/button-name
+
+  - id: low-contrast-text-gray-400
+    pattern-regex: '(?<!hover:)(?<!placeholder:)(?<!border-)(?<!bg-)(?<!divide-)(?<!ring-)text-gray-[34]00(?!\s*hover)(?!\s*\/)'
+    paths:
+      include:
+        - "admin-panel/src/**/*.tsx"
+        - "admin-panel/src/**/*.jsx"
+        - "landing-pages/src/**/*.tsx"
+    message: >
+      `text-gray-300` or `text-gray-400` on white backgrounds may fail WCAG AA
+      contrast requirements (ratio < 4.5:1). Use `text-gray-500` (5.92:1) or
+      `text-gray-600` (7.51:1) instead. Ignore if this is a hover/placeholder state.
+    languages: [generic]
+    severity: INFO
+    metadata:
+      category: accessibility
+      confidence: LOW
+
+
+  # ============================================================
+  # SECURITY RULES
+  # ============================================================
+
+  - id: no-hardcoded-supabase-keys
+    pattern-regex: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]{20,}'
+    paths:
+      include:
+        - "admin-panel/src/**"
+        - "landing-pages/src/**"
+        - "scripts/**"
+      exclude:
+        - "**/*.test.*"
+        - "**/tests/**"
+        - "**/.env*"
+    message: >
+      Possible hardcoded Supabase JWT key detected. Use environment variables
+      (e.g., `import.meta.env.VITE_SUPABASE_ANON_KEY`) instead of hardcoding
+      JWT tokens in source code.
+    languages: [generic]
+    severity: ERROR
+    metadata:
+      category: security
+      confidence: HIGH
+
+  - id: no-hardcoded-api-keys
+    pattern-regex: '(?i)(api[_-]?key|apikey|secret[_-]?key)\s*[:=]\s*["\x27][A-Za-z0-9_\-]{16,}["\x27]'
+    paths:
+      include:
+        - "admin-panel/src/**"
+        - "landing-pages/src/**"
+        - "scripts/**"
+        - "content-engine/**"
+      exclude:
+        - "**/*.test.*"
+        - "**/tests/**"
+        - "**/.env*"
+        - "**/example*"
+    message: >
+      Hardcoded API key or secret detected. Use environment variables or
+      a secrets manager instead. Never commit credentials to source code.
+    languages: [generic]
+    severity: ERROR
+    metadata:
+      category: security
+      confidence: MEDIUM
+
+  - id: dangerous-innerhtml-usage
+    pattern-regex: 'dangerouslySetInnerHTML'
+    paths:
+      include:
+        - "admin-panel/src/**"
+        - "landing-pages/src/**"
+      exclude:
+        - "**/*.test.*"
+        - "**/tests/**"
+    message: >
+      `dangerouslySetInnerHTML` can lead to XSS vulnerabilities.
+      Ensure the content is sanitized (e.g., with DOMPurify) before rendering.
+      If this is intentional and the content is trusted, document why it is safe.
+    languages: [generic]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: MEDIUM
+      references:
+        - https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html
+
+
+  - id: no-service-role-in-client
+    pattern-regex: '(?i)service[_-]?role'
+    paths:
+      include:
+        - "admin-panel/src/**"
+        - "landing-pages/src/**"
+      exclude:
+        - "**/env.ts"
+        - "**/lib/supabase.ts"
+        - "**/*.test.*"
+        - "**/*.d.ts"
+    message: >
+      Reference to `service_role` found in client-side code. The service role
+      key bypasses RLS and should NEVER be used in browser code. Use the
+      `anon` key and enforce access control via RLS policies.
+    languages: [generic]
+    severity: ERROR
+    metadata:
+      category: security
+      confidence: HIGH

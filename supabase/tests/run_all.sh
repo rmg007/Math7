@@ -27,7 +27,7 @@ echo ""
 # Test counter
 TESTS_PASSED=0
 TESTS_FAILED=0
-TESTS_TOTAL=3
+TESTS_TOTAL=4
 
 # Function to run a test
 run_test() {
@@ -57,6 +57,7 @@ run_test() {
 }
 
 # Run all tests
+run_test "tests/rls/rls_core_tests.sql" "pgTAP: Core RLS Policy Tests"
 run_test "tests/rls/mentor_isolation_test.sql" "VUL-002: Mentor Domain Isolation"
 run_test "tests/functions/sync_validation_test.sql" "VUL-003: Server-Side Validation"
 run_test "tests/security/rate_limiting_test.sql" "VUL-007: Rate Limiting"
