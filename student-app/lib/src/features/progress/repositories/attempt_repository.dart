@@ -141,7 +141,7 @@ class AttemptRepository {
       filter: _database.attempts.isCorrect.equals(true),
     );
 
-    query..addColumns([totalExpr, correctExpr]);
+    query.addColumns([totalExpr, correctExpr]);
 
     final result = await query.getSingleOrNull();
 
