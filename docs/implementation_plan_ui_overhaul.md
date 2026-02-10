@@ -41,10 +41,10 @@ Address the 17 identified UI/UX inconsistencies and critical functional gaps acr
     *   [x] Create a utility for raw identifiers: `Multiple_choice` -> `Multiple Choice`, `super_admin` -> `Super Admin`.
     *   [x] Apply this to Question types, User roles, and App categories.
 2.  **Rich Text Rendering**
-    *   [ ] Integrate `ReactMarkdown` in the **AI Governance** feature to properly render Security Notes.
+    *   [x] Integrate `ReactMarkdown` in the **AI Governance** feature to properly render Security Notes.
 3.  **Unified Status Badge System**
-    *   [ ] Create a `StatusBadge` primitive.
-    *   [ ] Centralize color logic: `Draft` (gray), `Active` (green), `Published` (blue), `Exhausted` (red).
+    *   [x] Create a `StatusBadge` primitive.
+    *   [x] Centralize color logic: `Draft` (gray), `Active` (green), `Published` (blue), `Exhausted` (red).
 
 ## Phase 4: UX Polish & Consistency
 **Goal**: Smooth out the empty states and layout inconsistencies.
@@ -52,16 +52,26 @@ Address the 17 identified UI/UX inconsistencies and critical functional gaps acr
 1.  **Premium Empty States**
     *   [x] Replace "No items found" text with an `EmptyState` component featuring an icon, description, and primary CTA.
 2.  **Filter Bar Standardization**
-    *   [ ] Align filter layouts (Search | Status | Category) to the same grid across all Curriculum pages.
+    *   [x] Align filter layouts (Search | Status | Category) to the same grid across all Curriculum pages (Domains, Skills, Questions).
+    *   [x] Extended to Platform pages (Apps, User Management) for premium UI consistency.
 3.  **Z-Index & Overlays**
     *   [ ] Fix z-index of floating widgets to ensure they don't obscure table actions or summary cards.
 4.  **Pagination Audit**
-    *   [ ] Add standard pagination to Invitation Codes, Apps, and User Management for consistent UI feel.
+    *   [x] Add standard pagination to Invitation Codes, Apps, and User Management for consistent UI feel.
+
+## Phase 5: Security & Governance Compliance
+**Goal**: Verify architectural integrity and protect multi-tenant boundaries.
+
+1.  **Harden RLS Tenant Isolation**
+    *   [x] Remediation for VUL-018: Restricted `admin` role access to specific `app_id` boundaries.
+    *   [x] Verified `Super Admin` global access vs `Admin` scoped access.
+2.  **Audit AI Security Logs**
+    *   [x] Integration of Security Notes with Markdown rendering for transparency.
 
 ---
 
 ## Success Metrics
 - [x] 0% Clipping on 13.3" laptop screens.
 - [x] No raw underscores visible in the UI.
-- [ ] Sidebar requires no scrolling on standard viewports.
-- [ ] 100% rendering of Markdown and HTML content.
+- [x] Sidebar requires no scrolling on standard viewports.
+- [x] 100% rendering of Markdown and HTML content.

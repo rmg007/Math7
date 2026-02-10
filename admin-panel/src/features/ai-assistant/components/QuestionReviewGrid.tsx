@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Trash2, Edit2, Save, X, AlertCircle } from 'lucide-react';
+import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 
 export interface GeneratedQuestion {
   id: string;
@@ -52,18 +53,6 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
     onQuestionsChange(updatedQuestions);
   };
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'easy':
-        return 'bg-green-100 text-green-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'hard':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   const getQuestionTypeLabel = (type: string) => {
     switch (type) {
@@ -96,26 +85,34 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
         <h3 className="text-lg font-semibold text-gray-900">
           Generated Questions ({questions.length})
         </h3>
-        <div className="text-sm text-gray-600">
-          <span className="font-medium text-green-700">
-            {questions.filter((q) => q.difficulty === 'easy').length}
-          </span>{' '}
-          Easy ·{' '}
-          <span className="font-medium text-yellow-700">
-            {questions.filter((q) => q.difficulty === 'medium').length}
-          </span>{' '}
-          Medium ·{' '}
-          <span className="font-medium text-red-700">
-            {questions.filter((q) => q.difficulty === 'hard').length}
-          </span>{' '}
-          Hard
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-green-500" />
+            <span className="text-sm font-medium text-gray-600">
+              {questions.filter((q) => q.difficulty === 'easy').length} Easy
+            </span>
+          </div>
+          <span className="text-gray-300">·</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-yellow-500" />
+            <span className="text-sm font-medium text-gray-600">
+              {questions.filter((q) => q.difficulty === 'medium').length} Medium
+            </span>
+          </div>
+          <span className="text-gray-300">·</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-red-500" />
+            <span className="text-sm font-medium text-gray-600">
+              {questions.filter((q) => q.difficulty === 'hard').length} Hard
+            </span>
+          </div>
         </div>
       </div>
 
       <div className="space-y-3">
         {questions.map((question, index) => {
           const isEditing = editingId === question.id;
-          const displayQuestion = isEditing ? editForm! : question;
+          const displayQuestion = (isEditing && editForm) ? editForm : question;
 
           return (
             <div
@@ -136,9 +133,9 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
                   <div className="mb-3">
                     {isEditing ? (
                       <textarea
-                        value={displayQuestion.text}
+                        value={editForm?.text || ''}
                         onChange={(e) =>
-                          setEditForm({ ...editForm!, text: e.target.value })
+                          setEditForm(editForm ? { ...editForm, text: e.target.value } : null)
                         }
                         className="w-full p-2 border border-gray-300 rounded-md text-sm"
                         rows={3}
@@ -196,16 +193,13 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
 
                   {/* Metadata Tags */}
                   <div className="flex items-center gap-2 mt-3">
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-semibold ${getDifficultyColor(
-                        displayQuestion.difficulty
-                      )}`}
-                    >
-                      {displayQuestion.difficulty.toUpperCase()}
-                    </span>
-                    <span className="px-2 py-1 rounded text-xs font-semibold bg-purple-100 text-purple-800">
-                      {getQuestionTypeLabel(displayQuestion.question_type)}
-                    </span>
+                    <StatusBadge 
+                      status={displayQuestion.difficulty as StatusType} 
+                    />
+                    <StatusBadge 
+                      status="draft" 
+                      label={getQuestionTypeLabel(displayQuestion.question_type)}
+                    />
                   </div>
                 </div>
 

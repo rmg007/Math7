@@ -35,8 +35,8 @@ export  const DocumentUploader: React.FC<DocumentUploaderProps> = ({
       const page = await pdf.getPage(i);
       const textContent = await page.getTextContent();
       const pageText = textContent.items
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .map((item: any) => item.str)
+        .filter((item): item is { str: string } & typeof item => 'str' in item)
+        .map((item) => item.str)
         .join(' ');
       textChunks.push(pageText);
     }

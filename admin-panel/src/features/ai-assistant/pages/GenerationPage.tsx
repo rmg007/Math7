@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Wand2, Download, AlertCircle, Save } from 'lucide-react';
+import { Wand2, Download, AlertCircle, Save, CheckCircle2 } from 'lucide-react';
+import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import { DocumentUploader } from '../components/DocumentUploader';
 import { QuestionReviewGrid, GeneratedQuestion } from '../components/QuestionReviewGrid';
 import { useSkills } from '@/features/curriculum/hooks/use-skills';
@@ -7,7 +8,15 @@ import { useBulkCreateQuestions } from '@/features/curriculum/hooks/use-question
 import { useToast } from '@/hooks/use-toast';
 import { useApp } from '@/contexts/AppContext';
 import { governedGenerateQuestions } from '../api/governedGeneration';
+import { AdminHeader } from '@/components/ui/admin-header';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import Papa from 'papaparse';
+import ReactMarkdown from 'react-markdown';
 
 interface DifficultyConfig {
   easy: number;
@@ -188,160 +197,151 @@ export const GenerationPage: React.FC = () => {
   const totalQuestions = difficultyConfig.easy + difficultyConfig.medium + difficultyConfig.hard;
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          AI Question Generator
-        </h1>
-        <p className="text-gray-600">
-          Upload a document, configure generation settings, and review AI-generated questions
-        </p>
-      </div>
+    <div className="space-y-8">
+      <AdminHeader 
+        title="AI Question Generator"
+        description="Extract curriculum content from documents and use advanced AI to generate high-quality assessment questions."
+        icon={Wand2}
+      />
 
       {/* Step 1: Upload Document */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          Step 1: Upload Source Document
-        </h2>
-        <DocumentUploader onTextExtracted={handleTextExtracted} />
-      </div>
+      <Card className="border-blue-100 shadow-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-blue-900">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-sm font-bold">1</span>
+            Source Document
+          </CardTitle>
+          <CardDescription>Upload a PDF, Word doc, or image to extract content for generation.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DocumentUploader onTextExtracted={handleTextExtracted} />
+        </CardContent>
+      </Card>
 
       {/* Step 2: Configure Generation */}
       {extractedText && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Step 2: Configure Question Generation
-          </h2>
+        <Card className="border-purple-100 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-purple-900">
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-100 text-purple-600 text-sm font-bold">2</span>
+              Generation Settings
+            </CardTitle>
+            <CardDescription>Define question distribution and custom instructions for the AI model.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <Label className="text-purple-900 font-semibold">Difficulty Distribution</Label>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="easy" className="text-[10px] uppercase tracking-wider text-gray-500">Easy</Label>
+                    <Input
+                      id="easy"
+                      type="number"
+                      min="0"
+                      value={difficultyConfig.easy}
+                      onChange={(e) => setDifficultyConfig({ ...difficultyConfig, easy: parseInt(e.target.value) || 0 })}
+                      className="border-purple-100 focus:ring-purple-200"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="medium" className="text-[10px] uppercase tracking-wider text-gray-500">Medium</Label>
+                    <Input
+                      id="medium"
+                      type="number"
+                      min="0"
+                      value={difficultyConfig.medium}
+                      onChange={(e) => setDifficultyConfig({ ...difficultyConfig, medium: parseInt(e.target.value) || 0 })}
+                      className="border-purple-100 focus:ring-purple-200"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="hard" className="text-[10px] uppercase tracking-wider text-gray-500">Hard</Label>
+                    <Input
+                      id="hard"
+                      type="number"
+                      min="0"
+                      value={difficultyConfig.hard}
+                      onChange={(e) => setDifficultyConfig({ ...difficultyConfig, hard: parseInt(e.target.value) || 0 })}
+                      className="border-purple-100 focus:ring-purple-200"
+                    />
+                  </div>
+                </div>
+                <p className="text-[11px] text-purple-600 font-medium bg-purple-50 p-2 rounded-lg">
+                  Total targeting: <span className="font-bold">{totalQuestions}</span> questions
+                </p>
+              </div>
 
-          <div className="space-y-6">
-            {/* Difficulty Distribution */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Difficulty Distribution (Total: {totalQuestions} questions)
-              </label>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Easy
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={difficultyConfig.easy}
-                    onChange={(e) =>
-                      setDifficultyConfig({
-                        ...difficultyConfig,
-                        easy: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Medium
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={difficultyConfig.medium}
-                    onChange={(e) =>
-                      setDifficultyConfig({
-                        ...difficultyConfig,
-                        medium: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Hard
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={difficultyConfig.hard}
-                    onChange={(e) =>
-                      setDifficultyConfig({
-                        ...difficultyConfig,
-                        hard: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="instructions" className="text-purple-900 font-semibold">Custom Instructions</Label>
+                <Textarea
+                  id="instructions"
+                  value={customInstructions}
+                  onChange={(e) => setCustomInstructions(e.target.value)}
+                  placeholder="e.g., Focus on specific learning objectives, tone should be academic..."
+                  className="h-[104px] border-purple-100 focus:ring-purple-200 text-sm"
+                />
               </div>
             </div>
 
-            {/* Custom Instructions */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Custom Instructions (Optional)
-              </label>
-              <textarea
-                value={customInstructions}
-                onChange={(e) => setCustomInstructions(e.target.value)}
-                placeholder="E.g., Focus on algebra concepts, include word problems..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                rows={3}
-              />
-            </div>
-
-            {/* Error Display */}
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-md flex items-start gap-2">
+              <div className="p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-700">{error}</p>
+                <p className="text-sm text-red-700 font-medium">{error}</p>
               </div>
             )}
 
-            {/* Generate Button */}
-            <button
+            <Button
               onClick={handleGenerate}
-              disabled={isGenerating || !extractedText}
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-3 px-4 rounded-md hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              disabled={isGenerating || !extractedText || totalQuestions === 0}
+              className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg shadow-purple-200"
             >
               {isGenerating ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   Generating {totalQuestions} questions...
-                </>
+                </span>
               ) : (
-                <>
+                <span className="flex items-center gap-2">
                   <Wand2 className="w-5 h-5" />
-                  Generate {totalQuestions} Questions
-                </>
+                  Generate Questions
+                </span>
               )}
-            </button>
-          </div>
-        </div>
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
       {/* Governance & Validation Summary */}
       {governanceInfo && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <h4 className="text-xs font-bold text-gray-500 uppercase mb-1">Tokens Consumed</h4>
-            <p className="text-2xl font-bold text-gray-900">{governanceInfo.tokens_consumed.toLocaleString()}</p>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
+            <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Tokens Consumed</h4>
+            <div className="flex items-baseline gap-2">
+                <p className="text-3xl font-bold text-gray-900 font-mono">{governanceInfo.tokens_consumed.toLocaleString()}</p>
+                <span className="text-xs text-gray-400">total</span>
+            </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <h4 className="text-xs font-bold text-gray-500 uppercase mb-1">Quota Remaining</h4>
-            <p className="text-2xl font-bold text-purple-600">{governanceInfo.quota_remaining.toLocaleString()}</p>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
+            <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Quota Remaining</h4>
+            <div className="flex items-baseline gap-2">
+                <p className="text-3xl font-bold text-purple-600 font-mono">{governanceInfo.quota_remaining.toLocaleString()}</p>
+                <span className="text-xs text-purple-300">available</span>
+            </div>
           </div>
-          <div className={`bg-white p-4 rounded-lg shadow-sm border border-gray-200 ${validationSummary?.status === 'approved' ? 'border-green-200' : 'border-red-200'}`}>
-            <h4 className="text-xs font-bold text-gray-500 uppercase mb-1">Validation Status</h4>
-            <div className="flex items-center gap-2">
-              <span className={`text-2xl font-bold ${validationSummary?.status === 'approved' ? 'text-green-600' : 'text-red-500'}`}>
-                {validationSummary?.status.toUpperCase()}
-              </span>
-              <span className="text-sm font-medium text-gray-500">
-                 Score: {((validationSummary?.overall_score || 0) * 100).toFixed(0)}%
-              </span>
+          <div className={`bg-white p-6 rounded-2xl shadow-sm border ${validationSummary?.status === 'approved' ? 'border-green-100' : 'border-red-100'} transition-all hover:shadow-md`}>
+            <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Validation Status</h4>
+            <div className="flex items-center justify-between">
+              <StatusBadge 
+                status={(validationSummary?.status === 'approved' ? 'resolved' : 'exhausted') as StatusType} 
+                label={validationSummary?.status.toUpperCase()}
+              />
+              <div className="text-right">
+                <span className={`text-xl font-bold font-mono ${validationSummary?.status === 'approved' ? 'text-green-600' : 'text-red-500'}`}>
+                  {((validationSummary?.overall_score || 0) * 100).toFixed(0)}%
+                </span>
+                <p className="text-[10px] text-gray-400 uppercase font-medium">Quality Score</p>
+              </div>
             </div>
           </div>
         </div>
@@ -350,74 +350,92 @@ export const GenerationPage: React.FC = () => {
       {validationSummary && validationSummary.status !== 'approved' && (
         <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5" />
-          <div>
-            <h4 className="text-sm font-semibold text-amber-900">Validation Notice</h4>
-            <p className="text-sm text-amber-800">{validationSummary.summary}</p>
+          <div className="prose prose-sm max-w-none text-amber-900">
+            <h4 className="text-sm font-semibold mb-1">Validation Notice</h4>
+            <ReactMarkdown>{validationSummary.summary}</ReactMarkdown>
           </div>
         </div>
       )}
 
       {/* Step 3: Review & Export */}
       {generatedQuestions.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
-            <h2 className="text-xl font-semibold text-gray-800">
-              Step 3: Review & Save
-            </h2>
-            <div className="flex flex-wrap items-center gap-2">
-              <select
-                value={selectedSkillId}
-                onChange={(e) => setSelectedSkillId(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm min-w-[200px]"
-              >
-                <option value="">Select Target Skill...</option>
-                {skills?.map((skill: { skill_id: string; title: string }) => (
-                  <option key={skill.skill_id} value={skill.skill_id}>
-                    {skill.title}
-                  </option>
-                ))}
-              </select>
+        <Card className="border-indigo-100 shadow-sm animate-in fade-in zoom-in-95 duration-500">
+          <CardHeader>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-indigo-900">
+                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 text-sm font-bold">3</span>
+                  Review & Finalize
+                </CardTitle>
+                <CardDescription>Review AI-generated content and save it to your curriculum library.</CardDescription>
+              </div>
               
-              <button
-                onClick={handleImportDirectly}
-                disabled={isSaving || !selectedSkillId}
-                className="bg-purple-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-purple-700 transition-all flex items-center gap-2 disabled:opacity-50"
-              >
-                {isSaving ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4" />
-                )}
-                Save to Library
-              </button>
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="w-64">
+                    <Select value={selectedSkillId} onValueChange={setSelectedSkillId}>
+                        <SelectTrigger className="bg-white border-indigo-200">
+                            <SelectValue placeholder="Select Target Skill..." />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#1a1b4b] border-white/10 text-white">
+                            {skills?.map(skill => (
+                                <SelectItem key={skill.skill_id} value={skill.skill_id}>{skill.title}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
 
-              <button
-                onClick={handleExportCSV}
-                className="bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700 transition-all flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                Export CSV
-              </button>
+                <Button
+                    onClick={handleImportDirectly}
+                    disabled={isSaving || !selectedSkillId}
+                    className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+                >
+                    {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+                    Save to Library
+                </Button>
+
+                <Button
+                    variant="outline"
+                    onClick={handleExportCSV}
+                    className="border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800 gap-2"
+                >
+                    <Download className="w-4 h-4" />
+                    Export CSV
+                </Button>
+              </div>
             </div>
-          </div>
+          </CardHeader>
+          <CardContent>
+            <QuestionReviewGrid
+                questions={generatedQuestions}
+                onQuestionsChange={setGeneratedQuestions}
+            />
 
-          <QuestionReviewGrid
-            questions={generatedQuestions}
-            onQuestionsChange={setGeneratedQuestions}
-          />
-
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-            <h4 className="text-sm font-semibold text-blue-900 mb-2">
-              📋 Next Steps
-            </h4>
-            <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-              <li>Review and edit the generated questions above</li>
-              <li>Choose a target skill from the dropdown</li>
-              <li>Click "Save to Library" to import directly OR "Export CSV" for manual bulk import</li>
-              <li>Verify the questions in the curriculum management page</li>
-            </ol>
-          </div>
-        </div>
+            <div className="mt-8 p-6 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl">
+              <h4 className="text-sm font-bold text-indigo-900 mb-3 flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-indigo-600" />
+                Completion Workflow
+              </h4>
+              <ul className="text-xs text-indigo-800 space-y-2 grid grid-cols-1 md:grid-cols-2 gap-x-8">
+                <li className="flex items-center gap-2">
+                    <span className="w-5 h-5 flex items-center justify-center rounded-full bg-indigo-200 text-indigo-700 text-[10px] font-bold">1</span>
+                    Review and refine generated questions in the grid.
+                </li>
+                <li className="flex items-center gap-2">
+                    <span className="w-5 h-5 flex items-center justify-center rounded-full bg-indigo-200 text-indigo-700 text-[10px] font-bold">2</span>
+                    Select a target skill from the dropdown above.
+                </li>
+                <li className="flex items-center gap-2">
+                    <span className="w-5 h-5 flex items-center justify-center rounded-full bg-indigo-200 text-indigo-700 text-[10px] font-bold">3</span>
+                    Click "Save to Library" to import directly.
+                </li>
+                <li className="flex items-center gap-2">
+                    <span className="w-5 h-5 flex items-center justify-center rounded-full bg-indigo-200 text-indigo-700 text-[10px] font-bold">4</span>
+                    Verify your imported questions in the curriculum module.
+                </li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

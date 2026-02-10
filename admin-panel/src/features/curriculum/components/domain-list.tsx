@@ -1,11 +1,17 @@
 import { Link } from 'react-router-dom'
-import { Plus, CheckSquare, Square, Search, GripVertical, Pencil, Trash2, ChevronRight, Filter, Book } from 'lucide-react'
-import { usePaginatedDomains, useDeleteDomain, useBulkDeleteDomains, useUpdateDomainOrder } from '../hooks/use-domains'
+import { Plus, Book, Search, Filter, Square, CheckSquare, GripVertical, Pencil, Trash2, X } from 'lucide-react'
+import { usePaginatedDomains, useDeleteDomain, useBulkDeleteDomains, useUpdateDomainOrder, useBulkCreateDomains } from '../hooks/use-domains'
+import { DataToolbar } from '@/components/ui/data-toolbar'
+import type { DataColumn } from '@/lib/data-utils';
 import { useState, useEffect, useMemo } from 'react'
 import { useToast } from '@/hooks/use-toast';
+import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import { Pagination } from '@/components/ui/pagination'
 import { SortableHeader } from '@/components/ui/sortable-header'
 import { EmptyState } from '@/components/ui/empty-state'
+import { AdminHeader } from '@/components/ui/admin-header';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +48,14 @@ const DEFAULT_PAGE_SIZE = 10
 
 type Domain = Tables<'domains'>
 
+const DOMAIN_COLUMNS: DataColumn[] = [
+    { key: 'title', header: 'Title' },
+    { key: 'slug', header: 'Slug' },
+    { key: 'description', header: 'Description' },
+    { key: 'sort_order', header: 'Sort Order' },
+    { key: 'status', header: 'Status' },
+];
+
 interface SortableRowProps {
   domain: Domain
   isSelected: boolean
@@ -66,9 +80,7 @@ function SortableRow({ domain, isSelected, onSelect, onDelete, renderStatusBadge
     transition,
     opacity: isDragging ? 0.5 : 1,
     boxShadow: isDragging ? '0 4px 12px rgba(0, 0, 0, 0.15)' : undefined,
-    backgroundColor: isDragging ? '#f9fafb' : undefined,
-    position: 'relative' as const,
-    zIndex: isDragging ? 10 : undefined,
+    zIndex: isDragging ? 50 : undefined,
   }
 
   return (
@@ -154,9 +166,7 @@ function SortableCard({ domain, isSelected, onSelect, onDelete, renderStatusBadg
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    boxShadow: isDragging ? '0 8px 16px rgba(0, 0, 0, 0.15)' : undefined,
-    position: 'relative' as const,
-    zIndex: isDragging ? 10 : undefined,
+    zIndex: isDragging ? 50 : undefined,
   }
 
   return (
@@ -242,6 +252,7 @@ export function DomainList() {
   const deleteDomain = useDeleteDomain()
   const bulkDelete = useBulkDeleteDomains()
   const updateDomainOrder = useUpdateDomainOrder()
+  const bulkCreate = useBulkCreateDomains()
   const { toast } = useToast()
 
   const showToast = (title: string, type: 'success' | 'error' = 'success') => {
@@ -385,22 +396,23 @@ export function DomainList() {
     setPage(1)
   }
 
-  const renderStatusBadge = (status: string) => {
-    const statusMapping = {
-      live: { label: 'LIVE', className: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-      published: { label: 'PUBLISHED', className: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
-      draft: { label: 'DRAFT', className: 'bg-orange-50 text-orange-600 border-orange-100' },
-      default: { label: 'UNKNOWN', className: 'bg-gray-100 text-gray-600 border-gray-200' }
+  const handleImport = async (data: Partial<Domain>[]) => {
+    try {
+      await bulkCreate.mutateAsync(data);
+      showToast(`${data.length} domains imported successfully`, 'success');
+    } catch {
+      showToast('Failed to import domains. Check for duplicate slugs.', 'error');
+    }
+  };
+
+    const renderStatusBadge = (status: string) => {
+        return (
+            <StatusBadge 
+                status={status.toLowerCase() as StatusType} 
+                label={status.toUpperCase()}
+            />
+        );
     };
-
-    const config = statusMapping[status as keyof typeof statusMapping] || statusMapping.default;
-
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide border ${config.className}`}>
-        {config.label}
-      </span>
-    )
-  }
 
   if (isLoading) {
     return (
@@ -425,63 +437,77 @@ export function DomainList() {
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumbs & Header */}
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 text-xs font-semibold tracking-wider text-gray-500 uppercase">
-          <span>Curriculum</span>
-          <ChevronRight className="h-3 w-3" />
-          <span className="text-purple-600">Domains</span>
-        </div>
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Curriculum Domains</h2>
-            <p className="text-gray-500 mt-1 text-sm md:text-base">Configure and organize the high-level educational areas.</p>
-          </div>
+      <AdminHeader 
+        title="Curriculum Domains"
+        description="Configure and organize the high-level educational areas for your curriculum."
+        icon={Book}
+        breadcrumbs={[
+          { label: 'Curriculum', href: '#' },
+          { label: 'Domains', href: '/domains' }
+        ]}
+        actions={
           <div className="flex items-center gap-3">
-             <div className="hidden md:flex bg-gray-100 p-1 rounded-lg">
-                <button className="px-4 py-1.5 text-sm font-medium bg-white shadow-sm rounded-md text-gray-900">Active</button>
-                <button className="px-4 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-900">Archived</button>
-             </div>
-             <Link
-              to="/domains/new"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              <Plus className="h-4 w-4" />
-              <span>New Domain</span>
+             <DataToolbar 
+                data={domains as Record<string, unknown>[]}
+                columns={DOMAIN_COLUMNS}
+                entityName="Domains"
+                onImport={handleImport}
+                importDisabled={false}
+             />
+             <Link to="/domains/new">
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  <span>New Domain</span>
+                </Button>
             </Link>
           </div>
-        </div>
-      </div>
+        }
+      />
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {/* Filter Bar */}
-        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-white">
-             <div className="relative flex-1 w-full md:max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
+        <div className="space-y-3 md:space-y-4 mb-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search by domain title or unique ID..."
+                placeholder="Search domains..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm rounded-lg border border-gray-200 bg-gray-50/50 text-gray-700 focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-200 transition-all placeholder:text-gray-400"
+                className="w-full pl-10 pr-4 py-3 min-h-[48px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-base"
               />
             </div>
-            
-             <div className="flex items-center gap-3 w-full md:w-auto">
-               <div className="relative w-full md:w-48">
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'published' | 'live')}
-                    className="w-full appearance-none pl-4 pr-10 py-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors cursor-pointer"
-                  >
-                    <option value="all">All Statuses</option>
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="live">Live</option>
-                  </select>
-                  <Filter className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-               </div>
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="h-4 w-4" />
+                <span>Clear filters</span>
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-400" />
+              <span className="text-sm font-medium text-gray-600">Status</span>
+              <Select
+                value={statusFilter}
+                onValueChange={(v) => setStatusFilter(v as 'all' | 'draft' | 'published' | 'live')}
+              >
+                <SelectTrigger className="w-full sm:w-[150px] h-10">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="live">Live</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+          </div>
         </div>
 
         <div className="p-0">

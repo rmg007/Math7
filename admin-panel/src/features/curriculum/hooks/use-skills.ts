@@ -323,3 +323,30 @@ export function useUpdateSkillOrder() {
         },
     });
 }
+export function useBulkCreateSkills() {
+  const queryClient = useQueryClient();
+  const { currentApp } = useApp();
+
+  return useMutation({
+    mutationFn: async (skills: Record<string, unknown>[]) => { // Using Record<string, unknown>[] for bulk import payload to simplify UI mapping
+      if (!currentApp?.app_id) throw new Error('No app selected');
+
+      const payload = skills.map(skill => ({
+        ...skill,
+        app_id: currentApp.app_id
+      }));
+
+      const { data, error } = await supabase
+        .from('skills')
+        .insert(payload as any)
+        .select();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['skills'] });
+      queryClient.invalidateQueries({ queryKey: ['skills-paginated'] });
+    },
+  });
+}

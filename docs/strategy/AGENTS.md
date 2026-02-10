@@ -1,109 +1,60 @@
-# 🤖 Questerix AI Agent Constitution
+# 🤖 Questerix Supreme Agent Protocol (SSoT)
 
-> **Effective Phase**: 17+ (Project Oracle Era)
+> **Status**: [ACTIVE] Repository-Local Single Source of Truth
 > **Governance**: Superpower Mode (`ops_runner.py`) Authorized
 > **Identity**: You are an autonomous agent building the Questerix Platform.
 
 ---
 
-## 1. 🧠 Universal Context Discovery
+## 1. 🚨 MANDATORY: Session Start Protocol
+Every agent, in every session, **MUST** execute these three steps before performing any task:
 
-**DO NOT rely on outdated assumptions.** The project evolves rapidly.
-Every session MUST begin with this Discovery Protocol:
-
-### Step 1: Locate Yourself
-- **Map**: Read `docs/technical/CONTEXT_MAP.md` immediately.
-  - This file tells you *exactly* where to find technical contracts, architecture deep dives, and operational guides.
-
-### Step 2: Check State
-- **State**: Read `PHASE_STATE.json` immediately.
-  - This is the **Single Source of Truth** for the project's progress.
-  - **Do not** re-implement completed phases. build *forward*.
-
-### Step 3: Consult the Oracle
-- **Knowledge**: The project uses "Project Oracle" (RAG System).
-  - Use `view_file docs/technical/KNOWLEDGE_INDEX.md` to understand how to query documentation if needed.
-  - **Primary Knowledge Source**: The `knowledge/` directory contains distilled "Knowledge Items" (KIs). **ALWAYS** check these first.
+1. **Check Time**: Note the current local time provided in the system prompt.
+2. **Check Task & Status**:
+   - Read `docs/status/current_project_status.md` (What is done?).
+   - Read the active task in the current conversation memory.
+3. **Check Schema**:
+   - Read `admin-panel/src/lib/database.types.ts` to understand the current database state.
+   - Do **NOT** assume the schema based on legacy documentation.
 
 ---
 
-## 2. ⚡ Execution Protocol: Superpower Mode
+## 2. 🧠 The Single Source of Truth (SSoT)
+**The Repository is the Brain.** Private AI memory (KIs, conversation history) is secondary to the code and documentation in this repository.
 
-To bypass IDE restrictions and ensure autonomous execution, you command the **Ops Runner**.
-
-**The Pattern**:
-1. **Identify Task**: Determine the terminal command needed (e.g., `npm run build`, `flutter test`).
-2. **Bypass Gate**: Instead of running it directly (which might block), write it to `tasks.json`.
-3. **Execute**: Run `python ops_runner.py tasks.json`.
-
-**Example**:
-```json
-// tasks.json
-[
-  {
-    "command": "npm run build",
-    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel"
-  }
-]
-```
-```powershell
-python ops_runner.py tasks.json
-```
+- **Primary Truth**: The files in `docs/` and the source code.
+- **Protocol**: If an agent's internal memory conflicts with a file in `docs/`, the file **WINS**.
+- **Discovery**: Use **Project Oracle** search if you are unsure where a piece of logic lives.
 
 ---
 
-## 3. 🛑 Non-Negotiable Directives
+## 3. 🛑 Non-Negotiable Development Standards
 
-### A. Architectural Integrity
-1.  **No Freelancing**: Do not invent new patterns. Follow `docs/technical/` guides.
-2.  **Strict Typing**: TypeScript and Dart types MUST match `docs/technical/SCHEMA.md`. No `any`.
-3.  **Offline-First**: The Student App is offline-first (Drift DB). Never assume connectivity.
+### A. Type Safety (Zero-Drift Policy)
+- **NO `any` types**: There is always a correct type in `database.types.ts`.
+- **NO `as` casting**: Use the `Tables<...>` helper from `lib/database.types.ts`. If you think you need to cast, your data-fetching logic is likely wrong.
+- **NO `as never`**: This is a sign of a type system failure. Fix the type instead.
 
-### B. Operational Discipline
-1.  **Verify First**: Never submit code without "Proof of Run" (`docs/operational/CI_CONTRACT.md`).
-2.  **Update Documentation**: If you change code, update the corresponding documentation.
-3.  **Phase Atomicity**: Complete one phase at a time. Update `PHASE_STATE.json` only after validation passes.
+### B. Security & Cleanliness
+- **NO Hardcoded IDs**: Never hardcode Supabase Project IDs, API keys, or User IDs in code. Use environment variables.
+- **NO Legacy Names**: The project is **Questerix**. References to `Math7` or `SKOA` (strategic terminology excluded) should be purged during refactoring.
 
-### C. Agent Efficiency
-1.  **Batch Edits**: Use `multi_replace_file_content` for all file modifications.
-2.  **Context Hygiene**: Do not read huge files (`view_file`) unless necessary. Use `grep_search` or `view_file_outline`.
-3.  **Silence is Golden**: In "Terse Mode", output only JSON or code. No chatter.
+### C. Execution Discipline
+- **Bypass Gates**: Use the `ops_runner.py` workaround if the IDE blocks your commands.
+- **Document as you go**: Successful feature completion **INCLUDES** updating the corresponding documentation in `docs/`.
 
 ---
 
-## 4. 📂 The Map (Quick Reference)
+## 4. 📂 Architectural Map (Entry Points)
 
 | Domain | Key Document |
 |--------|--------------|
-| **Database** | `docs/technical/SCHEMA.md` |
-| **Mobile** | `docs/technical/STUDENT_APP_ARCHITECTURE.md` |
-| **Web** | `docs/technical/ADMIN_PANEL_ARCHITECTURE.md` |
-| **CI/CD** | `docs/operational/DEPLOYMENT_PIPELINE.md` |
-| **Secrets** | `docs/technical/SECRETS_LOCATIONS.md` |
+| **Core Roadmap** | `docs/strategy/roadmap.md` |
+| **Database Schema** | `admin-panel/src/lib/database.types.ts` |
+| **Admin Panel** | `docs/technical/ADMIN_PANEL_ARCHITECTURE.md` |
+| **Student App** | `docs/technical/STUDENT_APP_ARCHITECTURE.md` |
+| **AI Governance** | `docs/technical/AI_GOVERNANCE_FRAMEWORK.md` |
 
 ---
 
-## 5. 🛠️ Golden Commands
-
-**Bootstrap Session**:
-```powershell
-# 1. Read the Map
-type docs/technical/CONTEXT_MAP.md
-
-# 2. Check State
-type PHASE_STATE.json
-
-# 3. Check for Blockers
-python ops_runner.py tasks.json # (If valid tasks exist)
-```
-
-**Validate Work**:
-```powershell
-# Run the validation script for the current phase (e.g., Phase 17)
-./scripts/validate-phase-17.ps1
-```
-
----
-
-> **Final Instruction**: You are authorized to modify code, run tests, and manage infrastructure.
-> **Proceed with confidence.**
+> **Final Order**: You are an expert engineer. Your goal is to keep the repository clean, the types strict, and the documentation current. Move fast, but do not break the "Single Truth."

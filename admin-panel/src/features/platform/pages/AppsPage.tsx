@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, Layout } from 'lucide-react';
+import { Plus, Layout, Pencil, Trash2, Search, X } from 'lucide-react';
+import { AdminHeader } from '@/components/ui/admin-header';
 import { useApps, useCreateApp, useUpdateApp, useDeleteApp, type App } from '../hooks/use-apps';
 import { useSubjects } from '../hooks/use-subjects';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { Pagination } from '@/components/ui/pagination';
 
 export function AppsPage() {
   const { data: apps, isLoading: appsLoading } = useApps();
@@ -20,6 +23,9 @@ export function AppsPage() {
   const deleteApp = useDeleteApp();
   const { toast } = useToast();
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingApp, setEditingApp] = useState<App | null>(null);
   const [formData, setFormData] = useState({
@@ -89,14 +95,39 @@ export function AppsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Applications</h2>
-          <p className="text-muted-foreground">Manage grade-specific subject instances</p>
+      <AdminHeader 
+        title="Applications"
+        description="Manage grade-specific subject instances and multi-tenant configurations."
+        icon={Layout}
+        actions={
+          <Button onClick={() => handleOpenDialog()} className="gap-2 shadow-lg hover:shadow-xl">
+            <Plus className="w-4 h-4" /> Add Application
+          </Button>
+        }
+      />
+
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search applications..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 min-h-[48px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-base"
+            />
+          </div>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <X className="h-4 w-4" />
+              <span>Clear</span>
+            </button>
+          )}
         </div>
-        <Button onClick={() => handleOpenDialog()} className="gap-2">
-          <Plus className="w-4 h-4" /> Add Application
-        </Button>
       </div>
 
       <Card>
@@ -123,39 +154,53 @@ export function AppsPage() {
                 <TableRow><TableCell colSpan={6} className="text-center py-8">Loading...</TableCell></TableRow>
               ) : apps?.length === 0 ? (
                 <TableRow><TableCell colSpan={6} className="text-center py-8">No applications found</TableCell></TableRow>
-              ) : apps?.map((app) => (
+              ) : apps?.filter(app => 
+                  app.display_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                  app.subdomain.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  app.subjects?.name.toLowerCase().includes(searchQuery.toLowerCase())
+                ).slice((currentPage - 1) * pageSize, currentPage * pageSize).map((app) => (
                 <TableRow key={app.app_id}>
                   <TableCell className="font-medium">{app.display_name}</TableCell>
                   <TableCell>{app.subjects?.name ?? 'Unknown'}</TableCell>
                   <TableCell className="font-mono text-xs">{app.subdomain}.questerix.com</TableCell>
                   <TableCell>{app.grade_level}</TableCell>
                   <TableCell>
-                     <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider ${
-                      app.is_active ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-gray-500/10 text-gray-500 border border-gray-500/20'
-                    }`}>
-                      {app.is_active ? 'Active' : 'Inactive'}
-                    </span>
+                    <StatusBadge status={app.is_active ? 'active' : 'inactive'} />
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                       <button 
-                        onClick={() => handleOpenDialog(app)}
-                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium hover:bg-blue-200 transition-colors"
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(app.app_id)}
-                        className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium hover:bg-red-200 transition-colors"
-                      >
-                        Delete
-                      </button>
+                       <Button 
+                         variant="ghost" 
+                         size="icon" 
+                         onClick={() => handleOpenDialog(app)}
+                         className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                       >
+                         <Pencil className="w-4 h-4" />
+                       </Button>
+                       <Button 
+                         variant="ghost" 
+                         size="icon" 
+                         onClick={() => handleDelete(app.app_id)}
+                         className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                       >
+                         <Trash2 className="w-4 h-4" />
+                       </Button>
                     </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+          {apps && apps.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil((apps?.length ?? 0) / pageSize)}
+              totalCount={apps?.length ?? 0}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
+            />
+          )}
         </CardContent>
       </Card>
 

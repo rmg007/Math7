@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Users, Shield, ShieldAlert, UserX, Search } from 'lucide-react';
+import { Users, Shield, ShieldAlert, UserX, Search, UserCog, X } from 'lucide-react';
 import type { Tables } from '@/lib/database.types';
+import { Pagination } from '@/components/ui/pagination';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { AdminHeader } from '@/components/ui/admin-header';
+import { Button } from '@/components/ui/button';
 
 type AdminUser = Tables<'profiles'>;
 
@@ -20,6 +24,8 @@ export function UserManagementPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     fetchUsers();
@@ -62,8 +68,6 @@ export function UserManagementPage() {
     let query = supabase.from('profiles').select('id, email, full_name, role, created_at, deleted_at');
     
     // Super admins should only see regular admins (and themselves)
-    // Admins seeing this page is technically a violation of current design, but if they reach it, 
-    // they shouldn't see anyone higher than them.
     if (userRole === 'super_admin') {
       query = query.or(`role.eq.admin,id.eq.${authUser?.id}`);
     } else {
@@ -122,27 +126,39 @@ export function UserManagementPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
-        <p className="text-muted-foreground">
-          Manage admin users and their access.
-        </p>
-      </div>
+      <AdminHeader 
+        title="User Management"
+        description="Manage administrative users, their roles, and system access levels."
+        icon={UserCog}
+        actions={
+          <div className="flex items-center gap-2 px-4 py-2 bg-purple-100 rounded-lg">
+            <Users className="w-5 h-5 text-purple-600" />
+            <span className="font-medium text-purple-700">{activeUsers.length} Active Users</span>
+          </div>
+        }
+      />
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors"
-          />
-        </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-purple-100 rounded-lg">
-          <Users className="w-5 h-5 text-purple-600" />
-          <span className="font-medium text-purple-700">{activeUsers.length} Active Users</span>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 min-h-[48px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-base"
+            />
+          </div>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <X className="h-4 w-4" />
+              <span>Clear</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -155,107 +171,112 @@ export function UserManagementPage() {
             </div>
           </div>
         ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">User</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Role</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Joined</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Status</th>
-                <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filteredUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center">
-                      <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                        <Users className="w-8 h-8 text-gray-400" />
-                      </div>
-                      <p className="text-gray-500">No admin users found.</p>
-                    </div>
-                  </td>
+          <>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-100">
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">User</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Role</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Joined</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Status</th>
+                  <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
                 </tr>
-              ) : (
-                filteredUsers.map((user) => (
-                  <tr key={user.id} className={`hover:bg-gray-50 transition-colors ${user.deleted_at ? 'opacity-60' : ''}`}>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100">
-                          <span className="text-purple-700 font-semibold">
-                            {(user.full_name || user.email)?.charAt(0).toUpperCase()}
-                          </span>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center">
+                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                          <Users className="w-8 h-8 text-gray-400" />
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-900">
-                            {user.full_name || 'No name'}
-                            {user.id === currentUserId && (
-                              <span className="ml-2 text-xs text-purple-600">(You)</span>
-                            )}
-                          </p>
-                          <p className="text-sm text-gray-500">{user.email}</p>
-                        </div>
+                        <p className="text-gray-500">No admin users found.</p>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        {user.role === 'super_admin' ? (
-                          <>
-                            <ShieldAlert className="w-4 h-4 text-purple-600" />
-                            <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
-                              Super Admin
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <Shield className="w-4 h-4 text-blue-600" />
-                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                              Admin
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">
-                      {formatDate(user.created_at)}
-                    </td>
-                    <td className="px-6 py-4">
-                      {user.deleted_at ? (
-                        <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
-                          Deactivated
-                        </span>
-                      ) : (
-                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                          Active
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      {user.id !== currentUserId && (
-                        user.deleted_at ? (
-                          <button
-                            onClick={() => handleReactivate(user.id)}
-                            className="px-3 py-2 text-sm font-medium text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
-                          >
-                            Reactivate
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleDeactivate(user.id)}
-                            className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <UserX className="h-4 w-4" />
-                            Deactivate
-                          </button>
-                        )
-                      )}
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  filteredUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((user) => (
+                    <tr key={user.id} className={`hover:bg-gray-50 transition-colors ${user.deleted_at ? 'opacity-60' : ''}`}>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100">
+                            <span className="text-purple-700 font-semibold">
+                              {(user.full_name || user.email)?.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">
+                              {user.full_name || 'No name'}
+                              {user.id === currentUserId && (
+                                <span className="ml-2 text-xs text-purple-600">(You)</span>
+                              )}
+                            </p>
+                            <p className="text-sm text-gray-500">{user.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          {user.role === 'super_admin' ? (
+                            <>
+                              <ShieldAlert className="w-4 h-4 text-purple-600" />
+                              <StatusBadge status="active" label="Super Admin" className="bg-purple-100 text-purple-700 hover:bg-purple-100" />
+                            </>
+                          ) : (
+                            <>
+                              <Shield className="w-4 h-4 text-blue-600" />
+                              <StatusBadge status="published" label="Admin" />
+                            </>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {formatDate(user.created_at)}
+                      </td>
+                      <td className="px-6 py-4">
+                         <StatusBadge 
+                            status={user.deleted_at ? 'inactive' : 'active'} 
+                            label={user.deleted_at ? 'Deactivated' : 'Active'}
+                          />
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        {user.id !== currentUserId && (
+                          user.deleted_at ? (
+                            <Button
+                              variant="ghost"
+                              onClick={() => handleReactivate(user.id)}
+                              className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                            >
+                              Reactivate
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              onClick={() => handleDeactivate(user.id)}
+                              className="inline-flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <UserX className="h-4 w-4" />
+                              Deactivate
+                            </Button>
+                          )
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+            {filteredUsers.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={Math.ceil(filteredUsers.length / pageSize)}
+                totalCount={filteredUsers.length}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
+              />
+            )}
+          </>
         )}
       </div>
 

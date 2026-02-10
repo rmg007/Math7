@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { Database } from '@/lib/database.types';
+import { Tables, TablesInsert, TablesUpdate } from '@/lib/database.types';
 
-export type Subject = Database['public']['Tables']['subjects']['Row'];
-export type SubjectInsert = Database['public']['Tables']['subjects']['Insert'];
-export type SubjectUpdate = Database['public']['Tables']['subjects']['Update'];
+export type Subject = Tables<'subjects'>;
+export type SubjectInsert = TablesInsert<'subjects'>;
+export type SubjectUpdate = TablesUpdate<'subjects'>;
 
 export function useSubjects() {
   return useQuery({
@@ -14,9 +14,8 @@ export function useSubjects() {
         .from('subjects')
         .select('*')
         .order('display_order');
-      
       if (error) throw error;
-      return data as Subject[];
+      return data || [];
     },
   });
 }
@@ -33,7 +32,7 @@ export function useCreateSubject() {
         .single();
       
       if (error) throw error;
-      return data as Subject;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] });
@@ -54,7 +53,10 @@ export function useUpdateSubject() {
         .single();
 
       if (error) throw error;
-      return data as Subject;
+      if (!data) {
+        throw new Error(`Subject with ID ${id} not found for update.`);
+      }
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] });

@@ -10,8 +10,10 @@ import {
   Plus,
   Pencil,
   Trash2,
-  ExternalLink
+  ExternalLink,
+  Bug
 } from 'lucide-react';
+import { AdminHeader } from '@/components/ui/admin-header';
 import { useKnownIssues, type KnownIssue } from '../hooks/use-known-issues';
 import { useCreateKnownIssue, useUpdateKnownIssue, useDeleteKnownIssue } from '../hooks/use-known-issues-mutations';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
@@ -176,22 +178,19 @@ export function KnownIssuesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-            Known Issues
-          </h2>
-          <p className="text-muted-foreground mt-1">
-            Tracked bugs, their root causes, and resolutions.
-          </p>
-        </div>
-        <Button 
-          onClick={() => handleOpenDialog()}
-          className="bg-indigo-600 hover:bg-indigo-700 shadow-md transition-all hover:scale-105"
-        >
-          <Plus className="w-4 h-4 mr-2" /> Record Issue
-        </Button>
-      </div>
+      <AdminHeader 
+        title="Known Issues"
+        description="Tracked bugs, their root causes, and documented resolutions."
+        icon={Bug}
+        actions={
+          <Button 
+            onClick={() => handleOpenDialog()}
+            className="bg-indigo-600 hover:bg-indigo-700 shadow-md transition-all hover:scale-105"
+          >
+            <Plus className="w-4 h-4 mr-2" /> Record Issue
+          </Button>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="bg-indigo-50/50 border-indigo-100">

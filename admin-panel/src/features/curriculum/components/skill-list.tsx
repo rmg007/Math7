@@ -1,13 +1,17 @@
 import { Link } from 'react-router-dom';
-import { usePaginatedSkills, useDeleteSkill, useBulkDeleteSkills, useBulkUpdateSkillsStatus, useDuplicateSkill, useUpdateSkillOrder } from '../hooks/use-skills';
+import { usePaginatedSkills, useDeleteSkill, useBulkDeleteSkills, useBulkUpdateSkillsStatus, useDuplicateSkill, useUpdateSkillOrder, useBulkCreateSkills } from '../hooks/use-skills';
 import { useDomains } from '../hooks/use-domains';
 import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import type { DataColumn } from '@/lib/data-utils';
-import { Plus, CheckSquare, Square, Search, X, Trash, Layers, GripVertical } from 'lucide-react';
+import { Plus, CheckSquare, Square, Search, X, Trash, Layers, GripVertical, Filter } from 'lucide-react';
+import { AdminHeader } from '@/components/ui/admin-header';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 const SKILL_COLUMNS: DataColumn[] = [
     { key: 'title', header: 'title' },
@@ -73,7 +77,7 @@ function SortableRow({ skill, isSelected, onSelect, onDelete, onDuplicate, rende
         boxShadow: isDragging ? '0 4px 12px rgba(0, 0, 0, 0.15)' : undefined,
         backgroundColor: isDragging ? '#f9fafb' : undefined,
         position: 'relative' as const,
-        zIndex: isDragging ? 10 : undefined,
+        zIndex: isDragging ? 50 : undefined,
     };
 
     return (
@@ -172,7 +176,7 @@ function SortableCard({ skill, isSelected, onSelect, onDelete, onDuplicate, rend
         opacity: isDragging ? 0.5 : 1,
         boxShadow: isDragging ? '0 8px 16px rgba(0, 0, 0, 0.15)' : undefined,
         position: 'relative' as const,
-        zIndex: isDragging ? 10 : undefined,
+        zIndex: isDragging ? 50 : undefined,
     };
 
     return (
@@ -279,6 +283,7 @@ export function SkillList() {
     const bulkUpdateStatus = useBulkUpdateSkillsStatus();
     const duplicateSkill = useDuplicateSkill();
     const updateSkillOrder = useUpdateSkillOrder();
+    const bulkCreate = useBulkCreateSkills();
     const { toast } = useToast();
     
     const showToast = (title: string, type: 'success' | 'error' = 'success') => {
@@ -355,6 +360,7 @@ export function SkillList() {
         if (sortBy === column) {
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
         } else {
+            setSortBy(column);
             setSortBy(column);
             setSortOrder('asc');
         }
@@ -466,27 +472,22 @@ export function SkillList() {
         setPage(1);
     };
 
-    const renderStatusBadge = (status: string) => {
-        switch (status) {
-            case 'live':
-                return (
-                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                        Live
-                    </span>
-                );
-            case 'published':
-                return (
-                    <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
-                        Published
-                    </span>
-                );
-            default:
-                return (
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
-                        Draft
-                    </span>
-                );
+    const handleImport = async (data: Record<string, unknown>[]) => {
+        try {
+            await bulkCreate.mutateAsync(data);
+            showToast(`${data.length} skills imported successfully`, 'success');
+        } catch {
+            showToast('Failed to import skills. Check for duplicate slugs.', 'error');
         }
+    };
+
+    const renderStatusBadge = (status: string) => {
+        return (
+            <StatusBadge 
+                status={status.toLowerCase() as StatusType} 
+                label={status.toUpperCase()}
+            />
+        );
     };
 
     if (isLoading) {
@@ -502,28 +503,28 @@ export function SkillList() {
 
     return (
         <div className="space-y-4 md:space-y-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Skills</h2>
-                    <p className="mt-1 text-sm md:text-base text-gray-500">Manage learning skills</p>
-                </div>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <DataToolbar
-                        data={skills as Record<string, unknown>[]}
-                        columns={SKILL_COLUMNS}
-                        entityName="Skills"
-                        importDisabled={true}
-                        importDisabledMessage="Skill import is not available. Please create skills manually."
-                    />
-                    <Link
-                        to="/skills/new"
-                        className="inline-flex items-center justify-center gap-2 px-5 py-3 min-h-[48px] bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto"
-                    >
-                        <Plus className="h-5 w-5" />
-                        <span>New Skill</span>
-                    </Link>
-                </div>
-            </div>
+            <AdminHeader 
+                title="Skills"
+                description="Manage and organize learning skills for your curriculum."
+                icon={Layers}
+                actions={
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <DataToolbar
+                            data={skills as Record<string, unknown>[]}
+                            columns={SKILL_COLUMNS}
+                            entityName="Skills"
+                            onImport={handleImport}
+                            importDisabled={false}
+                        />
+                        <Link to="/skills/new">
+                            <Button className="gap-2">
+                                <Plus className="h-4 w-4" />
+                                <span>New Skill</span>
+                            </Button>
+                        </Link>
+                    </div>
+                }
+            />
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
                 <div className="space-y-3 md:space-y-4 mb-4">
@@ -550,31 +551,41 @@ export function SkillList() {
                     </div>
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2 w-full sm:w-auto">
-                            <label className="text-sm font-medium text-gray-600">Domain:</label>
-                            <select
+                        <div className="flex items-center gap-2">
+                            <Filter className="h-4 w-4 text-gray-400" />
+                            <span className="text-sm font-medium text-gray-600">Domain</span>
+                            <Select
                                 value={selectedDomainId}
-                                onChange={(e) => setSelectedDomainId(e.target.value)}
-                                className="px-3 py-3 min-h-[48px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-base w-full sm:w-auto"
+                                onValueChange={setSelectedDomainId}
                             >
-                                <option value="all">All Domains</option>
-                                {domains?.map(domain => (
-                                    <option key={domain.domain_id} value={domain.domain_id}>{domain.title}</option>
-                                ))}
-                            </select>
+                                <SelectTrigger className="w-full sm:w-[200px] h-10">
+                                    <SelectValue placeholder="All Domains" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Domains</SelectItem>
+                                    {domains?.map(domain => (
+                                        <SelectItem key={domain.domain_id} value={domain.domain_id}>{domain.title}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
-                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2 w-full sm:w-auto">
-                            <label className="text-sm font-medium text-gray-600">Status:</label>
-                            <select
+
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-600">Status</span>
+                            <Select
                                 value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'published' | 'live')}
-                                className="px-3 py-3 min-h-[48px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-base w-full sm:w-auto"
+                                onValueChange={(v) => setStatusFilter(v as 'all' | 'draft' | 'published' | 'live')}
                             >
-                                <option value="all">All Status</option>
-                                <option value="draft">Draft</option>
-                                <option value="published">Published</option>
-                                <option value="live">Live</option>
-                            </select>
+                                <SelectTrigger className="w-full sm:w-[150px] h-10">
+                                    <SelectValue placeholder="All Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Status</SelectItem>
+                                    <SelectItem value="draft">Draft</SelectItem>
+                                    <SelectItem value="published">Published</SelectItem>
+                                    <SelectItem value="live">Live</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
 
                         {isDragDisabled && sortBy === 'sort_order' && (
@@ -620,13 +631,11 @@ export function SkillList() {
                     </div>
                 </div>
 
-                {/* Desktop Table View */}
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={handleDragEnd}
                 >
-                    {/* Desktop Table View */}
                     <div className="hidden md:block overflow-hidden rounded-xl border border-gray-100">
                         <table className="w-full">
                             <thead>
@@ -723,7 +732,6 @@ export function SkillList() {
                         </table>
                     </div>
 
-                    {/* Mobile Card View */}
                     <div className="md:hidden">
                         <SortableContext items={skillIds} strategy={verticalListSortingStrategy}>
                             {!skills.length ? (

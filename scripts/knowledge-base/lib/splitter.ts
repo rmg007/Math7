@@ -3,7 +3,7 @@
  * Hierarchy-aware text splitter that preserves document structure
  */
 
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 
 export interface DocumentChunk {
   content: string;

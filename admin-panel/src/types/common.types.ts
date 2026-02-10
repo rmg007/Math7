@@ -15,7 +15,7 @@ export type ProfileRow = Tables<'profiles'>;
 // Extends the DB Row with optional joined fields from related tables.
 export type QuestionListItem = QuestionRow & {
     metadata?: Json;
-    skills?: { name: string; domains: { name: string } | null } | null;
+    skills: { title: string; domains: { title: string } | null } | null;
 };
 
 // Domain list item type (direct alias — all fields match the domains Row)

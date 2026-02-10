@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Boxes } from 'lucide-react';
+import { Plus, Pencil, Trash2, Boxes, Search, X } from 'lucide-react';
 import { useSubjects, useCreateSubject, useUpdateSubject, useDeleteSubject, type Subject } from '../hooks/use-subjects';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +17,8 @@ export function SubjectsPage() {
   const updateSubject = useUpdateSubject();
   const deleteSubject = useDeleteSubject();
   const { toast } = useToast();
+
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
@@ -94,6 +96,37 @@ export function SubjectsPage() {
         }
       />
 
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search subjects..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all outline-none"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="text-xs font-medium text-gray-500 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+              {subjects?.filter(s => 
+                s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                s.slug.toLowerCase().includes(searchQuery.toLowerCase())
+              ).length || 0} Subjects
+            </div>
+          </div>
+        </div>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -129,7 +162,10 @@ export function SubjectsPage() {
                     />
                   </TableCell>
                 </TableRow>
-              ) : subjects?.map((s) => (
+              ) : subjects?.filter(s => 
+                s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                s.slug.toLowerCase().includes(searchQuery.toLowerCase())
+              ).map((s) => (
                 <TableRow key={s.subject_id}>
                   <TableCell className="font-medium">{s.name}</TableCell>
                   <TableCell className="font-mono text-xs">{s.slug}</TableCell>

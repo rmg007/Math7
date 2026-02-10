@@ -276,3 +276,31 @@ export function useUpdateDomainOrder() {
         },
     });
 }
+
+export function useBulkCreateDomains() {
+  const queryClient = useQueryClient();
+  const { currentApp } = useApp();
+
+  return useMutation({
+    mutationFn: async (domains: Record<string, unknown>[]) => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
+
+      const payload = domains.map(domain => ({
+        ...domain,
+        app_id: currentApp.app_id
+      }));
+
+      const { data, error } = await supabase
+        .from('domains')
+        .insert(payload as any)
+        .select();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['domains'] });
+      queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
+    },
+  });
+}

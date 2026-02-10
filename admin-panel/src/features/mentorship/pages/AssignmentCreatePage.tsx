@@ -39,12 +39,12 @@ export function AssignmentCreatePage() {
   const { data: group } = useQuery({
     queryKey: ['group', groupId, currentApp?.app_id],
     queryFn: async () => {
-      if (!currentApp?.app_id) throw new Error('No app selected')
+      if (!currentApp?.app_id || !groupId) throw new Error('Missing app or group context')
       
       const { data, error } = await supabase
         .from('groups')
         .select('*')
-        .eq('id', groupId!)
+        .eq('id', groupId)
         .eq('app_id', currentApp.app_id)
         .single()
       if (error) throw error
@@ -71,8 +71,11 @@ export function AssignmentCreatePage() {
       
       const { data, error } = await query
       if (error) throw error
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return data as any as Skill[]
+      
+      return (data as unknown as (Omit<Skill, 'id'> & { skill_id: string })[]).map(s => ({
+        ...s,
+        id: s.skill_id
+      }))
     },
     enabled: type === 'skill_mastery' && Boolean(currentApp?.app_id)
   })

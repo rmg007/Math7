@@ -3,6 +3,10 @@ import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { Tables } from '@/lib/database.types'
+import { StatusBadge, type StatusType } from '@/components/ui/status-badge'
+import { Pagination } from '@/components/ui/pagination'
+import { AdminHeader } from '@/components/ui/admin-header'
+import { Key, Search, X } from 'lucide-react'
 
 type InvitationCode = Tables<'invitation_codes'>
 
@@ -13,8 +17,11 @@ export function InvitationCodesPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [maxUses, setMaxUses] = useState("1")
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [expiresDays, setExpiresDays] = useState("")
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const fetchCodes = async () => {
     setLoading(true)
@@ -111,14 +118,11 @@ export function InvitationCodesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-          Invitation Codes
-        </h1>
-        <p className="text-gray-500 mt-1">
-          Generate and manage invitation codes for new admin users
-        </p>
-      </div>
+      <AdminHeader 
+        title="Invitation Codes"
+        description="Generate and manage invitation codes for new admin users."
+        icon={Key}
+      />
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -167,6 +171,40 @@ export function InvitationCodesPage() {
         </div>
       </div>
 
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search invitation codes..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all outline-none"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setCurrentPage(1);
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="text-xs font-medium text-gray-500 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+              {codes.filter(c => c.code.toLowerCase().includes(searchQuery.toLowerCase())).length} Codes
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100">
           <h2 className="text-lg font-semibold text-gray-900">All Invitation Codes</h2>
@@ -177,6 +215,7 @@ export function InvitationCodesPage() {
             No invitation codes yet. Generate your first code above.
           </div>
         ) : (
+          <>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px]">
               <thead className="bg-gray-50">
@@ -190,10 +229,11 @@ export function InvitationCodesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {codes.map((code) => {
+                {codes
+                  .filter(c => c.code.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .slice((currentPage - 1) * pageSize, currentPage * pageSize).map((code) => {
                   const isExpired = code.expires_at && new Date(code.expires_at) < new Date()
                   const isExhausted = (code.times_used ?? 0) >= (code.max_uses ?? 1)
-                  const isUsable = code.is_active && !isExpired && !isExhausted
 
                   return (
                     <tr key={code.id} className="hover:bg-gray-50">
@@ -203,13 +243,11 @@ export function InvitationCodesPage() {
                         </code>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          isUsable
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-600'
-                        }`}>
-                          {!code.is_active ? 'Deactivated' : isExpired ? 'Expired' : isExhausted ? 'Exhausted' : 'Active'}
-                        </span>
+                        {(() => {
+                          const status: StatusType = !code.is_active ? 'inactive' : isExpired ? 'error' : isExhausted ? 'exhausted' : 'active';
+                          const label = !code.is_active ? 'Deactivated' : isExpired ? 'Expired' : isExhausted ? 'Exhausted' : 'Active';
+                          return <StatusBadge status={status} label={label} />;
+                        })()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {code.times_used} / {code.max_uses}
@@ -246,6 +284,17 @@ export function InvitationCodesPage() {
               </tbody>
             </table>
           </div>
+          {codes.length > 0 && (
+             <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(codes.filter(c => c.code.toLowerCase().includes(searchQuery.toLowerCase())).length / pageSize)}
+              totalCount={codes.filter(c => c.code.toLowerCase().includes(searchQuery.toLowerCase())).length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
+            />
+          )}
+          </>
         )}
       </div>
     </div>

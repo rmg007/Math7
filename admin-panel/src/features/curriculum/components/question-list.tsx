@@ -3,21 +3,24 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
     usePaginatedQuestions, 
     useDeleteQuestion, 
-    useBulkDeleteQuestions, 
-    useBulkUpdateQuestionsStatus, 
     useDuplicateQuestion, 
-    useUpdateQuestionOrder,
-    useBulkCreateQuestions
+    useUpdateQuestionOrder, 
+    useBulkDeleteQuestions, 
+    useBulkUpdateQuestionsStatus,
+    useBulkCreateQuestions,
+    QuestionInsert
 } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatIdentifier } from '@/lib/format-utils';
 import type { DataColumn } from '@/lib/data-utils';
 import type { QuestionListItem } from '@/types/common.types';
@@ -30,18 +33,9 @@ import {
   CheckSquare,
   Square,
   Trash,
-  FileText
+  FileText,
+  Filter
 } from 'lucide-react';
-
-const QUESTION_COLUMNS: DataColumn[] = [
-    { key: 'content', header: 'content' },
-    { key: 'type', header: 'type' },
-    { key: 'points', header: 'points' },
-    { key: 'status', header: 'status' },
-    { key: 'options', header: 'options' },
-    { key: 'solution', header: 'solution' },
-    { key: 'explanation', header: 'explanation' },
-];
 import {
     DndContext,
     closestCenter,
@@ -61,9 +55,17 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-const DEFAULT_PAGE_SIZE = 10;
+const QUESTION_COLUMNS: DataColumn[] = [
+    { key: 'content', header: 'content' },
+    { key: 'type', header: 'type' },
+    { key: 'points', header: 'points' },
+    { key: 'status', header: 'status' },
+    { key: 'options', header: 'options' },
+    { key: 'solution', header: 'solution' },
+    { key: 'explanation', header: 'explanation' },
+];
 
-// QuestionListItem type imported from common.types
+const DEFAULT_PAGE_SIZE = 10;
 
 interface SortableRowProps {
     question: QuestionListItem;
@@ -71,12 +73,11 @@ interface SortableRowProps {
     onSelect: (id: string) => void;
     onDelete: (id: string) => void;
     onDuplicate: (id: string) => void;
-    renderStatusBadge: (status: string) => JSX.Element;
     isDragDisabled: boolean;
     isDuplicating: boolean;
 }
 
-function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, renderStatusBadge, isDragDisabled, isDuplicating }: SortableRowProps) {
+function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, isDragDisabled, isDuplicating }: SortableRowProps) {
     const {
         attributes,
         listeners,
@@ -93,7 +94,7 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, re
         boxShadow: isDragging ? '0 4px 12px rgba(0, 0, 0, 0.15)' : undefined,
         backgroundColor: isDragging ? '#f9fafb' : undefined,
         position: 'relative' as const,
-        zIndex: isDragging ? 10 : undefined,
+        zIndex: isDragging ? 50 : undefined,
     };
 
     return (
@@ -131,7 +132,7 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, re
                 </span>
             </td>
             <td className="px-6 py-4">
-                <span className="text-gray-700">{question.skills?.name}</span>
+                <span className="text-gray-700">{question.skills?.title}</span>
             </td>
             <td className="px-6 py-4">
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-orange-700 font-semibold text-sm">
@@ -139,7 +140,9 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, re
                 </span>
             </td>
             <td className="px-6 py-4">
-                {renderStatusBadge(question.status || 'draft')}
+                <StatusBadge 
+                    status={question.status?.toLowerCase() as StatusType || 'draft'} 
+                />
             </td>
             <td className="px-6 py-4">
                 {!question.skills ? (
@@ -179,7 +182,7 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, re
     );
 }
 
-function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, renderStatusBadge, isDragDisabled, isDuplicating }: SortableRowProps) {
+function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, isDragDisabled, isDuplicating }: SortableRowProps) {
     const {
         attributes,
         listeners,
@@ -195,7 +198,7 @@ function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, r
         opacity: isDragging ? 0.5 : 1,
         boxShadow: isDragging ? '0 8px 16px rgba(0, 0, 0, 0.15)' : undefined,
         position: 'relative' as const,
-        zIndex: isDragging ? 10 : undefined,
+        zIndex: isDragging ? 50 : undefined,
     };
 
     return (
@@ -232,16 +235,18 @@ function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, r
                     />
                 </div>
                 <div className="flex-shrink-0">
-                    {renderStatusBadge(question.status || 'draft')}
+                    <StatusBadge 
+                        status={question.status?.toLowerCase() as StatusType || 'draft'} 
+                    />
                 </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm">
                 <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                     {formatIdentifier(question.type)}
                 </span>
-                {question.skills?.name && (
+                {question.skills?.title && (
                     <span className="text-gray-600 text-xs">
-                        Skill: <span className="font-medium">{question.skills.name}</span>
+                        Skill: <span className="font-medium">{question.skills.title}</span>
                     </span>
                 )}
                 <span className="inline-flex items-center gap-1 text-gray-600">
@@ -511,7 +516,7 @@ export function QuestionList() {
                 };
             });
 
-            await bulkCreate.mutateAsync(questionsToImport);
+            await bulkCreate.mutateAsync(questionsToImport as QuestionInsert[]);
             showToast(`Successfully imported ${questionsToImport.length} questions`, 'success');
         } catch (error) {
             console.error('Import error:', error);
@@ -538,29 +543,6 @@ export function QuestionList() {
         setStatusFilter('all');
         setSelectedSkillId('all');
         setPage(1);
-    };
-
-    const renderStatusBadge = (status: string) => {
-        switch (status) {
-            case 'live':
-                return (
-                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                        Live
-                    </span>
-                );
-            case 'published':
-                return (
-                    <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
-                        Published
-                    </span>
-                );
-            default:
-                return (
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
-                        Draft
-                    </span>
-                );
-        }
     };
 
     if (!currentApp) {
@@ -654,33 +636,43 @@ export function QuestionList() {
                     </div>
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2 w-full sm:w-auto">
-                            <label className="text-sm font-medium text-gray-600">Skill:</label>
-                            <select
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <Filter className="h-4 w-4 text-gray-400" />
+                            <span className="text-sm font-medium text-gray-600">Skill</span>
+                            <Select
                                 value={selectedSkillId}
-                                onChange={(e) => setSelectedSkillId(e.target.value)}
-                                className="px-3 py-3 min-h-[48px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-base w-full sm:w-auto sm:min-w-[200px]"
+                                onValueChange={setSelectedSkillId}
                             >
-                                <option value="all">All Skills</option>
-                                {skills?.map((skill: { skill_id: string; title: string }) => (
-                                    <option key={skill.skill_id} value={skill.skill_id}>
-                                        {skill.title}
-                                    </option>
-                                ))}
-                            </select>
+                                <SelectTrigger className="w-full sm:w-[200px] h-10">
+                                    <SelectValue placeholder="All Skills" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Skills</SelectItem>
+                                    {skills?.map((skill: { skill_id: string; title: string }) => (
+                                        <SelectItem key={skill.skill_id} value={skill.skill_id}>
+                                            {skill.title}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
-                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2 w-full sm:w-auto">
-                            <label className="text-sm font-medium text-gray-600">Status:</label>
-                            <select
+
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <span className="text-sm font-medium text-gray-600">Status</span>
+                            <Select
                                 value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'published' | 'live')}
-                                className="px-3 py-3 min-h-[48px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-base w-full sm:w-auto"
+                                onValueChange={(v) => setStatusFilter(v as 'all' | 'draft' | 'published' | 'live')}
                             >
-                                <option value="all">All Status</option>
-                                <option value="draft">Draft</option>
-                                <option value="published">Published</option>
-                                <option value="live">Live</option>
-                            </select>
+                                <SelectTrigger className="w-full sm:w-[150px] h-10">
+                                    <SelectValue placeholder="All Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Status</SelectItem>
+                                    <SelectItem value="draft">Draft</SelectItem>
+                                    <SelectItem value="published">Published</SelectItem>
+                                    <SelectItem value="live">Live</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
 
                         {selectedIds.size > 0 && (
@@ -726,7 +718,6 @@ export function QuestionList() {
                     collisionDetection={closestCenter}
                     onDragEnd={handleDragEnd}
                 >
-                    {/* Desktop Table View */}
                     <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-100 bg-white">
                         <table className="w-full min-w-[1000px]">
                             <thead>
@@ -815,7 +806,6 @@ export function QuestionList() {
                                                 onSelect={handleSelectOne}
                                                 onDelete={handleDelete}
                                                 onDuplicate={handleDuplicate}
-                                                renderStatusBadge={renderStatusBadge}
                                                 isDragDisabled={isDragDisabled}
                                                 isDuplicating={duplicateQuestion.isPending}
                                             />
@@ -828,36 +818,26 @@ export function QuestionList() {
 
                     {/* Mobile Card View */}
                     <div className="md:hidden">
-                        <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>
-                            {!questions.length ? (
-                                <div className="rounded-xl border border-gray-100 p-8 text-center">
-                                    <div className="flex flex-col items-center">
-                                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                                            <FileText className="w-8 h-8 text-gray-400" />
-                                        </div>
-                                        <p className="text-gray-500 mb-4">
-                                            {hasActiveFilters ? 'No questions match your filters.' : 'No questions found. Create one to get started.'}
-                                        </p>
-                                        {hasActiveFilters ? (
-                                            <button
-                                                onClick={clearFilters}
-                                                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-                                            >
-                                                <X className="h-4 w-4" />
-                                                Clear filters
-                                            </button>
-                                        ) : (
-                                            <Link
-                                                to="/questions/new"
-                                                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
-                                            >
-                                                <Plus className="h-4 w-4" />
-                                                Create Question
-                                            </Link>
-                                        )}
-                                    </div>
-                                </div>
-                            ) : (
+                        {!questions.length ? (
+                            <div className="bg-white rounded-xl border border-gray-100 p-8">
+                                <EmptyState
+                                    icon={FileText}
+                                    title={hasActiveFilters ? "No matches found" : "No questions found"}
+                                    description={hasActiveFilters 
+                                        ? "Try adjusting your filters or search terms." 
+                                        : "Your curriculum library is empty."
+                                    }
+                                    action={hasActiveFilters ? {
+                                        label: "Clear all filters",
+                                        onClick: clearFilters
+                                    } : {
+                                        label: "Create First Question",
+                                        onClick: () => navigate('/questions/new')
+                                    }}
+                                />
+                            </div>
+                        ) : (
+                            <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>
                                 <div className="space-y-3">
                                     {questions.map((question: QuestionListItem) => (
                                         <SortableCard
@@ -867,14 +847,13 @@ export function QuestionList() {
                                             onSelect={handleSelectOne}
                                             onDelete={handleDelete}
                                             onDuplicate={handleDuplicate}
-                                            renderStatusBadge={renderStatusBadge}
                                             isDragDisabled={isDragDisabled}
                                             isDuplicating={duplicateQuestion.isPending}
                                         />
                                     ))}
                                 </div>
-                            )}
-                        </SortableContext>
+                            </SortableContext>
+                        )}
                     </div>
                 </DndContext>
 

@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { Database } from '@/lib/database.types';
+import { Tables, TablesInsert, TablesUpdate } from '@/lib/database.types';
 
-export type App = Database['public']['Tables']['apps']['Row'];
-export type AppInsert = Database['public']['Tables']['apps']['Insert'];
-export type AppUpdate = Database['public']['Tables']['apps']['Update'];
+export type App = Tables<'apps'>;
+export type AppInsert = TablesInsert<'apps'>;
+export type AppUpdate = TablesUpdate<'apps'>;
 
 export function useApps() {
   return useQuery({
@@ -21,7 +21,7 @@ export function useApps() {
         .order('display_name');
       
       if (error) throw error;
-      return data as (App & { subjects: { name: string } | null })[];
+      return data || [];
     },
   });
 }
@@ -38,6 +38,7 @@ export function useCreateApp() {
         .single();
       
       if (error) throw error;
+      if (!data) throw new Error('Failed to create app');
 
       // Automatically create a landing page entry for the new app
       await supabase.from('app_landing_pages').insert({
@@ -48,7 +49,7 @@ export function useCreateApp() {
         hero_subheadline: `Master your subjects with adaptive practice.`
       });
 
-      return data as App;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['apps-admin'] });
@@ -70,7 +71,8 @@ export function useUpdateApp() {
         .single();
 
       if (error) throw error;
-      return data as App;
+      if (!data) throw new Error(`App with ID ${id} not found for update.`);
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['apps-admin'] });

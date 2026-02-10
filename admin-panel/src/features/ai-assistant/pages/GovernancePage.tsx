@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Shield, Zap, Search, Activity } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { StatusBadge, StatusType } from '@/components/ui/status-badge';
+import ReactMarkdown from 'react-markdown';
 import {
   Card,
   CardContent,
@@ -70,8 +71,10 @@ export const GovernancePage: React.FC = () => {
 
       sessions.forEach(session => {
         const profile = session.created_by_profile;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const appName = (profile as any)?.apps?.display_name || 'Unknown App';
+        const profileApps = profile && typeof profile === 'object' && 'apps' in profile
+          ? (profile as { apps?: { display_name: string } | null }).apps
+          : null;
+        const appName = profileApps?.display_name || 'Unknown App';
         const appId = profile?.app_id || 'unknown';
 
         if (!aggMap.has(appId)) {
@@ -85,13 +88,15 @@ export const GovernancePage: React.FC = () => {
           });
         }
 
-        const entry = aggMap.get(appId)!;
-        entry.total_tokens += session.token_count || 0;
-        entry.total_questions += session.questions_generated || 0;
-        entry.session_count += 1;
-        
-        if (new Date(session.created_at) > new Date(entry.last_active)) {
-          entry.last_active = session.created_at;
+        const entry = aggMap.get(appId);
+        if (entry) {
+          entry.total_tokens += session.token_count || 0;
+          entry.total_questions += session.questions_generated || 0;
+          entry.session_count += 1;
+          
+          if (new Date(session.created_at) > new Date(entry.last_active)) {
+            entry.last_active = session.created_at;
+          }
         }
       });
 
@@ -184,13 +189,10 @@ export const GovernancePage: React.FC = () => {
                          </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className={cn(
-                          "flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold rounded-full uppercase",
-                          usage.is_throttled ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
-                        )}>
-                           <Activity className="w-3 h-3" />
-                           {usage.is_throttled ? 'Throttled' : 'Active'}
-                        </span>
+                        <StatusBadge
+                          status={(usage.is_throttled ? 'throttled' : 'active') as StatusType}
+                          icon={<Activity className="w-3 h-3" />}
+                        />
                       </div>
                     </div>
 
@@ -229,13 +231,47 @@ export const GovernancePage: React.FC = () => {
              </CardContent>
           </Card>
 
+          <div className="bg-white rounded-xl shadow-sm border border-[#1a1b4b]/10 overflow-hidden">
+            <div className="px-6 py-4 border-b border-[#1a1b4b]/10 bg-gray-50/50">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Shield className="w-5 h-5 text-purple-600" />
+                AI Security & Governance Protocol
+              </h3>
+            </div>
+            <div className="p-6">
+              <div className="prose prose-sm prose-purple max-w-none text-gray-700 leading-relaxed">
+                <div className="space-y-4">
+                  <ReactMarkdown>
+{`
+### 🛡️ Enterprise-Grade Security Architecture
+
+Our AI generation infrastructure is built on **Privacy-by-Design** principles, ensuring that your data remains secure throughout the entire curriculum generation lifecycle.
+
+#### 1. Data Isolation & Sovereignty
+Each application instance operates within a strictly isolated vector namespace. We enforce **Multi-Tenant Logical Isolation** at the database, embedding, and model routing layers to prevent cross-tenant data leakage.
+
+#### 2. Advanced Security Features
+*   **Automatic PII Scrubbing**: Our proprietary pre-processing layer redacts Personally Identifiable Information (PII) using NIST-compliant patterns before any data is transmitted to inference models.
+*   **Encrypted Inference Pathways**: All data in transit to LLM providers is encrypted using TLS 1.3 with Perfect Forward Secrecy.
+*   **Zero Retention Policy**: We utilize API endpoints configured with zero-data-retention, ensuring that training on your proprietary curriculum data is strictly prohibited.
+
+#### 3. Governance & Control
+*   **Intelligent Model Throttling**: Real-time monitoring of token consumption and session velocity prevents service degradation and manages operational costs.
+*   **Full Audit Traceability**: Every AI interaction is logged with precise timestamps, model metadata, and tenant IDs for comprehensive governance compliance.
+`}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-6 shadow-inner">
             <h3 className="text-sm font-bold text-indigo-900 uppercase tracking-widest mb-2 flex items-center gap-2">
                <Zap className="w-4 h-4" />
                Live Monitoring
             </h3>
             <p className="text-sm text-indigo-800 leading-relaxed">
-              Usage data is aggregated from the <code>ai_generation_sessions</code> table. 
+              Usage data is aggregated from the \`ai_generation_sessions\` table. 
               Costs are estimated based on public Gemini pricing and may vary.
             </p>
           </div>

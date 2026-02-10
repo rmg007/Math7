@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Globe, Pencil, Save, ChevronLeft, Plus, LayoutPanelTop } from 'lucide-react';
+import { Globe, Pencil, Save, ChevronLeft, Plus, LayoutPanelTop, Search, X } from 'lucide-react';
 import { useLandingPages, useUpdateLandingPage, useCreateLandingPage, type LandingPage } from '../hooks/use-landings';
 import { useApps } from '../hooks/use-apps';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { Pagination } from '@/components/ui/pagination';
 import { EmptyState } from '@/components/ui/empty-state';
 
 export function LandingsPage() {
@@ -24,7 +26,11 @@ export function LandingsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedAppId, setSelectedAppId] = useState<string>('');
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   const [editingLanding, setEditingLanding] = useState<LandingPage | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [formData, setFormData] = useState({
     hero_headline: '',
     hero_subheadline: '',
@@ -168,6 +174,43 @@ export function LandingsPage() {
         }
       />
 
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4 mb-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search landing pages (app name or headline)..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all outline-none"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setCurrentPage(1);
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="text-xs font-medium text-gray-500 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+              {landings?.filter(l => 
+                l.apps?.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                l.hero_headline?.toLowerCase().includes(searchQuery.toLowerCase())
+              ).length || 0} Pages
+            </div>
+          </div>
+        </div>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -182,6 +225,7 @@ export function LandingsPage() {
                 <TableHead>Application</TableHead>
                 <TableHead>Subdomain</TableHead>
                 <TableHead>Headline</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -202,13 +246,22 @@ export function LandingsPage() {
                     />
                   </TableCell>
                 </TableRow>
-              ) : landings?.map((l) => (
+              ) : landings?.filter(l => 
+                l.apps?.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                l.hero_headline?.toLowerCase().includes(searchQuery.toLowerCase())
+              ).slice((currentPage - 1) * pageSize, currentPage * pageSize).map((l) => (
                 <TableRow key={l.landing_page_id}>
                   <TableCell className="font-medium">{l.apps?.display_name}</TableCell>
                   <TableCell className="font-mono text-xs">{l.apps?.subdomain}.questerix.com</TableCell>
                   <TableCell className="max-w-md truncate">{l.hero_headline || 'No headline'}</TableCell>
+                  <TableCell>
+                    <StatusBadge 
+                      status={l.is_published ? 'live' : 'draft'} 
+                      label={l.is_published ? 'Published' : 'Draft'} 
+                    />
+                  </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(l)}>
+                    <Button variant="ghost" size="icon" onClick={() => handleEdit(l)} className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
                       <Pencil className="w-4 h-4" />
                     </Button>
                   </TableCell>
@@ -216,6 +269,16 @@ export function LandingsPage() {
               ))}
             </TableBody>
           </Table>
+          {landings && landings.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(landings.length / pageSize)}
+              totalCount={landings.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
+            />
+          )}
         </CardContent>
       </Card>
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>

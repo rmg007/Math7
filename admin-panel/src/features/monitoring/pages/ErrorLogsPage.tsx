@@ -14,8 +14,10 @@ import {
   Clock,
   Trash2,
   Info,
-  Copy
+  Copy,
+  Bug
 } from 'lucide-react';
+import { AdminHeader } from '@/components/ui/admin-header';
 import { 
   useErrorLogs, 
   useErrorLogStats, 
@@ -136,24 +138,21 @@ export function ErrorLogsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-            Error Logs
-          </h2>
-          <p className="text-muted-foreground mt-1">
-            Monitor and triage application errors in real-time. Zero external dependencies.
-          </p>
-        </div>
-        <Button 
-          variant="outline" 
-          onClick={() => refetch()}
-          className="gap-2"
-        >
-          <RefreshCw className="w-4 h-4" />
-          Refresh
-        </Button>
-      </div>
+      <AdminHeader 
+        title="Error Logs"
+        description="Monitor and triage application errors in real-time. Zero external dependencies."
+        icon={Bug}
+        actions={
+          <Button 
+            variant="outline" 
+            onClick={() => refetch()}
+            className="gap-2 shadow-sm"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </Button>
+        }
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

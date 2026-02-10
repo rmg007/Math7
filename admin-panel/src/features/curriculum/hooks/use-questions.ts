@@ -2,9 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/lib/database.types';
 import { useApp } from '@/hooks/use-app';
+import type { QuestionListItem } from '@/types/common.types';
 
 type Question = Database['public']['Tables']['questions']['Row'];
-type QuestionInsert = Database['public']['Tables']['questions']['Insert'];
+export type QuestionInsert = Database['public']['Tables']['questions']['Insert'];
 
 export type CurriculumStatus = Database['public']['Enums']['curriculum_status'];
 
@@ -54,7 +55,7 @@ export function useQuestions(skillId?: string) {
       const { data, error } = await query;
       
       if (error) throw error;
-      return data as unknown as (Question & { skills: { name: string, domains: { name: string } | null } | null })[];
+      return (data || []) as unknown as QuestionListItem[];
     },
     enabled: Boolean(currentApp?.app_id),
   });
@@ -65,7 +66,7 @@ export function usePaginatedQuestions(params: PaginationParams) {
 
   return useQuery({
     queryKey: ['questions-paginated', params, currentApp?.app_id],
-    queryFn: async (): Promise<PaginatedResponse<Question & { skills: { name: string, domains: { name: string } | null } | null }>> => {
+    queryFn: async (): Promise<PaginatedResponse<QuestionListItem>> => {
       if (!currentApp?.app_id) throw new Error('No app selected');
 
       const { page, pageSize, search, status, skillId, sortBy = 'created_at', sortOrder = 'desc' } = params;
@@ -104,7 +105,7 @@ export function usePaginatedQuestions(params: PaginationParams) {
       if (error) throw error;
 
       return {
-        data: data as unknown as (Question & { skills: { name: string, domains: { name: string } | null } | null })[],
+        data: (data || []) as unknown as QuestionListItem[],
         totalCount: count ?? 0,
         page,
         pageSize,

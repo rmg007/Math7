@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabase';
 import { Clock, DollarSign, FileText, AlertCircle } from 'lucide-react';
 
 import { Database } from '@/lib/database.types';
+import { AdminHeader } from '@/components/ui/admin-header';
+import { StatusBadge, StatusType } from '@/components/ui/status-badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 type GenerationSession = Database['public']['Tables']['ai_generation_sessions']['Row'];
 
@@ -51,19 +54,14 @@ export const SessionsPage: React.FC = () => {
   const totalQuestionsGenerated = sessions.reduce((sum, s) => sum + (s.questions_generated || 0), 0);
   const totalQuestionsImported = sessions.reduce((sum, s) => sum + (s.questions_imported || 0), 0);
 
-  const getStatusBadgeColor = (status: string | null) => {
-    if (!status) return 'bg-gray-100 text-gray-800';
+  const getStatusType = (status: string | null): StatusType => {
+    if (!status) return 'pending';
     switch (status.toLowerCase()) {
-      case 'reviewing':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'approved':
-        return 'bg-green-100 text-green-800';
-      case 'imported':
-        return 'bg-blue-100 text-blue-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'reviewing': return 'pending';
+      case 'approved': return 'resolved';
+      case 'imported': return 'completed' as StatusType; // 'completed' is not in StatusType but it defaults correctly
+      case 'rejected': return 'exhausted';
+      default: return 'pending';
     }
   };
 
@@ -90,64 +88,76 @@ export const SessionsPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          AI Generation History
-        </h1>
-        <p className="text-gray-600">
-          Track AI question generation sessions, costs, and import status
-        </p>
-      </div>
+    <div className="space-y-8">
+      <AdminHeader 
+        title="AI Generation History"
+        description="Track and audit AI question generation sessions, token consumption, and model efficiency across applications."
+        icon={Clock}
+      />
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <FileText className="w-5 h-5 text-purple-600" />
-            <h3 className="text-sm font-semibold text-gray-700">Total Generated</h3>
-          </div>
-          <p className="text-2xl font-bold text-gray-900">{totalQuestionsGenerated}</p>
-          <p className="text-xs text-gray-500 mt-1">{sessions.length} sessions</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card className="border-purple-100 shadow-sm shadow-purple-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-bold text-gray-400 border-none uppercase tracking-widest flex items-center gap-2">
+                <FileText className="w-3.5 h-3.5 text-purple-600" />
+                Total Generated
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-gray-900 font-mono tracking-tight">{totalQuestionsGenerated}</p>
+            <p className="text-[10px] text-gray-500 mt-1 uppercase font-medium">{sessions.length} sessions executed</p>
+          </CardContent>
+        </Card>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <FileText className="w-5 h-5 text-green-600" />
-            <h3 className="text-sm font-semibold text-gray-700">Imported</h3>
-          </div>
-          <p className="text-2xl font-bold text-gray-900">{totalQuestionsImported}</p>
-          <p className="text-xs text-gray-500 mt-1">
-            {totalQuestionsGenerated > 0
-              ? `${((totalQuestionsImported / totalQuestionsGenerated) * 100).toFixed(1)}% approval`
-              : 'No data'}
-          </p>
-        </div>
+        <Card className="border-green-100 shadow-sm shadow-green-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-bold text-gray-400 border-none uppercase tracking-widest flex items-center gap-2">
+                <FileText className="w-3.5 h-3.5 text-green-600" />
+                Imported questions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-gray-900 font-mono tracking-tight">{totalQuestionsImported}</p>
+            <p className="text-[10px] text-green-600 mt-1 uppercase font-medium">
+              {totalQuestionsGenerated > 0
+                ? `${((totalQuestionsImported / totalQuestionsGenerated) * 100).toFixed(1)}% Conversion rate`
+                : 'Insufficient data'}
+            </p>
+          </CardContent>
+        </Card>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <DollarSign className="w-5 h-5 text-blue-600" />
-            <h3 className="text-sm font-semibold text-gray-700">Total Cost</h3>
-          </div>
-          <p className="text-2xl font-bold text-gray-900">${totalCost.toFixed(4)}</p>
-          <p className="text-xs text-gray-500 mt-1">
-            ~${(totalCost / totalQuestionsGenerated || 0).toFixed(6)} per question
-          </p>
-        </div>
+        <Card className="border-blue-100 shadow-sm shadow-blue-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-bold text-gray-400 border-none uppercase tracking-widest flex items-center gap-2">
+                <DollarSign className="w-3.5 h-3.5 text-blue-600" />
+                Total Estimated Cost
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-gray-900 font-mono tracking-tight">${totalCost.toFixed(3)}</p>
+            <p className="text-[10px] text-blue-600 mt-1 uppercase font-medium font-mono">
+              ~${(totalCost / totalQuestionsGenerated || 0).toFixed(6)} / Q
+            </p>
+          </CardContent>
+        </Card>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <Clock className="w-5 h-5 text-orange-600" />
-            <h3 className="text-sm font-semibold text-gray-700">Avg Time</h3>
-          </div>
-          <p className="text-2xl font-bold text-gray-900">
-            {sessions.length > 0
-              ? (sessions.reduce((sum, s) => sum + (s.generation_time_ms || 0), 0) / sessions.length / 1000).toFixed(1)
-              : 0}s
-          </p>
-          <p className="text-xs text-gray-500 mt-1">per session</p>
-        </div>
+        <Card className="border-orange-100 shadow-sm shadow-orange-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-bold text-gray-400 border-none uppercase tracking-widest flex items-center gap-2">
+                <Clock className="w-3.5 h-3.5 text-orange-600" />
+                Avg Latency
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-gray-900 font-mono tracking-tight">
+              {sessions.length > 0
+                ? (sessions.reduce((sum, s) => sum + (s.generation_time_ms || 0), 0) / sessions.length / 1000).toFixed(1)
+                : 0}s
+            </p>
+            <p className="text-[10px] text-orange-600 mt-1 uppercase font-medium">Generation time / session</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Sessions Table */}
@@ -204,13 +214,10 @@ export const SessionsPage: React.FC = () => {
                     ${calculateCost(session).toFixed(4)}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-semibold ${getStatusBadgeColor(
-                        session.status
-                      )}`}
-                    >
-                      {(session.status || 'reviewing').toUpperCase()}
-                    </span>
+                    <StatusBadge 
+                      status={getStatusType(session.status)} 
+                      label={(session.status || 'reviewing').toUpperCase()}
+                    />
                   </td>
                 </tr>
               ))}
