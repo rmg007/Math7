@@ -282,4 +282,17 @@ Lessons learned from bugs, incidents, and development discoveries.
   - **Documentation Pruning**: High-signal repos require aggressive pruning of "session logs" once their tasks are consolidated to prevent context window pollution for AI agents.
 - **Reference**: `admin-panel/src/App.tsx`, `tasks.md`, `docs/status/MAIN_BRANCH_STATUS.md`
 
+## 2026-02-10: Search Efficiency & Forensic Hardening
+
+- **Context**: Refined the `/forensics` protocol and fixed a major performance anti-pattern (Greedy Search).
+- **Major Changes**:
+  - **Optimized Search**: Updated all forensic scripts to use `-t` (type) and `-g` (glob) patterns to exclude `node_modules`, `dist`, and `build` folders.
+  - **Logic-Based Integrity**: Upgraded "Dead File" detection from simple size checks to logic-stripping (removing comments/imports) to detect "hollow placeholders."
+  - **Autopsy Refinement**: Added log-end verification to detect "Zombie Processes" that fail to reach a "Summary" or "Done" state.
+- **Lessons Learned**:
+  - **Greedy Search Anti-Pattern**: Attempting to scan a monorepo root without explicit exclusions is a critical inefficiency. It pollutes the AI's context with noise from dependencies and build artifacts.
+  - **Rust Matcher Performance**: Using `ripgrep` (or its internal equivalent in `grep_search`) is only effective when guided; default recursive searches are "greedy" and dangerous for large directories.
+  - **Placeholders vs. Features**: A file can have 500 lines of types and imports but 0 lines of executable logic. Forensics must strip structural noise to verify functional presence.
+- **Reference**: `.agent/workflows/forensics.md`, `LEARNING_LOG.md`
+
 ---

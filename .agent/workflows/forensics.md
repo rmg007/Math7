@@ -27,26 +27,27 @@ description: All-Seeing Auditor Protocol - Deep-Dive Forensic Audit
 - **Goal**: Ensure the audit isn't failing due to missing environment configuration.
 
 ### STEP 1: THE TAXONOMY SCAN (Known Vulnerabilities)
-- **Action**: Scan for confirmed architectural anti-patterns.
+- **Action**: Scan for confirmed architectural anti-patterns with optimized filters.
 - **Core Checks**:
   ```powershell
-  # VUL-001: Anonymous Auth without anchors
-  grep -r "signInAnonymously" student-app/lib/
+  # VUL-001: Anonymous Auth without anchors (Ignore node_modules/dist)
+  rg "signInAnonymously" -t dart -t ts -t js -g "!node_modules" -g "!dist"
+
   # VUL-002: Subject Leakage (Missing domain_id in RLS)
-  grep -A 10 "POLICY.*mentor" supabase/migrations/*.sql | Select-String -Pattern "domain_id" -NotMatch
-  # VUL-003: client-side result trust
-  grep -r "is_correct" student-app/lib/services/sync*
+  rg -A 10 "POLICY.*mentor" supabase/migrations/*.sql | Select-String -Pattern "domain_id" -NotMatch
+
+  # VUL-003: Client-side result trust
+  rg "is_correct" -t dart -t ts -t js -g "!node_modules" -g "!dist" student-app/lib/services/sync*
   ```
 - **Report as**: 🔍 TAXONOMY FINDINGS
 
 ### STEP 2: DETECT "HOLLOW" INFRASTRUCTURE
 - **Action**: Inspect core files (`lib/supabase.ts`, `database.dart`, `auth_provider.dart`).
 - **Threshold**: Flag files that contain **only** imports, types, interfaces, or comments.
-- **Reasoning**: A file with no logic is a placeholder disguised as a feature.
 - **Command**:
   ```powershell
-  # Logic-check: find files that lack function/class bodies or executable logic
-  Get-ChildItem -Recurse -Include *.ts,*.tsx,*.dart | ForEach-Object {
+  # Logic-check: skip node_modules/dist, find files lacking executable logic
+  Get-ChildItem -Recurse -Include *.ts,*.tsx,*.dart | Where-Object { $_.FullName -notmatch "node_modules|dist|build" } | ForEach-Object {
       $c = Get-Content $_.FullName -Raw
       $logic = $c -replace '(?s)/\*.*?\*/|//.*', '' -replace 'import.*?;', '' -replace 'interface.*\{.*?\}', '' -replace 'type.*?;', ''
       if ($logic.Trim().Length -lt 20) { Write-Host "💀 DEAD FILE (Hollow): $($_.FullName)" -ForegroundColor Red }
@@ -65,12 +66,14 @@ description: All-Seeing Auditor Protocol - Deep-Dive Forensic Audit
   foreach ($log in $logs) {
       if (Test-Path $log) {
           $content = Get-Content $log
-          $lastLine = $content[-1]
-          if ($lastLine -notmatch "Exit Code|Summary|Done|Total|passed") { 
-              Write-Host "🧟 ZOMBIE STATE: $log (Incomplete log - possible hang)" -ForegroundColor Red 
-          }
-          if ($log -match "tsc_errors" -and ($content.Count -gt 50 -or $content -match "implicitly has an 'any' type")) {
-              Write-Host "🧟 TYPE COLLAPSE: $log is too large or contains implicit 'any' usage" -ForegroundColor Red
+          if ($content.Count -gt 0) {
+              $lastLine = $content[-1]
+              if ($lastLine -notmatch "Exit Code|Summary|Done|Total|passed") { 
+                  Write-Host "🧟 ZOMBIE STATE: $log (Incomplete log - possible hang)" -ForegroundColor Red 
+              }
+              if ($log -match "tsc_errors" -and ($content.Count -gt 50 -or $content -match "implicitly has an 'any' type")) {
+                  Write-Host "🧟 TYPE COLLAPSE: $log is too large or contains implicit 'any' usage" -ForegroundColor Red
+              }
           }
       }
   }
@@ -79,23 +82,22 @@ description: All-Seeing Auditor Protocol - Deep-Dive Forensic Audit
 
 ### STEP 4: MIGRATION ARCHAEOLOGY
 - **Action**: Search `supabase/migrations/` for `fix`, `recursion`, `harden`, `leak`, `patch`.
-- **Logic**: A patch is a confession. If a migration "hardens RLS", the system was previously vulnerable. If it "fixes recursion", the DB was crashing.
 - **Command**:
   ```powershell
-  Select-String -Path "supabase/migrations/*.sql" -Pattern "fix|recursion|harden|leak|patch" | Select-Object FileName, LineNumber, Line -Unique
+  rg "fix|recursion|harden|leak|patch" supabase/migrations/*.sql --no-heading --no-line-number | Select-Object -Unique
   ```
 - **Report as**: 🔓 SECURITY GAPS
 
 ### STEP 5: CONFIG DRIFT SCAN
-- **Action**: Compare `.env.example` (and other samples) against actual code usage (`process.env` or `import.meta.env`).
-- **Detection**: Environment variables used in code but missing from the example/sample documentation.
+- **Action**: Verify every `env` var used in code is documented.
 - **Command**:
   ```powershell
-  # Find vars in code
-  $codeVars = grep -roP "(?:process\.env\.|import\.meta\.env\.)[A-Z0-9_]+" . | Select-Object -Unique
-  # Check against .env.example
+  Write-Host "--- Scanning for environment variable usage ---"
+  # Optimized rg: filter by type, exclude node_modules, strip prefix in-situ
+  $codeVars = rg "(process\.env|import\.meta\.env)\.(?<var>[A-Z0-9_]+)" -t ts -t js -g "!node_modules" -g "!dist" -o --replace '$var' --no-heading --no-line-number | sort -u
+  
   foreach ($v in $codeVars) {
-      if (-not (Select-String -Path ".env.example" -Pattern ($v -replace ".*env\.", ""))) {
+      if (-not (rg "\b$v\b" .env.example -q)) {
           Write-Host "💣 CONFIG BOMB: $v used in code but missing from .env.example" -ForegroundColor Yellow
       }
   }
@@ -103,24 +105,20 @@ description: All-Seeing Auditor Protocol - Deep-Dive Forensic Audit
 - **Report as**: 💣 CONFIG BOMBS
 
 ### STEP 6: SILENT FAILURE HUNT
-- **Action**: Project-wide search for "Silent Killers."
-- **Patterns**: `catch (e) {}`, `test.skip`, `dangerouslySetInnerHTML`, and `as any`.
-- **Logic**: Empty catch blocks swallow errors; skipped tests hide regressions; `as any` bypasses the safety of the type system.
+- **Action**: Project-wide search for "Silent Killers" (Exclude node_modules/dist).
 - **Command**:
   ```powershell
-  # Search for the "Four Horsemen" of stability risk
-  grep -rnE "catch.*\{\}|test\.skip|dangerouslySetInnerHTML|as any" --include="*.ts" --include="*.tsx" --include="*.dart" .
+  rg "catch.*\{\}|test\.skip|dangerouslySetInnerHTML|as any" -t ts -t js -t dart -g "!node_modules" -g "!dist" --no-heading
   ```
 - **Report as**: 📉 STABILITY RISKS
 
 ### STEP 7: AI CONTENT GOVERNANCE (Phase 12 Readiness)
 - **Action**: Verify AI generation and validation integrity.
-- **Checks**:
+- **Command**:
   ```powershell
-  # Check for unvalidated prompt templates
-  grep -r "PromptTemplate" supabase/functions/
-  # Check for missing temperature/token limits in AI calls
-  grep -r "generateContent" supabase/functions/ | Select-String -Pattern "temperature" -NotMatch
+  # Check for unvalidated templates or missing safety params
+  rg "PromptTemplate" -g "!node_modules" supabase/functions/
+  rg "generateContent" -g "!node_modules" supabase/functions/ | Select-String -Pattern "temperature" -NotMatch
   ```
 - **Report as**: 🤖 AI GOVERNANCE RISKS
 
