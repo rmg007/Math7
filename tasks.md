@@ -1,13 +1,13 @@
 # Questerix Tasks
 
-## 🟡 Up Next
+All tasks complete. Backlog is empty.
 
-### Stryker — Mutation Testing (DEFERRED)
-- **Status:** Evaluated — `@stryker-mutator/core` has Node.js 22 compatibility issues
-- **Recommendation:** Defer until test count justifies the CI time investment
-- **Prerequisite:** Admin panel needs >50% unit test coverage to make mutation testing meaningful
+## ✅ Recently Completed
 
-## 🟢 Backlog
-
-### Student App — Query Performance
-- [ ] `attempt_repository.dart` → `getStatsBySkill()` fetches all attempts; needs Drift JOIN
+- **Gitleaks** — pre-commit hook + CI workflow
+- **Dependabot** — weekly dependency scanning (npm, pip, GitHub Actions)
+- **Semgrep** — 6 custom rules + CI workflow
+- **pgTAP** — 16 RLS isolation tests in CI
+- **plpgsql_check** — enabled ext, found & fixed 7 broken functions
+- **Stryker** — evaluated, deferred (Node.js 22 compat + low test count)
+- **Student App query perf** — `getStatsBySkill()` rewritten with Drift JOIN

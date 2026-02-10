@@ -116,20 +116,39 @@ class AttemptRepository {
     return rows.map(DriftMappers.toAttempt).toList();
   }
 
-  /// Get attempt statistics for a skill
+  /// Get attempt statistics for a skill (uses JOIN, no full-table scan)
   Future<Map<String, int>> getStatsBySkill(String skillId) async {
-    // This would require a join with questions table
-    // For now, return basic stats
-    if (_userId == null) {
+    final userId = _userId;
+    if (userId == null) {
       return {'total': 0, 'correct': 0};
     }
 
-    // TODO: Improve query to filter by skill via JOIN
-    final attempts = await _database.select(_database.attempts).get();
-    final total = attempts.length;
-    final correct = attempts.where((a) => a.isCorrect).length;
+    final query = _database.selectOnly(_database.attempts).join([
+      innerJoin(
+        _database.questions,
+        _database.questions.id.equalsExp(_database.attempts.questionId),
+      ),
+    ]);
 
-    return {'total': total, 'correct': correct};
+    query.where(
+      _database.questions.skillId.equals(skillId) &
+          _database.attempts.userId.equals(userId) &
+          _database.attempts.deletedAt.isNull(),
+    );
+
+    final totalExpr = countAll();
+    final correctExpr = _database.attempts.isCorrect.count(
+      filter: _database.attempts.isCorrect.equals(true),
+    );
+
+    query..addColumns([totalExpr, correctExpr]);
+
+    final result = await query.getSingleOrNull();
+
+    return {
+      'total': result?.read(totalExpr) ?? 0,
+      'correct': result?.read(correctExpr) ?? 0,
+    };
   }
 
   /// Batch upsert attempts (for sync)

@@ -1,3 +1,149 @@
+## 2026-02-10: Security Tooling Integration & plpgsql_check Bug Discovery
+
+### Session Context
+
+- **Objective**: Automate security scanning (Gitleaks, Dependabot, Semgrep, pgTAP) and validate database function integrity.
+- **Scope**: CI workflows, pre-commit hooks, Supabase functions, Student App performance.
+- **Outcome**: ✅ All security tools automated. 7 broken database functions discovered and fixed. Query performance bug resolved.
+
+---
+
+### Key Learnings
+
+#### 1. plpgsql_check Finds Bugs That CREATE FUNCTION Won't
+**What Happened**: Ran `plpgsql_check` against all 41 public PL/pgSQL functions and found 7 with hard errors — referencing non-existent columns (`duration_seconds`, `status`, `deleted_at`, `display_name`, `tokens_remaining`). These functions were syntactically valid but would crash at runtime.
+**Root Cause**: Schema evolved over time (columns renamed/removed) but functions weren't updated. PostgreSQL doesn't validate function bodies against the schema at creation time.
+**Rule**: "Run `plpgsql_check` after any schema migration that renames or removes columns. Functions that reference those columns will silently break."
+
+#### 2. Hardcoded Secrets in Utility Scripts
+**What Happened**: Gitleaks detected a hardcoded database password in `scripts/generate_types.js`. The password was committed months ago and never caught.
+**Fix**: Replaced with `SUPABASE_DB_PASSWORD` environment variable.
+**Rule**: "Utility scripts are the #1 hiding spot for hardcoded credentials. Always grep for passwords before committing scripts."
+
+#### 3. Semgrep Rules Need Tuning — Start with High-Confidence
+**What Happened**: Initial Semgrep rules flagged hundreds of false positives for `text-gray-400` (accessibility) and legitimate icon buttons. After tuning with negative lookaheads, noise dropped to near zero.
+**Rule**: "Start new Semgrep rules at severity INFO with `confidence: LOW`. Promote to WARNING only after validating on the real codebase."
+
+#### 4. Schema Drift in RPC Functions Is Silent and Deadly
+**What Happened**: `start_session()` referenced columns (`status`, `metadata`) that existed in an older schema but were removed. The function was still callable — it just threw a runtime error when invoked.
+**Pattern**: `sessions` table had `total_time_ms` not `duration_seconds`, `full_name` not `display_name`, `current_token_usage` not `tokens_remaining`.
+**Rule**: "When renaming columns, always search for the old name across ALL database functions: `SELECT proname, prosrc FROM pg_proc WHERE prosrc LIKE '%old_column_name%'`"
+
+#### 5. Full-Table Scans Hidden Behind Simple Method Names
+**What Happened**: `getStatsBySkill()` in the Student App was doing `select * from attempts` (ALL attempts, ALL users, ALL skills) and then filtering in Dart. With 10k attempts, this loads everything into memory.
+**Fix**: Replaced with a Drift JOIN through `questions` table + SQL aggregation (`COUNT`). Now only matching rows are counted, never leaving the database.
+**Rule**: "Any `select(table).get()` followed by `.where()` in Dart is a red flag. Push filtering to SQL."
+
+#### 6. pgcrypto Must Be Schema-Qualified in User Functions
+**What Happened**: `recover_student_identity()` called `crypt()` without a schema prefix. Since it has `SET search_path = 'public'`, it couldn't find the function in the `extensions` schema.
+**Fix**: Use `extensions.crypt()` instead of `crypt()`.
+**Rule**: "All extension functions must be called with schema prefix when `search_path` is restricted (which it should be for SECURITY DEFINER functions)."
+
+---
+
+### Files Changed
+
+| File | Action | Why |
+|------|--------|-----|
+| `.gitleaks.toml` | Created | Secret scanning configuration |
+| `.github/dependabot.yml` | Created | Automated dependency scanning |
+| `.github/workflows/gitleaks.yml` | Created | CI secret scanning |
+| `.github/workflows/semgrep.yml` | Created | CI SAST scanning |
+| `.semgrep/questerix-rules.yml` | Created | Custom a11y + security rules |
+| `scripts/hooks/pre-commit` | Created | Local secret scanning |
+| `scripts/generate_types.js` | Modified | Removed hardcoded password |
+| `supabase/tests/rls/rls_core_tests.sql` | Created | 16 pgTAP RLS tests |
+| `AGENTS.md` | Modified | Added Communication Rules |
+| `student-app/.../attempt_repository.dart` | Modified | JOIN-based query perf fix |
+| DB: 7 functions | Migrated | Fixed column references + type casts |
+
+---
+
+
+
+### Session Context
+
+- **Objective**: Fix all failing E2E tests (functional + bulk import), set up visual regression testing, and resolve TypeScript build errors.
+- **Scope**: `admin-panel/tests/`, `admin-panel/src/features/curriculum/components/question-form.tsx`
+- **Outcome**: ✅ 15/15 functional E2E tests green, 10/10 visual regression tests green, 0 TypeScript errors.
+
+---
+
+### Key Learnings
+
+#### 1. Mock Data Must Pass Client-Side Validation
+**What Happened**: Bulk import tests used mock question data with `options: { A: '4', B: '5' }`, but the app validates via Zod schema which expects `[{ text: string, is_correct: boolean }]`. The Edge Function mock bypasses validation on queue insert, but `processImport()` re-validates.
+**Rule**: "If the app has client-side validation (Zod/Yup), mock data in E2E tests MUST match the schema — not just the API shape."
+
+#### 2. Never Assert on Transient Toasts
+**What Happened**: Tests checking for `getByText('Import Successful')` failed because toasts auto-dismiss before the assertion runs.
+**Solution**: Assert on persistent state changes (buffer count "0 Candidates", button disabled state) instead.
+**Rule**: "E2E assertions should target durable DOM state, not ephemeral notifications."
+
+#### 3. Supabase RPC URL Format
+**What Happened**: Route mock `**/rpc/import_questions_bulk` didn't match because Supabase client calls `/rest/v1/rpc/<name>`.
+**Rule**: "Supabase RPC mocks need pattern `**/*<rpc_name>*` or `**/rest/v1/rpc/<name>` — not just `**/rpc/<name>`."
+
+#### 4. TypeScript `as Json` vs `as unknown as Json`
+**What Happened**: Casting form `data.solution` directly `as Json` fails when the intermediate type `{}` doesn't overlap with `Json`.
+**Solution**: Bridge through `unknown`: `{ correct_option_id: data.solution } as unknown as Json`.
+**Rule**: "When Supabase-generated Json types conflict with form data types, use `as unknown as Json` — never suppress with `any`."
+
+---
+
+## 2026-02-10: Admin Panel Standardization & Premium UX Finalization
+
+
+### Session Context
+
+- **Objective**: Finalize UI/UX standardization across the Admin Panel, implement bulk operations for curriculum nodes, and replace all generic loading states.
+- **Scope**: `admin-panel/src/features/`, `src/App.tsx`, `AuthGuards`, `DomainList`.
+- **Outcome**: ✅ Premium loading screens implemented for all transitions. Bulk status updates added to Domain management. "Zero-any" standard applied to all management tables.
+
+---
+
+### Key Learnings
+
+#### 1. The "Shadow Selection" Pattern for Bulk Actions
+
+**What Happened**: Implementing bulk actions in complex tables (like Domains or Users) requires a balance between "clean" data viewing and administrative power. 
+**Solution**: Used a `selectedIds` state that triggers a high-impact, floating bulk action bar at the bottom scroll boundary.
+**Lesson**: Don't put bulk buttons in the table header if they consume space. Use a "Shadow" bar that only materializes when needed.
+**Rule**: "Selection drives materialization. If 0 items are selected, the action bar should not exist in the DOM flow."
+
+#### 2. Aesthetic Continuity in Loading States
+
+**What Happened**: Generic spinners and `"Loading..."` text broke the "Premium Dashboard" illusion during initial boot and role verification.
+**Solution**: Built a branded `LoadingPage` component with gradient pulses and high-impact typography.
+**Lesson**: Loading states are as much a brand touchpoint as the landing page. If the app feels "cheap" for 2 seconds, the user's trust is diminished.
+**Rule**: "Every transition is a branding opportunity. Replace spinners with pulsing brand anchors."
+
+#### 3. Zero-State Stewardship (The EmptyState Pattern)
+
+**What Happened**: Empty tables (`Subjects`, `Landings`) were rendering as blank white spaces or headers with no content, which looked like application errors.
+**Solution**: Enforced the `EmptyState` component with a relevant icon, narrative description, and a primary CTA (provisioning button).
+**Lesson**: An empty page is a high-risk area for user abandonment. Guide them on "what to do next" rather than showing they have "nothing to see."
+
+#### 4. Diagnostic Toast layering
+
+**What Happened**: Toasts were being obscured by the sidebar or floating action bars. No single z-index was robust across all pages.
+**Fix**: Updated the `ToastViewport` to a standardized high z-index and verified it against the new animated bulk action bars.
+**Rule**: "Diagnostic feedback (Toasts/Modals) must ALWAYS trump operational UI (Tables/Bars)."
+
+---
+
+### Files Modified/Created
+
+| File                                         | Action   | Purpose                                      |
+| -------------------------------------------- | -------- | -------------------------------------------- |
+| `admin-panel/src/App.tsx`                    | Modified | Premium `LoadingPage` implementation         |
+| `.../features/auth/components/auth-guard.tsx` | Modified | Branded session verification UI              |
+| `.../curriculum/components/domain-list.tsx`  | Modified | Bulk Status Update implementation            |
+| `.../platform/pages/SubjectsPage.tsx`        | Modified | EmptyState alignment                         |
+| `.../platform/pages/LandingsPage.tsx`        | Modified | Table clipping & EmptyState fix              |
+
+---
+
 ## 2026-02-09: Admin Panel 400 Error — RLS Function Column Mismatch
 
 ### Session Context
@@ -898,3 +1044,78 @@ Completed the standardization of the Admin Panel UI, focusing on premium aesthet
 ---
 
 This document captures lessons learned during development to prevent repeated mistakes and improve future implementations.
+
+---
+
+## 2026-02-10: Performance Optimization & Test Credential Consolidation
+
+### Session Context
+
+- **Objective**: Optimize Admin Panel list rendering performance; consolidate scattered test credentials into a single source of truth; provision verified test users (super_admin, admin, mentor) in Supabase.
+- **Scope**: 9 feature files optimized, `tests/test-utils.ts`, `tests/setup-test-users.js`, `.env.test.local`, `.agent/TEST_ACCOUNTS.md`.
+- **Outcome**: ✅ All list components memoized. ✅ All test users synced (4/4). ✅ 23 stale log/output files cleaned from admin-panel root.
+
+---
+
+### Key Learnings
+
+#### 1. React.memo + useCallback: The Memoization Discipline
+
+**What Happened**: Large curriculum lists (questions, skills, domains) with inline callbacks caused excessive re-renders on every keystroke in the search input.
+**Solution**: Extracted row/card components into standalone `React.memo` wrappers and stabilized all event handlers (copy, delete, select, navigate) with `useCallback`.
+**Lesson**: `React.memo` is only effective if ALL function props are stable references. A single unstable callback prop will defeat the memo entirely.
+**Rule**: "If you memo the child, you must `useCallback` every function prop. No exceptions."
+
+#### 2. Hook Execution Order: Never Call Hooks After Early Returns
+
+**What Happened**: `getStatus` and `getSkillTitle` in `GroupDetailPage.tsx` were defined as `useCallback` hooks AFTER conditional `if (groupLoading) return ...` early returns. React enforces a strict hook execution order, and calling hooks conditionally or after returns is a violation.
+**Solution**: Hoisted all `useCallback` definitions above every conditional return statement.
+**Rule**: "All hooks must live in the unconditional top of the component body. Early returns come after the last hook."
+
+#### 3. Temporal Dead Zone in useEffect Dependencies
+
+**What Happened**: `UserManagementPage.tsx` had `useEffect` referencing `getCurrentUser` and `fetchUsers` before they were defined with `useCallback`, plus an `eslint-disable` comment suppressing the missing dependency warning.
+**Solution**: Moved `useCallback` declarations above the `useEffect` that depends on them. Added proper dependencies `[getCurrentUser, fetchUsers]` and removed the eslint-disable comment.
+**Rule**: "Never suppress `react-hooks/exhaustive-deps`. Fix the dependency, don't silence the linter."
+
+#### 4. Idempotent User Sync vs. Destructive Recreate
+
+**What Happened**: The `setup-test-users.js` script used a "delete then recreate" strategy. This failed with "Database error deleting user" because Supabase enforces foreign key constraints on `auth.users` when profiles, group_members, or other tables reference the user ID.
+**Solution**: Replaced with an idempotent "sync" strategy: check existence → update auth metadata & password if exists → create if missing → upsert public.profiles role.
+**Rule**: "Never delete auth users in a shared database. Sync in-place."
+
+#### 5. Test Credential Single Source of Truth
+
+**What Happened**: Credentials were scattered across: `.agent/TEST_ACCOUNTS.md`, `tests/test-utils.ts`, `tests/setup-test-users.js`, `tests/setup-test-users.sql`, Knowledge Items, and inline in E2E specs.
+**Solution**: Established a clear hierarchy:
+  1. `.env.test.local` — environment vars (consumed by Playwright config and setup scripts)
+  2. `tests/test-utils.ts` — `TEST_USERS` object with `SUPER_ADMIN`, `ADMIN`, `MENTOR` roles (code-level SSoT)
+  3. `.agent/TEST_ACCOUNTS.md` — human-readable reference (for agents and developers)
+**Rule**: "Three layers: env file → code constant → documentation. All must agree."
+
+#### 6. Cleaning Build Artifacts is Mandatory Hygiene
+
+**What Happened**: 23 stale `.txt` and `.json` files (lint outputs, build logs, tsc errors, deploy logs) accumulated in the `admin-panel/` root over multiple sessions.
+**Impact**: Polluted `git status`, confused file search, increased cognitive load for every agent session.
+**Solution**: Bulk-deleted all transient output files. These should be generated into `test-results/` or temporary directories, not project root.
+**Rule**: "Transient outputs go in `.gitignore`'d directories. Never commit log files to root."
+
+---
+
+### Files Changed
+
+| Path | Action | Description |
+| :--- | :--- | :--- |
+| `admin-panel/src/features/curriculum/components/question-list.tsx` | Optimized | Memoized SortableRow/SortableCard, stabilized 8+ callbacks |
+| `admin-panel/src/features/curriculum/components/domain-list.tsx` | Optimized | Memoized SortableRow/SortableCard, stabilized callbacks |
+| `admin-panel/src/features/curriculum/components/skill-list.tsx` | Optimized | Memoized SortableRow/SortableCard, stabilized callbacks |
+| `admin-panel/src/features/platform/pages/AppsPage.tsx` | Optimized | Memoized AppRow, introduced CompiledApp type |
+| `admin-panel/src/features/auth/pages/UserManagementPage.tsx` | Optimized | Memoized UserRow, fixed TDZ, removed eslint-disable |
+| `admin-panel/src/features/auth/pages/InvitationCodesPage.tsx` | Optimized | Memoized InvitationCodeRow, stabilized callbacks |
+| `admin-panel/src/features/platform/pages/SubjectsPage.tsx` | Optimized | Memoized SubjectRow, stabilized callbacks |
+| `admin-panel/src/features/mentorship/pages/GroupsPage.tsx` | Optimized | Memoized GroupCard, stabilized copyCode |
+| `admin-panel/src/features/mentorship/pages/GroupDetailPage.tsx` | Optimized | Memoized MemberRow/AssignmentRow/ProgressCell, hoisted hooks |
+| `admin-panel/tests/test-utils.ts` | Refactored | Role-based TEST_USERS SSoT (SUPER_ADMIN, ADMIN, MENTOR) |
+| `admin-panel/tests/setup-test-users.js` | Refactored | Idempotent sync strategy, all 3 roles, profile upsert |
+| `admin-panel/.env.test.local` | Created | Centralized test env vars with credentials |
+| `admin-panel/*.txt, *.json (23 files)` | Deleted | Stale build/lint/deploy output artifacts |
