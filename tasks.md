@@ -2,17 +2,10 @@
 
 ## 🟡 Up Next
 
-### CodeQL — Semantic SAST
-- [ ] Add `.github/workflows/codeql.yml`
-
-### plpgsql_check — Database Function Validation
-- [ ] Enable extension, run against triggers
-
-### Lychee — Documentation Link Checker
-- [ ] Add weekly CI job
-
 ### Stryker — Mutation Testing
 - [ ] Evaluate for admin-panel test suite
+- [ ] Run baseline mutation score report
+- [ ] Decide: worth the CI time cost?
 
 ## 🟢 Backlog
 
