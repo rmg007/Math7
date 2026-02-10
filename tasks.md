@@ -2,10 +2,10 @@
 
 ## 🟡 Up Next
 
-### Stryker — Mutation Testing
-- [ ] Evaluate for admin-panel test suite
-- [ ] Run baseline mutation score report
-- [ ] Decide: worth the CI time cost?
+### Stryker — Mutation Testing (DEFERRED)
+- **Status:** Evaluated — `@stryker-mutator/core` has Node.js 22 compatibility issues
+- **Recommendation:** Defer until test count justifies the CI time investment
+- **Prerequisite:** Admin panel needs >50% unit test coverage to make mutation testing meaningful
 
 ## 🟢 Backlog
 
