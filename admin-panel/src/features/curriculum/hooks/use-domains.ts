@@ -292,7 +292,7 @@ export function useBulkCreateDomains() {
 
       const { data, error } = await supabase
         .from('domains')
-        .insert(payload as any)
+        .insert(payload as Database['public']['Tables']['domains']['Insert'][])
         .select();
 
       if (error) throw error;

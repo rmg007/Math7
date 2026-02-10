@@ -15,7 +15,8 @@ import {
   Trash2,
   Info,
   Copy,
-  Bug
+  Bug,
+  X
 } from 'lucide-react';
 import { AdminHeader } from '@/components/ui/admin-header';
 import { 
@@ -29,7 +30,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
 import { 
   Table, 
   TableBody, 
@@ -84,20 +85,7 @@ export function ErrorLogsPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'new':
-        return <Badge variant="destructive" className="text-xs">New</Badge>;
-      case 'seen':
-        return <Badge variant="secondary" className="text-xs">Seen</Badge>;
-      case 'ignored':
-        return <Badge variant="outline" className="text-xs">Ignored</Badge>;
-      case 'resolved':
-        return <Badge className="bg-green-100 text-green-700 hover:bg-green-200 text-xs border-none">Resolved</Badge>;
-      case 'promoted':
-        return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 text-xs border-none">Issue Created</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
+    return <StatusBadge status={status as StatusType} />;
   };
 
   const handlePromote = (error: ErrorLog) => {
@@ -214,38 +202,53 @@ export function ErrorLogsPage() {
       </div>
 
       {/* Error Table */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search errors by message, type or stack trace..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all outline-none"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[160px] rounded-xl border-gray-200">
+                <Filter className="w-4 h-4 mr-2 text-gray-400" />
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="new">New</SelectItem>
+                <SelectItem value="seen">Seen</SelectItem>
+                <SelectItem value="ignored">Ignored</SelectItem>
+                <SelectItem value="resolved">Resolved</SelectItem>
+                <SelectItem value="promoted">Issues</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="text-xs font-medium text-gray-500 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+              {filteredErrors?.length || 0} Logs
+            </div>
+          </div>
+        </div>
+      </div>
+
       <Card className="shadow-sm overflow-hidden">
         <CardHeader className="bg-gray-50/50 border-b pb-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-lg">Recent Errors</CardTitle>
-              <CardDescription>Click an error to view full details.</CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="relative w-64">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search errors..." 
-                  className="pl-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-32">
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="new">New</SelectItem>
-                  <SelectItem value="seen">Seen</SelectItem>
-                  <SelectItem value="ignored">Ignored</SelectItem>
-                  <SelectItem value="resolved">Resolved</SelectItem>
-                  <SelectItem value="promoted">Issues</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div>
+            <CardTitle className="text-lg">Recent Errors</CardTitle>
+            <CardDescription>Click an error to view full details and context.</CardDescription>
           </div>
         </CardHeader>
         <CardContent className="p-0 overflow-x-auto">

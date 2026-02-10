@@ -338,7 +338,7 @@ export function useBulkCreateSkills() {
 
       const { data, error } = await supabase
         .from('skills')
-        .insert(payload as any)
+        .insert(payload as Database['public']['Tables']['skills']['Insert'][])
         .select();
 
       if (error) throw error;

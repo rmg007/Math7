@@ -465,38 +465,34 @@ export function DomainList() {
       />
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
-        <div className="space-y-3 md:space-y-4 mb-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search domains..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 min-h-[48px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-base"
-              />
-            </div>
-            {hasActiveFilters && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search domains..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all outline-none"
+            />
+            {searchQuery && (
               <button
-                onClick={clearFilters}
-                className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
               >
                 <X className="h-4 w-4" />
-                <span>Clear filters</span>
               </button>
             )}
           </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
               <Filter className="h-4 w-4 text-gray-400" />
-              <span className="text-sm font-medium text-gray-600">Status</span>
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status:</span>
               <Select
                 value={statusFilter}
                 onValueChange={(v) => setStatusFilter(v as 'all' | 'draft' | 'published' | 'live')}
               >
-                <SelectTrigger className="w-full sm:w-[150px] h-10">
+                <SelectTrigger className="w-[130px] h-7 border-none bg-transparent p-0 focus:ring-0 shadow-none text-sm font-semibold">
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -507,6 +503,17 @@ export function DomainList() {
                 </SelectContent>
               </Select>
             </div>
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="h-9 px-3 gap-2 text-gray-500 hover:text-gray-900"
+              >
+                <X className="h-4 w-4" />
+                <span>Clear All</span>
+              </Button>
+            )}
           </div>
         </div>
 

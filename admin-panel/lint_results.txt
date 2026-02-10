@@ -1,0 +1,23 @@
+
+> admin-panel@0.0.0 lint
+> eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0
+
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\hooks\use-domains.ts
+  295:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\hooks\use-skills.ts
+  341:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\pages\question-edit-page.tsx
+  9:62  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\pages\skill-edit-page.tsx
+  8:56  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\main.tsx
+  11:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+Γ£û 5 problems (0 errors, 5 warnings)
+
+ESLint found too many warnings (maximum: 0).

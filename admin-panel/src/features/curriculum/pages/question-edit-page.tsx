@@ -6,7 +6,7 @@ import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 
 export function QuestionEditPage() {
     const { id } = useParams<{ id: string }>();
-    const { data: question, isLoading, error } = useQuestion(id!);
+    const { data: question, isLoading, error } = useQuestion(id || '');
 
     if (isLoading) {
         return (

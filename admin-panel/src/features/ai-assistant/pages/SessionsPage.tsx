@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Clock, DollarSign, FileText, AlertCircle } from 'lucide-react';
+import { Clock, DollarSign, FileText, AlertCircle, Search, X } from 'lucide-react';
 
 import { Database } from '@/lib/database.types';
 import { AdminHeader } from '@/components/ui/admin-header';
@@ -18,6 +18,7 @@ export const SessionsPage: React.FC = () => {
   const [sessions, setSessions] = useState<GenerationSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchSessions();
@@ -59,11 +60,16 @@ export const SessionsPage: React.FC = () => {
     switch (status.toLowerCase()) {
       case 'reviewing': return 'pending';
       case 'approved': return 'resolved';
-      case 'imported': return 'completed' as StatusType; // 'completed' is not in StatusType but it defaults correctly
+      case 'imported': return 'published';
       case 'rejected': return 'exhausted';
       default: return 'pending';
     }
   };
+
+  const filteredSessions = sessions.filter(session => {
+    return session.model_used.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (session.status?.toLowerCase() ?? '').includes(searchTerm.toLowerCase());
+  });
 
   if (loading) {
     return (
@@ -160,6 +166,35 @@ export const SessionsPage: React.FC = () => {
         </Card>
       </div>
 
+      {/* Filter Bar */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by model or status..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all outline-none"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="text-xs font-medium text-gray-500 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+              {filteredSessions.length} Sessions
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Sessions Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
@@ -190,7 +225,7 @@ export const SessionsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {sessions.map((session) => (
+              {filteredSessions.map((session) => (
                 <tr key={session.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {new Date(session.created_at).toLocaleDateString('en-US', {
@@ -225,7 +260,7 @@ export const SessionsPage: React.FC = () => {
           </table>
         </div>
 
-        {sessions.length === 0 && (
+        {filteredSessions.length === 0 && (
           <div className="py-12 text-center">
             <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500">No generation sessions yet</p>

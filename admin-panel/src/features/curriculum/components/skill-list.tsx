@@ -527,38 +527,34 @@ export function SkillList() {
             />
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4">
-                <div className="space-y-3 md:space-y-4 mb-4">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search skills..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-3 min-h-[48px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors text-base"
-                            />
-                        </div>
-                        {hasActiveFilters && (
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center mb-4">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search skills..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all outline-none"
+                        />
+                        {searchQuery && (
                             <button
-                                onClick={clearFilters}
-                                className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                onClick={() => setSearchQuery('')}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
                             >
                                 <X className="h-4 w-4" />
-                                <span>Clear filters</span>
                             </button>
                         )}
                     </div>
-
-                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                        <div className="flex items-center gap-2">
-                            <Filter className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm font-medium text-gray-600">Domain</span>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+                            <Filter className="h-3.5 w-3.5 text-gray-400" />
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Domain:</span>
                             <Select
                                 value={selectedDomainId}
                                 onValueChange={setSelectedDomainId}
                             >
-                                <SelectTrigger className="w-full sm:w-[200px] h-10">
+                                <SelectTrigger className="w-[140px] h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-bold text-gray-700">
                                     <SelectValue placeholder="All Domains" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -570,13 +566,13 @@ export function SkillList() {
                             </Select>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-600">Status</span>
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status:</span>
                             <Select
                                 value={statusFilter}
                                 onValueChange={(v) => setStatusFilter(v as 'all' | 'draft' | 'published' | 'live')}
                             >
-                                <SelectTrigger className="w-full sm:w-[150px] h-10">
+                                <SelectTrigger className="w-[110px] h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-bold text-gray-700">
                                     <SelectValue placeholder="All Status" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -588,47 +584,75 @@ export function SkillList() {
                             </Select>
                         </div>
 
+                        {hasActiveFilters && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={clearFilters}
+                                className="h-9 px-3 gap-2 text-gray-500 hover:text-gray-900"
+                            >
+                                <X className="h-4 w-4" />
+                                <span>Clear All</span>
+                            </Button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Bulk Actions & Information */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between mb-4 px-1">
+                    <div className="flex items-center gap-2">
                         {isDragDisabled && sortBy === 'sort_order' && (
-                            <span className="text-xs md:text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
+                            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100 uppercase tracking-tight">
                                 Clear filters to enable drag reordering
                             </span>
                         )}
+                    </div>
 
-                        {selectedIds.size > 0 && (
-                            <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-                                <span className="text-sm text-gray-600 w-full sm:w-auto">{selectedIds.size} selected</span>
-                                <button
+                    {selectedIds.size > 0 && (
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mr-2">{selectedIds.size} selected</span>
+                            <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-xl border border-gray-100">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={handleMarkPublished}
                                     disabled={bulkUpdateStatus.isPending}
-                                    className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors flex-1 sm:flex-none"
+                                    className="h-8 text-xs font-bold text-amber-600 hover:text-amber-700 hover:bg-white shadow-sm"
                                 >
-                                    Mark Published
-                                </button>
-                                <button
+                                    Publish
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={handleMarkLive}
                                     disabled={bulkUpdateStatus.isPending}
-                                    className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors flex-1 sm:flex-none"
+                                    className="h-8 text-xs font-bold text-green-600 hover:text-green-700 hover:bg-white shadow-sm"
                                 >
-                                    Mark Live
-                                </button>
-                                <button
+                                    Go Live
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={handleMarkDraft}
                                     disabled={bulkUpdateStatus.isPending}
-                                    className="inline-flex items-center justify-center gap-1 px-4 py-3 min-h-[48px] text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex-1 sm:flex-none"
+                                    className="h-8 text-xs font-bold text-gray-500 hover:text-gray-700 hover:bg-white shadow-sm"
                                 >
-                                    Mark Draft
-                                </button>
-                                <button
+                                    Draft
+                                </Button>
+                                <div className="w-px h-4 bg-gray-200 mx-1" />
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={handleBulkDelete}
                                     disabled={bulkDelete.isPending}
-                                    className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                                    className="h-8 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-white shadow-sm gap-1.5"
                                 >
-                                    <Trash className="h-4 w-4" />
+                                    <Trash className="h-3.5 w-3.5" />
                                     Delete
-                                </button>
+                                </Button>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
 
                 <DndContext

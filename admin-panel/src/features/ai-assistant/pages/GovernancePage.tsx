@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Shield, Zap, Search, Activity } from 'lucide-react';
+import { Shield, Zap, Search, Activity, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import ReactMarkdown from 'react-markdown';
@@ -30,8 +30,8 @@ interface TenantUsage {
   total_questions: number;
   session_count: number;
   last_active: string;
-  is_throttled?: boolean; // Added from codescene-init context
-  monthly_token_limit?: number; // Added from codescene-init context
+  is_throttled?: boolean;
+  monthly_token_limit?: number;
 }
 
 export const GovernancePage: React.FC = () => {
@@ -48,7 +48,6 @@ export const GovernancePage: React.FC = () => {
   const fetchUsage = async () => {
     setIsLoading(true);
     try {
-      // Fetch sessions with creator info to link to apps
       const { data, error } = await supabase
         .from('ai_generation_sessions')
         .select(`
@@ -65,7 +64,6 @@ export const GovernancePage: React.FC = () => {
 
       if (error) throw error;
 
-      // Aggregate data by App ID
       const aggMap = new Map<string, TenantUsage>();
       const sessions = (data as unknown) as AIGenerationSession[];
 
@@ -156,17 +154,31 @@ export const GovernancePage: React.FC = () => {
         {/* Left Col: Tenant Usage */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-gray-900">Tenant Usage</h2>
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search tenants..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-64"
-                />
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4 mb-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search tenants by name or ID..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="text-xs font-medium text-gray-500 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+                    {filteredData.length} Tenants Listed
+                  </div>
+                </div>
               </div>
             </div>
 

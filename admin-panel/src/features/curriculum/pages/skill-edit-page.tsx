@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 
 export function SkillEditPage() {
     const { id } = useParams<{ id: string }>();
-    const { data: skill, isLoading, error } = useSkill(id!);
+    const { data: skill, isLoading, error } = useSkill(id || '');
 
     if (isLoading) {
         return (

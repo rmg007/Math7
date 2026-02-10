@@ -11,7 +11,8 @@ import {
   Pencil,
   Trash2,
   ExternalLink,
-  Bug
+  Bug,
+  X
 } from 'lucide-react';
 import { AdminHeader } from '@/components/ui/admin-header';
 import { useKnownIssues, type KnownIssue } from '../hooks/use-known-issues';
@@ -19,7 +20,7 @@ import { useCreateKnownIssue, useUpdateKnownIssue, useDeleteKnownIssue } from '.
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
 import {
   Table,
   TableBody,
@@ -152,28 +153,21 @@ export function KnownIssuesPage() {
   };
 
   const getStatusBadge = (status: string | null) => {
-    if (!status) return <Badge variant="outline">Unknown</Badge>;
-    switch (status) {
-      case 'open':
-        return <Badge variant="destructive" className="flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Open</Badge>;
-      case 'closed':
-        return <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-200 flex items-center gap-1 border-none"><CheckCircle2 className="w-3 h-3" /> Resolved</Badge>;
-      case 'recurring':
-        return <Badge variant="outline" className="flex items-center gap-1"><Clock className="w-3 h-3" /> Recurring</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
+    if (!status) return <StatusBadge status="inactive" label="Unknown" />;
+    
+    const icon = status === 'open' ? <AlertCircle className="w-3 h-3" /> : 
+                 status === 'recurring' ? <Clock className="w-3 h-3" /> :
+                 status === 'closed' ? <CheckCircle2 className="w-3 h-3" /> : undefined;
+
+    const statusType: StatusType = status === 'closed' ? 'resolved' : (status as StatusType);
+    const label = status === 'closed' ? 'Resolved' : undefined;
+
+    return <StatusBadge status={statusType} label={label} icon={icon} />;
   };
 
-  const getSeverityColor = (severity: string | null) => {
-    if (!severity) return 'text-gray-600';
-    switch (severity) {
-      case 'critical': return 'text-red-600 font-bold';
-      case 'high': return 'text-orange-600 font-semibold';
-      case 'medium': return 'text-yellow-600';
-      case 'low': return 'text-blue-600';
-      default: return 'text-gray-600';
-    }
+  const getSeverityBadge = (severity: string | null) => {
+    if (!severity) return null;
+    return <StatusBadge status={severity as StatusType} className="font-semibold" />;
   };
 
   return (
@@ -240,36 +234,51 @@ export function KnownIssuesPage() {
         </Card>
       </div>
 
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-4 mb-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search issues by title, description or root cause..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[160px] rounded-xl border-gray-200">
+                <Filter className="w-4 h-4 mr-2 text-gray-400" />
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="open">Open Issues</SelectItem>
+                <SelectItem value="recurring">Recurring</SelectItem>
+                <SelectItem value="closed">Resolved</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="text-xs font-medium text-gray-500 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+              {filteredIssues?.length || 0} Issues
+            </div>
+          </div>
+        </div>
+      </div>
+
       <Card className="shadow-sm overflow-hidden border-indigo-100/50">
         <CardHeader className="bg-gray-50/50 border-b pb-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-lg">Issue Library</CardTitle>
-              <CardDescription>Click an issue to view details. Search by title, description, or root cause.</CardDescription>
-            </div>
-            <div className="flex items-center gap-2 max-w-md w-full">
-              <div className="relative w-full">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by title or description..."
-                  className="pl-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="open">Open</SelectItem>
-                  <SelectItem value="recurring">Recurring</SelectItem>
-                  <SelectItem value="closed">Resolved</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div>
+            <CardTitle className="text-lg">Issue Library</CardTitle>
+            <CardDescription>Click an issue to view details and technical root causes.</CardDescription>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -307,11 +316,7 @@ export function KnownIssuesPage() {
                       <div className="text-xs text-muted-foreground line-clamp-1">{issue.description || 'No description provided'}</div>
                     </TableCell>
                     <TableCell>{getStatusBadge(issue.status)}</TableCell>
-                    <TableCell>
-                      <span className={`text-xs uppercase tracking-wider ${getSeverityColor(issue.severity)}`}>
-                        {issue.severity || 'Unknown'}
-                      </span>
-                    </TableCell>
+                    <TableCell>{getSeverityBadge(issue.severity)}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {issue.created_at ? new Date(issue.created_at).toLocaleDateString() : 'N/A'}
                     </TableCell>
