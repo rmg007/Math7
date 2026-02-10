@@ -46,14 +46,11 @@ class MockSupabaseService {
     required String email,
     required String password,
   }) async {
-    // TODO: Implement mock authentication response
-    // For now, this is a placeholder
     throw UnimplementedError('Mock sign in not yet implemented');
   }
 
   /// Mock authentication - simulate sign out
   Future<void> mockSignOut() async {
-    // TODO: Implement mock sign out
     throw UnimplementedError('Mock sign out not yet implemented');
   }
 
@@ -64,20 +61,17 @@ class MockSupabaseService {
 
   /// Mock data insertion
   Future<void> mockInsert(String table, Map<String, dynamic> data) async {
-    // TODO: Implement mock insert
     throw UnimplementedError('Mock insert not yet implemented');
   }
 
   /// Mock data update
   Future<void> mockUpdate(
       String table, Map<String, dynamic> data, String id) async {
-    // TODO: Implement mock update
     throw UnimplementedError('Mock update not yet implemented');
   }
 
   /// Mock data deletion
   Future<void> mockDelete(String table, String id) async {
-    // TODO: Implement mock delete
     throw UnimplementedError('Mock delete not yet implemented');
   }
 }

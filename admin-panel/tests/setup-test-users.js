@@ -16,6 +16,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load environment variables
+dotenv.config({ path: path.resolve(__dirname, '../.env.test.local') });
+dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
@@ -40,6 +42,15 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 // Verified working test accounts (password == email convention)
 const TEST_USERS = [
   {
+    email: 'mhalim80@hotmail.com',
+    password: 'mhalim80@hotmail.com',
+    role: 'super_admin',
+    metadata: {
+      name: 'Ryan Gonzalez',
+      role: 'super_admin',
+    },
+  },
+  {
     email: 'testadmin@example.com',
     password: 'testadmin@example.com',
     role: 'admin',
@@ -57,43 +68,75 @@ const TEST_USERS = [
       role: 'admin',
     },
   },
+  {
+    email: 'testmentor@example.com',
+    password: 'testmentor@example.com',
+    role: 'mentor',
+    metadata: {
+      name: 'Test Mentor',
+      role: 'mentor',
+    },
+  },
 ];
 
-async function createTestUser(userData) {
-  console.log(`\n📝 Creating user: ${userData.email}`);
+async function syncTestUser(userData) {
+  console.log(`\n� Syncing user: ${userData.email}`);
 
   try {
     // Check if user already exists
-    const { data: existingUsers } = await supabase.auth.admin.listUsers();
-    const existingUser = existingUsers?.users?.find(u => u.email === userData.email);
+    const { data: listData } = await supabase.auth.admin.listUsers();
+    const existingUser = listData?.users?.find(u => u.email === userData.email);
+    let userId;
 
     if (existingUser) {
-      console.log(`⚠️  User already exists: ${userData.email}`);
-      console.log(`   Deleting existing user...`);
+      console.log(`ℹ️  User already exists: ${userData.email} (${existingUser.id})`);
+      userId = existingUser.id;
       
-      const { error: deleteError } = await supabase.auth.admin.deleteUser(existingUser.id);
-      if (deleteError) {
-        console.error(`❌ Error deleting user: ${deleteError.message}`);
+      // Update existing user (password and metadata)
+      const { error: updateError } = await supabase.auth.admin.updateUserById(userId, {
+        password: userData.password,
+        user_metadata: userData.metadata,
+        email_confirm: true
+      });
+
+      if (updateError) {
+        console.error(`❌ Error updating user: ${updateError.message}`);
         return false;
       }
-      console.log(`✅ Deleted existing user`);
+      console.log(`✅ User auth updated`);
+    } else {
+      // Create new user
+      const { data, error: createError } = await supabase.auth.admin.createUser({
+        email: userData.email,
+        password: userData.password,
+        email_confirm: true,
+        user_metadata: userData.metadata,
+      });
+
+      if (createError) {
+        console.error(`❌ Error creating user: ${createError.message}`);
+        return false;
+      }
+      userId = data.user.id;
+      console.log(`✅ User created successfully: ${userId}`);
     }
 
-    // Create new user
-    const { data, error } = await supabase.auth.admin.createUser({
-      email: userData.email,
-      password: userData.password,
-      email_confirm: true,
-      user_metadata: userData.metadata,
-    });
+    // Ensure public.profiles entry is correct
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({
+        id: userId,
+        email: userData.email,
+        full_name: userData.metadata.name,
+        role: userData.role,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
 
-    if (error) {
-      console.error(`❌ Error creating user: ${error.message}`);
+    if (profileError) {
+      console.error(`❌ Error syncing profile: ${profileError.message}`);
       return false;
     }
-
-    console.log(`✅ User created successfully: ${userData.email}`);
-    console.log(`   User ID: ${data.user.id}`);
+    console.log(`✅ Public profile synced (Role: ${userData.role})`);
 
     return true;
   } catch (error) {
@@ -110,7 +153,7 @@ async function setupTestUsers() {
   let failCount = 0;
 
   for (const userData of TEST_USERS) {
-    const success = await createTestUser(userData);
+    const success = await syncTestUser(userData);
     if (success) {
       successCount++;
     } else {

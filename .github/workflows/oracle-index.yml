@@ -1,0 +1,39 @@
+name: Project Oracle Indexer
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - 'scripts/knowledge-base/**'
+      - '.github/workflows/oracle-index.yml'
+  workflow_dispatch:
+
+jobs:
+  index-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: scripts/knowledge-base
+        run: npm ci
+
+      - name: Run Indexer
+        working-directory: scripts/knowledge-base
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: npx tsx indexer.ts

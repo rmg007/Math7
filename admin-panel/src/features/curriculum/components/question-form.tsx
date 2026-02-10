@@ -54,7 +54,7 @@ const questionSchema = z.object({
 type QuestionFormData = z.infer<typeof questionSchema>;
 
 interface QuestionFormProps {
-  initialData?: any; // Using any temporarily as the extended relation types are complex
+  initialData?: Question;
 }
 
 export function QuestionForm({ initialData }: QuestionFormProps) {
@@ -101,12 +101,12 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
         sol = data.solution || {};
       }
       switch (type) {
-          case 'multiple_choice': return (sol as any).correct_option_id || '';
-          case 'mcq_multi': return (sol as any).correct_ids || [];
-          case 'boolean': return (sol as any).correct_value ?? null;
-          case 'text_input': return (sol as any).exact_match || '';
-          case 'reorder_steps': return (sol as any).correct_order || [];
-          default: return (sol as any).correct_option_id || '';
+          case 'multiple_choice': return (sol as Record<string, unknown>).correct_option_id || '';
+          case 'mcq_multi': return (sol as Record<string, unknown>).correct_ids || [];
+          case 'boolean': return (sol as Record<string, unknown>).correct_value ?? null;
+          case 'text_input': return (sol as Record<string, unknown>).exact_match || '';
+          case 'reorder_steps': return (sol as Record<string, unknown>).correct_order || [];
+          default: return (sol as Record<string, unknown>).correct_option_id || '';
       }
   };
 
@@ -141,9 +141,11 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
 
   const onSubmit = async (data: QuestionFormData) => {
     try {
-      const submissionData: any = { 
+      const submissionData: Database['public']['Tables']['questions']['Insert'] = { 
         ...data,
         app_id: currentApp?.app_id || '',
+        solution: data.solution as Json,
+        options: data.options as Json,
       };
 
       if (data.type === 'multiple_choice') {
@@ -151,27 +153,27 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
              form.setError('solution', { message: 'Required' });
              return;
           }
-          submissionData.solution = { correct_option_id: data.solution };
+           submissionData.solution = { correct_option_id: data.solution } as unknown as Json;
       } else if (data.type === 'mcq_multi') {
           if (!(data.solution as string[]).length) {
              form.setError('solution', { message: 'Select at least one' });
              return;
           }
-          submissionData.solution = { correct_ids: data.solution };
+           submissionData.solution = { correct_ids: data.solution } as unknown as Json;
       } else if (data.type === 'boolean') {
           if (data.solution === null) {
              form.setError('solution', { message: 'Required' });
              return;
           }
-          submissionData.solution = { correct_value: data.solution };
+          submissionData.solution = { correct_value: data.solution } as unknown as Json;
       } else if (data.type === 'text_input') {
           if (!data.solution) {
              form.setError('solution', { message: 'Required' });
              return;
           }
-          submissionData.solution = { exact_match: data.solution };
+           submissionData.solution = { exact_match: data.solution } as unknown as Json;
       } else if (data.type === 'reorder_steps') {
-          submissionData.solution = { correct_order: data.solution };
+           submissionData.solution = { correct_order: data.solution } as unknown as Json;
       }
 
       if (initialData) {

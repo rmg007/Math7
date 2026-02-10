@@ -1,9 +1,21 @@
-
 // Convention: password == email (for all test accounts)
-export const TEST_CREDENTIALS = {
-  email: process.env.TEST_SUPER_ADMIN_EMAIL || process.env.TEST_ADMIN_EMAIL || 'testadmin@example.com',
-  password: process.env.TEST_SUPER_ADMIN_PASSWORD || process.env.TEST_ADMIN_PASSWORD || 'testadmin@example.com',
+export const TEST_USERS = {
+  SUPER_ADMIN: {
+    email: process.env.TEST_SUPER_ADMIN_EMAIL || 'mhalim80@hotmail.com',
+    password: process.env.TEST_SUPER_ADMIN_PASSWORD || 'mhalim80@hotmail.com',
+  },
+  ADMIN: {
+    email: process.env.TEST_ADMIN_EMAIL || 'testadmin@example.com',
+    password: process.env.TEST_ADMIN_PASSWORD || 'testadmin@example.com',
+  },
+  MENTOR: {
+    email: process.env.TEST_MENTOR_EMAIL || 'testmentor@example.com',
+    password: process.env.TEST_MENTOR_PASSWORD || 'testmentor@example.com',
+  },
 };
+
+// Legacy support for scripts that use TEST_CREDENTIALS
+export const TEST_CREDENTIALS = TEST_USERS.ADMIN;
 
 export function generateTestUser() {
   const email = `test-${Date.now()}@example.com`;

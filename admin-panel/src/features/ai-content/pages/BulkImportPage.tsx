@@ -1,208 +1,282 @@
-import React, { useState } from 'react';
-import Papa from 'papaparse';
-import { useBulkImport, QueuedQuestion } from '@/hooks/useBulkImport';
-import { useSkills } from '@/features/curriculum/hooks/use-skills';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState } from 'react';
+import { 
+  FileUp, 
+  Trash2, 
+  Download,
+  Terminal,
+  Play,
+  X,
+  Sparkles,
+  Zap
+} from 'lucide-react';
+import { useBulkImport } from '@/hooks/use-bulk-import';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Upload, FileText, CheckCircle2 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 import { AdminHeader } from '@/components/ui/admin-header';
+import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/lib/supabase';
+import type { QueuedQuestion } from '@/lib/validation/import-schema';
+import { useSkills } from '@/features/curriculum/hooks/use-skills';
+import { EmptyState } from '@/components/ui/empty-state';
 
-export const BulkImportPage = () => {
-  const [file, setFile] = useState<File | null>(null);
-  const [parsedData, setParsedData] = useState<QueuedQuestion[]>([]);
-  const [selectedSkillId, setSelectedSkillId] = useState<string>('');
-  const { importQuestions, importing } = useBulkImport();
+
+export default function BulkImportPage() {
+  const { 
+    importQueue, 
+    setImportQueue, 
+    handleFileUpload, 
+    processImport, 
+    isProcessing, 
+    isDryRun,
+    setIsDryRun,
+    progress 
+  } = useBulkImport();
+
+  const { toast } = useToast();
   const { data: skills } = useSkills();
+  const [selectedSkillId, setSelectedSkillId] = useState<string>('');
+  const [importPrompt, setImportPrompt] = useState('');
+  const [isAiParsing, setIsAiParsing] = useState(false);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFile(file);
-
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        try {
-            // Map CSV fields to QueuedQuestion
-            const mappedData: QueuedQuestion[] = results.data.map((row: any) => ({
-              skill_id: selectedSkillId, // Will be overridden on submit
-              content: row.content,
-              type: (row.type as any) || 'multiple_choice',
-              points: parseInt(row.points) || 1,
-              is_published: false,
-              explanation: row.explanation,
-              // Handle JSON fields safely
-              options: row.options ? (typeof row.options === 'string' ? JSON.parse(row.options) : row.options) : {},
-              solution: row.solution ? (typeof row.solution === 'string' ? JSON.parse(row.solution) : row.solution) : {},
-            })).filter((q: QueuedQuestion) => q.content && q.solution);
-
-            setParsedData(mappedData);
-            toast({
-                title: "File Parsed Successfully",
-                description: `Found ${mappedData.length} valid questions.`,
-            });
-        } catch (err: any) {
-            console.error(err);
-            toast({
-                title: "Parsing Error",
-                description: "Failed to parse CSV JSON fields. Ensure options/solution are valid JSON.",
-                variant: "destructive"
-            });
-            setParsedData([]);
-        }
-      },
-      error: (error) => {
-        toast({
-            title: "CSV Error",
-            description: error.message,
-            variant: "destructive"
-        });
-      }
-    });
+  const downloadTemplate = async () => {
+    const { downloadBulkImportTemplate } = await import('@/utils/csv-templates');
+    downloadBulkImportTemplate();
   };
 
-  const handleSubmit = async () => {
-    if (!selectedSkillId) {
-       toast({
-           title: "Missing Skill",
-           description: "Please select a target skill first.",
-           variant: "destructive"
-       });
-       return;
-    }
-    
-    // Assign selected skill to all questions
-    const finalData = parsedData.map(q => ({ ...q, skill_id: selectedSkillId }));
-    
-    const success = await importQuestions(finalData);
-    if (success) {
-        setParsedData([]);
-        setFile(null);
-        // Reset file input
-        const input = document.getElementById('csv-upload') as HTMLInputElement;
-        if (input) input.value = '';
+  const handleAiImport = async () => {
+    if (!importPrompt.trim()) return;
+    setIsAiParsing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('parse-import-prompt', {
+        body: { prompt: importPrompt, skill_id: selectedSkillId }
+      });
+      if (error) throw error;
+      
+      const newQuestions = data.questions as QueuedQuestion[];
+      setImportQueue(prev => [...prev, ...newQuestions]);
+      toast({ 
+        title: "AI Analysis Complete", 
+        description: `Successfully extracted ${newQuestions.length} questions.`,
+        className: "bg-indigo-600 text-white"
+      });
+      setImportPrompt('');
+    } catch (err) {
+      toast({ 
+        title: "Extraction Failed", 
+        description: "The AI was unable to parse that prompt.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsAiParsing(false);
     }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader 
-        title="Bulk Import Questions" 
-        description="Import questions from CSV files generated by the AI Content tool or created manually."
-        icon={Upload}
+        title="Curriculum Nexus"
+        description="Bulk synchronize educational content via CSV or AI Prompt."
+        icon={Terminal}
+        actions={
+          <Button 
+            variant="outline" 
+            onClick={downloadTemplate}
+            className="h-10 px-4 rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50 font-bold uppercase tracking-widest text-[9px] gap-2"
+          >
+            <Download className="w-4 h-4" /> Template
+          </Button>
+        }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Card className="border-blue-100 shadow-sm">
-            <CardHeader>
-                <CardTitle className="text-blue-900">1. Select Target Skill</CardTitle>
-                <CardDescription>All imported questions will be added to this skill.</CardDescription>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-4 space-y-6">
+          <Card className="rounded-[2rem] border-0 shadow-2xl shadow-indigo-100/50 overflow-hidden">
+            <CardHeader className="bg-indigo-600 text-white p-8">
+              <div className="flex items-center gap-3 mb-2">
+                <Zap className="w-5 h-5 text-indigo-200" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-100">Synchronizer</span>
+              </div>
+              <CardTitle className="text-2xl font-black tracking-tight">Import Source</CardTitle>
             </CardHeader>
-            <CardContent>
-                <Select value={selectedSkillId} onValueChange={setSelectedSkillId}>
-                    <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a skill..." />
+            <CardContent className="p-8 space-y-8">
+              <div className="space-y-4">
+                 <Label className="text-[10px] font-black uppercase tracking-widest text-gray-600">Target Skill (Optional)</Label>
+                 <Select value={selectedSkillId} onValueChange={setSelectedSkillId}>
+                    <SelectTrigger aria-label="Select target skill" className="w-full h-12 rounded-xl border-gray-100 bg-gray-50 font-bold text-xs uppercase tracking-tight italic">
+                      <SelectValue placeholder="Select target skill..." />
                     </SelectTrigger>
                     <SelectContent>
-                        {skills?.map(skill => (
-                            <SelectItem key={skill.skill_id} value={skill.skill_id}>
-                                {skill.title}
-                            </SelectItem>
-                        ))}
+                      {skills?.map((skill) => (
+                        <SelectItem key={skill.skill_id} value={skill.skill_id}>
+                          {skill.title}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
-                </Select>
-            </CardContent>
-          </Card>
+                 </Select>
+              </div>
 
-          <Card className="border-purple-100 shadow-sm">
-            <CardHeader>
-                <CardTitle className="text-purple-900">2. Upload CSV</CardTitle>
-                <CardDescription>File must contain: content, type, points, solution (JSON), options (JSON).</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-500 transition-colors bg-gray-50">
-                    <Input 
-                        type="file" 
-                        accept=".csv" 
-                        onChange={handleFileUpload} 
-                        className="hidden" 
-                        id="csv-upload" 
+              <Tabs defaultValue="file" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 rounded-xl h-12 p-1 bg-gray-100 mb-6">
+                  <TabsTrigger value="file" className="rounded-lg font-bold text-[10px] uppercase tracking-widest">CSV File</TabsTrigger>
+                  <TabsTrigger value="ai" className="rounded-lg font-bold text-[10px] uppercase tracking-widest flex gap-2">
+                    <Sparkles className="w-3 h-3" /> AI Prompt
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="file" className="space-y-6">
+                  <div className="relative group">
+                    <input 
+                      type="file" 
+                      accept=".csv" 
+                      onChange={handleFileUpload}
+                      aria-label="Upload CSV file"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                     />
-                    <label htmlFor="csv-upload" className="cursor-pointer flex flex-col items-center gap-2 w-full h-full justify-center">
-                        <Upload className="w-10 h-10 text-gray-400" />
-                        <span className="text-sm font-medium text-gray-600">Click to upload CSV</span>
-                    </label>
-                </div>
-                {file && (
-                    <div className="mt-4 flex items-center gap-2 text-sm text-green-600 bg-green-50 p-2 rounded border border-green-100">
-                        <FileText className="w-4 h-4" />
-                        <span className="font-semibold">{file.name}</span>
-                        <span className="text-gray-500">({parsedData.length} valid rows)</span>
+                    <div className="p-10 border-2 border-dashed border-gray-100 rounded-[2rem] bg-gray-50/50 group-hover:border-indigo-400 group-hover:bg-indigo-50/30 transition-all flex flex-col items-center justify-center text-center">
+                      <FileUp className="w-12 h-12 text-gray-300 group-hover:text-indigo-500 mb-4 transition-transform group-hover:scale-110" />
+                      <p className="text-xs font-bold text-gray-500 group-hover:text-indigo-600 uppercase tracking-widest">Drop CSV Matrix</p>
                     </div>
-                )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="ai" className="space-y-6">
+                  <div className="space-y-4">
+                    <Textarea 
+                      placeholder="Paste unstructured questions here..."
+                      className="min-h-[200px] rounded-2xl border-gray-100 bg-gray-50 focus:bg-white resize-none text-sm placeholder:text-gray-300 transition-all focus:border-indigo-500"
+                      value={importPrompt}
+                      onChange={(e) => setImportPrompt(e.target.value)}
+                    />
+                    <Button 
+                      className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-xs uppercase tracking-widest gap-2"
+                      onClick={handleAiImport}
+                      disabled={isAiParsing || !importPrompt.trim()}
+                    >
+                      {isAiParsing ? (
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                         <Sparkles className="w-4 h-4" />
+                      )}
+                      Sync with AI
+                    </Button>
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              <div className="pt-8 border-t border-gray-100 space-y-6">
+                 <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-gray-600">Execution Mode</Label>
+                      <p className="text-xs font-bold text-gray-700">{isDryRun ? 'Dry Run' : 'Production'}</p>
+                    </div>
+                    <Switch checked={isDryRun} onCheckedChange={setIsDryRun} aria-label="Toggle dry run mode" />
+                 </div>
+
+                 <Button 
+                    className="w-full h-14 bg-gray-900 hover:bg-black text-white rounded-2xl font-black text-xs uppercase tracking-widest gap-3 shadow-xl"
+                    disabled={importQueue.length === 0 || isProcessing}
+                    onClick={processImport}
+                  >
+                    {isProcessing ? (
+                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                       <Play className="w-5 h-5 fill-current" />
+                    )}
+                    Commit {importQueue.length} Units
+                  </Button>
+              </div>
             </CardContent>
           </Card>
-      </div>
 
-      {parsedData.length > 0 && selectedSkillId && (
-         <div className="flex justify-end animate-in fade-in slide-in-from-bottom-4">
-             <Button 
-                onClick={handleSubmit} 
-                disabled={importing} 
-                size="lg"
-                className="bg-green-600 hover:bg-green-700 min-w-[200px]"
-             >
-                {importing ? (
-                    <span className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Importing...
-                    </span>
-                ) : (
-                    <span className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4" />
-                        Confirm Import ({parsedData.length})
-                    </span>
-                )}
-             </Button>
-         </div>
-      )}
+          {isProcessing && (
+            <Card className="rounded-3xl border-0 shadow-lg bg-indigo-50 p-6 space-y-3">
+              <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-indigo-600">
+                <span>Synchronizing...</span>
+                <span>{progress}%</span>
+              </div>
+              <Progress value={progress} className="h-2 bg-white" />
+            </Card>
+          )}
+        </div>
 
-      {/* Preview Grid (Optional, simple list for now) */}
-      {parsedData.length > 0 && (
-        <Card>
-            <CardHeader>
-                <CardTitle>Preview</CardTitle>
+        <div className="lg:col-span-8 space-y-6">
+          <Card className="rounded-[2.5rem] border-0 shadow-sm bg-white overflow-hidden min-h-[600px] flex flex-col">
+            <CardHeader className="p-8 border-b border-gray-50 flex flex-row items-center justify-between bg-gray-50/30">
+              <div>
+                <CardTitle className="text-xl font-black tracking-tight text-gray-900">Synchronizer Buffer</CardTitle>
+                <CardDescription className="text-xs font-bold uppercase tracking-widest text-gray-600 mt-1">
+                  {importQueue.length} Candidates
+                </CardDescription>
+              </div>
+              {importQueue.length > 0 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setImportQueue([])}
+                  className="text-red-500 hover:bg-red-50 font-black text-[10px] uppercase tracking-widest gap-2"
+                >
+                  <Trash2 className="w-3 h-3" /> Purge
+                </Button>
+              )}
             </CardHeader>
-            <CardContent>
-                <div className="max-h-[400px] overflow-y-auto border rounded-md">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 sticky top-0">
-                            <tr>
-                                <th className="p-2 border-b">#</th>
-                                <th className="p-2 border-b">Content</th>
-                                <th className="p-2 border-b">Type</th>
-                                <th className="p-2 border-b">Points</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {parsedData.map((q, i) => (
-                                <tr key={i} className="border-b hover:bg-gray-50">
-                                    <td className="p-2">{i + 1}</td>
-                                    <td className="p-2 truncate max-w-xs" title={q.content}>{q.content}</td>
-                                    <td className="p-2">{q.type}</td>
-                                    <td className="p-2">{q.points}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            <CardContent className="p-0 flex-1 flex flex-col">
+              {importQueue.length === 0 ? (
+                <EmptyState
+                  icon={Terminal}
+                  title="Buffer Empty"
+                  description="Initialize synchronize operations via CSV upload or AI prompt to populate this buffer."
+                  className="flex-1"
+                />
+              ) : (
+                <div className="divide-y divide-gray-50">
+                  {importQueue.map((item, index) => (
+                    <div key={index} className="p-6 hover:bg-gray-50/50 transition-colors group">
+                      <div className="flex items-start gap-4">
+                        <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[10px] font-black text-gray-400 shrink-0">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-3">
+                            <span className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded-md text-[9px] font-black uppercase tracking-widest">
+                               {item.type}
+                            </span>
+                            <h4 className="text-sm font-bold text-gray-900 leading-tight line-clamp-2">{item.content}</h4>
+                          </div>
+                          <div className="flex items-center gap-6">
+                             <div className="flex items-center gap-2">
+                                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Skill ID:</span>
+                                <span className="text-[10px] font-mono text-gray-500">{(item.skill_id as string)?.slice(0, 8)}...</span>
+                             </div>
+                             <div className="flex items-center gap-2">
+                                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Points:</span>
+                                <span className="text-[10px] font-black text-gray-700">{item.points}</span>
+                             </div>
+                          </div>
+                        </div>
+                        <Button 
+                             variant="ghost" 
+                             size="icon" 
+                             className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all rounded-xl"
+                             onClick={() => setImportQueue(q => q.filter((_, i) => i !== index))}
+                           >
+                             <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
+              )}
             </CardContent>
-        </Card>
-      )}
+          </Card>
+        </div>
+      </div>
     </div>
   );
-};
+}

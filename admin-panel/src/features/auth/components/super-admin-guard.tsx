@@ -36,8 +36,11 @@ export function SuperAdminGuard({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+      <div className="flex flex-col items-center justify-center p-20 animate-in fade-in duration-700">
+        <div className="h-12 w-12 rounded-2xl bg-purple-500/10 flex items-center justify-center animate-bounce">
+          <div className="h-6 w-6 rounded-full border-2 border-purple-600 border-t-transparent animate-spin" />
+        </div>
+        <p className="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Elevating Authority</p>
       </div>
     )
   }

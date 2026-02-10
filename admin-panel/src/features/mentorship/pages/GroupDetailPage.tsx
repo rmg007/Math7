@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Plus, Users, School, Home, Trash2, Edit3, UserPlus, Copy, Check, ClipboardList, CheckCircle, Circle, Clock, LayoutDashboard, Settings, Layers } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useState, useCallback, memo } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -44,6 +44,173 @@ interface ProgressEntry {
   skill_id: string
   mastery_level: number | null
 }
+
+const MemberRow = memo(({ 
+  member, 
+  onEdit, 
+  onRemove, 
+  isEditing, 
+  editNickname, 
+  onNicknameChange, 
+  onSave, 
+  onCancel,
+  isPending 
+}: { 
+  member: Member; 
+  onEdit: (id: string, nickname: string) => void; 
+  onRemove: (id: string) => void;
+  isEditing: boolean;
+  editNickname: string;
+  onNicknameChange: (val: string) => void;
+  onSave: (id: string) => void;
+  onCancel: () => void;
+  isPending: boolean;
+}) => {
+  const displayName = member.nickname || member.profiles?.full_name || member.profiles?.email || 'Anonymous User'
+  const isAnonymous = !member.user_id || !member.profiles?.email
+
+  return (
+    <div className="flex items-center justify-between p-4 hover:bg-gray-50/50 transition-all group">
+      <div className="flex items-center gap-4 flex-1">
+        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-sm shadow-indigo-500/20 shadow-lg">
+          {displayName.charAt(0).toUpperCase()}
+        </div>
+
+        <div className="flex-1">
+          {isEditing ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={editNickname}
+                onChange={(e) => onNicknameChange(e.target.value)}
+                className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 w-full max-w-[200px]"
+                placeholder="Enter nickname"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && member.user_id) onSave(member.user_id)
+                  if (e.key === 'Escape') onCancel()
+                }}
+                autoFocus
+              />
+              <Button 
+                size="sm" 
+                className="h-8 rounded-lg font-bold text-[10px] uppercase tracking-widest"
+                onClick={() => member.user_id && onSave(member.user_id)}
+                disabled={isPending || !member.user_id}
+              >
+                Save
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-gray-900 text-sm leading-tight">{displayName}</h3>
+                {isAnonymous && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-black uppercase tracking-widest">
+                    Anon
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 mt-0.5">
+                 {member.profiles?.email && (
+                  <p className="text-[11px] text-gray-400 font-semibold">{member.profiles.email}</p>
+                )}
+                <span className="text-[11px] text-gray-300">•</span>
+                <p className="text-[11px] text-gray-400 font-semibold">
+                   {member.joined_at ? new Date(member.joined_at).toLocaleDateString() : 'Active'}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {!isEditing && (
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => member.user_id && onEdit(member.user_id, member.nickname || '')}
+            className="h-8 w-8 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
+          >
+            <Edit3 className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => member.user_id && onRemove(member.user_id)}
+            className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+});
+
+const AssignmentRow = memo(({ assignment }: { assignment: Assignment }) => {
+  return (
+    <div key={assignment.id} className="p-4 flex items-center justify-between hover:bg-gray-50/50 transition-all group">
+      <div className="flex items-center gap-4">
+        <div className={cn(
+          "p-2.5 rounded-xl border",
+          assignment.type === 'skill_mastery' 
+            ? "bg-blue-500/10 border-blue-500/10 text-blue-600" 
+            : "bg-purple-500/10 border-purple-500/10 text-purple-600"
+        )}>
+          <ClipboardList className="h-5 w-5" />
+        </div>
+        <div>
+          <h3 className="font-bold text-gray-900 text-sm leading-tight capitalize">{assignment.type.replace('_', ' ')}</h3>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">
+               {assignment.scope}
+            </span>
+            {assignment.due_date && (
+               <div className="flex items-center gap-1">
+                 <span className="text-[10px] text-gray-300">•</span>
+                 <Clock className="w-3 h-3 text-gray-300" />
+                 <span className="text-[11px] text-gray-400 font-semibold">{new Date(assignment.due_date).toLocaleDateString()}</span>
+               </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className={cn(
+        "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.1em] border",
+        assignment.status === 'pending' 
+          ? "bg-amber-500/10 text-amber-600 border-amber-500/20" 
+          : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+      )}>
+        {assignment.status}
+      </div>
+    </div>
+  );
+});
+
+const ProgressCell = memo(({ status }: { status: string }) => {
+  return (
+    <TableCell className="text-center py-4">
+      {status === 'mastered' ? (
+        <div className="flex justify-center">
+           <div className="p-1 bg-emerald-500/10 rounded-lg">
+             <CheckCircle className="h-4 w-4 text-emerald-600" />
+           </div>
+        </div>
+      ) : status === 'in_progress' ? (
+        <div className="flex justify-center">
+          <div className="p-1 bg-amber-500/10 rounded-lg">
+            <Clock className="h-4 w-4 text-amber-600 animate-pulse" />
+          </div>
+        </div>
+      ) : (
+        <div className="flex justify-center">
+          <Circle className="h-4 w-4 text-gray-100" />
+        </div>
+      )}
+    </TableCell>
+  );
+});
 
 export function GroupDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -205,7 +372,7 @@ export function GroupDetailPage() {
     }
   })
 
-  const copyJoinCode = () => {
+  const copyJoinCode = useCallback(() => {
     if (group?.join_code) {
       navigator.clipboard.writeText(group.join_code)
       setCopiedCode(true)
@@ -215,23 +382,33 @@ export function GroupDetailPage() {
         description: 'Join code copied to clipboard',
       })
     }
-  }
+  }, [group?.join_code, toast]);
 
-  const handleSaveNickname = (memberId: string) => {
+  const handleSaveNickname = useCallback((memberId: string) => {
     if (editNickname.trim()) {
       updateNicknameMutation.mutate({ memberId, nickname: editNickname.trim() })
     }
-  }
+  }, [editNickname, updateNicknameMutation]);
 
-  const startEditingNickname = (memberId: string, currentNickname: string) => {
+  const startEditingNickname = useCallback((memberId: string, currentNickname: string) => {
     setEditingMemberId(memberId)
     setEditNickname(currentNickname || '')
-  }
+  }, []);
 
-  const cancelEditing = () => {
+  const cancelEditing = useCallback(() => {
     setEditingMemberId(null)
     setEditNickname('')
-  }
+  }, []);
+
+  const getStatus = useCallback((memberId: string, skillId: string) => {
+    const entry = progress?.find((p: ProgressEntry) => p.user_id === memberId && p.skill_id === skillId)
+    // Assuming entry.mastery_score is 0-100.
+    if (!entry || entry.mastery_level === null) return 'not_started'
+    if (entry.mastery_level >= 100) return 'mastered'
+    return 'in_progress'
+  }, [progress]);
+
+  const getSkillTitle = useCallback((skillId: string) => assignmentSkills?.find((s: Skill) => s.skill_id === skillId)?.title || 'Skill', [assignmentSkills]);
 
   if (groupLoading) {
     return (
@@ -260,16 +437,6 @@ export function GroupDetailPage() {
       </div>
     )
   }
-
-  const getStatus = (memberId: string, skillId: string) => {
-    const entry = progress?.find((p: ProgressEntry) => p.user_id === memberId && p.skill_id === skillId)
-    // Assuming entry.mastery_score is 0-100.
-    if (!entry || entry.mastery_level === null) return 'not_started'
-    if (entry.mastery_level >= 100) return 'mastered'
-    return 'in_progress'
-  }
-
-  const getSkillTitle = (skillId: string) => assignmentSkills?.find((s: Skill) => s.skill_id === skillId)?.title || 'Skill'
 
   const memberCount = members?.length || 0
 
@@ -387,94 +554,20 @@ export function GroupDetailPage() {
                 </div>
               ) : members && members.length > 0 ? (
                 <div className="divide-y divide-gray-50 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
-                  {members.map((member: Member) => {
-                    const displayName = member.nickname || member.profiles?.full_name || member.profiles?.email || 'Anonymous User'
-                    const isAnonymous = !member.user_id || !member.profiles?.email
-                    const isEditing = editingMemberId === member.user_id
-
-                    return (
-                      <div 
-                        key={member.user_id}
-                        className="flex items-center justify-between p-4 hover:bg-gray-50/50 transition-all group"
-                      >
-                        <div className="flex items-center gap-4 flex-1">
-                          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-sm shadow-indigo-500/20 shadow-lg">
-                            {displayName.charAt(0).toUpperCase()}
-                          </div>
-
-                          <div className="flex-1">
-                            {isEditing ? (
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="text"
-                                  value={editNickname}
-                                  onChange={(e) => setEditNickname(e.target.value)}
-                                  className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 w-full max-w-[200px]"
-                                  placeholder="Enter nickname"
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && member.user_id) handleSaveNickname(member.user_id)
-                                    if (e.key === 'Escape') cancelEditing()
-                                  }}
-                                  autoFocus
-                                />
-                                <Button 
-                                  size="sm" 
-                                  className="h-8 rounded-lg font-bold text-[10px] uppercase tracking-widest"
-                                  onClick={() => member.user_id && handleSaveNickname(member.user_id)}
-                                  disabled={updateNicknameMutation.isPending || !member.user_id}
-                                >
-                                  Save
-                                </Button>
-                              </div>
-                            ) : (
-                              <>
-                                <div className="flex items-center gap-2">
-                                  <h3 className="font-bold text-gray-900 text-sm leading-tight">{displayName}</h3>
-                                  {isAnonymous && (
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-black uppercase tracking-widest">
-                                      Anon
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                   {member.profiles?.email && (
-                                    <p className="text-[11px] text-gray-400 font-semibold">{member.profiles.email}</p>
-                                  )}
-                                  <span className="text-[11px] text-gray-300">•</span>
-                                  <p className="text-[11px] text-gray-400 font-semibold">
-                                     {member.joined_at ? new Date(member.joined_at).toLocaleDateString() : 'Active'}
-                                  </p>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </div>
-
-                        {!isEditing && (
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() => member.user_id && startEditingNickname(member.user_id, member.nickname || '')}
-                              className="h-8 w-8 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
-                            >
-                              <Edit3 className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() => {
-                                member.user_id && removeMemberMutation.mutate(member.user_id)
-                              }}
-                              className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
+                  {members.map((member: Member) => (
+                    <MemberRow 
+                      key={member.user_id}
+                      member={member}
+                      onEdit={startEditingNickname}
+                      onRemove={removeMemberMutation.mutate}
+                      isEditing={editingMemberId === member.user_id}
+                      editNickname={editNickname}
+                      onNicknameChange={setEditNickname}
+                      onSave={handleSaveNickname}
+                      onCancel={cancelEditing}
+                      isPending={updateNicknameMutation.isPending}
+                    />
+                  ))}
                 </div>
               ) : (
                 <EmptyState 
@@ -511,41 +604,7 @@ export function GroupDetailPage() {
               ) : assignments && assignments.length > 0 ? (
                 <div className="divide-y divide-gray-50 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
                   {assignments.map((assignment: Assignment) => (
-                    <div key={assignment.id} className="p-4 flex items-center justify-between hover:bg-gray-50/50 transition-all group">
-                      <div className="flex items-center gap-4">
-                        <div className={cn(
-                          "p-2.5 rounded-xl border",
-                          assignment.type === 'skill_mastery' 
-                            ? "bg-blue-500/10 border-blue-500/10 text-blue-600" 
-                            : "bg-purple-500/10 border-purple-500/10 text-purple-600"
-                        )}>
-                          <ClipboardList className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-gray-900 text-sm leading-tight capitalize">{assignment.type.replace('_', ' ')}</h3>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">
-                               {assignment.scope}
-                            </span>
-                            {assignment.due_date && (
-                               <div className="flex items-center gap-1">
-                                 <span className="text-[10px] text-gray-300">•</span>
-                                 <Clock className="w-3 h-3 text-gray-300" />
-                                 <span className="text-[11px] text-gray-400 font-semibold">{new Date(assignment.due_date).toLocaleDateString()}</span>
-                               </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className={cn(
-                        "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.1em] border",
-                        assignment.status === 'pending' 
-                          ? "bg-amber-500/10 text-amber-600 border-amber-500/20" 
-                          : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                      )}>
-                        {assignment.status}
-                      </div>
-                    </div>
+                     <AssignmentRow key={assignment.id} assignment={assignment} />
                   ))}
                 </div>
               ) : (
@@ -605,27 +664,8 @@ export function GroupDetailPage() {
                              </div>
                           </TableCell>
                           {assignmentSkillIds.map((skillId: string) => {
-                             const status = member.user_id ? getStatus(member.user_id, skillId) : 'not_started'
                              return (
-                               <TableCell key={skillId} className="text-center py-4">
-                                 {status === 'mastered' ? (
-                                   <div className="flex justify-center">
-                                      <div className="p-1 bg-emerald-500/10 rounded-lg">
-                                        <CheckCircle className="h-4 w-4 text-emerald-600" />
-                                      </div>
-                                   </div>
-                                 ) : status === 'in_progress' ? (
-                                   <div className="flex justify-center">
-                                     <div className="p-1 bg-amber-500/10 rounded-lg">
-                                       <Clock className="h-4 w-4 text-amber-600 animate-pulse" />
-                                     </div>
-                                   </div>
-                                 ) : (
-                                   <div className="flex justify-center">
-                                     <Circle className="h-4 w-4 text-gray-100" />
-                                   </div>
-                                 )}
-                               </TableCell>
+                               <ProgressCell key={skillId} status={member.user_id ? getStatus(member.user_id, skillId) : 'not_started'} />
                              )
                           })}
                         </TableRow>

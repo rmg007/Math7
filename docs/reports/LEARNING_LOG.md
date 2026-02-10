@@ -254,3 +254,32 @@ Lessons learned from bugs, incidents, and development discoveries.
 - **Reference**: `src/components/ui/status-badge.tsx`, `src/features/*/pages/*`
 
 ---
+
+---
+
+## 2026-02-10: Unified Deployment & Forensics Protocol
+
+- **Context**: Deployed Questerix v0.9.0 (Admin/Student/Landing) to Cloudflare Pages and established the "All-Seeing Auditor" forensics workflow.
+- **Major Changes**:
+  - **Sequential Orchestrator**: Refactored `orchestrator.ps1` to run builds sequentially. This avoids PATH issues and file-locking conflicts (port 5173) common in restricted Windows/PowerShell environments.
+  - **Forensics Workflow (`/forensics`)**: Created a high-rigor audit protocol to detect "Structural Rot" (hollow files < 100 bytes, zombie tests that hang, and historical RLS vulnerabilities).
+- **Lessons Learned**:
+  - **Hollow Shell Risk**: In monorepos, a build can report "Success" even if core modules (like `supabase.ts`) are 0-byte placeholders. Integrity checks MUST include file-size verification.
+  - **Zombie Processes**: Tests that "hang" at 95% are often silent environment failures. Timeout gates and raw log analysis are required beyond simple exit codes.
+  - **Flutter Web Defines**: Injecting `--dart-define` must handle newline-separated files correctly; mapping them to a persistent `--dart-define=KEY=VAL` list in a shell loop is more reliable than passing the raw file content.
+- **Reference**: `orchestrator.ps1`, `.agent/workflows/forensics.md`, `tasks.md`
+
+## 2026-02-10: SSoT Hardening & Multi-Tenant UX Polish
+
+- **Context**: Finalized the unification of project documentation and addressed critical UX gaps in the Admin Panel dashboard.
+- **Major Changes**:
+  - Implemented `RoleRedirect` component to handle role-based entry points without infinite loops.
+  - Standardized `EmptyState` component across all management pages for consistency.
+  - Centralized all project-wide tasks into a single root `tasks.md`.
+- **Lessons Learned**:
+  - **One Brain, One Repo**: Decentralized "Backups" for documentation create drift; repository-local documentation indexed via Oracle is the optimal AI-assist architecture.
+  - **Role-Based Redirect Pattern**: Using a dedicated client-side redirect component is safer than static `Navigate` components when dealing with complex RBAC logic.
+  - **Documentation Pruning**: High-signal repos require aggressive pruning of "session logs" once their tasks are consolidated to prevent context window pollution for AI agents.
+- **Reference**: `admin-panel/src/App.tsx`, `tasks.md`, `docs/status/MAIN_BRANCH_STATUS.md`
+
+---

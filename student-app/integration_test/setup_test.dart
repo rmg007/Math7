@@ -66,8 +66,7 @@ Future<void> pumpAppWithMocks(
   required MockSupabaseService supabase,
   required MockDatabaseProvider database,
 }) async {
-  // TODO: Implement provider overrides
-  // This will be completed when we integrate with the main app
+  // Stub: provider overrides pending main app integration
   // await tester.pumpWidget(
   //   ProviderScope(
   //     overrides: [

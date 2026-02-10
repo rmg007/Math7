@@ -11,7 +11,7 @@ import {
     QuestionInsert
 } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import { Pagination } from '@/components/ui/pagination';
@@ -69,6 +69,8 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { sanitizeHtml } from '@/lib/sanitize';
+
 
 const QUESTION_COLUMNS: DataColumn[] = [
     { key: 'content', header: 'content' },
@@ -92,7 +94,7 @@ interface SortableRowProps {
     isDuplicating: boolean;
 }
 
-function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, isDragDisabled, isDuplicating }: SortableRowProps) {
+const SortableRow = memo(({ question, isSelected, onSelect, onDelete, onDuplicate, isDragDisabled, isDuplicating }: SortableRowProps) => {
     const {
         attributes,
         listeners,
@@ -136,7 +138,7 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, is
                 )}
             </td>
             <td className="px-4 py-3">
-                <button onClick={() => onSelect(question.question_id)} className="text-gray-300 hover:text-indigo-600 transition-all duration-300 transform hover:scale-110">
+                <button onClick={() => onSelect(question.question_id)} aria-label={isSelected ? 'Deselect question' : 'Select question'} className="text-gray-300 hover:text-indigo-600 transition-all duration-300 transform hover:scale-110">
                     {isSelected ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
                 </button>
             </td>
@@ -144,11 +146,11 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, is
                 <div className="flex flex-col gap-1.5">
                     <div 
                         className="font-bold text-gray-900 text-[15px] tracking-tight line-clamp-2 group-hover/row:text-indigo-700 transition-colors prose-sm"
-                        dangerouslySetInnerHTML={{ __html: question.content }}
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(question.content) }}
                     />
                     {question.skills?.domains?.title && (
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
-                            <span className="text-indigo-400">{question.skills.domains.title}</span>
+                        <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-1.5">
+                            <span className="text-indigo-600">{question.skills.domains.title}</span>
                             <span className="text-gray-300">/</span>
                             <span>{question.skills.title}</span>
                         </p>
@@ -163,7 +165,7 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, is
             <td className="px-4 py-5 text-center">
                  <div className="inline-flex flex-col items-center">
                     <span className="text-lg font-black text-gray-900 leading-none">{question.points}</span>
-                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-tighter">PTS</span>
+                    <span className="text-[8px] font-black text-gray-600 uppercase tracking-tighter">PTS</span>
                 </div>
             </td>
             <td className="px-4 py-5">
@@ -200,9 +202,9 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, is
             </td>
         </tr>
     );
-}
+});
 
-function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, isDragDisabled, isDuplicating }: SortableRowProps) {
+const SortableCard = memo(({ question, isSelected, onSelect, onDelete, onDuplicate, isDragDisabled, isDuplicating }: SortableRowProps) => {
     const {
         attributes,
         listeners,
@@ -280,7 +282,7 @@ function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, i
                 <div className="min-w-0">
                     <div 
                         className="font-black text-gray-900 text-lg tracking-tight leading-relaxed mb-4 line-clamp-3 prose-sm"
-                        dangerouslySetInnerHTML={{ __html: question.content }}
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(question.content) }}
                     />
                     <div className="space-y-3">
                         {question.skills?.domains?.title && (
@@ -323,7 +325,7 @@ function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, i
             <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/5 blur-[80px] rounded-full pointer-events-none" />
         </div>
     );
-}
+});
 
 export function QuestionList() {
     const { currentApp } = useApp();
@@ -357,12 +359,12 @@ export function QuestionList() {
     const bulkCreate = useBulkCreateQuestions();
     const { toast } = useToast();
     
-    const showToast = (title: string, type: 'success' | 'error' = 'success') => {
+    const showToast = useCallback((title: string, type: 'success' | 'error' = 'success') => {
         toast({
             title,
             variant: type === 'error' ? 'destructive' : 'default',
         });
-    };
+    }, [toast]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -437,23 +439,25 @@ export function QuestionList() {
         setPage(1);
     };
 
-    const handleSelectAll = () => {
+    const handleSelectAll = useCallback(() => {
         if (selectedIds.size === questions.length && questions.length > 0) {
             setSelectedIds(new Set());
         } else {
             setSelectedIds(new Set(questions.map((q: QuestionListItem) => q.question_id)));
         }
-    };
+    }, [questions, selectedIds.size]);
 
-    const handleSelectOne = (id: string) => {
-        const newSelected = new Set(selectedIds);
-        if (newSelected.has(id)) {
-            newSelected.delete(id);
-        } else {
-            newSelected.add(id);
-        }
-        setSelectedIds(newSelected);
-    };
+    const handleSelectOne = useCallback((id: string) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) {
+                next.delete(id);
+            } else {
+                next.add(id);
+            }
+            return next;
+        });
+    }, []);
 
     const handleMarkLive = async () => {
         if (selectedIds.size === 0) return;
@@ -488,9 +492,9 @@ export function QuestionList() {
         }
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = useCallback((id: string) => {
         setDeleteConfirmation({ type: 'single', id });
-    };
+    }, []);
 
     const confirmExecution = async () => {
         if (!deleteConfirmation) return;
@@ -510,14 +514,14 @@ export function QuestionList() {
         }
     };
 
-    const handleDuplicate = async (id: string) => {
+    const handleDuplicate = useCallback(async (id: string) => {
         try {
             await duplicateQuestion.mutateAsync(id);
             showToast('Question duplicated', 'success');
         } catch {
             showToast('Failed to duplicate question', 'error');
         }
-    };
+    }, [duplicateQuestion, showToast]);
 
     const handleImport = async (data: Record<string, unknown>[]) => {
         if (!currentApp) return;
@@ -705,13 +709,13 @@ export function QuestionList() {
                 
                 <div className="flex flex-wrap items-center gap-4 shrink-0 w-full lg:w-auto">
                     <div className="flex items-center gap-3 px-5 py-3 bg-white/50 border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all">
-                        <Filter className="h-4 w-4 text-indigo-400" />
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Skill</span>
+                        <Filter className="h-4 w-4 text-indigo-600" />
+                        <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Skill</span>
                         <Select
                             value={selectedSkillId}
                             onValueChange={setSelectedSkillId}
                         >
-                            <SelectTrigger className="w-auto h-auto border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-600 hover:text-indigo-700 transition-colors uppercase tracking-tight italic gap-2">
+                            <SelectTrigger aria-label="Filter by skill" className="w-auto h-auto border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-600 hover:text-indigo-700 transition-colors uppercase tracking-tight italic gap-2">
                                 <SelectValue placeholder="All Clusters" />
                             </SelectTrigger>
                             <SelectContent className="rounded-2xl border-white/20 backdrop-blur-xl bg-white/90">
@@ -725,12 +729,12 @@ export function QuestionList() {
 
                     <div className="flex items-center gap-3 px-5 py-3 bg-white/50 border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</span>
+                        <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Status</span>
                         <Select
                             value={statusFilter}
                             onValueChange={(v) => setStatusFilter(v as 'all' | 'draft' | 'published' | 'live')}
                         >
-                            <SelectTrigger className="w-auto h-auto border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-600 hover:text-indigo-700 transition-colors uppercase tracking-tight italic gap-2">
+                            <SelectTrigger aria-label="Filter by status" className="w-auto h-auto border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-600 hover:text-indigo-700 transition-colors uppercase tracking-tight italic gap-2">
                                 <SelectValue placeholder="All States" />
                             </SelectTrigger>
                             <SelectContent className="rounded-2xl border-white/20 backdrop-blur-xl bg-white/90">
@@ -743,7 +747,7 @@ export function QuestionList() {
                     </div>
 
                     <div className="px-5 py-3 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-600/20 flex items-center gap-3">
-                         <span className="text-[10px] font-black text-white/70 uppercase tracking-widest">Assets</span>
+                         <span className="text-[10px] font-black text-white/90 uppercase tracking-widest">Assets</span>
                          <span className="text-sm font-black tracking-tight">{totalCount}</span>
                     </div>
                 </div>
@@ -808,13 +812,13 @@ export function QuestionList() {
                         <table className="w-full">
                             <thead className="bg-gray-50/50 border-b-2 border-gray-100">
                                 <tr>
-                                    <th className="w-12 h-14 pl-6 pr-2 font-black text-[10px] uppercase tracking-widest text-gray-400"></th>
+                                    <th className="w-12 h-14 pl-6 pr-2 font-black text-[10px] uppercase tracking-widest text-gray-600"></th>
                                     <th className="w-12 h-14 px-4">
-                                        <button onClick={handleSelectAll} className="text-gray-300 hover:text-indigo-600 transition-colors">
+                                        <button onClick={handleSelectAll} aria-label={isAllSelected ? 'Deselect all questions' : 'Select all questions'} className="text-gray-300 hover:text-indigo-600 transition-colors">
                                             {isAllSelected && questions.length > 0 ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
                                         </button>
                                     </th>
-                                    <th className="h-14 px-6 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">
+                                    <th className="h-14 px-6 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">
                                         <SortableHeader
                                             label="Question Content"
                                             column="content"
@@ -824,7 +828,7 @@ export function QuestionList() {
                                             className="text-[10px]"
                                         />
                                     </th>
-                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">
+                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">
                                          <SortableHeader
                                             label="Asset Type"
                                             column="type"
@@ -834,13 +838,13 @@ export function QuestionList() {
                                             className="text-[10px]"
                                         />
                                     </th>
-                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">
+                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">
                                         <div className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors cursor-default">
                                             <Filter className="h-3 w-3" />
                                             Target Skill
                                         </div>
                                     </th>
-                                    <th className="h-14 px-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">
+                                    <th className="h-14 px-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-600">
                                         <SortableHeader
                                             label="Weight"
                                             column="points"
@@ -850,7 +854,7 @@ export function QuestionList() {
                                             className="text-[10px] justify-center"
                                         />
                                     </th>
-                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">
+                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">
                                         <SortableHeader
                                             label="Status"
                                             column="status"
@@ -860,7 +864,7 @@ export function QuestionList() {
                                             className="text-[10px]"
                                         />
                                     </th>
-                                    <th className="h-14 pl-4 pr-10 text-right font-black text-[10px] uppercase tracking-widest text-gray-400">Execution</th>
+                                    <th className="h-14 pl-4 pr-10 text-right font-black text-[10px] uppercase tracking-widest text-gray-600">Execution</th>
                                 </tr>
                             </thead>
                             <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>

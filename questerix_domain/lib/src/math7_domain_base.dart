@@ -1,4 +1,4 @@
-// TODO: Put public facing types in this file.
+// Questerix Domain - public facing types
 
 /// Checks if you are awesome. Spoiler: you are.
 class Awesome {

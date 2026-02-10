@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Plus, Layout, Pencil, Trash2, Search, X, Layers, Globe, GraduationCap, Power, Activity } from 'lucide-react';
 import { AdminHeader } from '@/components/ui/admin-header';
-import { useApps, useCreateApp, useUpdateApp, useDeleteApp, type App } from '../hooks/use-apps';
+import { useApps, useCreateApp, useUpdateApp, useDeleteApp, type CompiledApp } from '../hooks/use-apps';
 import { useSubjects } from '../hooks/use-subjects';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -14,7 +14,74 @@ import { useToast } from '@/hooks/use-toast';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import { cn } from '@/lib/utils';
+
+interface AppRowProps {
+  app: CompiledApp;
+  onEdit: (app: CompiledApp) => void;
+  onDelete: (id: string) => void;
+}
+
+const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
+  return (
+    <TableRow key={app.app_id} className="group hover:bg-indigo-50/30 transition-colors border-b border-gray-50 last:border-0">
+      <TableCell className="px-8 py-5">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+             <Layout className="w-5 h-5 text-indigo-600" />
+          </div>
+          <div>
+            <div className="font-bold text-gray-900 tracking-tight text-base">{app.display_name}</div>
+            <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">ID: {app.app_id.slice(0, 8)}...</div>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+             <GraduationCap className="h-3.5 w-3.5 text-emerald-600" />
+          </div>
+          <span className="font-bold text-gray-700">{app.subjects?.name ?? 'Unlinked'}</span>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <Globe className="h-3.5 w-3.5 text-gray-300" />
+          <span className="font-mono text-xs font-black text-indigo-500 tracking-tighter">{app.subdomain}.questerix.com</span>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="px-3 py-1 bg-gray-100 rounded-lg text-[11px] font-black text-gray-500 uppercase tracking-widest inline-block border border-gray-200/50">
+           {app.grade_level || 'N/A'}
+        </div>
+      </TableCell>
+      <TableCell>
+        <StatusBadge status={app.is_active ? 'active' : 'inactive'} />
+      </TableCell>
+      <TableCell className="px-8 py-5 text-right">
+        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+           <Button 
+             variant="ghost" 
+             size="icon" 
+             onClick={() => onEdit(app)}
+             className="h-10 w-10 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl"
+           >
+             <Pencil className="w-4 h-4" />
+           </Button>
+           <Button 
+             variant="ghost" 
+             size="icon" 
+             onClick={() => onDelete(app.app_id)}
+             className="h-10 w-10 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl"
+           >
+             <Trash2 className="w-4 h-4" />
+           </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+});
 
 export function AppsPage() {
   const { data: apps, isLoading: appsLoading } = useApps();
@@ -28,7 +95,7 @@ export function AppsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingApp, setEditingApp] = useState<App | null>(null);
+  const [editingApp, setEditingApp] = useState<CompiledApp | null>(null);
   const [formData, setFormData] = useState({
     subject_id: '',
     display_name: '',
@@ -38,7 +105,7 @@ export function AppsPage() {
     is_active: true
   });
 
-  const handleOpenDialog = (app?: App) => {
+  const handleOpenDialog = useCallback((app?: CompiledApp) => {
     if (app) {
       setEditingApp(app);
       setFormData({
@@ -61,7 +128,7 @@ export function AppsPage() {
       });
     }
     setIsDialogOpen(true);
-  };
+  }, [subjects]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,14 +150,14 @@ export function AppsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     try {
       await deleteApp.mutateAsync(id);
       toast({ title: "Deployment Purged", description: "The application cluster and all associated data have been deleted." });
     } catch (error) {
       toast({ title: "Error", description: "Failed to delete app", variant: "destructive" });
     }
-  };
+  }, [deleteApp, toast]);
 
   const filteredApps = apps?.filter(app => 
     app.display_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -186,75 +253,33 @@ export function AppsPage() {
                 ))
               ) : paginatedApps.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-24">
-                    <div className="flex flex-col items-center gap-4">
-                       <div className="w-16 h-16 bg-gray-50 rounded-3xl border border-gray-100 flex items-center justify-center">
-                          <Layers className="w-8 h-8 text-gray-300" />
-                       </div>
-                       <div>
-                         <h4 className="text-lg font-bold text-gray-900 tracking-tight">No Clusters Found</h4>
-                         <p className="text-sm text-gray-500 font-medium">Reset filters or initialize a new app instance.</p>
-                       </div>
-                    </div>
+                  <TableCell colSpan={6} className="py-24">
+                    <EmptyState
+                      icon={Layers}
+                      title={searchQuery ? "No matches discovered" : "Zero Clusters Found"}
+                      description={searchQuery 
+                        ? `No application deployments match your search for "${searchQuery}".` 
+                        : "The deployment matrix is currently empty. Initialize a new cluster subject to begin."}
+                      action={searchQuery ? {
+                        label: "Clear Search",
+                        onClick: () => { setSearchQuery(''); setCurrentPage(1); }
+                      } : {
+                        label: "New Application",
+                        onClick: () => handleOpenDialog()
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
-              ) : paginatedApps.map((app) => (
-                <TableRow key={app.app_id} className="group hover:bg-indigo-50/30 transition-colors border-b border-gray-50 last:border-0">
-                  <TableCell className="px-8 py-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
-                         <Layout className="w-5 h-5 text-indigo-600" />
-                      </div>
-                      <div>
-                        <div className="font-bold text-gray-900 tracking-tight text-base">{app.display_name}</div>
-                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">ID: {app.app_id.slice(0, 8)}...</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                         <GraduationCap className="h-3.5 w-3.5 text-emerald-600" />
-                      </div>
-                      <span className="font-bold text-gray-700">{app.subjects?.name ?? 'Unlinked'}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Globe className="h-3.5 w-3.5 text-gray-300" />
-                      <span className="font-mono text-xs font-black text-indigo-500 tracking-tighter">{app.subdomain}.questerix.com</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="px-3 py-1 bg-gray-100 rounded-lg text-[11px] font-black text-gray-500 uppercase tracking-widest inline-block border border-gray-200/50">
-                       {app.grade_level || 'N/A'}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={app.is_active ? 'active' : 'inactive'} />
-                  </TableCell>
-                  <TableCell className="px-8 py-5 text-right">
-                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                       <Button 
-                         variant="ghost" 
-                         size="icon" 
-                         onClick={() => handleOpenDialog(app)}
-                         className="h-10 w-10 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl"
-                       >
-                         <Pencil className="w-4 h-4" />
-                       </Button>
-                       <Button 
-                         variant="ghost" 
-                         size="icon" 
-                         onClick={() => handleDelete(app.app_id)}
-                         className="h-10 w-10 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl"
-                       >
-                         <Trash2 className="w-4 h-4" />
-                       </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              ) : (
+                paginatedApps.map((app) => (
+                  <AppRow 
+                    key={app.app_id} 
+                    app={app} 
+                    onEdit={handleOpenDialog} 
+                    onDelete={handleDelete} 
+                  />
+                ))
+              )}
             </TableBody>
           </Table>
         </div>

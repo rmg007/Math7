@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { TEST_CREDENTIALS, generateTestSkill } from './test-utils';
+import { TEST_USERS, generateTestSkill } from './test-utils';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 // Login helper
@@ -34,8 +34,9 @@ test.describe('Admin Panel E2E Tests', () => {
     if (!process.env.VITE_SUPABASE_URL) {
       try {
         const dotenv = await import('dotenv');
-        dotenv.config({ path: '.env' });
+        dotenv.config({ path: '.env.test.local' });
         dotenv.config({ path: '.env.local' });
+        dotenv.config({ path: '.env' });
       } catch (e) {
         console.warn('Could not load dotenv, assuming environment is set');
       }
@@ -82,7 +83,7 @@ test.describe('Admin Panel E2E Tests', () => {
     });
 
     test('should login with valid credentials', async ({ page }) => {
-      await login(page, TEST_CREDENTIALS.email, TEST_CREDENTIALS.password);
+      await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
       await expect(page.locator('text=Domains').first()).toBeVisible();
     });
 
@@ -121,7 +122,7 @@ test.describe('Admin Panel E2E Tests', () => {
 
   test.describe('Dashboard', () => {
     test.beforeEach(async ({ page }) => {
-      await login(page, TEST_CREDENTIALS.email, TEST_CREDENTIALS.password);
+      await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
     });
 
     // test('should load dashboard', async ({ page }) => {
@@ -145,13 +146,13 @@ test.describe('Admin Panel E2E Tests', () => {
 
   test.describe('Domains Management', () => {
     test.beforeEach(async ({ page }) => {
-      await login(page, TEST_CREDENTIALS.email, TEST_CREDENTIALS.password);
+      await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
     });
 
     test('should list all domains', async ({ page }) => {
       await page.goto('/domains');
-      await expect(page.locator('h2:has-text("Domains")')).toBeVisible(); // Changed to h2 based on domain-form.tsx line 81
-      await expect(page.locator('a[href="/domains/new"]').first()).toBeVisible();
+      await expect(page.locator('text=Curriculum Domains')).toBeVisible();
+      await expect(page.locator('button:has-text("New Domain")').first()).toBeVisible();
     });
 
     // test('should create a new domain', async ({ page }) => {
@@ -220,12 +221,12 @@ test.describe('Admin Panel E2E Tests', () => {
 
   test.describe('Skills Management', () => {
     test.beforeEach(async ({ page }) => {
-      await login(page, TEST_CREDENTIALS.email, TEST_CREDENTIALS.password);
+      await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
     });
 
     test('should list all skills', async ({ page }) => {
       await page.goto('/skills');
-      await expect(page.locator('h2:has-text("Skills")')).toBeVisible();
+      await expect(page.locator('text=Curriculum Skills')).toBeVisible();
       await expect(page.locator('a[href="/skills/new"]').first()).toBeVisible();
     });
 
@@ -250,10 +251,11 @@ test.describe('Admin Panel E2E Tests', () => {
     test('should filter skills by domain', async ({ page }) => {
       await page.goto('/skills');
       // Assuming there is a domain filter select
-      const filterTrigger = page.locator('button[role="combobox"]:has-text("Filter by Domain")').or(page.locator('button[role="combobox"]:has-text("All Domains")'));
+      const filterTrigger = page.locator('button[role="combobox"]').filter({ hasText: /Filter by Domain|All Domains/ });
 
       if (await filterTrigger.isVisible()) {
-        await selectOption(page, filterTrigger, 0); // Select first domain
+        await filterTrigger.click();
+        await page.locator('[role="option"]').first().click();
         await page.waitForTimeout(1000); // Wait for filter
         // Verify items are displayed (or empty state)
         // Just verifying it doesn't crash
@@ -264,12 +266,12 @@ test.describe('Admin Panel E2E Tests', () => {
 
   test.describe('Questions Management', () => {
     test.beforeEach(async ({ page }) => {
-      await login(page, TEST_CREDENTIALS.email, TEST_CREDENTIALS.password);
+      await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
     });
 
     test('should list all questions', async ({ page }) => {
       await page.goto('/questions');
-      await expect(page.locator('h2:has-text("Questions")')).toBeVisible();
+      await expect(page.locator('text=Question Registry')).toBeVisible();
       const createBtn = page.locator('a[href="/questions/new"]');
       await expect(createBtn.first()).toBeVisible();
     });
@@ -277,36 +279,41 @@ test.describe('Admin Panel E2E Tests', () => {
     test('should create a new MCQ question', async ({ page }) => {
       await page.goto('/questions/new');
 
-      // Select Skill
-      await selectOption(page, 'button[role="combobox"]:has-text("Select a skill")', 0);
+      // Wait for form to load
+      await expect(page.locator('text=Architect Question')).toBeVisible();
 
-      // Select Type (MCQ is default usually, but let's be explicit)
-      // Note: Initial type is multiple_choice.
+      // 1. Select Skill — combobox labeled "Target Skill Segment"
+      await page.getByRole('combobox', { name: 'Target Skill Segment' }).click();
+      await page.locator('[role="option"]').first().click();
+      // Close any overlay/dropdown
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(500);
 
-      // Fill Content (RichTextEditor)
-      // Locate the ProseMirror editor div
-      const editor = page.locator('.ProseMirror').first();
-      await editor.fill('What is 2 + 2?');
+      // 2. Fill Question Content — click the ProseMirror editor within "Question Core" section
+      const questionEditor = page.locator('.ProseMirror').first();
+      await questionEditor.click();
+      await page.keyboard.type('E2E Test: What is 2 + 2?');
+      await page.waitForTimeout(300);
 
-      // Fill Options
-      // MCQ options are rendered. "Option A", "Option B" inputs.
-      // Option A
-      await page.fill('input[placeholder="Option A"]', '4');
-      // Option B
-      await page.fill('input[placeholder="Option B"]', '5');
+      // 3. Fill Options — textbox roles with placeholder labels
+      await page.getByRole('textbox', { name: 'Option A' }).fill('4');
+      await page.getByRole('textbox', { name: 'Option B' }).fill('5');
 
-      // Select Correct Answer
-      await page.click('button[role="radio"][value="a"]'); // Select A
+      // 4. Select correct answer — click first radio button (Option A)
+      await page.getByRole('radio').first().click();
 
-      // Fill Explanation
-      const explanationEditor = page.locator('.ProseMirror').nth(1); // Second editor
+      // 5. Fill Explanation (second ProseMirror editor)
+      const explanationEditor = page.locator('.ProseMirror').nth(1);
       if (await explanationEditor.isVisible()) {
-        await explanationEditor.fill('Because math.');
+        await explanationEditor.click();
+        await page.keyboard.type('Because 2 + 2 = 4.');
       }
 
-      await page.click('button[type="submit"]');
+      // 6. Submit — button labeled "DEPLOY QUESTION"
+      await page.getByRole('button', { name: 'DEPLOY QUESTION' }).click();
 
-      await expect(page).toHaveURL(/\/questions/);
+      // Should redirect to questions list
+      await expect(page).toHaveURL(/\/questions/, { timeout: 15000 });
     });
   });
 });

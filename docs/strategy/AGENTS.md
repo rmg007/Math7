@@ -11,7 +11,7 @@ Every agent, in every session, **MUST** execute these three steps before perform
 
 1. **Check Time**: Note the current local time provided in the system prompt.
 2. **Check Task & Status**:
-   - Read `docs/status/current_project_status.md` (What is done?).
+   - Read `docs/status/MAIN_BRANCH_STATUS.md` (What is done?).
    - Read the active task in the current conversation memory.
 3. **Check Schema**:
    - Read `admin-panel/src/lib/database.types.ts` to understand the current database state.
@@ -49,7 +49,7 @@ Every agent, in every session, **MUST** execute these three steps before perform
 
 | Domain | Key Document |
 |--------|--------------|
-| **Core Roadmap** | `docs/strategy/roadmap.md` |
+| **Core Roadmap** | `docs/status/ROADMAP.md` |
 | **Database Schema** | `admin-panel/src/lib/database.types.ts` |
 | **Admin Panel** | `docs/technical/ADMIN_PANEL_ARCHITECTURE.md` |
 | **Student App** | `docs/technical/STUDENT_APP_ARCHITECTURE.md` |

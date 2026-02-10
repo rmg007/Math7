@@ -11,7 +11,11 @@ import { glob } from 'glob';
 import { createSupabaseClient } from './lib/supabase-client.js';
 import { generateEmbeddings } from './lib/embedder.js';
 import { hashContent } from './lib/hasher.js';
-import { splitMarkdown } from './lib/splitter.js';
+import { splitMarkdown, splitCode, DocumentChunk } from './lib/splitter.js';
+import dotenv from 'dotenv';
+
+// Load environment variables from scripts/knowledge-base/.env
+dotenv.config({ path: path.resolve(import.meta.dirname, '.env') });
 
 // Configuration
 const PROJECT_ROOT = path.resolve(import.meta.dirname, '../..');
@@ -26,6 +30,10 @@ const INCLUDE_PATTERNS = [
   'admin-panel/README.md',
   'landing-pages/README.md',
   'content-engine/README.md',
+  // Code files for AI Context
+  'admin-panel/src/lib/database.types.ts',
+  '**/package.json',
+  'scripts/knowledge-base/**/*.ts',
 ];
 
 const DRY_RUN = process.argv.includes('--dry-run');
@@ -48,7 +56,7 @@ async function discoverFiles(): Promise<string[]> {
     const matches = await glob(pattern, {
       cwd: PROJECT_ROOT,
       absolute: false,
-      ignore: ['node_modules/**', '**/node_modules/**', 'dist/**', 'build/**'],
+      ignore: ['node_modules/**', '**/node_modules/**', 'dist/**', 'build/**', '.git/**'],
     });
     files.push(...matches);
   }
@@ -63,8 +71,17 @@ async function discoverFiles(): Promise<string[]> {
 async function processFile(relativePath: string): Promise<ChunkToIndex[]> {
   const absolutePath = path.join(PROJECT_ROOT, relativePath);
   const content = await fs.readFile(absolutePath, 'utf-8');
+  const ext = path.extname(relativePath).toLowerCase();
 
-  const chunks = await splitMarkdown(content, relativePath);
+  let chunks: DocumentChunk[];
+
+  if (ext === '.ts' || ext === '.json' || ext === '.js') {
+    // Treat JSON as JS/Code for splitting purposes
+    chunks = await splitCode(content, relativePath, 'js');
+  } else {
+    // Default to markdown (includes .md)
+    chunks = await splitMarkdown(content, relativePath);
+  }
 
   return chunks.map((chunk) => ({
     filePath: relativePath,

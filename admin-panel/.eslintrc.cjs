@@ -27,7 +27,7 @@ module.exports = {
     'yoda': ['error', 'never'],
     
     // TypeScript specific
-    '@typescript-eslint/no-explicit-any': 'warn', // Warn for gradual adoption
+    '@typescript-eslint/no-explicit-any': 'error', // Enforce strict type safety
     '@typescript-eslint/no-non-null-assertion': 'warn',
     '@typescript-eslint/no-inferrable-types': 'error',
     

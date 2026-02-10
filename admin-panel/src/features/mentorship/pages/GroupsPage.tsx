@@ -1,5 +1,5 @@
-import { useGroups } from '../hooks/use-groups';
-import { useState, useMemo } from 'react';
+import { useGroups, type Group } from '../hooks/use-groups';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Users, Copy, Check, School, Home, Search, X, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,73 @@ import { cn } from '@/lib/utils';
 
 import { Skeleton } from '@/components/ui/skeleton';
 
+interface GroupCardProps {
+  group: Group;
+  onCopy: (code: string, id: string) => void;
+  copiedId: string | null;
+}
+
+const GroupCard = memo(({ group, onCopy, copiedId }: GroupCardProps) => {
+  return (
+    <div key={group.id} className="relative group overflow-hidden rounded-[2.5rem] border border-white/40 bg-white/70 backdrop-blur-xl hover:border-indigo-300 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 hover:-translate-y-2">
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+      <div className="p-8 relative">
+        <div className="flex items-start justify-between mb-8">
+          <div className={cn(
+            "p-4 rounded-2xl shadow-sm border",
+            group.type === 'class' 
+              ? "bg-blue-500/10 text-blue-600 border-blue-500/10" 
+              : "bg-purple-500/10 text-purple-600 border-purple-500/10"
+          )}>
+            {group.type === 'class' ? <School className="h-6 w-6" /> : <Home className="h-6 w-6" />}
+          </div>
+          <span className={cn(
+            "text-[9px] uppercase font-black px-3 py-1 rounded-full border tracking-widest shadow-sm",
+            group.type === 'class' 
+              ? "bg-blue-50 text-blue-600 border-blue-200" 
+              : "bg-purple-50 text-purple-600 border-purple-200"
+          )}>
+            {group.type}
+          </span>
+        </div>
+        
+        <h3 className="text-xl font-black text-gray-900 mb-2 line-clamp-1 tracking-tight" title={group.name}>
+          {group.name}
+        </h3>
+        
+        <div className="mt-8 p-1.5 rounded-2xl bg-gray-100/50 border border-gray-100 flex items-center justify-between pl-4 pr-1.5 py-1.5">
+          <div className="flex flex-col">
+            <span className="text-[9px] text-gray-400 uppercase tracking-widest font-black mb-0.5">Access Code</span>
+            <span className="text-lg font-mono font-black text-indigo-600 tracking-[0.2em] leading-none pb-0.5">
+              {group.join_code}
+            </span>
+          </div>
+          <button 
+            onClick={() => onCopy(group.join_code, group.id)}
+            className="h-11 w-11 flex items-center justify-center rounded-xl bg-white border border-gray-100 hover:bg-indigo-50 hover:border-indigo-200 transition-all text-gray-400 hover:text-indigo-600 shadow-sm active:scale-90"
+            title="Copy Join Code"
+          >
+            {copiedId === group.id ? <Check className="h-5 w-5 text-emerald-500" /> : <Copy className="h-5 w-5" />}
+          </button>
+        </div>
+      </div>
+      
+      <div className="px-8 py-5 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between group-hover:bg-indigo-500 transition-all duration-500">
+        <div className="flex items-center gap-2">
+           <Activity className="h-3.5 w-3.5 text-gray-300 group-hover:text-white/50" />
+           <span className="text-xs font-bold text-gray-500 group-hover:text-white/80 transition-colors">Cluster Active</span>
+        </div>
+        <Link 
+          to={`/groups/${group.id}`} 
+          className="text-[11px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-700 p-2 group-hover:text-white group-hover:bg-white/10 rounded-xl transition-all"
+        >
+          Configure &rarr;
+        </Link>
+      </div>
+    </div>
+  );
+});
 
 export function GroupsPage() {
   const { data: groups, isLoading } = useGroups();
@@ -22,11 +89,11 @@ export function GroupsPage() {
     );
   }, [groups, searchTerm]);
 
-  const copyCode = (code: string, id: string) => {
+  const copyCode = useCallback((code: string, id: string) => {
     navigator.clipboard.writeText(code);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
-  };
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
@@ -101,63 +168,12 @@ export function GroupsPage() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredGroups.map((group) => (
-            <div key={group.id} className="relative group overflow-hidden rounded-[2.5rem] border border-white/40 bg-white/70 backdrop-blur-xl hover:border-indigo-300 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 hover:-translate-y-2">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
-              <div className="p-8 relative">
-                <div className="flex items-start justify-between mb-8">
-                  <div className={cn(
-                    "p-4 rounded-2xl shadow-sm border",
-                    group.type === 'class' 
-                      ? "bg-blue-500/10 text-blue-600 border-blue-500/10" 
-                      : "bg-purple-500/10 text-purple-600 border-purple-500/10"
-                  )}>
-                    {group.type === 'class' ? <School className="h-6 w-6" /> : <Home className="h-6 w-6" />}
-                  </div>
-                  <span className={cn(
-                    "text-[9px] uppercase font-black px-3 py-1 rounded-full border tracking-widest shadow-sm",
-                    group.type === 'class' 
-                      ? "bg-blue-50 text-blue-600 border-blue-200" 
-                      : "bg-purple-50 text-purple-600 border-purple-200"
-                  )}>
-                    {group.type}
-                  </span>
-                </div>
-                
-                <h3 className="text-xl font-black text-gray-900 mb-2 line-clamp-1 tracking-tight" title={group.name}>
-                  {group.name}
-                </h3>
-                
-                <div className="mt-8 p-1.5 rounded-2xl bg-gray-100/50 border border-gray-100 flex items-center justify-between pl-4 pr-1.5 py-1.5">
-                  <div className="flex flex-col">
-                    <span className="text-[9px] text-gray-400 uppercase tracking-widest font-black mb-0.5">Access Code</span>
-                    <span className="text-lg font-mono font-black text-indigo-600 tracking-[0.2em] leading-none pb-0.5">
-                      {group.join_code}
-                    </span>
-                  </div>
-                  <button 
-                    onClick={() => copyCode(group.join_code, group.id)}
-                    className="h-11 w-11 flex items-center justify-center rounded-xl bg-white border border-gray-100 hover:bg-indigo-50 hover:border-indigo-200 transition-all text-gray-400 hover:text-indigo-600 shadow-sm active:scale-90"
-                    title="Copy Join Code"
-                  >
-                    {copiedId === group.id ? <Check className="h-5 w-5 text-emerald-500" /> : <Copy className="h-5 w-5" />}
-                  </button>
-                </div>
-              </div>
-              
-              <div className="px-8 py-5 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between group-hover:bg-indigo-500 transition-all duration-500">
-                <div className="flex items-center gap-2">
-                   <Activity className="h-3.5 w-3.5 text-gray-300 group-hover:text-white/50" />
-                   <span className="text-xs font-bold text-gray-500 group-hover:text-white/80 transition-colors">Cluster Active</span>
-                </div>
-                <Link 
-                  to={`/groups/${group.id}`} 
-                  className="text-[11px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-700 p-2 group-hover:text-white group-hover:bg-white/10 rounded-xl transition-all"
-                >
-                  Configure &rarr;
-                </Link>
-              </div>
-            </div>
+             <GroupCard 
+               key={group.id} 
+               group={group} 
+               onCopy={copyCode} 
+               copiedId={copiedId} 
+             />
           ))}
         </div>
       )}

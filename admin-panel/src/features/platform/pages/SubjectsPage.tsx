@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Plus, Pencil, Trash2, Boxes, Search, X, Activity, Layers } from 'lucide-react';
 import { useSubjects, useCreateSubject, useUpdateSubject, useDeleteSubject, type Subject } from '../hooks/use-subjects';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,73 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { AdminHeader } from '@/components/ui/admin-header';
 import { EmptyState } from '@/components/ui/empty-state';
+
+interface SubjectRowProps {
+  subject: Subject;
+  onEdit: (subject: Subject) => void;
+  onDelete: (id: string) => void;
+}
+
+const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
+  return (
+    <TableRow key={subject.subject_id} className="group hover:bg-purple-50/30 transition-colors border-b border-gray-50 last:border-0">
+      <TableCell className="px-8 py-5">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: `${subject.color_hex}15`, border: `1px solid ${subject.color_hex}30` }}>
+             <Layers className="w-6 h-6" style={{ color: subject.color_hex || '#8b5cf6' }} />
+          </div>
+          <div>
+            <p className="font-black text-gray-900 tracking-tight text-base italic leading-none">{subject.name}</p>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">ID: {subject.subject_id.split('-')[0]}</p>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell className="py-5">
+         <code className="px-3 py-1.5 rounded-xl bg-gray-100/50 text-purple-600 font-mono text-[10px] font-black tracking-tight border border-gray-100">
+           {subject.slug}
+         </code>
+      </TableCell>
+      <TableCell className="py-5 text-center">
+        {subject.icon_url ? (
+          <div className="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center mx-auto shadow-sm">
+             <img src={subject.icon_url} alt="" className="w-6 h-6 object-contain" />
+          </div>
+        ) : (
+          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center mx-auto shadow-sm italic text-[10px] font-black text-gray-300">
+            NONE
+          </div>
+        )}
+      </TableCell>
+      <TableCell className="py-5">
+        <div className="flex items-center gap-2">
+          <span className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-xs font-black text-gray-600">
+            {subject.display_order ?? 0}
+          </span>
+        </div>
+      </TableCell>
+      <TableCell className="px-8 py-5 text-right">
+        <div className="flex justify-end gap-2">
+           <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => onEdit(subject)}
+            className="h-10 w-10 rounded-xl text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
+          >
+            <Pencil className="w-4 h-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => onDelete(subject.subject_id)}
+            className="h-10 w-10 rounded-xl text-rose-500 hover:bg-rose-50 hover:text-rose-600"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+});
 
 export function SubjectsPage() {
   const { data: subjects, isLoading } = useSubjects();
@@ -29,7 +96,7 @@ export function SubjectsPage() {
     display_order: 1,
   });
 
-  const handleOpenDialog = (subject?: Subject) => {
+  const handleOpenDialog = useCallback((subject?: Subject) => {
     if (subject) {
       setEditingSubject(subject);
       setFormData({
@@ -50,7 +117,7 @@ export function SubjectsPage() {
       });
     }
     setIsDialogOpen(true);
-  };
+  }, [subjects?.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,14 +135,14 @@ export function SubjectsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     try {
       await deleteSubject.mutateAsync(id);
       toast({ title: "Taxonomy Node Purged", description: "The subject and all associated metadata have been removed from the registry." });
     } catch (error) {
       toast({ title: "Error", description: "Failed to purge taxonomy node", variant: "destructive" });
     }
-  };
+  }, [deleteSubject, toast]);
 
   const filteredSubjects = subjects?.filter(s => 
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -173,62 +240,12 @@ export function SubjectsPage() {
                 </TableRow>
               ) : (
                 filteredSubjects.map((s) => (
-                <TableRow key={s.subject_id} className="group hover:bg-purple-50/30 transition-colors border-b border-gray-50 last:border-0">
-                  <TableCell className="px-8 py-5">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: `${s.color_hex}15`, border: `1px solid ${s.color_hex}30` }}>
-                         <Layers className="w-6 h-6" style={{ color: s.color_hex || '#8b5cf6' }} />
-                      </div>
-                      <div>
-                        <p className="font-black text-gray-900 tracking-tight text-base italic leading-none">{s.name}</p>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">ID: {s.subject_id.split('-')[0]}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-5">
-                     <code className="px-3 py-1.5 rounded-xl bg-gray-100/50 text-purple-600 font-mono text-[10px] font-black tracking-tight border border-gray-100">
-                       {s.slug}
-                     </code>
-                  </TableCell>
-                  <TableCell className="py-5 text-center">
-                    {s.icon_url ? (
-                      <div className="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center mx-auto shadow-sm">
-                         <img src={s.icon_url} alt="" className="w-6 h-6 object-contain" />
-                      </div>
-                    ) : (
-                      <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center mx-auto shadow-sm italic text-[10px] font-black text-gray-300">
-                        NONE
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="py-5">
-                    <div className="flex items-center gap-2">
-                      <span className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-xs font-black text-gray-600">
-                        {s.display_order ?? 0}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-8 py-5 text-right">
-                    <div className="flex justify-end gap-2">
-                       <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => handleOpenDialog(s)}
-                        className="h-10 w-10 rounded-xl text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => handleDelete(s.subject_id)}
-                        className="h-10 w-10 rounded-xl text-rose-500 hover:bg-rose-50 hover:text-rose-600"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                   <SubjectRow 
+                     key={s.subject_id} 
+                     subject={s} 
+                     onEdit={handleOpenDialog} 
+                     onDelete={handleDelete} 
+                   />
               )))}
             </TableBody>
           </Table>

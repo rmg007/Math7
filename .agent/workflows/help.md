@@ -28,7 +28,8 @@ Commands not auto-running? Use the workaround:
 | `/continue` | Switch to different AI agent |
 | `/autopilot` | Full autonomous mode |
 | `/blocked` | Report blockers |
-| `/audit` | Security vulnerability scan |
+| `/audit` | Quick security vulnerability scan |
+| `/forensics` | **Deep-Dive Forensic Audit (Trust No One)** |
 | `/sp` | Quick commands via watcher |
 
 ## 💤 Session Management
@@ -77,7 +78,10 @@ Enables all commands to auto-run (if IDE configured).
 Document what's stopping progress and partial achievements.
 
 ### `/audit` - Security Vulnerability Scan
-Systematic codebase scan using vulnerability taxonomy.
+Systematic codebase scan using vulnerability taxonomy. Use for quick reliability checks.
+
+### `/forensics` - All-Seeing Auditor Protocol
+**The "Nuclear Option" for Quality Control.** Use this when the system feels "buggy" or unstable. It assumes the repository is lying, checks for empty files (rot), zombie tests (hangs), and historical security confessions in migrations.
 
 ---
 

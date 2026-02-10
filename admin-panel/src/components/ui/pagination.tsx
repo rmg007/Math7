@@ -70,6 +70,7 @@ export function Pagination({
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
+              aria-label="Items per page"
               className="px-3 py-2 min-h-[44px] rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-200 text-sm"
             >
               {pageSizeOptions.map((size) => (

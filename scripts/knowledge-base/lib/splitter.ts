@@ -9,9 +9,12 @@ export interface DocumentChunk {
   content: string;
   breadcrumb: string;
   metadata: {
+    language?: string;
     heading?: string;
     level?: number;
     section?: string;
+    loc?: any;
+    [key: string]: any;
   };
 }
 
@@ -43,6 +46,37 @@ function buildBreadcrumb(fileName: string, headings: string[]): string {
   // Take up to 3 most recent headings for context
   const recentHeadings = headings.slice(-3);
   return `${fileName} > ${recentHeadings.join(' > ')}`;
+}
+
+/**
+ * Split code file into chunks using language-aware splitter
+ */
+export async function splitCode(
+  content: string,
+  filePath: string,
+  language: 'js' | 'python' | 'go' = 'js'
+): Promise<DocumentChunk[]> {
+  const fileName = filePath.split('/').pop() || filePath;
+
+  const splitter = RecursiveCharacterTextSplitter.fromLanguage(language, {
+    chunkSize: 1500, // Slightly larger for code context
+    chunkOverlap: 200,
+  });
+
+  const docs = await splitter.createDocuments([content]);
+
+  return docs.map((doc, index) => {
+    // For code, breadcrumb is just filename + chunk index/context
+    return {
+      content: doc.pageContent,
+      breadcrumb: `${fileName} (Part ${index + 1})`,
+      metadata: {
+        language,
+        loc: doc.metadata.loc,
+        ...doc.metadata
+      },
+    };
+  });
 }
 
 /**

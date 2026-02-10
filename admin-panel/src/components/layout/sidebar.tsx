@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { 
   Book, Layers, FileText, Upload, LogOut, Settings, Key, History, 
   Users, UserCog, Shield, Bug, AlertTriangle, Globe, Boxes, Layout,
-  ChevronDown, ChevronRight, ChevronLeft, FileUp, MessageSquare
+  ChevronDown, ChevronRight, ChevronLeft, FileUp, MessageSquare, BarChart3
 } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -23,6 +23,7 @@ type NavItem = {
   icon: React.ElementType
   superAdminOnly?: boolean
   hideForSuperAdmin?: boolean
+  isExternal?: boolean
 }
 
 type NavGroup = {
@@ -31,6 +32,12 @@ type NavGroup = {
 }
 
 const navigationGroups: NavGroup[] = [
+  {
+    title: 'Overview',
+    items: [
+      { name: 'Dashboard', href: '/dashboard', icon: BarChart3, superAdminOnly: true },
+    ]
+  },
   {
     title: 'Curriculum',
     items: [
@@ -65,6 +72,12 @@ const navigationGroups: NavGroup[] = [
       { name: 'User Management', href: '/users', icon: UserCog, superAdminOnly: true },
       { name: 'Invitation Codes', href: '/invitation-codes', icon: Key, superAdminOnly: true },
       { name: 'Settings', href: '/settings', icon: Settings },
+    ]
+  },
+  {
+    title: 'Support',
+    items: [
+      { name: 'Feedback', href: 'https://github.com/rmg007/Questerix/issues', icon: MessageSquare, isExternal: true },
     ]
   }
 ]
@@ -198,7 +211,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
                 if (app) setCurrentApp(app)
               }}
             >
-              <SelectTrigger className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 transition-colors rounded-xl focus:ring-0">
+              <SelectTrigger aria-label="Select application" className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 transition-colors rounded-xl focus:ring-0">
                 <SelectValue placeholder={appsLoading ? "Loading apps..." : "Select app"} />
               </SelectTrigger>
               <SelectContent className="bg-[#1a1b4b] border-white/10 text-white">
@@ -236,6 +249,8 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
           const matchGroupPath = visibleItems.some(item => location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href)));
           const isOpen = openGroups.includes(group.title);
 
+          if (visibleItems.length === 0) return null;
+
           return (
             <div key={group.title} className="space-y-1 pt-2 border-t border-white/5 first:pt-0 first:border-0">
                 {!isSidebarCollapsed && (
@@ -265,6 +280,36 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
                   {visibleItems.map((item) => {
                     const isActive = location.pathname === item.href || 
                       (item.href !== '/' && location.pathname.startsWith(item.href))
+                    if (item.isExternal) {
+                      return (
+                        <a
+                          key={item.name}
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={isSidebarCollapsed ? item.name : undefined}
+                          className={cn(
+                            "flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 group relative",
+                            isActive 
+                              ? "bg-white/10 text-white shadow-inner border border-white/5" 
+                              : "text-purple-200 hover:bg-white/5 hover:text-white",
+                            isSidebarCollapsed && "justify-center px-0 w-10 mx-auto"
+                          )}
+                        >
+                          <item.icon className={cn(
+                            "h-4 w-4 transition-colors",
+                            isActive ? "text-purple-300" : "text-purple-400 group-hover:text-purple-200"
+                          )} />
+                          {!isSidebarCollapsed && (
+                            <span className="flex-1 text-sm font-medium">{item.name}</span>
+                          )}
+                          {isActive && !isSidebarCollapsed && (
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-purple-400 rounded-r-full shadow-[0_0_8px_rgba(192,132,252,0.5)]" />
+                          )}
+                        </a>
+                      )
+                    }
+
                     return (
                       <Link
                         key={item.name}

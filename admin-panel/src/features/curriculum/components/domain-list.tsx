@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 import { Plus, Book, Search, Filter, Square, CheckSquare, GripVertical, Pencil, Trash2, X } from 'lucide-react'
-import { usePaginatedDomains, useDeleteDomain, useBulkDeleteDomains, useUpdateDomainOrder, useBulkCreateDomains } from '../hooks/use-domains'
+import { usePaginatedDomains, useDeleteDomain, useBulkDeleteDomains, useUpdateDomainOrder, useBulkCreateDomains, useBulkUpdateDomainsStatus } from '../hooks/use-domains'
 import { DataToolbar } from '@/components/ui/data-toolbar'
 import type { DataColumn } from '@/lib/data-utils';
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback, memo } from 'react'
 import { useToast } from '@/hooks/use-toast';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import { Pagination } from '@/components/ui/pagination'
@@ -67,7 +67,7 @@ interface SortableRowProps {
   isDragDisabled: boolean
 }
 
-function SortableRow({ domain, isSelected, onSelect, onDelete, renderStatusBadge, isDragDisabled }: SortableRowProps) {
+const SortableRow = memo(({ domain, isSelected, onSelect, onDelete, renderStatusBadge, isDragDisabled }: SortableRowProps) => {
   const {
     attributes,
     listeners,
@@ -105,7 +105,7 @@ function SortableRow({ domain, isSelected, onSelect, onDelete, renderStatusBadge
         )}
       </td>
       <td className="px-4 py-3">
-        <button onClick={() => onSelect(domain.domain_id)} className="text-gray-300 hover:text-indigo-600 transition-colors">
+        <button onClick={() => onSelect(domain.domain_id)} aria-label={isSelected ? 'Deselect domain' : 'Select domain'} className="text-gray-300 hover:text-indigo-600 transition-colors">
           {isSelected ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
         </button>
       </td>
@@ -116,7 +116,7 @@ function SortableRow({ domain, isSelected, onSelect, onDelete, renderStatusBadge
           </div>
           <div className="flex flex-col">
                <span className="font-black text-gray-900 text-sm tracking-tight leading-none group-hover/row:text-indigo-700 transition-colors">{domain.title}</span>
-               <span className="text-[10px] text-gray-400 font-black uppercase tracking-[0.1em] mt-1.5 opacity-70 italic">ID: {domain.domain_id.substring(0, 8)}</span>
+               <span className="text-[10px] text-gray-500 font-black uppercase tracking-[0.1em] mt-1.5 italic">ID: {domain.domain_id.substring(0, 8)}</span>
           </div>
         </div>
       </td>
@@ -130,7 +130,7 @@ function SortableRow({ domain, isSelected, onSelect, onDelete, renderStatusBadge
             <span className="text-xs font-black text-gray-900 tracking-tight italic">
                 {new Date(domain.updated_at).toLocaleDateString()}
             </span>
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5 opacity-60">
+            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-0.5">
                 {new Date(domain.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
         </div>
@@ -158,9 +158,9 @@ function SortableRow({ domain, isSelected, onSelect, onDelete, renderStatusBadge
       </td>
     </tr>
   )
-}
+});
 
-function SortableCard({ domain, isSelected, onSelect, onDelete, renderStatusBadge, isDragDisabled }: SortableRowProps) {
+const SortableCard = memo(({ domain, isSelected, onSelect, onDelete, renderStatusBadge, isDragDisabled }: SortableRowProps) => {
   const {
     attributes,
     listeners,
@@ -205,6 +205,7 @@ function SortableCard({ domain, isSelected, onSelect, onDelete, renderStatusBadg
             )}
             <button
               onClick={() => onSelect(domain.domain_id)}
+              aria-label={isSelected ? 'Deselect domain' : 'Select domain'}
               className="p-2 text-gray-300 hover:text-indigo-600 transition-colors"
             >
               {isSelected ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
@@ -232,7 +233,7 @@ function SortableCard({ domain, isSelected, onSelect, onDelete, renderStatusBadg
           </div>
           <div className="min-w-0">
             <h3 className="font-black text-gray-900 text-lg tracking-tight truncate leading-tight mb-1">{domain.title}</h3>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic opacity-60">ID: {domain.domain_id.substring(0, 8)}</p>
+            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest italic">ID: {domain.domain_id.substring(0, 8)}</p>
           </div>
         </div>
 
@@ -250,7 +251,7 @@ function SortableCard({ domain, isSelected, onSelect, onDelete, renderStatusBadg
       </div>
     </div>
   )
-}
+});
 
 export function DomainList() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -276,14 +277,15 @@ export function DomainList() {
   const bulkDelete = useBulkDeleteDomains()
   const updateDomainOrder = useUpdateDomainOrder()
   const bulkCreate = useBulkCreateDomains()
+  const bulkUpdateStatus = useBulkUpdateDomainsStatus()
   const { toast } = useToast()
 
-  const showToast = (title: string, type: 'success' | 'error' = 'success') => {
+  const showToast = useCallback((title: string, type: 'success' | 'error' = 'success') => {
     toast({
       title,
       variant: type === 'error' ? 'destructive' : 'default',
     })
-  }
+  }, [toast])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -358,28 +360,63 @@ export function DomainList() {
     setPage(1)
   }
 
-  const handleSelectAll = () => {
+  const handleSelectAll = useCallback(() => {
     if (selectedIds.size === domains.length && domains.length > 0) {
       setSelectedIds(new Set())
     } else {
       setSelectedIds(new Set(domains.map(d => d.domain_id)))
     }
-  }
+  }, [domains, selectedIds.size])
 
-  const handleSelectOne = (id: string) => {
-    const newSelected = new Set(selectedIds)
-    if (newSelected.has(id)) {
-      newSelected.delete(id)
-    } else {
-      newSelected.add(id)
+  const handleSelectOne = useCallback((id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
+
+  const handleMarkLive = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      await bulkUpdateStatus.mutateAsync({ ids: Array.from(selectedIds), status: 'live' });
+      showToast(`${selectedIds.size} domain(s) marked as live`, 'success');
+      setSelectedIds(new Set());
+    } catch {
+      showToast('Failed to update domains', 'error');
     }
-    setSelectedIds(newSelected)
-  }
+  };
+
+  const handleMarkDraft = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      await bulkUpdateStatus.mutateAsync({ ids: Array.from(selectedIds), status: 'draft' });
+      showToast(`${selectedIds.size} domain(s) marked as draft`, 'success');
+      setSelectedIds(new Set());
+    } catch {
+      showToast('Failed to update domains', 'error');
+    }
+  };
+
+  const handleMarkPublished = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      await bulkUpdateStatus.mutateAsync({ ids: Array.from(selectedIds), status: 'published' });
+      showToast(`${selectedIds.size} domain(s) marked as published`, 'success');
+      setSelectedIds(new Set());
+    } catch {
+      showToast('Failed to update domains', 'error');
+    }
+  };
 
 
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     setDeleteConfirmation({ type: 'single', id })
-  }
+  }, [])
 
   const confirmDelete = async () => {
     if (!deleteConfirmation) return
@@ -428,14 +465,14 @@ export function DomainList() {
     }
   };
 
-    const renderStatusBadge = (status: string) => {
+    const renderStatusBadge = useCallback((status: string) => {
         return (
             <StatusBadge 
                 status={status.toLowerCase() as StatusType} 
                 label={status.toUpperCase()}
             />
         );
-    };
+    }, []);
 
   if (isLoading) {
     return (
@@ -522,13 +559,13 @@ export function DomainList() {
         
         <div className="flex items-center gap-3 shrink-0">
           <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/5 border border-indigo-500/10 rounded-xl">
-             <Filter className="h-3.5 w-3.5 text-indigo-400" />
-             <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mr-2">Status:</span>
+             <Filter className="h-3.5 w-3.5 text-indigo-700" />
+             <span className="text-[10px] font-black text-indigo-700 uppercase tracking-widest mr-2">Status:</span>
              <Select
                value={statusFilter}
                onValueChange={(v) => setStatusFilter(v as 'all' | 'draft' | 'published' | 'live')}
              >
-               <SelectTrigger className="w-auto h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-700 hover:text-indigo-600 transition-colors uppercase tracking-tight">
+                <SelectTrigger aria-label="Filter by status" className="w-auto h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-700 hover:text-indigo-600 transition-colors uppercase tracking-tight">
                  <SelectValue placeholder="All Status" />
                </SelectTrigger>
                <SelectContent className="rounded-2xl border-white/20 backdrop-blur-xl bg-white/90">
@@ -541,11 +578,56 @@ export function DomainList() {
           </div>
 
           <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
-             <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Registry:</span>
+             <span className="text-[10px] font-black text-indigo-700 uppercase tracking-widest">Registry:</span>
              <span className="text-sm font-black text-indigo-700 tracking-tight">{totalCount} MAPPED</span>
           </div>
         </div>
       </div>
+
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between p-4 bg-indigo-600 rounded-[2rem] shadow-xl shadow-indigo-600/20 animate-in slide-in-from-top-4 duration-500">
+          <div className="flex items-center gap-4 pl-4">
+            <span className="text-white font-black text-xs uppercase tracking-[0.2em]">{selectedIds.size} SELECTED FOR BATCH PROCESSING</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleMarkPublished}
+              className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+            >
+              Publish
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleMarkLive}
+              className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+            >
+              Go Live
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleMarkDraft}
+              className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+            >
+              Draft
+            </Button>
+            <div className="w-px h-6 bg-white/20 mx-2" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setDeleteConfirmation({ type: 'bulk' })}
+              className="h-10 px-4 rounded-xl text-red-200 font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all gap-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              Purge
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-xl border border-white/20 overflow-hidden">
         <DndContext
@@ -558,13 +640,13 @@ export function DomainList() {
             <table className="w-full">
               <thead className="bg-gray-50/50 border-b-2 border-gray-100">
                 <tr>
-                  <th className="w-12 h-14 pl-6 pr-2 font-black text-[10px] uppercase tracking-widest text-gray-400"></th>
+                  <th className="w-12 h-14 pl-6 pr-2 font-black text-[10px] uppercase tracking-widest text-gray-600"></th>
                   <th className="w-12 h-14 px-4">
-                    <button onClick={handleSelectAll} className="text-gray-300 hover:text-indigo-600 transition-colors">
+                    <button onClick={handleSelectAll} aria-label={isAllSelected ? 'Deselect all domains' : 'Select all domains'} className="text-gray-300 hover:text-indigo-600 transition-colors">
                       {isAllSelected && domains.length > 0 ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
                     </button>
                   </th>
-                  <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">
+                  <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">
                     <SortableHeader
                         label="Identity & Domain"
                         column="title"
@@ -574,7 +656,7 @@ export function DomainList() {
                         className="text-[10px]"
                     />
                   </th>
-                  <th className="h-14 px-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">
+                  <th className="h-14 px-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-600">
                     <SortableHeader
                         label="Rank"
                         column="sort_order"
@@ -584,7 +666,7 @@ export function DomainList() {
                         className="text-[10px] justify-center"
                     />
                   </th>
-                  <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">
+                  <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">
                     <SortableHeader
                       label="Timestamp"
                       column="updated_at"
@@ -594,8 +676,8 @@ export function DomainList() {
                       className="text-[10px]"
                     />
                   </th>
-                  <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">Protocol Status</th>
-                  <th className="h-14 pl-4 pr-8 text-right font-black text-[10px] uppercase tracking-widest text-gray-400">Execution</th>
+                  <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">Protocol Status</th>
+                  <th className="h-14 pl-4 pr-8 text-right font-black text-[10px] uppercase tracking-widest text-gray-600">Execution</th>
                 </tr>
               </thead>
               <SortableContext items={domainIds} strategy={verticalListSortingStrategy}>

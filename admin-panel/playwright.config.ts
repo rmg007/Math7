@@ -19,7 +19,11 @@ export default defineConfig({
   timeout: 60000, // 60 seconds per test
   expect: {
     timeout: 10000, // 10 seconds for assertions
+    toHaveScreenshot: {
+      maxDiffPixelRatio: 0.05, // Allow 5% pixel difference for rendering noise
+    },
   },
+  snapshotPathTemplate: '{testDir}/__screenshots__/{projectName}/{testFilePath}/{arg}{ext}',
   reporter: [
     ['html', { open: 'never' }],
     ['list'],
@@ -38,6 +42,13 @@ export default defineConfig({
       use: { 
         ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1080 },
+      },
+    },
+    {
+      name: 'tablet',
+      testMatch: /visual-regression/,
+      use: {
+        ...devices['iPad Pro 11'],
       },
     },
     // Uncomment to test on other browsers

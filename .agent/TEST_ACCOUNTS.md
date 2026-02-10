@@ -85,7 +85,7 @@ This file contains test credentials. Ensure:
 | **Password** | `testmentor@example.com` |
 | **Name** | Test Mentor |
 | **Role** | `mentor` |
-| **User ID** | *(Dynamic)* |
+| **User ID** | `a5dc368b-0141-41e1-8556-8eb2cb076b4d` |
 | **Permissions** | Create groups, manage students, assign work |
 
 ---
@@ -178,4 +178,4 @@ If you need to reset a password, you can do it in Supabase Dashboard:
 
 ---
 
-*Last Updated: 2026-02-03 (Added Dynamic Verification Strategy)*
+*Last Updated: 2026-02-10 (Consolidated SSoT, idempotent sync, Mentor ID verified)*

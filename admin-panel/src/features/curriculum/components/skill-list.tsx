@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { usePaginatedSkills, useDeleteSkill, useBulkDeleteSkills, useBulkUpdateSkillsStatus, useDuplicateSkill, useUpdateSkillOrder, useBulkCreateSkills } from '../hooks/use-skills';
 import { useDomains } from '../hooks/use-domains';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import { Pagination } from '@/components/ui/pagination';
@@ -73,7 +73,7 @@ interface SortableRowProps {
     isDuplicating: boolean;
 }
 
-function SortableRow({ skill, isSelected, onSelect, onDelete, onDuplicate, renderStatusBadge, isDragDisabled, isDuplicating }: SortableRowProps) {
+const SortableRow = memo(({ skill, isSelected, onSelect, onDelete, onDuplicate, renderStatusBadge, isDragDisabled, isDuplicating }: SortableRowProps) => {
     const {
         attributes,
         listeners,
@@ -111,7 +111,7 @@ function SortableRow({ skill, isSelected, onSelect, onDelete, onDuplicate, rende
                 )}
             </td>
             <td className="px-4 py-3">
-                <button onClick={() => onSelect(skill.skill_id)} className="text-gray-300 hover:text-indigo-600 transition-colors">
+                <button onClick={() => onSelect(skill.skill_id)} aria-label={isSelected ? 'Deselect skill' : 'Select skill'} className="text-gray-300 hover:text-indigo-600 transition-colors">
                     {isSelected ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
                 </button>
             </td>
@@ -162,9 +162,9 @@ function SortableRow({ skill, isSelected, onSelect, onDelete, onDuplicate, rende
             </td>
         </tr>
     );
-}
+});
 
-function SortableCard({ skill, isSelected, onSelect, onDelete, onDuplicate, renderStatusBadge, isDragDisabled, isDuplicating }: SortableRowProps) {
+const SortableCard = memo(({ skill, isSelected, onSelect, onDelete, onDuplicate, renderStatusBadge, isDragDisabled, isDuplicating }: SortableRowProps) => {
     const {
         attributes,
         listeners,
@@ -209,6 +209,7 @@ function SortableCard({ skill, isSelected, onSelect, onDelete, onDuplicate, rend
                         )}
                         <button
                             onClick={() => onSelect(skill.skill_id)}
+                            aria-label={isSelected ? 'Deselect skill' : 'Select skill'}
                             className="p-2 text-gray-300 hover:text-indigo-600 transition-colors"
                         >
                             {isSelected ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
@@ -261,7 +262,7 @@ function SortableCard({ skill, isSelected, onSelect, onDelete, onDuplicate, rend
             </div>
         </div>
     );
-}
+});
 
 export function SkillList() {
     const [selectedDomainId, setSelectedDomainId] = useState<string>('all');
@@ -293,12 +294,12 @@ export function SkillList() {
     const bulkCreate = useBulkCreateSkills();
     const { toast } = useToast();
     
-    const showToast = (title: string, type: 'success' | 'error' = 'success') => {
+    const showToast = useCallback((title: string, type: 'success' | 'error' = 'success') => {
         toast({
             title,
             variant: type === 'error' ? 'destructive' : 'default',
         });
-    };
+    }, [toast]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -373,23 +374,25 @@ export function SkillList() {
         setPage(1);
     };
 
-    const handleSelectAll = () => {
+    const handleSelectAll = useCallback(() => {
         if (selectedIds.size === skills.length && skills.length > 0) {
             setSelectedIds(new Set());
         } else {
             setSelectedIds(new Set(skills.map((s: SkillListItem) => s.skill_id)));
         }
-    };
+    }, [skills, selectedIds.size]);
 
-    const handleSelectOne = (id: string) => {
-        const newSelected = new Set(selectedIds);
-        if (newSelected.has(id)) {
-            newSelected.delete(id);
-        } else {
-            newSelected.add(id);
-        }
-        setSelectedIds(newSelected);
-    };
+    const handleSelectOne = useCallback((id: string) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) {
+                next.delete(id);
+            } else {
+                next.add(id);
+            }
+            return next;
+        });
+    }, []);
 
     const handleMarkLive = async () => {
         if (selectedIds.size === 0) return;
@@ -424,9 +427,9 @@ export function SkillList() {
         }
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = useCallback((id: string) => {
         setDeleteConfirmation({ type: 'single', id });
-    };
+    }, []);
 
     const confirmExecution = async () => {
         if (!deleteConfirmation) return;
@@ -446,14 +449,14 @@ export function SkillList() {
         }
     };
 
-    const handleDuplicate = async (id: string) => {
+    const handleDuplicate = useCallback(async (id: string) => {
         try {
             await duplicateSkill.mutateAsync(id);
             showToast('Skill duplicated', 'success');
         } catch {
             showToast('Failed to duplicate skill', 'error');
         }
-    };
+    }, [duplicateSkill, showToast]);
 
     const handlePageChange = (newPage: number) => {
         setPage(newPage);
@@ -485,14 +488,14 @@ export function SkillList() {
         }
     };
 
-    const renderStatusBadge = (status: string) => {
+    const renderStatusBadge = useCallback((status: string) => {
         return (
             <StatusBadge 
                 status={status.toLowerCase() as StatusType} 
                 label={status.toUpperCase()}
             />
         );
-    };
+    }, []);
 
     if (isLoading) {
         return (
@@ -676,13 +679,13 @@ export function SkillList() {
                         <table className="w-full">
                             <thead className="bg-gray-50/50 border-b-2 border-gray-100">
                                 <tr>
-                                    <th className="w-12 h-14 pl-6 pr-2 font-black text-[10px] uppercase tracking-widest text-gray-400"></th>
+                                    <th className="w-12 h-14 pl-6 pr-2 font-black text-[10px] uppercase tracking-widest text-gray-600"></th>
                                     <th className="w-12 h-14 px-4">
-                                        <button onClick={handleSelectAll} className="text-gray-300 hover:text-indigo-600 transition-colors">
+                                        <button onClick={handleSelectAll} aria-label={isAllSelected ? 'Deselect all skills' : 'Select all skills'} className="text-gray-300 hover:text-indigo-600 transition-colors">
                                             {isAllSelected && skills.length > 0 ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
                                         </button>
                                     </th>
-                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">
+                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">
                                         <SortableHeader
                                             label="Identity & Skill"
                                             column="title"
@@ -692,8 +695,8 @@ export function SkillList() {
                                             className="text-[10px]"
                                         />
                                     </th>
-                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">Parent Domain</th>
-                                    <th className="h-14 px-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">
+                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">Parent Domain</th>
+                                    <th className="h-14 px-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-600">
                                         <SortableHeader
                                             label="LVL"
                                             column="difficulty_level"
@@ -703,8 +706,8 @@ export function SkillList() {
                                             className="text-[10px] justify-center"
                                         />
                                     </th>
-                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">Status</th>
-                                    <th className="h-14 pl-4 pr-8 text-right font-black text-[10px] uppercase tracking-widest text-gray-400">Execution</th>
+                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">Status</th>
+                                    <th className="h-14 pl-4 pr-8 text-right font-black text-[10px] uppercase tracking-widest text-gray-600">Execution</th>
                                 </tr>
                             </thead>
                             <SortableContext items={skillIds} strategy={verticalListSortingStrategy}>

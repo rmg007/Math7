@@ -1,6 +1,8 @@
 /**
  * Test Data Seeding Helpers for E2E Tests
- * Provides comprehensive seed data for admin panel testing
+ * 
+ * Aligned with the ACTUAL Supabase schema (database.types.ts).
+ * All column names here match the physical DB exactly.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -8,9 +10,10 @@ import { Database } from '../../src/lib/database.types';
 
 type Tables = Database['public']['Tables'];
 
-/**
- * Seed data interface
- */
+// Test data uses an existing app_id from the production seed.
+// This is resolved dynamically at runtime via getOrCreateTestApp().
+const TEST_SLUG_PREFIX = 'e2e_test';
+
 export interface SeedData {
   domains: Tables['domains']['Insert'][];
   skills: Tables['skills']['Insert'][];
@@ -18,151 +21,174 @@ export interface SeedData {
 }
 
 /**
- * Clean all test data from database
- * WARNING: Only use in test environment
+ * Clean all E2E test data from database (identified by slug prefix)
  */
 export async function cleanTestData(supabase: SupabaseClient<Database>) {
-  // Delete in correct order to respect foreign key constraints
-  await supabase.from('attempts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-  await supabase.from('questions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-  await supabase.from('skills').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-  await supabase.from('domains').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  // Delete in FK order: questions → skills → domains
+  await supabase.from('questions').delete().like('content', '%E2E Test%');
+  await supabase.from('skills').delete().like('slug', `${TEST_SLUG_PREFIX}_%`);
+  await supabase.from('domains').delete().like('slug', `${TEST_SLUG_PREFIX}_%`);
 }
 
 /**
- * Generate test data
+ * Resolve (or create) an app_id and subject_id for test data.
+ * Uses the first available app in the system.
  */
-export function generateTestData(): SeedData {
+async function getTestContext(supabase: SupabaseClient<Database>) {
+  // Get an existing app
+  const { data: apps } = await supabase
+    .from('apps')
+    .select('app_id, subject_id')
+    .limit(1)
+    .single();
+
+  if (!apps) {
+    throw new Error('No apps found in database. Seed at least one app before running E2E tests.');
+  }
+
+  return { appId: apps.app_id, subjectId: apps.subject_id ?? undefined };
+}
+
+/**
+ * Generate test data aligned to the current schema
+ */
+export function generateTestData(appId: string, subjectId?: string): SeedData {
   const domains: Tables['domains']['Insert'][] = [
     {
-      name: 'Test Algebra',
-      description: 'Algebraic concepts and operations for testing',
-      order_index: 1,
-      icon_url: 'https://example.com/algebra.png',
+      title: 'E2E Test Algebra',
+      slug: `${TEST_SLUG_PREFIX}_algebra`,
+      description: 'Algebraic concepts for E2E testing',
+      sort_order: 900,
+      app_id: appId,
+      subject_id: subjectId,
     },
     {
-      name: 'Test Geometry',
-      description: 'Shapes, angles, and spatial relationships for testing',
-      order_index: 2,
-      icon_url: 'https://example.com/geometry.png',
+      title: 'E2E Test Geometry',
+      slug: `${TEST_SLUG_PREFIX}_geometry`,
+      description: 'Shapes and spatial relationships for E2E testing',
+      sort_order: 901,
+      app_id: appId,
+      subject_id: subjectId,
     },
     {
-      name: 'Test Statistics',
-      description: 'Data analysis and probability for testing',
-      order_index: 3,
-      icon_url: 'https://example.com/statistics.png',
+      title: 'E2E Test Statistics',
+      slug: `${TEST_SLUG_PREFIX}_statistics`,
+      description: 'Data analysis for E2E testing',
+      sort_order: 902,
+      app_id: appId,
+      subject_id: subjectId,
     },
   ];
 
   const skills: Tables['skills']['Insert'][] = [
     {
-      domain_id: '', // Will be set after domain insertion
-      name: 'Linear Equations',
+      domain_id: '', // set after domain insertion
+      title: 'Linear Equations',
+      slug: `${TEST_SLUG_PREFIX}_linear_equations`,
       description: 'Solving equations of the form ax + b = c',
-      order_index: 1,
-      mastery_threshold: 80,
+      sort_order: 1,
+      app_id: appId,
     },
     {
-      domain_id: '', // Will be set after domain insertion
-      name: 'Quadratic Equations',
+      domain_id: '',
+      title: 'Quadratic Equations',
+      slug: `${TEST_SLUG_PREFIX}_quadratic_equations`,
       description: 'Solving equations of the form ax² + bx + c = 0',
-      order_index: 2,
-      mastery_threshold: 80,
+      sort_order: 2,
+      app_id: appId,
     },
     {
-      domain_id: '', // Will be set after domain insertion (Geometry)
-      name: 'Triangle Properties',
+      domain_id: '', // Geometry
+      title: 'Triangle Properties',
+      slug: `${TEST_SLUG_PREFIX}_triangle_properties`,
       description: 'Understanding angles and sides of triangles',
-      order_index: 1,
-      mastery_threshold: 75,
+      sort_order: 1,
+      app_id: appId,
     },
     {
-      domain_id: '', // Will be set after domain insertion (Geometry)
-      name: 'Circle Measurements',
+      domain_id: '', // Geometry
+      title: 'Circle Measurements',
+      slug: `${TEST_SLUG_PREFIX}_circle_measurements`,
       description: 'Calculating circumference, area, and arc length',
-      order_index: 2,
-      mastery_threshold: 75,
+      sort_order: 2,
+      app_id: appId,
     },
     {
-      domain_id: '', // Will be set after domain insertion (Statistics)
-      name: 'Mean and Median',
+      domain_id: '', // Statistics
+      title: 'Mean and Median',
+      slug: `${TEST_SLUG_PREFIX}_mean_median`,
       description: 'Calculating measures of central tendency',
-      order_index: 1,
-      mastery_threshold: 70,
+      sort_order: 1,
+      app_id: appId,
     },
   ];
 
   const questions: Tables['questions']['Insert'][] = [
     {
-      skill_id: '', // Will be set after skill insertion
-      question_type: 'multiple_choice',
-      question_text: 'Solve for x: 2x + 5 = 15',
-      correct_answer: '5',
-      options: JSON.stringify(['3', '5', '7', '10']),
+      skill_id: '', // set after skill insertion
+      type: 'multiple_choice',
+      content: 'E2E Test: Solve for x: 2x + 5 = 15',
+      solution: JSON.parse('{"correct_answer": "5"}'),
+      options: JSON.parse('["3", "5", "7", "10"]'),
       explanation: 'Subtract 5 from both sides: 2x = 10. Divide by 2: x = 5',
-      difficulty: 2,
       points: 10,
-      time_limit: 60,
-      order_index: 1,
+      sort_order: 1,
+      app_id: appId,
     },
     {
-      skill_id: '', // Same skill as above
-      question_type: 'multiple_choice',
-      question_text: 'Solve for x: 3x - 7 = 11',
-      correct_answer: '6',
-      options: JSON.stringify(['4', '6', '8', '18']),
+      skill_id: '', // same skill
+      type: 'multiple_choice',
+      content: 'E2E Test: Solve for x: 3x - 7 = 11',
+      solution: JSON.parse('{"correct_answer": "6"}'),
+      options: JSON.parse('["4", "6", "8", "18"]'),
       explanation: 'Add 7 to both sides: 3x = 18. Divide by 3: x = 6',
-      difficulty: 2,
       points: 10,
-      time_limit: 60,
-      order_index: 2,
+      sort_order: 2,
+      app_id: appId,
     },
     {
-      skill_id: '', // Quadratic skill
-      question_type: 'multiple_choice',
-      question_text: 'What are the solutions to x² - 5x + 6 = 0?',
-      correct_answer: 'x = 2 or x = 3',
-      options: JSON.stringify(['x = 1 or x = 6', 'x = 2 or x = 3', 'x = -2 or x = -3', 'No real solutions']),
+      skill_id: '', // Quadratic
+      type: 'multiple_choice',
+      content: 'E2E Test: What are the solutions to x² - 5x + 6 = 0?',
+      solution: JSON.parse('{"correct_answer": "x = 2 or x = 3"}'),
+      options: JSON.parse('["x = 1 or x = 6", "x = 2 or x = 3", "x = -2 or x = -3", "No real solutions"]'),
       explanation: 'Factor: (x - 2)(x - 3) = 0. Solutions: x = 2 or x = 3',
-      difficulty: 3,
       points: 15,
-      time_limit: 90,
-      order_index: 1,
+      sort_order: 1,
+      app_id: appId,
     },
     {
-      skill_id: '', // Triangle skill
-      question_type: 'multiple_choice',
-      question_text: 'What is the sum of interior angles in a triangle?',
-      correct_answer: '180°',
-      options: JSON.stringify(['90°', '180°', '270°', '360°']),
+      skill_id: '', // Triangle
+      type: 'multiple_choice',
+      content: 'E2E Test: What is the sum of interior angles in a triangle?',
+      solution: JSON.parse('{"correct_answer": "180°"}'),
+      options: JSON.parse('["90°", "180°", "270°", "360°"]'),
       explanation: 'The sum of interior angles in any triangle is always 180°',
-      difficulty: 1,
       points: 5,
-      time_limit: 30,
-      order_index: 1,
+      sort_order: 1,
+      app_id: appId,
     },
     {
-      skill_id: '', // Circle skill
-      question_type: 'text_input',
-      question_text: 'What is the circumference of a circle with radius 5 cm? (Use π ≈ 3.14)',
-      correct_answer: '31.4',
+      skill_id: '', // Circle
+      type: 'text_input',
+      content: 'E2E Test: What is the circumference of a circle with radius 5 cm? (Use π ≈ 3.14)',
+      solution: JSON.parse('{"correct_answer": "31.4"}'),
+      options: JSON.parse('[]'),
       explanation: 'C = 2πr = 2 × 3.14 × 5 = 31.4 cm',
-      difficulty: 2,
       points: 10,
-      time_limit: 60,
-      order_index: 1,
+      sort_order: 1,
+      app_id: appId,
     },
     {
-      skill_id: '', // Mean and Median skill
-      question_type: 'multiple_choice',
-      question_text: 'What is the mean of: 4, 8, 6, 5, 3, 7?',
-      correct_answer: '5.5',
-      options: JSON.stringify(['5', '5.5', '6', '6.5']),
+      skill_id: '', // Mean and Median
+      type: 'multiple_choice',
+      content: 'E2E Test: What is the mean of: 4, 8, 6, 5, 3, 7?',
+      solution: JSON.parse('{"correct_answer": "5.5"}'),
+      options: JSON.parse('["5", "5.5", "6", "6.5"]'),
       explanation: 'Sum: 4+8+6+5+3+7 = 33. Mean: 33÷6 = 5.5',
-      difficulty: 2,
       points: 10,
-      time_limit: 60,
-      order_index: 1,
+      sort_order: 1,
+      app_id: appId,
     },
   ];
 
@@ -170,8 +196,8 @@ export function generateTestData(): SeedData {
 }
 
 /**
- * Seed test data into database
- * Returns IDs of created records for reference
+ * Seed test data into database.
+ * Returns IDs of created records for reference in tests.
  */
 export async function seedTestData(
   supabase: SupabaseClient<Database>
@@ -180,47 +206,48 @@ export async function seedTestData(
   skillIds: Record<string, string>;
   questionIds: string[];
 }> {
-  const data = generateTestData();
+  const { appId, subjectId } = await getTestContext(supabase);
+  const data = generateTestData(appId, subjectId);
   const domainIds: Record<string, string> = {};
   const skillIds: Record<string, string> = {};
   const questionIds: string[] = [];
 
   // Insert domains
   for (const domain of data.domains) {
-    const { data: insertedDomain, error } = await supabase
+    const { data: inserted, error } = await supabase
       .from('domains')
       .insert(domain)
       .select()
       .single();
 
     if (error) {
-      throw new Error(`Failed to insert domain: ${error.message}`);
+      throw new Error(`Failed to insert domain "${domain.title}": ${error.message}`);
     }
 
-    domainIds[domain.name as string] = insertedDomain.id;
+    domainIds[domain.title] = inserted.domain_id;
   }
 
   // Insert skills (link to domains)
   const skillsWithDomains = [
-    { ...data.skills[0], domain_id: domainIds['Test Algebra'] },
-    { ...data.skills[1], domain_id: domainIds['Test Algebra'] },
-    { ...data.skills[2], domain_id: domainIds['Test Geometry'] },
-    { ...data.skills[3], domain_id: domainIds['Test Geometry'] },
-    { ...data.skills[4], domain_id: domainIds['Test Statistics'] },
+    { ...data.skills[0], domain_id: domainIds['E2E Test Algebra'] },
+    { ...data.skills[1], domain_id: domainIds['E2E Test Algebra'] },
+    { ...data.skills[2], domain_id: domainIds['E2E Test Geometry'] },
+    { ...data.skills[3], domain_id: domainIds['E2E Test Geometry'] },
+    { ...data.skills[4], domain_id: domainIds['E2E Test Statistics'] },
   ];
 
   for (const skill of skillsWithDomains) {
-    const { data: insertedSkill, error } = await supabase
+    const { data: inserted, error } = await supabase
       .from('skills')
       .insert(skill)
       .select()
       .single();
 
     if (error) {
-      throw new Error(`Failed to insert skill: ${error.message}`);
+      throw new Error(`Failed to insert skill "${skill.title}": ${error.message}`);
     }
 
-    skillIds[skill.name as string] = insertedSkill.id;
+    skillIds[skill.title] = inserted.skill_id;
   }
 
   // Insert questions (link to skills)
@@ -234,7 +261,7 @@ export async function seedTestData(
   ];
 
   for (const question of questionsWithSkills) {
-    const { data: insertedQuestion, error } = await supabase
+    const { data: inserted, error } = await supabase
       .from('questions')
       .insert(question)
       .select()
@@ -244,7 +271,7 @@ export async function seedTestData(
       throw new Error(`Failed to insert question: ${error.message}`);
     }
 
-    questionIds.push(insertedQuestion.id);
+    questionIds.push(inserted.question_id);
   }
 
   return { domainIds, skillIds, questionIds };
@@ -254,9 +281,9 @@ export async function seedTestData(
  * Verify seed data exists
  */
 export async function verifySeedData(supabase: SupabaseClient<Database>): Promise<boolean> {
-  const { data: domains } = await supabase.from('domains').select('id').limit(1);
-  const { data: skills } = await supabase.from('skills').select('id').limit(1);
-  const { data: questions } = await supabase.from('questions').select('id').limit(1);
+  const { data: domains } = await supabase.from('domains').select('domain_id').like('slug', `${TEST_SLUG_PREFIX}_%`).limit(1);
+  const { data: skills } = await supabase.from('skills').select('skill_id').like('slug', `${TEST_SLUG_PREFIX}_%`).limit(1);
+  const { data: questions } = await supabase.from('questions').select('question_id').like('content', '%E2E Test%').limit(1);
 
   return Boolean(domains && domains.length > 0 && skills && skills.length > 0 && questions && questions.length > 0);
 }
@@ -266,13 +293,17 @@ export async function verifySeedData(supabase: SupabaseClient<Database>): Promis
  */
 export function getTestUser() {
   return {
-    admin: {
-      email: process.env.TEST_ADMIN_EMAIL || '',
-      password: process.env.TEST_ADMIN_PASSWORD || '',
-    },
     superAdmin: {
-      email: process.env.TEST_SUPER_ADMIN_EMAIL || '',
-      password: process.env.TEST_SUPER_ADMIN_PASSWORD || '',
+      email: process.env.TEST_SUPER_ADMIN_EMAIL || 'mhalim80@hotmail.com',
+      password: process.env.TEST_SUPER_ADMIN_PASSWORD || 'mhalim80@hotmail.com',
+    },
+    admin: {
+      email: process.env.TEST_ADMIN_EMAIL || 'testadmin@example.com',
+      password: process.env.TEST_ADMIN_PASSWORD || 'testadmin@example.com',
+    },
+    mentor: {
+      email: process.env.TEST_MENTOR_EMAIL || 'testmentor@example.com',
+      password: process.env.TEST_MENTOR_PASSWORD || 'testmentor@example.com',
     },
   };
 }

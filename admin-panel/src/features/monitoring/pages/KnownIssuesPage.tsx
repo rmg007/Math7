@@ -9,14 +9,14 @@ import {
   Plus,
   Pencil,
   Trash2,
-  ExternalLink,
-  Bug,
-  X
+  X,
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
 import { AdminHeader } from '@/components/ui/admin-header';
 import { useKnownIssues, type KnownIssue } from '../hooks/use-known-issues';
 import { useCreateKnownIssue, useUpdateKnownIssue, useDeleteKnownIssue } from '../hooks/use-known-issues-mutations';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
@@ -47,6 +47,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/lib/database.types';
+import type { OracleResult } from '@/services/OracleService';
 
 type KnownIssueInsert = Database['public']['Tables']['known_issues']['Insert'];
 type KnownIssueUpdate = Database['public']['Tables']['known_issues']['Update'];
@@ -61,7 +62,12 @@ export function KnownIssuesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isOracleDialogOpen, setIsOracleDialogOpen] = useState(false);
+  const [oracleQuery, setOracleQuery] = useState('');
+  const [oracleResults, setOracleResults] = useState<OracleResult[]>([]);
+  const [isOracleSearching, setIsOracleSearching] = useState(false);
   const [editingIssue, setEditingIssue] = useState<KnownIssue | null>(null);
+  
   const [formData, setFormData] = useState<KnownIssueInsert>({
     title: '',
     description: '',
@@ -139,11 +145,26 @@ export function KnownIssuesPage() {
     }
   };
 
+  const handleOracleSearch = async () => {
+    if (!oracleQuery.trim()) return;
+    setIsOracleSearching(true);
+    try {
+      const { OracleService } = await import('@/services/OracleService');
+      const results = await OracleService.search(oracleQuery);
+      setOracleResults(results);
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Oracle Offline", description: "Failed to query Project Oracle base.", variant: "destructive" });
+    } finally {
+      setIsOracleSearching(false);
+    }
+  };
+
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       await deleteIssue.mutateAsync(id);
-      toast({ title: "Issue Vaporized", description: "The vulnerability has been purged from history." });
+      toast({ title: "Issue Purged", description: "Stability has been restored." });
     } catch (error) {
       toast({ title: "Error", description: "Failed to delete issue", variant: "destructive" });
     }
@@ -168,27 +189,30 @@ export function KnownIssuesPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
+    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8 pb-20">
       <AdminHeader 
         title="Stability Matrix"
-        description="Tracked vulnerabilities, root causes, and documented resolutions."
-        icon={Bug}
-        breadcrumbs={[
-          { label: 'Platform', href: '/apps' },
-          { label: 'Stability', href: '/known-issues' },
-          { label: 'Matrix', href: '/known-issues' }
-        ]}
+        description="Tracked vulnerabilities and Project Oracle intelligence."
+        icon={Shield}
         actions={
-          <Button 
-            onClick={() => handleOpenDialog()}
-            className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white transition-all hover:scale-105 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-indigo-200"
-          >
-            <Plus className="w-4 h-4" /> Record Issue
-          </Button>
+          <div className="flex gap-3">
+             <Button 
+                onClick={() => setIsOracleDialogOpen(true)}
+                variant="outline"
+                className="h-12 px-6 rounded-2xl border-indigo-200 text-indigo-600 hover:bg-indigo-50 font-bold uppercase tracking-widest text-[10px] gap-2 hidden md:flex"
+              >
+                <LifeBuoy className="w-4 h-4" /> Consult Oracle
+              </Button>
+              <Button 
+                onClick={() => handleOpenDialog()}
+                className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white transition-all hover:scale-105 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-indigo-200"
+              >
+                <Plus className="w-4 h-4" /> Record Issue
+              </Button>
+          </div>
         }
       />
 
-      {/* Stability Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
           <div className="flex items-center gap-4 mb-4">
@@ -203,7 +227,6 @@ export function KnownIssuesPage() {
           <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full bg-indigo-500 w-[100%]" />
           </div>
-          <p className="text-[10px] text-gray-400 mt-3 font-bold uppercase tracking-widest">Global Stability Archive</p>
         </div>
 
         <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
@@ -224,7 +247,6 @@ export function KnownIssuesPage() {
               style={{ width: `${(issues?.filter(i => i.status === 'open' || i.status === 'recurring').length ?? 0) / (issues?.length || 1) * 100}%` }} 
             />
           </div>
-          <p className="text-[10px] text-amber-600 mt-3 font-bold uppercase tracking-widest font-mono">Requires Attention</p>
         </div>
 
         <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
@@ -243,20 +265,18 @@ export function KnownIssuesPage() {
               style={{ width: `${(issues?.filter(i => i.status === 'closed').length ?? 0) / (issues?.length || 1) * 100}%` }} 
             />
           </div>
-          <p className="text-[10px] text-emerald-600 mt-3 font-bold uppercase tracking-widest">Archived & Documented</p>
         </div>
       </div>
 
-      {/* Stability Filter Bar */}
-      <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
+       <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
         <div className="relative flex-1 w-full group">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
           <input
             type="text"
-            placeholder="Search vulnerabilities by title or root cause..."
+            placeholder="Search vulnerabilities..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none text-sm font-medium"
+            className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none text-sm font-medium"
           />
           {searchTerm && (
             <button
@@ -268,7 +288,7 @@ export function KnownIssuesPage() {
           )}
         </div>
         
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex items-center shrink-0">
           <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl">
              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Filter:</span>
              <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -283,21 +303,10 @@ export function KnownIssuesPage() {
                 </SelectContent>
               </Select>
           </div>
-
-          <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
-             <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Archive:</span>
-             <span className="text-sm font-black text-indigo-700 tracking-tight">{filteredIssues?.length || 0} ITEMS</span>
-          </div>
         </div>
       </div>
 
       <Card className="shadow-sm overflow-hidden border-indigo-100/50">
-        <CardHeader className="bg-gray-50/50 border-b pb-4">
-          <div>
-            <CardTitle className="text-lg">Issue Library</CardTitle>
-            <CardDescription>Click an issue to view details and technical root causes.</CardDescription>
-          </div>
-        </CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader className="bg-gray-50/30">
@@ -338,34 +347,27 @@ export function KnownIssuesPage() {
                       {issue.created_at ? new Date(issue.created_at).toLocaleDateString() : 'N/A'}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                        {issue.sentry_link && (
-                          <Button variant="ghost" size="icon" asChild title="View on Sentry" className="h-8 w-8">
-                            <a href={issue.sentry_link} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="h-4 w-4 text-indigo-400 hover:text-indigo-600" />
-                            </a>
+                       <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-muted-foreground hover:text-indigo-600"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenDialog(issue);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
                           </Button>
-                        )}
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 text-muted-foreground hover:text-indigo-600"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenDialog(issue);
-                          }}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50"
-                          onClick={(e) => handleDelete(issue.id, e)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-muted-foreground hover:text-red-600"
+                            onClick={(e) => handleDelete(issue.id, e)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                       </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -375,118 +377,108 @@ export function KnownIssuesPage() {
         </CardContent>
       </Card>
 
+      <Dialog open={isOracleDialogOpen} onOpenChange={setIsOracleDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto rounded-[2rem] border-0 shadow-2xl p-0 overflow-hidden text-left">
+          <div className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 p-8 text-white relative">
+             <div className="absolute top-0 right-0 p-8 opacity-10">
+                <LifeBuoy className="w-32 h-32" />
+             </div>
+             <DialogHeader className="relative text-left">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
+                        <Sparkles className="w-5 h-5 text-indigo-200" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">Project Oracle Plus</span>
+                </div>
+                <DialogTitle className="text-3xl font-black tracking-tight text-white mb-2">Knowledge Sync</DialogTitle>
+                <DialogDescription className="text-indigo-100 opacity-80 text-sm max-w-md">
+                   Query the semantic knowledge base for architectural patterns and recovery protocols.
+                </DialogDescription>
+             </DialogHeader>
+
+             <div className="mt-8 relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40 group-focus-within:text-white transition-colors" />
+                <input 
+                    placeholder="Enter technical query or error signature..."
+                    className="w-full bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 pl-12 pr-32 text-white placeholder:text-white/30 focus:outline-none focus:ring-4 focus:ring-white/10 transition-all text-sm font-medium"
+                    value={oracleQuery}
+                    onChange={(e) => setOracleQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleOracleSearch()}
+                />
+                <Button 
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-indigo-900 hover:bg-indigo-50 rounded-xl px-4 py-2 font-black text-[10px] uppercase tracking-widest gap-2 h-10 shadow-lg"
+                    onClick={handleOracleSearch}
+                    disabled={isOracleSearching}
+                >
+                    {isOracleSearching ? <div className="w-3 h-3 border-2 border-indigo-900/30 border-t-indigo-900 rounded-full animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+                    Execute
+                </Button>
+             </div>
+          </div>
+
+          <div className="p-8 bg-white min-h-[300px]">
+             {isOracleSearching ? (
+                 <div className="flex flex-col items-center justify-center py-20 gap-4">
+                    <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest animate-pulse">Scanning Semantic Space...</p>
+                 </div>
+             ) : oracleResults.length > 0 ? (
+                 <div className="space-y-6">
+                    <h4 className="text-[10px] font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
+                        <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                        Intelligence matches FOUND ({oracleResults.length})
+                    </h4>
+                    <div className="grid grid-cols-1 gap-4">
+                        {oracleResults.map((res, i) => (
+                            <div key={i} className="p-6 bg-gray-50 rounded-2xl border border-gray-100 hover:border-indigo-200 transition-all">
+                                <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center justify-between">
+                                    <span>FILE: {res.file_path.split('\\').pop()}</span>
+                                    <span className="text-indigo-500">MATCH: {Math.round(res.similarity * 100)}%</span>
+                                </div>
+                                <div className="text-xs leading-relaxed text-gray-700 font-medium italic line-clamp-4">
+                                   \"{res.content}\"
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                 </div>
+             ) : (
+                 <div className="flex flex-col items-center justify-center py-20 text-center opacity-40">
+                    <LifeBuoy className="w-16 h-16 text-gray-300 mb-4" />
+                    <p className="text-sm font-bold text-gray-400">Enter a query to begin synchronization.</p>
+                 </div>
+             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+          <DialogHeader className="text-left">
             <DialogTitle>{editingIssue ? 'Edit Known Issue' : 'Record New Issue'}</DialogTitle>
-            <DialogDescription>
-              {editingIssue ? 'Update the details and status of this issue.' : 'Document a new bug or system limitation.'}
-            </DialogDescription>
           </DialogHeader>
-          
           <form onSubmit={handleSubmit} className="space-y-4 pt-2">
             <div className="space-y-2">
-              <Label htmlFor="title">Issue Title</Label>
+              <Label htmlFor="title" className="text-left block">Issue Title</Label>
               <Input
                 id="title"
-                placeholder="e.g. Authentication loop on iOS 17"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 required
               />
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select 
-                  value={formData.status ?? 'open'} 
-                  onValueChange={(val) => setFormData(prev => ({ ...prev, status: val }))}
-                >
-                  <SelectTrigger id="status">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="open">Open</SelectItem>
-                    <SelectItem value="recurring">Recurring</SelectItem>
-                    <SelectItem value="closed">Resolved (Closed)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="severity">Severity</Label>
-                <Select 
-                  value={formData.severity ?? 'medium'} 
-                  onValueChange={(val) => setFormData(prev => ({ ...prev, severity: val }))}
-                >
-                  <SelectTrigger id="severity">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low (Cosmetic)</SelectItem>
-                    <SelectItem value="medium">Medium (User Impact)</SelectItem>
-                    <SelectItem value="high">High (Feature Broken)</SelectItem>
-                    <SelectItem value="critical">Critical (System Down)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="text-left block">Description</Label>
               <Textarea
                 id="description"
-                placeholder="Describe the issue, steps to reproduce, or observed behavior..."
-                className="min-h-[100px]"
                 value={formData.description ?? ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="root_cause">Root Cause (Technical)</Label>
-              <Textarea
-                id="root_cause"
-                placeholder="Why is this happening? (Optional)"
-                className="min-h-[80px] font-mono text-sm bg-slate-50"
-                value={formData.root_cause ?? ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, root_cause: e.target.value }))}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="resolution">Resolution / Workaround</Label>
-              <Textarea
-                id="resolution"
-                placeholder="How was it fixed, or how can users avoid it? (Optional)"
-                className="min-h-[80px]"
-                value={formData.resolution ?? ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, resolution: e.target.value }))}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="sentry_link">Sentry Issue Link</Label>
-              <div className="flex gap-2">
-                <div className="flex items-center justify-center w-10 bg-slate-100 rounded border border-slate-200">
-                  <ExternalLink className="w-4 h-4 text-slate-500" />
-                </div>
-                <Input
-                  id="sentry_link"
-                  placeholder="https://sentry.io/organizations/..."
-                  value={formData.sentry_link ?? ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, sentry_link: e.target.value }))}
-                />
-              </div>
-            </div>
-
-            <DialogFooter className="pt-4 gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-              <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white">
-                {editingIssue ? 'Save Changes' : 'Record Issue'}
-              </Button>
-            </DialogFooter>
+             <DialogFooter className="pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                <Button type="submit">Save Issue</Button>
+             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>

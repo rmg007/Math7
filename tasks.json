@@ -1,7 +1,0 @@
-[
-  {
-    "description": "Verify Admin Panel Build",
-    "command": "Set-Location admin-panel; npm run build",
-    "cwd": "c:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix"
-  }
-]

@@ -197,41 +197,25 @@ function Invoke-PhaseBuild {
     if (Test-Path $adminDist) { Remove-Item -Recurse -Force $adminDist }
     if (Test-Path $studentBuild) { Remove-Item -Recurse -Force $studentBuild }
     
-    # Build in parallel using jobs
-    Write-Info "Starting parallel builds..."
-    
-    $adminJob = Start-Job -ScriptBlock {
-        param($Dir)
-        Set-Location (Join-Path $Dir 'admin-panel')
-        npm ci --silent 2>&1
-        npm run build 2>&1
-    } -ArgumentList $ScriptDir
-    
-    $studentJob = Start-Job -ScriptBlock {
-        param($Dir, $DefinesFile)
-        Set-Location (Join-Path $Dir 'student-app')
-        $defines = Get-Content $DefinesFile -Raw
-        flutter clean 2>&1
-        flutter pub get 2>&1
-        Invoke-Expression "flutter build web --release $defines" 2>&1
-    } -ArgumentList $ScriptDir, (Join-Path $ScriptDir '.flutter-defines.tmp')
-    
-    Write-Info "Waiting for parallel builds to complete..."
-    
-    # Wait for jobs and check results
-    $adminResult = Receive-Job -Job $adminJob -Wait
-    $studentResult = Receive-Job -Job $studentJob -Wait
-    
-    $adminSuccess = $adminJob.State -eq 'Completed'
-    $studentSuccess = $studentJob.State -eq 'Completed'
-    
-    # Log output
-    Add-Content -Path $LogFile -Value "=== Admin Panel Build Output ==="
-    Add-Content -Path $LogFile -Value ($adminResult -join "`n")
-    Add-Content -Path $LogFile -Value "=== Student App Build Output ==="
-    Add-Content -Path $LogFile -Value ($studentResult -join "`n")
-    
-    Remove-Job -Job $adminJob, $studentJob
+    # Build sequentially for maximum reliability in this environment
+    Write-Host "⚙️  Building Admin Panel..." -ForegroundColor Cyan
+    Set-Location (Join-Path $ScriptDir 'admin-panel')
+    npm run build
+    Set-Location $ScriptDir
+
+    Write-Host "⚙️  Building Student App..." -ForegroundColor Cyan
+    Set-Location (Join-Path $ScriptDir 'student-app')
+    # Properly format dart defines
+    $definesList = Get-Content (Join-Path $ScriptDir '.flutter-defines.tmp')
+    $definesArg = ""
+    foreach ($line in $definesList) {
+        if ($line.Trim() -and -not $line.StartsWith("#")) {
+            $definesArg += " --dart-define=$line"
+        }
+    }
+    Invoke-Expression "flutter build web --release --no-tree-shake-icons $definesArg"
+    Set-Location $ScriptDir
+
     
     # Verify build outputs exist
     if (-not (Test-Path $adminDist)) {

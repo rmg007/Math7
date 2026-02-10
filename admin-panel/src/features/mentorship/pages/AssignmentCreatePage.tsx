@@ -15,6 +15,7 @@ type AssignmentScope = 'mandatory' | 'suggested'
 
 interface Skill {
   id: string
+  skill_id?: string
   title: string
   domain_id: string
   domains: {
@@ -62,7 +63,7 @@ export function AssignmentCreatePage() {
 
       let query = supabase
         .from('skills')
-        .select('id, title, domain_id, domains(title)')
+        .select('skill_id, title, domain_id, domains(title)')
         .eq('app_id', currentApp.app_id)
         .limit(20)
       
@@ -73,10 +74,10 @@ export function AssignmentCreatePage() {
       const { data, error } = await query
       if (error) throw error
       
-      // The database returns skill_id but our interface uses id
-      return (data as any[]).map(s => ({
+      // The database uses skill_id but our UI expects id
+      return (data as (Skill & { skill_id: string })[]).map(s => ({
         ...s,
-        id: s.id
+        id: s.skill_id
       }))
     },
     enabled: type === 'skill_mastery' && Boolean(currentApp?.app_id)
