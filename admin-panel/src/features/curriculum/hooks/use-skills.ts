@@ -103,7 +103,12 @@ export function usePaginatedSkills(params: PaginationParams) {
         query = query.eq('domain_id', domainId);
       }
 
-      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+      if (sortBy.includes('.')) {
+        const [foreignTable, foreignColumn] = sortBy.split('.');
+        query = query.order(foreignColumn, { foreignTable, ascending: sortOrder === 'asc' });
+      } else {
+        query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+      }
       query = query.range(from, to);
 
       const { data, error, count } = await query;

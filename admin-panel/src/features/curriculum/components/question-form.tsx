@@ -127,6 +127,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
   });
 
   const questionType = form.watch('type');
+  const currentOptions = (form.watch('options') as { options: Array<{ id: string; text: string }> })?.options || [];
   const prevTypeRef = useRef(questionType);
 
   useEffect(() => {
@@ -264,7 +265,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                                     defaultValue={form.watch('solution') as string}
                                     className="space-y-4"
                                 >
-                                    {currentOptions.map((opt: any, index: number) => (
+                                    {currentOptions.map((opt: { id: string, text: string }, index: number) => (
                                         <div key={index} className="flex items-center gap-4 group">
                                             <RadioGroupItem value={opt.id} className="w-6 h-6 border-2 border-gray-200 text-indigo-600 focus:ring-indigo-500/20" />
                                             <div className="flex-1 flex gap-3">

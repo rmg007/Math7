@@ -56,7 +56,7 @@ export function useDomains() {
         .select('*')
         .eq('app_id', currentApp.app_id)
         .is('deleted_at', null)
-        .order('sort_order');
+        .order('sort_order', { ascending: true });
       
       if (error) throw error;
       return data as Domain[];
