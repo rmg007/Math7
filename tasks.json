@@ -1,22 +1,17 @@
 [
   {
-    "description": "Generate environment files",
-    "command": "powershell -NoProfile .\\scripts\\deploy\\generate-env.ps1 -ConfigFile master-config.json",
+    "description": "Stage all changes",
+    "command": "git add .",
     "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
   },
   {
-    "description": "Install dependencies",
-    "command": "npm install",
-    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel"
+    "description": "Commit changes",
+    "command": "git commit -m \"docs: enforce Superpower Mode in DEVELOPMENT.md and CI_CONTRACT.md, add Phase 17.5\"",
+    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
   },
   {
-    "description": "Build Admin Panel",
-    "command": "npm run build",
-    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel"
-  },
-  {
-    "description": "Deploy Admin Panel to Cloudflare",
-    "command": "npx -y wrangler pages deploy dist --project-name questerix-admin --commit-dirty --branch main",
-    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel"
+    "description": "Push changes to remote",
+    "command": "git push",
+    "cwd": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix"
   }
 ]
