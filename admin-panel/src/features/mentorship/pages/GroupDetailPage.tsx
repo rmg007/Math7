@@ -1,15 +1,16 @@
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Plus, Users, School, Home, Trash2, Edit3, UserPlus, Copy, Check, ClipboardList, CheckCircle, Circle, Clock, LayoutDashboard, Settings } from 'lucide-react'
+import { ArrowLeft, Plus, Users, School, Home, Trash2, Edit3, UserPlus, Copy, Check, ClipboardList, CheckCircle, Circle, Clock, LayoutDashboard, Settings, Layers } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { AdminHeader } from '@/components/ui/admin-header'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface Assignment {
   id: string
@@ -51,6 +52,7 @@ export function GroupDetailPage() {
   const [copiedCode, setCopiedCode] = useState(false)
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null)
   const [editNickname, setEditNickname] = useState('')
+  const navigate = useNavigate()
 
   // Fetch group details
   const { data: group, isLoading: groupLoading } = useQuery({
@@ -279,7 +281,6 @@ export function GroupDetailPage() {
         icon={group.type === 'class' ? School : Home}
         breadcrumbs={[
           { label: 'Mentorship', href: '/groups' },
-          { label: 'Groups', href: '/groups' },
           { label: group.name, href: `/groups/${id}` },
         ]}
         actions={
@@ -297,21 +298,21 @@ export function GroupDetailPage() {
       />
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="bg-gray-100/50 backdrop-blur-md p-1 rounded-2xl border border-white/20">
+        <TabsList className="bg-white/50 backdrop-blur-xl p-1.5 rounded-[1.5rem] border border-white/20 shadow-sm inline-flex">
           <TabsTrigger value="overview" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-indigo-600 font-bold text-xs uppercase tracking-widest transition-all">
             <LayoutDashboard className="w-4 h-4 mr-2" /> Overview
           </TabsTrigger>
           <TabsTrigger value="progress" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-indigo-600 font-bold text-xs uppercase tracking-widest transition-all">
             <ClipboardList className="w-4 h-4 mr-2" /> Progress Matrix
           </TabsTrigger>
-          <TabsTrigger value="settings" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-indigo-600 font-bold text-xs uppercase tracking-widest transition-all">
-            <Settings className="w-4 h-4 mr-2" /> Settings
+          <TabsTrigger value="settings" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 font-black text-[10px] uppercase tracking-[0.2em] transition-all">
+            <Settings className="w-3.5 h-3.5 mr-2" /> Parameters
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-8 outline-none">
           <div className="grid gap-6 md:grid-cols-3">
-            <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 p-6 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-8 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/10">
                   <Users className="h-5 w-5 text-purple-600" />
@@ -321,7 +322,7 @@ export function GroupDetailPage() {
               <div className="text-4xl font-black text-gray-900 tracking-tight">{memberCount}</div>
             </div>
 
-            <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 p-6 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-8 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/10">
@@ -347,7 +348,7 @@ export function GroupDetailPage() {
               </div>
             </div>
 
-            <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 p-6 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-8 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
                <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/10">
                   <UserPlus className="h-5 w-5 text-emerald-600" />
@@ -364,7 +365,7 @@ export function GroupDetailPage() {
           </div>
 
           <div className="grid gap-8 lg:grid-cols-2">
-            <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 shadow-sm overflow-hidden">
+            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 shadow-sm overflow-hidden flex flex-col">
               <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                 <div>
                    <h3 className="font-bold text-gray-900 tracking-tight text-lg">Members</h3>
@@ -476,15 +477,12 @@ export function GroupDetailPage() {
                   })}
                 </div>
               ) : (
-                <div className="p-16 text-center">
-                  <div className="h-12 w-12 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-6 w-6 text-gray-300" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 mb-1">Squad Empty</h3>
-                  <p className="text-xs text-gray-500 font-medium mb-6">
-                    Connect students using code <span className="font-black text-indigo-600 font-mono tracking-widest">{group.join_code}</span>
-                  </p>
-                </div>
+                <EmptyState 
+                  icon={Users}
+                  title="Squad Empty"
+                  description={`Connect students using code ${group.join_code}`}
+                  className="py-20"
+                />
               )}
             </div>
 
@@ -551,20 +549,23 @@ export function GroupDetailPage() {
                   ))}
                 </div>
               ) : (
-                <div className="p-16 text-center">
-                  <div className="h-12 w-12 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <ClipboardList className="h-6 w-6 text-gray-300" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 mb-1">No Active Tasks</h3>
-                  <p className="text-xs text-gray-500 font-medium">Create assignments to start monitoring mastery loops.</p>
-                </div>
+                <EmptyState 
+                  icon={ClipboardList}
+                  title="No Active Tasks"
+                  description="Create assignments to start monitoring mastery loops."
+                  className="py-20"
+                  action={{
+                    label: "Initialize Task",
+                    onClick: () => navigate(`/groups/${id}/assignments/new`)
+                  }}
+                />
               )}
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="progress" className="outline-none">
-           <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 shadow-sm overflow-hidden">
+           <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 shadow-sm overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                 <h2 className="font-bold text-gray-900 text-lg tracking-tight">Assignment Matrix</h2>
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Mastery tracking engine</p>
@@ -573,7 +574,12 @@ export function GroupDetailPage() {
               {!members || members.length === 0 ? (
                  <div className="p-16 text-center text-gray-400 font-medium">No students enrolled.</div>
               ) : !assignmentSkillIds || assignmentSkillIds.length === 0 ? (
-                 <div className="p-16 text-center text-gray-400 font-medium">No curricula tracked in this matrix.</div>
+                 <EmptyState 
+                   icon={Layers}
+                   title="Matrix Not Initialized"
+                   description="No curricula tracked in this matrix. Assign skills to see progress data."
+                   className="py-24"
+                 />
               ) : (
                 <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-200">
                   <Table className="border-collapse">
@@ -632,7 +638,7 @@ export function GroupDetailPage() {
         </TabsContent>
 
         <TabsContent value="settings" className="outline-none">
-          <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 p-16 shadow-sm text-center">
+          <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-16 shadow-sm text-center">
             <div className="w-16 h-16 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-center mx-auto mb-6">
                <Settings className="w-8 h-8 text-gray-200" />
             </div>

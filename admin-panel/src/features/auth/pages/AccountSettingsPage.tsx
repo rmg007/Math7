@@ -127,7 +127,7 @@ export function AccountSettingsPage() {
       )}
 
       {/* Profile Information Section */}
-      <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-sm border border-white/20 hover:shadow-md transition-all">
+      <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-10 shadow-sm hover:shadow-xl transition-all">
         <div className="flex items-center gap-4 mb-8">
           <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/10">
             <BadgeCheck className="h-6 w-6 text-indigo-600" />
@@ -189,7 +189,7 @@ export function AccountSettingsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Deactivation Card */}
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-sm border border-amber-500/10 hover:border-amber-500/20 transition-all flex flex-col justify-between">
+          <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-amber-500/10 hover:border-amber-500/20 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between p-10">
             <div>
               <div className="flex items-center gap-4 mb-4">
                 <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600">
@@ -237,7 +237,7 @@ export function AccountSettingsPage() {
           </div>
 
           {/* Delete Card */}
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-sm border border-red-500/10 hover:border-red-500/20 transition-all flex flex-col justify-between">
+          <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-red-500/10 hover:border-red-500/20 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between p-10">
             <div>
               <div className="flex items-center gap-4 mb-4">
                 <div className="p-2.5 rounded-xl bg-red-500/10 text-red-600">

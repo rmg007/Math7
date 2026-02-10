@@ -9,14 +9,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateSkill, useUpdateSkill } from '../hooks/use-skills';
 import { useDomains } from '../hooks/use-domains';
 import { useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Zap, Globe, ListOrdered, FileText, ShieldCheck, Layers } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -25,6 +24,8 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Database } from '@/lib/database.types';
+import { Card, CardContent } from '@/components/ui/card';
+import { AdminHeader } from '@/components/ui/admin-header';
 
 type Skill = Database['public']['Tables']['skills']['Row'];
 
@@ -35,7 +36,7 @@ const STATUS_OPTIONS: { value: 'draft' | 'published' | 'live'; label: string; de
 ];
 
 const skillSchema = z.object({
-  domain_id: z.string().uuid(),
+  domain_id: z.string().uuid('Please select a valid domain'),
   slug: z.string()
     .regex(/^[a-z0-9_]+$/, 'Slug must contain only lowercase letters, numbers, and underscores')
     .min(1, 'Slug is required')
@@ -58,6 +59,8 @@ export function SkillForm({ initialData }: SkillFormProps) {
   const createSkill = useCreateSkill();
   const updateSkill = useUpdateSkill();
   const { data: domains, isLoading: isLoadingDomains } = useDomains();
+
+  const isEditing = Boolean(initialData);
 
   const form = useForm<SkillFormData>({
     resolver: zodResolver(skillSchema),
@@ -85,168 +88,236 @@ export function SkillForm({ initialData }: SkillFormProps) {
       navigate('/skills');
     } catch (error) {
       console.error('Failed to save skill:', error);
-      // Ideally show a toast here
     }
   };
 
   const isSubmitting = createSkill.isPending || updateSkill.isPending;
 
-  if (isLoadingDomains) return <Loader2 className="animate-spin" />;
+  if (isLoadingDomains) {
+    return (
+      <div className="flex h-[50vh] justify-center items-center">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 md:space-y-6 w-full max-w-2xl px-1">
-        
-        <FormField
-          control={form.control}
-          name="domain_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Domain</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger className="min-h-[48px] text-base">
-                    <SelectValue placeholder="Select a domain" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                    {domains?.map((domain) => (
-                        <SelectItem key={domain.domain_id} value={domain.domain_id}>
-                            {domain.title}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                The domain this skill belongs to.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <AdminHeader 
+        title={isEditing ? 'Refine Skill' : 'Provision Skill'}
+        description={isEditing ? 'Modify the specific attributes and difficulty parameters of this skill.' : 'Anchor a new technical node within the curriculum hierarchy.'}
+        icon={Zap}
+        breadcrumbs={[
+          { label: 'Curriculum', href: '/domains' },
+          { label: 'Skills', href: '/skills' },
+          { label: isEditing ? 'Edit' : 'New', href: '#' }
+        ]}
+      />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                    <Input placeholder="e.g. Addition" {...field} className="min-h-[48px] text-base" />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
-
-            <FormField
-            control={form.control}
-            name="slug"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Slug</FormLabel>
-                <FormControl>
-                    <Input placeholder="e.g. addition" {...field} className="min-h-[48px] text-base" />
-                </FormControl>
-                <FormDescription>
-                    Unique identifier (URL-safe).
-                </FormDescription>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Describe this skill..." 
-                  className="resize-none min-h-[100px] text-base" 
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-             <FormField
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
+            <CardContent className="p-8 md:p-10 space-y-8">
+              <FormField
                 control={form.control}
-                name="difficulty_level"
+                name="domain_id"
                 render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Difficulty Level (1-5)</FormLabel>
-                    <FormControl>
-                        <Input type="number" min={1} max={5} {...field} className="min-h-[48px] text-base" />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
+                  <FormItem className="space-y-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Layers className="w-4 h-4 text-purple-500" />
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Parent Domain</FormLabel>
+                    </div>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-purple-500/10 transition-all border">
+                          <SelectValue placeholder="Select a domain context" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
+                        {domains?.map((domain) => (
+                          <SelectItem key={domain.domain_id} value={domain.domain_id} className="py-3 rounded-xl">
+                            <span className="font-bold text-gray-900">{domain.title}</span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-xs font-bold text-red-500 italic" />
+                  </FormItem>
                 )}
-            />
+              />
 
-            <FormField
-            control={form.control}
-            name="sort_order"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Sort Order</FormLabel>
-                <FormControl>
-                    <Input type="number" {...field} className="min-h-[48px] text-base" />
-                </FormControl>
-                <FormDescription>
-                    Order in which this appears in lists.
-                </FormDescription>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
-        </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FileText className="w-4 h-4 text-blue-500" />
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Skill Title</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g. Single-Digit Addition" 
+                          {...field} 
+                          className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all border"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs font-bold text-red-500 italic" />
+                    </FormItem>
+                  )}
+                />
 
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger className="min-h-[48px] text-base">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}{option.description ? ` - ${option.description}` : ''}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Controls visibility of this skill.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormField
+                  control={form.control}
+                  name="slug"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Globe className="w-4 h-4 text-indigo-500" />
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Resource identifier</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g. addition_basic" 
+                          {...field} 
+                          className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all border"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs font-bold text-red-500 italic" />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-        <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:gap-4">
-          <Button type="button" variant="outline" onClick={() => navigate('/skills')} className="w-full sm:w-auto min-h-[48px] px-6">
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto min-h-[48px] px-6">
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {initialData ? 'Update Skill' : 'Create Skill'}
-          </Button>
-        </div>
-      </form>
-    </Form>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <FormField
+                  control={form.control}
+                  name="difficulty_level"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Zap className="w-4 h-4 text-amber-500" />
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Intensity (1-5)</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min={1} 
+                          max={5} 
+                          {...field} 
+                          className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-amber-500/10 transition-all border text-center"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs font-bold text-red-500 italic" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="sort_order"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <ListOrdered className="w-4 h-4 text-slate-500" />
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Sequence</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          {...field} 
+                          className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-slate-500/10 transition-all border text-center"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs font-bold text-red-500 italic" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Protocol State</FormLabel>
+                      </div>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all border">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
+                          {STATUS_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value} className="py-3 rounded-xl">
+                              <div className="flex flex-col">
+                                <span className="font-bold text-gray-900">{option.label}</span>
+                                {option.description && (
+                                  <span className="text-[10px] text-gray-400 uppercase tracking-widest">{option.description}</span>
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage className="text-xs font-bold text-red-500 italic" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <FileText className="w-4 h-4 text-indigo-500" />
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Instructional Blueprint</FormLabel>
+                    </div>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Detail the core competencies and learning objectives of this skill..." 
+                        className="min-h-[150px] rounded-[2rem] border-gray-100 bg-white/50 text-base font-medium leading-relaxed focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all border p-6" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage className="text-xs font-bold text-red-500 italic" />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-4 pt-6">
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  onClick={() => navigate('/skills')}
+                  className="w-full sm:w-auto h-14 px-10 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-gray-400 hover:text-gray-900 hover:bg-gray-100/50 transition-all"
+                >
+                  Terminate
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto h-14 px-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all hover:-translate-y-0.5"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    isEditing ? 'Commit Update' : 'Anchor Skill'
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
+    </div>
   );
 }

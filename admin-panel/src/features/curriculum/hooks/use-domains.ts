@@ -5,6 +5,13 @@ import { useApp } from '@/hooks/use-app';
 
 type Domain = Database['public']['Tables']['domains']['Row'];
 
+// UUID validation helper
+function isValidUUID(uuid: string | undefined | null): uuid is string {
+  if (!uuid) return false;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+}
+
 // Form input type - excludes auto-generated fields
 export type DomainFormInput = {
   slug: string;
@@ -40,6 +47,9 @@ export function useDomains() {
     queryKey: ['domains', currentApp?.app_id],
     queryFn: async () => {
       if (!currentApp?.app_id) throw new Error('No app selected');
+      if (!isValidUUID(currentApp.app_id)) {
+        throw new Error(`Invalid app ID format: ${currentApp.app_id}`);
+      }
 
       const { data, error } = await supabase
         .from('domains')
@@ -51,7 +61,7 @@ export function useDomains() {
       if (error) throw error;
       return data as Domain[];
     },
-    enabled: Boolean(currentApp?.app_id),
+    enabled: Boolean(currentApp?.app_id) && isValidUUID(currentApp?.app_id),
   });
 }
 
@@ -61,7 +71,19 @@ export function usePaginatedDomains(params: PaginationParams) {
   return useQuery({
     queryKey: ['domains-paginated', params, currentApp?.app_id],
     queryFn: async (): Promise<PaginatedResponse<Domain>> => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+      if (!currentApp?.app_id) {
+        console.error('usePaginatedDomains: No app selected');
+        throw new Error('No app selected');
+      }
+
+      // Validate UUID format
+      if (!isValidUUID(currentApp.app_id)) {
+        console.error('usePaginatedDomains: Invalid app_id format:', {
+          app_id: currentApp.app_id,
+          type: typeof currentApp.app_id
+        });
+        throw new Error(`Invalid app ID format: ${currentApp.app_id}`);
+      }
 
       const { page, pageSize, search, status, sortBy = 'sort_order', sortOrder = 'asc' } = params;
       const from = (page - 1) * pageSize;
@@ -96,7 +118,7 @@ export function usePaginatedDomains(params: PaginationParams) {
         totalPages: Math.ceil((count ?? 0) / pageSize),
       };
     },
-    enabled: Boolean(currentApp?.app_id),
+    enabled: Boolean(currentApp?.app_id) && isValidUUID(currentApp?.app_id),
   });
 }
 
@@ -106,6 +128,9 @@ export function useDomain(domainId: string) {
         queryKey: ['domain', domainId, currentApp?.app_id],
         queryFn: async () => {
             if (!currentApp?.app_id) throw new Error('No app selected');
+            if (!isValidUUID(currentApp.app_id)) {
+                throw new Error(`Invalid app ID format: ${currentApp.app_id}`);
+            }
 
              const { data, error } = await supabase
                 .from('domains')
@@ -117,7 +142,7 @@ export function useDomain(domainId: string) {
             if (error) throw error;
             return data as Domain;
         },
-        enabled: Boolean(domainId) && Boolean(currentApp?.app_id),
+        enabled: Boolean(domainId) && Boolean(currentApp?.app_id) && isValidUUID(currentApp?.app_id),
     });
 }
 

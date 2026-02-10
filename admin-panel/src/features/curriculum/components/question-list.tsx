@@ -22,6 +22,7 @@ import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { formatIdentifier } from '@/lib/format-utils';
 import type { DataColumn } from '@/lib/data-utils';
 import type { QuestionListItem } from '@/types/common.types';
@@ -105,19 +106,25 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, is
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
-        boxShadow: isDragging ? '0 4px 12px rgba(0, 0, 0, 0.15)' : undefined,
+        boxShadow: isDragging ? '0 8px 32px rgba(99, 102, 241, 0.15)' : undefined,
         zIndex: isDragging ? 50 : undefined,
     };
 
     return (
-        <tr ref={setNodeRef} style={style} className="hover:bg-indigo-50/30 transition-all group/row border-b border-gray-50 last:border-0 relative">
-            <td className="pl-6 pr-2 py-4 w-12 relative overflow-hidden">
-                <div className="absolute inset-y-0 left-0 w-1 bg-indigo-600 opacity-0 group-hover/row:opacity-100 transition-opacity" />
+        <tr ref={setNodeRef} style={style} className={cn(
+            "hover:bg-indigo-50/20 transition-all group/row border-b border-gray-100/50 last:border-0 relative",
+            isSelected && "bg-indigo-50/30"
+        )}>
+            <td className="pl-8 pr-2 py-5 w-12 relative overflow-hidden">
+                <div className={cn(
+                    "absolute inset-y-0 left-0 w-1 bg-indigo-600 transition-all duration-300",
+                    isSelected ? "opacity-100" : "opacity-0 group-hover/row:opacity-100"
+                )} />
                 {!isDragDisabled ? (
                     <button
                         {...attributes}
                         {...listeners}
-                        className="p-2 text-indigo-400/50 hover:text-indigo-600 cursor-grab active:cursor-grabbing touch-none transition-colors"
+                        className="p-2 text-indigo-300 hover:text-indigo-600 cursor-grab active:cursor-grabbing touch-none transition-colors"
                         aria-label="Drag to reorder"
                     >
                         <GripVertical className="h-5 w-5" />
@@ -129,43 +136,47 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, is
                 )}
             </td>
             <td className="px-4 py-3">
-                <button onClick={() => onSelect(question.question_id)} className="text-gray-300 hover:text-indigo-600 transition-colors">
+                <button onClick={() => onSelect(question.question_id)} className="text-gray-300 hover:text-indigo-600 transition-all duration-300 transform hover:scale-110">
                     {isSelected ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
                 </button>
             </td>
-            <td className="px-6 py-4 max-w-[400px]">
-                <div 
-                    className="font-bold text-gray-900 text-sm tracking-tight line-clamp-2 group-hover/row:text-indigo-700 transition-colors prose-sm"
-                    dangerouslySetInnerHTML={{ __html: question.content }}
-                />
+            <td className="px-6 py-5 max-w-[450px]">
+                <div className="flex flex-col gap-1.5">
+                    <div 
+                        className="font-bold text-gray-900 text-[15px] tracking-tight line-clamp-2 group-hover/row:text-indigo-700 transition-colors prose-sm"
+                        dangerouslySetInnerHTML={{ __html: question.content }}
+                    />
+                    {question.skills?.domains?.title && (
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                            <span className="text-indigo-400">{question.skills.domains.title}</span>
+                            <span className="text-gray-300">/</span>
+                            <span>{question.skills.title}</span>
+                        </p>
+                    )}
+                </div>
             </td>
-            <td className="px-4 py-4">
-                <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-100/50 shadow-sm">
+            <td className="px-4 py-5">
+                <span className="px-3 py-1.5 bg-white border border-gray-100 text-gray-600 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm group-hover/row:border-indigo-100 group-hover/row:text-indigo-600 transition-all">
                     {formatIdentifier(question.type)}
                 </span>
             </td>
-            <td className="px-4 py-4">
-                <div className="flex flex-col">
-                    <span className="text-sm font-bold text-gray-700 leading-tight truncate max-w-[150px]">{question.skills?.title || 'ORPHAN'}</span>
-                    <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest opacity-60">SKILL</span>
+            <td className="px-4 py-5 text-center">
+                 <div className="inline-flex flex-col items-center">
+                    <span className="text-lg font-black text-gray-900 leading-none">{question.points}</span>
+                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-tighter">PTS</span>
                 </div>
             </td>
-            <td className="px-4 py-4 text-center">
-                 <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg bg-orange-100 text-orange-700 font-black text-xs border border-orange-200 shadow-sm">
-                    {question.points}
-                </span>
-            </td>
-            <td className="px-4 py-4">
+            <td className="px-4 py-5">
                 <StatusBadge 
                     status={question.status?.toLowerCase() as StatusType || 'draft'} 
                     label={question.status?.toUpperCase()}
                 />
             </td>
-            <td className="pl-4 pr-8 py-3 text-right">
-                <div className="flex items-center justify-end gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity">
+            <td className="pl-4 pr-10 py-5 text-right">
+                <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover/row:opacity-100 transition-all duration-300 transform translate-x-2 group-hover/row:translate-x-0">
                     <Link
                         to={`/questions/${question.question_id}/edit`}
-                        className="p-2 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                        className="p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-white border border-transparent hover:border-indigo-100 rounded-2xl transition-all shadow-none hover:shadow-lg hover:shadow-indigo-500/5"
                         title="Edit Question"
                     >
                         <Pencil className="h-4 w-4" />
@@ -173,14 +184,14 @@ function SortableRow({ question, isSelected, onSelect, onDelete, onDuplicate, is
                     <button
                         onClick={() => onDuplicate(question.question_id)}
                         disabled={isDuplicating}
-                        className="p-2 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all disabled:opacity-50"
+                        className="p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-white border border-transparent hover:border-indigo-100 rounded-2xl transition-all shadow-none hover:shadow-lg hover:shadow-indigo-500/5 disabled:opacity-50"
                         title="Duplicate Question"
                     >
                         <Copy className="h-4 w-4" />
                     </button>
                     <button
                         onClick={() => onDelete(question.question_id)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                        className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-white border border-transparent hover:border-red-100 rounded-2xl transition-all shadow-none hover:shadow-lg hover:shadow-red-500/5"
                         title="Delete Question"
                     >
                         <Trash2 className="h-4 w-4" />
@@ -213,51 +224,53 @@ function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, i
             ref={setNodeRef}
             style={style}
             className={cn(
-                "bg-white/80 backdrop-blur-xl rounded-3xl border transition-all duration-300 group/card",
-                isSelected ? 'border-indigo-400 bg-indigo-50/50 shadow-md shadow-indigo-500/10' : 'border-white/40 hover:border-indigo-200 hover:shadow-lg'
+                "bg-white/80 backdrop-blur-xl rounded-[2.5rem] border transition-all duration-500 group/card relative overflow-hidden",
+                isSelected 
+                    ? 'border-indigo-400 bg-indigo-50/50 shadow-xl shadow-indigo-500/10' 
+                    : 'border-white/40 hover:border-indigo-200 hover:shadow-2xl hover:shadow-indigo-500/5 hover:-translate-y-1'
             )}
         >
-            <div className="p-6 space-y-4">
+            <div className="p-8 space-y-6">
                 <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-center gap-2">
                         {!isDragDisabled ? (
                             <button
                                 {...attributes}
                                 {...listeners}
-                                className="p-2 text-indigo-300 hover:text-indigo-600 cursor-grab active:cursor-grabbing touch-none transition-colors"
+                                className="p-2.5 text-indigo-300 hover:text-indigo-600 cursor-grab active:cursor-grabbing touch-none transition-all rounded-xl hover:bg-indigo-50"
                                 aria-label="Drag to reorder"
                             >
                                 <GripVertical className="h-5 w-5" />
                             </button>
                         ) : (
-                            <div className="p-2 text-gray-200">
+                            <div className="p-2.5 text-gray-200">
                                 <GripVertical className="h-5 w-5" />
                             </div>
                         )}
                         <button
                             onClick={() => onSelect(question.question_id)}
-                            className="p-2 text-gray-300 hover:text-indigo-600 transition-colors"
+                            className="p-2.5 text-gray-300 hover:text-indigo-600 transition-all rounded-xl hover:bg-indigo-50 transform hover:scale-110"
                         >
-                            {isSelected ? <CheckSquare className="h-5 w-5 text-indigo-600" /> : <Square className="h-5 w-5" />}
+                            {isSelected ? <CheckSquare className="h-6 w-6 text-indigo-600" /> : <Square className="h-6 w-6" />}
                         </button>
                     </div>
-                     <div className="flex gap-1.5 opacity-0 group-hover/card:opacity-100 transition-opacity">
+                     <div className="flex gap-1.5 opacity-0 group-hover/card:opacity-100 transition-all duration-300 transform translate-y-2 group-hover/card:translate-y-0">
                         <Link
                             to={`/questions/${question.question_id}/edit`}
-                            className="p-2.5 rounded-xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm"
+                            className="p-3 rounded-2xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm hover:shadow-lg"
                         >
                             <Pencil className="h-4 w-4" />
                         </Link>
                         <button
                             onClick={() => onDuplicate(question.question_id)}
                             disabled={isDuplicating}
-                            className="p-2.5 rounded-xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm disabled:opacity-50"
+                            className="p-3 rounded-2xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm hover:shadow-lg disabled:opacity-50"
                         >
                             <Copy className="h-4 w-4" />
                         </button>
                         <button
                             onClick={() => onDelete(question.question_id)}
-                            className="p-2.5 rounded-xl bg-white border border-gray-100 text-red-500 hover:bg-red-50 transition-all shadow-sm"
+                            className="p-3 rounded-2xl bg-white border border-gray-100 text-red-500 hover:bg-red-50 transition-all shadow-sm hover:shadow-lg"
                         >
                             <Trash2 className="h-4 w-4" />
                         </button>
@@ -266,34 +279,48 @@ function SortableCard({ question, isSelected, onSelect, onDelete, onDuplicate, i
 
                 <div className="min-w-0">
                     <div 
-                        className="font-bold text-gray-900 text-[15px] tracking-tight leading-relaxed mb-3 line-clamp-3 prose-sm"
+                        className="font-black text-gray-900 text-lg tracking-tight leading-relaxed mb-4 line-clamp-3 prose-sm"
                         dangerouslySetInnerHTML={{ __html: question.content }}
                     />
-                    <div className="flex flex-wrap items-center gap-2">
-                         <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-100/50">
-                            {formatIdentifier(question.type)}
-                        </span>
-                        {question.skills?.title && (
-                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest opacity-60">
-                                SKILL: {question.skills.title.substring(0, 15)}...
-                            </span>
+                    <div className="space-y-3">
+                        {question.skills?.domains?.title && (
+                            <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-100 rounded-lg font-black text-[9px] uppercase tracking-widest px-2 py-0.5">
+                                    {question.skills.domains.title}
+                                </Badge>
+                                <span className="text-gray-300 text-xs italic">/</span>
+                                <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-100 rounded-lg font-black text-[9px] uppercase tracking-widest px-2 py-0.5">
+                                    {question.skills.title}
+                                </Badge>
+                            </div>
                         )}
+                        <div className="flex flex-wrap items-center gap-2">
+                             <span className="px-3 py-1.5 bg-white border border-gray-100 text-gray-600 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm">
+                                {formatIdentifier(question.type)}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+                <div className="flex items-center justify-between pt-6 border-t border-gray-100/50">
                      <StatusBadge 
                         status={question.status?.toLowerCase() as StatusType || 'draft'} 
                         label={question.status?.toUpperCase()}
                     />
-                    <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Points</span>
-                        <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg bg-orange-100 text-orange-700 font-black text-xs border border-orange-200">
-                             {question.points}
-                        </span>
+                    <div className="flex items-center gap-3">
+                        <div className="flex flex-col items-end">
+                            <span className="text-xl font-black text-gray-900 leading-none">{question.points}</span>
+                            <span className="text-[8px] font-black text-gray-400 uppercase tracking-tighter">WEIGHT</span>
+                        </div>
+                        <div className="w-10 h-10 rounded-2xl bg-orange-100 border border-orange-200 flex items-center justify-center shadow-sm">
+                            <Sparkles className="h-5 w-5 text-orange-600" />
+                        </div>
                     </div>
                 </div>
             </div>
+            
+            {/* Subtle card glow */}
+            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/5 blur-[80px] rounded-full pointer-events-none" />
         </div>
     );
 }
@@ -571,22 +598,42 @@ export function QuestionList() {
 
     if (isLoading) {
         return (
-            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
                 <AdminHeader 
-                    title="Question Library"
-                    description="Manage and organize your curriculum questions by type, skill, and difficulty."
+                    title="Question Registry"
+                    description="Clustering evaluation assets for mission-critical curriculum delivery."
                     icon={FileText}
                     breadcrumbs={[
                         { label: 'Curriculum', href: '/domains' },
                         { label: 'Questions', href: '/questions' }
                     ]}
                 />
-                <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 p-8 space-y-4">
-                    <Skeleton className="h-12 w-full rounded-2xl" />
-                    <Skeleton className="h-12 w-full rounded-2xl" />
-                    <Skeleton className="h-12 w-full rounded-2xl" />
-                    <Skeleton className="h-12 w-full rounded-2xl" />
-                    <Skeleton className="h-12 w-full rounded-2xl" />
+                
+                {/* Skeleton Filter Bar */}
+                <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
+                    <Skeleton className="h-14 flex-1 rounded-2xl" />
+                    <div className="flex gap-3">
+                        <Skeleton className="h-10 w-32 rounded-xl" />
+                        <Skeleton className="h-10 w-32 rounded-xl" />
+                        <Skeleton className="h-10 w-40 rounded-xl" />
+                    </div>
+                </div>
+
+                <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 overflow-hidden">
+                    <div className="p-8 space-y-6">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                            <div key={i} className="flex items-center gap-6 pb-6 border-b border-gray-50 last:border-0 last:pb-0">
+                                <Skeleton className="h-5 w-5 rounded" />
+                                <div className="flex-1 space-y-2">
+                                    <Skeleton className="h-5 w-3/4 rounded-lg" />
+                                    <Skeleton className="h-3 w-1/2 rounded-md" />
+                                </div>
+                                <Skeleton className="h-8 w-24 rounded-xl" />
+                                <Skeleton className="h-8 w-16 rounded-xl" />
+                                <Skeleton className="h-10 w-10 rounded-xl" />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         );
@@ -604,18 +651,18 @@ export function QuestionList() {
         <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <AdminHeader 
                 title="Question Registry"
-                description="Manage and optimize the high-availability curriculum questions and evaluation assets."
+                description="Clustering high-availability evaluation assets for mission-critical curriculum delivery."
                 icon={FileText}
                 breadcrumbs={[
                     { label: 'Curriculum', href: '/domains' },
                     { label: 'Questions', href: '/questions' }
                 ]}
                 actions={
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                         <Link to="/ai-questions">
-                            <Button variant="outline" className="h-12 px-6 rounded-2xl bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200 text-indigo-700 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-600/10 transition-all hover:-translate-y-0.5 gap-2 group">
-                                <Sparkles className="h-4 w-4 text-purple-500 group-hover:rotate-12 transition-transform" />
-                                <span>AI Generator</span>
+                            <Button variant="outline" className="h-12 px-8 rounded-2xl bg-white/50 backdrop-blur-md border border-indigo-100 text-indigo-600 font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-indigo-500/5 transition-all hover:-translate-y-1 hover:bg-white gap-3 group">
+                                <Sparkles className="h-4 w-4 text-indigo-500 group-hover:rotate-12 transition-transform" />
+                                <span>AI Accelerator</span>
                             </Button>
                         </Link>
                         <DataToolbar
@@ -626,9 +673,9 @@ export function QuestionList() {
                             importDisabled={false}
                         />
                         <Link to="/questions/new">
-                            <Button className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 gap-2">
-                                <Plus className="h-4 w-4" />
-                                <span>New Question</span>
+                            <Button className="h-12 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-1 gap-3">
+                                <Plus className="h-5 w-5" />
+                                <span>Initialize Asset</span>
                             </Button>
                         </Link>
                     </div>
@@ -636,83 +683,87 @@ export function QuestionList() {
             />
 
             {/* Premium Filter Bar */}
-            <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
+            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 p-6 flex flex-col lg:flex-row gap-6 items-center">
                 <div className="relative flex-1 w-full group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
                     <input
                         type="text"
-                        placeholder="Search question content, solutions, or explanations..."
+                        placeholder="Query curriculum assets..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none text-sm font-medium"
+                        className="w-full h-14 pl-14 pr-12 rounded-[1.25rem] border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 placeholder:italic focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none font-bold"
                     />
                     {searchQuery && (
                         <button
                             onClick={clearFilters}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
                         >
                             <X className="h-4 w-4" />
                         </button>
                     )}
                 </div>
                 
-                <div className="flex items-center gap-3 shrink-0">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/5 border border-indigo-500/10 rounded-xl">
-                        <Filter className="h-3.5 w-3.5 text-indigo-400" />
-                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mr-2">Skill:</span>
+                <div className="flex flex-wrap items-center gap-4 shrink-0 w-full lg:w-auto">
+                    <div className="flex items-center gap-3 px-5 py-3 bg-white/50 border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all">
+                        <Filter className="h-4 w-4 text-indigo-400" />
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Skill</span>
                         <Select
                             value={selectedSkillId}
                             onValueChange={setSelectedSkillId}
                         >
-                            <SelectTrigger className="w-auto h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-700 hover:text-indigo-600 transition-colors uppercase tracking-tight">
-                                <SelectValue placeholder="All Skills" />
+                            <SelectTrigger className="w-auto h-auto border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-600 hover:text-indigo-700 transition-colors uppercase tracking-tight italic gap-2">
+                                <SelectValue placeholder="All Clusters" />
                             </SelectTrigger>
                             <SelectContent className="rounded-2xl border-white/20 backdrop-blur-xl bg-white/90">
-                                <SelectItem value="all">ALL SKILLS</SelectItem>
+                                <SelectItem value="all" className="font-black italic">ALL CLUSTERS</SelectItem>
                                 {skills?.map((skill: { skill_id: string; title: string }) => (
-                                    <SelectItem key={skill.skill_id} value={skill.skill_id}>{skill.title.toUpperCase()}</SelectItem>
+                                    <SelectItem key={skill.skill_id} value={skill.skill_id} className="font-bold">{skill.title.toUpperCase()}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     </div>
 
-                    <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/5 border border-indigo-500/10 rounded-xl">
-                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mr-2">Status:</span>
+                    <div className="flex items-center gap-3 px-5 py-3 bg-white/50 border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</span>
                         <Select
                             value={statusFilter}
                             onValueChange={(v) => setStatusFilter(v as 'all' | 'draft' | 'published' | 'live')}
                         >
-                            <SelectTrigger className="w-auto h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-700 hover:text-indigo-600 transition-colors uppercase tracking-tight">
-                                <SelectValue placeholder="All Status" />
+                            <SelectTrigger className="w-auto h-auto border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-600 hover:text-indigo-700 transition-colors uppercase tracking-tight italic gap-2">
+                                <SelectValue placeholder="All States" />
                             </SelectTrigger>
                             <SelectContent className="rounded-2xl border-white/20 backdrop-blur-xl bg-white/90">
-                                <SelectItem value="all">ALL STATUS</SelectItem>
-                                <SelectItem value="draft">DRAFT</SelectItem>
-                                <SelectItem value="published">PUBLISHED</SelectItem>
-                                <SelectItem value="live">LIVE</SelectItem>
+                                <SelectItem value="all" className="font-black italic">ALL STATES</SelectItem>
+                                <SelectItem value="draft" className="font-bold">DRAFT</SelectItem>
+                                <SelectItem value="published" className="font-bold">PUBLISHED</SelectItem>
+                                <SelectItem value="live" className="font-bold">LIVE</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
-                    <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
-                         <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Assets:</span>
-                         <span className="text-sm font-black text-indigo-700 tracking-tight">{totalCount} CLUSTERED</span>
+                    <div className="px-5 py-3 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-600/20 flex items-center gap-3">
+                         <span className="text-[10px] font-black text-white/70 uppercase tracking-widest">Assets</span>
+                         <span className="text-sm font-black tracking-tight">{totalCount}</span>
                     </div>
                 </div>
             </div>
 
             {/* Bulk Actions Bar */}
             {selectedIds.size > 0 && (
-                <div className="flex items-center justify-between p-4 bg-indigo-600 rounded-[2rem] shadow-xl shadow-indigo-600/20 animate-in slide-in-from-top-4 duration-500">
+                <div className="sticky top-24 z-30 flex items-center justify-between p-3 bg-gray-900/90 backdrop-blur-xl border border-white/10 rounded-[1.5rem] shadow-2xl shadow-indigo-600/20 animate-in slide-in-from-top-8 duration-500 max-w-2xl mx-auto w-full">
                     <div className="flex items-center gap-4 pl-4">
-                        <span className="text-white font-black text-xs uppercase tracking-[0.2em]">{selectedIds.size} SELECTED FOR BATCH OPERATIONS</span>
+                        <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
+                            <span className="text-white font-black text-xs">{selectedIds.size}</span>
+                        </div>
+                        <span className="text-white/70 font-black text-[10px] uppercase tracking-widest group-hover:text-white transition-colors">Clustered Operations</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={handleMarkPublished}
-                             className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+                             className="h-10 px-4 rounded-xl text-white font-black text-[9px] uppercase tracking-[0.15em] hover:bg-white/10 transition-all"
                         >
                             Publish
                         </Button>
@@ -720,7 +771,7 @@ export function QuestionList() {
                             variant="ghost"
                             size="sm"
                             onClick={handleMarkLive}
-                             className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+                             className="h-10 px-4 rounded-xl text-white font-black text-[9px] uppercase tracking-[0.15em] hover:bg-white/10 transition-all"
                         >
                             Go Live
                         </Button>
@@ -728,16 +779,16 @@ export function QuestionList() {
                             variant="ghost"
                             size="sm"
                             onClick={handleMarkDraft}
-                             className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+                             className="h-10 px-4 rounded-xl text-white font-black text-[9px] uppercase tracking-[0.15em] hover:bg-white/10 transition-all"
                         >
                             Draft
                         </Button>
-                        <div className="w-px h-6 bg-white/20 mx-2" />
+                        <div className="w-px h-6 bg-white/10 mx-2" />
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => setDeleteConfirmation({ type: 'bulk' })}
-                            className="h-10 px-4 rounded-xl text-red-200 font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all gap-2"
+                            className="h-10 px-4 rounded-xl text-red-400 font-black text-[9px] uppercase tracking-[0.15em] hover:bg-red-500 hover:text-white transition-all gap-2"
                         >
                             <Trash2 className="h-4 w-4" />
                             Purge
@@ -783,7 +834,12 @@ export function QuestionList() {
                                             className="text-[10px]"
                                         />
                                     </th>
-                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">Target Skill</th>
+                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">
+                                        <div className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors cursor-default">
+                                            <Filter className="h-3 w-3" />
+                                            Target Skill
+                                        </div>
+                                    </th>
                                     <th className="h-14 px-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">
                                         <SortableHeader
                                             label="Weight"
@@ -794,8 +850,17 @@ export function QuestionList() {
                                             className="text-[10px] justify-center"
                                         />
                                     </th>
-                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">Status</th>
-                                    <th className="h-14 pl-4 pr-8 text-right font-black text-[10px] uppercase tracking-widest text-gray-400">Execution</th>
+                                    <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">
+                                        <SortableHeader
+                                            label="Status"
+                                            column="status"
+                                            currentSortBy={sortBy}
+                                            currentSortOrder={sortOrder}
+                                            onSort={handleSort}
+                                            className="text-[10px]"
+                                        />
+                                    </th>
+                                    <th className="h-14 pl-4 pr-10 text-right font-black text-[10px] uppercase tracking-widest text-gray-400">Execution</th>
                                 </tr>
                             </thead>
                             <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>
@@ -842,11 +907,17 @@ export function QuestionList() {
                     <div className="md:hidden p-4">
                         <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>
                             {!questions.length ? (
-                                <div className="rounded-[2rem] border border-dashed border-gray-200 p-12 bg-white/30 backdrop-blur-md">
+                                <div className="rounded-[2.5rem] border border-dashed border-gray-200 p-12 bg-white/30 backdrop-blur-md">
                                     <EmptyState
                                         icon={FileText}
                                         title={hasActiveFilters ? 'No matches found' : 'Registry empty'}
                                         description={hasActiveFilters ? 'Try adjusting your focus.' : 'Start adding assets to your library.'}
+                                        action={
+                                            hasActiveFilters ? {
+                                                label: "Clear filters",
+                                                onClick: clearFilters
+                                            } : undefined
+                                        }
                                     />
                                 </div>
                             ) : (

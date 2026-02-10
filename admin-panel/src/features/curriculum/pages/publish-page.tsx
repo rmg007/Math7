@@ -125,7 +125,7 @@ export function PublishPage() {
                 </div>
             </div>
 
-            <div className="bg-white/70 backdrop-blur-xl rounded-[3rem] shadow-sm border border-white/20 p-1 overflow-hidden">
+            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 p-1 overflow-hidden">
                 <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-blue-500/10 rounded-2xl border border-blue-500/10">
@@ -231,7 +231,7 @@ export function PublishPage() {
             )}
 
             {!isLoadingPreview && preview?.validationIssues && preview.validationIssues.length > 0 && (
-                <div className="bg-white/70 backdrop-blur-xl rounded-[3rem] shadow-sm border border-white/20 overflow-hidden">
+                <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 overflow-hidden">
                     <div className="px-8 py-6 border-b border-gray-100 bg-amber-500/5 flex items-center gap-4">
                         <div className="p-2 rounded-xl bg-amber-500/10">
                             <AlertTriangle className="h-5 w-5 text-amber-600" />
@@ -273,7 +273,7 @@ export function PublishPage() {
                 </div>
             )}
 
-            <div className="bg-white/70 backdrop-blur-xl rounded-[3rem] shadow-2xl border border-white/20 overflow-hidden group">
+            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/20 overflow-hidden group">
                 <div className="p-8 border-b border-gray-100 bg-gradient-to-r from-gray-50/50 to-transparent">
                     <div className="flex items-center gap-6">
                         <div className="flex items-center justify-center w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-indigo-600 to-purple-700 shadow-xl shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-500">
