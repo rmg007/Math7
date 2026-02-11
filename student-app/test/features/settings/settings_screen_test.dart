@@ -20,7 +20,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -36,7 +36,7 @@ void main() {
     testWidgets('should display sync section', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -54,7 +54,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -71,7 +71,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -87,7 +87,7 @@ void main() {
     testWidgets('should display account section', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -103,7 +103,7 @@ void main() {
     testWidgets('should display about section', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -119,7 +119,7 @@ void main() {
     testWidgets('should handle sync toggle', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -142,7 +142,7 @@ void main() {
     testWidgets('should handle theme selection', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -166,7 +166,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -189,7 +189,7 @@ void main() {
     testWidgets('should handle logout action', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -213,7 +213,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -233,7 +233,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -250,7 +250,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -267,7 +267,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -340,7 +340,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -357,7 +357,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -374,7 +374,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -392,7 +392,7 @@ void main() {
     testWidgets('should handle settings changes', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -408,7 +408,7 @@ void main() {
     testWidgets('should persist settings changes', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: container,
+          container: ProviderContainer(),
           child: MaterialApp(
             home: SettingsScreen(),
           ),

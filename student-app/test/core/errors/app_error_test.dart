@@ -221,18 +221,12 @@ void main() {
         case NetworkError():
           errorMessage = 'Network: ${error.message}';
           break;
-        case SyncError():
-          errorMessage = 'Sync: ${error.message}';
-          break;
-        case ValidationError():
-          errorMessage = 'Validation: ${error.message}';
-          break;
       }
 
       expect(errorMessage, 'Network: Connection failed');
     });
 
-    test('should support pattern matching with if-case', () {
+    test('should support pattern matching with if-case for SyncError', () {
       const SyncError error = SyncError('Rate limited', retryAfterSeconds: 30);
 
       if (error case SyncError(retryAfterSeconds: final retryAfter)) {
