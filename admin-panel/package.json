@@ -92,7 +92,7 @@
     "archunit": "^2.1.63",
     "autoprefixer": "^10.4.16",
     "dotenv": "^17.2.3",
-    "eslint": "^8.55.0",
+    "eslint": "^10.0.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.26",
     "husky": "^9.1.7",
