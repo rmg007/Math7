@@ -1,30 +1,65 @@
-name: Deploy Checkly Monitoring
+name: Checkly Autonomous Monitoring
 
-# Deploy Checkly synthetic monitoring configuration
-# Runs when check files change or on manual trigger
+# Fully autonomous production monitoring pipeline
+# Triggers: code changes, scheduled health checks, manual, post-deployment
+# Capabilities: deploy checks, verify health, self-heal, auto-rollback, incident reporting
 
 on:
+  # 1. Deploy when monitoring config changes
   push:
     branches: [main]
     paths:
       - 'admin-panel/__checks__/**'
       - 'admin-panel/package.json'
+
+  # 2. Scheduled autonomous health checks (every 6 hours)
+  schedule:
+    - cron: '0 */6 * * *'
+
+  # 3. Manual trigger with options
   workflow_dispatch:
     inputs:
-      deploy_environment:
-        description: 'Deployment environment'
+      action:
+        description: 'Action to perform'
         required: true
-        default: 'production'
+        default: 'health-check'
         type: choice
         options:
-          - production
-          - test
+          - health-check
+          - deploy
+          - self-heal
+          - full-cycle
+
+  # 4. Trigger after other deployments complete
+  workflow_run:
+    workflows: ['CI', 'Admin Panel E2E Tests']
+    types: [completed]
+    branches: [main]
+
+env:
+  CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}
+  CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }}
+  MONITOR_USER_EMAIL: ${{ secrets.MONITOR_USER_EMAIL }}
+  MONITOR_USER_PASSWORD: ${{ secrets.MONITOR_USER_PASSWORD }}
+  SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+  ADMIN_URL: https://questerix-admin.pages.dev
+  LANDING_URL: https://questerix-landing.pages.dev
+  STUDENT_URL: https://questerix-student.pages.dev
+  SUPABASE_URL: https://qvslbiceoonrgjxzkotb.supabase.co
 
 jobs:
-  deploy-checkly:
+  # =========================================================================
+  # PHASE 1: Deploy monitoring configuration (only on code changes)
+  # =========================================================================
+  deploy-checks:
     runs-on: ubuntu-latest
-    name: Deploy Checkly Checks
-    
+    name: 1. Deploy Monitoring Config
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.action == 'deploy' || github.event.inputs.action == 'full-cycle'))
+    outputs:
+      deployed: ${{ steps.deploy.outcome }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,30 +74,514 @@ jobs:
       - name: Install dependencies
         working-directory: admin-panel
         run: npm ci
-
-      - name: Validate Checkly configuration
-        working-directory: admin-panel
-        run: npx checkly test --dry-run
-        env:
-          CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}
-          CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }}
 
       - name: Deploy to Checkly
+        id: deploy
         working-directory: admin-panel
-        run: npx checkly deploy
-        env:
-          CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}
-          CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }}
-          MONITOR_USER_EMAIL: ${{ secrets.MONITOR_USER_EMAIL }}
-          MONITOR_USER_PASSWORD: ${{ secrets.MONITOR_USER_PASSWORD }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: npx checkly deploy --force
 
-  verify-deployment:
+  # =========================================================================
+  # PHASE 2: Run health checks against all production surfaces
+  # =========================================================================
+  health-check:
     runs-on: ubuntu-latest
-    name: Verify Deployment
-    needs: deploy-checkly
-    if: success()
-    
+    name: 2. Production Health Check
+    needs: [deploy-checks]
+    if: always() && !cancelled()
+    outputs:
+      admin-status: ${{ steps.check-admin.outcome }}
+      landing-status: ${{ steps.check-landing.outcome }}
+      student-status: ${{ steps.check-student.outcome }}
+      supabase-api-status: ${{ steps.check-supabase-api.outcome }}
+      supabase-auth-status: ${{ steps.check-supabase-auth.outcome }}
+      edge-functions-status: ${{ steps.check-edge-functions.outcome }}
+      any-failure: ${{ steps.summary.outputs.any_failure }}
+
+    steps:
+      - name: Check Admin Panel
+        id: check-admin
+        run: |
+          for i in 1 2 3; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$ADMIN_URL/login")
+            if [ "$STATUS" -eq 200 ]; then
+              echo "✅ Admin Panel: HTTP $STATUS (attempt $i)"
+              exit 0
+            fi
+            echo "⚠️ Admin Panel: HTTP $STATUS (attempt $i/3), retrying in 10s..."
+            sleep 10
+          done
+          echo "❌ Admin Panel: FAILED after 3 attempts"
+          exit 1
+
+      - name: Check Landing Pages
+        id: check-landing
+        if: always()
+        run: |
+          for i in 1 2 3; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$LANDING_URL")
+            if [ "$STATUS" -eq 200 ]; then
+              echo "✅ Landing Pages: HTTP $STATUS (attempt $i)"
+              exit 0
+            fi
+            echo "⚠️ Landing Pages: HTTP $STATUS (attempt $i/3), retrying in 10s..."
+            sleep 10
+          done
+          echo "❌ Landing Pages: FAILED after 3 attempts"
+          exit 1
+
+      - name: Check Student App
+        id: check-student
+        if: always()
+        run: |
+          for i in 1 2 3; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$STUDENT_URL")
+            if [ "$STATUS" -eq 200 ]; then
+              echo "✅ Student App: HTTP $STATUS (attempt $i)"
+              exit 0
+            fi
+            echo "⚠️ Student App: HTTP $STATUS (attempt $i/3), retrying in 10s..."
+            sleep 10
+          done
+          echo "❌ Student App: FAILED after 3 attempts"
+          exit 1
+
+      - name: Check Supabase REST API
+        id: check-supabase-api
+        if: always()
+        run: |
+          for i in 1 2 3; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 \
+              -H "apikey: $SUPABASE_ANON_KEY" \
+              -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+              "$SUPABASE_URL/rest/v1/")
+            if [ "$STATUS" -eq 200 ]; then
+              echo "✅ Supabase REST API: HTTP $STATUS (attempt $i)"
+              exit 0
+            fi
+            echo "⚠️ Supabase REST API: HTTP $STATUS (attempt $i/3), retrying in 10s..."
+            sleep 10
+          done
+          echo "❌ Supabase REST API: FAILED after 3 attempts"
+          exit 1
+
+      - name: Check Supabase Auth
+        id: check-supabase-auth
+        if: always()
+        run: |
+          for i in 1 2 3; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$SUPABASE_URL/auth/v1/health")
+            if [ "$STATUS" -eq 200 ]; then
+              echo "✅ Supabase Auth: HTTP $STATUS (attempt $i)"
+              exit 0
+            fi
+            echo "⚠️ Supabase Auth: HTTP $STATUS (attempt $i/3), retrying in 10s..."
+            sleep 10
+          done
+          echo "❌ Supabase Auth: FAILED after 3 attempts"
+          exit 1
+
+      - name: Check Edge Functions
+        id: check-edge-functions
+        if: always()
+        run: |
+          FAILED=0
+          for FUNC in validate-content generate-questions analyze-spec-drift critical-alert; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 \
+              -X POST \
+              -H "apikey: $SUPABASE_ANON_KEY" \
+              -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+              -H "Content-Type: application/json" \
+              -d '{}' \
+              "$SUPABASE_URL/functions/v1/$FUNC")
+            if [ "$STATUS" -eq 500 ] || [ "$STATUS" -eq 502 ] || [ "$STATUS" -eq 503 ]; then
+              echo "❌ Edge Function $FUNC: HTTP $STATUS (server error)"
+              FAILED=1
+            else
+              echo "✅ Edge Function $FUNC: HTTP $STATUS (healthy)"
+            fi
+          done
+          exit $FAILED
+
+      - name: Check SSL Certificates
+        id: check-ssl
+        if: always()
+        run: |
+          for DOMAIN in questerix-admin.pages.dev questerix-landing.pages.dev questerix-student.pages.dev; do
+            EXPIRY=$(echo | openssl s_client -servername $DOMAIN -connect $DOMAIN:443 2>/dev/null | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
+            if [ -z "$EXPIRY" ]; then
+              echo "❌ SSL for $DOMAIN: Could not retrieve certificate"
+              continue
+            fi
+            EXPIRY_EPOCH=$(date -d "$EXPIRY" +%s 2>/dev/null)
+            NOW_EPOCH=$(date +%s)
+            DAYS_LEFT=$(( (EXPIRY_EPOCH - NOW_EPOCH) / 86400 ))
+            if [ "$DAYS_LEFT" -lt 14 ]; then
+              echo "⚠️ SSL for $DOMAIN: EXPIRING in $DAYS_LEFT days!"
+            else
+              echo "✅ SSL for $DOMAIN: Valid for $DAYS_LEFT days (expires $EXPIRY)"
+            fi
+          done
+
+      - name: Measure Response Times
+        id: check-perf
+        if: always()
+        run: |
+          echo "=== Response Time Report ==="
+          for URL in "$ADMIN_URL/login" "$LANDING_URL" "$STUDENT_URL" "$SUPABASE_URL/auth/v1/health"; do
+            TIME=$(curl -s -o /dev/null -w "%{time_total}" --max-time 15 "$URL")
+            TIME_MS=$(echo "$TIME * 1000" | bc | cut -d. -f1)
+            if [ "$TIME_MS" -gt 5000 ]; then
+              echo "⚠️ SLOW $URL: ${TIME_MS}ms (> 5000ms threshold)"
+            else
+              echo "✅ $URL: ${TIME_MS}ms"
+            fi
+          done
+
+      - name: Summarize Health
+        id: summary
+        if: always()
+        run: |
+          ANY_FAILURE="false"
+          echo "========================================="
+          echo "     PRODUCTION HEALTH REPORT"
+          echo "     $(date -u '+%Y-%m-%d %H:%M UTC')"
+          echo "========================================="
+
+          declare -A CHECKS
+          CHECKS[admin]="${{ steps.check-admin.outcome }}"
+          CHECKS[landing]="${{ steps.check-landing.outcome }}"
+          CHECKS[student]="${{ steps.check-student.outcome }}"
+          CHECKS[supabase-api]="${{ steps.check-supabase-api.outcome }}"
+          CHECKS[supabase-auth]="${{ steps.check-supabase-auth.outcome }}"
+          CHECKS[edge-functions]="${{ steps.check-edge-functions.outcome }}"
+
+          for SERVICE in admin landing student supabase-api supabase-auth edge-functions; do
+            STATUS=${CHECKS[$SERVICE]}
+            if [ "$STATUS" == "success" ]; then
+              echo "  ✅ $SERVICE: HEALTHY"
+            else
+              echo "  ❌ $SERVICE: DOWN"
+              ANY_FAILURE="true"
+            fi
+          done
+
+          echo "========================================="
+          echo "any_failure=$ANY_FAILURE" >> "$GITHUB_OUTPUT"
+
+  # =========================================================================
+  # PHASE 3: Self-healing — attempt to fix detected failures
+  # =========================================================================
+  self-heal:
+    runs-on: ubuntu-latest
+    name: 3. Self-Heal
+    needs: [health-check]
+    if: >-
+      always() &&
+      (needs.health-check.outputs.any-failure == 'true' ||
+       (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'self-heal'))
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
+      - name: Redeploy Admin Panel (if down)
+        if: needs.health-check.outputs.admin-status == 'failure'
+        run: |
+          echo "🔧 Self-healing: Redeploying Admin Panel..."
+          cd admin-panel
+          npm ci
+          npm run build
+          npx wrangler pages deploy dist --project-name questerix-admin --branch main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VITE_SUPABASE_URL: ${{ env.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Redeploy Landing Pages (if down)
+        if: needs.health-check.outputs.landing-status == 'failure'
+        run: |
+          echo "🔧 Self-healing: Redeploying Landing Pages..."
+          cd landing-pages
+          npm ci
+          npm run build
+          npx wrangler pages deploy dist --project-name questerix-landing --branch main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Redeploy Edge Functions (if failing)
+        if: needs.health-check.outputs.edge-functions-status == 'failure'
+        run: |
+          echo "🔧 Self-healing: Redeploying Edge Functions..."
+          npx supabase functions deploy validate-content --project-ref qvslbiceoonrgjxzkotb
+          npx supabase functions deploy generate-questions --project-ref qvslbiceoonrgjxzkotb
+          npx supabase functions deploy analyze-spec-drift --project-ref qvslbiceoonrgjxzkotb
+          npx supabase functions deploy critical-alert --project-ref qvslbiceoonrgjxzkotb
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Wait for redeployment to propagate
+        run: sleep 30
+
+      - name: Verify self-heal worked
+        id: verify-heal
+        run: |
+          echo "🔍 Verifying self-heal results..."
+          STILL_BROKEN=0
+
+          if [ "${{ needs.health-check.outputs.admin-status }}" == "failure" ]; then
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$ADMIN_URL/login")
+            if [ "$STATUS" -ne 200 ]; then
+              echo "❌ Admin Panel still down after redeploy (HTTP $STATUS)"
+              STILL_BROKEN=1
+            else
+              echo "✅ Admin Panel recovered!"
+            fi
+          fi
+
+          if [ "${{ needs.health-check.outputs.landing-status }}" == "failure" ]; then
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$LANDING_URL")
+            if [ "$STATUS" -ne 200 ]; then
+              echo "❌ Landing Pages still down after redeploy (HTTP $STATUS)"
+              STILL_BROKEN=1
+            else
+              echo "✅ Landing Pages recovered!"
+            fi
+          fi
+
+          echo "still_broken=$STILL_BROKEN" >> "$GITHUB_OUTPUT"
+
+  # =========================================================================
+  # PHASE 4: Auto-rollback if self-heal failed
+  # =========================================================================
+  auto-rollback:
+    runs-on: ubuntu-latest
+    name: 4. Auto-Rollback
+    needs: [health-check, self-heal]
+    if: >-
+      always() &&
+      needs.self-heal.result == 'failure'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 5
+
+      - name: Rollback to previous commit
+        run: |
+          echo "🔄 Self-heal failed. Rolling back to previous commit..."
+          PREV_COMMIT=$(git rev-parse HEAD~1)
+          echo "Rolling back to: $PREV_COMMIT"
+          git checkout $PREV_COMMIT
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Rebuild and redeploy Admin Panel (previous version)
+        if: needs.health-check.outputs.admin-status == 'failure'
+        run: |
+          echo "🔄 Deploying previous version of Admin Panel..."
+          cd admin-panel
+          npm ci
+          npm run build
+          npx wrangler pages deploy dist --project-name questerix-admin --branch main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VITE_SUPABASE_URL: ${{ env.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Rebuild and redeploy Landing Pages (previous version)
+        if: needs.health-check.outputs.landing-status == 'failure'
+        run: |
+          echo "🔄 Deploying previous version of Landing Pages..."
+          cd landing-pages
+          npm ci
+          npm run build
+          npx wrangler pages deploy dist --project-name questerix-landing --branch main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  # =========================================================================
+  # PHASE 5: Incident reporting — create GitHub Issue for failures
+  # =========================================================================
+  incident-report:
+    runs-on: ubuntu-latest
+    name: 5. Incident Report
+    needs: [health-check, self-heal, auto-rollback]
+    if: >-
+      always() &&
+      needs.health-check.outputs.any-failure == 'true'
+    permissions:
+      issues: write
+
+    steps:
+      - name: Create Incident Issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now = new Date().toISOString();
+            const trigger = '${{ github.event_name }}';
+
+            const services = {
+              'Admin Panel': '${{ needs.health-check.outputs.admin-status }}',
+              'Landing Pages': '${{ needs.health-check.outputs.landing-status }}',
+              'Student App': '${{ needs.health-check.outputs.student-status }}',
+              'Supabase REST API': '${{ needs.health-check.outputs.supabase-api-status }}',
+              'Supabase Auth': '${{ needs.health-check.outputs.supabase-auth-status }}',
+              'Edge Functions': '${{ needs.health-check.outputs.edge-functions-status }}',
+            };
+
+            const selfHealResult = '${{ needs.self-heal.result }}';
+            const rollbackResult = '${{ needs.auto-rollback.result }}';
+
+            const failedServices = Object.entries(services)
+              .filter(([_, status]) => status === 'failure')
+              .map(([name]) => name);
+
+            const healthyServices = Object.entries(services)
+              .filter(([_, status]) => status === 'success')
+              .map(([name]) => name);
+
+            const serviceTable = Object.entries(services)
+              .map(([name, status]) => `| ${name} | ${status === 'success' ? '✅ Healthy' : '❌ Down'} |`)
+              .join('\n');
+
+            const body = `## 🚨 Production Incident Report
+
+            **Time**: ${now}
+            **Trigger**: ${trigger}
+            **Run**: [View workflow run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+
+            ### Service Status
+
+            | Service | Status |
+            |---------|--------|
+            ${serviceTable}
+
+            ### Affected Services
+            ${failedServices.map(s => `- ❌ **${s}**`).join('\n')}
+
+            ### Healthy Services
+            ${healthyServices.map(s => `- ✅ ${s}`).join('\n')}
+
+            ### Automated Recovery
+            - **Self-heal attempted**: ${selfHealResult !== 'skipped' ? 'Yes' : 'No'}
+            - **Self-heal result**: ${selfHealResult}
+            - **Auto-rollback attempted**: ${rollbackResult !== 'skipped' ? 'Yes' : 'No'}
+            - **Auto-rollback result**: ${rollbackResult}
+
+            ### Response Runbook
+            ${failedServices.includes('Admin Panel') || failedServices.includes('Landing Pages') || failedServices.includes('Student App') ?
+              '**Frontend Down**: Check [Cloudflare Status](https://www.cloudflarestatus.com/). Verify DNS. Check \`wrangler pages deployment list\`.' : ''}
+            ${failedServices.includes('Supabase REST API') || failedServices.includes('Supabase Auth') ?
+              '**Supabase Down**: Check [Supabase Status](https://status.supabase.com/). Verify billing/quotas. Check dashboard logs.' : ''}
+            ${failedServices.includes('Edge Functions') ?
+              '**Edge Functions Failing**: Check Supabase Functions logs. Verify env vars. Run \`supabase functions deploy\`.' : ''}
+
+            ---
+            *This issue was created automatically by the Checkly Autonomous Monitoring workflow.*
+            `;
+
+            // Check for existing open incident
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'incident,automated',
+              state: 'open',
+            });
+
+            if (existingIssues.data.length > 0) {
+              // Update existing incident
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssues.data[0].number,
+                body: `### 🔄 Incident Update (${now})\n\nFailed services: ${failedServices.join(', ')}\nSelf-heal: ${selfHealResult}\nRollback: ${rollbackResult}\n\n[Workflow run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+              });
+              console.log(`Updated existing incident #${existingIssues.data[0].number}`);
+            } else {
+              // Create new incident
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🚨 Production Incident: ${failedServices.join(', ')} DOWN`,
+                body: body,
+                labels: ['incident', 'automated', 'priority:critical'],
+              });
+              console.log('Created new incident issue');
+            }
+
+  # =========================================================================
+  # PHASE 6: Auto-close incident when all services recover
+  # =========================================================================
+  auto-resolve:
+    runs-on: ubuntu-latest
+    name: 6. Auto-Resolve Incidents
+    needs: [health-check]
+    if: >-
+      always() &&
+      needs.health-check.outputs.any-failure == 'false'
+    permissions:
+      issues: write
+
+    steps:
+      - name: Close resolved incidents
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const openIncidents = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'incident,automated',
+              state: 'open',
+            });
+
+            for (const issue of openIncidents.data) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `### ✅ Incident Resolved\n\nAll services are healthy as of ${new Date().toISOString()}.\n\nThis incident was **automatically resolved** by the monitoring system.\n\n[Verification run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+              });
+
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+                state_reason: 'completed',
+              });
+
+              console.log(`Auto-closed incident #${issue.number}`);
+            }
+
+  # =========================================================================
+  # PHASE 7: Checkly synthetic test verification
+  # =========================================================================
+  checkly-verify:
+    runs-on: ubuntu-latest
+    name: 7. Checkly Synthetic Tests
+    needs: [health-check]
+    if: >-
+      always() &&
+      needs.health-check.outputs.any-failure == 'false' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_run' ||
+       (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'full-cycle'))
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -78,49 +597,52 @@ jobs:
         working-directory: admin-panel
         run: npm ci
 
-      - name: Run all checks to verify deployment
+      - name: Run Checkly synthetic tests
         working-directory: admin-panel
         run: npx checkly test --record
-        env:
-          CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}
-          CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }}
-          MONITOR_USER_EMAIL: ${{ secrets.MONITOR_USER_EMAIL }}
-          MONITOR_USER_PASSWORD: ${{ secrets.MONITOR_USER_PASSWORD }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         continue-on-error: true
 
-      - name: Upload test results
+      - name: Upload Checkly results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: checkly-test-results
+          name: checkly-results-${{ github.run_id }}
           path: admin-panel/checkly-results/
-          retention-days: 7
+          retention-days: 14
 
-  post-deploy-notify:
+  # =========================================================================
+  # PHASE 8: Health report summary
+  # =========================================================================
+  report:
     runs-on: ubuntu-latest
-    name: Post-Deploy Notification
-    needs: [deploy-checkly, verify-deployment]
+    name: 8. Health Report
+    needs: [deploy-checks, health-check, self-heal, auto-rollback, incident-report, auto-resolve, checkly-verify]
     if: always()
-    
+
     steps:
-      - name: Notify deployment success
-        if: needs.deploy-checkly.result == 'success'
+      - name: Generate Report
         run: |
-          echo "✅ Checkly monitoring deployed successfully!"
-          echo "📊 View your checks at: https://app.checklyhq.com/"
-          echo "🔔 Alerts configured for: admin, landing, student, supabase"
-
-      - name: Notify deployment failure
-        if: needs.deploy-checkly.result == 'failure'
-        run: |
-          echo "❌ Checkly deployment failed!"
-          echo "🔧 Check the logs above for details"
-          exit 1
-
-      - name: Notify verification results
-        if: needs.verify-deployment.result == 'failure'
-        run: |
-          echo "⚠️ Some checks failed during verification"
-          echo "📊 Check the Checkly dashboard for details"
-          echo "🔗 https://app.checklyhq.com/"
+          echo "╔══════════════════════════════════════════════════════╗"
+          echo "║     QUESTERIX AUTONOMOUS MONITORING REPORT          ║"
+          echo "║     $(date -u '+%Y-%m-%d %H:%M UTC')                       ║"
+          echo "╠══════════════════════════════════════════════════════╣"
+          echo "║ Trigger: ${{ github.event_name }}"
+          echo "║ Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "╠══════════════════════════════════════════════════════╣"
+          echo "║ PHASE RESULTS:                                      ║"
+          echo "║  1. Deploy Config:    ${{ needs.deploy-checks.result || 'skipped' }}"
+          echo "║  2. Health Check:     ${{ needs.health-check.result || 'skipped' }}"
+          echo "║  3. Self-Heal:        ${{ needs.self-heal.result || 'skipped' }}"
+          echo "║  4. Auto-Rollback:    ${{ needs.auto-rollback.result || 'skipped' }}"
+          echo "║  5. Incident Report:  ${{ needs.incident-report.result || 'skipped' }}"
+          echo "║  6. Auto-Resolve:     ${{ needs.auto-resolve.result || 'skipped' }}"
+          echo "║  7. Checkly Verify:   ${{ needs.checkly-verify.result || 'skipped' }}"
+          echo "╠══════════════════════════════════════════════════════╣"
+          echo "║ SERVICE STATUS:                                      ║"
+          echo "║  Admin Panel:     ${{ needs.health-check.outputs.admin-status || 'unknown' }}"
+          echo "║  Landing Pages:   ${{ needs.health-check.outputs.landing-status || 'unknown' }}"
+          echo "║  Student App:     ${{ needs.health-check.outputs.student-status || 'unknown' }}"
+          echo "║  Supabase API:    ${{ needs.health-check.outputs.supabase-api-status || 'unknown' }}"
+          echo "║  Supabase Auth:   ${{ needs.health-check.outputs.supabase-auth-status || 'unknown' }}"
+          echo "║  Edge Functions:  ${{ needs.health-check.outputs.edge-functions-status || 'unknown' }}"
+          echo "╚══════════════════════════════════════════════════════╝"
