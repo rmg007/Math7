@@ -142,39 +142,11 @@ test.describe('Admin Panel E2E Tests', () => {
     test('should load dashboard', async ({ page }) => {
       await page.goto('/');
       
-      // Check for dashboard heading or title
-      const dashboardHeading = page.getByRole('heading', { name: /dashboard/i });
-      if (await dashboardHeading.isVisible()) {
-        await expect(dashboardHeading).toBeVisible();
-      } else {
-        // Fallback: check for dashboard content
-        await expect(page.locator('main, [role="main"]')).toBeVisible();
-      }
+      // Check for executive dashboard heading
+      await expect(page.locator('h1, h2').filter({ hasText: /Executive Dashboard/i })).toBeVisible({ timeout: 15000 });
       
-      // Check for any stats cards or summary content
-      const statsSelectors = [
-        'text=Total Domains',
-        'text=Total Skills', 
-        'text=Total Questions',
-        '[data-testid="stats-card"]',
-        '.stat-card',
-        '[class*="stat"]',
-        '[class*="metric"]'
-      ];
-      
-      let statsFound = false;
-      for (const selector of statsSelectors) {
-        if (await page.locator(selector).isVisible()) {
-          statsFound = true;
-          break;
-        }
-      }
-      
-      if (!statsFound) {
-        console.log('No dashboard stats found - checking for any dashboard content');
-        // At minimum, dashboard should have some content
-        await expect(page.locator('main, [role="main"]').first()).toBeVisible();
-      }
+      // Look for the stats cards
+      await expect(page.getByText(/SYSTEM OVERVIEW/i)).toBeVisible();
     });
 
     test('should navigate to different sections from dashboard', async ({ page }) => {
@@ -208,8 +180,8 @@ test.describe('Admin Panel E2E Tests', () => {
       
       await page.goto('/domains/new');
       
-      // Wait for form to load
-      await expect(page.locator('h1, h2').filter({ hasText: /new domain/i })).toBeVisible({ timeout: 10000 });
+      // Expect Create Domain heading
+      await expect(page.locator('h1, h2').filter({ hasText: /Create Domain/i })).toBeVisible({ timeout: 10000 });
       
       // Fill form fields
       const titleInput = page.locator('input[name="title"], input[placeholder*="title"], input[id*="title"]').first();
@@ -232,9 +204,7 @@ test.describe('Admin Panel E2E Tests', () => {
       }
       
       // Submit form
-      const submitBtn = page.locator('button[type="submit"], button:has-text("Create"), button:has-text("Save"), button:has-text("Submit")').first();
-      await expect(submitBtn).toBeVisible();
-      await submitBtn.click();
+      await page.click('button[type="submit"]:has-text("Initiate Provision")');
       
       // Should redirect to domains list
       await expect(page).toHaveURL(/\/domains/, { timeout: 15000 });
@@ -255,7 +225,7 @@ test.describe('Admin Panel E2E Tests', () => {
             await firstEditBtn.click();
             
             // Wait for edit form to load
-            await expect(page.locator('h1, h2').filter({ hasText: /edit domain/i })).toBeVisible({ timeout: 10000 });
+            await expect(page.locator('h1, h2').filter({ hasText: /Modify Domain/i })).toBeVisible({ timeout: 10000 });
             
             const updatedTitle = `Updated Domain ${Date.now()}`;
             const titleInput = page.locator('input[name="title"], input[placeholder*="title"], input[id*="title"]').first();
@@ -264,9 +234,7 @@ test.describe('Admin Panel E2E Tests', () => {
             await titleInput.fill(updatedTitle);
             
             // Submit form
-            const submitBtn = page.locator('button[type="submit"], button:has-text("Update"), button:has-text("Save"), button:has-text("Submit")').first();
-            await expect(submitBtn).toBeVisible();
-            await submitBtn.click();
+            await page.click('button[type="submit"]:has-text("Update Signature")');
             
             await expect(page).toHaveURL(/\/domains/, { timeout: 15000 });
             await page.reload();
@@ -284,7 +252,7 @@ test.describe('Admin Panel E2E Tests', () => {
         const tempTitle = `Delete Me ${Date.now()}`;
         
         // Wait for form and fill it
-        await expect(page.locator('h1, h2').filter({ hasText: /new domain/i })).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('h1, h2').filter({ hasText: /Create Domain/i })).toBeVisible({ timeout: 10000 });
         
         const titleInput = page.locator('input[name="title"], input[placeholder*="title"], input[id*="title"]').first();
         await titleInput.fill(tempTitle);
@@ -295,8 +263,7 @@ test.describe('Admin Panel E2E Tests', () => {
         }
         
         // Submit form
-        const submitBtn = page.locator('button[type="submit"], button:has-text("Create"), button:has-text("Save")').first();
-        await submitBtn.click();
+        await page.click('button[type="submit"]:has-text("Initiate Provision")');
         
         await expect(page).toHaveURL(/\/domains/, { timeout: 15000 });
         await page.reload();
@@ -334,13 +301,16 @@ test.describe('Admin Panel E2E Tests', () => {
 
     test('should list all skills', async ({ page }) => {
       await page.goto('/skills');
-      await expect(page.locator('text=Curriculum Skills')).toBeVisible();
+      await expect(page.locator('h1, h2').filter({ hasText: /Curriculum Skills/i })).toBeVisible({ timeout: 10000 });
       await expect(page.locator('a[href="/skills/new"]').first()).toBeVisible();
     });
 
     test('should create a new skill', async ({ page }) => {
       const testSkill = generateTestSkill();
       await page.goto('/skills/new');
+
+      // Expect Provision Skill heading
+      await expect(page.locator('h1, h2').filter({ hasText: /Provision Skill/i })).toBeVisible({ timeout: 10000 });
 
       // Select Domain first
       await selectOption(page, 'button[role="combobox"]:has-text("Select a domain")', 0); // Select first available domain
@@ -350,7 +320,7 @@ test.describe('Admin Panel E2E Tests', () => {
       await page.fill('textarea[name="description"]', testSkill.description);
       await page.fill('input[name="difficulty_level"]', '3'); // 1-5
 
-      await page.click('button[type="submit"]');
+      await page.click('button[type="submit"]:has-text("Anchor Skill")');
 
       await expect(page).toHaveURL(/\/skills/);
       await expect(page.locator(`text=${testSkill.name}`).first()).toBeVisible();
@@ -379,7 +349,7 @@ test.describe('Admin Panel E2E Tests', () => {
 
     test('should list all questions', async ({ page }) => {
       await page.goto('/questions');
-      await expect(page.locator('text=Question Registry')).toBeVisible();
+      await expect(page.locator('h1, h2').filter({ hasText: /Question Registry/i })).toBeVisible({ timeout: 10000 });
       const createBtn = page.locator('a[href="/questions/new"]');
       await expect(createBtn.first()).toBeVisible();
     });
@@ -388,7 +358,7 @@ test.describe('Admin Panel E2E Tests', () => {
       await page.goto('/questions/new');
 
       // Wait for form to load
-      await expect(page.locator('text=Architect Question')).toBeVisible();
+      await expect(page.locator('h1, h2').filter({ hasText: /Architect Question/i })).toBeVisible({ timeout: 10000 });
 
       // 1. Select Skill — combobox labeled "Target Skill Segment"
       await page.getByRole('combobox', { name: 'Target Skill Segment' }).click();
@@ -418,7 +388,7 @@ test.describe('Admin Panel E2E Tests', () => {
       }
 
       // 6. Submit — button labeled "DEPLOY QUESTION"
-      await page.getByRole('button', { name: 'DEPLOY QUESTION' }).click();
+      await page.click('button[type="submit"]:has-text("DEPLOY QUESTION")');
 
       // Should redirect to questions list
       await expect(page).toHaveURL(/\/questions/, { timeout: 15000 });
