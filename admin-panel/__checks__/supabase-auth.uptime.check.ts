@@ -9,6 +9,10 @@ export default defineConfig({
   frequency: 2,
   locations: ['us-east-1', 'eu-west-1'],
   tags: ['supabase', 'auth', 'uptime', 'p0-critical'],
+  headers: {
+    'apikey': process.env.SUPABASE_ANON_KEY || '',
+    'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || ''}`,
+  },
   assertions: [
     {
       type: 'statusCode',

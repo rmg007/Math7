@@ -169,7 +169,10 @@ jobs:
         if: always()
         run: |
           for i in 1 2 3; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$SUPABASE_URL/auth/v1/health")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 \
+              -H "apikey: $SUPABASE_ANON_KEY" \
+              -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+              "$SUPABASE_URL/auth/v1/health")
             if [ "$STATUS" -eq 200 ]; then
               echo "✅ Supabase Auth: HTTP $STATUS (attempt $i)"
               exit 0
