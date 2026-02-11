@@ -4,8 +4,14 @@
   "global": {
     "SUPABASE_URL": "https://qvslbiceoonrgjxzkotb.supabase.co",
     "API_BASE_URL": "https://api.questerix.com",
+    "STUDENT_APP_URL": "https://questerix-student.pages.dev",
     "THEME_PRIMARY_COLOR": "0xFF319795",
     "SENTRY_DSN": ""
+  },
+  "landing": {
+    "VITE_STUDENT_APP_URL": "${global.STUDENT_APP_URL}",
+    "VITE_SUPABASE_URL": "${global.SUPABASE_URL}",
+    "VITE_SUPABASE_ANON_KEY": "${global.SUPABASE_ANON_KEY}"
   },
   "admin": {
     "VITE_APP_NAME": "Questerix Admin",

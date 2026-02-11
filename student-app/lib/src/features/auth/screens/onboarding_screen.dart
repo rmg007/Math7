@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:student_app/src/core/config/app_config_service.dart';
 import 'package:student_app/src/core/theme/app_theme.dart';
-import '../providers/auth_providers.dart';
+import '../providers/auth_provider.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});

@@ -1,8 +1,4 @@
-import type { Database } from '../lib/database.types';
-
-type AppData = Database['public']['Tables']['apps']['Row'] & {
-  subjects: Database['public']['Tables']['subjects']['Row'] | null
-};
+import type { AppData } from '../types/app';
 
 export const GradeLandingPage = ({ app }: { app: AppData | null }) => {
   return (

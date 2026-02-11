@@ -1,0 +1,126 @@
+name: Deploy Checkly Monitoring
+
+# Deploy Checkly synthetic monitoring configuration
+# Runs when check files change or on manual trigger
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'admin-panel/__checks__/**'
+      - 'admin-panel/package.json'
+  workflow_dispatch:
+    inputs:
+      deploy_environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - test
+
+jobs:
+  deploy-checkly:
+    runs-on: ubuntu-latest
+    name: Deploy Checkly Checks
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: admin-panel/package-lock.json
+
+      - name: Install dependencies
+        working-directory: admin-panel
+        run: npm ci
+
+      - name: Validate Checkly configuration
+        working-directory: admin-panel
+        run: npx checkly test --dry-run
+        env:
+          CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}
+          CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }}
+
+      - name: Deploy to Checkly
+        working-directory: admin-panel
+        run: npx checkly deploy
+        env:
+          CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}
+          CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }}
+          MONITOR_USER_EMAIL: ${{ secrets.MONITOR_USER_EMAIL }}
+          MONITOR_USER_PASSWORD: ${{ secrets.MONITOR_USER_PASSWORD }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+  verify-deployment:
+    runs-on: ubuntu-latest
+    name: Verify Deployment
+    needs: deploy-checkly
+    if: success()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: admin-panel/package-lock.json
+
+      - name: Install dependencies
+        working-directory: admin-panel
+        run: npm ci
+
+      - name: Run all checks to verify deployment
+        working-directory: admin-panel
+        run: npx checkly test --record
+        env:
+          CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}
+          CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }}
+          MONITOR_USER_EMAIL: ${{ secrets.MONITOR_USER_EMAIL }}
+          MONITOR_USER_PASSWORD: ${{ secrets.MONITOR_USER_PASSWORD }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        continue-on-error: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkly-test-results
+          path: admin-panel/checkly-results/
+          retention-days: 7
+
+  post-deploy-notify:
+    runs-on: ubuntu-latest
+    name: Post-Deploy Notification
+    needs: [deploy-checkly, verify-deployment]
+    if: always()
+    
+    steps:
+      - name: Notify deployment success
+        if: needs.deploy-checkly.result == 'success'
+        run: |
+          echo "✅ Checkly monitoring deployed successfully!"
+          echo "📊 View your checks at: https://app.checklyhq.com/"
+          echo "🔔 Alerts configured for: admin, landing, student, supabase"
+
+      - name: Notify deployment failure
+        if: needs.deploy-checkly.result == 'failure'
+        run: |
+          echo "❌ Checkly deployment failed!"
+          echo "🔧 Check the logs above for details"
+          exit 1
+
+      - name: Notify verification results
+        if: needs.verify-deployment.result == 'failure'
+        run: |
+          echo "⚠️ Some checks failed during verification"
+          echo "📊 Check the Checkly dashboard for details"
+          echo "🔗 https://app.checklyhq.com/"

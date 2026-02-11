@@ -175,7 +175,13 @@ function Invoke-PhaseGenerateEnv {
     
     & (Join-Path $ScriptDir 'scripts\deploy\generate-env.ps1') -ConfigFile $script:ConfigFile
     
-    Write-Success "Environment files generated"
+    $definesPath = Join-Path $ScriptDir '.flutter-defines.tmp'
+    if (Test-Path $definesPath) {
+        Write-Success "Environment files generated and verified: $definesPath"
+    } else {
+        Write-Err "Environment files generated but verification failed: $definesPath NOT FOUND"
+        exit 1
+    }
 }
 
 # =============================================================================

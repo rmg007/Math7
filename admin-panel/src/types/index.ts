@@ -49,7 +49,7 @@ export interface SkillWithQuestions extends Skill {
 export type QuestionListItem = QuestionRow & {
     metadata?: Json;
     skills: { title: string; domains: { title: string } | null } | null;
-} | null;
+};
 
 export type DomainListItem = DomainRow;
 export type SkillReference = Pick<SkillRow, 'skill_id' | 'title'>;

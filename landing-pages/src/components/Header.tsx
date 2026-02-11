@@ -19,15 +19,15 @@ export const Header = () => {
           <a href="/how-it-works" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">How It Works</a>
           <a href="/#subjects" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Subjects</a>
           <div className="h-6 w-px bg-gray-200 mx-2"></div>
-          <a href="http://localhost:3000" className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">Log in</a>
-          <a href="http://localhost:3000" className="bg-blue-600 text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 hover:-translate-y-0.5 active:translate-y-0 text-center">
+          <a href={import.meta.env.VITE_STUDENT_APP_URL || "http://localhost:3000"} className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">Log in</a>
+          <a href={import.meta.env.VITE_STUDENT_APP_URL || "http://localhost:3000"} className="bg-blue-600 text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 hover:-translate-y-0.5 active:translate-y-0 text-center">
             Get Started
           </a>
         </nav>
 
         {/* Mobile Actions */}
         <div className="flex items-center gap-4 md:hidden">
-          <a href="http://localhost:3000" className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 active:scale-95 text-nowrap">
+          <a href={import.meta.env.VITE_STUDENT_APP_URL || "http://localhost:3000"} className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 active:scale-95 text-nowrap">
             Get Started
           </a>
           <button 
@@ -70,14 +70,14 @@ export const Header = () => {
 
               <div className="mt-auto flex flex-col gap-3">
                 <a 
-                  href="http://localhost:3000" 
+                  href={import.meta.env.VITE_STUDENT_APP_URL || "http://localhost:3000"} 
                   onClick={() => setIsMenuOpen(false)}
                   className="w-full py-3 text-lg font-medium text-gray-900 hover:bg-gray-50 rounded-xl text-center border border-gray-200"
                 >
                   Log in
                 </a>
                 <a 
-                  href="http://localhost:3000" 
+                  href={import.meta.env.VITE_STUDENT_APP_URL || "http://localhost:3000"} 
                   onClick={() => setIsMenuOpen(false)}
                   className="w-full py-3 bg-blue-600 text-white rounded-xl text-lg font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98] text-center"
                 >

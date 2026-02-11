@@ -127,7 +127,7 @@ export const HowItWorksPage = () => {
               Join thousands of students who are achieving their academic goals with Questerix.
             </p>
             <a 
-              href="http://localhost:3000"
+              href={import.meta.env.VITE_STUDENT_APP_URL || "http://localhost:3000"}
               className="inline-block bg-white text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-all shadow-xl hover:-translate-y-1"
             >
               Get Started Free

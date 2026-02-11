@@ -1,8 +1,6 @@
 import { ArrowRight, Star, GraduationCap, Book, ChevronLeft } from 'lucide-react';
-import type { Database } from '../lib/database.types';
 import { Header } from '../components/Header';
-
-type SubjectData = Database['public']['Tables']['subjects']['Row'];
+import type { SubjectData } from '../types/app';
 
 export const SubjectHubPage = ({ subject }: { subject: SubjectData | null }) => {
   // Color available for future theming: subject?.color_hex || '#3B82F6'

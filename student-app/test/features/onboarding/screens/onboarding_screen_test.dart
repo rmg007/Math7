@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:student_app/src/core/config/app_config_service.dart';
 import 'package:student_app/src/features/auth/screens/onboarding_screen.dart';
-import 'package:student_app/src/features/auth/providers/auth_providers.dart';
+import 'package:student_app/src/features/auth/providers/auth_provider.dart';
 import 'package:questerix_domain/questerix_domain.dart';
 
 // Mocks
@@ -12,9 +12,7 @@ class MockAppConfigService extends StateNotifier<AppContext?>
     implements AppConfigService {
   MockAppConfigService()
       : super(const AppContext(
-            appId: 'test-app',
-            appName: 'Test App',
-            primaryColor: 0xFF0000FF));
+            appId: 'test-app', appName: 'Test App', primaryColor: 0xFF0000FF));
 
   @override
   Future<AppContext> load() async => state!;
@@ -64,7 +62,7 @@ void main() {
 
       // Verify "When is your birthday?" title
       expect(find.text('When is your birthday?'), findsOneWidget);
-       // Verify Date Selection button
+      // Verify Date Selection button
       expect(find.text('Select Date'), findsOneWidget);
     });
 
@@ -117,11 +115,11 @@ void main() {
       // Given the complexity of navigating DatePicker in tests, we can skip specific date picking
       // if we trust the "Under 13" test works, or we mock the date returned by showDatePicker?
       // Can't easily mock global showDatePicker.
-      
+
       // Let's rely on the default (10 years < 13) for the previous test.
       // For this test, we might struggle without complex interactions.
       // BUT, we can verify that the Parent Step has a "Go Back" button.
-      
+
       // Alternative: We can interact with the widget class directly if possible, or just accept testing one path.
       // Actually, let's just test that the Parent Approval UI works correctly.
     });
@@ -142,7 +140,7 @@ void main() {
       final emailField = find.widgetWithText(TextField, 'Parent Email');
       await tester.ensureVisible(emailField);
       await tester.enterText(emailField, 'invalid-email');
-      
+
       // Tap Send Request
       await tester.tap(find.text('Send Request'));
       await tester.pumpAndSettle();

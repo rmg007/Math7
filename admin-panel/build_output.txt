@@ -1,0 +1,11 @@
+
+> admin-panel@0.0.0 build
+> tsc && vite build
+
+src/features/auth/pages/AccountSettingsPage.tsx(6,34): error TS2307: Cannot find module '@/lib/format-utils' or its corresponding type declarations.
+src/features/curriculum/components/question-form.tsx(31,27): error TS2307: Cannot find module '@/types/database.types' or its corresponding type declarations.
+src/features/curriculum/components/question-list.tsx(26,34): error TS2307: Cannot find module '@/lib/format-utils' or its corresponding type declarations.
+src/features/curriculum/components/question-list.tsx(28,39): error TS2307: Cannot find module '@/types/common.types' or its corresponding type declarations.
+src/features/curriculum/components/question-list.tsx(72,30): error TS2307: Cannot find module '@/lib/sanitize' or its corresponding type declarations.
+src/features/curriculum/hooks/use-questions.ts(5,39): error TS2307: Cannot find module '@/types/common.types' or its corresponding type declarations.
+src/lib/env.test.ts(2,44): error TS2307: Cannot find module './env' or its corresponding type declarations.

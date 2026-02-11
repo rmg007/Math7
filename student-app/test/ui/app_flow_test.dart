@@ -10,10 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:student_app/src/app.dart';
 import 'package:student_app/src/core/database/database.dart';
 import 'package:student_app/src/core/core_providers.dart';
-import 'package:student_app/src/features/auth/providers/auth_providers.dart'
-    as domain_auth;
-import 'package:student_app/src/features/auth/providers/auth_provider.dart'
-    as infra_auth;
+import 'package:student_app/src/features/auth/providers/auth_provider.dart';
 // Connectivity is now in core_providers.dart
 import 'package:student_app/src/features/home/screens/main_shell.dart';
 import 'package:student_app/src/core/sync/sync_service.dart';
@@ -84,11 +81,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            domain_auth.authRepositoryProvider.overrideWithValue(mockAuthRepo),
+            authRepositoryProvider.overrideWithValue(mockAuthRepo),
             databaseProvider.overrideWithValue(db),
             supabaseClientProvider.overrideWithValue(mockSupabaseClient),
-            infra_auth.currentSessionProvider.overrideWithValue(null),
-            infra_auth.authStateProvider.overrideWith((ref) => Stream.value(
+            currentSessionProvider.overrideWithValue(null),
+            supabaseAuthStateProvider.overrideWith((ref) => Stream.value(
                 const supabase.AuthState(
                     supabase.AuthChangeEvent.signedOut, null))),
             connectivityServiceProvider
@@ -156,11 +153,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            domain_auth.authRepositoryProvider.overrideWithValue(mockAuthRepo),
+            authRepositoryProvider.overrideWithValue(mockAuthRepo),
             databaseProvider.overrideWithValue(db),
             supabaseClientProvider.overrideWithValue(mockSupabaseClient),
-            infra_auth.currentSessionProvider.overrideWithValue(mockSession),
-            infra_auth.authStateProvider.overrideWith((ref) => Stream.value(
+            currentSessionProvider.overrideWithValue(mockSession),
+            supabaseAuthStateProvider.overrideWith((ref) => Stream.value(
                 supabase.AuthState(
                     supabase.AuthChangeEvent.signedIn, mockSession))),
             connectivityServiceProvider

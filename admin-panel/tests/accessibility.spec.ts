@@ -29,15 +29,27 @@ async function login(page: import('@playwright/test').Page) {
   await page.waitForTimeout(1500);
 }
 
-function filterViolations(violations: any[]) {
+interface AxeNode {
+  html: string;
+}
+
+interface AxeViolation {
+  id: string;
+  impact?: 'minor' | 'moderate' | 'serious' | 'critical' | null;
+  description: string;
+  helpUrl: string;
+  nodes: AxeNode[];
+}
+
+function filterViolations(violations: AxeViolation[]) {
   // Only fail on critical and serious — minor/moderate are logged but not blockers
   return violations.filter(v => v.impact === 'critical' || v.impact === 'serious');
 }
 
-function formatViolations(violations: any[]): string {
+function formatViolations(violations: AxeViolation[]): string {
   return violations
     .map(v => {
-      const nodes = v.nodes.map((n: any) => `    → ${n.html}`).join('\n');
+      const nodes = v.nodes.map((n: AxeNode) => `    → ${n.html}`).join('\n');
       return `[${v.impact?.toUpperCase()}] ${v.id}: ${v.description}\n  Help: ${v.helpUrl}\n${nodes}`;
     })
     .join('\n\n');

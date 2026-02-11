@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { Database } from '@/lib/database.types';
-import type { Json } from '@/types/database.types';
+import type { Json } from '@/lib/database.types';
 import { AdminHeader } from '@/components/ui/admin-header';
 
 type Question = Database['public']['Tables']['questions']['Row'];

@@ -23,9 +23,9 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { formatIdentifier } from '@/lib/format-utils';
+import { formatIdentifier } from '@/lib/utils';
 import type { DataColumn } from '@/lib/data-utils';
-import type { QuestionListItem } from '@/types/common.types';
+import type { QuestionListItem } from '@/types';
 import { cn } from '@/lib/utils';
 import {
   Plus,

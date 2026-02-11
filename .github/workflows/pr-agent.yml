@@ -1,0 +1,33 @@
+name: AI PR Agent Reviewer
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  issue_comment:
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '/review')
+
+jobs:
+  pr_agent_job:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: read
+    name: Run PR Agent
+    steps:
+      - name: PR Agent action
+        uses: Codium-ai/pr-agent@main
+        env:
+          OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
+          CONFIG.MODEL: "gpt-4o" 
+          PR_REVIEWER.EXTRA_INSTRUCTIONS: |
+            You are the "Master Auditor" for the Questerix platform. 
+            Strictly enforce these rules:
+            1. TENANT ISOLATION: Flag any database query that does not include an 'app_id' or 'id' filter. This is a critical security risk.
+            2. ARCHITECTURE: Hooks MUST follow 'use-*.ts'. All repositories in Flutter must follow the established Repository pattern.
+            3. CODE QUALITY: No 'any' types allowed in TypeScript. No hardcoded secrets. 
+            4. PERFORMANCE: Flag un-optimized loops or missing debouncing in UI interactions.
+            5. FEEDBACK: Be professional but strict. If code violates our core 'AGENTS.md' standards, mark it as 'Request Changes'.
+          PR_REVIEWER.REQUIRE_SCORE_REVIEW: "true"
+          PR_REVIEWER.ENABLE_REVIEW_LABELS_SECURITY: "true"
+          PR_COMMENTER.CLI_MODE: "false"

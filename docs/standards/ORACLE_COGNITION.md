@@ -1834,6 +1834,8 @@ Future<void> pushChanges() async {
 - [ ] Naming conventions followed
 - [ ] No feature isolation violations
 - [ ] Multi-tenant safety considered
+- [ ] **Infrastructure Check**: Have you confirmed DAST (OWASP ZAP) and Performance (Lighthouse CI) readiness for the environment?
+- [ ] **AI Integrity Check**: Have AI-driven modules (document parsers, generators) been tested with real inputs/outputs to prevent prompt drift?
 
 ### When Reviewing Code
 - [ ] No security vulnerabilities (RLS, secrets, XSS)
@@ -1850,6 +1852,25 @@ Future<void> pushChanges() async {
 - [ ] Database migrations are idempotent
 - [ ] No hardcoded secrets or UUIDs
 - [ ] UI text changes synced with tests
+- [ ] **Audit Registry**: Have you checked `tasks.md` for "Institutional Integrity" backlog items?
+
+---
+
+## 🏛️ Institutional Quality Audit Protocol
+
+To prevent architectural and security "blind spots," the agent MUST perform a **Global Context Audit** at the start of every implementation phase (e.g., Phase 2.0-beta rollout).
+
+### 🔍 Audit Dimensions
+
+| Level | Dimension | Mandatory Check |
+|-------|-----------|-----------------|
+| **1. Security** | **Dynamic Scanning** | Is OWASP ZAP/DAST configured for running endpoints? |
+| **2. Reliability** | **AI Regression** | Do generators have "Real I/O Mock" tests for schema stability? |
+| **3. Performance** | **UX Regression** | Is Lighthouse CI gating PRs for SEO/PageSpeed/A11y? |
+| **4. Integrity** | **Unit Coverage** | Are core Services (`CurriculumService`, `SyncService`) >80% covered? |
+| **5. Continuity** | **E2E Stability** | Are login/CRUD flows enabled in the CI pipeline? |
+
+> **Directive**: If any of these are missing, they MUST be added to the `HARDENING BACKLOG` in `tasks.md` immediately.
 
 ---
 

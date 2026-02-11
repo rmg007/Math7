@@ -130,33 +130,3 @@ class LocalCurriculumRepository implements CurriculumRepository {
     }
   }
 }
-
-// Legacy class names for migration compatibility
-class DriftDomainRepository extends LocalCurriculumRepository {
-  DriftDomainRepository(super.database);
-  Future<void> batchUpsert(List<model.Domain> data) => batchUpsertDomains(data);
-  Future<void> batchDelete(List<String> ids) =>
-      super.executeBatchDelete(ids, table: 'domains');
-  Future<void> deleteByIds(List<String> ids) => batchDelete(ids);
-  Future<List<model.Domain>> getAll() async {
-    final rows = await (_database.select(_database.domains)
-          ..where((d) => d.deletedAt.isNull()))
-        .get();
-    return rows.map(DriftMappers.toDomain).toList();
-  }
-}
-
-class DriftSkillRepository extends LocalCurriculumRepository {
-  DriftSkillRepository(super.database);
-  Future<void> batchUpsert(List<model.Skill> data) => batchUpsertSkills(data);
-  Future<void> batchDelete(List<String> ids) =>
-      super.executeBatchDelete(ids, table: 'skills');
-}
-
-class DriftQuestionRepository extends LocalCurriculumRepository {
-  DriftQuestionRepository(super.database);
-  Future<void> batchUpsert(List<model.Question> data) =>
-      batchUpsertQuestions(data);
-  Future<void> batchDelete(List<String> ids) =>
-      super.executeBatchDelete(ids, table: 'questions');
-}

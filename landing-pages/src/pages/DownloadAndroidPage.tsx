@@ -97,7 +97,7 @@ export const DownloadAndroidPage = () => {
               iOS
             </a>
             <span className="text-gray-300">|</span>
-            <a href="http://localhost:3000" className="text-blue-600 hover:text-blue-700 font-semibold">
+            <a href={import.meta.env.VITE_STUDENT_APP_URL || "http://localhost:3000"} className="text-blue-600 hover:text-blue-700 font-semibold">
               Web App
             </a>
           </div>

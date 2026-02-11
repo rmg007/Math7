@@ -14,7 +14,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ScriptDir = $PSScriptRoot
 $RootDir = Split-Path -Parent (Split-Path -Parent $ScriptDir)
 
 $configPath = Join-Path $RootDir $ConfigFile
@@ -91,6 +91,26 @@ foreach ($prop in $configJson.admin.PSObject.Properties) {
 $adminEnvPath = Join-Path $RootDir "admin-panel\.env.local"
 Set-Content -Path $adminEnvPath -Value $adminEnvContent
 Write-Host "  ✅ Created: $adminEnvPath" -ForegroundColor Green
+
+
+# Generate Landing Pages .env
+Write-Host "⚙️  Generating landing-pages/.env..." -ForegroundColor Cyan
+$landingEnvContent = @()
+$landingEnvContent += "# Generated from $ConfigFile on $(Get-Date)"
+$landingEnvContent += "# DO NOT EDIT MANUALLY"
+
+foreach ($prop in $configJson.landing.PSObject.Properties) {
+    if ($prop.Name -eq "_comment") { continue }
+    
+    $val = $prop.Value
+    $resolvedVal = Resolve-Value -val $val
+    
+    $landingEnvContent += "$($prop.Name)=$resolvedVal"
+}
+
+$landingEnvPath = Join-Path $RootDir "landing-pages\.env"
+Set-Content -Path $landingEnvPath -Value $landingEnvContent
+Write-Host "  ✅ Created: $landingEnvPath" -ForegroundColor Green
 
 
 # Generate Student App .flutter-defines.tmp

@@ -1,0 +1,49 @@
+
+2026-02-10 17:44:59 [INFO] dYs? QUESTERIX UNIFIED DEPLOYMENT PIPELINE
+2026-02-10 17:44:59 [INFO] Started at: 02/10/2026 17:44:59
+
+
+2026-02-10 17:45:00 [INFO] â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?
+2026-02-10 17:45:00 [INFO] PHASE 1: VALIDATION
+2026-02-10 17:45:00 [INFO] â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?
+2026-02-10 17:45:00 [INFO] Wrangler not found in PATH, checking if npx can run it...
+2026-02-10 17:45:02 [SUCCESS] Wrangler available via npx
+2026-02-10 17:45:02 [SUCCESS] All required tools available
+2026-02-10 17:45:02 [SUCCESS] .secrets file found and is in .gitignore
+2026-02-10 17:45:02 [WARN] CLOUDFLARE_API_TOKEN not set. Deployment will rely on local Wrangler login.
+2026-02-10 17:45:02 [SUCCESS] Configuration validated: C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\master-config.json
+2026-02-10 17:45:02 [INFO] Deployment version: 0.9.0
+2026-02-10 17:45:02 [INFO] Environment: production
+
+2026-02-10 17:45:02 [INFO] â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?
+2026-02-10 17:45:02 [INFO] PHASE 2: ENVIRONMENT GENERATION
+2026-02-10 17:45:02 [INFO] â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?
+â?O Config file not found: C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\master-config.json
+2026-02-10 17:45:02 [SUCCESS] Environment files generated
+
+2026-02-10 17:45:02 [INFO] â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?
+2026-02-10 17:45:02 [INFO] PHASE 3: PARALLEL BUILD
+2026-02-10 17:45:02 [INFO] â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?â?
+2026-02-10 17:45:02 [INFO] Cleaning previous build artifacts...
+âsTï,?  Building Admin Panel...
+
+> admin-panel@0.0.0 build
+> tsc && vite build
+
+src/features/auth/pages/AccountSettingsPage.tsx(6,34): error TS2307: Cannot find module '@/lib/format-utils' or its corresponding type declarations.
+src/features/curriculum/components/question-form.tsx(31,27): error TS2307: Cannot find module '@/types/database.types' or its corresponding type declarations.
+src/features/curriculum/components/question-list.tsx(26,34): error TS2307: Cannot find module '@/lib/format-utils' or its corresponding type declarations.
+src/features/curriculum/components/question-list.tsx(28,39): error TS2307: Cannot find module '@/types/common.types' or its corresponding type declarations.
+src/features/curriculum/components/question-list.tsx(72,30): error TS2307: Cannot find module '@/lib/sanitize' or its corresponding type declarations.
+src/features/curriculum/hooks/use-questions.ts(5,39): error TS2307: Cannot find module '@/types/common.types' or its corresponding type declarations.
+src/lib/env.test.ts(2,44): error TS2307: Cannot find module './env' or its corresponding type declarations.
+âsTï,?  Building Student App...
+Get-Content : Cannot find path 'C:\Users\mhali\OneDrive\Desktop\Important 
+Projects\Questerix\.flutter-defines.tmp' because it does not exist.
+At C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\orchestrator.ps1:209 char:20
++ ... finesList = Get-Content (Join-Path $ScriptDir '.flutter-defines.tmp') ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\mhali\...ter-defines.tmp:String) [Get 
+   -Content], ItemNotFoundException
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.GetContentCommand
+ 

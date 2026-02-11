@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/lib/database.types';
 import { useApp } from '@/hooks/use-app';
-import type { QuestionListItem } from '@/types/common.types';
+import type { QuestionListItem } from '@/types';
 
 type Question = Database['public']['Tables']['questions']['Row'];
 export type QuestionInsert = Database['public']['Tables']['questions']['Insert'];

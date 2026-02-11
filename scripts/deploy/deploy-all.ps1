@@ -14,8 +14,7 @@ param(
     [switch]$SkipLanding
 )
 
-# HARD RULE: Overriding param to ensure landing pages are NEVER deployed in this phase
-$SkipLanding = $true
+# SkipLanding is now controlled by the parameter
 
 $ErrorActionPreference = 'Stop'
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -36,7 +35,7 @@ Write-Host "Starting parallel deployments..." -ForegroundColor Cyan
 if (-not $SkipLanding) {
     $landingJob = Start-Job -ScriptBlock {
         param($Dir, $ProjectName)
-        $landingDir = Join-Path $Dir 'landing-pages'
+        $landingDir = Join-Path $Dir 'landing-pages\dist'
         npx -y wrangler pages deploy $landingDir --project-name $ProjectName --commit-dirty --branch main 2>&1
     } -ArgumentList $RootDir, $cfLanding
 }

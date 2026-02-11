@@ -80,7 +80,7 @@ export const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="http://localhost:3000" className="hover:text-white transition-colors flex items-center gap-2">
+                <a href={import.meta.env.VITE_STUDENT_APP_URL || "http://localhost:3000"} className="hover:text-white transition-colors flex items-center gap-2">
                   Web App
                 </a>
               </li>

@@ -45,17 +45,9 @@ final remoteCurriculumRepositoryProvider =
   return SupabaseCurriculumRepository(ref.watch(supabaseClientProvider));
 });
 
-/// Legacy Providers (for backward compatibility)
 final domainRepositoryProvider = Provider<CurriculumRepository>(
     (ref) => ref.watch(localCurriculumRepositoryProvider));
 final skillRepositoryProvider = Provider<CurriculumRepository>(
     (ref) => ref.watch(localCurriculumRepositoryProvider));
 final questionRepositoryProvider = Provider<CurriculumRepository>(
     (ref) => ref.watch(localCurriculumRepositoryProvider));
-
-final localDomainRepositoryProvider = Provider<DriftDomainRepository>(
-    (ref) => DriftDomainRepository(ref.watch(databaseProvider)));
-final localSkillRepositoryProvider = Provider<DriftSkillRepository>(
-    (ref) => DriftSkillRepository(ref.watch(databaseProvider)));
-final localQuestionRepositoryProvider = Provider<DriftQuestionRepository>(
-    (ref) => DriftQuestionRepository(ref.watch(databaseProvider)));

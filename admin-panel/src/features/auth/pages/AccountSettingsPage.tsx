@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { formatIdentifier } from "@/lib/format-utils"
+import { formatIdentifier } from "@/lib/utils"
 import type { Tables } from '@/lib/database.types'
 import { AdminHeader } from "@/components/ui/admin-header"
 import { User, Shield, Calendar, Mail, AlertTriangle, Trash2, ShieldAlert, BadgeCheck } from "lucide-react"
