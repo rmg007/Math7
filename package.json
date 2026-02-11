@@ -13,7 +13,7 @@
     "deps:graph": "depcruise admin-panel/src landing-pages/src --config .dependency-cruiser.cjs --output-type dot > dependency-graph.dot",
     "deps:archi": "depcruise admin-panel/src landing-pages/src --config .dependency-cruiser.cjs --output-type archi > architecture-graph.dot",
     "deps:report": "depcruise admin-panel/src landing-pages/src --config .dependency-cruiser.cjs --output-type html > dependency-report.html",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "keywords": [],
   "author": "",

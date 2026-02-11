@@ -26,7 +26,7 @@
     "checkly": "checkly",
     "checkly:test": "checkly test",
     "checkly:deploy": "checkly deploy",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
