@@ -720,13 +720,15 @@ export function SkillList() {
                                                     title={hasActiveFilters ? 'No matches found' : 'No skills yet'}
                                                     description={hasActiveFilters ? 'Try adjusting your search or domain filter.' : 'Start building your curriculum by adding some learning objectives.'}
                                                     action={
-                                                        hasActiveFilters ? {
-                                                            label: "Clear filters",
-                                                            onClick: clearFilters
-                                                        } : {
-                                                            label: "Create Skill",
-                                                            onClick: () => (window.location.href = "/skills/new")
-                                                        }
+                                                        hasActiveFilters ? (
+                                                            <Button onClick={clearFilters} className="rounded-full px-8 shadow-md">
+                                                                Clear filters
+                                                            </Button>
+                                                        ) : (
+                                                            <Button onClick={() => (window.location.href = "/skills/new")} className="rounded-full px-8 shadow-md">
+                                                                Create Skill
+                                                            </Button>
+                                                        )
                                                     }
                                                 />
                                             </td>
@@ -761,13 +763,15 @@ export function SkillList() {
                                         title={hasActiveFilters ? 'No matches found' : 'No skills yet'}
                                         description={hasActiveFilters ? 'Try adjusting your search or filters.' : 'Get started by creating your first skill.'}
                                         action={
-                                            hasActiveFilters ? {
-                                                label: "Clear filters",
-                                                onClick: clearFilters
-                                            } : {
-                                                label: "Create Skill",
-                                                onClick: () => (window.location.href = "/skills/new")
-                                            }
+                                            hasActiveFilters ? (
+                                                <Button onClick={clearFilters} className="rounded-full px-8 shadow-md" variant="outline">
+                                                    Clear filters
+                                                </Button>
+                                            ) : (
+                                                <Button onClick={() => (window.location.href = "/skills/new")} className="rounded-full px-8 shadow-md">
+                                                    Create Skill
+                                                </Button>
+                                            )
                                         }
                                     />
                                 </div>

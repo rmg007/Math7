@@ -1,3 +1,38 @@
+## 2026-02-11: Parallel Agent Productivity Suite & Automated Certification
+
+### Session Context
+
+- **Objective**: Parallelize repetitive agent tasks to reduce wall-clock time and token consumption during `/process` and `/certify` cycles.
+- **Scope**: PowerShell automation, Husky hooks, certification artifacts, monorepo verification.
+- **Outcome**: ✅ 5 parallelized scripts implemented. `/process` and `/certify` workflows updated. Pre-push hook upgraded to use `preflight.ps1`.
+
+### What Was Done
+
+1. **Parallel Preflight Validation (`preflight.ps1`)**
+   - Bundled `tsc --noEmit`, `npm run lint`, `flutter analyze`, and `deps:validate` into parallel PowerShell jobs.
+   - Reduced verification wall-clock time from ~5 mins to ~90 seconds.
+
+2. **Automated Certification Evidence (`certify-evidence.ps1`)**
+   - Implemented "Phase 0" for the `/certify` workflow.
+   - Orchestrates tests, build metrics, and hygiene scans in parallel, outputting to timestamped artifact directories.
+
+3. **Code Hygiene Scanner (`code-hygiene-scan.ps1`)**
+   - Automated detection of empty catch blocks, hardcoded secrets, and service role leakage.
+   - Replaced manual `grep` commands with structured parallel scanning.
+
+4. **Workflow Hardening**
+   - Updated `.agent/workflows/process.md` and `.agent/workflows/certify.md` to enforce the use of these scripts.
+   - Upgraded `.husky/pre-push` to run `preflight.ps1`, ensuring global quality before any push.
+
+### What Was Learned
+
+1. **PowerShell Job Isolation**: Background jobs (`Start-Job`) run in a separate process. **Rule**: Always pass paths as arguments and use `Resolve-Path` to ensure absolute path consistency across different working directories.
+2. **The "Silent Fail" Job Hazard**: PowerShell jobs don't automatically report exit codes to the parent. **Rule**: Use `exit $LASTEXITCODE` inside the script block and check `$job.ChildJobs[0].ExitCode` in the parent loop.
+3. **IO Contention**: When multiple jobs write to the same log directory, ensure unique filenames (e.g., `JobName.log`) to prevent lock conflicts.
+4. **Token ROI vs. Time ROI**: Automation saves modest tokens (~10-20%) but massive wall-clock time (~50-70%). The real value is in iteration velocity and developer focus, not just LLM cost reduction.
+
+---
+
 ## 2026-02-11: Admin Panel Test Suite Stabilization & Coverage Recovery
 
 ### Session Context

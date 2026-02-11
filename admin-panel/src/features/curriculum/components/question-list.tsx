@@ -877,13 +877,15 @@ export function QuestionList() {
                                                     title={hasActiveFilters ? 'No matches found' : 'Registry empty'}
                                                     description={hasActiveFilters ? 'Adjust your search parameters or skill focus.' : 'The question cluster is empty. Use AI generation or manual creation to populate it.'}
                                                     action={
-                                                        hasActiveFilters ? {
-                                                            label: "Clear filters",
-                                                            onClick: clearFilters
-                                                        } : {
-                                                            label: "New Question",
-                                                            onClick: () => (window.location.href = "/questions/new")
-                                                        }
+                                                        hasActiveFilters ? (
+                                                            <Button onClick={clearFilters} className="rounded-full px-8 shadow-md">
+                                                                Clear filters
+                                                            </Button>
+                                                        ) : (
+                                                            <Button onClick={() => (window.location.href = "/questions/new")} className="rounded-full px-8 shadow-md">
+                                                                New Question
+                                                            </Button>
+                                                        )
                                                     }
                                                 />
                                             </td>
@@ -917,10 +919,11 @@ export function QuestionList() {
                                         title={hasActiveFilters ? 'No matches found' : 'Registry empty'}
                                         description={hasActiveFilters ? 'Try adjusting your focus.' : 'Start adding assets to your library.'}
                                         action={
-                                            hasActiveFilters ? {
-                                                label: "Clear filters",
-                                                onClick: clearFilters
-                                            } : undefined
+                                            hasActiveFilters ? (
+                                                <Button onClick={clearFilters} className="rounded-full px-8 shadow-md">
+                                                    Clear filters
+                                                </Button>
+                                            ) : undefined
                                         }
                                     />
                                 </div>

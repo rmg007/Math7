@@ -1,5 +1,5 @@
 # preflight.ps1 - Parallel Validation Suite
-# Runs type checks, linting, and dependency validation in parallel to save time.
+# Runs type checks, linting, and dependency validation in parallel.
 
 $ErrorActionPreference = "Continue"
 $startTime = Get-Date
@@ -7,48 +7,44 @@ $startTime = Get-Date
 $logDir = "$PSScriptRoot/../.agent/logs/preflight"
 if (!(Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
 
-Write-Host "`n⚡ Starting Preflight Validation Suite..." -ForegroundColor Cyan
+Write-Host "⚡ Starting Preflight Validation Suite..." -ForegroundColor Cyan
 
+$root = Resolve-Path "$PSScriptRoot/.."
 $jobs = @()
 
 # 1. Admin Panel Typecheck
 $jobs += Start-Job -Name "admin-typecheck" -ScriptBlock {
-    param($root)
-    Set-Location "$root/admin-panel"
-    npx tsc --noEmit 2>&1 | Out-File "$root/.agent/logs/preflight/admin-typecheck.log"
-    return ($LastExitCode -eq 0)
-} -ArgumentList $PSScriptRoot/..
+    param($rootPath)
+    Set-Location "$rootPath/admin-panel"
+    npx tsc --noEmit 2>&1 | Out-File "$rootPath/.agent/logs/preflight/admin-typecheck.log"
+} -ArgumentList $root
 
 # 2. Admin Panel Linting
 $jobs += Start-Job -Name "admin-lint" -ScriptBlock {
-    param($root)
-    Set-Location "$root/admin-panel"
-    npm run lint 2>&1 | Out-File "$root/.agent/logs/preflight/admin-lint.log"
-    return ($LastExitCode -eq 0)
-} -ArgumentList $PSScriptRoot/..
+    param($rootPath)
+    Set-Location "$rootPath/admin-panel"
+    npm run lint 2>&1 | Out-File "$rootPath/.agent/logs/preflight/admin-lint.log"
+} -ArgumentList $root
 
 # 3. Student App Static Analysis
 $jobs += Start-Job -Name "student-analyze" -ScriptBlock {
-    param($root)
-    if (Test-Path "$root/student-app") {
-        Set-Location "$root/student-app"
-        flutter analyze 2>&1 | Out-File "$root/.agent/logs/preflight/student-analyze.log"
-        return ($LastExitCode -eq 0)
+    param($rootPath)
+    if (Test-Path "$rootPath/student-app") {
+        Set-Location "$rootPath/student-app"
+        flutter analyze 2>&1 | Out-File "$rootPath/.agent/logs/preflight/student-analyze.log"
     }
-    return $true # Skip if student-app not present
-} -ArgumentList $PSScriptRoot/..
+} -ArgumentList $root
 
 # 4. Dependency Validation
 $jobs += Start-Job -Name "deps-validate" -ScriptBlock {
-    param($root)
-    Set-Location $root
-    npm run deps:validate 2>&1 | Out-File "$root/.agent/logs/preflight/deps-validate.log"
-    return ($LastExitCode -eq 0)
-} -ArgumentList $PSScriptRoot/..
+    param($rootPath)
+    Set-Location $rootPath
+    npm run deps:validate 2>&1 | Out-File "$rootPath/.agent/logs/preflight/deps-validate.log"
+} -ArgumentList $root
 
-Write-Host "⏳ Waiting for jobs to complete..." -ForegroundColor Yellow
+Write-Host "⏳ Waiting for jobs..." -ForegroundColor Yellow
 
-$results = Wait-Job $jobs | Receive-Job
+$jobs | Wait-Job | Out-Null
 
 $endTime = Get-Date
 $duration = $endTime - $startTime
@@ -57,15 +53,13 @@ Write-Host "`n📋 Preflight Results (Duration: $($duration.TotalSeconds.ToStrin
 Write-Host "---------------------------------------------------"
 
 $failCount = 0
-$index = 0
 foreach ($job in $jobs) {
-    $status = if ($results[$index]) { 
+    if ($job.ChildJobs[0].ExitCode -eq 0) {
         Write-Host "[✓] PASS: $($job.Name)" -ForegroundColor Green
-    } else { 
+    } else {
         Write-Host "[✗] FAIL: $($job.Name) - See $logDir/$($job.Name).log" -ForegroundColor Red
         $failCount++
     }
-    $index++
 }
 
 Remove-Job $jobs

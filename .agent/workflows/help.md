@@ -18,6 +18,22 @@ Commands not auto-running? Use the workaround:
 
 ---
 
+## ⚡ Turbo Parallel Commands (Automated via Scripts)
+
+These scripts run multiple checks in parallel to save 60-70% wall-clock time.
+
+| Command | File Path | When to Use |
+|---------|-----------|-------------|
+| **Preflight** | `scripts/preflight.ps1` | Fast global validation (TSC, Lint, Analyze, Deps) |
+| **Test All** | `scripts/run-all-tests.ps1` | Run EVERY test suite in the project simultaneously |
+| **Hygiene** | `scripts/code-hygiene-scan.ps1` | Scan for secrets, empty catches, and leaks |
+| **Certify** | `scripts/certify-evidence.ps1` | Collect all mechanical audit artifacts |
+| **Sync Types** | `scripts/gen-types-verify.ps1` | Generate types + Compile check |
+
+> **Automation Note**: These are now baked into `/process` and `/certify`. You rarely need to run them manually.
+
+---
+
 ## 🚀 Primary Workflows
 
 | Workflow | When to Use |

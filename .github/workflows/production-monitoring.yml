@@ -94,7 +94,7 @@ jobs:
           cat perf-report.txt
 
       - name: Alert on performance degradation
-        if: env.SLOW_SUPABASE == 'true' || env.SLOW_ADMIN == 'true'
+        if: ${{ env.SLOW_SUPABASE == 'true' || env.SLOW_ADMIN == 'true' }}
         uses: actions/github-script@v7
         with:
           script: |
@@ -150,7 +150,7 @@ jobs:
           done
 
       - name: Alert on SSL expiration
-        if: env.SSL_EXPIRING == 'true'
+        if: ${{ env.SSL_EXPIRING == 'true' }}
         uses: actions/github-script@v7
         with:
           script: |

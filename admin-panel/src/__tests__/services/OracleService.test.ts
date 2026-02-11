@@ -18,10 +18,10 @@ describe('OracleService', () => {
 
   describe('search', () => {
     it('should return empty array for empty query', async () => {
-      const result1 = await OracleService.search('');
-      const result2 = await OracleService.search('   ');
+      const result = await OracleService.search('');
+      await OracleService.search('   ');
       
-      expect(result1).toEqual([]);
+      expect(result).toEqual([]);
       expect(supabase.functions.invoke).not.toHaveBeenCalled();
     });
 

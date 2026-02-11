@@ -613,10 +613,11 @@ export function GroupDetailPage() {
                   title="No Active Tasks"
                   description="Create assignments to start monitoring mastery loops."
                   className="py-20"
-                  action={{
-                    label: "Initialize Task",
-                    onClick: () => navigate(`/groups/${id}/assignments/new`)
-                  }}
+                  action={
+                    <Button onClick={() => navigate(`/groups/${id}/assignments/new`)} className="rounded-full px-8 shadow-md">
+                      Initialize Task
+                    </Button>
+                  }
                 />
               )}
             </div>

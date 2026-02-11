@@ -3,6 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CurriculumService } from '@/services/CurriculumService';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import Papa from 'papaparse';
 
 // Mock dependencies
 vi.mock('@/services/CurriculumService');
@@ -11,12 +12,8 @@ vi.mock('papaparse', () => ({
   default: {
     parse: vi.fn(),
   },
+  parse: vi.fn(),
 }));
-
-// Mock File and FileReader
-global.File = class File {
-  constructor(public chunks: any[], public name: string, public options?: any) {}
-} as any;
 
 describe('useBulkImport', () => {
   const mockToast = vi.fn();
@@ -28,7 +25,7 @@ describe('useBulkImport', () => {
     vi.mocked(CurriculumService.importQuestionsBulk).mockResolvedValue({
       success: true,
       count: 5,
-    });
+    } as any);
   });
 
   afterEach(() => {
@@ -52,22 +49,21 @@ describe('useBulkImport', () => {
 
   describe('handleFileUpload', () => {
     it('should handle file upload and parse CSV successfully', async () => {
-      const Papa = await import('papaparse');
-      const mockFile = new File([''], 'test.csv');
+      const mockFile = new File([''], 'test.csv', { type: 'text/csv' });
       const mockData = [
         { content: 'Question 1', points: '10', skill_id: 'skill-1' },
         { content: 'Question 2', points: '15', skill_id: 'skill-2' },
       ];
 
-      vi.mocked(Papa.default.parse).mockImplementation((_file, options) => {
-        options?.complete?.({ data: mockData } as any);
+      (Papa.parse as any).mockImplementation((_file: any, options: any) => {
+        options?.complete?.({ data: mockData, errors: [], meta: {} as any });
       });
 
       const { result } = renderHook(() => useBulkImport());
 
       const mockEvent = {
         target: { files: [mockFile] },
-      } as React.ChangeEvent<HTMLInputElement>;
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
 
       act(() => {
         result.current.handleFileUpload(mockEvent);
@@ -82,11 +78,10 @@ describe('useBulkImport', () => {
     });
 
     it('should handle parsing errors', async () => {
-      const Papa = await import('papaparse');
-      const mockFile = new File([''], 'test.csv');
-      const parseError = new Error('Invalid CSV format');
+      const mockFile = new File([''], 'test.csv', { type: 'text/csv' });
+      const parseError = { message: 'Invalid CSV format', row: 0, type: 'FieldMismatch', code: 'TooFewFields' } as any;
 
-      vi.mocked(Papa.default.parse).mockImplementation((file, options) => {
+      (Papa.parse as any).mockImplementation((_file: any, options: any) => {
         options?.error?.(parseError);
       });
 
@@ -94,7 +89,7 @@ describe('useBulkImport', () => {
 
       const mockEvent = {
         target: { files: [mockFile] },
-      } as React.ChangeEvent<HTMLInputElement>;
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
 
       act(() => {
         result.current.handleFileUpload(mockEvent);
@@ -112,7 +107,7 @@ describe('useBulkImport', () => {
 
       const mockEvent = {
         target: { files: null },
-      } as React.ChangeEvent<HTMLInputElement>;
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
 
       act(() => {
         result.current.handleFileUpload(mockEvent);
@@ -122,8 +117,7 @@ describe('useBulkImport', () => {
     });
 
     it('should parse CSV rows with correct defaults', async () => {
-      const Papa = await import('papaparse');
-      const mockFile = new File([''], 'test.csv');
+      const mockFile = new File([''], 'test.csv', { type: 'text/csv' });
       const mockData = [
         { content: 'Question 1' }, // Minimal data
         { 
@@ -138,15 +132,15 @@ describe('useBulkImport', () => {
         },
       ];
 
-      vi.mocked(Papa.default.parse).mockImplementation((_file, options) => {
-        options?.complete?.({ data: mockData } as any);
+      (Papa.parse as any).mockImplementation((_file: any, options: any) => {
+        options?.complete?.({ data: mockData, errors: [], meta: {} as any });
       });
 
       const { result } = renderHook(() => useBulkImport());
 
       const mockEvent = {
         target: { files: [mockFile] },
-      } as React.ChangeEvent<HTMLInputElement>;
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
 
       act(() => {
         result.current.handleFileUpload(mockEvent);
@@ -187,7 +181,7 @@ describe('useBulkImport', () => {
         success: true,
         count: 5,
         isDryRun: true,
-      });
+      } as any);
 
       const { result } = renderHook(() => useBulkImport());
 
@@ -226,7 +220,7 @@ describe('useBulkImport', () => {
       vi.mocked(CurriculumService.importQuestionsBulk).mockResolvedValue({
         success: true,
         count: 3,
-      });
+      } as any);
 
       const { result } = renderHook(() => useBulkImport());
 
@@ -261,7 +255,7 @@ describe('useBulkImport', () => {
         success: false,
         count: 0,
         error: 'Validation failed',
-      });
+      } as any);
 
       const { result } = renderHook(() => useBulkImport());
 
@@ -318,7 +312,7 @@ describe('useBulkImport', () => {
     });
 
     it('should update progress during processing', async () => {
-      vi.mocked(CurriculumService.importQuestionsBulk).mockResolvedValue({ success: true, count: 1 });
+      vi.mocked(CurriculumService.importQuestionsBulk).mockResolvedValue({ success: true, count: 1 } as any);
 
       const { result } = renderHook(() => useBulkImport());
 

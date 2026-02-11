@@ -39,7 +39,7 @@ describe('CurriculumService', () => {
       vi.mocked(QueuedQuestionSchema.safeParse).mockReturnValue({
         success: true,
         data: mockValidQuestion,
-      } as any);
+      } as ReturnType<typeof QueuedQuestionSchema.safeParse>);
 
       const result = await CurriculumService.importQuestionsBulk(
         [mockValidQuestion],
@@ -59,17 +59,17 @@ describe('CurriculumService', () => {
         .mockReturnValueOnce({
           success: true,
           data: mockValidQuestion,
-        } as any)
+        } as ReturnType<typeof QueuedQuestionSchema.safeParse>)
         .mockReturnValueOnce({
           success: false,
           error: {
             errors: [{ path: ['content'], message: 'Content is required', code: 'invalid_type' }],
           },
-        } as any);
+        } as unknown as ReturnType<typeof QueuedQuestionSchema.safeParse>);
 
       const result = await CurriculumService.importQuestionsBulk([
         mockValidQuestion,
-        { invalid: 'question' } as any,
+        { invalid: 'question' } as unknown as typeof mockValidQuestion,
       ]);
 
       expect(result).toEqual({
@@ -92,12 +92,8 @@ describe('CurriculumService', () => {
       vi.mocked(QueuedQuestionSchema.safeParse).mockReturnValue({
         success: true,
         data: mockValidQuestion,
-      } as any);
+      } as ReturnType<typeof QueuedQuestionSchema.safeParse>);
 
-      const mockRpcResponse = [
-        { success: true, inserted_count: 2 },
-        { success: true, inserted_count: 1 },
-      ];
 
       vi.mocked(supabase.rpc)
         .mockResolvedValueOnce({
@@ -106,14 +102,14 @@ describe('CurriculumService', () => {
           status: 200,
           statusText: 'OK',
           count: null
-        } as any)
+        } as unknown as { data: { success: boolean, inserted_count: number }[]; error: null; status: number; statusText: string; count: null })
         .mockResolvedValueOnce({
           data: [{ success: true, inserted_count: 1 }],
           error: null,
           status: 200,
           statusText: 'OK',
           count: null
-        } as any);
+        } as unknown as { data: { success: boolean, inserted_count: number }[]; error: null; status: number; statusText: string; count: null });
 
       // Create 3 questions with batch size of 2
       const questions = [mockValidQuestion, mockValidQuestion, mockValidQuestion];

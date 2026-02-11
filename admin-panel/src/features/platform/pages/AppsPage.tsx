@@ -260,13 +260,15 @@ export function AppsPage() {
                       description={searchQuery 
                         ? `No application deployments match your search for "${searchQuery}".` 
                         : "The deployment matrix is currently empty. Initialize a new cluster subject to begin."}
-                      action={searchQuery ? {
-                        label: "Clear Search",
-                        onClick: () => { setSearchQuery(''); setCurrentPage(1); }
-                      } : {
-                        label: "New Application",
-                        onClick: () => handleOpenDialog()
-                      }}
+                      action={searchQuery ? (
+                        <Button onClick={() => { setSearchQuery(''); setCurrentPage(1); }} className="rounded-full px-8 shadow-md">
+                          Clear Search
+                        </Button>
+                      ) : (
+                        <Button onClick={() => handleOpenDialog()} className="rounded-full px-8 shadow-md">
+                          New Application
+                        </Button>
+                      )}
                     />
                   </TableCell>
                 </TableRow>

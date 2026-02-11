@@ -281,10 +281,11 @@ export function LandingsPage() {
                       icon={LayoutPanelTop}
                       title="No Marketing Records Identified"
                       description="Initialize your first landing registry to define the digital persona of an application node."
-                      action={{
-                        label: "INITIATE REGISTRY",
-                        onClick: () => setIsCreateDialogOpen(true)
-                      }}
+                      action={
+                        <Button onClick={() => setIsCreateDialogOpen(true)} className="rounded-full px-8 shadow-md">
+                          INITIATE REGISTRY
+                        </Button>
+                      }
                     />
                   </TableCell>
                 </TableRow>

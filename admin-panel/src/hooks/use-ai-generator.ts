@@ -19,14 +19,15 @@ export function useAIGenerator() {
         setError(null);
 
         try {
-            const tempInstruction = params.promptInstruction || '';
+            const { skillTitle, ...rest } = params;
+            const tempInstruction = rest.promptInstruction || '';
             // Inject skill context if missing
-            const instructionWithSkill = tempInstruction.includes(params.skillTitle) 
+            const instructionWithSkill = tempInstruction.includes(skillTitle) 
                 ? tempInstruction 
-                : `Focus on the skill/topic: "${params.skillTitle}". ${tempInstruction}`;
+                : `Focus on the skill/topic: "${skillTitle}". ${tempInstruction}`;
 
             const questions = await generateQuestionsFromAI({
-                ...params,
+                ...rest,
                 promptInstruction: instructionWithSkill
             });
 

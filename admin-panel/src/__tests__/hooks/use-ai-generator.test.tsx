@@ -1,6 +1,6 @@
 import { useAIGenerator } from '@/hooks/use-ai-generator';
 import { useToast } from '@/hooks/use-toast';
-import { generateQuestionsFromAI } from '@/lib/gemini';
+import { generateQuestionsFromAI, type AIQuestion } from '@/lib/gemini';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -10,7 +10,7 @@ vi.mock('@/hooks/use-toast');
 
 describe('useAIGenerator', () => {
   const mockToast = vi.fn();
-  const mockQuestions = [
+  const mockQuestions: AIQuestion[] = [
     { content: 'Question 1', type: 'multiple_choice', points: 1, correct_answer: 'Option A', explanation: 'Reason 1', options: ['Option A', 'Option B'] },
     { content: 'Question 2', type: 'boolean', points: 1, correct_answer: 'True', explanation: 'Reason 2', options: ['True', 'False'] },
   ];
@@ -52,7 +52,10 @@ describe('useAIGenerator', () => {
       });
 
       expect(generateQuestionsFromAI).toHaveBeenCalledWith({
-        ...params,
+        context: params.context,
+        count: params.count,
+        difficulty: params.difficulty,
+        questionType: params.questionType,
         promptInstruction: 'Focus on the skill/topic: "Algebra". Focus on equations',
       });
 
@@ -85,7 +88,10 @@ describe('useAIGenerator', () => {
       });
 
       expect(generateQuestionsFromAI).toHaveBeenCalledWith({
-        ...params,
+        context: params.context,
+        count: params.count,
+        difficulty: params.difficulty,
+        questionType: params.questionType,
         promptInstruction: 'Create questions about cells', // Already contains skill title
       });
     });
@@ -109,7 +115,10 @@ describe('useAIGenerator', () => {
       });
 
       expect(generateQuestionsFromAI).toHaveBeenCalledWith({
-        ...params,
+        context: params.context,
+        count: params.count,
+        difficulty: params.difficulty,
+        questionType: params.questionType,
         promptInstruction: 'Focus on the skill/topic: "World War II". Focus on dates and events',
       });
     });
@@ -133,7 +142,10 @@ describe('useAIGenerator', () => {
       });
 
       expect(generateQuestionsFromAI).toHaveBeenCalledWith({
-        ...params,
+        context: params.context,
+        count: params.count,
+        difficulty: params.difficulty,
+        questionType: params.questionType,
         promptInstruction: 'Focus on the skill/topic: "Continents". ',
       });
     });
@@ -316,13 +328,12 @@ describe('useAIGenerator', () => {
         });
       });
 
-      expect(generateQuestionsFromAI).toHaveBeenCalledWith({
-        context: 'Test',
-        count: 1,
-        difficulty: 'easy',
-        skillTitle: longSkillTitle,
-        promptInstruction: `Focus on the skill/topic: "${longSkillTitle}". Basic questions`,
-      });
+      expect(generateQuestionsFromAI).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skillTitle: undefined, // It's not passed to the lib function
+          promptInstruction: expect.stringContaining(longSkillTitle),
+        })
+      );
     });
   });
 });

@@ -20,6 +20,19 @@ description: Independent post-implementation audit and certification
 2. **Evidence Required**: Every check must produce concrete proof (screenshots, logs, test output)
 3. **Edge Case Focus**: Actively try to break things
 4. **Fix or Document**: For every issue found, either fix it or justify why it's acceptable
+5. **Efficiency**: Use parallel collection scripts to save significant wall-clock time.
+
+---
+
+## ⚡ Phase 0: Automated Evidence Collection
+**Estimated Time**: 5-15 minutes (Parallelized)
+**Goal**: Prime the audit with a comprehensive set of automated reports.
+
+1. **Execute**: `powershell .\scripts\certify-evidence.ps1`
+2. **Review**: Check `.agent/artifacts/certify_[TIMESTAMP]/manifest.json` for an overview.
+3. **Analyze**: Open the log files in that directory (`preflight.log`, `tests.log`, `hygiene.log`, `admin-build.log`) to spot failures early.
+
+> **Note**: This step handles the heavy lifting for tests, lints, and build checks simultaneously.
 
 ---
 
@@ -114,11 +127,9 @@ description: Independent post-implementation audit and certification
   - **Proof**: Screenshot or excerpt from plan showing 5 threats
 
 - [ ] **Forbidden Pattern Scan**
-  - Search for:
-    - Empty `catch`/`except` blocks: `grep -r "catch.*{.*}" --include="*.ts" --include="*.dart"`
-    - Hardcoded secrets: `grep -ri "api.*key.*=.*\"" --include="*.ts" --include="*.dart"`
-    - Functions >40 lines: Use code analysis or manual spot-check
-  - **Proof**: "0 forbidden patterns found" OR list of exceptions with justification
+  - Action: Run `powershell .\scripts\code-hygiene-scan.ps1`
+  - **Proof**: Summary output showing "0 found" or justification for exceptions.
+  - Check logs: `.agent/logs/hygiene/`
 
 **Exit Gate**: IDD compliance confirmed OR violations documented for remediation.
 
@@ -130,10 +141,10 @@ description: Independent post-implementation audit and certification
 
 ### Checklist
 
-- [ ] **Re-Run All Tests** (Don't trust previous reports)
-  - Flutter: `flutter test`
-  - Admin: `cd admin-panel && npm test`
-  - **Proof**: Fresh terminal output with pass/fail counts
+- [ ] **Re-Run All Tests** (Fresh proof required)
+  - Action: Run `powershell .\scripts\run-all-tests.ps1`
+  - **Proof**: Terminal output summary with pass/fail counts.
+  - Link: Check detailed logs in `.agent/logs/tests/`.
 
 - [ ] **Edge Case Coverage**
   - Verify tests exist for: `null`, empty strings, network failure, permission denied

@@ -6,14 +6,14 @@
 - [x] **Step 1.1: Standardize Vitest Thresholds**
   - Remove coverage thresholds from `admin-panel/vitest.config.ts`.
   - Rely on CI gate (70%) as the single source of truth.
-- [ ] **Step 1.2: Content Engine Local Stability**
+- [x] **Step 1.2: Content Engine Local Stability**
   - Add `pytest>=7.0.0` and `pytest-cov>=4.0.0` to `content-engine/requirements.txt`.
 - [x] **Step 1.3: Fix Edge Function Tests**
   - Refactor `supabase/functions/*/index.ts` to use handlers.
   - Guard `Deno.serve` calls with `import.meta.main`.
 - [x] **Step 1.4: Verification Checkpoint**
   - [x] Verify Admin Panel coverage generates `lcov.info`.
-  - [ ] Verify Content Engine hits 80% locally.
+  - [x] Verify Content Engine hits 80% locally.
   - [x] Verify Edge Functions run without a local server.
 
 ### 🧪 Phase 2: Close Coverage Gaps

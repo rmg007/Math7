@@ -21,6 +21,18 @@
 | :--- | :--- | :--- | :--- | :--- |
 | **Login** | `src/features/auth/pages/LoginPage.tsx` | `tests/admin-panel.e2e.spec.ts` | E2E | 100% |
 | **Curriculum** | `src/features/curriculum/*` | `tests/admin-panel.e2e.spec.ts` | E2E | 80% |
+| **Monitoring** | `src/features/monitoring/*` | `tests/monitoring.e2e.spec.ts` | E2E | 70% |
+
+## 🧠 AI Content Engine (Python)
+*Coverage managed via `pytest --cov`*
+
+| Component | Source Dir | Test Dir | Coverage | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Document Parser** | `src/parsers/` | `tests/test_document_parser.py` | 98% | ✅ Stabilized |
+| **Question Generator** | `src/generators/` | `tests/test_question_generator.py` | 98% | ✅ Verified |
+| **CLI & Main** | `src/__main__.py` | `tests/test_main.py` | 81% | ✅ Verified |
+| **Validators** | `src/validators/` | `tests/test_question_generator.py` | 87% | ✅ Verified |
+| **OVERALL** | `src/` | `tests/` | **91%** | ✅ **GATED (80%)** |
 
 ## 🛡️ Database (Supabase)
 *Coverage managed via `supabase test` (pgTAP)*

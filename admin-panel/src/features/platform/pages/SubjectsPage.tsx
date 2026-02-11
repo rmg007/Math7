@@ -231,10 +231,11 @@ export function SubjectsPage() {
                       icon={Boxes}
                       title="Taxonomy Vacuum Detected"
                       description="No knowledge domains have been defined. Initiate a node to begin architecting the platform scope."
-                      action={{
-                        label: "PROVISION NODE",
-                        onClick: () => handleOpenDialog()
-                      }}
+                      action={
+                        <Button onClick={() => handleOpenDialog()} className="rounded-full px-8 shadow-md">
+                          PROVISION NODE
+                        </Button>
+                      }
                     />
                   </TableCell>
                 </TableRow>

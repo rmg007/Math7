@@ -1,5 +1,5 @@
 import { sanitizeHtml } from '@/lib/sanitize';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 // Mock DOMPurify
 vi.mock('dompurify', () => ({
@@ -37,20 +37,20 @@ describe('sanitize', () => {
     it('should return empty string for null input', () => {
       const result = sanitizeHtml(null);
       expect(result).toBe('');
-      expect(mockDOMPurify.default.sanitize).not.toHaveBeenCalled();
+      expect(DOMPurify.sanitize).not.toHaveBeenCalled();
     });
 
     it('should return empty string for undefined input', () => {
       const result = sanitizeHtml(undefined);
       expect(result).toBe('');
-      expect(mockDOMPurify.default.sanitize).not.toHaveBeenCalled();
+      expect(DOMPurify.sanitize).not.toHaveBeenCalled();
     });
 
     it('should return empty string for empty string input', () => {
-      vi.mocked(mockDOMPurify.default.sanitize).mockReturnValue('');
+      vi.mocked(DOMPurify.sanitize).mockReturnValue('');
       const result = sanitizeHtml('');
       expect(result).toBe('');
-      expect(mockDOMPurify.default.sanitize).toHaveBeenCalledWith('', {
+      expect(DOMPurify.sanitize).toHaveBeenCalledWith('', {
         USE_PROFILES: { html: true },
         ALLOWED_TAGS: [
           'p', 'br', 'strong', 'em', 'u', 'ol', 'ul', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',

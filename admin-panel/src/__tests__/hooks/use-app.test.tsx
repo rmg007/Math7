@@ -1,79 +1,72 @@
 import { renderHook } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { useApp } from '@/hooks/use-app';
-import { AppContext } from '@/contexts/AppContextDefinition';
-
-// Mock the context
-vi.mock('@/contexts/AppContextDefinition', () => ({
-  AppContext: {
-    _currentValue: undefined,
-  },
-}));
+import { AppContext, type AppContextType } from '@/contexts/AppContextDefinition';
+import React from 'react';
 
 describe('useApp', () => {
-  const mockContextValue = {
-    user: { id: '1', name: 'Test User' },
-    theme: 'light',
-    setUser: vi.fn(),
-    setTheme: vi.fn(),
+  const mockContextValue: AppContextType = {
+    apps: [],
+    currentApp: null,
+    isLoading: false,
+    setCurrentApp: vi.fn(),
+    refreshApps: vi.fn(),
+    isSidebarCollapsed: false,
+    toggleSidebar: vi.fn(),
   };
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('should return context value when used within AppProvider', () => {
-    // Mock the context to return a value
-    vi.mocked(AppContext)._currentValue = mockContextValue;
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <AppContext.Provider value={mockContextValue}>
+        {children}
+      </AppContext.Provider>
+    );
 
-    const { result } = renderHook(() => useApp());
+    const { result } = renderHook(() => useApp(), { wrapper });
 
     expect(result.current).toEqual(mockContextValue);
   });
 
   it('should throw error when used outside AppProvider', () => {
-    // Mock the context to return undefined (outside provider)
-    vi.mocked(AppContext)._currentValue = undefined;
-
+    // Silence console.error for expected error
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    
     expect(() => {
       renderHook(() => useApp());
     }).toThrow('useApp must be used within an AppProvider');
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('should work with different context values', () => {
-    const darkThemeContext = {
+    const customContext: AppContextType = {
       ...mockContextValue,
-      theme: 'dark',
-      user: { id: '2', name: 'Dark User' },
+      isLoading: true,
+      isSidebarCollapsed: true,
     };
 
-    vi.mocked(AppContext)._currentValue = darkThemeContext;
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <AppContext.Provider value={customContext}>
+        {children}
+      </AppContext.Provider>
+    );
 
-    const { result } = renderHook(() => useApp());
+    const { result } = renderHook(() => useApp(), { wrapper });
 
-    expect(result.current.theme).toBe('dark');
-    expect(result.current.user.name).toBe('Dark User');
-  });
-
-  it('should handle context with minimal properties', () => {
-    const minimalContext = {
-      user: null,
-      theme: 'system',
-    };
-
-    vi.mocked(AppContext)._currentValue = minimalContext;
-
-    const { result } = renderHook(() => useApp());
-
-    expect(result.current).toEqual(minimalContext);
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.isSidebarCollapsed).toBe(true);
   });
 
   it('should preserve function references in context', () => {
-    vi.mocked(AppContext)._currentValue = mockContextValue;
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <AppContext.Provider value={mockContextValue}>
+        {children}
+      </AppContext.Provider>
+    );
 
-    const { result } = renderHook(() => useApp());
+    const { result } = renderHook(() => useApp(), { wrapper });
 
-    expect(typeof result.current.setUser).toBe('function');
-    expect(typeof result.current.setTheme).toBe('function');
+    expect(typeof result.current.setCurrentApp).toBe('function');
+    expect(typeof result.current.toggleSidebar).toBe('function');
   });
 });

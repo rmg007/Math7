@@ -297,3 +297,16 @@ Lessons learned from bugs, incidents, and development discoveries.
 - **Reference**: `.agent/workflows/forensics.md`, `scripts/maintenance/forensic_audit.ps1`
 
 ---
+
+---
+
+## 2026-02-11: Python/Pathlib Mocking Best Practices
+
+- **Root Cause**: FileNotFoundError in tests attempting to parse non-existent dummy files, and AttributeError when incorrectly mocking pathlib.Path properties.
+- **Lesson**: 
+  - When a parser uses Path(file).exists(), you MUST mock exists() to return True for dummy files.
+  - Mocking Path properties (like .suffix or .name) requires type(mock_path.return_value).suffix = property(lambda x: ...) if using real string behavior, or simply setting mock_path.return_value.suffix = '.pdf'.
+  - Avoid mock.return_value.suffix.lower.return_value if suffix is already mocked as a string, as strings don't have a return_value attribute.
+- **Prevention**: Centralized setup_method in test classes to provide a consistent Path mock that handles common extensions dynamically based on the input filename.
+- **Regression Test**: tests/test_document_parser.py (all tests now passing with 98% coverage).
+- **Pattern Name**: 'Dynamic Path Property Mocking'

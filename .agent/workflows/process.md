@@ -79,9 +79,10 @@ Before Phase 1, create `.agent/artifacts/TASK_STATE.json`:
 2.  **RLS & Multi-Tenant Audit**:
     *   Implement/Update Row Level Security policies.
     *   **Verification**: Run SQL checks to ensure `app_id` isolation is enforced.
-3.  **Type Synchronization**:
-    *   **TypeScript**: Run `supabase gen types typescript` to update frontend interfaces.
-    *   **Dart**: Update models/mappers in `questerix_domain` or `student-app` to match schema.
+3.  **Type Synchronization & Verification**:
+    *   Run: `powershell .\scripts\gen-types-verify.ps1`
+    *   **Goal**: Ensure all frontend and backend types are synced AND that the project still compiles.
+    *   **Note**: This script handles the `supabase gen types` and `tsc --noEmit` check in parallel.
 4.  **Seed Data Integrity**:
     *   Apply/Update `seed.sql` with realistic data.
     *   Verify that no constraint violations occur during ingestion.
@@ -170,7 +171,19 @@ Before Phase 1, create `.agent/artifacts/TASK_STATE.json`:
     *   Verify: No circular dependencies introduced by new code
     *   Verify: Feature isolation maintained (no cross-feature imports)
     *   **Proof**: Command output showing "no dependency violations found"
-7.  **QA Loop**: Run tests. If any fail, fix the code and re-run.
+7.  **Quality Verification Suite**:
+    *   **Action**: Run `powershell .\scripts\preflight.ps1`
+    *   **Goal**: Verify type safety, linting, and project-wide dependency hygiene in parallel.
+    *   **Proof**: Attach the summary report from `.agent/logs/preflight/`.
+8.  **Full Test Suite**:
+    *   **Action**: Run `powershell .\scripts\run-all-tests.ps1`
+    *   **Goal**: Execute every test suite in the project (Admin, Student, Python, Supabase) simultaneously.
+    *   **Proof**: Summary results showing pass/fail counts.
+9.  **Security & Hygiene Scan**:
+    *   **Action**: Run `powershell .\scripts\code-hygiene-scan.ps1`
+    *   **Goal**: Detect empty catch blocks, leaked secrets, and other anti-patterns.
+    *   **Proof**: Findings from `.agent/logs/hygiene/`.
+10. **QA Loop**: If any step fails, fix the code and re-run the specific script.
     *   **Micro-Postmortem**: For every test failure fixed, **IMMEDIATELY** add an entry to `docs/LEARNING_LOG.md`.
 7.  **Visual Design Audit (If UI changed)**:
     *   **Visual Inspection**: Use `browser_subagent` to capture screenshots of all modified screens.

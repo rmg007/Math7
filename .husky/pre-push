@@ -1,1 +1,1 @@
-cd admin-panel && npm run typecheck && cd ../student-app && flutter analyze
+powershell -NoProfile .\scripts\preflight.ps1
