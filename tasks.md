@@ -31,7 +31,19 @@
 - [x] **Update Documentation**
   - [x] Mark service/hooks/content-engine tasks as DONE.
   - [x] Correct `docs/reports/TEST_COVERAGE.md` matrix.
-- [ ] **[SECURITY] DAST Integration**
-  - Configure OWASP ZAP (GitHub Action) for endpoint scanning.
-- [ ] **[PERF] Lighthouse CI**
-  - Integrate LHCI for performance/A11y/SEO auditing.
+- [x] **[SECURITY] DAST Integration**
+  - Configured OWASP ZAP via `dast.yml` GitHub Action.
+- [x] **[PERF] Lighthouse CI**
+  - Integrated LHCI via `lighthouse.yml` and `admin-panel-e2e.yml`.
+
+---
+
+## 🤖 CI AUTOMATION
+
+- [x] **Dependabot**: npm, pip, GitHub Actions, Flutter/Pub ecosystems covered.
+- [x] **Auto-Format**: `auto-format.yml` for consistent code style.
+- [x] **Type Generation**: `type-generation.yml` for Supabase types.
+- [x] **Platform Health Report**: `platform-health-report.yml` aggregates CI results on PRs.
+- [x] **Self-Healing CI**: `ci-repair-dispatch.yml` creates repair issues on failure.
+- [ ] **GitHub Secrets**: Add Supabase + test user credentials to GitHub Settings.
+- [ ] **`gh auth login`**: Authenticate GitHub CLI for agent issue discovery.

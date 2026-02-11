@@ -1,4 +1,54 @@
-## 2026-02-11: Parallel Agent Productivity Suite & Automated Certification
+## 2026-02-11: Self-Healing CI & GitHub Automation Strategy
+
+### Session Context
+
+- **Objective**: Delegate more work to GitHub Actions so CI failures auto-generate repair tickets instead of silent red X marks.
+- **Scope**: GitHub Actions workflows, Dependabot config, agent `/wake` and `/default` protocols, Node.js version standardization.
+- **Outcome**: ✅ Self-Healing CI (`ci-repair-dispatch.yml`) deployed. Dependabot expanded to Flutter/Pub. Agent discovery protocol integrated.
+
+### What Was Done
+
+1. **Self-Healing CI (`ci-repair-dispatch.yml`)**
+   - Created a `workflow_run` trigger that fires when `CI` or `Admin Panel E2E Tests` fail.
+   - Auto-creates a structured GitHub Issue with failure logs, labeled `ci-repair`.
+   - Deduplicates: updates existing issues instead of creating duplicates.
+   - Escalates after 2 failed repair attempts by adding `needs-human` label.
+
+2. **Agent Discovery Protocol**
+   - Updated `/wake` and `/default` workflows to run `gh issue list --label ci-repair` on session start.
+   - Agent now auto-discovers pending repair issues and offers to prioritize them.
+
+3. **Dependabot Flutter Support**
+   - Added `pub` ecosystem entry in `.github/dependabot.yml` for `student-app/` directory.
+   - Weekly schedule, grouped minor/patch updates, max 5 open PRs.
+
+4. **Platform Health Report (`platform-health-report.yml`)**
+   - Aggregates results from CI, DAST, Lighthouse, and Visual Regression workflows.
+   - Posts a single executive summary comment on Pull Requests.
+
+5. **Node.js Version Standardization**
+   - Updated `admin-panel-e2e.yml` from Node 18 → 20 to match the main CI workflow.
+
+### What Was Learned
+
+1. **The "Audit vs. Repair" Mental Model**: GitHub Actions is a _passive auditor_—it finds problems but doesn't fix them. The AI agent is the _active repair team_. The Self-Healing CI bridges these two roles by converting audit failures into actionable work items.
+
+2. **Why E2E Fails in 33 Seconds**: An abnormally fast test suite failure (33s for 36 tests) almost always means a missing environment variable or secret, not a code bug. The test runner crashes at the login step before any test executes.
+
+3. **Deduplication is Critical**: Without deduplication, every push to `main` while a bug is unfixed would create a new issue. The workflow checks for existing open `ci-repair` issues before creating.
+
+4. **Escalation Prevents Infinite Loops**: The 2-attempt max with `needs-human` label prevents the agent from endlessly retrying a fix that requires human intervention (like adding secrets).
+
+5. **`gh` CLI Authentication**: The GitHub CLI (`gh`) requires `gh auth login` once per machine. Without it, the agent can't query issues programmatically. This is a one-time setup cost.
+
+### Preventative Measures
+
+- **ALWAYS** check for open `ci-repair` issues at session start.
+- **ALWAYS** verify locally (build + lint + type-check) before diagnosing a CI failure as a "code bug."
+- **NEVER** let GitHub auto-fix logic or types—only formatting. Logic fixes require agent reasoning.
+- **NEVER** create repair PRs without deduplication guards.
+
+---
 
 ### Session Context
 
@@ -64,7 +114,7 @@
 
 2. **Ephemeral UI State Hazard**: Toasts and progress bars that auto-dismiss via `setTimeout` are the primary source of race conditions in unit tests. **Rule**: Use fake timers (`vi.useFakeTimers`) for any test involving progress tracking or transient notifications.
 
-3. **Zod Error Precision**: When testing Zod schemas, if a custom `.error()` message isn't provided, Zod defaults to its internal error engine. Tests must match the *actual* generated string.
+3. **Zod Error Precision**: When testing Zod schemas, if a custom `.error()` message isn't provided, Zod defaults to its internal error engine. Tests must match the _actual_ generated string.
 
 4. **Global Mock Poisoning**: Using `stubGlobal` can poison the global environment for other tests. `vi.spyOn` on `globalThis` is generally safer as it leverages Vitest's automatic restoration.
 
@@ -158,6 +208,7 @@
 ## 2026-02-09: Post-Merge Consolidation & Repository Hygiene
 
 ### Session Context
+
 - **Objective**: Resolve final merge conflicts from `replit_branch`, unify `main`, and optimize agent performance.
 - **Scope**: `admin-panel/` (Auth & Monitoring), `database.types.ts`, Git metadata.
 - **Outcome**: ✅ Consolidated all features into `main`. Successfully deleted 7 stale branches. Recovered 317MB of agent memory via automated cleanup.
