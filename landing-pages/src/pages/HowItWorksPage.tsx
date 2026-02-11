@@ -1,6 +1,6 @@
-import { Header } from '../components/Header';
+import { BookOpen, Brain, CheckCircle2, Target, TrendingUp } from 'lucide-react';
 import { Footer } from '../components/Footer';
-import { BookOpen, Brain, TrendingUp, Target, CheckCircle2 } from 'lucide-react';
+import { Header } from '../components/Header';
 
 export const HowItWorksPage = () => {
   return (
@@ -35,7 +35,7 @@ export const HowItWorksPage = () => {
               <div className="absolute -top-4 -left-4 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold shadow-lg">
                 1
               </div>
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 pt-12 rounded-2xl h-full">
+              <div className="bg-linear-to-br from-blue-50 to-indigo-50 p-8 pt-12 rounded-2xl h-full">
                 <BookOpen className="text-blue-600 mb-4" size={32} />
                 <h3 className="text-xl font-bold mb-3">Assess Your Level</h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -50,7 +50,7 @@ export const HowItWorksPage = () => {
               <div className="absolute -top-4 -left-4 w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center text-xl font-bold shadow-lg">
                 2
               </div>
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-8 pt-12 rounded-2xl h-full">
+              <div className="bg-linear-to-br from-purple-50 to-pink-50 p-8 pt-12 rounded-2xl h-full">
                 <Target className="text-purple-600 mb-4" size={32} />
                 <h3 className="text-xl font-bold mb-3">Practice with Purpose</h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -65,7 +65,7 @@ export const HowItWorksPage = () => {
               <div className="absolute -top-4 -left-4 w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center text-xl font-bold shadow-lg">
                 3
               </div>
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-8 pt-12 rounded-2xl h-full">
+              <div className="bg-linear-to-br from-green-50 to-emerald-50 p-8 pt-12 rounded-2xl h-full">
                 <TrendingUp className="text-green-600 mb-4" size={32} />
                 <h3 className="text-xl font-bold mb-3">Achieve Mastery</h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -109,7 +109,7 @@ export const HowItWorksPage = () => {
               },
             ].map((feature, i) => (
               <div key={i} className="flex gap-4 p-6 border border-gray-200 rounded-xl hover:shadow-lg transition-shadow">
-                <CheckCircle2 className="text-green-600 flex-shrink-0" size={24} />
+                <CheckCircle2 className="text-green-600 shrink-0" size={24} />
                 <div>
                   <h3 className="font-bold mb-2">{feature.title}</h3>
                   <p className="text-gray-600 text-sm">{feature.desc}</p>
@@ -121,7 +121,7 @@ export const HowItWorksPage = () => {
 
         {/* CTA */}
         <section className="max-w-4xl mx-auto px-6 text-center">
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white p-12 rounded-3xl">
+          <div className="bg-linear-to-br from-blue-600 to-indigo-600 text-white p-12 rounded-3xl">
             <h2 className="text-3xl font-bold mb-4">Ready to Start Learning?</h2>
             <p className="text-blue-100 mb-8 text-lg">
               Join thousands of students who are achieving their academic goals with Questerix.
