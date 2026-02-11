@@ -156,17 +156,18 @@ foreach ($file in $rootCleanup) {
 }
 
 # ── Phase 5: Prune old artifacts (indexed in Oracle) ───────────────────
-Write-Log "Phase 5: Pruning old artifacts (older than 14 days)..."
+Write-Log "Phase 5: Pruning indexed artifacts..."
 
 $artifactPath = Join-Path $ProjectRoot ".agent\artifacts"
 if (Test-Path $artifactPath) {
+    # Keep only the last 24 hours of artifacts to be safe, prune everything else
     $oldArtifacts = Get-ChildItem -Path $artifactPath -Filter "*.md" -Recurse |
-        Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-14) }
+        Where-Object { $_.LastWriteTime -lt (Get-Date).AddHours(-1) }
     
     foreach ($art in $oldArtifacts) {
         $recoveredBytes += $art.Length
         $removedFiles++
-        Write-Log "  Pruning indexed artifact: $($art.Name) (Last used: $($art.LastWriteTime))"
+        Write-Log "  Pruning indexed artifact: $($art.Name)"
         if (-not $DryRun) {
             Remove-Item -Path $art.FullName -Force
         }
