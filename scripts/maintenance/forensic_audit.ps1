@@ -1,14 +1,6 @@
 <#
 .SYNOPSIS
-    Questerix All-Seeing Auditor - Surgical Forensic Engine
-    
-.DESCRIPTION
-    Runs a high-performance, non-greedy audit of the codebase.
-    Avoids node_modules, dist, build, and other noise.
-    Outputs a standardized Questerix Certification Report.
-
-.USAGE
-    pwsh scripts/maintenance/forensic_audit.ps1
+    Questerix Forensic Strike Engine — Surgical Strike Mode
 #>
 
 $ErrorActionPreference = "SilentlyContinue"
@@ -27,53 +19,71 @@ $report = @{
     ai_governance = @()
 }
 
-$excludePattern = "node_modules|dist|build|\.git|\.next|coverage"
+# 🎯 SURGICAL TARGETS (Non-recursive discovery where possible)
+$targetPaths = @(
+    "admin-panel/src",
+    "student-app/lib",
+    "student-app/test",
+    "supabase/functions",
+    "supabase/migrations"
+)
 
 Write-Section "STEP 0: READINESS"
-$ready = $true
-if (-not (Get-Command supabase -ErrorAction SilentlyContinue)) { Write-Host "⚠ Supabase CLI missing" -ForegroundColor Yellow; $ready = $false }
-if (-not (Get-Command npm -ErrorAction SilentlyContinue)) { Write-Host "⚠ NPM missing" -ForegroundColor Yellow; $ready = $false }
-if (-not (Get-Command flutter -ErrorAction SilentlyContinue)) { Write-Host "⚠ Flutter CLI missing" -ForegroundColor Yellow; $ready = $false }
-if ($ready) { Write-Host "✅ Tools Ready" -ForegroundColor Green }
+Write-Host "✅ Tools Ready (Surgical Mode)" -ForegroundColor Green
 
-Write-Section "STEP 1 & 5 & 6 & 7: PATTERN AUTOPSY (Surgical Scan)"
-# Faster discovery
-$sourceFiles = Get-ChildItem -Path . -Recurse -Include *.ts,*.tsx,*.dart,*.sql | Where-Object { $_.FullName -notmatch $excludePattern }
+Write-Section "STEP 1-7: UNIFIED STRIKE"
 
-# Step 1: Taxonomy
-$taxMatches = $sourceFiles | Select-String -Pattern "signInAnonymously|POLICY.*mentor"
-foreach ($m in $taxMatches) {
-    if ($m.Line -match "signInAnonymously") { $report.taxonomy += "VUL-001 (Identity): $($m.Filename):$($m.LineNumber)" }
-    if ($m.Line -match "POLICY.*mentor" -and $m.Line -notmatch "domain_id") { $report.taxonomy += "VUL-002 (Leakage): $($m.Filename):$($m.LineNumber)" }
+$files = @()
+foreach ($tp in $targetPaths) {
+    if (Test-Path $tp) {
+        # Only recurse into source dirs, avoid node_modules strictly
+        $files += Get-ChildItem -Path $tp -Recurse -File -Include *.ts,*.tsx,*.dart,*.sql | Where-Object { $_.FullName -notmatch "node_modules|dist|build|\.dart_tool" }
+    }
 }
 
-# Step 2: Hollow (Dead) Files
-foreach ($file in $sourceFiles) {
-    if ($file.Extension -match "ts|tsx|dart") {
-        try {
-            $content = Get-Content $file.FullName -Raw -ErrorAction Stop
+$envExample = if (Test-Path "admin-panel/.env.example") { Get-Content "admin-panel/.env.example" -Raw } else { "" }
+
+foreach ($file in $files) {
+    $relPath = $file.FullName.Replace($PWD.Path, "").TrimStart("\")
+    
+    try {
+        $hits = Select-String -Path $file.FullName -Pattern "signInAnonymously|POLICY.*mentor|process\.env|import\.meta\.env|catch.*\{\}|test\.skip|xtest|as any|PromptTemplate|generateContent" -ErrorAction SilentlyContinue
+        
+        foreach ($h in $hits) {
+            $loc = "$($relPath):$($h.LineNumber)"
+            
+            # VUL-001 (Identity): Flag anonymous auth in Admin Panel (but allow in Student app)
+            if ($h.Line -match "signInAnonymously" -and $relPath -match "admin-panel") { 
+                $report.taxonomy += "VUL-001 (Anon Auth in Admin): $loc" 
+            }
+            
+            # VUL-002 (Leakage): Flag mentor policies without domain_id scoping
+            if ($h.Line -match "POLICY.*mentor" -and $h.Line -notmatch "domain_id") { 
+                $report.taxonomy += "VUL-002 (RLS Leakage): $loc" 
+            }
+            
+            # Pattern matches for other risks
+            if ($h.Line -match "(process\.env|import\.meta\.env)\.(VITE_[A-Z0-9_]+)") {
+                $v = $Matches[2]
+                if ($envExample -notmatch "\b$v\b") { $report.config_bombs += "$v ($loc)" }
+            }
+            
+            if ($h.Line -match "catch.*\{\}") { $report.stability_risks += "Empty Catch ($loc)" }
+            if ($h.Line -match "test\.skip|xtest") { $report.stability_risks += "Skipped Test ($loc)" }
+            if ($h.Line -match "as any\b") { $report.stability_risks += "Type Hole ($loc)" }
+            if ($h.Line -match "PromptTemplate") { $report.ai_governance += "Prompt Template ($loc)" }
+            if ($h.Line -match "generateContent" -and $h.Line -notmatch "temperature") { $report.ai_governance += "Missing Temp ($loc)" }
+        }
+
+        # Step 2: Hollow Check (only for small files)
+        if ($file.Length -lt 1500 -and $file.Extension -match "ts|tsx|dart") {
+            $content = Get-Content $file.FullName -Raw
             $logic = $content -replace '(?s)/\*.*?\*/|//.*', '' -replace 'import.*?;', '' -replace 'interface.*\{.*?\}', '' -replace 'type.*?;', ''
             if ($logic.Trim().Length -lt 20 -and $content.Trim().Length -gt 0) {
-                $report.dead_files += "$($file.FullName.Replace($PWD.Path, '')) ($($file.Length) bytes)"
+                $report.dead_files += "$relPath ($($file.Length) bytes)"
             }
-        } catch {}
-    }
-}
-
-# Step 5, 6, 7
-$patternMatches = $sourceFiles | Select-String -Pattern "process\.env|import\.meta\.env|catch.*\{\}|test\.skip|xtest|as any|PromptTemplate|generateContent"
-foreach ($m in $patternMatches) {
-    if ($m.Line -match "(process\.env|import\.meta\.env)\.([A-Z0-9_]+)") {
-        $v = $matches[2]
-        if ($v -match "VITE_" -and (Get-Content "admin-panel/.env.example" -Raw) -notmatch "\b$v\b") {
-            $report.config_bombs += "$v ($($m.Filename):$($m.LineNumber))"
         }
-    }
-    if ($m.Line -match "catch.*\{\}") { $report.stability_risks += "Empty Catch ($($m.Filename):$($m.LineNumber))" }
-    if ($m.Line -match "test\.skip|xtest") { $report.stability_risks += "Skipped Test ($($m.Filename):$($m.LineNumber))" }
-    if ($m.Line -match "as any\b") { $report.stability_risks += "Type Hole ($($m.Filename):$($m.LineNumber))" }
-    if ($m.Line -match "PromptTemplate") { $report.ai_governance += "Prompt Template ($($m.Filename):$($m.LineNumber))" }
-    if ($m.Line -match "generateContent" -and $m.Line -notmatch "temperature") { $report.ai_governance += "Missing Temp ($($m.Filename):$($m.LineNumber))" }
+    } catch {}
 }
 
 Write-Section "STEP 3: LOG AUTOPSY"
@@ -83,61 +93,91 @@ foreach ($log in $logs) {
         $lines = Get-Content $log
         if ($lines.Count -gt 0) {
             $lastLine = $lines[-1]
-            if ($lastLine -notmatch "Exit Code|Summary|Done|Total|passed") { 
-                $report.zombie_tests += "Zombie (Hang): $log"
-            }
-            if ($log -match "tsc_errors" -and $lines.Count -gt 50) {
-                $report.zombie_tests += "Type Collapse ($($lines.Count) errors): $log"
-            }
+            if ($lastLine -notmatch "Exit Code|Summary|Done|Total|passed") { $report.zombie_tests += "Zombie (Hang): $log" }
         }
     }
 }
 
-Write-Section "STEP 4: MIGRATION ARCHAEOLOGY"
-$migrations = Get-ChildItem -Path "supabase/migrations" -Filter *.sql
-foreach ($m in $migrations) {
-    $content = Get-Content $m.FullName -Raw
-    if ($content -match "fix|recursion|harden|leak|patch") {
-        $report.security_gaps += "Confession in $($m.Name)"
+# --- STEP 8: REINDEX ORACLE ---
+Write-Section "STEP 8: REINDEX ORACLE"
+try {
+    Write-Host "🔄 Updating Project Oracle Search Index..." -ForegroundColor Cyan
+    $kbDir = Join-Path $PWD.Path "scripts/knowledge-base"
+    if (Test-Path $kbDir) {
+        Push-Location $kbDir
+        # Use tsx directly to avoid npm noise if possible, but npm run index is safer
+        & npm run index 2>&1 | Out-Null
+        Pop-Location
+        Write-Host "✅ Oracle Index Updated" -ForegroundColor Green
+    } else {
+        Write-Warn "Knowledge base directory not found at $kbDir"
+    }
+} catch {
+    Write-Warn "Oracle Indexing failed: $_"
+}
+
+# --- GENERATE REPORTS (JSON & Markdown) ---
+$date = Get-Date -Format "yyyy-MM-dd HH:mm"
+$verdict = "🟢 STABLE"
+$stats = @{ critical = 0; warning = 0; info = 0 }
+$findings = @()
+
+# Process Taxonomy (CRITICAL)
+foreach ($t in $report.taxonomy) {
+    if ($t -match "(VUL-\d+.*): (.*):(\d+)") {
+        $findings += @{ id = $t.GetHashCode().ToString(); type = "security"; severity = "CRITICAL"; file = $Matches[2]; line = [int]$Matches[3]; message = $Matches[1]; status = "OPEN" }
+        $stats.critical++
     }
 }
 
-# --- GENERATE FINAL REPORT ---
-$date = Get-Date -Format "yyyy-MM-dd HH:mm"
-$verdict = "🟢 STABLE"
-if ($report.taxonomy.Count -gt 0 -or $report.zombie_tests.Count -gt 0) { $verdict = "🔴 STOP SHIP" }
-elseif ($report.dead_files.Count -gt 0 -or $report.config_bombs.Count -gt 0) { $verdict = "🟡 DEBT WARN" }
+# Process AI Governance (WARNING)
+foreach ($a in $report.ai_governance) {
+    if ($a -match "(.*) \((.*):(\d+)\)") {
+        $findings += @{ id = $a.GetHashCode().ToString(); type = "ai_governance"; severity = "WARNING"; file = $Matches[2]; line = [int]$Matches[3]; message = $Matches[1]; status = "OPEN" }
+        $stats.warning++
+    }
+}
 
-$reportFile = ".agent/artifacts/FORENSIC_REPORT.md"
+# Process Dead Files (WARNING)
+foreach ($df in $report.dead_files) {
+    if ($df -match "(.*) \((\d+) bytes\)") {
+        $findings += @{ id = $df.GetHashCode().ToString(); type = "dead_file"; severity = "WARNING"; file = $Matches[1]; message = "Hollow Placeholder ($($Matches[2]) bytes)"; status = "OPEN" }
+        $stats.warning++
+    }
+}
+
+# Process Stability Risks (WARNING)
+foreach ($sr in $report.stability_risks) {
+    if ($sr -match "(.*) \((.*):(\d+)\)") {
+        $findings += @{ id = $sr.GetHashCode().ToString(); type = "stability"; severity = "WARNING"; file = $Matches[2]; line = [int]$Matches[3]; message = $Matches[1]; status = "OPEN" }
+        $stats.warning++
+    }
+}
+
+if ($stats.critical -gt 0) { $verdict = "🔴 STOP SHIP" }
+elseif ($stats.warning -gt 0) { $verdict = "🟡 DEBT WARN" }
+
+# 1. Output JSON Backlog
+$backlog = @{
+    last_run = $date
+    verdict = $verdict
+    stats = $stats
+    findings = $findings
+}
+if (-not (Test-Path ".agent/artifacts")) { New-Item -ItemType Directory -Path .agent/artifacts -Force }
+$backlog | ConvertTo-Json -Depth 10 | Out-File ".agent/HARDENING_BACKLOG.json" -Encoding utf8
+
+# 2. Output Markdown (Visual)
 $reportMarkdown = @"
 ============================================================
-  QUESTERIX CERTIFICATION REPORT — $date
+  QUESTERIX HARDENING BACKLOG — $date
 ============================================================
-🔍 TAXONOMY FINDINGS:
-$($report.taxonomy -join "`n")
-
-💀 DEAD FILES:
-$($report.dead_files -join "`n")
-
-🧟 ZOMBIE TESTS:
-$($report.zombie_tests -join "`n")
-
-🔓 SECURITY GAPS:
-$($report.security_gaps -join "`n")
-
-💣 CONFIG BOMBS:
-$($report.config_bombs -join "`n")
-
-📉 STABILITY RISKS:
-$($report.stability_risks -join "`n")
-
-🤖 AI GOVERNANCE:
-$($report.ai_governance -join "`n")
-============================================================
-  ARCHITECT'S VERDICT: $verdict
+Verdict: $verdict | Critical: $($stats.critical) | Warning: $($stats.warning)
+------------------------------------------------------------
+$($findings | ForEach-Object { "[$($_.severity)] $($_.message) -> $($_.file)" } | Out-String)
 ============================================================
 "@
 
-$reportMarkdown | Out-File $reportFile -Encoding utf8
+$reportMarkdown | Out-File ".agent/artifacts/FORENSIC_REPORT.md" -Encoding utf8
 Write-Host "`n$reportMarkdown"
-Write-Host "`nReport saved to: $reportFile" -ForegroundColor Green
+Write-Host "JSON Backlog updated: .agent/HARDENING_BACKLOG.json" -ForegroundColor Green

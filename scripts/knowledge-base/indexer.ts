@@ -26,6 +26,7 @@ const INCLUDE_PATTERNS = [
   'AGENT_QUICKSTART.md',
   'ROADMAP.md',
   '.agent/workflows/*.md',
+  '.agent/artifacts/**/*.md',
   'student-app/README.md',
   'admin-panel/README.md',
   'landing-pages/README.md',

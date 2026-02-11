@@ -15,7 +15,10 @@ description: All-Seeing Auditor Protocol - Deep-Dive Forensic Audit
 
 ## 🚀 THE SUPREME MANDATE: EFFICIENCY FIRST
 
-> **CRITICAL RULE**: Searching the entire repository (especially `node_modules`, `dist`, `.git`, or `build`) is a **TERMINAL OFFENSE**. Always use surgical filters (`-t`, `-g`) or the centralized audit script.
+> **🚫 BANNED PATHS (NEVER SCAN)**: 
+> `node_modules`, `dist`, `build`, `.git`, `.next`, `coverage`, `.dart_tool`, `ios/Pods`.
+>
+> **CRITICAL RULE**: Searching the entire repository without explicit exclusions is a **TERMINAL OFFENSE**. Always use surgical filters (`-t`, `-g`) or the centralized audit script.
 
 ### ⛓️ THE FORENSIC PIPELINE (Unified Strike)
 
