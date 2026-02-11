@@ -125,7 +125,7 @@ foreach ($sigFile in Get-ChildItem $sigsDir -Filter "*.sig") {
     $buckets[$hash].RunIds += $runId
 
     # Find the workflow name for this run
-    $runData = $masterList | Where-Object { $_.databaseId -eq [int]$runId }
+    $runData = $masterList | Where-Object { "$($_.databaseId)" -eq $runId }
     if ($runData) {
         $wfName = $runData.workflowName
         if ($buckets[$hash].Workflows -notcontains $wfName) {
