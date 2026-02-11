@@ -46,7 +46,7 @@ jobs:
           knip --reporter json > ../landing-dead-code.json || true
 
       - name: Generate report
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
