@@ -46,6 +46,9 @@
 - [x] **Platform Health Report**: `platform-health-report.yml` aggregates CI results on PRs.
 - [x] **Self-Healing CI (v2)**: Signature-based deduplication + auto-close on green. Monitors all 35 workflows.
 - [x] **Forensic Audit Script**: `scripts/ci-failure-audit.ps1` for bulk backlog sweep.
+- [x] **CI Recovery Protocol**: `scripts/ci-recover.ps1` for mass-rerunning and unblocking CI.
+- [x] **Tier 1 Auto-Fix**: `ci-auto-fix.yml` — headless auto-fixer for husky, lockfile, dart patterns.
+- [x] **Make It Green Button**: `ci-recover-button.yml` — one-click mass rerun from GitHub UI.
 - [ ] **GitHub Secrets**: Add Supabase + test user credentials to GitHub Settings.
 - [x] **`gh auth login`**: Authenticate GitHub CLI for agent issue discovery and PR management.
 - [ ] **CLI-First PRs**: Transition all PR lifecycle management (list, view, merge) to `gh` CLI.
