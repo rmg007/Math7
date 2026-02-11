@@ -21,7 +21,7 @@ jobs:
     name: OWASP ZAP DAST Scan
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: ZAP Full Scan
         uses: zaproxy/action-full-scan@v0.10.0
