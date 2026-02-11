@@ -1,0 +1,227 @@
+name: CI Auto-Fix
+
+on:
+  workflow_run:
+    workflows:
+      - "Admin Panel E2E Tests"
+      - "Auto Format"
+      - "Bundle Size Monitoring"
+      - "Changelog & Release Management"
+      - "CI"
+      - "Code Duplication Detection"
+      - "Commit Message Validation"
+      - "Coverage Tracking"
+      - "DAST Security Scanning"
+      - "Database Safety"
+      - "Dead Code Detection"
+      - "Developer Experience"
+      - "Flutter Builds (CI)"
+      - "Gitleaks Secret Scan"
+      - "License & SBOM Management"
+      - "Lighthouse CI"
+      - "PR Preview Testing"
+      - "Production Monitoring"
+      - "Project Oracle Indexer"
+      - "Scan with dart-analyze"
+      - "Screenshot Diffing"
+      - "Secret Scanning"
+      - "Security Governance"
+      - "Semgrep Static Analysis"
+      - "Staging Database Migrations"
+      - "Type Generation"
+      - "Validation"
+      - "Visual Regression Testing"
+      - "Workflow Health Check"
+    types:
+      - completed
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  auto-fix:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'failure'
+    steps:
+      - name: Checkout the branch that failed
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch failure logs and match fix pattern
+        id: diagnose
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const branch = run.head_branch;
+            const workflowName = run.name;
+
+            console.log(`Diagnosing failure in "${workflowName}" on branch "${branch}"`);
+
+            // Get failed job logs
+            const jobs = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: run.id
+            });
+
+            let logText = '';
+            for (const job of jobs.data.jobs) {
+              if (job.conclusion === 'failure') {
+                try {
+                  const logData = await github.rest.actions.downloadJobLogsForWorkflowRun({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    job_id: job.id
+                  });
+                  logText = typeof logData.data === 'string' ? logData.data : '';
+                } catch (e) {
+                  console.log(`Could not get logs: ${e.message}`);
+                }
+                break;
+              }
+            }
+
+            const logLower = logText.toLowerCase();
+
+            // ── Pattern Matching Engine ──
+            // Each pattern: { id, detect(), description }
+            const patterns = [
+              {
+                id: 'husky',
+                match: logLower.includes('husky') && (logLower.includes('not found') || logLower.includes('command failed')),
+                description: 'Husky not found in CI environment'
+              },
+              {
+                id: 'npm-lockfile',
+                match: logLower.includes('elockverify') || logLower.includes('npm warn') && logLower.includes('package-lock.json'),
+                description: 'npm lockfile out of sync'
+              },
+              {
+                id: 'dart-fix',
+                match: (workflowName.includes('dart-analyze') || workflowName.includes('Scan with dart')) && logLower.includes('info •'),
+                description: 'Dart analyzer warnings that dart fix can resolve'
+              }
+            ];
+
+            const matched = patterns.find(p => p.match);
+
+            if (matched) {
+              console.log(`✅ Matched pattern: ${matched.id} — ${matched.description}`);
+              core.setOutput('fix_id', matched.id);
+              core.setOutput('fix_description', matched.description);
+              core.setOutput('should_fix', 'true');
+            } else {
+              console.log('❌ No auto-fix pattern matched. Deferring to Tier 2 (AI Agent).');
+              core.setOutput('should_fix', 'false');
+            }
+
+      # ── Fix: Husky not found ──
+      - name: "Fix: Husky not found"
+        if: steps.diagnose.outputs.fix_id == 'husky'
+        run: |
+          echo "🔧 Fixing husky prepare scripts..."
+
+          # Fix root package.json
+          if [ -f package.json ]; then
+            sed -i 's/"prepare": "husky"/"prepare": "husky || true"/g' package.json
+          fi
+
+          # Fix admin-panel/package.json
+          if [ -f admin-panel/package.json ]; then
+            sed -i 's/"prepare": "husky"/"prepare": "husky || true"/g' admin-panel/package.json
+          fi
+
+          echo "✅ Husky prepare scripts patched."
+
+      # ── Fix: npm lockfile out of sync ──
+      - name: "Fix: npm lockfile sync"
+        if: steps.diagnose.outputs.fix_id == 'npm-lockfile'
+        run: |
+          echo "🔧 Regenerating package-lock.json..."
+
+          # Determine which package.json changed
+          if [ -f admin-panel/package.json ]; then
+            cd admin-panel && npm install --package-lock-only && cd ..
+          fi
+
+          if [ -f package.json ]; then
+            npm install --package-lock-only
+          fi
+
+          echo "✅ Lockfiles regenerated."
+
+      # ── Fix: Dart analyzer warnings ──
+      - name: "Fix: Dart analyzer"
+        if: steps.diagnose.outputs.fix_id == 'dart-fix'
+        run: |
+          echo "🔧 Running dart fix --apply..."
+
+          if [ -d student-app ]; then
+            cd student-app && dart fix --apply && cd ..
+          fi
+
+          echo "✅ Dart fixes applied."
+
+      # ── Commit and push the fix ──
+      - name: Commit and push auto-fix
+        if: steps.diagnose.outputs.should_fix == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          FIX_ID="${{ steps.diagnose.outputs.fix_id }}"
+          FIX_DESC="${{ steps.diagnose.outputs.fix_description }}"
+
+          # Check if there are changes to commit
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "⚠️ No changes to commit. Fix pattern matched but files were already correct."
+            exit 0
+          fi
+
+          git add -A
+          git commit -m "fix(ci): auto-fix [${FIX_ID}] — ${FIX_DESC}
+
+          Applied automatically by CI Auto-Fix (Tier 1).
+          Triggered by failure in: ${{ github.event.workflow_run.name }}
+          Run: ${{ github.event.workflow_run.html_url }}"
+
+          git push origin "${BRANCH}"
+
+          echo "✅ Auto-fix committed and pushed to ${BRANCH}"
+
+      # ── Post summary ──
+      - name: Write job summary
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const shouldFix = '${{ steps.diagnose.outputs.should_fix }}';
+            const fixId = '${{ steps.diagnose.outputs.fix_id }}';
+            const fixDesc = '${{ steps.diagnose.outputs.fix_description }}';
+            const run = context.payload.workflow_run;
+
+            let summary = `## 🤖 CI Auto-Fix Report\n\n`;
+            summary += `**Failed Workflow**: ${run.name}\n`;
+            summary += `**Branch**: ${run.head_branch}\n`;
+            summary += `**Commit**: ${run.head_sha.substring(0, 7)}\n\n`;
+
+            if (shouldFix === 'true') {
+              summary += `### ✅ Tier 1 Auto-Fix Applied\n\n`;
+              summary += `| Field | Value |\n|-------|-------|\n`;
+              summary += `| Pattern | \`${fixId}\` |\n`;
+              summary += `| Description | ${fixDesc} |\n`;
+              summary += `| Action | Committed fix and pushed to \`${run.head_branch}\` |\n\n`;
+              summary += `The original workflow should re-run automatically on the new push.\n`;
+            } else {
+              summary += `### ❌ No Auto-Fix Available\n\n`;
+              summary += `No known fix pattern matched. This failure will be handled by:\n`;
+              summary += `- **Tier 2**: AI Agent (via \`ci-repair\` issue on next session)\n`;
+              summary += `- **Tier 3**: Human (if AI fails after 3 attempts)\n`;
+            }
+
+            await core.summary.addRaw(summary).write();

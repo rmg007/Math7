@@ -1,0 +1,141 @@
+name: "CI Recovery: Make It Green"
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to recover (default: main)"
+        required: false
+        default: "main"
+      run_maintenance:
+        description: "Trigger maintenance workflows (Auto Format, Type Gen, Cleanup)"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger maintenance workflows
+        if: inputs.run_maintenance == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = '${{ inputs.branch }}';
+            const maintenanceWorkflows = ['auto-format.yml', 'type-generation.yml', 'auto-cleanup.yml'];
+
+            console.log(`🛠️ Triggering maintenance pulse on branch: ${branch}`);
+
+            for (const wf of maintenanceWorkflows) {
+              try {
+                await github.rest.actions.createWorkflowDispatch({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: wf,
+                  ref: branch
+                });
+                console.log(`  ✅ Dispatched: ${wf}`);
+              } catch (e) {
+                console.log(`  ⚠️ Could not dispatch ${wf}: ${e.message}`);
+              }
+            }
+
+      - name: Discover and rerun failed workflows
+        id: rerun
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = '${{ inputs.branch }}';
+
+            console.log(`\n🔍 Discovering failed runs on branch: ${branch}`);
+
+            // Get recent failed runs on this branch
+            const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: branch,
+              status: 'failure',
+              per_page: 100
+            });
+
+            if (runs.total_count === 0) {
+              console.log('✅ No failed runs found. All systems green!');
+              core.setOutput('rerun_count', '0');
+              return;
+            }
+
+            // Group by workflow name to only rerun the latest failure per workflow
+            const byWorkflow = {};
+            for (const run of runs.workflow_runs) {
+              // Skip CI Auto-Fix and CI Repair Dispatch to avoid loops
+              if (run.name === 'CI Auto-Fix' || run.name === 'CI Repair Dispatch' || run.name === 'CI Recovery: Make It Green') continue;
+
+              if (!byWorkflow[run.name]) {
+                byWorkflow[run.name] = run;
+              }
+            }
+
+            const uniqueFailures = Object.values(byWorkflow);
+            console.log(`📋 Found ${uniqueFailures.length} unique failed workflows.\n`);
+
+            let rerunCount = 0;
+            const results = [];
+
+            for (const run of uniqueFailures) {
+              try {
+                await github.rest.actions.reRunWorkflow({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: run.id
+                });
+                console.log(`  🔄 Rerunning: ${run.name} (ID: ${run.id})`);
+                results.push({ name: run.name, status: '🔄 Rerunning' });
+                rerunCount++;
+              } catch (e) {
+                console.log(`  ⚠️ Could not rerun ${run.name}: ${e.message}`);
+                results.push({ name: run.name, status: `⚠️ ${e.message}` });
+              }
+            }
+
+            core.setOutput('rerun_count', rerunCount.toString());
+            core.setOutput('results', JSON.stringify(results));
+
+      - name: Write recovery summary
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = '${{ inputs.branch }}';
+            const rerunCount = '${{ steps.rerun.outputs.rerun_count }}';
+            const maintenance = '${{ inputs.run_maintenance }}';
+
+            let results = [];
+            try { results = JSON.parse('${{ steps.rerun.outputs.results }}'); } catch {}
+
+            let summary = `## 🚀 CI Recovery Report\n\n`;
+            summary += `| Parameter | Value |\n|-----------|-------|\n`;
+            summary += `| Branch | \`${branch}\` |\n`;
+            summary += `| Maintenance Pulse | ${maintenance === 'true' ? '✅ Triggered' : '⏭️ Skipped'} |\n`;
+            summary += `| Workflows Rerun | **${rerunCount}** |\n\n`;
+
+            if (results.length > 0) {
+              summary += `### Rerun Details\n\n`;
+              summary += `| Workflow | Status |\n|----------|--------|\n`;
+              for (const r of results) {
+                summary += `| ${r.name} | ${r.status} |\n`;
+              }
+              summary += `\n`;
+            }
+
+            summary += `---\n`;
+            summary += `*Monitor progress: [GitHub Actions](https://github.com/${context.repo.owner}/${context.repo.repo}/actions)*\n`;
+
+            await core.summary.addRaw(summary).write();
