@@ -71,7 +71,12 @@ Deno.serve(async (req) => {
 
     // 3. Use Gemini to generate test cases
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') ?? '')
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-2.0-flash-exp',
+      generationConfig: {
+        temperature: 0.1,
+      },
+    })
 
     const prompt = `You are a test code generator. Generate test cases for the following specification.
 
@@ -123,7 +128,7 @@ Focus on:
 
 Return ONLY the test case code, no explanation.`
 
-    const result = await model.generateContent(prompt)
+    const result = await model.generateContent(prompt) // enforced-temp
     const testCases = result.response.text()
 
     // 4. Generate complete test file

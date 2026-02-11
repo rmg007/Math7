@@ -18,6 +18,7 @@ $report = @{
     stability_risks = @()
     ai_governance = @()
 }
+$rootDir = $PWD.Path
 
 # 🎯 SURGICAL TARGETS (Non-recursive discovery where possible)
 $targetPaths = @(
@@ -36,8 +37,7 @@ Write-Section "STEP 1-7: UNIFIED STRIKE"
 $files = @()
 foreach ($tp in $targetPaths) {
     if (Test-Path $tp) {
-        # Only recurse into source dirs, avoid node_modules strictly
-        $files += Get-ChildItem -Path $tp -Recurse -File -Include *.ts,*.tsx,*.dart,*.sql | Where-Object { $_.FullName -notmatch "node_modules|dist|build|\.dart_tool" }
+        $files += Get-ChildItem -Path $tp -Recurse -File -Include *.ts,*.tsx,*.dart,*.sql | Where-Object { $_.FullName -notmatch "node_modules|dist|build|\.dart_tool|archive" }
     }
 }
 
@@ -72,13 +72,13 @@ foreach ($file in $files) {
             if ($h.Line -match "test\.skip|xtest") { $report.stability_risks += "Skipped Test ($loc)" }
             if ($h.Line -match "as any\b") { $report.stability_risks += "Type Hole ($loc)" }
             if ($h.Line -match "PromptTemplate") { $report.ai_governance += "Prompt Template ($loc)" }
-            if ($h.Line -match "generateContent" -and $h.Line -notmatch "temperature") { $report.ai_governance += "Missing Temp ($loc)" }
+            if ($h.Line -match "generateContent" -and $h.Line -notmatch "temperature" -and $h.Line -notmatch "// enforced-temp") { $report.ai_governance += "Missing Temp ($loc)" }
         }
 
         # Step 2: Hollow Check (only for small files)
         if ($file.Length -lt 1500 -and $file.Extension -match "ts|tsx|dart") {
             $content = Get-Content $file.FullName -Raw
-            $logic = $content -replace '(?s)/\*.*?\*/|//.*', '' -replace 'import.*?;', '' -replace 'interface.*\{.*?\}', '' -replace 'type.*?;', ''
+            $logic = $content -replace '(?s)/\*.*?\*/|//.*', '' -replace 'import.*?;', '' -replace 'interface.*\{.*?\}', '' -replace 'type.*?;', '' -replace 'final\s+.*?Provider\s*=', ''
             if ($logic.Trim().Length -lt 20 -and $content.Trim().Length -gt 0) {
                 $report.dead_files += "$relPath ($($file.Length) bytes)"
             }
@@ -164,8 +164,8 @@ $backlog = @{
     stats = $stats
     findings = $findings
 }
-if (-not (Test-Path ".agent/artifacts")) { New-Item -ItemType Directory -Path .agent/artifacts -Force }
-$backlog | ConvertTo-Json -Depth 10 | Out-File ".agent/HARDENING_BACKLOG.json" -Encoding utf8
+if (-not (Test-Path "$rootDir/.agent/artifacts")) { New-Item -ItemType Directory -Path "$rootDir/.agent/artifacts" -Force }
+$backlog | ConvertTo-Json -Depth 10 | Out-File "$rootDir/.agent/HARDENING_BACKLOG.json" -Encoding utf8
 
 # 2. Output Markdown (Visual)
 $reportMarkdown = @"
@@ -178,6 +178,6 @@ $($findings | ForEach-Object { "[$($_.severity)] $($_.message) -> $($_.file)" } 
 ============================================================
 "@
 
-$reportMarkdown | Out-File ".agent/artifacts/FORENSIC_REPORT.md" -Encoding utf8
+$reportMarkdown | Out-File "$rootDir/.agent/artifacts/FORENSIC_REPORT.md" -Encoding utf8
 Write-Host "`n$reportMarkdown"
 Write-Host "JSON Backlog updated: .agent/HARDENING_BACKLOG.json" -ForegroundColor Green

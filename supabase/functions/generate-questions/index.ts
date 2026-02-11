@@ -97,6 +97,7 @@ serve(async (req) => {
       model: model, // ✅ FIX P1: Use variable, not hardcoded literal
       generationConfig: {
         responseMimeType: "application/json", // ✅ FIX R1: Force JSON output
+        temperature: 0.1,
       },
     });
 
@@ -105,7 +106,7 @@ serve(async (req) => {
 
     // Call AI
     const startTime = Date.now();
-    const result = await geminiModel.generateContent(prompt);
+    const result = await geminiModel.generateContent(prompt); // enforced-temp
     const response = await result.response;
     const generatedText = response.text();
     const generationTime = Date.now() - startTime;

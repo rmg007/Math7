@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:student_app/src/core/theme/app_theme.dart';
 import 'package:student_app/src/features/progress/repositories/skill_progress_repository.dart';
 import 'package:student_app/src/features/progress/repositories/session_repository.dart';
-import 'package:student_app/src/features/curriculum/repositories/domain_repository.dart';
+import 'package:student_app/src/features/curriculum/repositories/curriculum_repositories.dart';
 
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});

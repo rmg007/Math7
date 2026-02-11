@@ -1,0 +1,51 @@
+{
+  "verdict": "🟡 DEBT WARN",
+  "last_run": "2026-02-10 17:32",
+  "stats": {
+    "warning": 5,
+    "info": 0,
+    "critical": 0
+  },
+  "findings": [
+    {
+      "file": "admin-panel\\src\\lib\\monitoring.ts",
+      "status": "OPEN",
+      "message": "Hollow Placeholder (1138 bytes)",
+      "type": "dead_file",
+      "id": "1945503120",
+      "severity": "WARNING"
+    },
+    {
+      "file": "admin-panel\\src\\vite-env.d.ts",
+      "status": "OPEN",
+      "message": "Hollow Placeholder (1309 bytes)",
+      "type": "dead_file",
+      "id": "-777210336",
+      "severity": "WARNING"
+    },
+    {
+      "file": "student-app\\lib\\src\\core\\theme\\generated\\app_borders.g.dart",
+      "status": "OPEN",
+      "message": "Hollow Placeholder (1180 bytes)",
+      "type": "dead_file",
+      "id": "-2143922839",
+      "severity": "WARNING"
+    },
+    {
+      "file": "student-app\\lib\\src\\core\\theme\\generated\\generated.dart",
+      "status": "OPEN",
+      "message": "Hollow Placeholder (265 bytes)",
+      "type": "dead_file",
+      "id": "1689916149",
+      "severity": "WARNING"
+    },
+    {
+      "file": "student-app\\lib\\src\\core\\core_providers.dart",
+      "status": "OPEN",
+      "message": "Hollow Placeholder (1498 bytes)",
+      "type": "dead_file",
+      "id": "-780500001",
+      "severity": "WARNING"
+    }
+  ]
+}

@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:questerix_domain/questerix_domain.dart' as model;
+import 'package:student_app/src/features/auth/providers/auth_provider.dart';
 import 'package:student_app/src/core/database/database.dart';
 import 'package:student_app/src/core/database/mappers.dart';
-import 'package:student_app/src/core/database/providers.dart';
-import 'package:student_app/src/core/supabase/providers.dart';
+import 'package:student_app/src/core/core_providers.dart';
 import 'package:uuid/uuid.dart';
 
 // T2 FIX: Removed AppSignatureService - was security theater (circular integrity)
@@ -14,7 +14,7 @@ import 'package:uuid/uuid.dart';
 /// Provider for attempt repository
 final attemptRepositoryProvider = Provider<AttemptRepository>((ref) {
   final database = ref.watch(databaseProvider);
-  final userId = ref.watch(currentUserIdProvider);
+  final userId = ref.watch(currentUserProvider)?.id;
   return AttemptRepository(database, userId);
 });
 

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:student_app/src/core/connectivity/connectivity_service.dart';
+import 'package:student_app/src/core/core_providers.dart';
 import 'package:student_app/src/core/providers/settings_provider.dart';
 import 'package:student_app/src/core/sync/sync_service.dart';
 import 'package:student_app/src/core/theme/app_theme.dart';
 import 'package:student_app/src/features/auth/providers/auth_provider.dart';
-import 'package:student_app/src/core/database/providers.dart';
+// Core providers integrated
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SettingsScreen extends ConsumerWidget {

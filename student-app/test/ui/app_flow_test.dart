@@ -9,13 +9,12 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import 'package:student_app/src/app.dart';
 import 'package:student_app/src/core/database/database.dart';
-import 'package:student_app/src/core/database/providers.dart';
-import 'package:student_app/src/core/supabase/providers.dart';
+import 'package:student_app/src/core/core_providers.dart';
 import 'package:student_app/src/features/auth/providers/auth_providers.dart'
     as domain_auth;
 import 'package:student_app/src/features/auth/providers/auth_provider.dart'
     as infra_auth;
-import 'package:student_app/src/core/connectivity/connectivity_service.dart';
+// Connectivity is now in core_providers.dart
 import 'package:student_app/src/features/home/screens/main_shell.dart';
 import 'package:student_app/src/core/sync/sync_service.dart';
 

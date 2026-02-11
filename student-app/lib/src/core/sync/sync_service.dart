@@ -4,11 +4,9 @@ import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:student_app/src/core/database/database.dart';
-import 'package:student_app/src/core/database/providers.dart';
-import 'package:student_app/src/core/supabase/providers.dart';
-import 'package:student_app/src/features/curriculum/repositories/domain_repository.dart';
-import 'package:student_app/src/features/curriculum/repositories/skill_repository.dart';
-import 'package:student_app/src/features/curriculum/repositories/question_repository.dart';
+import 'package:student_app/src/core/core_providers.dart';
+import 'package:student_app/src/features/curriculum/repositories/curriculum_repositories.dart';
+import 'package:student_app/src/features/curriculum/repositories/local_curriculum_repository.dart';
 
 import 'package:questerix_domain/questerix_domain.dart' as model;
 
@@ -43,26 +41,20 @@ final syncServiceProvider =
     StateNotifierProvider<SyncService, SyncState>((ref) {
   final database = ref.watch(databaseProvider);
   final supabase = ref.watch(supabaseClientProvider);
-  final domainRepo = ref.watch(localDomainRepositoryProvider);
-  final skillRepo = ref.watch(localSkillRepositoryProvider);
-  final questionRepo = ref.watch(localQuestionRepositoryProvider);
-  return SyncService(database, supabase, domainRepo, skillRepo, questionRepo);
+  final curriculumRepo = ref.watch(localCurriculumRepositoryProvider);
+  return SyncService(database, supabase, curriculumRepo);
 });
 
 /// Sync service - handles push/pull synchronization (manual only)
 class SyncService extends StateNotifier<SyncState> {
   final AppDatabase _database;
   final SupabaseClient _supabase;
-  final DriftDomainRepository _domainRepo;
-  final DriftSkillRepository _skillRepo;
-  final DriftQuestionRepository _questionRepo;
+  final LocalCurriculumRepository _curriculumRepo;
 
   SyncService(
     this._database,
     this._supabase,
-    this._domainRepo,
-    this._skillRepo,
-    this._questionRepo,
+    this._curriculumRepo,
   ) : super(SyncState.idle());
 
   /// Full sync: push local changes, then pull remote changes
@@ -134,28 +126,28 @@ class SyncService extends StateNotifier<SyncState> {
                 },
               );
 
-            // Update local skill progress if returned
-            if (response.isNotEmpty) {
-              final progressList = response.map((json) {
-                return SkillProgressCompanion(
-                  id: Value(json['id'] as String),
-                  userId: Value(json['user_id'] as String),
-                  skillId: Value(json['skill_id'] as String),
-                  totalAttempts: Value(json['total_attempts'] as int),
-                  correctAttempts: Value(json['correct_attempts'] as int),
-                  totalPoints: Value(json['total_points'] as int),
-                  masteryLevel: Value((json['mastery_level'] as num).round()),
-                  currentStreak: Value(json['current_streak'] as int),
-                  longestStreak: Value(json['longest_streak'] as int),
-                  lastAttemptAt: Value(json['last_attempt_at'] != null
-                      ? DateTime.parse(json['last_attempt_at'] as String)
-                      : null),
-                  createdAt:
-                      Value(DateTime.parse(json['created_at'] as String)),
-                  updatedAt:
-                      Value(DateTime.parse(json['updated_at'] as String)),
-                );
-              }).toList();
+              // Update local skill progress if returned
+              if (response.isNotEmpty) {
+                final progressList = response.map((json) {
+                  return SkillProgressCompanion(
+                    id: Value(json['id'] as String),
+                    userId: Value(json['user_id'] as String),
+                    skillId: Value(json['skill_id'] as String),
+                    totalAttempts: Value(json['total_attempts'] as int),
+                    correctAttempts: Value(json['correct_attempts'] as int),
+                    totalPoints: Value(json['total_points'] as int),
+                    masteryLevel: Value((json['mastery_level'] as num).round()),
+                    currentStreak: Value(json['current_streak'] as int),
+                    longestStreak: Value(json['longest_streak'] as int),
+                    lastAttemptAt: Value(json['last_attempt_at'] != null
+                        ? DateTime.parse(json['last_attempt_at'] as String)
+                        : null),
+                    createdAt:
+                        Value(DateTime.parse(json['created_at'] as String)),
+                    updatedAt:
+                        Value(DateTime.parse(json['updated_at'] as String)),
+                  );
+                }).toList();
 
                 await _database.batch((batch) {
                   for (final progress in progressList) {
@@ -171,7 +163,8 @@ class SyncService extends StateNotifier<SyncState> {
               await _supabase.from(tableName).upsert(payloads);
             }
           } else if (action == 'DELETE') {
-            final ids = batch.map((item) => item.recordId).whereType<String>().toList();
+            final ids =
+                batch.map((item) => item.recordId).whereType<String>().toList();
             await _supabase.from(tableName).delete().inFilter('id', ids);
           }
 
@@ -225,13 +218,13 @@ class SyncService extends StateNotifier<SyncState> {
     if (active.isNotEmpty) {
       final domains =
           active.map((json) => model.Domain.fromJson(json)).toList();
-      await _domainRepo.batchUpsert(domains);
+      await _curriculumRepo.batchUpsertDomains(domains);
     }
 
     // Delete tombstoned records
     if (deleted.isNotEmpty) {
       final deletedIds = deleted.map((json) => json['id'] as String).toList();
-      await _domainRepo.batchDelete(deletedIds);
+      await _curriculumRepo.executeBatchDelete(deletedIds, table: 'domains');
     }
 
     await _updateLastSync('domains', DateTime.now());
@@ -251,15 +244,14 @@ class SyncService extends StateNotifier<SyncState> {
 
     // Upsert active records
     if (active.isNotEmpty) {
-      final skills =
-          active.map((json) => model.Skill.fromJson(json)).toList();
-      await _skillRepo.batchUpsert(skills);
+      final skills = active.map((json) => model.Skill.fromJson(json)).toList();
+      await _curriculumRepo.batchUpsertSkills(skills);
     }
 
     // Delete tombstoned records
     if (deleted.isNotEmpty) {
       final deletedIds = deleted.map((json) => json['id'] as String).toList();
-      await _skillRepo.batchDelete(deletedIds);
+      await _curriculumRepo.executeBatchDelete(deletedIds, table: 'skills');
     }
 
     await _updateLastSync('skills', DateTime.now());
@@ -281,13 +273,13 @@ class SyncService extends StateNotifier<SyncState> {
     if (active.isNotEmpty) {
       final questions =
           active.map((json) => model.Question.fromJson(json)).toList();
-      await _questionRepo.batchUpsert(questions);
+      await _curriculumRepo.batchUpsertQuestions(questions);
     }
 
     // Delete tombstoned records
     if (deleted.isNotEmpty) {
       final deletedIds = deleted.map((json) => json['id'] as String).toList();
-      await _questionRepo.batchDelete(deletedIds);
+      await _curriculumRepo.executeBatchDelete(deletedIds, table: 'questions');
     }
 
     await _updateLastSync('questions', DateTime.now());

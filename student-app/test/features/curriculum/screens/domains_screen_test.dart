@@ -4,19 +4,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:questerix_domain/questerix_domain.dart' as model;
 import 'package:mocktail/mocktail.dart';
-import 'package:student_app/src/core/connectivity/connectivity_service.dart';
+import 'package:student_app/src/core/core_providers.dart';
 import 'package:student_app/src/core/sync/sync_service.dart';
-import 'package:student_app/src/features/curriculum/repositories/domain_repository.dart';
+import 'package:student_app/src/features/curriculum/repositories/curriculum_repositories.dart';
 import 'package:student_app/src/features/curriculum/screens/domains_screen.dart';
 import 'package:student_app/src/features/progress/repositories/skill_progress_repository.dart';
-import 'package:student_app/src/features/curriculum/repositories/skill_repository.dart';
+// Legacy imports removed
 
-class MockDomainRepository extends Mock implements DomainRepository {}
+class MockCurriculumRepository extends Mock implements CurriculumRepository {}
 
 class MockSkillProgressRepository extends Mock
     implements SkillProgressRepository {}
 
-class MockSkillRepository extends Mock implements SkillRepository {}
+// class MockSkillRepository is now MockCurriculumRepository
 
 class MockSyncService extends StateNotifier<SyncState>
     with Mock
@@ -25,16 +25,14 @@ class MockSyncService extends StateNotifier<SyncState>
 }
 
 void main() {
-  late MockDomainRepository mockDomainRepository;
+  late MockCurriculumRepository mockCurriculumRepository;
   late MockSkillProgressRepository mockSkillProgressRepository;
   late MockSyncService mockSyncService;
-  late MockSkillRepository mockSkillRepository;
 
   setUp(() {
-    mockDomainRepository = MockDomainRepository();
+    mockCurriculumRepository = MockCurriculumRepository();
     mockSkillProgressRepository = MockSkillProgressRepository();
     mockSyncService = MockSyncService();
-    mockSkillRepository = MockSkillRepository();
 
     when(() => mockSkillProgressRepository.getMasteryForDomain(any()))
         .thenAnswer((_) async => 50);
@@ -44,17 +42,17 @@ void main() {
     when(() => mockSyncService.sync()).thenAnswer((_) async {});
 
     // Default stub for SkillsScreen loading
-    when(() => mockSkillRepository.watchByDomain(any()))
+    when(() => mockCurriculumRepository.watchByDomain(any()))
         .thenAnswer((_) => const Stream.empty());
   });
 
   Widget createWidgetUnderTest({Map<String, WidgetBuilder>? routes}) {
     return ProviderScope(
       overrides: [
-        domainRepositoryProvider.overrideWithValue(mockDomainRepository),
+        domainRepositoryProvider.overrideWithValue(mockCurriculumRepository),
         skillProgressRepositoryProvider
             .overrideWithValue(mockSkillProgressRepository),
-        skillRepositoryProvider.overrideWithValue(mockSkillRepository),
+        skillRepositoryProvider.overrideWithValue(mockCurriculumRepository),
         connectivityServiceProvider
             .overrideWith((ref) => Stream.value(ConnectivityStatus.online)),
         syncServiceProvider.overrideWith((ref) => mockSyncService),
@@ -73,7 +71,7 @@ void main() {
       final controller = StreamController<List<model.Domain>>();
       addTearDown(() => controller.close());
 
-      when(() => mockDomainRepository.watchAllPublished())
+      when(() => mockCurriculumRepository.watchAllPublished())
           .thenAnswer((_) => controller.stream);
 
       await tester.pumpWidget(createWidgetUnderTest());
@@ -108,7 +106,7 @@ void main() {
         ),
       ];
 
-      when(() => mockDomainRepository.watchAllPublished())
+      when(() => mockCurriculumRepository.watchAllPublished())
           .thenAnswer((_) => Stream.value(mockDomains));
 
       await tester.pumpWidget(createWidgetUnderTest());
@@ -120,7 +118,7 @@ void main() {
 
     testWidgets('displays empty state when no domains',
         (WidgetTester tester) async {
-      when(() => mockDomainRepository.watchAllPublished())
+      when(() => mockCurriculumRepository.watchAllPublished())
           .thenAnswer((_) => Stream.value([]));
 
       await tester.pumpWidget(createWidgetUnderTest());
@@ -143,7 +141,7 @@ void main() {
         ),
       ];
 
-      when(() => mockDomainRepository.watchAllPublished())
+      when(() => mockCurriculumRepository.watchAllPublished())
           .thenAnswer((_) => Stream.value(mockDomains));
 
       await tester.pumpWidget(createWidgetUnderTest(
@@ -162,7 +160,7 @@ void main() {
 
     testWidgets('displays error message when loading fails',
         (WidgetTester tester) async {
-      when(() => mockDomainRepository.watchAllPublished())
+      when(() => mockCurriculumRepository.watchAllPublished())
           .thenAnswer((_) => Stream.error(Exception('Error loading domains')));
 
       await tester.pumpWidget(createWidgetUnderTest());

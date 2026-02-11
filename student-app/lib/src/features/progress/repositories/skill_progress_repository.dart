@@ -1,14 +1,14 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
+import 'package:student_app/src/features/auth/providers/auth_provider.dart';
 import 'package:student_app/src/core/database/database.dart';
-import 'package:student_app/src/core/database/providers.dart';
-import 'package:student_app/src/core/supabase/providers.dart';
+import 'package:student_app/src/core/core_providers.dart';
 
 final skillProgressRepositoryProvider =
     Provider<SkillProgressRepository>((ref) {
   final database = ref.watch(databaseProvider);
-  final userId = ref.watch(currentUserIdProvider);
+  final userId = ref.watch(currentUserProvider)?.id;
   return SkillProgressRepository(database, userId);
 });
 

@@ -84,12 +84,17 @@ serve(async (req) => {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     // Use Gemini Pro for validation (Stronger reasoning than Flash)
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      generationConfig: {
+        temperature: 0.1,
+      },
+    });
 
     const prompt = buildValidationPrompt(questions, source_text, rules);
 
     const startTime = Date.now();
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(prompt); // enforced-temp
     const response = await result.response;
     const validationText = response.text();
     const duration = Date.now() - startTime;

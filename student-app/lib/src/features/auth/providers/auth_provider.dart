@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:student_app/src/core/supabase/providers.dart';
+import 'package:student_app/src/core/core_providers.dart';
 import 'package:student_app/src/core/services/security_service.dart';
 
 class AuthService {

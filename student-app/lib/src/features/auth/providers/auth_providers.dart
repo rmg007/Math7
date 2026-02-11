@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:questerix_domain/questerix_domain.dart';
-import 'package:student_app/src/core/supabase/providers.dart';
+import 'package:student_app/src/core/core_providers.dart';
 import '../repositories/supabase_auth_repository.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {

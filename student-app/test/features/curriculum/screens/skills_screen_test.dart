@@ -4,22 +4,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:questerix_domain/questerix_domain.dart' as model;
 import 'package:mocktail/mocktail.dart';
-import 'package:student_app/src/features/curriculum/repositories/skill_repository.dart';
+import 'package:student_app/src/features/curriculum/repositories/curriculum_repositories.dart';
 import 'package:student_app/src/features/curriculum/screens/skills_screen.dart';
 import 'package:student_app/src/features/curriculum/screens/practice_screen.dart';
 import 'package:student_app/src/features/progress/repositories/skill_progress_repository.dart';
-// Practice Screen Dependencies
-import 'package:student_app/src/features/curriculum/repositories/question_repository.dart';
 import 'package:student_app/src/features/progress/repositories/attempt_repository.dart';
 import 'package:student_app/src/features/progress/repositories/session_repository.dart';
 
-class MockSkillRepository extends Mock implements SkillRepository {}
+class MockCurriculumRepository extends Mock implements CurriculumRepository {}
 
 class MockSkillProgressRepository extends Mock
     implements SkillProgressRepository {}
 
 // Practice Deps
-class MockQuestionRepository extends Mock implements QuestionRepository {}
+// class MockQuestionRepository is now handled by MockCurriculumRepository
 
 class MockAttemptRepository extends Mock implements AttemptRepository {}
 
@@ -27,25 +25,23 @@ class MockPracticeSessionRepository extends Mock
     implements PracticeSessionRepository {}
 
 void main() {
-  late MockSkillRepository mockSkillRepository;
+  late MockCurriculumRepository mockCurriculumRepository;
   late MockSkillProgressRepository mockSkillProgressRepository;
-  late MockQuestionRepository mockQuestionRepository;
   late MockAttemptRepository mockAttemptRepository;
   late MockPracticeSessionRepository mockPracticeSessionRepository;
 
   const testDomainId = 'test-domain-1';
 
   setUp(() {
-    mockSkillRepository = MockSkillRepository();
+    mockCurriculumRepository = MockCurriculumRepository();
     mockSkillProgressRepository = MockSkillProgressRepository();
-    mockQuestionRepository = MockQuestionRepository();
     mockAttemptRepository = MockAttemptRepository();
     mockPracticeSessionRepository = MockPracticeSessionRepository();
 
     when(() => mockSkillProgressRepository.getProgressForSkill(any()))
         .thenAnswer((_) async => null);
 
-    when(() => mockQuestionRepository.getRandomBySkill(any(), any()))
+    when(() => mockCurriculumRepository.getRandomBySkill(any(), any()))
         .thenAnswer((_) async => []);
     when(() => mockPracticeSessionRepository.startSession(
         skillId: any(named: 'skillId'))).thenAnswer((_) async => 'session-1');
@@ -54,10 +50,10 @@ void main() {
   Widget createWidgetUnderTest() {
     return ProviderScope(
       overrides: [
-        skillRepositoryProvider.overrideWithValue(mockSkillRepository),
+        skillRepositoryProvider.overrideWithValue(mockCurriculumRepository),
         skillProgressRepositoryProvider
             .overrideWithValue(mockSkillProgressRepository),
-        questionRepositoryProvider.overrideWithValue(mockQuestionRepository),
+        questionRepositoryProvider.overrideWithValue(mockCurriculumRepository),
         attemptRepositoryProvider.overrideWithValue(mockAttemptRepository),
         practiceSessionRepositoryProvider
             .overrideWithValue(mockPracticeSessionRepository),
@@ -77,7 +73,7 @@ void main() {
       final controller = StreamController<List<model.Skill>>();
       addTearDown(() => controller.close());
 
-      when(() => mockSkillRepository.watchByDomain(any()))
+      when(() => mockCurriculumRepository.watchByDomain(any()))
           .thenAnswer((_) => controller.stream);
 
       await tester.pumpWidget(createWidgetUnderTest());
@@ -113,7 +109,7 @@ void main() {
         ),
       ];
 
-      when(() => mockSkillRepository.watchByDomain(any()))
+      when(() => mockCurriculumRepository.watchByDomain(any()))
           .thenAnswer((_) => Stream.value(mockSkills));
 
       await tester.pumpWidget(createWidgetUnderTest());
@@ -125,7 +121,7 @@ void main() {
 
     testWidgets('displays error message when loading fails',
         (WidgetTester tester) async {
-      when(() => mockSkillRepository.watchByDomain(any()))
+      when(() => mockCurriculumRepository.watchByDomain(any()))
           .thenAnswer((_) => Stream.error('API Error'));
 
       await tester.pumpWidget(createWidgetUnderTest());
@@ -153,7 +149,7 @@ void main() {
         ),
       ];
 
-      when(() => mockSkillRepository.watchByDomain(any()))
+      when(() => mockCurriculumRepository.watchByDomain(any()))
           .thenAnswer((_) => Stream.value(mockSkills));
 
       await tester.pumpWidget(createWidgetUnderTest());

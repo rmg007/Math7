@@ -30,7 +30,14 @@ export async function generateQuestionsFromAI(params: GenerateQuestionsParams): 
     const { context, count, difficulty, promptInstruction, questionType } = params;
 
     // Use Gemini 1.5 Flash for speed and cost
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ 
+        model: "gemini-1.5-flash",
+        generationConfig: {
+            temperature: 0.1,
+            topP: 0.95,
+            topK: 40,
+        }
+    });
 
     const systemPrompt = `
     You are a strict Data Extraction Engine. You DO NOT speak. You ONLY output a valid JSON Array.
@@ -66,7 +73,7 @@ export async function generateQuestionsFromAI(params: GenerateQuestionsParams): 
     `;
 
     try {
-        const result = await model.generateContent([systemPrompt, userPrompt]);
+        const result = await model.generateContent([systemPrompt, userPrompt]); // enforced-temp
         const response = result.response;
         const text = response.text();
         

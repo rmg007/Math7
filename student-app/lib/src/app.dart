@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:student_app/src/core/connectivity/connectivity_service.dart';
+import 'package:student_app/src/core/core_providers.dart';
 import 'package:student_app/src/core/providers/settings_provider.dart';
 import 'package:student_app/src/core/theme/app_theme.dart';
 import 'package:student_app/src/features/auth/providers/auth_provider.dart';
@@ -25,16 +25,14 @@ class _QuesterixAppState extends ConsumerState<QuesterixApp> {
     final settings = ref.watch(settingsProvider);
     ref.listen(authStateProvider, (previous, next) {});
 
-    ref.listen(connectivityServiceProvider, (previous, next) {
-      next.whenData((status) {
-        if (previous != null) {
-          previous.whenData((prevStatus) {
-            if (prevStatus != status) {
-              _showConnectivitySnackbar(context, status);
-            }
-          });
-        }
-      });
+    ref.listen<AsyncValue<ConnectivityStatus>>(connectivityServiceProvider,
+        (previous, next) {
+      final oldStatus = previous?.valueOrNull;
+      final newStatus = next.valueOrNull;
+
+      if (newStatus != null && oldStatus != null && oldStatus != newStatus) {
+        _showConnectivitySnackbar(context, newStatus);
+      }
     });
 
     return MaterialApp(

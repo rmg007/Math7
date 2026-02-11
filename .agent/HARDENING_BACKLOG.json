@@ -1,230 +1,51 @@
 {
   "stats": {
-    "critical": 6,
-    "warning": 20,
-    "info": 0
+    "info": 0,
+    "critical": 0,
+    "warning": 5
   },
-  "verdict": "🔴 STOP SHIP",
   "findings": [
     {
-      "status": "OPEN",
-      "type": "security",
-      "message": "VUL-002 (RLS Leakage)",
-      "severity": "CRITICAL",
-      "line": 86,
-      "file": "supabase\\migrations\\20260203000007_create_mentor_hub.sql",
-      "id": "-1942598307"
-    },
-    {
-      "status": "OPEN",
-      "type": "security",
-      "message": "VUL-002 (RLS Leakage)",
-      "severity": "CRITICAL",
-      "line": 87,
-      "file": "supabase\\migrations\\20260203000007_create_mentor_hub.sql",
-      "id": "-1130295450"
-    },
-    {
-      "status": "OPEN",
-      "type": "security",
-      "message": "VUL-002 (RLS Leakage)",
-      "severity": "CRITICAL",
-      "line": 105,
-      "file": "supabase\\migrations\\20260203000007_create_mentor_hub.sql",
-      "id": "-1558385258"
-    },
-    {
-      "status": "OPEN",
-      "type": "security",
-      "message": "VUL-002 (RLS Leakage)",
-      "severity": "CRITICAL",
-      "line": 106,
-      "file": "supabase\\migrations\\20260203000007_create_mentor_hub.sql",
-      "id": "1296778423"
-    },
-    {
-      "status": "OPEN",
-      "type": "security",
-      "message": "VUL-002 (RLS Leakage)",
-      "severity": "CRITICAL",
-      "line": 124,
-      "file": "supabase\\migrations\\20260203000007_create_mentor_hub.sql",
-      "id": "-1252316154"
-    },
-    {
-      "status": "OPEN",
-      "type": "security",
-      "message": "VUL-002 (RLS Leakage)",
-      "severity": "CRITICAL",
-      "line": 125,
-      "file": "supabase\\migrations\\20260203000007_create_mentor_hub.sql",
-      "id": "1249749844"
-    },
-    {
-      "status": "OPEN",
-      "type": "ai_governance",
-      "message": "Missing Temp",
-      "severity": "WARNING",
-      "line": 69,
-      "file": "admin-panel\\src\\lib\\gemini.ts",
-      "id": "1115775177"
-    },
-    {
-      "status": "OPEN",
-      "type": "ai_governance",
-      "message": "Missing Temp",
-      "severity": "WARNING",
-      "line": 110,
-      "file": "supabase\\functions\\analyze-spec-drift\\index.ts",
-      "id": "459661175"
-    },
-    {
-      "status": "OPEN",
-      "type": "ai_governance",
-      "message": "Missing Temp",
-      "severity": "WARNING",
-      "line": 108,
-      "file": "supabase\\functions\\generate-questions\\index.ts",
-      "id": "1610391343"
-    },
-    {
-      "status": "OPEN",
-      "type": "ai_governance",
-      "message": "Missing Temp",
-      "severity": "WARNING",
-      "line": 126,
-      "file": "supabase\\functions\\generate-test-from-spec\\index.ts",
-      "id": "-2072563730"
-    },
-    {
-      "status": "OPEN",
-      "type": "ai_governance",
-      "message": "Missing Temp",
-      "severity": "WARNING",
-      "line": 92,
-      "file": "supabase\\functions\\validate-content\\index.ts",
-      "id": "-1394530845"
-    },
-    {
-      "status": "OPEN",
+      "id": "-947852293",
       "type": "dead_file",
-      "message": "Hollow Placeholder (1316 bytes)",
-      "severity": "WARNING",
-      "file": "admin-panel\\src\\lib\\env.ts",
-      "id": "1526706598"
-    },
-    {
       "status": "OPEN",
-      "type": "dead_file",
-      "message": "Hollow Placeholder (1138 bytes)",
       "severity": "WARNING",
       "file": "admin-panel\\src\\lib\\monitoring.ts",
-      "id": "-1012431566"
+      "message": "Hollow Placeholder (1138 bytes)"
     },
     {
-      "status": "OPEN",
+      "id": "1492629625",
       "type": "dead_file",
-      "message": "Hollow Placeholder (1051 bytes)",
-      "severity": "WARNING",
-      "file": "admin-panel\\src\\types\\curriculum.types.ts",
-      "id": "-289456291"
-    },
-    {
       "status": "OPEN",
-      "type": "dead_file",
-      "message": "Hollow Placeholder (1309 bytes)",
       "severity": "WARNING",
       "file": "admin-panel\\src\\vite-env.d.ts",
-      "id": "-1322299793"
+      "message": "Hollow Placeholder (1309 bytes)"
     },
     {
-      "status": "OPEN",
+      "id": "1169597322",
       "type": "dead_file",
-      "message": "Hollow Placeholder (1401 bytes)",
-      "severity": "WARNING",
-      "file": "student-app\\lib\\src\\core\\connectivity\\connectivity_service.dart",
-      "id": "61716800"
-    },
-    {
       "status": "OPEN",
-      "type": "dead_file",
-      "message": "Hollow Placeholder (443 bytes)",
-      "severity": "WARNING",
-      "file": "student-app\\lib\\src\\core\\database\\providers.dart",
-      "id": "-2008256423"
-    },
-    {
-      "status": "OPEN",
-      "type": "dead_file",
-      "message": "Hollow Placeholder (613 bytes)",
-      "severity": "WARNING",
-      "file": "student-app\\lib\\src\\core\\errors\\error_handler.dart",
-      "id": "972215239"
-    },
-    {
-      "status": "OPEN",
-      "type": "dead_file",
-      "message": "Hollow Placeholder (745 bytes)",
-      "severity": "WARNING",
-      "file": "student-app\\lib\\src\\core\\supabase\\providers.dart",
-      "id": "334755882"
-    },
-    {
-      "status": "OPEN",
-      "type": "dead_file",
-      "message": "Hollow Placeholder (1180 bytes)",
       "severity": "WARNING",
       "file": "student-app\\lib\\src\\core\\theme\\generated\\app_borders.g.dart",
-      "id": "-241735200"
+      "message": "Hollow Placeholder (1180 bytes)"
     },
     {
-      "status": "OPEN",
+      "id": "1326538073",
       "type": "dead_file",
-      "message": "Hollow Placeholder (265 bytes)",
+      "status": "OPEN",
       "severity": "WARNING",
       "file": "student-app\\lib\\src\\core\\theme\\generated\\generated.dart",
-      "id": "-807749180"
+      "message": "Hollow Placeholder (265 bytes)"
     },
     {
-      "status": "OPEN",
+      "id": "-714481475",
       "type": "dead_file",
-      "message": "Hollow Placeholder (418 bytes)",
-      "severity": "WARNING",
-      "file": "student-app\\lib\\src\\features\\curriculum\\repositories\\interfaces\\domain_repository.dart",
-      "id": "1239736362"
-    },
-    {
       "status": "OPEN",
-      "type": "dead_file",
-      "message": "Hollow Placeholder (478 bytes)",
       "severity": "WARNING",
-      "file": "student-app\\lib\\src\\features\\curriculum\\repositories\\interfaces\\question_repository.dart",
-      "id": "876179113"
-    },
-    {
-      "status": "OPEN",
-      "type": "dead_file",
-      "message": "Hollow Placeholder (415 bytes)",
-      "severity": "WARNING",
-      "file": "student-app\\lib\\src\\features\\curriculum\\repositories\\interfaces\\skill_repository.dart",
-      "id": "-1901658492"
-    },
-    {
-      "status": "OPEN",
-      "type": "dead_file",
-      "message": "Hollow Placeholder (1238 bytes)",
-      "severity": "WARNING",
-      "file": "student-app\\lib\\src\\features\\curriculum\\repositories\\remote\\supabase_domain_repository.dart",
-      "id": "-574118726"
-    },
-    {
-      "status": "OPEN",
-      "type": "dead_file",
-      "message": "Hollow Placeholder (1313 bytes)",
-      "severity": "WARNING",
-      "file": "student-app\\lib\\src\\features\\curriculum\\repositories\\remote\\supabase_skill_repository.dart",
-      "id": "-1762478577"
+      "file": "student-app\\lib\\src\\core\\core_providers.dart",
+      "message": "Hollow Placeholder (1498 bytes)"
     }
   ],
-  "last_run": "2026-02-10 16:22"
+  "verdict": "🟡 DEBT WARN",
+  "last_run": "2026-02-10 17:33"
 }

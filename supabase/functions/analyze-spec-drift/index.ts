@@ -70,7 +70,12 @@ Deno.serve(async (req) => {
 
     // 3. Use Gemini to analyze drift
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') ?? '')
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-2.0-flash-exp',
+      generationConfig: {
+        temperature: 0.1,
+      },
+    })
 
     const prompt = `You are a specification compliance analyzer. Compare the specification against the actual implementation and identify any drift.
 
@@ -107,7 +112,7 @@ Rules:
 - Return "pass" only if zero findings
 `
 
-    const result = await model.generateContent(prompt)
+    const result = await model.generateContent(prompt) // enforced-temp
     const analysis = JSON.parse(result.response.text())
 
     // 4. Store validation results

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../supabase/providers.dart';
+import '../core_providers.dart';
 import 'env.dart';
 
 /// Represents the multi-tenant context for the current running session
@@ -66,10 +66,9 @@ class AppConfigService extends StateNotifier<AppContext?> {
     }
 
     if (subdomain == null) {
-       throw AppInitializationException(
-         'Security Violation: No tenant subdomain detected. Hardcoded fallbacks are disabled.',
-         subdomain: 'null'
-       );
+      throw AppInitializationException(
+          'Security Violation: No tenant subdomain detected. Hardcoded fallbacks are disabled.',
+          subdomain: 'null');
     }
 
     // 2. Fetch Config from Database (apps table)

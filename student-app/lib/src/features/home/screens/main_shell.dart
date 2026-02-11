@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:student_app/src/core/connectivity/connectivity_service.dart';
+import 'package:student_app/src/core/core_providers.dart';
 import 'package:student_app/src/core/sync/sync_service.dart';
 import 'package:student_app/src/core/theme/app_theme.dart';
 import 'package:student_app/src/core/theme/generated/generated.dart';

@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:questerix_domain/questerix_domain.dart' as model;
 import 'package:mocktail/mocktail.dart';
-import 'package:student_app/src/features/curriculum/repositories/question_repository.dart';
+import 'package:student_app/src/features/curriculum/repositories/curriculum_repositories.dart';
 import 'package:student_app/src/features/curriculum/screens/practice_screen.dart';
 import 'package:student_app/src/features/progress/repositories/attempt_repository.dart';
 import 'package:student_app/src/features/progress/repositories/session_repository.dart';
 import 'package:student_app/src/features/progress/repositories/skill_progress_repository.dart';
 
-class MockQuestionRepository extends Mock implements QuestionRepository {}
+class MockCurriculumRepository extends Mock implements CurriculumRepository {}
 
 class MockAttemptRepository extends Mock implements AttemptRepository {}
 
@@ -20,13 +20,13 @@ class MockPracticeSessionRepository extends Mock
     implements PracticeSessionRepository {}
 
 void main() {
-  late MockQuestionRepository mockQuestionRepository;
+  late MockCurriculumRepository mockCurriculumRepository;
   late MockAttemptRepository mockAttemptRepository;
   late MockSkillProgressRepository mockSkillProgressRepository;
   late MockPracticeSessionRepository mockSessionRepository;
 
   setUp(() {
-    mockQuestionRepository = MockQuestionRepository();
+    mockCurriculumRepository = MockCurriculumRepository();
     mockAttemptRepository = MockAttemptRepository();
     mockSkillProgressRepository = MockSkillProgressRepository();
     mockSessionRepository = MockPracticeSessionRepository();
@@ -55,7 +55,7 @@ void main() {
       ),
     ];
 
-    when(() => mockQuestionRepository.getRandomBySkill(any(), any()))
+    when(() => mockCurriculumRepository.getRandomBySkill(any(), any()))
         .thenAnswer((_) async => questions);
 
     when(() =>
@@ -66,7 +66,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          questionRepositoryProvider.overrideWithValue(mockQuestionRepository),
+          questionRepositoryProvider
+              .overrideWithValue(mockCurriculumRepository),
           attemptRepositoryProvider.overrideWithValue(mockAttemptRepository),
           skillProgressRepositoryProvider
               .overrideWithValue(mockSkillProgressRepository),
@@ -119,7 +120,7 @@ void main() {
       ),
     ];
 
-    when(() => mockQuestionRepository.getRandomBySkill(any(), any()))
+    when(() => mockCurriculumRepository.getRandomBySkill(any(), any()))
         .thenAnswer((_) async => questions);
     when(() =>
             mockSessionRepository.startSession(skillId: any(named: 'skillId')))
@@ -146,7 +147,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          questionRepositoryProvider.overrideWithValue(mockQuestionRepository),
+          questionRepositoryProvider
+              .overrideWithValue(mockCurriculumRepository),
           attemptRepositoryProvider.overrideWithValue(mockAttemptRepository),
           skillProgressRepositoryProvider
               .overrideWithValue(mockSkillProgressRepository),
