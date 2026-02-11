@@ -8,45 +8,126 @@
 
 ---
 
-## 2026-02-11: Checkly Synthetic Monitoring Implementation
+## 2026-02-11: Checkly Autonomous Monitoring Implementation
 
 ### Session Context
 
-- **Objective**: Implement production-grade synthetic monitoring across all 3 Cloudflare Pages apps + Supabase backend using Checkly.
-- **Scope**: Uptime monitors, Playwright checks, API health checks, SSL monitoring, status page, CI integration.
-- **Outcome**: ✅ Full monitoring infrastructure deployed using Checkly's free Hobby tier (10 checks).
+- **Objective**: Implement fully autonomous production monitoring with self-healing, auto-rollback, and incident reporting.
+- **Scope**: 8-phase autonomous pipeline, uptime monitors, Playwright checks, health checks, GitHub Actions integration.
+- **Outcome**: ✅ Complete autonomous monitoring system deployed with self-healing capabilities.
 
 ### What Was Done
 
 1. **Infrastructure Setup**
-   - Added Checkly CLI to admin-panel/package.json with checkly:test and checkly:deploy scripts
+   - Added Checkly CLI v7 to admin-panel/package.json with checkly:test and checkly:deploy scripts
    - Created admin-panel/**checks**/ directory structure following Checkly conventions
 
 2. **Monitoring Configuration**
-   - Created checkly.config.ts with 5 uptime monitors (admin, landing, student, supabase-rest, supabase-auth)
-   - Added SSL certificate monitoring for all 3 domains
-   - Configured alert channels with escalation rules
+   - Created checkly.config.ts with 6 uptime monitors (admin, landing, student, supabase-rest, supabase-auth, edge-functions)
+   - Added SSL certificate monitoring for all domains
+   - Configured checkMatch and browserChecks.testMatch for CLI v7 compatibility
 
-3. **Playwright Checks**
-   - admin-login.check.ts: P0 critical login flow test (adapted from existing E2E tests)
-   - admin-pages.check.ts: P1 important CRUD page readability tests
-   - landing-page.check.ts: P1 important landing page and route tests
+3. **Playwright Browser Checks**
+   - admin-login.spec.ts: P0 critical login flow test (production-safe)
+   - admin-pages.spec.ts: P1 important CRUD page readability tests
+   - landing-page.spec.ts: P1 important landing page and route tests
+   - api-health.spec.ts: Supabase REST API, Auth, and Edge Function health verification
 
-4. **API Health Checks**
-   - api-health.check.ts: Supabase REST API, Auth, and Edge Function health verification
-   - Tests for proper error responses (400/401) vs server errors (500)
+4. **Uptime Monitors**
+   - admin-http.uptime.check.ts: Admin Panel availability
+   - landing-http.uptime.check.ts: Landing Pages availability
+   - student-http.uptime.check.ts: Student App availability
+   - supabase-api.uptime.check.ts: Supabase REST API availability
+   - supabase-auth.uptime.check.ts: Supabase Auth availability (with apikey header)
 
-5. **CI/CD Integration**
-   - Created .github/workflows/checkly-deploy.yml for automated deployment
-   - Post-deploy verification step to catch regressions immediately
-   - Artifact upload for test results
+5. **Autonomous GitHub Actions Workflow**
+   - Created .github/workflows/checkly-deploy.yml with 8-phase pipeline:
+     1. Deploy monitoring config to Checkly
+     2. Health checks with 3x retry, SSL validation, response times
+     3. Self-healing via Cloudflare Pages + Supabase Edge Functions redeployment
+     4. Auto-rollback to previous commit if self-heal fails
+     5. Incident reporting via GitHub Issues (auto-create/update)
+     6. Auto-resolution (close issues when services recover)
+     7. Checkly synthetic test verification
+     8. Comprehensive health report summary
+
+6. **Triggers & Automation**
+   - Push to main (when check files change)
+   - Scheduled every 6 hours
+   - Manual workflow_dispatch with options (health-check, deploy, self-heal, full-cycle)
+   - Post-CI/E2E workflow completion
+
+### Critical Issues Resolved
+
+1. **Checkly CLI v7 Compatibility**
+   - Issue: `test.describe()` not allowed in .check.ts files
+   - Fix: Renamed Playwright files to .spec.ts, configured browserChecks.testMatch
+   - Issue: `test()` calls not allowed in construct files
+   - Fix: Separated uptime monitors (.check.ts) from Playwright tests (.spec.ts)
+
+2. **Supabase Auth Health Endpoint**
+   - Issue: `/auth/v1/health` returning 401 "No API key found"
+   - Fix: Added apikey and Authorization headers to both workflow and uptime check
+
+3. **Workflow Discovery**
+   - Issue: GitHub Actions showing "workflow does not exist"
+   - Fix: Pushed changes to trigger workflow registration
 
 ### Technical Decisions
 
-- **Check Allocation**: Used exactly 10 uptime monitors to fit Checkly Hobby free tier
-- **Smart Check Types**: Uptime monitors for "is it alive?" (cheap), Playwright for "does it work?" (expensive)
-- **Production Safety**: All checks are read-only, no test data seeding, dedicated monitoring account
-- **Alert Strategy**: 2 consecutive failures to avoid false positives, immediate alerts for P0 critical failures
+- **Check Allocation**: Used exactly 6 uptime monitors to fit Checkly Hobby free tier
+- **Autonomous Design**: Full self-healing without manual intervention
+- **Production Safety**: All checks are read-only, dedicated monitoring account
+- **Incident Management**: Automatic GitHub Issues with detailed runbooks
+- **Secrets Management**: All sensitive data in GitHub secrets (CHECKLY_API_KEY, CLOUDFLARE_API_TOKEN, SUPABASE_ACCESS_TOKEN)
+
+### Required GitHub Secrets
+
+For full autonomous operation:
+
+- `CHECKLY_API_KEY` ✅ (added)
+- `CHECKLY_ACCOUNT_ID` ✅ (added)
+- `MONITOR_USER_EMAIL` ✅ (added)
+- `MONITOR_USER_PASSWORD` ✅ (added)
+- `SUPABASE_ANON_KEY` ✅ (added)
+- `CLOUDFLARE_API_TOKEN` ✅ (added)
+- `CLOUDFLARE_ACCOUNT_ID` ✅ (added)
+- `SUPABASE_ACCESS_TOKEN` ✅ (added)
+
+### URLs Monitored
+
+- Admin Panel: https://questerix-admin.pages.dev
+- Landing Pages: https://questerix-landing.pages.dev
+- Student App: https://questerix-student.pages.dev
+- Supabase: https://qvslbiceoonrgjxzkotb.supabase.co
+
+### What Was Learned
+
+1. **Checkly CLI v7 Architecture**
+   - `.check.ts` files are for constructs/config only
+   - `.spec.ts` files are for Playwright tests
+   - Must use checkMatch + browserChecks.testMatch patterns
+
+2. **Autonomous Monitoring Patterns**
+   - Health checks with retries and timeouts
+   - Self-healing via redeployment
+   - Auto-rollback with previous commit restoration
+   - Incident reporting with GitHub Issues
+   - Auto-resolution when services recover
+
+3. **GitHub Actions Advanced Patterns**
+   - Multi-phase conditional workflows
+   - Dynamic job dependencies with `needs` and `if`
+   - GitHub Script API for issue management
+   - Artifact upload for test results
+   - Comprehensive reporting with ASCII art
+
+4. **Production Monitoring Best Practices**
+   - Separate uptime monitors (cheap) from browser checks (expensive)
+   - Use dedicated monitoring accounts
+   - Include SSL certificate monitoring
+   - Validate API error responses (400/401 vs 500)
+   - Track response times and performance metrics
 
 ### Key Learnings
 
@@ -58,27 +139,30 @@
 
 ### Files Created/Modified
 
-**Created (7 files):**
+**Created (11 files):**
 
-- admin-panel/**checks**/checkly.config.ts
-- admin-panel/**checks**/alert-channels.ts
-- admin-panel/**checks**/admin-login.check.ts
-- admin-panel/**checks**/admin-pages.check.ts
-- admin-panel/**checks**/landing-page.check.ts
-- admin-panel/**checks**/api-health.check.ts
-- .github/workflows/checkly-deploy.yml
+- admin-panel/**checks**/checkly.config.ts (updated with checkMatch + browserChecks.testMatch)
+- admin-panel/**checks**/README.md (monitoring documentation)
+- admin-panel/**checks**/admin-login.spec.ts (renamed from .check.ts)
+- admin-panel/**checks**/admin-pages.spec.ts (renamed from .check.ts)
+- admin-panel/**checks**/landing-page.spec.ts (renamed from .check.ts)
+- admin-panel/**checks**/api-health.spec.ts (renamed from .check.ts)
+- admin-panel/**checks**/admin-http.uptime.check.ts
+- admin-panel/**checks**/landing-http.uptime.check.ts
+- admin-panel/**checks**/student-http.uptime.check.ts
+- admin-panel/**checks**/supabase-api.uptime.check.ts
+- admin-panel/**checks**/supabase-auth.uptime.check.ts (with apikey header)
+- .github/workflows/checkly-deploy.yml (8-phase autonomous pipeline)
 
 **Modified (1 file):**
 
-- admin-panel/package.json (added checkly dependency and scripts)
+- admin-panel/package.json (updated checkly dependency to v7.0.0)
 
-### Next Steps Required
+### Status: ✅ COMPLETE
 
-1. Set up Checkly API keys in GitHub secrets
-2. Create dedicated monitoring user in Supabase Auth
-3. Configure environment variables in Checkly dashboard
-4. Run `npm install` and `npx checkly deploy` to activate monitoring
-5. Configure public status page subdomain
+All monitoring checks deployed and autonomous workflow active. GitHub secrets configured. System now runs automatically with self-healing capabilities.
+
+---
 
 ---
 

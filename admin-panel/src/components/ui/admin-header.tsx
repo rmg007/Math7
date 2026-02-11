@@ -47,12 +47,12 @@ export function AdminHeader({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           {Icon && (
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/20 flex-shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/10 flex-shrink-0">
               <Icon className="w-6 h-6 text-white" />
             </div>
           )}
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{title}</h1>
+            <h1 data-testid="admin-header-title" className="text-3xl font-bold text-gray-900 tracking-tight">{title}</h1>
             {description && <p className="text-gray-500 mt-1 max-w-2xl">{description}</p>}
           </div>
         </div>

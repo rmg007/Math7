@@ -192,7 +192,7 @@ body {
 .sidebar {
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+  scrollbar-color: rgba(167, 139, 250, 0.15) transparent;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -200,10 +200,10 @@ body {
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-  background-color: transparent;
+  background-color: rgba(167, 139, 250, 0.15);
   border-radius: 3px;
 }
 
 .sidebar:hover::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(167, 139, 250, 0.35);
 }
