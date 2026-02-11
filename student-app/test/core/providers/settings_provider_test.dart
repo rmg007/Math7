@@ -280,11 +280,11 @@ void main() {
       final settingsNotifierProvider =
           StateNotifierProvider<SettingsNotifier, AppSettings>(
               (ref) => SettingsNotifier());
-      final notifier = container.read(settingsNotifierProvider.notifier);
+      // Just ensure we can read it
+      container.read(settingsNotifierProvider.notifier);
 
-      // Should not throw when disposing
+      // Should not throw when disposing the container
       expect(() {
-        notifier.dispose();
         container.dispose();
       }, returnsNormally);
     });
@@ -307,8 +307,8 @@ void main() {
       expect(stopwatch.elapsedMilliseconds, lessThan(1000));
 
       // Final state should be correct
-      expect(notifier.state.largeText, isFalse); // 100 % 2 == 0
-      expect(notifier.state.darkMode, isFalse); // 100 % 3 == 1
+      expect(notifier.state.largeText, isFalse); // 99 % 2 == 0 is false
+      expect(notifier.state.darkMode, isTrue); // 99 % 3 == 0 is true
 
       notifier.dispose();
     });

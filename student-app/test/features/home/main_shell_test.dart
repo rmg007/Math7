@@ -3,13 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 import 'package:student_app/src/features/home/screens/main_shell.dart';
+import 'package:drift/drift.dart';
+import '../../helpers/test_helpers.dart';
 
 void main() {
+  setUpAll(() {
+    driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  });
+
   group('MainShell Widget Tests', () {
     late ProviderContainer container;
 
     setUp(() {
-      container = ProviderContainer();
+      container = ProviderContainer(
+        overrides: getTestOverrides(),
+      );
     });
 
     tearDown(() {
@@ -34,6 +42,10 @@ void main() {
       expect(find.text('Home'), findsOneWidget);
       expect(find.text('Progress'), findsOneWidget);
       expect(find.text('Settings'), findsOneWidget);
+
+      // Clean up to avoid pending timers from StreamBuilder/Drift
+      await tester.pumpWidget(Container());
+      await tester.pumpAndSettle();
     });
 
     testWidgets('should show correct initial tab (Home)',
@@ -49,6 +61,10 @@ void main() {
 
       // Should show Home tab initially (index 0)
       expect(find.text('Home'), findsOneWidget);
+
+      // Clean up
+      await tester.pumpWidget(Container());
+      await tester.pumpAndSettle();
     });
 
     testWidgets('should switch tabs when tapped', (WidgetTester tester) async {
@@ -74,6 +90,10 @@ void main() {
 
       // Should switch to Settings tab
       expect(find.text('Settings'), findsOneWidget);
+
+      // Clean up
+      await tester.pumpWidget(Container());
+      await tester.pumpAndSettle();
     });
 
     testWidgets('should show sync badge when syncing',
@@ -90,6 +110,10 @@ void main() {
       // Look for sync badge (implementation depends on actual UI)
       // This test would need mocking of sync state
       expect(find.byType(MainShell), findsOneWidget);
+
+      // Clean up
+      await tester.pumpWidget(Container());
+      await tester.pumpAndSettle();
     });
 
     testWidgets('should adapt layout for tablet screens',
@@ -202,7 +226,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: ProviderContainer(overrides: getTestOverrides()),
           child: MaterialApp(
             home: MainShell(),
           ),
@@ -219,7 +243,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: ProviderContainer(overrides: getTestOverrides()),
           child: MaterialApp(
             home: MainShell(),
           ),

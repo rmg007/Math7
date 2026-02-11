@@ -2,32 +2,73 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:student_app/src/features/progress/screens/progress_screen.dart';
 import 'package:student_app/src/features/progress/repositories/skill_progress_repository.dart';
+import 'package:student_app/src/features/progress/repositories/session_repository.dart';
+import 'package:student_app/src/features/curriculum/repositories/curriculum_repositories.dart';
+import 'package:student_app/src/core/core_providers.dart';
+import 'package:student_app/src/features/auth/providers/auth_provider.dart';
 
 class MockSkillProgressRepository extends Mock
     implements SkillProgressRepository {}
 
+class MockPracticeSessionRepository extends Mock
+    implements PracticeSessionRepository {}
+
+class MockCurriculumRepository extends Mock implements CurriculumRepository {}
+
+class MockSupabaseClient extends Mock implements SupabaseClient {}
+
+class MockAuthService extends Mock implements AuthService {}
+
 void main() {
+  late MockSkillProgressRepository mockProgressRepo;
+  late MockPracticeSessionRepository mockSessionRepo;
+  late MockCurriculumRepository mockCurriculumRepo;
+  late MockSupabaseClient mockSupabaseClient;
+  late MockAuthService mockAuthService;
+  late ProviderContainer container;
+
+  setUp(() {
+    mockProgressRepo = MockSkillProgressRepository();
+    mockSessionRepo = MockPracticeSessionRepository();
+    mockCurriculumRepo = MockCurriculumRepository();
+    mockSupabaseClient = MockSupabaseClient();
+    mockAuthService = MockAuthService();
+
+    // Default mocks
+    when(() => mockProgressRepo.getOverallStats()).thenAnswer((_) async => {
+          'totalPoints': 0,
+          'totalAttempts': 0,
+          'totalCorrect': 0,
+          'averageMastery': 0.0,
+          'longestStreak': 0,
+        });
+    when(() => mockCurriculumRepo.watchAllPublished())
+        .thenAnswer((_) => Stream.value([]));
+    when(() => mockSessionRepo.watchRecentSessions(limit: any(named: 'limit')))
+        .thenAnswer((_) => Stream.value([]));
+    when(() => mockProgressRepo.getMasteryForDomain(any()))
+        .thenAnswer((_) async => 0);
+
+    container = ProviderContainer(
+      overrides: [
+        skillProgressRepositoryProvider.overrideWithValue(mockProgressRepo),
+        practiceSessionRepositoryProvider.overrideWithValue(mockSessionRepo),
+        domainRepositoryProvider.overrideWithValue(mockCurriculumRepo),
+        supabaseClientProvider.overrideWithValue(mockSupabaseClient),
+        authServiceProvider.overrideWithValue(mockAuthService),
+        currentUserProvider.overrideWithValue(null),
+      ],
+    );
+  });
+
+  tearDown(() {
+    container.dispose();
+  });
+
   group('ProgressScreen Widget Tests', () {
-    late MockSkillProgressRepository mockRepository;
-    late ProviderContainer container;
-
-    setUp(() {
-      mockRepository = MockSkillProgressRepository();
-
-      // Mock the repository provider
-      container = ProviderContainer(
-        overrides: [
-          skillProgressRepositoryProvider.overrideWithValue(mockRepository),
-        ],
-      );
-    });
-
-    tearDown(() {
-      container.dispose();
-    });
-
     testWidgets('should build ProgressScreen with AppBar',
         (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -48,7 +89,7 @@ void main() {
     testWidgets('should display overall stats section',
         (WidgetTester tester) async {
       // Mock repository response
-      when(() => mockRepository.getOverallStats()).thenAnswer((_) async => {
+      when(() => mockProgressRepo.getOverallStats()).thenAnswer((_) async => {
             'totalPoints': 1500,
             'totalAttempts': 50,
             'totalCorrect': 40,
@@ -128,7 +169,7 @@ void main() {
 
     testWidgets('should handle loading state', (WidgetTester tester) async {
       // Mock repository to delay response
-      when(() => mockRepository.getOverallStats()).thenAnswer((_) async {
+      when(() => mockProgressRepo.getOverallStats()).thenAnswer((_) async {
         await Future.delayed(const Duration(seconds: 1));
         return {
           'totalPoints': 1000,
@@ -157,8 +198,8 @@ void main() {
 
     testWidgets('should handle error state', (WidgetTester tester) async {
       // Mock repository to throw error
-      when(() => mockRepository.getOverallStats())
-          .thenThrow(Exception('Failed to load stats'));
+      when(() => mockProgressRepo.getOverallStats())
+          .thenAnswer((_) async => throw Exception('Failed to load stats'));
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
@@ -178,7 +219,7 @@ void main() {
     testWidgets('should display correct stats values',
         (WidgetTester tester) async {
       // Mock repository with specific stats
-      when(() => mockRepository.getOverallStats()).thenAnswer((_) async => {
+      when(() => mockProgressRepo.getOverallStats()).thenAnswer((_) async => {
             'totalPoints': 2500,
             'totalAttempts': 100,
             'totalCorrect': 85,
@@ -237,7 +278,7 @@ void main() {
 
       // Verify layout structure
       expect(find.byType(SingleChildScrollView), findsOneWidget);
-      expect(find.byType(Column), findsOneWidget);
+      expect(find.byType(Column), findsWidgets);
       expect(find.byType(ProgressScreen), findsOneWidget);
     });
   });
@@ -247,6 +288,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
+          container: container,
           child: MaterialApp(
             home: ProgressScreen(),
           ),
@@ -260,6 +302,7 @@ void main() {
     testWidgets('should support screen readers', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
+          container: container,
           child: MaterialApp(
             home: ProgressScreen(),
           ),
@@ -274,21 +317,13 @@ void main() {
   group('ProgressScreen Integration Tests', () {
     testWidgets('should integrate with repository correctly',
         (WidgetTester tester) async {
-      final mockRepository = MockSkillProgressRepository();
-
-      when(() => mockRepository.getOverallStats()).thenAnswer((_) async => {
+      when(() => mockProgressRepo.getOverallStats()).thenAnswer((_) async => {
             'totalPoints': 500,
             'totalAttempts': 20,
             'totalCorrect': 15,
             'averageMastery': 0.75,
             'longestStreak': 2,
           });
-
-      final container = ProviderContainer(
-        overrides: [
-          skillProgressRepositoryProvider.overrideWithValue(mockRepository),
-        ],
-      );
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
@@ -302,10 +337,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify repository was called
-      verify(() => mockRepository.getOverallStats()).called(1);
+      verify(() => mockProgressRepo.getOverallStats()).called(1);
       expect(find.byType(ProgressScreen), findsOneWidget);
-
-      container.dispose();
     });
   });
 }

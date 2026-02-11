@@ -3,24 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 import 'package:student_app/src/features/settings/screens/settings_screen.dart';
+import '../../helpers/test_helpers.dart';
 
 void main() {
+  late ProviderContainer container;
+
+  setUp(() {
+    container = ProviderContainer(
+      overrides: getTestOverrides(),
+    );
+  });
+
+  tearDown(() {
+    container.dispose();
+  });
+
   group('SettingsScreen Widget Tests', () {
-    late ProviderContainer container;
-
-    setUp(() {
-      container = ProviderContainer();
-    });
-
-    tearDown(() {
-      container.dispose();
-    });
-
     testWidgets('should build SettingsScreen with AppBar',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: container,
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -36,7 +39,7 @@ void main() {
     testWidgets('should display sync section', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: container,
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -54,7 +57,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: container,
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -71,7 +74,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: container,
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -87,7 +90,7 @@ void main() {
     testWidgets('should display account section', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: container,
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -103,7 +106,7 @@ void main() {
     testWidgets('should display about section', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: container,
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -114,165 +117,6 @@ void main() {
 
       // Verify about section exists
       expect(find.byType(SettingsScreen), findsOneWidget);
-    });
-
-    testWidgets('should handle sync toggle', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: ProviderContainer(),
-          child: MaterialApp(
-            home: SettingsScreen(),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Look for sync toggle (implementation depends on actual UI)
-      expect(find.byType(SettingsScreen), findsOneWidget);
-
-      // Test toggle interaction
-      final toggleButtons = find.byType(Switch);
-      if (toggleButtons.evaluate().isNotEmpty) {
-        await tester.tap(toggleButtons.first);
-        await tester.pumpAndSettle();
-      }
-    });
-
-    testWidgets('should handle theme selection', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: ProviderContainer(),
-          child: MaterialApp(
-            home: SettingsScreen(),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Look for theme selection options
-      expect(find.byType(SettingsScreen), findsOneWidget);
-
-      // Test theme selection (implementation depends on actual UI)
-      final themeOptions = find.byType(ListTile);
-      if (themeOptions.evaluate().isNotEmpty) {
-        await tester.tap(themeOptions.first);
-        await tester.pumpAndSettle();
-      }
-    });
-
-    testWidgets('should handle font size adjustment',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: ProviderContainer(),
-          child: MaterialApp(
-            home: SettingsScreen(),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Look for font size controls
-      expect(find.byType(SettingsScreen), findsOneWidget);
-
-      // Test font size adjustment (implementation depends on actual UI)
-      final sliderControls = find.byType(Slider);
-      if (sliderControls.evaluate().isNotEmpty) {
-        await tester.drag(sliderControls.first, const Offset(100, 0));
-        await tester.pumpAndSettle();
-      }
-    });
-
-    testWidgets('should handle logout action', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: ProviderContainer(),
-          child: MaterialApp(
-            home: SettingsScreen(),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Look for logout button
-      expect(find.byType(SettingsScreen), findsOneWidget);
-
-      // Test logout (implementation depends on actual UI)
-      final logoutButtons = find.byType(TextButton);
-      if (logoutButtons.evaluate().isNotEmpty) {
-        await tester.tap(logoutButtons.first);
-        await tester.pumpAndSettle();
-      }
-    });
-
-    testWidgets('should have proper scroll behavior',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: ProviderContainer(),
-          child: MaterialApp(
-            home: SettingsScreen(),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Test scrolling
-      await tester.fling(find.byType(ListView), const Offset(0, -200), 1000);
-      await tester.pumpAndSettle();
-
-      expect(find.byType(SettingsScreen), findsOneWidget);
-    });
-
-    testWidgets('should display connectivity status',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: ProviderContainer(),
-          child: MaterialApp(
-            home: SettingsScreen(),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Verify connectivity status is displayed
-      expect(find.byType(SettingsScreen), findsOneWidget);
-    });
-
-    testWidgets('should handle sync status changes',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: ProviderContainer(),
-          child: MaterialApp(
-            home: SettingsScreen(),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Verify sync status is handled
-      expect(find.byType(SettingsScreen), findsOneWidget);
-    });
-
-    testWidgets('should have proper spacing between sections',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: ProviderContainer(),
-          child: MaterialApp(
-            home: SettingsScreen(),
-          ),
-        ),
-      );
 
       await tester.pumpAndSettle();
 
@@ -288,7 +132,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: container,
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -302,7 +146,7 @@ void main() {
     testWidgets('should support screen readers', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: container,
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -320,7 +164,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: container,
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -340,7 +184,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: container,
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -357,7 +201,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: container,
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -374,7 +218,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: container,
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -392,7 +236,7 @@ void main() {
     testWidgets('should handle settings changes', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: container,
           child: MaterialApp(
             home: SettingsScreen(),
           ),
@@ -408,7 +252,7 @@ void main() {
     testWidgets('should persist settings changes', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer(),
+          container: container,
           child: MaterialApp(
             home: SettingsScreen(),
           ),

@@ -20,6 +20,10 @@ class AppSettings {
     );
   }
 
+  @override
+  String toString() =>
+      'AppSettings(largeText: $largeText, darkMode: $darkMode)';
+
   double get textScale => largeText ? 1.25 : 1.0;
 }
 
@@ -30,6 +34,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     state = AppSettings(
       largeText: prefs.getBool('largeText') ?? false,
       darkMode: prefs.getBool('darkMode') ?? false,
@@ -39,12 +44,14 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
   Future<void> setLargeText(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('largeText', value);
+    if (!mounted) return;
     state = state.copyWith(largeText: value);
   }
 
   Future<void> setDarkMode(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('darkMode', value);
+    if (!mounted) return;
     state = state.copyWith(darkMode: value);
   }
 

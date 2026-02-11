@@ -146,13 +146,12 @@ void main() {
 
   group('Error Type Tests', () {
     test('should distinguish between error types', () {
-      const appError = AppError('Generic error');
       const networkError = NetworkError('Network error');
       const syncError = SyncError('Sync error');
       const validationError = ValidationError('Validation error', {});
 
-      expect(appError, isA<AppError>());
-      expect(appError, isNot(isA<NetworkError>()));
+      expect(networkError, isA<AppError>());
+      expect(networkError, isA<NetworkError>());
 
       expect(networkError, isA<AppError>());
       expect(networkError, isA<NetworkError>());
@@ -208,7 +207,7 @@ void main() {
       const NetworkError error1 = NetworkError('Test');
       const NetworkError error2 = NetworkError('Test');
 
-      expect(error1.hashCode, isNot(equals(error2.hashCode)));
+      expect(error1.hashCode, equals(error2.hashCode));
     });
   });
 

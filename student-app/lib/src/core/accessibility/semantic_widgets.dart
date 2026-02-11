@@ -25,6 +25,7 @@ class SemanticButton extends StatelessWidget {
       label: semanticLabel,
       hint: semanticHint,
       onTap: enabled ? onPressed : null,
+      container: true,
       child: GestureDetector(
         onTap: enabled ? onPressed : null,
         behavior: HitTestBehavior.opaque,
