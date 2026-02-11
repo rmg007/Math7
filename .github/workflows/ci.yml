@@ -13,7 +13,7 @@ jobs:
         run: bash ./scripts/check-docs-freshness.sh
 
       - name: Link Integrity Check (Lychee)
-        uses: lycheeverse/lychee-action@v1
+        uses: lycheeverse/lychee-action@v2
         with:
           args: --verbose --no-progress './**/*.md' --exclude 'node_modules'
           fail: true
