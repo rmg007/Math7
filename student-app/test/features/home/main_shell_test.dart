@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
+import 'package:flutter/services.dart';
 import 'package:student_app/src/features/home/screens/main_shell.dart';
 
-import 'main_shell_test.mocks.dart';
-
-@GenerateMocks([])
 void main() {
   group('MainShell Widget Tests', () {
     late ProviderContainer container;
@@ -20,9 +16,11 @@ void main() {
       container.dispose();
     });
 
-    testWidgets('should build MainShell with navigation tabs', (WidgetTester tester) async {
+    testWidgets('should build MainShell with navigation tabs',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
+          container: container,
           child: MaterialApp(
             home: MainShell(),
           ),
@@ -31,16 +29,18 @@ void main() {
 
       // Verify the main shell is built
       expect(find.byType(MainShell), findsOneWidget);
-      
+
       // Verify navigation destinations exist
       expect(find.text('Home'), findsOneWidget);
       expect(find.text('Progress'), findsOneWidget);
       expect(find.text('Settings'), findsOneWidget);
     });
 
-    testWidgets('should show correct initial tab (Home)', (WidgetTester tester) async {
+    testWidgets('should show correct initial tab (Home)',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
+          container: container,
           child: MaterialApp(
             home: MainShell(),
           ),
@@ -54,6 +54,7 @@ void main() {
     testWidgets('should switch tabs when tapped', (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
+          container: container,
           child: MaterialApp(
             home: MainShell(),
           ),
@@ -75,9 +76,11 @@ void main() {
       expect(find.text('Settings'), findsOneWidget);
     });
 
-    testWidgets('should show sync badge when syncing', (WidgetTester tester) async {
+    testWidgets('should show sync badge when syncing',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
+          container: container,
           child: MaterialApp(
             home: MainShell(),
           ),
@@ -89,13 +92,15 @@ void main() {
       expect(find.byType(MainShell), findsOneWidget);
     });
 
-    testWidgets('should adapt layout for tablet screens', (WidgetTester tester) async {
+    testWidgets('should adapt layout for tablet screens',
+        (WidgetTester tester) async {
       // Set tablet screen size
       tester.binding.window.physicalSizeTestValue = const Size(1024, 768);
       tester.binding.window.devicePixelRatioTestValue = 1.0;
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
+          container: container,
           child: MaterialApp(
             home: MainShell(),
           ),
@@ -104,18 +109,20 @@ void main() {
 
       // Verify responsive layout
       expect(find.byType(MainShell), findsOneWidget);
-      
+
       // Reset window size
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
     });
 
-    testWidgets('should adapt layout for desktop screens', (WidgetTester tester) async {
+    testWidgets('should adapt layout for desktop screens',
+        (WidgetTester tester) async {
       // Set desktop screen size
       tester.binding.window.physicalSizeTestValue = const Size(1920, 1080);
       tester.binding.window.devicePixelRatioTestValue = 1.0;
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
+          container: container,
           child: MaterialApp(
             home: MainShell(),
           ),
@@ -124,14 +131,16 @@ void main() {
 
       // Verify responsive layout
       expect(find.byType(MainShell), findsOneWidget);
-      
+
       // Reset window size
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
     });
 
-    testWidgets('should handle connectivity state changes', (WidgetTester tester) async {
+    testWidgets('should handle connectivity state changes',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
+          container: container,
           child: MaterialApp(
             home: MainShell(),
           ),
@@ -142,9 +151,11 @@ void main() {
       expect(find.byType(MainShell), findsOneWidget);
     });
 
-    testWidgets('should maintain state when switching tabs', (WidgetTester tester) async {
+    testWidgets('should maintain state when switching tabs',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
+          container: container,
           child: MaterialApp(
             home: MainShell(),
           ),
@@ -163,9 +174,11 @@ void main() {
       expect(find.text('Home'), findsOneWidget);
     });
 
-    testWidgets('should handle navigation properly', (WidgetTester tester) async {
+    testWidgets('should handle navigation properly',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
+          container: container,
           child: MaterialApp(
             home: MainShell(),
           ),
@@ -174,20 +187,22 @@ void main() {
 
       // Test navigation between different screens
       expect(find.byType(MainShell), findsOneWidget);
-      
+
       // Each tab should contain its respective screen
       await tester.tap(find.text('Progress'));
       await tester.pumpAndSettle();
-      
+
       await tester.tap(find.text('Settings'));
       await tester.pumpAndSettle();
     });
   });
 
   group('MainShell Accessibility Tests', () {
-    testWidgets('should have proper accessibility labels', (WidgetTester tester) async {
+    testWidgets('should have proper accessibility labels',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
+          container: ProviderContainer(),
           child: MaterialApp(
             home: MainShell(),
           ),
@@ -200,9 +215,11 @@ void main() {
       expect(find.bySemanticsLabel('Settings'), findsOneWidget);
     });
 
-    testWidgets('should support keyboard navigation', (WidgetTester tester) async {
+    testWidgets('should support keyboard navigation',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         UncontrolledProviderScope(
+          container: ProviderContainer(),
           child: MaterialApp(
             home: MainShell(),
           ),
@@ -212,7 +229,7 @@ void main() {
       // Test focus navigation
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
-      
+
       // Verify focus management
       expect(find.byType(MainShell), findsOneWidget);
     });
