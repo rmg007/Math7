@@ -8,7 +8,7 @@ description: Default entry point for Questerix development
 
 > **⚡ Superpower Fallback**: If commands need approval, use `/sp` - I output JSON, you paste into `tasks.json`, watcher runs it.
 
-You are operating in the **Questerix Unified Lifecycle**. 
+You are operating in the **Questerix Unified Lifecycle**.
 
 ---
 
@@ -23,6 +23,30 @@ if (Test-Path "docs/HANDOVER.md") { Write-Output "HANDOVER_EXISTS" } else { Writ
 
 - **If `HANDOVER_EXISTS`**: Execute the `/wake` workflow automatically. Do NOT ask the user — just restore context, run health check, and present the summary.
 - **If `NO_HANDOVER`**: Proceed normally with whatever the user asked.
+
+---
+
+## 🩺 CI Repair Check (Run After Wake)
+
+After wake/handover resolution, check GitHub for open CI repair issues:
+
+```powershell
+// turbo
+gh issue list --label "ci-repair" --state open --json number,title,body --limit 5 2>$null
+```
+
+- **If `gh` is not authenticated**: Skip silently. Do NOT block session start.
+- **If repair issues found**: Present them to the user:
+
+  ```
+  🩺 Found [N] open CI repair issue(s):
+     #42: [REPAIR] CI Failure: CI — Lint
+     #43: [REPAIR] CI Failure: Admin Panel E2E Tests — Run E2E tests
+
+  Would you like me to prioritize fixing these? [Y/n]
+  ```
+
+- **If none found**: Skip silently.
 
 ---
 

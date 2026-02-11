@@ -22,9 +22,10 @@ if (Test-Path "docs/HANDOVER.md") { Get-Content "docs/HANDOVER.md" } else { Writ
 ```
 
 **If not found**: Stop and report:
+
 ```
 ☀️ No handover file found at docs/HANDOVER.md.
-   
+
    Options:
    1. Use /resume (recover from same-agent session break)
    2. Use /continue (recover after agent switch)
@@ -34,6 +35,7 @@ if (Test-Path "docs/HANDOVER.md") { Get-Content "docs/HANDOVER.md" } else { Writ
 ### 1.2 Parse and Validate
 
 Extract from HANDOVER.md:
+
 - `Saved` timestamp
 - `Branch` name
 - `Next Immediate Step`
@@ -44,10 +46,10 @@ Extract from HANDOVER.md:
 
 Calculate age of HANDOVER.md from the `Saved` timestamp.
 
-| Age | Action |
-|-----|--------|
-| < 4 hours | Proceed normally |
-| 4-24 hours | Proceed with note: "Handover is [N] hours old." |
+| Age        | Action                                                                             |
+| ---------- | ---------------------------------------------------------------------------------- |
+| < 4 hours  | Proceed normally                                                                   |
+| 4-24 hours | Proceed with note: "Handover is [N] hours old."                                    |
 | > 24 hours | Warn: "⚠️ This handover is [N] days old. Context may be outdated. Proceed anyway?" |
 
 ---
@@ -62,11 +64,12 @@ git branch --show-current
 ```
 
 Compare with HANDOVER.md branch. If different:
+
 ```
 ⚠️ Branch mismatch!
    HANDOVER says: [saved_branch]
    Current branch: [current_branch]
-   
+
    Switch to [saved_branch]? [Y/n]
 ```
 
@@ -90,6 +93,17 @@ cd admin-panel ; npx tsc --noEmit 2>&1 | Select-Object -First 10
 
 **If clean**: Note: "✅ TypeScript compilation clean."
 
+### 2.4 CI Repair Check
+
+```powershell
+// turbo
+gh issue list --label "ci-repair" --state open --json number,title --limit 5 2>$null
+```
+
+- **If `gh` is not authenticated**: Skip silently.
+- **If repair issues found**: Include them in the state summary under a "🩺 CI Repairs Pending" section.
+- **If none found**: Skip.
+
 ---
 
 ## Phase 3: Present State
@@ -104,18 +118,23 @@ Display to user:
 **Build**: [✅ clean | ⚠️ N errors]
 
 ## What Was Happening
+
 [from HANDOVER.md]
 
 ## Next Immediate Step
+
 [from HANDOVER.md]
 
 ## Cleanup Needed
+
 [from HANDOVER.md, or "None"]
 
 ## Open Questions
+
 [from HANDOVER.md, or "None"]
 
 ---
+
 Ready to continue? [Y/n]
 ```
 
@@ -143,14 +162,17 @@ On user confirmation:
 ## Edge Cases
 
 ### HANDOVER.md Exists But Is Empty/Corrupted
+
 ```
 ⚠️ HANDOVER.md exists but could not be parsed.
 
 Falling back to /resume workflow...
 ```
+
 Then execute `/resume` steps instead.
 
 ### git pull --ff-only Fails
+
 ```
 ⚠️ Cannot fast-forward. Remote has diverged.
 
@@ -163,14 +185,17 @@ Which approach? [1/2/3]
 ```
 
 ### Health Check Takes Too Long (>15 seconds)
+
 - Kill the check and report: "Health check timed out. Skipping — you can run `npm run typecheck` manually."
 
 ### Multiple HANDOVER Files
+
 - Only `docs/HANDOVER.md` is recognized. Any other location is ignored.
 
 ---
 
 ## Success Criteria
+
 - [ ] HANDOVER.md loaded and parsed
 - [ ] Branch validated (match or user confirmed switch)
 - [ ] Pull completed (or skipped with explanation)
