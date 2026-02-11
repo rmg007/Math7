@@ -1,0 +1,32 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "files.exclude": {
+    "**/admin-panel/node_modules/workspace/questerix_domain": true,
+    "**/admin-panel/node_modules/workspace/student-app": true
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true,
+    "**/student-app/build/**": true,
+    "**/admin-panel/dist/**": true,
+    "**/coverage/**": true
+  },
+  "dart.analysisExcludedFolders": [
+    "admin-panel/node_modules/workspace"
+  ],
+  "typescript.tsdk": "admin-panel/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "eslint.workingDirectories": ["admin-panel"],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "files.autoSave": "afterDelay"
+}
