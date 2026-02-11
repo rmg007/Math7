@@ -2,7 +2,42 @@ name: CI Repair Dispatch
 
 on:
   workflow_run:
-    workflows: ["CI", "Admin Panel E2E Tests"]
+    workflows:
+      - "Admin Panel E2E Tests"
+      - "AI PR Agent Reviewer"
+      - "Auto Cleanup"
+      - "Auto Format"
+      - "Auto Label PRs"
+      - "Bundle Size Monitoring"
+      - "Changelog & Release Management"
+      - "Checkly Autonomous Monitoring"
+      - "CI"
+      - "Code Duplication Detection"
+      - "Commit Message Validation"
+      - "Coverage Tracking"
+      - "DAST Security Scanning"
+      - "Database Safety"
+      - "Dead Code Detection"
+      - "Developer Experience"
+      - "Flutter Builds (CI)"
+      - "Gitleaks Secret Scan"
+      - "License & SBOM Management"
+      - "Lighthouse CI"
+      - "Platform Health Report"
+      - "PR Preview Testing"
+      - "Production Monitoring"
+      - "Project Oracle Indexer"
+      - "Reindex Documentation (Manual)"
+      - "Scan with dart-analyze"
+      - "Screenshot Diffing"
+      - "Secret Scanning"
+      - "Security Governance"
+      - "Semgrep Static Analysis"
+      - "Staging Database Migrations"
+      - "Type Generation"
+      - "Validation"
+      - "Visual Regression Testing"
+      - "Workflow Health Check"
     types:
       - completed
 
@@ -11,40 +46,17 @@ permissions:
   issues: write
 
 jobs:
+  # ─── JOB 1: Handle failures → create/update repair issues ───
   create-repair-issue:
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'failure'
     steps:
-      - name: Check for existing repair issue
-        id: check
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const workflowName = context.payload.workflow_run.name;
-            const label = 'ci-repair';
-
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: label,
-              state: 'open'
-            });
-
-            // Deduplicate: don't create if an open issue for the same workflow exists
-            const existing = issues.data.find(i => i.title.includes(workflowName));
-            if (existing) {
-              console.log(`Existing repair issue #${existing.number} found. Updating instead.`);
-              core.setOutput('existing_issue', existing.number);
-              core.setOutput('should_create', 'false');
-            } else {
-              core.setOutput('should_create', 'true');
-            }
-
-      - name: Fetch failure logs
+      - name: Fetch failure logs and generate signature
         id: logs
         uses: actions/github-script@v7
         with:
           script: |
+            const crypto = require('crypto');
             const run = context.payload.workflow_run;
 
             // Get jobs for this run
@@ -57,11 +69,12 @@ jobs:
             let failedSteps = [];
             let failedJobName = 'unknown';
             let logSnippet = '';
+            let errorLines = '';
 
             for (const job of jobs.data.jobs) {
               if (job.conclusion === 'failure') {
                 failedJobName = job.name;
-                
+
                 for (const step of job.steps) {
                   if (step.conclusion === 'failure') {
                     failedSteps.push(step.name);
@@ -75,22 +88,75 @@ jobs:
                     repo: context.repo.repo,
                     job_id: job.id
                   });
-                  
-                  // Get last 80 lines of the log
-                  const fullLog = logData.data;
+
+                  const fullLog = typeof logData.data === 'string' ? logData.data : '';
                   const lines = fullLog.split('\n');
+
+                  // Last 80 lines for display
                   logSnippet = lines.slice(-80).join('\n');
+
+                  // Extract error-pattern lines for signature (ChatGPT Step 3B)
+                  const errorPattern = /Error:|ERROR|FATAL|failed|exit code|Traceback|AssertionError|Unhandled|panic:|Cannot find|Module not found|TypeError|ReferenceError|SyntaxError/i;
+                  const errorMatches = lines
+                    .filter(l => errorPattern.test(l))
+                    // Strip timestamps and ANSI codes to normalize
+                    .map(l => l.replace(/\d{4}-\d{2}-\d{2}T[\d:.]+Z/g, '').replace(/\x1b\[[0-9;]*m/g, '').trim())
+                    .slice(-50);
+
+                  errorLines = errorMatches.join('\n');
                 } catch (e) {
                   logSnippet = 'Could not retrieve logs: ' + e.message;
+                  errorLines = `log-fetch-failed:${e.message}`;
                 }
-                
+
                 break; // Only process the first failed job
               }
             }
 
+            // Generate signature hash (ChatGPT Step 4)
+            // If we got error lines, hash those. Otherwise hash workflow+job+steps as fallback.
+            const signatureInput = errorLines.length > 10
+              ? errorLines
+              : `${run.name}::${failedJobName}::${failedSteps.join(',')}`;
+
+            const fullHash = crypto.createHash('sha256').update(signatureInput).digest('hex');
+            const shortHash = fullHash.substring(0, 8);
+
+            console.log(`Signature input length: ${signatureInput.length}`);
+            console.log(`Signature hash: ${shortHash} (full: ${fullHash})`);
+
             core.setOutput('failed_job', failedJobName);
             core.setOutput('failed_steps', failedSteps.join(', '));
-            core.setOutput('log_snippet', logSnippet.substring(0, 3000)); // GitHub has limits
+            core.setOutput('log_snippet', logSnippet.substring(0, 3000));
+            core.setOutput('signature', shortHash);
+            core.setOutput('full_hash', fullHash);
+
+      - name: Check for existing issue by signature
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const signature = '${{ steps.logs.outputs.signature }}';
+            const label = 'ci-repair';
+
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: label,
+              state: 'open',
+              per_page: 100
+            });
+
+            // Deduplicate by SIGNATURE HASH instead of workflow name
+            const existing = issues.data.find(i => i.title.includes(signature));
+            if (existing) {
+              console.log(`Existing repair issue #${existing.number} found (signature: ${signature}). Updating.`);
+              core.setOutput('existing_issue', existing.number);
+              core.setOutput('should_create', 'false');
+            } else {
+              console.log(`No existing issue for signature ${signature}. Creating new.`);
+              core.setOutput('should_create', 'true');
+            }
 
       - name: Create repair issue
         if: steps.check.outputs.should_create == 'true'
@@ -100,6 +166,8 @@ jobs:
             const run = context.payload.workflow_run;
             const failedJob = '${{ steps.logs.outputs.failed_job }}';
             const failedSteps = '${{ steps.logs.outputs.failed_steps }}';
+            const signature = '${{ steps.logs.outputs.signature }}';
+            const fullHash = '${{ steps.logs.outputs.full_hash }}';
             const logSnippet = `${{ steps.logs.outputs.log_snippet }}`;
 
             const body = `## 🔧 CI Repair Request
@@ -110,7 +178,8 @@ jobs:
             **Commit**: ${run.head_sha.substring(0, 7)}
             **Branch**: ${run.head_branch}
             **Run URL**: ${run.html_url}
-            **Attempts**: 1/2
+            **Signature**: \`${signature}\` (full: \`${fullHash}\`)
+            **Attempts**: 1/3
 
             ### Failure Log (last 80 lines)
             \`\`\`
@@ -118,13 +187,14 @@ jobs:
             \`\`\`
 
             ---
-            *Auto-generated by ci-repair-dispatch. The AI agent will pick this up on next session.*
-            *If the agent fails to fix this after 2 attempts, this issue will be labeled \`needs-human\`.*`;
+            *Auto-generated by CI Repair Dispatch (signature-based deduplication).*
+            *The AI agent will pick this up on next session.*
+            *Escalated to \`needs-human\` after 3 failed repair attempts.*`;
 
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `[REPAIR] CI Failure: ${run.name} — ${failedSteps || failedJob}`,
+              title: `[REPAIR] ${run.name}: ${failedSteps || failedJob} [${signature}]`,
               body: body,
               labels: ['ci-repair', 'automated', 'priority:high']
             });
@@ -136,7 +206,6 @@ jobs:
           script: |
             const run = context.payload.workflow_run;
             const issueNumber = parseInt('${{ steps.check.outputs.existing_issue }}');
-            const failedJob = '${{ steps.logs.outputs.failed_job }}';
             const failedSteps = '${{ steps.logs.outputs.failed_steps }}';
             const logSnippet = `${{ steps.logs.outputs.log_snippet }}`;
 
@@ -147,10 +216,10 @@ jobs:
               issue_number: issueNumber
             });
 
-            const attemptMatch = issue.data.body.match(/\*\*Attempts\*\*: (\d+)\/2/);
+            const attemptMatch = issue.data.body.match(/\*\*Attempts\*\*: (\d+)\/3/);
             const currentAttempts = attemptMatch ? parseInt(attemptMatch[1]) : 1;
 
-            if (currentAttempts >= 2) {
+            if (currentAttempts >= 3) {
               // Escalate to human
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
@@ -163,7 +232,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issueNumber,
-                body: `## ⛔ Escalated to Human\n\nThis failure has persisted after 2 repair attempts. Manual intervention required.\n\n**Latest Run**: ${run.html_url}`
+                body: `## ⛔ Escalated to Human\n\nThis failure has persisted after 3 repair attempts. Manual intervention required.\n\n**Latest Run**: ${run.html_url}`
               });
             } else {
               // Update with new failure data
@@ -171,6 +240,49 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issueNumber,
-                body: `## 🔄 Still Failing (Attempt ${currentAttempts + 1}/2)\n\n**Commit**: ${run.head_sha.substring(0, 7)}\n**Run URL**: ${run.html_url}\n\n### Latest Log\n\`\`\`\n${logSnippet}\n\`\`\``
+                body: `## 🔄 Still Failing (Attempt ${currentAttempts + 1}/3)\n\n**Commit**: ${run.head_sha.substring(0, 7)}\n**Branch**: ${run.head_branch}\n**Run URL**: ${run.html_url}\n\n### Latest Log\n\`\`\`\n${logSnippet}\n\`\`\``
+              });
+            }
+
+  # ─── JOB 2: Handle successes → auto-close resolved repair issues ───
+  auto-close-resolved:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Close resolved repair issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const workflowName = run.name;
+            const label = 'ci-repair';
+
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: label,
+              state: 'open',
+              per_page: 100
+            });
+
+            // Find issues whose title contains this workflow name
+            const matchingIssues = issues.data.filter(i => i.title.includes(workflowName));
+
+            for (const issue of matchingIssues) {
+              console.log(`Closing resolved issue #${issue.number}: ${issue.title}`);
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `## ✅ Resolved\n\nThe **${workflowName}** workflow has passed successfully.\n\n**Commit**: ${run.head_sha.substring(0, 7)}\n**Branch**: ${run.head_branch}\n**Run URL**: ${run.html_url}\n\n*Auto-closed by CI Repair Dispatch.*`
+              });
+
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+                state_reason: 'completed'
               });
             }

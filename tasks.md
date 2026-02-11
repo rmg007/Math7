@@ -44,6 +44,8 @@
 - [x] **Auto-Format**: `auto-format.yml` for consistent code style.
 - [x] **Type Generation**: `type-generation.yml` for Supabase types.
 - [x] **Platform Health Report**: `platform-health-report.yml` aggregates CI results on PRs.
-- [x] **Self-Healing CI**: `ci-repair-dispatch.yml` creates repair issues on failure.
+- [x] **Self-Healing CI (v2)**: Signature-based deduplication + auto-close on green. Monitors all 35 workflows.
+- [x] **Forensic Audit Script**: `scripts/ci-failure-audit.ps1` for bulk backlog sweep.
 - [ ] **GitHub Secrets**: Add Supabase + test user credentials to GitHub Settings.
-- [ ] **`gh auth login`**: Authenticate GitHub CLI for agent issue discovery.
+- [x] **`gh auth login`**: Authenticate GitHub CLI for agent issue discovery and PR management.
+- [ ] **CLI-First PRs**: Transition all PR lifecycle management (list, view, merge) to `gh` CLI.

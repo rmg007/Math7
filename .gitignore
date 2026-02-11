@@ -106,3 +106,6 @@ deps-output.txt
 .gemini/antigravity/knowledge/
 !.gemini/antigravity/knowledge/.keep
 
+
+# CI Failure Audit (local forensic data)
+_gh_failures/

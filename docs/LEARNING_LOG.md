@@ -1,3 +1,51 @@
+## 2026-02-11: Universal Repair Dispatch & Full Repository Health Monitoring
+
+### Session Context
+
+- **Objective**: Expand the CI Repair system to cover every single workflow in the repository, ensuring zero silent failures.
+- **Scope**: `.github/workflows/ci-repair-dispatch.yml`, GitHub Actions `workflow_run` event.
+- **Outcome**: ✅ Universal Repair Dispatch implemented. 35 unique workflows are now monitored for failures.
+
+### What Was Learned
+
+1. **The Wildcard Limitation**: `workflow_run` does not support wildcards for `workflows`. To achieve universal monitoring, every workflow must be explicitly listed. This provides a robust "Total Health" monitoring system but requires occasional updates as new workflows are added.
+
+2. **Deduplication vs. Scale**: Monitoring 35+ workflows would be too noisy without the existing deduplication logic. Because we update existing issues rather than creating new ones, the "Issues" tab stays clean even with high failure counts across different modules.
+
+3. **Total Visibility**: By monitoring workflows like `Type Generation`, `DAST`, and `Lighthouse`, we prevent "Ghost Regressions" where a project builds fine but has a hidden security flaw or data-type mismatch.
+
+### Preventative Measures
+
+- **ALWAYS** check for `[REPAIR]` issues regardless of which workflow failed.
+- **ALWAYS** update the `workflows` list in `ci-repair-dispatch.yml` when adding a new `.yml` file to the repository.
+- **NEVER** ignore a repair issue from a "maintenance" workflow—these are often early warnings of structural decay.
+
+---
+
+## 2026-02-11: CLI-First Pull Request Management Strategy
+
+### Session Context
+
+- **Objective**: Transition away from browser-based PR reviews to a pure command-line workflow using `gh` CLI.
+- **Scope**: GitHub CLI (`gh`), `git ls-remote`, PR lifecycle automation.
+- **Outcome**: ✅ Strategy codified. `tasks.md` updated to enforce `gh` CLI usage for all PR operations.
+
+### What Was Learned
+
+1. **CLI Efficiency vs. Browser Overhead**: Managing 27+ PRs in the browser induces significant context switching and lag. The `gh` CLI provides structured access to PR status, reviews, and checks without the visual noise.
+
+2. **`git ls-remote` as a Fallback**: When `gh` authentication is missing, `git ls-remote origin "refs/pull/*/head"` remains a reliable way to count and verify the existence of PRs directly from the git protocol.
+
+3. **Authentication Bottleneck**: The primary blocker for CLI-first PR management is `gh auth login`. This must be the first step in any new environment to unlock the agent's ability to manage the repo lifecycle.
+
+### Preventative Measures
+
+- **ALWAYS** perform PR discovery via `gh pr list` or `git ls-remote` before opening a browser.
+- **NEVER** merge PRs via the web UI if the CLI is available; use `gh pr merge --auto` to follow established CI gates.
+- **ALWAYS** update `tasks.md` when a platform-wide workflow preference (like CLI vs UI) is established.
+
+---
+
 ## 2026-02-11: Self-Healing CI & GitHub Automation Strategy
 
 ### Session Context
