@@ -10,6 +10,7 @@
 
 ### 🟡 Medium Priority
 - [ ] **[TEST] Student App**: Add tests for `progress/`, `home/`, `settings/` features, and `core/errors/`.
+- [x] **[TEST] Student App MainShell**: Fixed widget tests, resolved pending timers and hit-test offset errors.
 - [ ] **[TEST] E2E Restoration**: Fix and enable disabled tests (domain CRUD, logout, dashboard stats).
 - [ ] **[GOVERNANCE] Coverage Gate**: Implement minimum threshold (50%) in CI for core modules.
 - [x] **[CLEANUP] Remove Redundant Curriculum/Provider Files**: Delete files replaced by `core_providers.dart` and `curriculum_repositories.dart`.
@@ -21,6 +22,7 @@
 - **[ARCH] Consolidate Curriculum Repositories**: Unified Local/Remote repos and providers.
 - **[ARCH] Consolidate Core Providers**: Merged DB, Supabase, and Connectivity providers.
 - **[TESTS] Fix Student App Widget Tests**: Verified all 78 tests passing in the Student App.
+- **[TESTS] Student App MainShell**: Fixed failing widget tests, resolved pending timers (Drift/StreamBuilder), and corrected hit-test offset errors in responsive layouts.
 - **[SECURITY] Sanitize Question Content**: Implemented `DOMPurify` sanitization for `dangerouslySetInnerHTML` in the Admin Panel.
 - **[AUDIT] Verify Tenant Isolation (VUL-018)**: Hardened RLS policies for `profiles`, `apps`, and `subjects`. Fixed VUL-018 in `import_questions_bulk` RPC.
 

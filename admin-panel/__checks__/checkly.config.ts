@@ -6,4 +6,10 @@ import { defineConfig } from 'checkly';
 export default defineConfig({
   projectName: 'questerix-monitoring',
   logicalId: 'questerix-monitoring-project',
+  checks: {
+    checkMatch: '**/__checks__/**/*.check.ts',
+    browserChecks: {
+      testMatch: '**/__checks__/**/*.spec.ts',
+    },
+  },
 });
