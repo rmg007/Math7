@@ -70,3 +70,14 @@ updates:
     labels:
       - "dependencies"
       - "ci"
+
+  # Student App (Flutter/Dart)
+  - package-ecosystem: "pub"
+    directory: "/student-app"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "student-app"

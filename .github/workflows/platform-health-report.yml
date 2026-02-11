@@ -1,0 +1,99 @@
+name: Platform Health Report
+
+on:
+  workflow_run:
+    workflows:
+      [
+        "CI",
+        "DAST Security Scanning",
+        "Lighthouse CI",
+        "Visual Regression Testing",
+      ]
+    types:
+      - completed
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  summarize:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.event == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Aggregate Results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const workflowName = run.name;
+            const conclusion = run.conclusion;
+            const statusEmoji = conclusion === 'success' ? '✅' : '❌';
+
+            // Get the PR number from the workflow run
+            // This requires searching for the PR associated with the head branch
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${run.head_branch}`,
+              state: 'open'
+            });
+
+            if (prs.data.length === 0) {
+              console.log('No open PR found for this run');
+              return;
+            }
+
+            const prNumber = prs.data[0].number;
+
+            let reportLine = `| ${statusEmoji} | **${workflowName}** | ${conclusion} | [View Log](${run.html_url}) |`;
+
+            // Check for existing Health Report comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber
+            });
+
+            const reportHeader = '## 🏥 Platform Health Executive Summary';
+            const existingComment = comments.data.find(c => c.body.includes(reportHeader));
+
+            let body = '';
+            if (existingComment) {
+              // Update existing table
+              let oldBody = existingComment.body;
+              if (oldBody.includes(workflowName)) {
+                // Replace Existing Line
+                const lines = oldBody.split('\n');
+                const updatedLines = lines.map(l => l.includes(workflowName) ? reportLine : l);
+                body = updatedLines.join('\n');
+              } else {
+                // Add New Line
+                body = oldBody + '\n' + reportLine;
+              }
+              
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: body
+              });
+            } else {
+              // Create New Table
+              body = `${reportHeader}\n\n`;
+              body += '> This automated report provides a high-level overview of the platform health across all validation suites.\n\n';
+              body += '| Status | Suite | Conclusion | Details |\n';
+              body += '|:---:|:---|:---|:---|\n';
+              body += reportLine;
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+            }
