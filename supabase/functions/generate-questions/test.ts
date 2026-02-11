@@ -3,8 +3,8 @@
  * Tests authentication, authorization, input validation, AI integration, and error handling
  */
 
-import { assertEquals, assertExists, assertRejects, assertStringIncludes } from "https://deno.land/std@0.168.0/testing/asserts.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { assertEquals, assertExists, assertStringIncludes } from "https://deno.land/std@0.168.0/testing/asserts.ts";
+import { generateQuestionsHandler } from "./index.ts";
 
 // Mock environment variables
 const originalEnv = Deno.env.toObject();
@@ -146,8 +146,13 @@ class MockModel {
 }
 
 Deno.test("generate-questions - CORS preflight", async () => {
-  const response = await fetch("http://localhost:9000/functions/v1/generate-questions", {
+  const request = new Request("http://localhost:9000/functions/v1/generate-questions", {
     method: "OPTIONS"
+  });
+  
+  const response = await generateQuestionsHandler(request, { 
+    supabase: new MockSupabaseClient(), 
+    genAI: new MockGenerativeAI("test-key") 
   });
   
   assertEquals(response.status, 200);
@@ -155,7 +160,7 @@ Deno.test("generate-questions - CORS preflight", async () => {
 });
 
 Deno.test("generate-questions - missing authorization header", async () => {
-  const response = await fetch("http://localhost:9000/functions/v1/generate-questions", {
+  const request = new Request("http://localhost:9000/functions/v1/generate-questions", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -164,13 +169,18 @@ Deno.test("generate-questions - missing authorization header", async () => {
     })
   });
   
+  const response = await generateQuestionsHandler(request, { 
+    supabase: new MockSupabaseClient(), 
+    genAI: new MockGenerativeAI("test-key") 
+  });
+  
   assertEquals(response.status, 401);
   const error = await response.json();
   assertEquals(error.error, "Missing authorization header");
 });
 
 Deno.test("generate-questions - invalid token", async () => {
-  const response = await fetch("http://localhost:9000/functions/v1/generate-questions", {
+  const request = new Request("http://localhost:9000/functions/v1/generate-questions", {
     method: "POST",
     headers: {
       "Authorization": "Bearer invalid-token",
@@ -182,6 +192,11 @@ Deno.test("generate-questions - invalid token", async () => {
     })
   });
   
+  const response = await generateQuestionsHandler(request, { 
+    supabase: new MockSupabaseClient(), 
+    genAI: new MockGenerativeAI("test-key") 
+  });
+  
   assertEquals(response.status, 401);
   const error = await response.json();
   assertEquals(error.error, "Invalid or expired token");
@@ -190,7 +205,7 @@ Deno.test("generate-questions - invalid token", async () => {
 Deno.test("generate-questions - non-admin user", async () => {
   // This would require mocking the auth to return a non-admin user
   // For now, we'll test the structure
-  const response = await fetch("http://localhost:9000/functions/v1/generate-questions", {
+  const request = new Request("http://localhost:9000/functions/v1/generate-questions", {
     method: "POST",
     headers: {
       "Authorization": "Bearer non-admin-token",
@@ -203,11 +218,15 @@ Deno.test("generate-questions - non-admin user", async () => {
   });
   
   // Should return 403 for non-admin
+  const response = await generateQuestionsHandler(request, { 
+    supabase: new MockSupabaseClient(), 
+    genAI: new MockGenerativeAI("test-key") 
+  });
   assertEquals(response.status, 403);
 });
 
 Deno.test("generate-questions - missing text content", async () => {
-  const response = await fetch("http://localhost:9000/functions/v1/generate-questions", {
+  const request = new Request("http://localhost:9000/functions/v1/generate-questions", {
     method: "POST",
     headers: {
       "Authorization": "Bearer valid-token",
@@ -219,13 +238,17 @@ Deno.test("generate-questions - missing text content", async () => {
     })
   });
   
+  const response = await generateQuestionsHandler(request, { 
+    supabase: new MockSupabaseClient(), 
+    genAI: new MockGenerativeAI("test-key") 
+  });
   assertEquals(response.status, 500);
   const error = await response.json();
   assertStringIncludes(error.error, "Text content is required");
 });
 
 Deno.test("generate-questions - invalid question count", async () => {
-  const response = await fetch("http://localhost:9000/functions/v1/generate-questions", {
+  const request = new Request("http://localhost:9000/functions/v1/generate-questions", {
     method: "POST",
     headers: {
       "Authorization": "Bearer valid-token",
@@ -237,13 +260,17 @@ Deno.test("generate-questions - invalid question count", async () => {
     })
   });
   
+  const response = await generateQuestionsHandler(request, { 
+    supabase: new MockSupabaseClient(), 
+    genAI: new MockGenerativeAI("test-key") 
+  });
   assertEquals(response.status, 500);
   const error = await response.json();
   assertStringIncludes(error.error, "Total questions must be between 1 and 100");
 });
 
 Deno.test("generate-questions - successful generation", async () => {
-  const response = await fetch("http://localhost:9000/functions/v1/generate-questions", {
+  const request = new Request("http://localhost:9000/functions/v1/generate-questions", {
     method: "POST",
     headers: {
       "Authorization": "Bearer valid-token",
@@ -257,6 +284,10 @@ Deno.test("generate-questions - successful generation", async () => {
     })
   });
   
+  const response = await generateQuestionsHandler(request, { 
+    supabase: new MockSupabaseClient(), 
+    genAI: new MockGenerativeAI("test-key") 
+  });
   assertEquals(response.status, 200);
   const result = await response.json();
   
@@ -282,7 +313,7 @@ Deno.test("generate-questions - successful generation", async () => {
 });
 
 Deno.test("generate-questions - AI service error", async () => {
-  const response = await fetch("http://localhost:9000/functions/v1/generate-questions", {
+  const request = new Request("http://localhost:9000/functions/v1/generate-questions", {
     method: "POST",
     headers: {
       "Authorization": "Bearer valid-token",
@@ -294,13 +325,17 @@ Deno.test("generate-questions - AI service error", async () => {
     })
   });
   
+  const response = await generateQuestionsHandler(request, { 
+    supabase: new MockSupabaseClient(), 
+    genAI: new MockGenerativeAI("test-key") 
+  });
   assertEquals(response.status, 500);
   const error = await response.json();
   assertStringIncludes(error.error, "Failed to generate questions");
 });
 
 Deno.test("generate-questions - invalid JSON response from AI", async () => {
-  const response = await fetch("http://localhost:9000/functions/v1/generate-questions", {
+  const request = new Request("http://localhost:9000/functions/v1/generate-questions", {
     method: "POST",
     headers: {
       "Authorization": "Bearer valid-token",
@@ -312,13 +347,17 @@ Deno.test("generate-questions - invalid JSON response from AI", async () => {
     })
   });
   
+  const response = await generateQuestionsHandler(request, { 
+    supabase: new MockSupabaseClient(), 
+    genAI: new MockGenerativeAI("test-key") 
+  });
   assertEquals(response.status, 500);
   const error = await response.json();
   assertStringIncludes(error.error, "AI did not return valid JSON array");
 });
 
 Deno.test("generate-questions - custom model selection", async () => {
-  const response = await fetch("http://localhost:9000/functions/v1/generate-questions", {
+  const request = new Request("http://localhost:9000/functions/v1/generate-questions", {
     method: "POST",
     headers: {
       "Authorization": "Bearer valid-token",
@@ -331,13 +370,17 @@ Deno.test("generate-questions - custom model selection", async () => {
     })
   });
   
+  const response = await generateQuestionsHandler(request, { 
+    supabase: new MockSupabaseClient(), 
+    genAI: new MockGenerativeAI("test-key") 
+  });
   assertEquals(response.status, 200);
   const result = await response.json();
   assertEquals(result.metadata.model, "gpt-4o-mini");
 });
 
 Deno.test("generate-questions - maximum question limit", async () => {
-  const response = await fetch("http://localhost:9000/functions/v1/generate-questions", {
+  const request = new Request("http://localhost:9000/functions/v1/generate-questions", {
     method: "POST",
     headers: {
       "Authorization": "Bearer valid-token",
@@ -349,6 +392,10 @@ Deno.test("generate-questions - maximum question limit", async () => {
     })
   });
   
+  const response = await generateQuestionsHandler(request, { 
+    supabase: new MockSupabaseClient(), 
+    genAI: new MockGenerativeAI("test-key") 
+  });
   assertEquals(response.status, 500);
   const error = await response.json();
   assertStringIncludes(error.error, "Total questions must be between 1 and 100");
@@ -357,7 +404,7 @@ Deno.test("generate-questions - maximum question limit", async () => {
 Deno.test("generate-questions - text truncation", async () => {
   const longText = "A".repeat(6000); // Longer than 5000 char limit
   
-  const response = await fetch("http://localhost:9000/functions/v1/generate-questions", {
+  const request = new Request("http://localhost:9000/functions/v1/generate-questions", {
     method: "POST",
     headers: {
       "Authorization": "Bearer valid-token",
@@ -369,6 +416,10 @@ Deno.test("generate-questions - text truncation", async () => {
     })
   });
   
+  const response = await generateQuestionsHandler(request, { 
+    supabase: new MockSupabaseClient(), 
+    genAI: new MockGenerativeAI("test-key") 
+  });
   assertEquals(response.status, 200);
   // Should succeed even with long text (truncated)
   const result = await response.json();
@@ -377,7 +428,7 @@ Deno.test("generate-questions - text truncation", async () => {
 
 Deno.test("generate-questions - quota enforcement", async () => {
   // Test that quota consumption is attempted
-  const response = await fetch("http://localhost:9000/functions/v1/generate-questions", {
+  const request = new Request("http://localhost:9000/functions/v1/generate-questions", {
     method: "POST",
     headers: {
       "Authorization": "Bearer valid-token",
@@ -389,6 +440,10 @@ Deno.test("generate-questions - quota enforcement", async () => {
     })
   });
   
+  const response = await generateQuestionsHandler(request, { 
+    supabase: new MockSupabaseClient(), 
+    genAI: new MockGenerativeAI("test-key") 
+  });
   assertEquals(response.status, 200);
   // The function should attempt to consume tokens via RPC
   // In a real test, you'd verify the RPC was called

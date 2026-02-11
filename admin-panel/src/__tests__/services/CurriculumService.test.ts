@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { CurriculumService, ImportResult } from '@/services/CurriculumService';
 import { supabase } from '@/lib/supabase';
+import { CurriculumService } from '@/services/CurriculumService';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock Supabase
 vi.mock('@/lib/supabase', () => ({
@@ -23,7 +23,7 @@ describe('CurriculumService', () => {
 
   describe('importQuestionsBulk', () => {
     const mockValidQuestion = {
-      type: 'multiple_choice',
+      type: 'multiple_choice' as const,
       content: 'Test question',
       options: [
         { text: 'Option A', is_correct: true },
@@ -39,7 +39,7 @@ describe('CurriculumService', () => {
       vi.mocked(QueuedQuestionSchema.safeParse).mockReturnValue({
         success: true,
         data: mockValidQuestion,
-      });
+      } as any);
 
       const result = await CurriculumService.importQuestionsBulk(
         [mockValidQuestion],
@@ -59,17 +59,17 @@ describe('CurriculumService', () => {
         .mockReturnValueOnce({
           success: true,
           data: mockValidQuestion,
-        })
+        } as any)
         .mockReturnValueOnce({
           success: false,
           error: {
-            errors: [{ path: ['content'], message: 'Content is required' }],
+            errors: [{ path: ['content'], message: 'Content is required', code: 'invalid_type' }],
           },
-        });
+        } as any);
 
       const result = await CurriculumService.importQuestionsBulk([
         mockValidQuestion,
-        { invalid: 'question' },
+        { invalid: 'question' } as any,
       ]);
 
       expect(result).toEqual({
@@ -92,17 +92,28 @@ describe('CurriculumService', () => {
       vi.mocked(QueuedQuestionSchema.safeParse).mockReturnValue({
         success: true,
         data: mockValidQuestion,
-      });
+      } as any);
 
       const mockRpcResponse = [
         { success: true, inserted_count: 2 },
         { success: true, inserted_count: 1 },
       ];
 
-      vi.mocked(supabase.rpc).mockResolvedValue({
-        data: mockRpcResponse,
-        error: null,
-      });
+      vi.mocked(supabase.rpc)
+        .mockResolvedValueOnce({
+          data: [{ success: true, inserted_count: 2 }],
+          error: null,
+          status: 200,
+          statusText: 'OK',
+          count: null
+        } as any)
+        .mockResolvedValueOnce({
+          data: [{ success: true, inserted_count: 1 }],
+          error: null,
+          status: 200,
+          statusText: 'OK',
+          count: null
+        } as any);
 
       // Create 3 questions with batch size of 2
       const questions = [mockValidQuestion, mockValidQuestion, mockValidQuestion];
@@ -122,12 +133,14 @@ describe('CurriculumService', () => {
       vi.mocked(QueuedQuestionSchema.safeParse).mockReturnValue({
         success: true,
         data: mockValidQuestion,
-      });
+      } as any);
 
       vi.mocked(supabase.rpc).mockResolvedValue({
         data: null,
-        error: { message: 'Database constraint violation' },
-      });
+        error: { message: 'Database constraint violation', details: '', hint: '', code: '23505' },
+        status: 400,
+        statusText: 'Bad Request'
+      } as any);
 
       const result = await CurriculumService.importQuestionsBulk([mockValidQuestion]);
 
@@ -143,12 +156,14 @@ describe('CurriculumService', () => {
       vi.mocked(QueuedQuestionSchema.safeParse).mockReturnValue({
         success: true,
         data: mockValidQuestion,
-      });
+      } as any);
 
       vi.mocked(supabase.rpc).mockResolvedValue({
         data: [{ success: false, inserted_count: 0 }],
         error: null,
-      });
+        status: 200,
+        statusText: 'OK'
+      } as any);
 
       const result = await CurriculumService.importQuestionsBulk([mockValidQuestion]);
 
@@ -164,18 +179,22 @@ describe('CurriculumService', () => {
       vi.mocked(QueuedQuestionSchema.safeParse).mockReturnValue({
         success: true,
         data: mockValidQuestion,
-      });
+      } as any);
 
       // First batch succeeds, second fails
       vi.mocked(supabase.rpc)
         .mockResolvedValueOnce({
           data: [{ success: true, inserted_count: 2 }],
           error: null,
-        })
+          status: 200,
+          statusText: 'OK'
+        } as any)
         .mockResolvedValueOnce({
           data: null,
-          error: { message: 'Connection timeout' },
-        });
+          error: { message: 'Connection timeout', details: '', hint: '', code: 'timeout' },
+          status: 504,
+          statusText: 'Gateway Timeout'
+        } as any);
 
       const questions = [
         mockValidQuestion,
@@ -214,12 +233,14 @@ describe('CurriculumService', () => {
       vi.mocked(QueuedQuestionSchema.safeParse).mockReturnValue({
         success: true,
         data: mockValidQuestion,
-      });
+      } as any);
 
       vi.mocked(supabase.rpc).mockResolvedValue({
         data: [{ success: true, inserted_count: 60 }],
         error: null,
-      });
+        status: 200,
+        statusText: 'OK'
+      } as any);
 
       // Create 60 questions (should be 2 batches with default size 50)
       const questions = Array(60).fill(mockValidQuestion);

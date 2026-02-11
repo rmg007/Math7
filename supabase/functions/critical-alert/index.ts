@@ -13,7 +13,7 @@ interface ErrorRecord {
   };
 }
 
-serve(async (req) => {
+export async function criticalAlertHandler(req: Request): Promise<Response> {
   try {
     const payload = await req.json();
     const { record, type } = payload as { record: ErrorRecord, type: string };
@@ -43,10 +43,16 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error(`Error processing alert: ${error.message}`);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`Error processing alert: ${message}`);
+    return new Response(JSON.stringify({ error: message }), {
       headers: { "Content-Type": "application/json" },
       status: 400,
     });
   }
-})
+}
+
+// Start the server only if run as main
+if (import.meta.main) {
+  serve(criticalAlertHandler)
+}

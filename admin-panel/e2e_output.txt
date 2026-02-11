@@ -1,0 +1,73 @@
+
+> admin-panel@0.0.0 test:e2e
+> playwright test tests/admin-panel.e2e.spec.ts
+
+[dotenv@17.2.3] injecting env (10) from .env.test.local -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+
+Running 15 tests using 1 worker
+
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+Seeding test data...
+Test data seeded successfully.
+  Γ£ô   1 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:78:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should load login page (868ms)
+  Γ£ô   2 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:85:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should login with valid credentials (4.2s)
+  Γ£ô   3 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:90:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should show error with invalid credentials (1.2s)
+  Γ£ô   4 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:98:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should logout successfully (2.6s)
+  Γ£ô   5 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:122:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should redirect to login when accessing protected route without auth (741ms)
+  Γ£ô   6 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:133:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Dashboard ΓÇ║ should load dashboard (3.5s)
+  Γ£ô   7 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:138:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Dashboard ΓÇ║ should navigate to different sections from dashboard (2.1s)
+  Γ£ô   8 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:154:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should list all domains (1.7s)
+Cleaning up test data...
+  Γ£ÿ   9 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:159:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should create a new domain (12.3s)
+  -  10 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:191:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should edit an existing domain
+  -  11 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:215:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should delete a domain
+  -  12 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:243:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Skills Management ΓÇ║ should list all skills
+  -  13 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:248:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Skills Management ΓÇ║ should create a new skill
+  -  14 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:271:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Questions Management ΓÇ║ should list all questions
+  -  15 [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:276:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Questions Management ΓÇ║ should create a new MCQ question
+
+
+  1) [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:159:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should create a new domain 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByText('E2E Domain 1770829721376').first()
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for getByText('E2E Domain 1770829721376').first()[22m
+
+
+      186 |       // Should redirect to domains list
+      187 |       await expect(page).toHaveURL(/\/domains/, { timeout: 15000 });
+    > 188 |       await expect(page.getByText(testDomain.name).first()).toBeVisible({ timeout: 10000 });
+          |                                                             ^
+      189 |     });
+      190 |
+      191 |     test('should edit an existing domain', async ({ page }) => {
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\admin-panel.e2e.spec.ts:188:61
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\admin-panel.e2e-Admin-Pane-c5b3e--should-create-a-new-domain-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\admin-panel.e2e-Admin-Pane-c5b3e--should-create-a-new-domain-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\admin-panel.e2e-Admin-Pane-c5b3e--should-create-a-new-domain-chromium\error-context.md
+
+  1 failed
+    [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:159:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should create a new domain 
+  6 did not run
+  8 passed (36.9s)
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m

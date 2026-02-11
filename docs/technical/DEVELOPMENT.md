@@ -142,6 +142,36 @@ This project uses an **evidence-based workflow system** that forces the AI to pr
 
 See `.agent/workflows/*.md` for detailed workflow instructions.
 
+## 🛠️ Development Automation (Quality Gates)
+
+This project uses **Husky** and **lint-staged** to enforce quality standards locally before code reaches the remote repository.
+
+### Pre-commit Hooks (Fast Fixes)
+- **Timing**: < 5 seconds.
+- **Scope**: Changed files only.
+- **Actions**:
+  - **Admin Panel**: Fixes linting (ESLint) and formatting (Prettier).
+  - **Student App**: Formats Dart code (`dart format`).
+  - **Global**: Formats JSON, Markdown, and YAML.
+
+### Pre-push Hooks (Safety Net)
+- **Timing**: 10-30 seconds.
+- **Scope**: Project-wide sanity check.
+- **Actions**:
+  - **Admin Panel**: Runs TypeScript type-checking (`tsc --noEmit`).
+  - **Student App**: Runs Flutter analysis (`flutter analyze`).
+- **Bypass**: Use `git commit --no-verify` in emergencies.
+
+### Local Setup
+To initialize the automation hooks on a new machine:
+```bash
+# Bash
+bash scripts/setup-automation.sh
+
+# PowerShell
+.\scripts\setup-automation.ps1
+```
+
 ## 🧪 Testing Strategy
 
 ### Mobile / Student App

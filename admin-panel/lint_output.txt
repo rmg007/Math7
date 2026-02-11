@@ -1,0 +1,54 @@
+
+> admin-panel@0.0.0 lint
+> eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0
+
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\hooks\use-ai-generator.test.tsx
+  20:65  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\hooks\use-bulk-import.test.tsx
+   18:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   18:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   19:6   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   26:65  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   58:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  138:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  193:71  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  228:59  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  260:88  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  284:88  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  319:88  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  344:88  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\lib\data-utils.test.ts
+   23:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   23:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  314:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  315:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  325:79  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\lib\file-parsers.test.ts
+    2:26  error  'ParsedFile' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   51:75  error  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  118:75  error  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  143:75  error  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  163:75  error  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  188:79  error  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  257:75  error  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\lib\validation\import-schema.test.ts
+  295:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  420:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\services\CurriculumService.test.ts
+  2:29  error  'ImportResult' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\services\OracleService.test.ts
+  36:58  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  37:63  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\services\SecurityLogger.test.ts
+  13:7  error  'originalDev' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+Γ£û 31 problems (31 errors, 0 warnings)
+

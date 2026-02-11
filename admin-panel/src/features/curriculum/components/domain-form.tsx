@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -26,6 +26,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Loader2, Book, Globe, ListOrdered, FileText, ShieldCheck } from 'lucide-react'
 import { useCreateDomain, useUpdateDomain, useDomains } from '../hooks/use-domains'
 import { AdminHeader } from '@/components/ui/admin-header'
+import { useApp } from '@/hooks/use-app'
 
 const STATUS_OPTIONS: { value: 'draft' | 'live'; label: string; description?: string }[] = [
   { value: 'draft', label: 'Draft', description: 'Not visible to students' },
@@ -48,6 +49,7 @@ type DomainFormData = z.infer<typeof domainSchema>
 export function DomainForm() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { currentApp, isLoading: isAppLoading } = useApp()
   const createDomain = useCreateDomain()
   const updateDomain = useUpdateDomain()
   const { data: domains } = useDomains()
@@ -68,15 +70,13 @@ export function DomainForm() {
 
   // Auto-set sort order for new domains
   useEffect(() => {
-    if (!isEditing && domains) {
+    if (!isEditing && domains && domains.length > 0) {
       const maxOrder = domains.reduce((max, d) => Math.max(max, d.sort_order ?? 0), 0)
-      form.reset({
-        title: '',
-        slug: '',
-        description: '',
-        sort_order: maxOrder + 1,
-        status: 'draft',
-      })
+      const currentSortOrder = form.getValues('sort_order')
+      // Only set if it hasn't been manually changed from 0
+      if (currentSortOrder === 0) {
+        form.setValue('sort_order', maxOrder + 1)
+      }
     }
   }, [domains, isEditing, form])
 
@@ -92,7 +92,17 @@ export function DomainForm() {
     }
   }, [existingDomain, form])
 
+  const [error, setError] = useState<string | null>(null)
+
   const onSubmit = async (data: DomainFormData) => {
+    setError(null)
+    if (!currentApp?.app_id) {
+      const msg = 'Failed to save domain: No app selected (currentApp is ' + JSON.stringify(currentApp) + ')'
+      console.error(msg)
+      setError(msg)
+      return
+    }
+
     try {
       if (isEditing && id) {
         await updateDomain.mutateAsync({ domain_id: id, ...data })
@@ -100,12 +110,34 @@ export function DomainForm() {
         await createDomain.mutateAsync(data)
       }
       navigate('/domains')
-    } catch (error) {
-      console.error('Failed to save domain', error)
+    } catch (err: any) {
+      console.error('Failed to save domain:', err)
+      setError(err?.message || 'An unexpected error occurred while saving.')
     }
   }
 
   const isSubmitting = createDomain.isPending || updateDomain.isPending
+
+  if (isAppLoading || (isEditing && !existingDomain && domains)) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <Loader2 className="w-12 h-12 text-purple-500 animate-spin" />
+        <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Synchronizing Context...</p>
+      </div>
+    )
+  }
+
+  if (!currentApp) {
+    return (
+      <Card className="bg-amber-50 border-amber-200">
+        <CardContent className="p-8 flex flex-col items-center text-center space-y-4">
+          <Globe className="w-12 h-12 text-amber-500" />
+          <h3 className="text-xl font-bold text-amber-900">No App Selected</h3>
+          <p className="text-amber-700">Please select an application from the sidebar to manage domains.</p>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -122,6 +154,18 @@ export function DomainForm() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          {error && (
+            <div className="p-4 rounded-2xl bg-red-50 border border-red-100 flex items-start gap-4">
+              <div className="p-2 bg-red-100 rounded-full shrink-0">
+                <ShieldCheck className="w-5 h-5 text-red-600" />
+              </div>
+              <div className="space-y-1 pt-1">
+                <h4 className="text-sm font-bold text-red-900 uppercase tracking-wider">Submission Failed</h4>
+                <p className="text-sm text-red-700 font-medium">{error}</p>
+              </div>
+            </div>
+          )}
+
           <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
             <CardContent className="p-8 md:p-10 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

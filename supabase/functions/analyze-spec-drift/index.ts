@@ -1,5 +1,5 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.1.3'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,15 +20,17 @@ interface DriftFinding {
   severity: 'critical' | 'high' | 'medium' | 'low'
 }
 
-Deno.serve(async (req) => {
+export async function analyzeSpecDriftHandler(req: Request, deps?: { supabase?: any; genAI?: any }): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseClient = deps?.supabase || createClient(
+      supabaseUrl,
+      supabaseAnonKey,
       {
         global: {
           headers: { Authorization: req.headers.get('Authorization')! },
@@ -69,8 +71,9 @@ Deno.serve(async (req) => {
     }
 
     // 3. Use Gemini to analyze drift
-    const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') ?? '')
-    const model = genAI.getGenerativeModel({ 
+    const apiKey = Deno.env.get('GEMINI_API_KEY');
+    const genAIClient = deps?.genAI || new GoogleGenerativeAI(apiKey!)
+    const model = genAIClient.getGenerativeModel({ 
       model: 'gemini-2.0-flash-exp',
       generationConfig: {
         temperature: 0.1,
@@ -163,4 +166,9 @@ Rules:
       }
     )
   }
-})
+}
+
+// Start the server only if run as main
+if (import.meta.main) {
+  Deno.serve(analyzeSpecDriftHandler)
+}

@@ -22,6 +22,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **UI**: Standardized `EmptyState` components across all management features for premium consistency.
 - **UI**: Implemented conditional sidebar navigation groups based on user role visibility.
 
+### Fixed
+- **Testing**: Resolved 7 critical failures in the Admin Panel test suite (Vite/Vitest).
+- **Testing**: Fixed race conditions in `useBulkImport` progress tracking using fake timers.
+- **Testing**: Corrected Zod validation expectations and UUID format tests.
+- **Testing**: Refactored illegal `await import` calls in unit tests to standard top-level imports.
+- **Testing**: Stabilized `data-utils` tests by switching to `globalThis` spying for URL APIs and expanded coverage to 100% with pure unit testing strategies.
+- **Backend**: Refactored Supabase Edge Functions to use handlers and guarded server loops for unit test compatibility.
+
+### Changed
+- **Governance**: Updated `LEARNING_LOG.md` and `tasks.md` to reflect the shift from "Assumed 100% Coverage" to "Verified Stabilization."
 
 ## [0.9.0] - 2026-02-10
 ### Added

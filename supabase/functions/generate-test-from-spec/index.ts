@@ -37,15 +37,17 @@ describe('{{ENTITY_NAME}}', () => {
 });`,
 }
 
-Deno.serve(async (req) => {
+export async function generateTestFromSpecHandler(req: Request, deps?: { supabase?: any; genAI?: any }): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseClient = deps?.supabase || createClient(
+      supabaseUrl,
+      supabaseAnonKey,
       {
         global: {
           headers: { Authorization: req.headers.get('Authorization')! },
@@ -70,8 +72,9 @@ Deno.serve(async (req) => {
     const template = TEST_TEMPLATES[framework]
 
     // 3. Use Gemini to generate test cases
-    const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') ?? '')
-    const model = genAI.getGenerativeModel({ 
+    const apiKey = Deno.env.get('GEMINI_API_KEY');
+    const genAIClient = deps?.genAI || new GoogleGenerativeAI(apiKey!)
+    const model = genAIClient.getGenerativeModel({ 
       model: 'gemini-2.0-flash-exp',
       generationConfig: {
         temperature: 0.1,
@@ -165,4 +168,9 @@ Return ONLY the test case code, no explanation.`
       }
     )
   }
-})
+}
+
+// Start the server only if run as main
+if (import.meta.main) {
+  Deno.serve(generateTestFromSpecHandler)
+}

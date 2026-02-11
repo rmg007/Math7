@@ -8,6 +8,208 @@
 
 ---
 
+## 2026-02-11: Admin Panel Test Suite Stabilization & Coverage Recovery
+
+### Session Context
+
+- **Objective**: Resolve critical failures in the Admin Panel test suite (Vite/Vitest) and recover from a "false confidence" of 100% coverage.
+- **Scope**: `admin-panel/src/__tests__/`, Vitest mocking, asynchronous hook testing, file parsing validation.
+- **Outcome**: ✅ 7 critical test files fixed and stabilized. 100% pass rate restored for curriculum validation and bulk import logic.
+
+### What Was Done
+
+1. **Syntax & Infrastructure Repairs**
+   - Eliminated illegal `await import()` calls inside synchronous `describe` blocks across `sanitize.test.ts` and `file-parsers.test.ts`. These were causing silent execution failures or esbuild crashes.
+   - Refactored to standard top-level imports and used `vi.mocked()` for type-safe mocking of external libraries (`DOMPurify`, `pdfjs-dist`, `mammoth`).
+
+2. **Asynchronous Hook Stabilization (`useBulkImport`)**
+   - Implemented `vi.useFakeTimers()` to handle `setTimeout` progress resets.
+   - Added `vi.advanceTimersByTime(1000)` to verifyprogress cleanup without introducing brittle `waitFor` delays.
+
+3. **Schema & Validation Accuracy**
+   - Corrected `import-schema.test.ts` to match Zod's native error strings ("Expected boolean" vs custom messages).
+   - Fixed UUID validation tests that were using valid patterns as negative cases.
+
+4. **Browser API Mocking Fixes**
+   - Replaced `vi.stubGlobal('URL', ...)` with `vi.spyOn(globalThis.URL, ...)` in `data-utils.test.ts`. This ensured better isolation and prevented state leakage between tests.
+
+### What Was Learned
+
+1. **The "Describe-Sync" Constraint**: Vitest and Jest do not support top-level `await` or `await import` inside `describe` blocks if the wrapper isn't async, often leading to cryptic compilation errors. **Rule**: Always use standard imports and `vi.mock` at the top level.
+
+2. **Ephemeral UI State Hazard**: Toasts and progress bars that auto-dismiss via `setTimeout` are the primary source of race conditions in unit tests. **Rule**: Use fake timers (`vi.useFakeTimers`) for any test involving progress tracking or transient notifications.
+
+3. **Zod Error Precision**: When testing Zod schemas, if a custom `.error()` message isn't provided, Zod defaults to its internal error engine. Tests must match the *actual* generated string or provide explicit custom messages.
+
+4. **Global Mock Poisoning**: Using `stubGlobal` can poison the global environment for other tests if not meticulously cleaned. `vi.spyOn` on `globalThis` is generally safer as it leverages Vitest's automatic restoration.
+
+4. **Global Mock Poisoning**: Using `stubGlobal` can poison the global environment for other tests if not meticulously cleaned. `vi.spyOn` on `globalThis` is generally safer as it leverages Vitest's automatic restoration.
+
+---
+
+## 2026-02-11: Backend Testability & Pure Unit Testing Strategies
+
+### Session Context
+
+- **Objective**: Refactor Supabase Edge Functions for better testability and implement "pure" unit tests for browser-side utilities.
+- **Scope**: `supabase/functions/`, `admin-panel/src/lib/data-utils.ts`, Deno dependency injection.
+- **Outcome**: ✅ Edge Functions refactored to handler pattern. `data-utils` coverage expanded to 100% with zero external library mocks.
+
+### What Was Done
+
+1. **Edge Function Handler Pattern**
+   - Refactored `index.ts` files in `supabase/functions` to separate core logic into a `handler` function.
+   - Guarded `Deno.serve` with `if (import.meta.main)` to allow importing without side effects.
+   - Switched from global `fetch` dependency to passing mocks directly into the handler.
+
+2. **Pure Browser Mocking (`data-utils`)**
+   - Replaced complex global mocks with a "Pure Unit Test" environment in `data-utils.test.ts`.
+   - Used `Object.defineProperty` to manually stub `Blob`, `URL`, and `document` properties.
+   - This approach eliminated flakiness caused by Vitest's `stubGlobal` not correctly cleaning up `globalThis` in certain environments.
+
+3. **CSV Parsing Edge Cases**
+   - Added exhaustive tests for CSV parsing: escaped quotes (`""`), quoted newlines, and trailing commas.
+   - Verified that the manual parser handles whitespace trimming and column count mismatches correctly.
+
+### What Was Learned
+
+1. **Dependency Injection (DI) in Edge Functions**: The "Handler" pattern is the single most effective way to test Deno functions. By passing a `deps` object (Supabase, GenAI) into a pure function, you can test complex AI workflows in milliseconds without a local Deno server.
+
+2. **Hard-coded Globals vs. Library Mocks**: For small, browser-centric utilities, manually defining the DOM interface (`document.createElement`, `URL.createObjectURL`) in the test file is more robust than relying on `jsdom` configuration or global stubs. It provides explicit control and better isolation.
+
+3. **import.meta.main is Essential**: In Deno, this is the equivalent of Python's `if __name__ == '__main__':`. It is critical for hybrid files that act as both executable services and testable libraries.
+
+---
+
+## 2026-02-11: Minimal Viable Automation (MVA) Implementation
+
+### Session Context
+
+- **Objective**: Implement a high-speed, cross-platform testing and quality strategy that enforces standards without slowing down development.
+- **Scope**: Husky hooks, lint-staged, root package.json, monorepo path management.
+- **Outcome**: ✅ Pre-commit hooks (<5s) and Pre-push hooks (<30s) implemented. Setup scripts for Bash/PowerShell created.
+
+### What Was Done
+
+1. **Monorepo Hook Infrastructure**
+   - Created root-level `package.json` to manage Husky and lint-staged centrally.
+   - Configured `.lintstagedrc.json` to handle path stripping for `student-app` (Flutter) and specific config for `admin-panel` (Vite).
+   - Created `.husky/pre-commit`: Runs `lint-staged` (lint + format changed files).
+   - Created `.husky/pre-push`: Runs `typecheck` (Admin) and `analyze` (Student App).
+
+2. **Cross-Platform Setup Scripts**
+   - `scripts/setup-automation.sh` (Bash) and `scripts/setup-automation.ps1` (PowerShell) to initialize hooks and permissions on any OS.
+
+3. **IDE Integration Enhancements**
+   - Created `.vscode/tasks.json` with "Watch Tests" and "Analyze" tasks for both sub-projects.
+   - Updated `.vscode/settings.json` with `files.watcherExclude` to prevent IDE lag from `build` and `coverage` directories.
+
+### What Was Learned
+
+1. **The "Check Overkill" Trap**: Original proposal included full tests in pre-commit. **Critical Learner**: Anything > 10s in pre-commit will be bypassed by developers. Keep it to fast linting/formatting.
+
+2. **Monorepo Path Handling**: `lint-staged` passes absolute paths to commands. **Learned**: Commands like `dart format` or `eslint` often need to be run from the sub-directory to find their config files, which requires careful path stripping or wrapper scripts in a monorepo.
+
+3. **IDE Watcher Hygiene**: Large projects like Questerix (with Flutter build artifacts and Playwright traces) can kill IDE performance if watchers aren't limited. **Fix**: Explicitly exclude `build/`, `dist/`, and `coverage/` in `.vscode/settings.json`.
+
+---
+
+
+
+### Session Context
+
+- **Objective**: Redesign the admin panel sidebar's nav groups, nav items, header, and footer to improve visual hierarchy, reclaim vertical space, and eliminate nested scrollbars.
+- **Scope**: `sidebar.tsx` component, scrollbar CSS, `admin-header.tsx` glow refinement.
+- **Outcome**: ✅ Complete visual redesign with ~200px vertical space reclaimed, stronger active states, cleaner hierarchy, and always-visible subtle scrollbar.
+
+### What Was Done
+
+1. **Header Optimization**
+   - Reduced height from `h-20` to `h-16`
+   - Removed "Admin Panel" subtitle (saves vertical space)
+   - Moved collapse toggle from footer to header (ChevronLeft next to logo)
+   - Added LifeBuoy help icon next to collapse button (Feedback moved from footer)
+   - Logo becomes expand trigger when collapsed
+
+2. **App Selector Lightening**
+   - Removed solid `bg-white/5` backdrop and "CURRENT APPLICATION" label
+   - Made trigger `bg-transparent` with thin `border-white/10`
+   - Changed from `rounded-xl` to `rounded-lg` for consistency
+   - Reduced padding `px-4` → `px-3`
+
+3. **Navigation Container Tightening**
+   - `px-4 py-6 space-y-6` → `px-3 py-4 space-y-4`
+   - Changed scrollbar class from `custom-scrollbar` to `sidebar`
+   - Removed `border-t` separators between groups (whitespace-only)
+
+4. **Nav Group Headers — Whisper-Quiet Labels**
+   - Removed button appearance (no `rounded-lg`, no `bg-white/10`)
+   - `text-xs font-bold tracking-widest` → `text-[10px] font-semibold tracking-wider`
+   - Active: `text-purple-200/80` (subtle), Inactive: `text-purple-400/40`
+   - Chevrons: `h-4 w-4` → `h-3 w-3`, lower opacity
+
+5. **Nav Items — Stronger Active State & Hierarchy**
+   - Added `ml-1` indentation for parent-child relationship
+   - `rounded-xl` → `rounded-lg` (aligns with design token `semantic.button`)
+   - `px-4 py-2` → `px-3 py-2.5` (better touch targets)
+   - Active: `bg-white/10 shadow-inner border` → `bg-purple-500/15 font-semibold`
+   - Inactive: `text-purple-200` → `text-purple-200/80`
+   - Icons: `h-4 w-4` → `h-[18px] w-[18px]`
+   - Active icon: `text-purple-300` → `text-white` (real contrast)
+   - Inactive icon: `text-purple-400` → `text-purple-400/70`
+   - Left indicator: `w-1 h-6 solid` → `w-[3px] h-5 gradient from-purple-400 to-blue-400` + stronger glow
+   - Applied to both `<Link>` and external `<a>` variants
+
+6. **Footer — Compact Profile Row**
+   - Deleted entire collapse toggle button (moved to header)
+   - `px-4 py-4 space-y-3` → `px-3 py-3 space-y-2`
+   - User profile: 2-row layout (~80px) → single-row (~40px)
+   - Single row: `[Avatar] [Name/Role] [Logout]`
+   - Removed Feedback link (moved to header)
+   - Kept collapsed-state avatar + logout layout
+   - Kept `!userInfo` fallback logout button
+
+7. **Scrollbar — Always Subtly Visible**
+   - Updated `.sidebar` CSS in `index.css`
+   - Default: `rgba(167, 139, 250, 0.15)` (always visible)
+   - Hover: `rgba(167, 139, 250, 0.35)` (brighter)
+
+8. **AdminHeader Glow Refinement**
+   - `shadow-purple-500/20` → `shadow-purple-500/10` (enterprise-appropriate)
+
+### What Was Learned
+
+1. **Vertical Math Matters**: By saving ~200px (header shrinkage + profile compaction + spacing reduction), the sidebar fits without scrolling on most viewports. This is a better UX than hiding scrollbars.
+
+2. **Visual Hierarchy Fixes**:
+   - Moving collapse toggle to header cleans up the footer's purpose (profile only)
+   - Whisper-quiet group headers reduce visual noise; users ignore headers after first week
+   - Stronger active states (`bg-purple-500/15`, white icons, gradient bar) make current page obvious
+
+3. **Design Token Consistency**: Using `rounded-lg` for nav items aligns with `semantic.button` token, while keeping `rounded-xl` for cards/selectors maintains distinction.
+
+4. **CSS Scrollbar Strategy**: Always-subtle scrollbars (15% opacity) with hover-brightening (35%) are better than completely hidden scrollbars — users need a visual cue that content overflows.
+
+5. **Component Integration**: Moving Feedback to header as LifeBuoy icon eliminates the "orphaned" footer element and saves another ~30px.
+
+6. **Glow Intensity**: Reducing icon shadow opacity from 20% to 10% shifts from "gaming UI" to "enterprise admin" aesthetic.
+
+7. **Implementation Discipline**: Gemini's generated code had 9+ errors vs. the actual codebase (wrong props, missing features). Always verify against existing patterns before applying AI suggestions.
+
+### Files Modified
+
+- `admin-panel/src/components/layout/sidebar.tsx` — full redesign
+- `admin-panel/src/index.css` — scrollbar visibility
+- `admin-panel/src/components/ui/admin-header.tsx` — glow reduction
+
+### Future Opportunities
+
+- Default-collapse inactive nav groups to eliminate scrolling entirely on smaller viewports
+- Consider adding a subtle hover state to group headers (even though they're non-interactive visually)
+- Evaluate if the gradient left bar should be a design token for consistency
+
+---
+
 ## 2026-02-11: Checkly Autonomous Monitoring Implementation
 
 ### Session Context

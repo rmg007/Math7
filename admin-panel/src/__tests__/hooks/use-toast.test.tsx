@@ -1,6 +1,6 @@
-import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useToast, toast } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('useToast', () => {
   beforeEach(() => {
@@ -77,8 +77,8 @@ describe('useToast', () => {
 
       let toastId: string;
       act(() => {
-        const result = result.current.toast({ title: 'Original' });
-        toastId = result.id;
+        const toastResult = result.current.toast({ title: 'Original' });
+        toastId = toastResult.id;
       });
 
       act(() => {
@@ -100,8 +100,8 @@ describe('useToast', () => {
 
       let toastId: string;
       act(() => {
-        const result = result.current.toast({ title: 'Toast 1' });
-        toastId = result.id;
+        const toastResult = result.current.toast({ title: 'Toast 1' });
+        toastId = toastResult.id;
       });
 
       act(() => {
@@ -137,8 +137,8 @@ describe('useToast', () => {
 
       let toastId: string;
       act(() => {
-        const result = result.current.toast({ title: 'Test Toast' });
-        toastId = result.id;
+        const toastResult = result.current.toast({ title: 'Test Toast' });
+        toastId = toastResult.id;
       });
 
       // Toast should be present
@@ -196,8 +196,8 @@ describe('useToast', () => {
 
       let toastId: string;
       act(() => {
-        const result = result.current.toast({ title: 'Test' });
-        toastId = result.id;
+        const toastResult = result.current.toast({ title: 'Test' });
+        toastId = toastResult.id;
       });
 
       const toast = result.current.toasts.find(t => t.id === toastId);
@@ -235,8 +235,8 @@ describe('useToast', () => {
 
       let toastId: string;
       act(() => {
-        const result = result.current.toast({ title: 'Original' });
-        toastId = result.id;
+        const toastResult = result.current.toast({ title: 'Original' });
+        toastId = toastResult.id;
       });
 
       act(() => {
@@ -333,8 +333,8 @@ describe('useToast', () => {
 
       let toastId: string;
       act(() => {
-        const result = result.current.toast({ title: 'Test' });
-        toastId = result.id;
+        const toastResult = result.current.toast({ title: 'Test' });
+        toastId = toastResult.id;
       });
 
       // Dismiss immediately

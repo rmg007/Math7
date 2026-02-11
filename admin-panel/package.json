@@ -11,6 +11,7 @@
     "lint:fix": "eslint . --ext ts,tsx --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,json}\"",
     "test": "vitest run",
+    "test:watch": "vitest",
     "test:quick": "vitest run --changed HEAD~1 --reporter=json --outputFile=test-results.json",
     "test:full": "vitest run --coverage --reporter=json --outputFile=test-results.json",
     "test:arch": "vitest run src/__tests__/architecture.test.ts",

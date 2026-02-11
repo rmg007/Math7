@@ -1,6 +1,6 @@
-import { Header } from '../components/Header';
+import { Apple, Globe, Smartphone, Zap } from 'lucide-react';
 import { Footer } from '../components/Footer';
-import { Apple, Smartphone, Globe, Zap } from 'lucide-react';
+import { Header } from '../components/Header';
 
 export const DownloadIOSPage = () => {
   return (
@@ -10,7 +10,7 @@ export const DownloadIOSPage = () => {
       <main className="pt-32 pb-20">
         {/* Hero */}
         <section className="max-w-4xl mx-auto px-6 mb-20 text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-3xl flex items-center justify-center text-white mx-auto mb-6 shadow-2xl shadow-blue-600/30">
+          <div className="w-20 h-20 bg-linear-to-br from-blue-600 to-indigo-600 rounded-3xl flex items-center justify-center text-white mx-auto mb-6 shadow-2xl shadow-blue-600/30">
             <Apple size={40} />
           </div>
           

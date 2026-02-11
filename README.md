@@ -46,6 +46,22 @@ The project consists:
 - `docs/technical/MCP_SETUP_GUIDE.md`
 - `docs/technical/CLOUD_DEV.md` (Replit & Codespaces)
 - `docs/technical/IDE_SETUP.md` (Cursor, Windsurf, VS Code)
+- `scripts/setup-automation.sh` (Minimal Viable Automation setup)
+
+## 🛠️ Development Automation
+
+This project uses **Husky** and **lint-staged** to ensure code quality:
+- **Pre-commit**: Automatically lints and formats changed files (<5s).
+- **Pre-push**: Validates types (Admin Panel) and analyzes code (Student App).
+
+To set up locally:
+```bash
+# On Windows/Bash
+bash scripts/setup-automation.sh
+# On Windows/PowerShell
+.\scripts\setup-automation.ps1
+```
+
 
 ## 🤖 For AI Agents
 

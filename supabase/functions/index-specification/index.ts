@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,15 +9,17 @@ interface IndexRequest {
   specId: string
 }
 
-Deno.serve(async (req) => {
+export async function indexSpecificationHandler(req: Request, deps?: { supabase?: any; fetch?: typeof fetch }): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseClient = deps?.supabase || createClient(
+      supabaseUrl,
+      supabaseAnonKey,
       {
         global: {
           headers: { Authorization: req.headers.get('Authorization')! },
@@ -41,7 +43,8 @@ Deno.serve(async (req) => {
     // 2. Generate embedding using OpenAI
     const embeddingText = `${spec.entity_type}: ${spec.entity_name}\n\n${spec.spec_content}`
     
-    const openaiResponse = await fetch('https://api.openai.com/v1/embeddings', {
+    const fetcher = deps?.fetch || fetch;
+    const openaiResponse = await fetcher('https://api.openai.com/v1/embeddings', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
@@ -93,4 +96,9 @@ Deno.serve(async (req) => {
       }
     )
   }
-})
+}
+
+// Start the server only if run as main
+if (import.meta.main) {
+  Deno.serve(indexSpecificationHandler)
+}

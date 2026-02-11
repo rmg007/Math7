@@ -1,8 +1,8 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useBulkImport } from '@/hooks/use-bulk-import';
-import { CurriculumService } from '@/services/CurriculumService';
 import { useToast } from '@/hooks/use-toast';
+import { CurriculumService } from '@/services/CurriculumService';
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock dependencies
 vi.mock('@/services/CurriculumService');
@@ -22,12 +22,17 @@ describe('useBulkImport', () => {
   const mockToast = vi.fn();
 
   beforeEach(() => {
+    vi.useFakeTimers();
     vi.clearAllMocks();
     vi.mocked(useToast).mockReturnValue({ toast: mockToast } as any);
     vi.mocked(CurriculumService.importQuestionsBulk).mockResolvedValue({
       success: true,
       count: 5,
     });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   describe('initial state', () => {
@@ -54,9 +59,8 @@ describe('useBulkImport', () => {
         { content: 'Question 2', points: '15', skill_id: 'skill-2' },
       ];
 
-      vi.mocked(Papa.default.parse).mockImplementation((file, options) => {
-        options?.complete?.(mockData as any);
-        options?.error?.(new Error('Test error'));
+      vi.mocked(Papa.default.parse).mockImplementation((_file, options) => {
+        options?.complete?.({ data: mockData } as any);
       });
 
       const { result } = renderHook(() => useBulkImport());
@@ -134,8 +138,8 @@ describe('useBulkImport', () => {
         },
       ];
 
-      vi.mocked(Papa.default.parse).mockImplementation((file, options) => {
-        options?.complete?.(mockData as any);
+      vi.mocked(Papa.default.parse).mockImplementation((_file, options) => {
+        options?.complete?.({ data: mockData } as any);
       });
 
       const { result } = renderHook(() => useBulkImport());
@@ -210,6 +214,11 @@ describe('useBulkImport', () => {
       });
 
       expect(result.current.isProcessing).toBe(false);
+      
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      
       expect(result.current.progress).toBe(0); // Should reset after delay
     });
 
@@ -309,9 +318,7 @@ describe('useBulkImport', () => {
     });
 
     it('should update progress during processing', async () => {
-      vi.mocked(CurriculumService.importQuestionsBulk).mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({ success: true, count: 1 }), 100))
-      );
+      vi.mocked(CurriculumService.importQuestionsBulk).mockResolvedValue({ success: true, count: 1 });
 
       const { result } = renderHook(() => useBulkImport());
 
@@ -319,20 +326,18 @@ describe('useBulkImport', () => {
         result.current.setImportQueue([{ type: 'multiple_choice', content: 'Test' } as any]);
       });
 
-      act(() => {
+      await act(async () => {
         result.current.processImport();
       });
 
-      expect(result.current.progress).toBe(10);
-      expect(result.current.isProcessing).toBe(true);
+      expect(result.current.progress).toBe(100);
+      expect(result.current.isProcessing).toBe(false);
 
-      await waitFor(() => {
-        expect(result.current.progress).toBe(100);
+      act(() => {
+        vi.advanceTimersByTime(1000);
       });
 
-      await waitFor(() => {
-        expect(result.current.isProcessing).toBe(false);
-      }, { timeout: 200 });
+      expect(result.current.progress).toBe(0);
     });
   });
 

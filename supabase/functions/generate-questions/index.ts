@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { GoogleGenerativeAI } from 'npm:@google/generative-ai@0.1.3';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { GoogleGenerativeAI } from 'npm:@google/generative-ai@0.1.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,7 +18,7 @@ interface GenerationRequest {
   model?: 'gemini-1.5-flash' | 'gpt-4o-mini';
 }
 
-serve(async (req) => {
+export async function generateQuestionsHandler(req: Request, deps?: { supabase?: any; genAI?: any }): Promise<Response> {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -38,7 +38,7 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = deps?.supabase || createClient(supabaseUrl, supabaseServiceKey);
 
     // Verify the user's JWT
     const token = authHeader.replace('Bearer ', '');
@@ -88,11 +88,11 @@ serve(async (req) => {
 
     // Initialize AI client
     const apiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!apiKey) {
+    if (!apiKey && !deps?.genAI) {
       throw new Error('GEMINI_API_KEY not configured');
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
+    const genAI = deps?.genAI || new GoogleGenerativeAI(apiKey!);
     const geminiModel = genAI.getGenerativeModel({ 
       model: model, // ✅ FIX P1: Use variable, not hardcoded literal
       generationConfig: {
@@ -168,7 +168,12 @@ serve(async (req) => {
       }
     );
   }
-});
+}
+
+// Start the server only if run as main
+if (import.meta.main) {
+  serve(generateQuestionsHandler);
+}
 
 function buildPrompt(
   text: string,

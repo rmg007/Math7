@@ -1,8 +1,8 @@
-import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useAIGenerator } from '@/hooks/use-ai-generator';
-import { generateQuestionsFromAI } from '@/lib/gemini';
 import { useToast } from '@/hooks/use-toast';
+import { generateQuestionsFromAI } from '@/lib/gemini';
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock dependencies
 vi.mock('@/lib/gemini');
@@ -11,8 +11,8 @@ vi.mock('@/hooks/use-toast');
 describe('useAIGenerator', () => {
   const mockToast = vi.fn();
   const mockQuestions = [
-    { id: '1', content: 'Question 1', type: 'multiple_choice' },
-    { id: '2', content: 'Question 2', type: 'boolean' },
+    { content: 'Question 1', type: 'multiple_choice', points: 1, correct_answer: 'Option A', explanation: 'Reason 1', options: ['Option A', 'Option B'] },
+    { content: 'Question 2', type: 'boolean', points: 1, correct_answer: 'True', explanation: 'Reason 2', options: ['True', 'False'] },
   ];
 
   beforeEach(() => {

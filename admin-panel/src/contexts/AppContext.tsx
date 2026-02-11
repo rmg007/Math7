@@ -1,6 +1,6 @@
-import { ReactNode, useState, useEffect, useContext } from 'react';
-import { supabase } from '@/lib/supabase';
 import { App } from '@/features/platform/hooks/use-apps';
+import { supabase } from '@/lib/supabase';
+import { ReactNode, useContext, useEffect, useState } from 'react';
 import { AppContext } from './AppContextDefinition';
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAppContext = () => useContext(AppContext);
@@ -30,8 +30,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (data && data.length > 0) {
         setApps(data);
 
-        // Try to restore from localStorage
-        const savedAppId = localStorage.getItem(STORAGE_KEY);
+        // Try to get user's persisted app preference from profile first
+        const { data: { user } } = await supabase.auth.getUser();
+        let profileAppId: string | undefined;
+
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('app_id')
+            .eq('id', user.id)
+            .single();
+          profileAppId = profile?.app_id ?? undefined;
+        }
+
+        const savedAppId = profileAppId || localStorage.getItem(STORAGE_KEY);
         const savedApp = data.find(a => a.app_id === savedAppId);
 
         if (savedApp) {
@@ -40,6 +52,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
           // Auto-select first active app or first app
           const activeApp = data.find(a => a.is_active) || data[0];
           setCurrentApp(activeApp);
+          // Sync default to profile if user exists
+          if (user && activeApp) {
+             supabase.from('profiles').update({ app_id: activeApp.app_id }).eq('id', user.id).then();
+          }
         }
       }
     } catch (err) {
@@ -51,11 +67,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     loadApps();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      loadApps();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const handleSetCurrentApp = (app: App) => {
+  const handleSetCurrentApp = async (app: App) => {
     setCurrentApp(app);
     localStorage.setItem(STORAGE_KEY, app.app_id);
+    
+    // Persist to profile for RLS context
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from('profiles').update({ app_id: app.app_id }).eq('id', user.id);
+    }
   };
 
   const toggleSidebar = () => {
