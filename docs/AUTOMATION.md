@@ -10,13 +10,13 @@ This document catalogs all automated workflows in the Questerix project. Every a
 
 | Category                 | Workflows    | Purpose                         |
 | ------------------------ | ------------ | ------------------------------- |
-| **Quality Assurance**    | 11 workflows | Code quality, testing, coverage |
-| **Security**             | 6 workflows  | DAST, SAST, dependency scanning |
+| **Quality Assurance**    | 13 workflows | Code quality, testing, coverage |
+| **Security**             | 7 workflows  | DAST, SAST, dependency scanning |
 | **Developer Experience** | 8 workflows  | PRs, issues, onboarding         |
 | **Operations**           | 5 workflows  | Monitoring, performance         |
-| **Maintenance**          | 4 workflows  | Dependencies, cleanup           |
+| **Maintenance**          | 5 workflows  | Dependencies, cleanup           |
 
-**Total**: 34 automated workflows running 24/7
+**Total**: 37 automated workflows running 24/7
 
 ---
 
@@ -61,7 +61,19 @@ This document catalogs all automated workflows in the Questerix project. Every a
 - **What it does**: Generates before/after screenshots with pixel-level diffs
 - **Saves**: "Did something break?" questions
 
-### 7. **Dead Code Detection** (`dead-code.yml`)
+### 7. **PR Preview Testing** (`.github/workflows/preview-testing.yml`)
+
+- **Trigger**: PRs affecting frontend
+- **What it does**: Waits for Cloudflare deployment, runs Lighthouse + ZAP on the preview URL
+- **Saves**: Manual validation of preview sites
+
+### 8. **Flutter Builds** (`.github/workflows/flutter-builds.yml`)
+
+- **Trigger**: PRs affecting student-app
+- **What it does**: Builds Android APK and iOS app bundle
+- **Saves**: "Does it still build?" anxiety
+
+### 9. **Dead Code Detection** (`dead-code.yml`)
 
 - **Trigger**: Weekly + PRs
 - **What it does**: Finds unused files, exports, and dependencies
@@ -236,7 +248,13 @@ This document catalogs all automated workflows in the Questerix project. Every a
 - **What it does**: Analyzes CI performance, finds slow/failing workflows
 - **Saves**: CI optimization discovery
 
-### 32. **Dependency Graph Publishing** (existing `ci.yml`)
+### 32. **Staging Database Migrations** (`staging-migrations.yml`)
+
+- **Trigger**: PRs with SQL migration changes
+- **What it does**: Automatically applies migrations to a staging project for immediate testing
+- **Saves**: "Did I write valid SQL?" bugs
+
+### 33. **Dependency Graph Publishing** (existing `ci.yml`)
 
 - **Trigger**: Every commit
 - **What it does**: Generates architecture diagrams

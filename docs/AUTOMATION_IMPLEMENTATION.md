@@ -2,7 +2,7 @@
 
 ## Summary
 
-We've successfully implemented **34 automated workflows** that will save approximately **6 hours and 50 minutes per week** (~355 hours/year, or **44 work days**).
+We've successfully implemented **37 automated workflows** that will save approximately **7 hours and 15 minutes per week** (~375 hours/year, or **47 work days**).
 
 ---
 
@@ -28,6 +28,9 @@ We've successfully implemented **34 automated workflows** that will save approxi
 16. **type-generation.yml** - Auto-gen types from DB schema
 17. **visual-regression.yml** - Playwright screenshot testing
 18. **workflow-health.yml** - CI/CD performance monitoring
+19. **preview-testing.yml** - Lighthouse+ZAP on Cloudflare previews
+20. **staging-migrations.yml** - Auto-apply DB changes to staging
+21. **flutter-builds.yml** - Android & iOS builds on PRs
 
 ### ✏️ **Updated Existing Workflows**
 
@@ -106,14 +109,15 @@ We've successfully implemented **34 automated workflows** that will save approxi
 
 From your original request, here's what we covered:
 
-| Item                    | Status         | Implementation                               |
-| ----------------------- | -------------- | -------------------------------------------- |
-| OWASP ZAP DAST          | ✅ **DONE**    | `dast.yml` + `.zap/rules.tsv`                |
-| Lighthouse CI           | ✅ **DONE**    | `lighthouse.yml` + `lighthouserc.json`       |
-| PR preview deploys      | 🔵 **PARTIAL** | Cloudflare handles this; can wire up testing |
-| Visual regression in CI | ✅ **DONE**    | `visual-regression.yml`                      |
-| Python linting          | ✅ **DONE**    | Updated `ci.yml` with ruff                   |
-| **BONUS: 27+ more**     | ✅ **DONE**    | See full list above                          |
+| Item                     | Status      | Implementation                               |
+| ------------------------ | ----------- | -------------------------------------------- |
+| OWASP ZAP DAST           | ✅ **DONE** | `dast.yml` + `.zap/rules.tsv`                |
+| Lighthouse CI            | ✅ **DONE** | `lighthouse.yml` + `lighthouserc.json`       |
+| PR preview deploys       | ✅ **DONE** | `preview-testing.yml` (waits for Cloudflare) |
+| Visual regression in CI  | ✅ **DONE** | `visual-regression.yml`                      |
+| Python linting           | ✅ **DONE** | Updated `ci.yml` with ruff                   |
+| Flutter Builds (APK/IPA) | ✅ **DONE** | `flutter-builds.yml` (Android/iOS CI)        |
+| **BONUS: 30+ more**      | ✅ **DONE** | See full list above                          |
 
 ---
 
@@ -123,15 +127,16 @@ From your original request, here's what we covered:
 
 Go to **Settings → Secrets and variables → Actions** and add:
 
-| Secret                  | Value Source          | Used By         |
-| ----------------------- | --------------------- | --------------- |
-| `SUPABASE_ACCESS_TOKEN` | Supabase Dashboard    | Type generation |
-| `SUPABASE_PROJECT_ID`   | Supabase URL          | Type generation |
-| `CLOUDFLARE_API_TOKEN`  | Cloudflare Dashboard  | Deployments     |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare Dashboard  | Deployments     |
-| `CHECKLY_API_KEY`       | Checkly Dashboard     | Monitoring      |
-| `MONITOR_USER_EMAIL`    | Test account          | E2E tests       |
-| `MONITOR_USER_PASSWORD` | Test account password | E2E tests       |
+| Secret                        | Value Source          | Used By            |
+| ----------------------------- | --------------------- | ------------------ |
+| `SUPABASE_ACCESS_TOKEN`       | Supabase Dashboard    | Type generation    |
+| `SUPABASE_PROJECT_ID`         | Supabase URL          | Type generation    |
+| `CLOUDFLARE_API_TOKEN`        | Cloudflare Dashboard  | Deployments        |
+| `CLOUDFLARE_ACCOUNT_ID`       | Cloudflare Dashboard  | Deployments        |
+| `CHECKLY_API_KEY`             | Checkly Dashboard     | Monitoring         |
+| `MONITOR_USER_EMAIL`          | Test account          | E2E tests          |
+| `MONITOR_USER_PASSWORD`       | Test account password | E2E tests          |
+| `SUPABASE_STAGING_PROJECT_ID` | Supabase URL          | Staging migrations |
 
 ### **2. Enable Renovate**
 

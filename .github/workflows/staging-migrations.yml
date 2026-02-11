@@ -1,0 +1,69 @@
+name: Staging Database Migrations
+
+on:
+  pull_request:
+    paths:
+      - "supabase/migrations/*.sql"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test-migrations-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+
+      - name: Verify Migrations on Staging
+        run: |
+          supabase db push --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }} --dry-run
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Apply Migrations to Staging
+        if: github.event.pull_request.merged == false
+        run: |
+          # Apply migrations to a temporary branch or dedicated staging project
+          supabase db push --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Comment on PR
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## 🗄️ Staging Migration Successful
+              
+              Database migrations have been successfully applied to the **staging environment**.
+              
+              - **Project**: ${process.env.PROJECT_ID}
+              - **Status**: ✅ Migrated
+              
+              Manual validation of the staging database is recommended before merging.`
+            });
+        env:
+          PROJECT_ID: ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
+
+      - name: Report Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## ❌ Staging Migration Failed
+              
+              Database migrations failed to apply to the staging environment. This must be fixed before the PR can be merged to avoid production issues.`
+            });
