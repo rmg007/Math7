@@ -166,6 +166,11 @@ jobs:
         run: cd admin-panel && npm run test:arch
       - name: Test
         run: cd admin-panel && npm run test -- --coverage
+      - name: Coverage Gate (70% minimum)
+        uses: verygoodopensource/very_good_coverage@v2
+        with:
+          path: './admin-panel/coverage/lcov.info'
+          min_coverage: 70
       - name: Build
         run: cd admin-panel && npm run build
       - name: Supabase typegen guard
@@ -184,6 +189,24 @@ jobs:
           npm run preview &
           npx wait-on http://localhost:4173
           npx pa11y http://localhost:4173 --standard WCAG2AA || echo "Accessibility issues detected"
+
+  edge-functions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - name: Run edge function tests
+        run: |
+          cd supabase/functions
+          deno test --allow-net --allow-env --allow-read --allow-write run-tests.ts
+      - name: Upload edge function test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: edge-function-test-results
+          path: supabase/functions/test-results/
 
   supabase-regression-tests:
     name: Security Regression Tests
