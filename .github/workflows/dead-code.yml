@@ -1,0 +1,150 @@
+name: Dead Code Detection
+
+on:
+  pull_request:
+    paths:
+      - "admin-panel/src/**"
+      - "landing-pages/src/**"
+  schedule:
+    - cron: "0 3 * * 0" # Weekly on Sunday at 3 AM
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  detect-dead-code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install knip
+        run: npm install -g knip
+
+      - name: Analyze admin panel
+        id: admin-analysis
+        continue-on-error: true
+        run: |
+          cd admin-panel
+          npm ci
+          knip --reporter json > ../admin-dead-code.json || true
+
+      - name: Analyze landing pages
+        id: landing-analysis
+        continue-on-error: true
+        run: |
+          cd landing-pages
+          npm ci
+          knip --reporter json > ../landing-dead-code.json || true
+
+      - name: Generate report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let report = '## 🧹 Dead Code Analysis\n\n';
+
+            // Admin Panel
+            if (fs.existsSync('admin-dead-code.json')) {
+              const adminData = JSON.parse(fs.readFileSync('admin-dead-code.json', 'utf8'));
+              const unusedFiles = adminData.files || [];
+              const unusedExports = adminData.exports || [];
+              const unusedDeps = adminData.dependencies || [];
+              
+              report += '### Admin Panel\n\n';
+              
+              if (unusedFiles.length > 0) {
+                report += `**Unused Files (${unusedFiles.length}):**\n`;
+                unusedFiles.slice(0, 10).forEach(file => {
+                  report += `- \`${file}\`\n`;
+                });
+                if (unusedFiles.length > 10) report += `- ... and ${unusedFiles.length - 10} more\n`;
+                report += '\n';
+              }
+              
+              if (unusedExports.length > 0) {
+                report += `**Unused Exports (${unusedExports.length}):**\n`;
+                unusedExports.slice(0, 10).forEach(exp => {
+                  report += `- \`${exp.name}\` in \`${exp.file}\`\n`;
+                });
+                if (unusedExports.length > 10) report += `- ... and ${unusedExports.length - 10} more\n`;
+                report += '\n';
+              }
+              
+              if (unusedDeps.length > 0) {
+                report += `**Unused Dependencies (${unusedDeps.length}):**\n`;
+                unusedDeps.forEach(dep => {
+                  report += `- \`${dep}\`\n`;
+                });
+                report += '\n';
+              }
+            }
+
+            // Landing Pages
+            if (fs.existsSync('landing-dead-code.json')) {
+              const landingData = JSON.parse(fs.readFileSync('landing-dead-code.json', 'utf8'));
+              const unusedFiles = landingData.files || [];
+              
+              report += '### Landing Pages\n\n';
+              
+              if (unusedFiles.length > 0) {
+                report += `**Unused Files (${unusedFiles.length}):**\n`;
+                unusedFiles.slice(0, 5).forEach(file => {
+                  report += `- \`${file}\`\n`;
+                });
+                if (unusedFiles.length > 5) report += `- ... and ${unusedFiles.length - 5} more\n`;
+              }
+            }
+
+            report += '\n---\n*This analysis helps identify code that can be safely removed to reduce bundle size.*';
+
+            if (context.eventName === 'pull_request') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: report
+              });
+            } else {
+              // Create or update an issue
+              const issues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: 'automated,dead-code',
+                state: 'open'
+              });
+              
+              if (issues.data.length > 0) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issues.data[0].number,
+                  body: `### Updated Analysis (${new Date().toISOString().split('T')[0]})\n\n${report}`
+                });
+              } else {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: '🧹 Dead Code Cleanup Opportunity',
+                  body: report,
+                  labels: ['automated', 'dead-code', 'refactor']
+                });
+              }
+            }
+
+      - name: Upload analysis artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dead-code-analysis
+          path: |
+            admin-dead-code.json
+            landing-dead-code.json

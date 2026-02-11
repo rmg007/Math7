@@ -1,0 +1,127 @@
+name: Screenshot Diffing
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - "admin-panel/src/**/*.tsx"
+      - "landing-pages/src/**/*.tsx"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  screenshot-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+          path: base
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          path: pr
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Playwright
+        run: |
+          cd pr/admin-panel
+          npm ci
+          npx playwright install chromium
+
+      - name: Build and screenshot base version
+        run: |
+          cd base/admin-panel
+          npm ci
+          npm run build
+          npm run preview &
+          npx wait-on http://localhost:4173
+          npx playwright screenshot http://localhost:4173/login base-login.png
+          npx playwright screenshot http://localhost:4173/apps base-apps.png
+          pkill -f "vite preview"
+
+      - name: Build and screenshot PR version
+        run: |
+          cd pr/admin-panel
+          npm run preview &
+          npx wait-on http://localhost:4173
+          npx playwright screenshot http://localhost:4173/login pr-login.png
+          npx playwright screenshot http://localhost:4173/apps pr-apps.png
+
+      - name: Compare screenshots
+        id: compare
+        run: |
+          npm install -g pixelmatch
+          node -e "
+          const fs = require('fs');
+          const PNG = require('pngjs').PNG;
+          const pixelmatch = require('pixelmatch');
+
+          const pages = ['login', 'apps'];
+          let hasDiff = false;
+
+          for (const page of pages) {
+            const img1 = PNG.sync.read(fs.readFileSync(\`base-\${page}.png\`));
+            const img2 = PNG.sync.read(fs.readFileSync(\`pr-\${page}.png\`));
+            const {width, height} = img1;
+            const diff = new PNG({width, height});
+            
+            const numDiffPixels = pixelmatch(img1.data, img2.data, diff.data, width, height, {threshold: 0.1});
+            
+            if (numDiffPixels > 0) {
+              fs.writeFileSync(\`diff-\${page}.png\`, PNG.sync.write(diff));
+              console.log(\`\${page}: \${numDiffPixels} pixels differ\`);
+              hasDiff = true;
+            }
+          }
+
+          process.exit(hasDiff ? 1 : 0);
+          "
+        continue-on-error: true
+
+      - name: Upload screenshot comparison
+        if: steps.compare.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshot-diff-${{ github.event.pull_request.number }}
+          path: |
+            base-*.png
+            pr-*.png
+            diff-*.png
+
+      - name: Comment with visual diff
+        if: steps.compare.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const artifactUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## 📸 Visual Changes Detected
+              
+              This PR includes visual changes to the UI. Screenshots have been captured for review.
+              
+              **Pages with changes:**
+              - Login page
+              - Apps page
+              
+              **[View Before/After Screenshots](${artifactUrl})**
+              
+              The screenshots show:
+              - \`base-*.png\`: Current production version
+              - \`pr-*.png\`: This PR's version
+              - \`diff-*.png\`: Pixel differences highlighted
+              
+              If these changes are intentional, you can ignore this message.`
+            });

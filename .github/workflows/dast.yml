@@ -1,0 +1,104 @@
+name: DAST Security Scanning
+
+on:
+  schedule:
+    - cron: "0 1 * * *" # Daily at 1 AM UTC
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Target URL to scan"
+        required: false
+        default: "https://questerix-admin.pages.dev"
+
+permissions:
+  contents: read
+  issues: write
+  security-events: write
+
+jobs:
+  owasp-zap-scan:
+    runs-on: ubuntu-latest
+    name: OWASP ZAP DAST Scan
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: ZAP Full Scan
+        uses: zaproxy/action-full-scan@v0.10.0
+        with:
+          target: ${{ github.event.inputs.target || 'https://questerix-admin.pages.dev' }}
+          rules_file_name: ".zap/rules.tsv"
+          cmd_options: "-a"
+          allow_issue_writing: true
+          artifact_name: "zap-scan-results"
+
+      - name: Upload ZAP SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: report_json.sarif
+
+      - name: Create security issue for findings
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let findings = '## 🔒 DAST Security Findings\n\n';
+            findings += `**Target**: ${process.env.TARGET_URL}\n`;
+            findings += `**Scan Date**: ${new Date().toISOString()}\n\n`;
+
+            if (fs.existsSync('report_json.json')) {
+              const report = JSON.parse(fs.readFileSync('report_json.json', 'utf8'));
+              const alerts = report.site[0].alerts || [];
+              
+              const highRisk = alerts.filter(a => a.riskdesc.includes('High'));
+              const mediumRisk = alerts.filter(a => a.riskdesc.includes('Medium'));
+              
+              if (highRisk.length > 0) {
+                findings += '### High Risk Issues\n\n';
+                highRisk.forEach(alert => {
+                  findings += `- **${alert.alert}**\n`;
+                  findings += `  - Risk: ${alert.riskdesc}\n`;
+                  findings += `  - Description: ${alert.desc}\n`;
+                  findings += `  - Solution: ${alert.solution}\n\n`;
+                });
+              }
+              
+              if (mediumRisk.length > 0) {
+                findings += '### Medium Risk Issues\n\n';
+                mediumRisk.forEach(alert => {
+                  findings += `- **${alert.alert}**: ${alert.riskdesc}\n`;
+                });
+              }
+            }
+
+            findings += '\n[View Full Report](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId + ')';
+
+            // Check for existing security issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'security,automated,dast',
+              state: 'open'
+            });
+
+            if (issues.data.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues.data[0].number,
+                body: findings
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🔒 DAST Security Vulnerabilities Detected',
+                body: findings,
+                labels: ['security', 'automated', 'dast', 'priority:high']
+              });
+            }
+        env:
+          TARGET_URL: ${{ github.event.inputs.target || 'https://questerix-admin.pages.dev' }}

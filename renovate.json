@@ -1,0 +1,81 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
+  "timezone": "UTC",
+  "schedule": ["before 6am on Monday"],
+  "labels": ["dependencies", "automated"],
+  "assignees": ["@questerix/maintainers"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "vulnerabilityAlerts": {
+    "labels": ["security", "priority:critical"],
+    "automerge": false
+  },
+  "packageRules": [
+    {
+      "description": "Auto-merge patch updates for known-safe packages",
+      "matchUpdateTypes": ["patch"],
+      "matchPackagePatterns": [
+        "lucide-react",
+        "prettier",
+        "eslint",
+        "typescript"
+      ],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Group all minor and patch updates to reduce PR noise",
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "description": "Separate major updates for careful review",
+      "matchUpdateTypes": ["major"],
+      "labels": ["breaking-change", "priority:high"],
+      "automerge": false
+    },
+    {
+      "description": "Admin Panel dependencies",
+      "matchFiles": ["admin-panel/package.json"],
+      "labels": ["admin-panel"]
+    },
+    {
+      "description": "Landing Pages dependencies",
+      "matchFiles": ["landing-pages/package.json"],
+      "labels": ["landing-pages"]
+    },
+    {
+      "description": "Student App dependencies",
+      "matchFiles": ["student-app/pubspec.yaml"],
+      "labels": ["student-app"]
+    },
+    {
+      "description": "Python dependencies",
+      "matchFiles": ["content-engine/requirements.txt"],
+      "labels": ["content-engine"]
+    },
+    {
+      "description": "GitHub Actions",
+      "matchManagers": ["github-actions"],
+      "labels": ["ci"],
+      "automerge": true,
+      "automergeType": "pr"
+    }
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": ["\\.github/workflows/.+\\.yml$"],
+      "matchStrings": [
+        "flutter-version:\\s*['\"]?(?<currentValue>[^'\"\\s]+)['\"]?"
+      ],
+      "depNameTemplate": "flutter",
+      "datasourceTemplate": "github-tags",
+      "lookupNameTemplate": "flutter/flutter"
+    }
+  ],
+  "ignoreDeps": [],
+  "ignorePaths": ["**/node_modules/**", "**/dist/**", "**/build/**"]
+}

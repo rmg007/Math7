@@ -1,0 +1,95 @@
+name: Lighthouse CI
+
+on:
+  pull_request:
+    paths:
+      - "admin-panel/**"
+      - "landing-pages/**"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: |
+          cd admin-panel
+          npm ci
+
+      - name: Build
+        run: |
+          cd admin-panel
+          npm run build
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          configPath: "./lighthouserc.json"
+          temporaryPublicStorage: true
+          uploadArtifacts: true
+
+      - name: Comment Lighthouse scores
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Read Lighthouse results
+            const resultsPath = '.lighthouseci';
+            if (!fs.existsSync(resultsPath)) {
+              console.log('No Lighthouse results found');
+              return;
+            }
+
+            const files = fs.readdirSync(resultsPath);
+            const manifestFile = files.find(f => f.includes('manifest'));
+
+            if (!manifestFile) {
+              console.log('No manifest file found');
+              return;
+            }
+
+            const manifest = JSON.parse(fs.readFileSync(`${resultsPath}/${manifestFile}`, 'utf8'));
+            const results = manifest[0];
+
+            const score = (value) => Math.round(value * 100);
+            const emoji = (value) => value >= 0.9 ? '🟢' : value >= 0.5 ? '🟡' : '🔴';
+
+            let comment = '## ⚡ Lighthouse Performance Report\n\n';
+            comment += '| Category | Score |\n';
+            comment += '|----------|-------|\n';
+            comment += `| ${emoji(results.summary.performance)} Performance | ${score(results.summary.performance)} |\n`;
+            comment += `| ${emoji(results.summary.accessibility)} Accessibility | ${score(results.summary.accessibility)} |\n`;
+            comment += `| ${emoji(results.summary['best-practices'])} Best Practices | ${score(results.summary['best-practices'])} |\n`;
+            comment += `| ${emoji(results.summary.seo)} SEO | ${score(results.summary.seo)} |\n`;
+
+            // Check for regressions
+            if (results.summary.performance < 0.9) {
+              comment += '\n⚠️ **Performance Warning**: Score below 90. Consider optimizing bundle size, images, or lazy loading.';
+            }
+
+            if (results.summary.accessibility < 0.9) {
+              comment += '\n⚠️ **Accessibility Warning**: Score below 90. Review ARIA labels, contrast ratios, and keyboard navigation.';
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });

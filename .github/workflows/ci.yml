@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check docs freshness
         run: bash ./scripts/check-docs-freshness.sh
-      
+
       - name: Link Integrity Check (Lychee)
         uses: lycheeverse/lychee-action@v1
         with:
@@ -31,11 +31,11 @@ jobs:
         run: cd student-app && flutter analyze
       - name: Flutter test with coverage
         run: cd student-app && flutter test --coverage
-      
+
       - name: Coverage Gate (60% minimum)
         uses: verygoodopensource/very_good_coverage@v2
         with:
-          path: './student-app/coverage/lcov.info'
+          path: "./student-app/coverage/lcov.info"
           min_coverage: 60
       - name: Upload Flutter coverage artifact
         uses: actions/upload-artifact@v4
@@ -49,20 +49,24 @@ jobs:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: ./student-app/coverage/lcov.info
 
-
   python:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Install deps
         run: |
           python -m venv .venv
           . .venv/bin/activate
           pip install -r content-engine/requirements.txt
-          pip install pytest coverage
+          pip install pytest coverage ruff
+      - name: Lint with ruff
+        run: |
+          . .venv/bin/activate
+          ruff check content-engine/ *.py --output-format=github
+          ruff format --check content-engine/ *.py
       - name: Run tests with coverage
         run: |
           . .venv/bin/activate
@@ -82,17 +86,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      
+          python-version: "3.11"
+
       - name: Install Bandit
         run: pip install bandit[toml]
-      
+
       - name: Run Bandit on content-engine
         run: bandit -r content-engine/ -f json -o bandit-content-engine.json || true
-      
+
       - name: Run Bandit on root scripts
         run: bandit -r *.py -f json -o bandit-root.json || true
-      
+
       - name: Check for high severity issues
         run: |
           if [ -f bandit-content-engine.json ]; then
@@ -103,7 +107,7 @@ jobs:
               exit 1
             fi
           fi
-          
+
           if [ -f bandit-root.json ]; then
             HIGH_ROOT=$(jq '[.results[] | select(.issue_severity == "HIGH" or .issue_severity == "CRITICAL")] | length' bandit-root.json)
             if [ "$HIGH_ROOT" -gt 0 ]; then
@@ -112,9 +116,9 @@ jobs:
               exit 1
             fi
           fi
-          
+
           echo "✅ No high/critical severity security issues found"
-      
+
       - name: Upload Bandit reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -130,8 +134,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: |
             admin-panel/package-lock.json
             package-lock.json
@@ -166,10 +170,15 @@ jobs:
         run: cd admin-panel && npm run test:arch
       - name: Test
         run: cd admin-panel && npm run test -- --coverage
+      - name: Cross-browser E2E (Chromium, Firefox, WebKit)
+        run: |
+          cd admin-panel
+          npx playwright install chromium firefox webkit
+          npx playwright test --project=chromium --project=firefox --project=webkit
       - name: Coverage Gate (70% minimum)
         uses: verygoodopensource/very_good_coverage@v2
         with:
-          path: './admin-panel/coverage/lcov.info'
+          path: "./admin-panel/coverage/lcov.info"
           min_coverage: 70
       - name: Build
         run: cd admin-panel && npm run build
@@ -213,17 +222,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: latest
-      
+
       - name: Start Supabase
         run: |
           cd supabase
           supabase start
-      
+
       - name: Run Regression Tests
         run: |
           cd supabase
@@ -231,7 +240,7 @@ jobs:
           ./tests/run_all.sh
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:54322/postgres
-      
+
       - name: Stop Supabase
         if: always()
         run: |
@@ -243,19 +252,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      
+          node-version: "20"
+
       - name: Install Oracle Plus CLI
         run: |
           cd tools/oracle-plus
           npm ci
           npm run build
           npm link
-      
+
       - name: Run Drift Analysis
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -264,7 +273,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           oracle-plus check --all --format github > drift-report.md
-      
+
       - name: Post PR Comment
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
@@ -278,7 +287,7 @@ jobs:
               repo: context.repo.repo,
               body: report
             });
-      
+
       - name: Fail if Critical Drift
         run: |
           if grep -q "severity: critical" drift-report.md; then

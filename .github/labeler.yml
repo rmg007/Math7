@@ -1,0 +1,63 @@
+# Auto-label PRs based on file paths changed
+
+# Admin Panel
+admin-panel:
+  - admin-panel/**/*
+
+# Student App
+student-app:
+  - student-app/**/*
+
+# Landing Pages
+landing-pages:
+  - landing-pages/**/*
+
+# Content Engine
+content-engine:
+  - content-engine/**/*
+
+# Database/Supabase
+database:
+  - supabase/**/*
+  - "**/migrations/**/*"
+
+# CI/CD
+ci:
+  - .github/workflows/**/*
+  - .husky/**/*
+  - scripts/**/*
+
+# Documentation
+documentation:
+  - docs/**/*
+  - "**/*.md"
+  - AGENTS.md
+  - README.md
+
+# Dependencies
+dependencies:
+  - "**/package.json"
+  - "**/package-lock.json"
+  - "**/pubspec.yaml"
+  - "**/requirements.txt"
+
+# Security
+security:
+  - .github/workflows/security.yml
+  - .gitleaks.toml
+  - .semgrep/**/*
+
+# Testing
+testing:
+  - "**/*.test.ts"
+  - "**/*.spec.ts"
+  - "**/*.test.tsx"
+  - "**/*_test.dart"
+  - tests/**/*
+
+# Infrastructure
+infrastructure:
+  - .devcontainer/**/*
+  - Dockerfile
+  - docker-compose.yml
+  - wrangler.toml

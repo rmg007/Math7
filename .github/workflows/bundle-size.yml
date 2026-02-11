@@ -1,0 +1,97 @@
+name: Bundle Size Monitoring
+
+on:
+  pull_request:
+    paths:
+      - "admin-panel/**"
+      - "landing-pages/**"
+      - "student-app/**"
+  push:
+    branches: [main]
+
+jobs:
+  track-bundle-size:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: |
+            admin-panel/package-lock.json
+            landing-pages/package-lock.json
+
+      - name: Build Admin Panel
+        run: |
+          cd admin-panel
+          npm ci
+          npm run build
+
+      - name: Build Landing Pages
+        run: |
+          cd landing-pages
+          npm ci
+          npm run build
+
+      - name: Analyze bundle size
+        uses: andresz1/size-limit-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          directory: admin-panel
+          build_script: npm run build
+
+      - name: Check for bundle size bloat
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            function getDirectorySize(dir) {
+              let size = 0;
+              const files = fs.readdirSync(dir, { withFileTypes: true });
+              for (const file of files) {
+                const filePath = path.join(dir, file.name);
+                if (file.isDirectory()) {
+                  size += getDirectorySize(filePath);
+                } else {
+                  size += fs.statSync(filePath).size;
+                }
+              }
+              return size;
+            }
+
+            const adminSize = getDirectorySize('admin-panel/dist');
+            const landingSize = getDirectorySize('landing-pages/dist');
+
+            const adminSizeMB = (adminSize / 1024 / 1024).toFixed(2);
+            const landingSizeMB = (landingSize / 1024 / 1024).toFixed(2);
+
+            // Thresholds (in MB)
+            const adminThreshold = 5;
+            const landingThreshold = 3;
+
+            let comment = '## 📦 Bundle Size Report\n\n';
+            comment += '| App | Size | Status |\n';
+            comment += '|-----|------|--------|\n';
+            comment += `| Admin Panel | ${adminSizeMB} MB | ${adminSize > adminThreshold * 1024 * 1024 ? '⚠️ Over threshold' : '✅ OK'} |\n`;
+            comment += `| Landing Pages | ${landingSizeMB} MB | ${landingSize > landingThreshold * 1024 * 1024 ? '⚠️ Over threshold' : '✅ OK'} |\n`;
+
+            if (adminSize > adminThreshold * 1024 * 1024 || landingSize > landingThreshold * 1024 * 1024) {
+              comment += '\n⚠️ **Warning**: Bundle size exceeded threshold! Consider code splitting or lazy loading.';
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });

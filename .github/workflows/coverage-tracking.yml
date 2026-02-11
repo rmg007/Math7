@@ -1,0 +1,152 @@
+name: Coverage Tracking
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  track-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Admin Panel tests
+        run: |
+          cd admin-panel
+          npm ci
+          npm run test -- --coverage
+
+      - name: Run Flutter tests
+        run: |
+          cd student-app
+          flutter pub get
+          flutter test --coverage
+
+      - name: Run Python tests
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install -r content-engine/requirements.txt
+          pip install pytest coverage
+          cd content-engine
+          coverage run -m pytest
+          coverage json -o ../python-coverage.json
+
+      - name: Generate coverage report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Parse admin panel coverage
+            let adminCoverage = 0;
+            if (fs.existsSync('admin-panel/coverage/coverage-summary.json')) {
+              const summary = JSON.parse(fs.readFileSync('admin-panel/coverage/coverage-summary.json', 'utf8'));
+              adminCoverage = summary.total.lines.pct;
+            }
+
+            // Parse Python coverage
+            let pythonCoverage = 0;
+            if (fs.existsSync('python-coverage.json')) {
+              const pyCov = JSON.parse(fs.readFileSync('python-coverage.json', 'utf8'));
+              pythonCoverage = pyCov.totals.percent_covered;
+            }
+
+            // Flutter coverage (approximate from lcov)
+            let flutterCoverage = 0;
+            if (fs.existsSync('student-app/coverage/lcov.info')) {
+              // Simplified calculation - in production use a proper lcov parser
+              const lcov = fs.readFileSync('student-app/coverage/lcov.info', 'utf8');
+              const lines = lcov.match(/LF:\d+/g) || [];
+              const hit = lcov.match(/LH:\d+/g) || [];
+              if (lines.length > 0 && hit.length > 0) {
+                const totalLines = lines.reduce((sum, l) => sum + parseInt(l.split(':')[1]), 0);
+                const hitLines = hit.reduce((sum, h) => sum + parseInt(h.split(':')[1]), 0);
+                flutterCoverage = ((hitLines / totalLines) * 100).toFixed(2);
+              }
+            }
+
+            // Load historical data
+            let history = [];
+            if (fs.existsSync('.coverage-history.json')) {
+              history = JSON.parse(fs.readFileSync('.coverage-history.json', 'utf8'));
+            }
+
+            // Add current data
+            const current = {
+              date: new Date().toISOString().split('T')[0],
+              admin: adminCoverage,
+              flutter: parseFloat(flutterCoverage),
+              python: pythonCoverage,
+              commit: context.sha.substring(0, 7)
+            };
+
+            history.push(current);
+
+            // Keep last 30 days
+            if (history.length > 30) {
+              history = history.slice(-30);
+            }
+
+            fs.writeFileSync('.coverage-history.json', JSON.stringify(history, null, 2));
+
+            // Generate report
+            let report = '## 📊 Test Coverage Report\n\n';
+            report += '| Project | Coverage | Trend |\n';
+            report += '|---------|----------|-------|\n';
+
+            const emoji = (val, threshold) => val >= threshold ? '✅' : '⚠️';
+            const trend = (current, previous) => {
+              if (!previous) return '—';
+              if (current > previous) return '📈';
+              if (current < previous) return '📉';
+              return '➡️';
+            };
+
+            const prev = history.length >= 2 ? history[history.length - 2] : null;
+
+            report += `| Admin Panel | ${adminCoverage.toFixed(2)}% ${emoji(adminCoverage, 70)} | ${trend(adminCoverage, prev?.admin)} |\n`;
+            report += `| Student App | ${flutterCoverage}% ${emoji(flutterCoverage, 60)} | ${trend(flutterCoverage, prev?.flutter)} |\n`;
+            report += `| Content Engine | ${pythonCoverage.toFixed(2)}% ${emoji(pythonCoverage, 80)} | ${trend(pythonCoverage, prev?.python)} |\n`;
+
+            report += '\n**Thresholds**: Admin Panel (70%), Student App (60%), Content Engine (80%)\n';
+
+            if (context.eventName === 'pull_request') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: report
+              });
+            }
+
+      - name: Commit coverage history
+        if: github.ref == 'refs/heads/main'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "📊 Update coverage history [skip ci]"
+          file_pattern: .coverage-history.json

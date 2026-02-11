@@ -1,0 +1,78 @@
+name: Type Generation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/migrations/**/*.sql"
+  pull_request:
+    paths:
+      - "supabase/migrations/**/*.sql"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate-types:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Generate TypeScript types
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+        run: |
+          # Generate types for admin panel
+          supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > admin-panel/src/lib/database.types.ts
+
+          # Verify the types file is not empty
+          if [ ! -s admin-panel/src/lib/database.types.ts ]; then
+            echo "Error: Generated types file is empty"
+            exit 1
+          fi
+
+          echo "✅ Types generated successfully"
+
+      - name: Generate Dart types for Flutter
+        continue-on-error: true
+        run: |
+          # This would need a Dart type generator
+          # For now, we'll create a placeholder
+          echo "// TODO: Auto-generate Dart types from Supabase schema" > student-app/lib/types/database.dart
+
+      - name: Commit generated types
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "🔄 Auto-generate database types from schema changes [skip ci]"
+          file_pattern: |
+            admin-panel/src/lib/database.types.ts
+            student-app/lib/types/database.dart
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '✅ Database types have been automatically regenerated from schema changes.'
+            });

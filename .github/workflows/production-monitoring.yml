@@ -1,0 +1,170 @@
+name: Production Monitoring
+
+on:
+  schedule:
+    - cron: "*/30 * * * *" # Every 30 minutes
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  broken-link-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check production links
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: |
+            --verbose
+            --no-progress
+            --exclude-mail
+            --max-concurrency 8
+            https://questerix-admin.pages.dev
+            https://questerix-landing.pages.dev
+            https://questerix-student.pages.dev
+          fail: true
+
+      - name: Create issue if links broken
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'broken-links,automated',
+              state: 'open'
+            });
+
+            const body = `## 🔗 Broken Links Detected in Production
+
+            Automated link checking found broken links on the production site.
+
+            **Checked at**: ${new Date().toISOString()}
+
+            [View detailed results](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+
+            **Action required**: Review and fix broken links to maintain site quality.`;
+
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🔗 Broken Links Detected in Production',
+                body: body,
+                labels: ['broken-links', 'automated', 'priority:medium']
+              });
+            }
+
+  performance-monitoring:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Monitor API response times
+        run: |
+          SUPABASE_URL="https://qvslbiceoonrgjxzkotb.supabase.co"
+          ADMIN_URL="https://questerix-admin.pages.dev"
+
+          echo "=== Response Time Report ===" > perf-report.txt
+
+          # Check Supabase API
+          TIME=$(curl -s -o /dev/null -w "%{time_total}" --max-time 10 "$SUPABASE_URL/rest/v1/")
+          TIME_MS=$(echo "$TIME * 1000" | bc | cut -d. -f1)
+          echo "Supabase API: ${TIME_MS}ms" >> perf-report.txt
+
+          if [ "$TIME_MS" -gt 2000 ]; then
+            echo "WARNING: Supabase API is slow (${TIME_MS}ms > 2000ms)" >> perf-report.txt
+            echo "SLOW_SUPABASE=true" >> $GITHUB_ENV
+          fi
+
+          # Check Admin Panel
+          TIME=$(curl -s -o /dev/null -w "%{time_total}" --max-time 10 "$ADMIN_URL/login")
+          TIME_MS=$(echo "$TIME * 1000" | bc | cut -d. -f1)
+          echo "Admin Panel: ${TIME_MS}ms" >> perf-report.txt
+
+          if [ "$TIME_MS" -gt 3000 ]; then
+            echo "WARNING: Admin Panel is slow (${TIME_MS}ms > 3000ms)" >> perf-report.txt
+            echo "SLOW_ADMIN=true" >> $GITHUB_ENV
+          fi
+
+          cat perf-report.txt
+
+      - name: Alert on performance degradation
+        if: env.SLOW_SUPABASE == 'true' || env.SLOW_ADMIN == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('perf-report.txt', 'utf8');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '⚠️ Performance Degradation Detected',
+              body: `## Performance Alert
+              
+              Production systems are experiencing slow response times.
+              
+              \`\`\`
+              ${report}
+              \`\`\`
+              
+              **Threshold**: 
+              - Supabase API: 2000ms
+              - Admin Panel: 3000ms
+              
+              **Action required**: Investigate and optimize slow endpoints.`,
+              labels: ['performance', 'automated', 'priority:high']
+            });
+
+  ssl-cert-monitoring:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check SSL certificates
+        run: |
+          DOMAINS="questerix-admin.pages.dev questerix-landing.pages.dev"
+
+          for DOMAIN in $DOMAINS; do
+            EXPIRY=$(echo | openssl s_client -servername $DOMAIN -connect $DOMAIN:443 2>/dev/null | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
+            
+            if [ -z "$EXPIRY" ]; then
+              echo "❌ Failed to retrieve SSL cert for $DOMAIN"
+              continue
+            fi
+            
+            EXPIRY_EPOCH=$(date -d "$EXPIRY" +%s 2>/dev/null || echo "0")
+            NOW_EPOCH=$(date +%s)
+            DAYS_LEFT=$(( (EXPIRY_EPOCH - NOW_EPOCH) / 86400 ))
+            
+            echo "$DOMAIN expires in $DAYS_LEFT days"
+            
+            if [ "$DAYS_LEFT" -lt 30 ]; then
+              echo "SSL_EXPIRING=true" >> $GITHUB_ENV
+              echo "EXPIRING_DOMAIN=$DOMAIN" >> $GITHUB_ENV
+              echo "DAYS_LEFT=$DAYS_LEFT" >> $GITHUB_ENV
+            fi
+          done
+
+      - name: Alert on SSL expiration
+        if: env.SSL_EXPIRING == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔒 SSL Certificate Expiring Soon',
+              body: `## SSL Certificate Alert
+              
+              **Domain**: ${process.env.EXPIRING_DOMAIN}
+              **Days remaining**: ${process.env.DAYS_LEFT}
+              
+              **Action required**: Renew SSL certificate before expiration to prevent service disruption.
+              
+              Cloudflare Pages typically auto-renews certificates, but this should be verified.`,
+              labels: ['security', 'infrastructure', 'automated', 'priority:high']
+            });

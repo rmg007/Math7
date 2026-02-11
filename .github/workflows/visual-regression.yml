@@ -1,0 +1,85 @@
+name: Visual Regression Testing
+
+on:
+  pull_request:
+    paths:
+      - "admin-panel/src/**"
+      - "landing-pages/src/**"
+  schedule:
+    - cron: "0 4 * * *" # Daily at 4 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  visual-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: admin-panel/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd admin-panel
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Build admin panel
+        run: |
+          cd admin-panel
+          npm run build
+
+      - name: Start preview server
+        run: |
+          cd admin-panel
+          npm run preview &
+          npx wait-on http://localhost:4173
+
+      - name: Run visual regression tests
+        env:
+          MONITOR_USER_EMAIL: ${{ secrets.MONITOR_USER_EMAIL }}
+          MONITOR_USER_PASSWORD: ${{ secrets.MONITOR_USER_PASSWORD }}
+        run: |
+          cd admin-panel
+          npx playwright test tests/visual-regression.spec.ts --project=chromium
+
+      - name: Upload visual regression results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-regression-diff
+          path: |
+            admin-panel/tests/__screenshots__/
+            admin-panel/test-results/
+          retention-days: 30
+
+      - name: Comment visual regression failures
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## 🎨 Visual Regression Failures Detected
+              
+              Visual differences were found in this PR. Please review the artifacts to see the differences.
+              
+              If the changes are intentional, update the baseline screenshots by running:
+              \`\`\`bash
+              cd admin-panel
+              npx playwright test tests/visual-regression.spec.ts --update-snapshots
+              \`\`\`
+              
+              [View Test Results](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
+            });

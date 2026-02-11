@@ -1,0 +1,124 @@
+name: Code Duplication Detection
+
+on:
+  pull_request:
+    paths:
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "**/*.dart"
+      - "**/*.py"
+  schedule:
+    - cron: "0 5 * * 1" # Weekly on Monday at 5 AM
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  detect-duplicates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install jscpd
+        run: npm install -g jscpd
+
+      - name: Detect TypeScript/JavaScript duplicates
+        run: |
+          jscpd admin-panel/src landing-pages/src --reporters json,console --output ./jscpd-report --threshold 3
+        continue-on-error: true
+
+      - name: Detect Python duplicates
+        run: |
+          jscpd content-engine --reporters json,console --output ./jscpd-python --threshold 3
+        continue-on-error: true
+
+      - name: Generate duplicate code report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let report = '## 📋 Code Duplication Report\n\n';
+
+            // TypeScript/JavaScript duplicates
+            if (fs.existsSync('jscpd-report/jscpd-report.json')) {
+              const tsData = JSON.parse(fs.readFileSync('jscpd-report/jscpd-report.json', 'utf8'));
+              const duplicates = tsData.duplicates || [];
+              const percentage = tsData.statistics?.total?.percentage || 0;
+              
+              report += `### TypeScript/JavaScript\n\n`;
+              report += `**Duplication**: ${percentage.toFixed(2)}%\n`;
+              report += `**Duplicate blocks**: ${duplicates.length}\n\n`;
+              
+              if (duplicates.length > 0 && percentage > 5) {
+                report += '⚠️ **Warning**: Duplication exceeds 5% threshold\n\n';
+                report += '**Top duplicates:**\n\n';
+                duplicates.slice(0, 5).forEach((dup, i) => {
+                  report += `${i + 1}. ${dup.firstFile.name} (${dup.lines} lines)\n`;
+                  report += `   - Also in: ${dup.secondFile.name}\n\n`;
+                });
+              }
+            }
+
+            // Python duplicates
+            if (fs.existsSync('jscpd-python/jscpd-report.json')) {
+              const pyData = JSON.parse(fs.readFileSync('jscpd-python/jscpd-report.json', 'utf8'));
+              const percentage = pyData.statistics?.total?.percentage || 0;
+              
+              report += `### Python\n\n`;
+              report += `**Duplication**: ${percentage.toFixed(2)}%\n\n`;
+            }
+
+            report += '\n---\n*Consider refactoring duplicated code into reusable functions or components.*';
+
+            if (context.eventName === 'pull_request') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: report
+              });
+            } else {
+              // Create or update issue for scheduled runs
+              const issues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: 'automated,code-quality,duplication',
+                state: 'open'
+              });
+              
+              if (issues.data.length > 0) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issues.data[0].number,
+                  body: `### Updated Analysis (${new Date().toISOString().split('T')[0]})\n\n${report}`
+                });
+              } else {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: '📋 Code Duplication Detected',
+                  body: report,
+                  labels: ['automated', 'code-quality', 'duplication', 'refactor']
+                });
+              }
+            }
+
+      - name: Upload duplication reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: duplication-reports
+          path: |
+            jscpd-report/
+            jscpd-python/

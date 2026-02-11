@@ -1,0 +1,83 @@
+name: Auto Label PRs
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Label by file paths
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+
+      - name: Label by PR size
+        uses: codelytv/pr-size-labeler@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          xs_label: "size/xs"
+          xs_max_size: 10
+          s_label: "size/s"
+          s_max_size: 100
+          m_label: "size/m"
+          m_max_size: 500
+          l_label: "size/l"
+          l_max_size: 1000
+          xl_label: "size/xl"
+          message_if_xl: "⚠️ This PR is very large (>1000 lines). Consider breaking it into smaller PRs for easier review."
+
+      - name: Check for breaking changes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title.toLowerCase();
+            const body = context.payload.pull_request.body || '';
+
+            const hasBreakingChange = 
+              title.includes('breaking') ||
+              title.includes('!:') ||
+              body.includes('BREAKING CHANGE');
+
+            if (hasBreakingChange) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['breaking-change', 'priority:high']
+              });
+            }
+
+      - name: Auto-label questions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title.toLowerCase();
+            const body = context.payload.pull_request.body || '';
+
+            const isQuestion = 
+              title.includes('how to') ||
+              title.includes('how do i') ||
+              title.includes('help') ||
+              body.includes('?');
+
+            if (isQuestion) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['question']
+              });
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: '👋 This looks like a question! Check out our [documentation](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/tree/main/docs) or [AGENTS.md](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/blob/main/AGENTS.md) for help.'
+              });
+            }

@@ -1,0 +1,34 @@
+# Code ownership and auto-assignment rules
+# Format: path @owner1 @owner2
+
+# Default owners for everything
+* @questerix/core-team
+
+# Frontend applications
+/admin-panel/ @questerix/frontend-team
+/landing-pages/ @questerix/frontend-team
+
+# Mobile application
+/student-app/ @questerix/mobile-team
+
+# Backend and infrastructure
+/content-engine/ @questerix/backend-team
+/supabase/ @questerix/backend-team @questerix/database-team
+
+# DevOps and CI/CD
+/.github/ @questerix/devops-team
+/scripts/ @questerix/devops-team
+
+# Documentation
+/docs/ @questerix/documentation-team
+*.md @questerix/documentation-team
+
+# Security-sensitive files
+/.github/workflows/security.yml @questerix/security-team
+/.gitleaks.toml @questerix/security-team
+/.semgrep/ @questerix/security-team
+
+# Configuration files
+renovate.json @questerix/devops-team
+.dependabot/ @questerix/devops-team
+package.json @questerix/frontend-team @questerix/devops-team
