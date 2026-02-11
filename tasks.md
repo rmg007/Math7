@@ -28,9 +28,9 @@
 
 ### 📝 Phase 3: Documentation & Hardening
 
-- [ ] **Update Documentation**
-  - Mark service/hooks/content-engine tasks as DONE.
-  - Correct `docs/reports/TEST_COVERAGE.md` matrix.
+- [x] **Update Documentation**
+  - [x] Mark service/hooks/content-engine tasks as DONE.
+  - [x] Correct `docs/reports/TEST_COVERAGE.md` matrix.
 - [ ] **[SECURITY] DAST Integration**
   - Configure OWASP ZAP (GitHub Action) for endpoint scanning.
 - [ ] **[PERF] Lighthouse CI**
