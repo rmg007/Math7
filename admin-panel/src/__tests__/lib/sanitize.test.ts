@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { sanitizeHtml } from '@/lib/sanitize';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
@@ -27,8 +28,23 @@ describe('sanitize', () => {
       expect(DOMPurify.sanitize).toHaveBeenCalledWith(mockHtml, {
         USE_PROFILES: { html: true },
         ALLOWED_TAGS: [
-          'p', 'br', 'strong', 'em', 'u', 'ol', 'ul', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-          'blockquote', 'code', 'pre'
+          'p',
+          'br',
+          'strong',
+          'em',
+          'u',
+          'ol',
+          'ul',
+          'li',
+          'h1',
+          'h2',
+          'h3',
+          'h4',
+          'h5',
+          'h6',
+          'blockquote',
+          'code',
+          'pre',
         ],
       });
       expect(result).toBe(expectedSanitized);
@@ -53,8 +69,23 @@ describe('sanitize', () => {
       expect(DOMPurify.sanitize).toHaveBeenCalledWith('', {
         USE_PROFILES: { html: true },
         ALLOWED_TAGS: [
-          'p', 'br', 'strong', 'em', 'u', 'ol', 'ul', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-          'blockquote', 'code', 'pre'
+          'p',
+          'br',
+          'strong',
+          'em',
+          'u',
+          'ol',
+          'ul',
+          'li',
+          'h1',
+          'h2',
+          'h3',
+          'h4',
+          'h5',
+          'h6',
+          'blockquote',
+          'code',
+          'pre',
         ],
       });
     });
@@ -83,7 +114,8 @@ describe('sanitize', () => {
     });
 
     it('should handle complex HTML structures', () => {
-      const complexHtml = '<h1>Title</h1><p>Paragraph with <strong>bold</strong> and <em>italic</em> text</p>';
+      const complexHtml =
+        '<h1>Title</h1><p>Paragraph with <strong>bold</strong> and <em>italic</em> text</p>';
       const expectedSanitized = complexHtml; // Assuming all tags are allowed
 
       vi.mocked(DOMPurify.sanitize).mockReturnValue(expectedSanitized as any);
@@ -149,7 +181,8 @@ describe('sanitize', () => {
     });
 
     it('should handle all heading levels', () => {
-      const headingsHtml = '<h1>Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3><h4>Heading 4</h4><h5>Heading 5</h5><h6>Heading 6</h6>';
+      const headingsHtml =
+        '<h1>Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3><h4>Heading 4</h4><h5>Heading 5</h5><h6>Heading 6</h6>';
       const expectedSanitized = headingsHtml;
 
       vi.mocked(DOMPurify.sanitize).mockReturnValue(expectedSanitized as any);

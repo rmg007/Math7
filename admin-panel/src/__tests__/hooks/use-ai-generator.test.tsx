@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAIGenerator } from '@/hooks/use-ai-generator';
 import { useToast } from '@/hooks/use-toast';
 import { generateQuestionsFromAI, type AIQuestion } from '@/lib/gemini';
@@ -11,8 +12,22 @@ vi.mock('@/hooks/use-toast');
 describe('useAIGenerator', () => {
   const mockToast = vi.fn();
   const mockQuestions: AIQuestion[] = [
-    { content: 'Question 1', type: 'multiple_choice', points: 1, correct_answer: 'Option A', explanation: 'Reason 1', options: ['Option A', 'Option B'] },
-    { content: 'Question 2', type: 'boolean', points: 1, correct_answer: 'True', explanation: 'Reason 2', options: ['True', 'False'] },
+    {
+      content: 'Question 1',
+      type: 'multiple_choice',
+      points: 1,
+      correct_answer: 'Option A',
+      explanation: 'Reason 1',
+      options: ['Option A', 'Option B'],
+    },
+    {
+      content: 'Question 2',
+      type: 'boolean',
+      points: 1,
+      correct_answer: 'True',
+      explanation: 'Reason 2',
+      options: ['True', 'False'],
+    },
   ];
 
   beforeEach(() => {
@@ -181,7 +196,7 @@ describe('useAIGenerator', () => {
 
     it('should set generating state during process', async () => {
       vi.mocked(generateQuestionsFromAI).mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(mockQuestions), 100))
+        () => new Promise((resolve) => setTimeout(() => resolve(mockQuestions), 100))
       );
 
       const { result } = renderHook(() => useAIGenerator());
@@ -202,7 +217,7 @@ describe('useAIGenerator', () => {
 
       // Wait for completion
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await new Promise((resolve) => setTimeout(resolve, 150));
       });
 
       expect(result.current.isGenerating).toBe(false);
@@ -211,7 +226,7 @@ describe('useAIGenerator', () => {
     it('should clear previous error on new generation attempt', async () => {
       // First call fails
       vi.mocked(generateQuestionsFromAI).mockRejectedValueOnce(new Error('First error'));
-      
+
       const { result } = renderHook(() => useAIGenerator());
 
       await act(async () => {

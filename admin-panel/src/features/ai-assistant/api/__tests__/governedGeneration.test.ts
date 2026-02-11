@@ -1,0 +1,96 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { supabase } from '@/lib/supabase';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { generateQuestions } from '../generateQuestions';
+import { governedGenerateQuestions } from '../governedGeneration';
+import { validateContent } from '../validateContent';
+
+vi.mock('../generateQuestions', () => ({
+  generateQuestions: vi.fn(),
+}));
+
+vi.mock('../validateContent', () => ({
+  validateContent: vi.fn(),
+}));
+
+vi.mock('@/lib/supabase', () => ({
+  supabase: {
+    rpc: vi.fn(),
+  },
+}));
+
+describe('governedGenerateQuestions', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const mockAppId = 'app-123';
+  const mockRequest = {
+    text: 'Test content',
+    difficulty_distribution: { easy: 1, medium: 0, hard: 0 },
+  };
+
+  const mockGenerationResponse = {
+    questions: [
+      { text: 'Q1', question_type: 'mcq' as const, difficulty: 'easy' as const, metadata: {} },
+    ],
+    metadata: {
+      model: 'gemini-1.5-flash',
+      generation_time_ms: 100,
+      token_count: 500,
+      questions_generated: 1,
+    },
+  };
+
+  const mockValidationResponse = {
+    is_valid: true,
+    issues: [],
+    overall_score: 9.5,
+  };
+
+  it('should successfully orchestrate governed generation', async () => {
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: null } as any);
+    vi.mocked(generateQuestions).mockResolvedValue(mockGenerationResponse);
+    vi.mocked(validateContent).mockResolvedValue(mockValidationResponse as any);
+
+    const result = await governedGenerateQuestions(mockAppId, mockRequest);
+
+    // Initial quota check
+    expect(supabase.rpc).toHaveBeenCalledWith('consume_tenant_tokens', {
+      p_app_id: mockAppId,
+      p_token_count: 0,
+    });
+
+    // Content generation
+    expect(generateQuestions).toHaveBeenCalledWith(mockRequest);
+
+    // Dynamic validation
+    expect(validateContent).toHaveBeenCalledWith({
+      questions: mockGenerationResponse.questions,
+      source_text: mockRequest.text,
+    });
+
+    // Final token consumption
+    expect(supabase.rpc).toHaveBeenLastCalledWith('consume_tenant_tokens', {
+      p_app_id: mockAppId,
+      p_token_count: expect.any(Number),
+    });
+
+    expect(result.questions).toEqual(mockGenerationResponse.questions);
+    expect(result.validation).toEqual(mockValidationResponse);
+    expect(result.governance.tokens_consumed).toBeGreaterThan(500);
+  });
+
+  it('should throw if initial quota check fails', async () => {
+    vi.mocked(supabase.rpc).mockResolvedValueOnce({
+      data: null,
+      error: { message: 'Quota exceeded', code: 'P0001' } as any,
+    } as any);
+
+    await expect(governedGenerateQuestions(mockAppId, mockRequest)).rejects.toThrow(
+      'Quota exceeded'
+    );
+
+    expect(generateQuestions).not.toHaveBeenCalled();
+  });
+});

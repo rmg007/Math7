@@ -20,7 +20,7 @@ describe('OracleService', () => {
     it('should return empty array for empty query', async () => {
       const result = await OracleService.search('');
       await OracleService.search('   ');
-      
+
       expect(result).toEqual([]);
       expect(supabase.functions.invoke).not.toHaveBeenCalled();
     });
@@ -33,24 +33,24 @@ describe('OracleService', () => {
 
     it('should call oracle-query Edge Function with correct parameters', async () => {
       const mockResults = [
-        { 
-          id: '1', 
-          content: 'test content', 
+        {
+          id: '1',
+          content: 'test content',
           file_path: 'docs/test.md',
           breadcrumb: 'Docs > Test',
-          similarity: 0.9 
+          similarity: 0.9,
         },
       ];
 
       vi.mocked(supabase.functions.invoke).mockResolvedValue({
         data: { results: mockResults },
         error: null,
-      } as any);
+      } as unknown as { data: { results: typeof mockResults }; error: null });
 
       const result = await OracleService.search('test query');
 
       expect(supabase.functions.invoke).toHaveBeenCalledWith('oracle-query', {
-        body: { query: 'test query' }
+        body: { query: 'test query' },
       });
       expect(result).toEqual(mockResults);
     });
@@ -59,8 +59,8 @@ describe('OracleService', () => {
       const mockError = { message: 'Function failed' };
       vi.mocked(supabase.functions.invoke).mockResolvedValue({
         data: null,
-        error: mockError as any,
-      } as any);
+        error: mockError,
+      } as unknown as { data: null; error: typeof mockError });
 
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -86,12 +86,12 @@ describe('OracleService', () => {
       vi.mocked(supabase.functions.invoke).mockResolvedValue({
         data: { results: [] },
         error: null,
-      } as any);
+      } as unknown as { data: { results: [] }; error: null });
 
       await OracleService.findSolutionForError('Simple error');
 
       expect(supabase.functions.invoke).toHaveBeenCalledWith('oracle-query', {
-        body: { query: 'Error: Simple error' }
+        body: { query: 'Error: Simple error' },
       });
     });
 
@@ -99,13 +99,13 @@ describe('OracleService', () => {
       vi.mocked(supabase.functions.invoke).mockResolvedValue({
         data: { results: [] },
         error: null,
-      } as any);
+      } as unknown as { data: { results: [] }; error: null });
 
       const error = new Error('Object error');
       await OracleService.findSolutionForError(error);
 
       expect(supabase.functions.invoke).toHaveBeenCalledWith('oracle-query', {
-        body: { query: 'Error: Object error' }
+        body: { query: 'Error: Object error' },
       });
     });
 
@@ -113,12 +113,14 @@ describe('OracleService', () => {
       vi.mocked(supabase.functions.invoke).mockResolvedValue({
         data: { results: [] },
         error: null,
-      } as any);
+      } as unknown as { data: { results: [] }; error: null });
 
       const longMessage = 'A'.repeat(600);
       await OracleService.findSolutionForError(longMessage);
 
-      const callArgs = vi.mocked(supabase.functions.invoke).mock.calls[0][1] as any;
+      const callArgs = vi.mocked(supabase.functions.invoke).mock.calls[0][1] as {
+        body: { query: string };
+      };
       expect(callArgs.body.query.length).toBeLessThan(510);
       expect(callArgs.body.query).toMatch(/^Error: A+/);
     });

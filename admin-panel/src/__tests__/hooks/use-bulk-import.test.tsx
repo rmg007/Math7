@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useBulkImport } from '@/hooks/use-bulk-import';
 import { useToast } from '@/hooks/use-toast';
 import { CurriculumService } from '@/services/CurriculumService';
 import { act, renderHook } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Papa from 'papaparse';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock dependencies
 vi.mock('@/services/CurriculumService');
@@ -21,11 +22,13 @@ describe('useBulkImport', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
-    vi.mocked(useToast).mockReturnValue({ toast: mockToast } as any);
+    vi.mocked(useToast).mockReturnValue({ toast: mockToast } as unknown as ReturnType<
+      typeof useToast
+    >);
     vi.mocked(CurriculumService.importQuestionsBulk).mockResolvedValue({
       success: true,
       count: 5,
-    } as any);
+    });
   });
 
   afterEach(() => {
@@ -55,8 +58,8 @@ describe('useBulkImport', () => {
         { content: 'Question 2', points: '15', skill_id: 'skill-2' },
       ];
 
-      (Papa.parse as any).mockImplementation((_file: any, options: any) => {
-        options?.complete?.({ data: mockData, errors: [], meta: {} as any });
+      (Papa.parse as any).mockImplementation((_file: File, options: any) => {
+        options?.complete?.({ data: mockData, errors: [], meta: {} });
       });
 
       const { result } = renderHook(() => useBulkImport());
@@ -79,10 +82,9 @@ describe('useBulkImport', () => {
 
     it('should handle parsing errors', async () => {
       const mockFile = new File([''], 'test.csv', { type: 'text/csv' });
-      const parseError = { message: 'Invalid CSV format', row: 0, type: 'FieldMismatch', code: 'TooFewFields' } as any;
 
-      (Papa.parse as any).mockImplementation((_file: any, options: any) => {
-        options?.error?.(parseError);
+      (Papa.parse as any).mockImplementation((_file: File, options: any) => {
+        options?.error?.(new Error('Parse error'));
       });
 
       const { result } = renderHook(() => useBulkImport());
@@ -120,7 +122,7 @@ describe('useBulkImport', () => {
       const mockFile = new File([''], 'test.csv', { type: 'text/csv' });
       const mockData = [
         { content: 'Question 1' }, // Minimal data
-        { 
+        {
           content: 'Question 2',
           type: 'boolean',
           points: '20',
@@ -132,8 +134,8 @@ describe('useBulkImport', () => {
         },
       ];
 
-      (Papa.parse as any).mockImplementation((_file: any, options: any) => {
-        options?.complete?.({ data: mockData, errors: [], meta: {} as any });
+      (Papa.parse as any).mockImplementation((_file: File, options: any) => {
+        options?.complete?.({ data: mockData, errors: [], meta: {} });
       });
 
       const { result } = renderHook(() => useBulkImport());
@@ -148,7 +150,7 @@ describe('useBulkImport', () => {
 
       const queue = result.current.importQueue;
       expect(queue).toHaveLength(2);
-      
+
       // First row with defaults
       expect(queue[0]).toMatchObject({
         type: 'multiple_choice',
@@ -181,14 +183,14 @@ describe('useBulkImport', () => {
         success: true,
         count: 5,
         isDryRun: true,
-      } as any);
+      });
 
       const { result } = renderHook(() => useBulkImport());
 
       // Set up some questions in queue
       act(() => {
         result.current.setImportQueue([
-          { type: 'multiple_choice', content: 'Test', points: 10 } as any,
+          { type: 'multiple_choice', content: 'Test', points: 10 } as unknown as any,
         ]);
       });
 
@@ -196,10 +198,10 @@ describe('useBulkImport', () => {
         await result.current.processImport();
       });
 
-      expect(CurriculumService.importQuestionsBulk).toHaveBeenCalledWith(
-        expect.any(Array),
-        { dryRun: true, batchSize: 50 }
-      );
+      expect(CurriculumService.importQuestionsBulk).toHaveBeenCalledWith(expect.any(Array), {
+        dryRun: true,
+        batchSize: 50,
+      });
 
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Dry Run Successful',
@@ -208,11 +210,11 @@ describe('useBulkImport', () => {
       });
 
       expect(result.current.isProcessing).toBe(false);
-      
+
       act(() => {
         vi.advanceTimersByTime(1000);
       });
-      
+
       expect(result.current.progress).toBe(0); // Should reset after delay
     });
 
@@ -220,7 +222,7 @@ describe('useBulkImport', () => {
       vi.mocked(CurriculumService.importQuestionsBulk).mockResolvedValue({
         success: true,
         count: 3,
-      } as any);
+      });
 
       const { result } = renderHook(() => useBulkImport());
 
@@ -228,7 +230,7 @@ describe('useBulkImport', () => {
       act(() => {
         result.current.setIsDryRun(false);
         result.current.setImportQueue([
-          { type: 'multiple_choice', content: 'Test' } as any,
+          { type: 'multiple_choice', content: 'Test' } as unknown as any,
         ]);
       });
 
@@ -236,10 +238,10 @@ describe('useBulkImport', () => {
         await result.current.processImport();
       });
 
-      expect(CurriculumService.importQuestionsBulk).toHaveBeenCalledWith(
-        expect.any(Array),
-        { dryRun: false, batchSize: 50 }
-      );
+      expect(CurriculumService.importQuestionsBulk).toHaveBeenCalledWith(expect.any(Array), {
+        dryRun: false,
+        batchSize: 50,
+      });
 
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Import Successful',
@@ -255,7 +257,7 @@ describe('useBulkImport', () => {
         success: false,
         count: 0,
         error: 'Validation failed',
-      } as any);
+      });
 
       const { result } = renderHook(() => useBulkImport());
 
@@ -312,7 +314,10 @@ describe('useBulkImport', () => {
     });
 
     it('should update progress during processing', async () => {
-      vi.mocked(CurriculumService.importQuestionsBulk).mockResolvedValue({ success: true, count: 1 } as any);
+      vi.mocked(CurriculumService.importQuestionsBulk).mockResolvedValue({
+        success: true,
+        count: 1,
+      });
 
       const { result } = renderHook(() => useBulkImport());
 

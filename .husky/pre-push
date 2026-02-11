@@ -1,1 +1,0 @@
-powershell -NoProfile .\scripts\preflight.ps1

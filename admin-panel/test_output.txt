@@ -1,0 +1,31 @@
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mC:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel[39m
+
+ [33mΓ¥»[39m src/features/curriculum/hooks/__tests__/use-domains.test.tsx [2m ([22m[2m6 tests[22m [2m|[22m [31m1 failed[39m[2m)[22m[90m 239[2mms[22m[39m
+[31m   [33mΓ¥»[31m src/features/curriculum/hooks/__tests__/use-domains.test.tsx[2m > [22museDomains[2m > [22museDeleteDomain[2m > [22mshould mark a domain as deleted[39m
+[31m     ΓåÆ client.from(...).update(...).eq is not a function[39m
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 1 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  src/features/curriculum/hooks/__tests__/use-domains.test.tsx > useDomains > useDeleteDomain > should mark a domain as deleted
+TypeError: client.from(...).update(...).eq is not a function
+ Γ¥» Object.mutationFn src/features/curriculum/hooks/use-domains.ts:225:18
+    223|                 .from('domains')
+    224|                 .update({ deleted_at: new Date().toISOString() })
+    225|                 .eq('domain_id', domain_id)
+       |                  ^
+    226|                 .eq('app_id', currentApp.app_id);
+    227|             
+ Γ¥» Object.fn ../../../Important%20Projects/Questerix/admin-panel/node_modules/@tanstack/query-core/build/modern/mutation.js:74:29
+ Γ¥» run ../../../Important%20Projects/Questerix/admin-panel/node_modules/@tanstack/query-core/build/modern/retryer.js:77:49
+ Γ¥» Object.start ../../../Important%20Projects/Questerix/admin-panel/node_modules/@tanstack/query-core/build/modern/retryer.js:119:9
+ Γ¥» Mutation.execute ../../../Important%20Projects/Questerix/admin-panel/node_modules/@tanstack/query-core/build/modern/mutation.js:115:40
+ Γ¥» src/features/curriculum/hooks/__tests__/use-domains.test.tsx:158:7
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/1]ΓÄ»
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 13:56:35
+[2m   Duration [22m 2.37s[2m (transform 89ms, setup 0ms, collect 362ms, tests 239ms, environment 950ms, prepare 149ms)[22m
+

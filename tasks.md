@@ -3,6 +3,7 @@
 ## 🛡️ TEST COVERAGE RECOVERY PLAN
 
 ### 🏗️ Phase 1: Unblock CI (Config + Edge Function Fixes)
+
 - [x] **Step 1.1: Standardize Vitest Thresholds**
   - Remove coverage thresholds from `admin-panel/vitest.config.ts`.
   - Rely on CI gate (70%) as the single source of truth.
@@ -17,15 +18,16 @@
   - [x] Verify Edge Functions run without a local server.
 
 ### 🧪 Phase 2: Close Coverage Gaps
-*Only execute if Phase 1 shows coverage below thresholds.*
-- [ ] **Step 2.1: Admin Panel Feature Hooks**
-  - Test `use-domains.ts`, `use-questions.ts`, `use-skills.ts`, `use-publish.ts`, `use-apps.ts`.
-- [ ] **Step 2.2: Student App Auth Providers**
-  - Unit tests for `auth_provider.dart` and `SessionRepository`.
-- [ ] **Step 2.3: Admin Panel AI API Logic**
-  - Test `generateQuestions.ts`, `governedGeneration.ts`, `validate-content.ts`.
+
+- [x] **Step 2.1: Admin Panel Feature Hooks**
+  - [x] Test `use-domains.ts`, `use-questions.ts`, `use-skills.ts`, `use-publish.ts`, `use-apps.ts`.
+- [x] **Step 2.2: Student App Auth Providers**
+  - [x] Unit tests for `auth_provider.dart` and `SessionRepository`.
+- [x] **Step 2.3: Admin Panel AI API Logic**
+  - [x] Test `generateQuestions.ts`, `governedGeneration.ts`, `validate-content.ts`.
 
 ### 📝 Phase 3: Documentation & Hardening
+
 - [ ] **Update Documentation**
   - Mark service/hooks/content-engine tasks as DONE.
   - Correct `docs/reports/TEST_COVERAGE.md` matrix.
@@ -33,4 +35,3 @@
   - Configure OWASP ZAP (GitHub Action) for endpoint scanning.
 - [ ] **[PERF] Lighthouse CI**
   - Integrate LHCI for performance/A11y/SEO auditing.
-

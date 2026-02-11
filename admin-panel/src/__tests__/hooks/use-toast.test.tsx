@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { toast, useToast } from '@/hooks/use-toast';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -41,7 +42,7 @@ describe('useToast', () => {
       }
 
       const { result } = renderHook(() => useToast());
-      
+
       // Should only have 1 toast (TOAST_LIMIT = 1)
       expect(result.current.toasts).toHaveLength(1);
       expect(result.current.toasts[0].title).toBe('Toast 4'); // Last one
@@ -88,7 +89,7 @@ describe('useToast', () => {
         });
       });
 
-      const updatedToast = result.current.toasts.find(t => t.id === toastId);
+      const updatedToast = result.current.toasts.find((t) => t.id === toastId);
       expect(updatedToast).toMatchObject({
         title: 'Updated Title',
         description: 'New description',
@@ -200,13 +201,13 @@ describe('useToast', () => {
         toastId = toastResult.id;
       });
 
-      const toast = result.current.toasts.find(t => t.id === toastId);
+      const toast = result.current.toasts.find((t) => t.id === toastId);
       expect(toast).toBeDefined();
 
       // Simulate onOpenChange being called with false
-      if (toast?.onOpenChange) {
+      if (toast && toast.onOpenChange) {
         act(() => {
-          toast.onOpenChange(false);
+          (toast.onOpenChange as any)(false);
         });
       }
 
@@ -246,7 +247,7 @@ describe('useToast', () => {
         });
       });
 
-      const updatedToast = result.current.toasts.find(t => t.id === toastId);
+      const updatedToast = result.current.toasts.find((t) => t.id === toastId);
       expect(updatedToast?.title).toBe('Updated Title');
       expect(updatedToast?.variant).toBe('destructive');
     });
@@ -304,7 +305,7 @@ describe('useToast', () => {
       const descriptionNode = <div>React Description</div>;
 
       act(() => {
-        result.current.toast({ title: titleNode, description: descriptionNode });
+        result.current.toast({ title: titleNode as any, description: descriptionNode as any });
       });
 
       expect(result.current.toasts[0].title).toBe(titleNode);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { parseFile } from '@/lib/file-parsers';
 // @ts-expect-error - No types available for pdfjs-dist build
@@ -41,11 +42,7 @@ describe('file-parsers', () => {
           numPages: 2,
           getPage: vi.fn().mockResolvedValue({
             getTextContent: vi.fn().mockResolvedValue({
-              items: [
-                { str: 'Page 1 content' },
-                { str: 'with multiple' },
-                { str: 'text items' },
-              ],
+              items: [{ str: 'Page 1 content' }, { str: 'with multiple' }, { str: 'text items' }],
             }),
           }),
         }),
@@ -72,7 +69,9 @@ describe('file-parsers', () => {
         messages: [],
       });
 
-      const file = new File(['docx content'], 'test.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      const file = new File(['docx content'], 'test.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      });
       const result = await parseFile(file);
 
       expect(result).toEqual({
@@ -100,7 +99,8 @@ describe('file-parsers', () => {
       const mockPdf = {
         promise: Promise.resolve({
           numPages: 3,
-          getPage: vi.fn()
+          getPage: vi
+            .fn()
             .mockResolvedValueOnce({
               getTextContent: vi.fn().mockResolvedValue({
                 items: [{ str: 'Page 1' }],
@@ -168,16 +168,22 @@ describe('file-parsers', () => {
 
       const file = new File(['pdf content'], 'broken.pdf', { type: 'application/pdf' });
 
-      await expect(parseFile(file)).rejects.toThrow('Failed to parse broken.pdf: PDF parsing failed');
+      await expect(parseFile(file)).rejects.toThrow(
+        'Failed to parse broken.pdf: PDF parsing failed'
+      );
       expect(mockConsoleError).toHaveBeenCalledWith('Error parsing file:', expect.any(Error));
     });
 
     it('should handle DOCX parsing errors', async () => {
       vi.mocked(mockMammoth.extractRawText).mockRejectedValue(new Error('DOCX parsing failed'));
 
-      const file = new File(['docx content'], 'broken.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      const file = new File(['docx content'], 'broken.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      });
 
-      await expect(parseFile(file)).rejects.toThrow('Failed to parse broken.docx: DOCX parsing failed');
+      await expect(parseFile(file)).rejects.toThrow(
+        'Failed to parse broken.docx: DOCX parsing failed'
+      );
       expect(mockConsoleError).toHaveBeenCalledWith('Error parsing file:', expect.any(Error));
     });
 
@@ -193,7 +199,9 @@ describe('file-parsers', () => {
 
       const file = new File(['content'], 'broken.txt', { type: 'text/plain' });
 
-      await expect(parseFile(file)).rejects.toThrow('Failed to parse broken.txt: File reading failed');
+      await expect(parseFile(file)).rejects.toThrow(
+        'Failed to parse broken.txt: File reading failed'
+      );
       expect(mockConsoleError).toHaveBeenCalledWith('Error parsing file:', expect.any(Error));
     });
 
@@ -203,7 +211,9 @@ describe('file-parsers', () => {
         messages: [{ type: 'warning', message: 'Some warning' }],
       } as any);
 
-      const file = new File(['content'], 'warnings.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      const file = new File(['content'], 'warnings.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      });
       const result = await parseFile(file);
 
       expect(result.content).toBe('Content with warnings');

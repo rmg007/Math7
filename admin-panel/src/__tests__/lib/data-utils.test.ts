@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   exportToCSV,
@@ -20,7 +21,10 @@ const mockClick = vi.fn();
 
 Object.defineProperty(global, 'Blob', {
   value: class Blob {
-    constructor(public content: any[], public options: any) {}
+    constructor(
+      public content: any[],
+      public options: any
+    ) {}
   },
 });
 
@@ -112,9 +116,7 @@ describe('data-utils', () => {
     });
 
     it('should escape CSV values with commas', () => {
-      const dataWithCommas = [
-        { id: 1, name: 'Doe, John', age: 30 },
-      ];
+      const dataWithCommas = [{ id: 1, name: 'Doe, John', age: 30 }];
 
       exportToCSV(dataWithCommas, columns, 'test');
 
@@ -123,9 +125,7 @@ describe('data-utils', () => {
     });
 
     it('should escape CSV values with quotes', () => {
-      const dataWithQuotes = [
-        { id: 1, name: 'John "The Man" Doe', age: 30 },
-      ];
+      const dataWithQuotes = [{ id: 1, name: 'John "The Man" Doe', age: 30 }];
 
       exportToCSV(dataWithQuotes, columns, 'test');
 
@@ -134,9 +134,7 @@ describe('data-utils', () => {
     });
 
     it('should escape CSV values with newlines', () => {
-      const dataWithNewlines = [
-        { id: 1, name: 'John\nDoe', age: 30 },
-      ];
+      const dataWithNewlines = [{ id: 1, name: 'John\nDoe', age: 30 }];
 
       exportToCSV(dataWithNewlines, columns, 'test');
 
@@ -216,61 +214,47 @@ describe('data-utils', () => {
       const csv = 'Name,Description\n"Doe, John","A person with, commas"';
       const result = parseCSV(csv);
 
-      expect(result).toEqual([
-        { Name: 'Doe, John', Description: 'A person with, commas' },
-      ]);
+      expect(result).toEqual([{ Name: 'Doe, John', Description: 'A person with, commas' }]);
     });
 
     it('should parse CSV with quoted quotes', () => {
       const csv = 'Name,Quote\nJohn,"He said ""Hello"" to me"';
       const result = parseCSV(csv);
 
-      expect(result).toEqual([
-        { Name: 'John', Quote: 'He said "Hello" to me' },
-      ]);
+      expect(result).toEqual([{ Name: 'John', Quote: 'He said "Hello" to me' }]);
     });
 
     it('should parse CSV with newlines in quotes', () => {
       const csv = 'Name,Description\nJohn,"Line 1\nLine 2"';
       const result = parseCSV(csv);
 
-      expect(result).toEqual([
-        { Name: 'John', Description: 'Line 1\nLine 2' },
-      ]);
+      expect(result).toEqual([{ Name: 'John', Description: 'Line 1\nLine 2' }]);
     });
 
     it('should throw error for CSV with only header', () => {
       const csv = 'Name,Age';
 
-      expect(() => parseCSV(csv)).toThrow(
-        'CSV must have at least a header row and one data row'
-      );
+      expect(() => parseCSV(csv)).toThrow('CSV must have at least a header row and one data row');
     });
 
     it('should throw error for mismatched column counts', () => {
       const csv = 'Name,Age\nJohn,30,Extra';
 
-      expect(() => parseCSV(csv)).toThrow(
-        'Row 2 has 3 columns, expected 2'
-      );
+      expect(() => parseCSV(csv)).toThrow('Row 2 has 3 columns, expected 2');
     });
 
     it('should handle empty values', () => {
       const csv = 'Name,Age\nJohn,';
       const result = parseCSV(csv);
 
-      expect(result).toEqual([
-        { Name: 'John', Age: '' },
-      ]);
+      expect(result).toEqual([{ Name: 'John', Age: '' }]);
     });
 
     it('should trim whitespace', () => {
       const csv = 'Name , Age\n  John , 30 ';
       const result = parseCSV(csv);
 
-      expect(result).toEqual([
-        { Name: 'John', Age: '30' },
-      ]);
+      expect(result).toEqual([{ Name: 'John', Age: '30' }]);
     });
   });
 
@@ -308,7 +292,7 @@ describe('data-utils', () => {
 
     it('should handle file read errors', async () => {
       const file = new File([''], 'test.txt');
-      
+
       // Mock FileReader to simulate error
       const mockFileReader = {
         onload: null as any,
@@ -354,22 +338,23 @@ describe('data-utils', () => {
 
   describe('helper functions', () => {
     it('should handle complex CSV parsing scenarios', () => {
-      const complexCsv = 'Name,"Description with ""quotes"" and, commas",Age\n' +
+      const complexCsv =
+        'Name,"Description with ""quotes"" and, commas",Age\n' +
         '"Doe, John","Complex ""description"", here",30\n' +
         'Jane,"Simple description",25';
 
       const result = parseCSV(complexCsv);
 
       expect(result).toEqual([
-        { 
-          Name: 'Doe, John', 
+        {
+          Name: 'Doe, John',
           'Description with "quotes" and, commas': 'Complex "description", here',
-          Age: '30'
+          Age: '30',
         },
-        { 
-          Name: 'Jane', 
+        {
+          Name: 'Jane',
           'Description with "quotes" and, commas': 'Simple description',
-          Age: '25'
+          Age: '25',
         },
       ]);
     });

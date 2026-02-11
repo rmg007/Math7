@@ -1,11 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-    BooleanSchema,
-    McqMultiSchema,
-    MultipleChoiceSchema,
-    QueuedQuestionSchema,
-    ReorderSchema,
-    TextInputSchema,
-    type QueuedQuestion,
+  BooleanSchema,
+  McqMultiSchema,
+  MultipleChoiceSchema,
+  QueuedQuestionSchema,
+  ReorderSchema,
+  TextInputSchema,
+  type QueuedQuestion,
 } from '@/lib/validation/import-schema';
 import { describe, expect, it } from 'vitest';
 
@@ -142,16 +143,16 @@ describe('import-schema validation', () => {
         points: 10,
         is_published: true,
         type: 'multiple_choice' as const,
-        options: [
-          { text: 'Only option', is_correct: true },
-        ],
+        options: [{ text: 'Only option', is_correct: true }],
       };
 
       const result = MultipleChoiceSchema.safeParse(invalid);
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('Multiple choice questions must have at least 2 options');
+        expect(result.error.errors[0].message).toBe(
+          'Multiple choice questions must have at least 2 options'
+        );
       }
     });
 
@@ -204,16 +205,16 @@ describe('import-schema validation', () => {
         points: 10,
         is_published: true,
         type: 'mcq_multi' as const,
-        options: [
-          { text: 'Single option', is_correct: true },
-        ],
+        options: [{ text: 'Single option', is_correct: true }],
       };
 
       const result = McqMultiSchema.safeParse(invalid);
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toBe('MCQ Multi questions must have at least 2 options');
+        expect(result.error.errors[0].message).toBe(
+          'MCQ Multi questions must have at least 2 options'
+        );
       }
     });
   });
@@ -404,9 +405,9 @@ describe('import-schema validation', () => {
         },
       ];
 
-      const results = questions.map(q => QueuedQuestionSchema.safeParse(q));
+      const results = questions.map((q) => QueuedQuestionSchema.safeParse(q));
 
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.success).toBe(true);
       });
     });
@@ -482,7 +483,7 @@ describe('import-schema validation', () => {
         '123E4567-E89B-12D3-A456-426614174000'.toUpperCase(),
       ];
 
-      validUUIDs.forEach(uuid => {
+      validUUIDs.forEach((uuid) => {
         const question = {
           skill_id: uuid,
           content: 'Test question',
@@ -509,7 +510,7 @@ describe('import-schema validation', () => {
         'invalid-dashes-pattern', // wrong format
       ];
 
-      invalidUUIDs.forEach(uuid => {
+      invalidUUIDs.forEach((uuid) => {
         const question = {
           skill_id: uuid,
           content: 'Test question',

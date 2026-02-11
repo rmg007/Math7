@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { SecurityLogger } from '@/services/SecurityLogger';
 import { supabase } from '@/lib/supabase';
@@ -27,7 +28,7 @@ describe('SecurityLogger', () => {
         eventType: 'test_event',
         severity: 'info',
         metadata: { key: 'value' },
-        appId: 'app-123'
+        appId: 'app-123',
       });
 
       expect(supabase.rpc).toHaveBeenCalledWith('log_security_event', {
@@ -44,7 +45,7 @@ describe('SecurityLogger', () => {
 
       await SecurityLogger.log({
         eventType: 'minimal_event',
-        severity: 'low'
+        severity: 'low',
       });
 
       expect(supabase.rpc).toHaveBeenCalledWith('log_security_event', {
@@ -62,10 +63,7 @@ describe('SecurityLogger', () => {
 
       await SecurityLogger.log({ eventType: 'dev_event', severity: 'info' });
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '[SecurityLogger] Event logged:',
-        'dev_event'
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('[SecurityLogger] Event logged:', 'dev_event');
     });
 
     it('should log to console.error in development on failure', async () => {
@@ -75,10 +73,7 @@ describe('SecurityLogger', () => {
 
       await SecurityLogger.log({ eventType: 'fail_event', severity: 'high' });
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '[SecurityLogger] Failed to log event:',
-        mockError
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('[SecurityLogger] Failed to log event:', mockError);
     });
 
     it('should handle unexpected errors without throwing', async () => {
@@ -86,8 +81,9 @@ describe('SecurityLogger', () => {
       vi.mocked(supabase.rpc).mockRejectedValue(new Error('Network failure'));
 
       // Should not throw
-      await expect(SecurityLogger.log({ eventType: 'error_event', severity: 'critical' }))
-        .resolves.not.toThrow();
+      await expect(
+        SecurityLogger.log({ eventType: 'error_event', severity: 'critical' })
+      ).resolves.not.toThrow();
 
       expect(consoleSpy).toHaveBeenCalledWith(
         '[SecurityLogger] Unexpected error:',
@@ -103,25 +99,34 @@ describe('SecurityLogger', () => {
 
     it('should log login', async () => {
       await SecurityLogger.logLogin('user-123');
-      expect(supabase.rpc).toHaveBeenCalledWith('log_security_event', expect.objectContaining({
-        p_event_type: 'login',
-        p_metadata: { userId: 'user-123' }
-      }));
+      expect(supabase.rpc).toHaveBeenCalledWith(
+        'log_security_event',
+        expect.objectContaining({
+          p_event_type: 'login',
+          p_metadata: { userId: 'user-123' },
+        })
+      );
     });
 
     it('should log logout', async () => {
       await SecurityLogger.logLogout();
-      expect(supabase.rpc).toHaveBeenCalledWith('log_security_event', expect.objectContaining({
-        p_event_type: 'logout'
-      }));
+      expect(supabase.rpc).toHaveBeenCalledWith(
+        'log_security_event',
+        expect.objectContaining({
+          p_event_type: 'logout',
+        })
+      );
     });
 
     it('should log sensitive action', async () => {
       await SecurityLogger.logSensitiveAction('delete_record', { id: 'rec-1' });
-      expect(supabase.rpc).toHaveBeenCalledWith('log_security_event', expect.objectContaining({
-        p_event_type: 'sensitive_action',
-        p_metadata: { action: 'delete_record', id: 'rec-1' }
-      }));
+      expect(supabase.rpc).toHaveBeenCalledWith(
+        'log_security_event',
+        expect.objectContaining({
+          p_event_type: 'sensitive_action',
+          p_metadata: { action: 'delete_record', id: 'rec-1' },
+        })
+      );
     });
   });
 });
