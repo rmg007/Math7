@@ -52,3 +52,19 @@
 - [ ] **GitHub Secrets**: Add Supabase + test user credentials to GitHub Settings.
 - [x] **`gh auth login`**: Authenticate GitHub CLI for agent issue discovery and PR management.
 - [ ] **CLI-First PRs**: Transition all PR lifecycle management (list, view, merge) to `gh` CLI.
+
+## 🛠️ CI STABILIZATION & RECOVERY
+
+- [x] **Repo Health Sweep**: Bulk-closed 71 issues, 25 PRs to clear noise.
+- [x] **Fix Make It Green Button**: Now uses fresh dispatches to avoid commit-lock.
+- [ ] **Re-enable & Fix Workflows**:
+  - [x] **Validation**: Restored archived scripts, re-enabled workflow, fixed SDK/Node versions.
+  - [ ] **Flutter Builds (CI)**: Fix build targets (iOS/Android) for Ubuntu.
+  - [ ] **Security (DAST/Secrets)**: Config and secret verification. (Next: Enable DAST)
+  - [ ] **Visual/Lighthouse**: Infra/Server configuration. (Next: Enable Lighthouse)
+  - [ ] **Staging Database**: Credential check.
+  - [ ] **Dead Code/Duplication**: Verify scan targets. (Next: Enable Dead Code)
+
+## 🚨 URGENT PROD FIXES
+
+- [x] **Admin Panel Crash**: Fixed `TypeError: Cannot read properties of undefined (reading 'bg')` in `StatusBadge` component by adding a robust fallback mechanism.
