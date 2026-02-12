@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/services.dart';
 import 'package:student_app/src/features/home/screens/main_shell.dart';
 import 'package:drift/drift.dart';
 import '../../helpers/test_helpers.dart';
@@ -24,7 +23,7 @@ void main() {
       container.dispose();
     });
 
-    Future<void> _setMobileSize(WidgetTester tester) async {
+    Future<void> setMobileSize(WidgetTester tester) async {
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() {
@@ -35,11 +34,11 @@ void main() {
 
     testWidgets('should build MainShell with navigation tabs',
         (WidgetTester tester) async {
-      await _setMobileSize(tester);
+      await setMobileSize(tester);
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
+          child: const MaterialApp(
             home: MainShell(),
           ),
         ),
@@ -59,11 +58,11 @@ void main() {
 
     testWidgets('should show correct initial tab (Home)',
         (WidgetTester tester) async {
-      await _setMobileSize(tester);
+      await setMobileSize(tester);
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
+          child: const MaterialApp(
             home: MainShell(),
           ),
         ),
@@ -77,11 +76,11 @@ void main() {
     });
 
     testWidgets('should switch tabs when tapped', (WidgetTester tester) async {
-      await _setMobileSize(tester);
+      await setMobileSize(tester);
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
+          child: const MaterialApp(
             home: MainShell(),
           ),
         ),
@@ -124,7 +123,7 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
+          child: const MaterialApp(
             home: MainShell(),
           ),
         ),
@@ -151,7 +150,7 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
+          child: const MaterialApp(
             home: MainShell(),
           ),
         ),
@@ -166,11 +165,11 @@ void main() {
 
     testWidgets('should maintain state when switching tabs',
         (WidgetTester tester) async {
-      await _setMobileSize(tester);
+      await setMobileSize(tester);
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
+          child: const MaterialApp(
             home: MainShell(),
           ),
         ),
@@ -206,7 +205,7 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: ProviderContainer(overrides: getTestOverrides()),
-          child: MaterialApp(
+          child: const MaterialApp(
             home: MainShell(),
           ),
         ),

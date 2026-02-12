@@ -103,7 +103,7 @@ void main() {
 
     group('Environment Variable Validation', () {
       test('should validate app version format', () {
-        final version = Env.appVersion;
+        const version = Env.appVersion;
         expect(
             version,
             matches(RegExp(
@@ -111,13 +111,13 @@ void main() {
       });
 
       test('should validate app name format', () {
-        final name = Env.appName;
+        const name = Env.appName;
         expect(
             name, matches(RegExp(r'^[a-zA-Z\s]+$'))); // Letters and spaces only
       });
 
       test('should validate supabase URL format when provided', () {
-        final url = Env.supabaseUrl;
+        const url = Env.supabaseUrl;
         if (url.isNotEmpty) {
           expect(
               url,
@@ -127,7 +127,7 @@ void main() {
       });
 
       test('should validate supabase key format when provided', () {
-        final key = Env.supabaseAnonKey;
+        const key = Env.supabaseAnonKey;
         if (key.isNotEmpty) {
           expect(
               key.length, greaterThan(20)); // Supabase keys are typically long
@@ -164,12 +164,12 @@ void main() {
 
       test('should maintain consistency across accesses', () {
         // Configuration should be consistent
-        final v1 = Env.appVersion;
-        final v2 = Env.appVersion;
+        const v1 = Env.appVersion;
+        const v2 = Env.appVersion;
         expect(v1, equals(v2));
 
-        final n1 = Env.appName;
-        final n2 = Env.appName;
+        const n1 = Env.appName;
+        const n2 = Env.appName;
         expect(n1, equals(n2));
 
         final c1 = Env.themePrimaryColor;
@@ -181,12 +181,12 @@ void main() {
     group('Security Tests', () {
       test('should have consistent configuration access', () {
         // Configuration should be consistent across accesses
-        final version1 = Env.appVersion;
-        final version2 = Env.appVersion;
+        const version1 = Env.appVersion;
+        const version2 = Env.appVersion;
         expect(version1, equals(version2));
 
-        final name1 = Env.appName;
-        final name2 = Env.appName;
+        const name1 = Env.appName;
+        const name2 = Env.appName;
         expect(name1, equals(name2));
 
         final color1 = Env.themePrimaryColor;

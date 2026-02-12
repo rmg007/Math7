@@ -9,9 +9,7 @@ class MockAppConfigService extends StateNotifier<AppContext?>
     implements AppConfigService {
   MockAppConfigService()
       : super(const AppContext(
-            appId: 'test-app',
-            appName: 'Test App',
-            primaryColor: 0xFF0000FF));
+            appId: 'test-app', appName: 'Test App', primaryColor: 0xFF0000FF));
 
   @override
   Future<AppContext> load() async => state!;

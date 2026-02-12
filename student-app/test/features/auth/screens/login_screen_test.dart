@@ -83,7 +83,7 @@ void main() {
       // Find password field
       final passwordFieldFinder = find.byType(TextFormField).last;
       await tester.enterText(passwordFieldFinder, 'secret');
-      
+
       // Find the TextField widget inside TextFormField
       final textFieldFinder = find.descendant(
         of: passwordFieldFinder,
@@ -133,12 +133,11 @@ void main() {
       // Enter valid data
       await tester.enterText(
           find.byType(TextFormField).first, 'test@example.com');
-      await tester.enterText(
-          find.byType(TextFormField).last, 'password123');
+      await tester.enterText(find.byType(TextFormField).last, 'password123');
 
       // Tap login
       await tester.tap(find.text('Sign In'));
-      
+
       // Pump for short duration to catch loading state
       await tester.pump(const Duration(milliseconds: 50));
 
@@ -162,8 +161,7 @@ void main() {
       // Enter valid data
       await tester.enterText(
           find.byType(TextFormField).first, 'test@example.com');
-      await tester.enterText(
-          find.byType(TextFormField).last, 'password123');
+      await tester.enterText(find.byType(TextFormField).last, 'password123');
 
       // Tap login
       await tester.tap(find.text('Sign In'));

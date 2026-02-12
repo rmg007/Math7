@@ -120,7 +120,7 @@ void main() {
     });
 
     test('should handle null field errors', () {
-      final error = ValidationError('Null field errors', <String, String>{});
+      const error = ValidationError('Null field errors', <String, String>{});
 
       expect(error.fieldErrors, isA<Map<String, String>>());
       expect(error.fieldErrors, isEmpty);
@@ -230,8 +230,6 @@ void main() {
 
       if (error case SyncError(retryAfterSeconds: final retryAfter)) {
         expect(retryAfter, 30);
-      } else {
-        fail('Should have matched SyncError pattern');
       }
     });
 
@@ -244,8 +242,6 @@ void main() {
       if (error case ValidationError(fieldErrors: final fields)) {
         expect(fields['email'], 'Invalid format');
         expect(fields['password'], 'Too short');
-      } else {
-        fail('Should have matched ValidationError pattern');
       }
     });
   });

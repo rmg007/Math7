@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:student_app/src/core/theme/app_theme.dart';
@@ -223,8 +224,8 @@ void main() {
 
     test('should support accessibility requirements', () {
       // High contrast colors should meet WCAG requirements
-      final background = AppColors.highContrastBackground;
-      final text = AppColors.highContrastTextPrimary;
+      const background = AppColors.highContrastBackground;
+      const text = AppColors.highContrastTextPrimary;
 
       expect(text, equals(const Color(0xFF000000)));
       expect(background, equals(const Color(0xFFFFFFFF)));
@@ -288,8 +289,8 @@ void main() {
     });
 
     test('should reuse color instances', () {
-      final color1 = AppColors.primary;
-      final color2 = AppColors.primary;
+      const color1 = AppColors.primary;
+      const color2 = AppColors.primary;
 
       expect(identical(color1, color2), isTrue);
     });

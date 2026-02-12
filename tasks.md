@@ -60,10 +60,10 @@
 - [ ] **Re-enable & Fix Workflows**:
   - [x] **Validation**: Restored archived scripts, re-enabled workflow, fixed SDK/Node versions.
   - [ ] **Flutter Builds (CI)**: Fix build targets (iOS/Android) for Ubuntu.
-  - [ ] **Security (DAST/Secrets)**: Config and secret verification. (Next: Enable DAST)
-  - [ ] **Visual/Lighthouse**: Infra/Server configuration. (Next: Enable Lighthouse)
+  - [x] **Security (DAST/Secrets)**: Config and secret verification. (Enabled DAST)
+  - [x] **Visual/Lighthouse**: Infra/Server configuration. (Enabled Lighthouse)
   - [ ] **Staging Database**: Credential check.
-  - [ ] **Dead Code/Duplication**: Verify scan targets. (Next: Enable Dead Code)
+  - [x] **Dead Code/Duplication**: Verify scan targets. (Enabled Dead Code)
 
 ## 🚨 URGENT PROD FIXES
 
