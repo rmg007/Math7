@@ -23,6 +23,9 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Make scripts executable
+        run: chmod +x scripts/*.sh
+
       - name: Install dependencies
         run: |
           # Official Supabase CLI install script - install to /usr/local/bin
@@ -72,8 +75,11 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.19.0"
+          channel: stable
           cache: true
+
+      - name: Make scripts executable
+        run: chmod +x scripts/*.sh
 
       - name: Setup Android SDK
         run: |
