@@ -25,9 +25,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # Official Supabase CLI install script
-          curl -fsSL https://raw.githubusercontent.com/supabase/cli/main/install.sh | sh
-          sudo mv bin/supabase /usr/local/bin/supabase
+          # Official Supabase CLI install script - install to /usr/local/bin
+          curl -fsSL https://raw.githubusercontent.com/supabase/cli/main/install.sh | sh -s -- -b /usr/local/bin
 
           cd admin-panel && npm ci
           cd ../student-app && flutter pub get
