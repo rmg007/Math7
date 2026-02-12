@@ -1,3 +1,59 @@
+# Learning Log
+
+## 2026-02-12: Tier 2 CI Repair Workflow Execution
+
+### Session Context
+
+- **Trigger**: Open `ci-repair` issues detected on session start
+- **Issues**: 2 open CI repair issues (#173: ruff linting, #174: SBOM/license failures)
+- **Outcome**: ✅ Both issues resolved and fixes pushed
+
+### What Was Done
+
+1. **Ruff Linting Fixes (Issue #173)**
+   - Removed unused imports: `typing.List`, `mock_open`, `json`, `pathlib.Path`, `MagicMock`
+   - Fixed E701 errors: Multiple statements on one line in test files
+   - Fixed F541 error: f-string without placeholders in `ops_runner.py`
+   - Used `ruff check --fix --unsafe-fixes` for automatic fixes where possible
+
+2. **SBOM & License Compliance Fixes (Issue #174)**
+   - **Branch Protection Issue**: Main branch requires PRs for changes
+     - Replaced `git-auto-commit-action` with `peter-evans/create-pull-request`
+     - SBOM and license updates now create PRs instead of direct commits
+   - **License Violation Issue**: `jszip@3.10.1` flagged for `(MIT OR GPL-3.0-or-later)` license
+     - Updated license check logic to handle dual licenses intelligently
+     - If any license option is permissive (MIT, Apache-2.0, etc.), package is allowed
+     - Only flags packages where ALL options are restrictive licenses
+
+### Root Causes Identified
+
+1. **Code Quality Drift**: Unused imports accumulated over time
+   - **Prevention**: Add pre-commit hooks for ruff auto-fix
+   - **Prevention**: Run `ruff check --fix` in CI before failing
+
+2. **Branch Protection Mismatch**: Workflows assumed direct push access
+   - **Prevention**: Test workflows in feature branches before main
+   - **Prevention**: Document branch protection requirements in workflow files
+
+3. **License Check Over-sensitivity**: Dual licenses not handled properly
+   - **Prevention**: Regular review of license compliance rules
+   - **Prevention**: Maintain whitelist of acceptable dual-license patterns
+
+### Lessons Learned
+
+- **Tier 2 CI Repair Works**: The 3-tier system (auto-fix → agent → human) successfully caught issues
+- **Branch Protection Impact**: Protected branches require workflow adjustments for automated commits
+- **Dual Licenses are Common**: Many packages offer permissive options alongside GPL
+- **Ruff Auto-fix is Powerful**: `--unsafe-fixes` can resolve most formatting issues automatically
+
+### Prevention Measures Implemented
+
+- Updated workflows to use PR creation for protected branches
+- Enhanced license checking logic for dual licenses
+- All ruff issues now automatically fixed in CI
+
+---
+
 ## 2026-02-12: Code Audit Remediation & Security Hardening
 
 ### Session Context
