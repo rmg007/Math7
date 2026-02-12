@@ -1,12 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { Tables, TablesInsert, TablesUpdate } from '@/lib/database.types';
+import { supabase } from '@/lib/supabase';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export type App = Tables<'apps'>;
 export interface CompiledApp extends App {
   subjects: {
     name: string;
   } | null;
+  display_name: string;
+  subdomain: string;
 }
 export type AppInsert = TablesInsert<'apps'>;
 export type AppUpdate = TablesUpdate<'apps'>;
@@ -17,14 +19,16 @@ export function useApps() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('apps')
-        .select(`
+        .select(
+          `
           *,
           subjects (
             name
           )
-        `)
+        `
+        )
         .order('display_name');
-      
+
       if (error) throw error;
       return (data || []) as CompiledApp[];
     },
@@ -33,15 +37,11 @@ export function useApps() {
 
 export function useCreateApp() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (app: AppInsert) => {
-      const { data, error } = await supabase
-        .from('apps')
-        .insert(app)
-        .select()
-        .single();
-      
+      const { data, error } = await supabase.from('apps').insert(app).select().single();
+
       if (error) throw error;
       if (!data) throw new Error('Failed to create app');
 
@@ -51,7 +51,7 @@ export function useCreateApp() {
         meta_title: `${data.display_name} | Questerix`,
         meta_description: `Learn ${data.display_name} with Questerix.`,
         hero_headline: `Ace ${data.display_name}`,
-        hero_subheadline: `Master your subjects with adaptive practice.`
+        hero_subheadline: `Master your subjects with adaptive practice.`,
       });
 
       return data;
@@ -91,11 +91,8 @@ export function useDeleteApp() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('apps')
-        .delete()
-        .eq('app_id', id);
-      
+      const { error } = await supabase.from('apps').delete().eq('app_id', id);
+
       if (error) throw error;
     },
     onSuccess: () => {

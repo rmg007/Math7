@@ -46,7 +46,7 @@ jobs:
         run: npm ci --legacy-peer-deps --legacy-peer-deps
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli@0.12.x

@@ -262,7 +262,7 @@ jobs:
       - name: Install Oracle Plus CLI
         run: |
           cd tools/oracle-plus
-          npm ci --legacy-peer-deps --legacy-peer-deps
+          npm install --legacy-peer-deps --legacy-peer-deps
           npm run build
           npm link
 
