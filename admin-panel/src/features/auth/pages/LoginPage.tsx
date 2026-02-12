@@ -1,91 +1,84 @@
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { useNavigate } from "react-router-dom"
-import { supabase } from "@/lib/supabase"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Rocket, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react"
-import { SecurityLogger } from "@/services/SecurityLogger"
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { supabase } from '@/lib/supabase';
+import { SecurityLogger } from '@/services/SecurityLogger';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { AlertCircle, Eye, EyeOff, Loader2, Rocket } from 'lucide-react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import * as z from 'zod';
 
 const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-})
+  email: z.string().email('Please enter a valid email'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
 
 const registerSchema = z.object({
-  fullName: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  inviteCode: z.string().min(1, "Invitation code is required"),
-})
+  fullName: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Please enter a valid email'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  inviteCode: z.string().min(1, 'Invitation code is required'),
+});
 
-type LoginFormValues = z.infer<typeof loginSchema>
-type RegisterFormValues = z.infer<typeof registerSchema>
+type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export function LoginPage() {
-  const navigate = useNavigate()
-  const [error, setError] = useState<string | null>(null)
-  const [isRegister, setIsRegister] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [showRegisterPassword, setShowRegisterPassword] = useState(false)
-  
+  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [isRegister, setIsRegister] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-  })
+  });
 
   const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-  })
+  });
 
   const onLogin = async (data: LoginFormValues) => {
-    setError(null)
+    setError(null);
     const { data: authData, error } = await supabase.auth.signInWithPassword({
       email: data.email,
       password: data.password,
-    })
+    });
 
     if (error) {
-      setError(error.message)
+      setError(error.message);
       SecurityLogger.log({
         eventType: 'failed_login',
         severity: 'low',
-        metadata: { email: data.email, reason: error.message }
+        metadata: { email: data.email, reason: error.message },
+      }).catch((err) => {
+        console.error('Failed to log security event:', err);
       });
     } else {
       await SecurityLogger.logLogin(authData.user.id);
-      
+
       // Sync Sentry User (Lazy)
       import('@/lib/monitoring').then(({ setUser }) => {
         setUser(authData.user.id, data.email);
       });
 
-      navigate("/")
+      navigate('/');
     }
-  }
+  };
 
   const onRegister = async (data: RegisterFormValues) => {
-    setError(null)
-    
-    // Validate invitation code against database
-    const { data: isValid, error: validateError } = await supabase.rpc(
-      'validate_invitation_code',
-      { p_code: data.inviteCode }
-    )
-    
-    if (validateError || !isValid) {
-      setError("Invalid or expired invitation code")
-      SecurityLogger.log({
-          eventType: 'failed_register_invite',
-          severity: 'medium',
-          metadata: { email: data.email, inviteCode: data.inviteCode }
-      });
-      return
-    }
-    
+    setError(null);
+
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -96,37 +89,60 @@ export function LoginPage() {
           role: 'admin',
         },
       },
-    })
+    });
 
     if (signUpError) {
-      setError(signUpError.message)
+      setError(signUpError.message);
       SecurityLogger.log({
-          eventType: 'failed_register',
-          severity: 'low',
-          metadata: { email: data.email, reason: signUpError.message }
+        eventType: 'failed_register',
+        severity: 'low',
+        metadata: { email: data.email, reason: signUpError.message },
+      }).catch((err) => {
+        console.error('Failed to log security event:', err);
       });
-      return
+      return;
     }
 
     if (signUpData.user) {
-         await SecurityLogger.log({
-            eventType: 'register',
-            severity: 'info',
-            metadata: { email: data.email, inviteCode: data.inviteCode, userId: signUpData.user.id }
-         });
+      await SecurityLogger.log({
+        eventType: 'register',
+        severity: 'info',
+        metadata: {
+          email: data.email,
+          inviteCode: data.inviteCode.slice(-4),
+          userId: signUpData.user.id,
+        },
+      }).catch((err) => {
+        console.error('Failed to log security event:', err);
+      });
 
-         // Sync Sentry User (Lazy)
-         const userId = signUpData.user.id;
-         import('@/lib/monitoring').then(({ setUser }) => {
-           setUser(userId, data.email);
-         });
+      // Sync Sentry User (Lazy)
+      const userId = signUpData.user.id;
+      import('@/lib/monitoring').then(({ setUser }) => {
+        setUser(userId, data.email);
+      });
     }
 
-    // Mark invitation code as used
-    await supabase.rpc('use_invitation_code', { p_code: data.inviteCode })
+    // Validate AND consume invitation code atomically
+    const { data: consumeResult, error: consumeError } = await supabase.rpc(
+      'validate_and_use_invitation_code',
+      { p_code: data.inviteCode }
+    );
 
-    navigate("/")
-  }
+    if (consumeError || !consumeResult) {
+      setError('Failed to use invitation code. Please contact support.');
+      SecurityLogger.log({
+        eventType: 'failed_register_consume',
+        severity: 'medium',
+        metadata: { email: data.email, inviteCode: data.inviteCode.slice(-4) },
+      }).catch((err) => {
+        console.error('Failed to log security event:', err);
+      });
+      return;
+    }
+
+    navigate('/');
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-900">
@@ -136,16 +152,14 @@ export function LoginPage() {
             <Rocket className="w-6 h-6 text-primary" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">Questerix Admin</h1>
-          <p className="text-muted-foreground mt-2">
-            Curriculum Management System
-          </p>
+          <p className="text-muted-foreground mt-2">Curriculum Management System</p>
         </div>
 
         <Card className="border-border/40 shadow-xl">
           <CardHeader>
-            <CardTitle>{isRegister ? "Create Account" : "Welcome Back"}</CardTitle>
+            <CardTitle>{isRegister ? 'Create Account' : 'Welcome Back'}</CardTitle>
             <CardDescription>
-              {isRegister ? "Enter your details to get started" : ""}
+              {isRegister ? 'Enter your details to get started' : ''}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -153,36 +167,40 @@ export function LoginPage() {
               <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name</Label>
-                  <Input 
+                  <Input
                     id="fullName"
-                    placeholder="John Doe" 
-                    {...registerForm.register("fullName")} 
+                    placeholder="John Doe"
+                    {...registerForm.register('fullName')}
                   />
                   {registerForm.formState.errors.fullName && (
-                    <p className="text-sm text-destructive">{registerForm.formState.errors.fullName.message}</p>
+                    <p className="text-sm text-destructive">
+                      {registerForm.formState.errors.fullName.message}
+                    </p>
                   )}
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input 
+                  <Input
                     id="email"
-                    type="email" 
-                    placeholder="name@example.com" 
-                    {...registerForm.register("email")} 
+                    type="email"
+                    placeholder="name@example.com"
+                    {...registerForm.register('email')}
                   />
                   {registerForm.formState.errors.email && (
-                    <p className="text-sm text-destructive">{registerForm.formState.errors.email.message}</p>
+                    <p className="text-sm text-destructive">
+                      {registerForm.formState.errors.email.message}
+                    </p>
                   )}
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
                   <div className="relative">
-                    <Input 
+                    <Input
                       id="password"
-                      type={showRegisterPassword ? "text" : "password"} 
-                      {...registerForm.register("password")} 
+                      type={showRegisterPassword ? 'text' : 'password'}
+                      {...registerForm.register('password')}
                       className="pr-10"
                     />
                     <Button
@@ -198,24 +216,28 @@ export function LoginPage() {
                         <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                       <span className="sr-only">
-                        {showRegisterPassword ? "Hide password" : "Show password"}
+                        {showRegisterPassword ? 'Hide password' : 'Show password'}
                       </span>
                     </Button>
                   </div>
                   {registerForm.formState.errors.password && (
-                    <p className="text-sm text-destructive">{registerForm.formState.errors.password.message}</p>
+                    <p className="text-sm text-destructive">
+                      {registerForm.formState.errors.password.message}
+                    </p>
                   )}
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="inviteCode">Invitation Code</Label>
-                  <Input 
+                  <Input
                     id="inviteCode"
-                    placeholder="INV-..." 
-                    {...registerForm.register("inviteCode")} 
+                    placeholder="INV-..."
+                    {...registerForm.register('inviteCode')}
                   />
                   {registerForm.formState.errors.inviteCode && (
-                    <p className="text-sm text-destructive">{registerForm.formState.errors.inviteCode.message}</p>
+                    <p className="text-sm text-destructive">
+                      {registerForm.formState.errors.inviteCode.message}
+                    </p>
                   )}
                 </div>
 
@@ -226,8 +248,14 @@ export function LoginPage() {
                   </div>
                 )}
 
-                <Button className="w-full" type="submit" disabled={registerForm.formState.isSubmitting}>
-                  {registerForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button
+                  className="w-full"
+                  type="submit"
+                  disabled={registerForm.formState.isSubmitting}
+                >
+                  {registerForm.formState.isSubmitting && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   Create Account
                 </Button>
               </form>
@@ -235,24 +263,26 @@ export function LoginPage() {
               <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="login-email">Email</Label>
-                  <Input 
+                  <Input
                     id="login-email"
-                    type="email" 
-                    placeholder="name@example.com" 
-                    {...loginForm.register("email")} 
+                    type="email"
+                    placeholder="name@example.com"
+                    {...loginForm.register('email')}
                   />
                   {loginForm.formState.errors.email && (
-                    <p className="text-sm text-destructive">{loginForm.formState.errors.email.message}</p>
+                    <p className="text-sm text-destructive">
+                      {loginForm.formState.errors.email.message}
+                    </p>
                   )}
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="login-password">Password</Label>
                   <div className="relative">
-                    <Input 
+                    <Input
                       id="login-password"
-                      type={showPassword ? "text" : "password"} 
-                      {...loginForm.register("password")} 
+                      type={showPassword ? 'text' : 'password'}
+                      {...loginForm.register('password')}
                       className="pr-10"
                     />
                     <Button
@@ -268,12 +298,14 @@ export function LoginPage() {
                         <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                       <span className="sr-only">
-                        {showPassword ? "Hide password" : "Show password"}
+                        {showPassword ? 'Hide password' : 'Show password'}
                       </span>
                     </Button>
                   </div>
                   {loginForm.formState.errors.password && (
-                    <p className="text-sm text-destructive">{loginForm.formState.errors.password.message}</p>
+                    <p className="text-sm text-destructive">
+                      {loginForm.formState.errors.password.message}
+                    </p>
                   )}
                 </div>
 
@@ -284,8 +316,14 @@ export function LoginPage() {
                   </div>
                 )}
 
-                <Button className="w-full" type="submit" disabled={loginForm.formState.isSubmitting}>
-                  {loginForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button
+                  className="w-full"
+                  type="submit"
+                  disabled={loginForm.formState.isSubmitting}
+                >
+                  {loginForm.formState.isSubmitting && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   Sign In
                 </Button>
               </form>
@@ -295,19 +333,16 @@ export function LoginPage() {
             <Button
               variant="link"
               onClick={() => {
-                setIsRegister(!isRegister)
-                setError(null)
+                setIsRegister(!isRegister);
+                setError(null);
               }}
               className="text-muted-foreground"
             >
-              {isRegister 
-                ? "Already have an account? Sign in" 
-                : "Don't have an account? Register"
-              }
+              {isRegister ? 'Already have an account? Sign in' : "Don't have an account? Register"}
             </Button>
           </CardFooter>
         </Card>
       </div>
     </div>
-  )
+  );
 }

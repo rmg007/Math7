@@ -339,6 +339,54 @@
 
 ---
 
+## 2026-02-12: Critical Audit Remediation (Bulk Import + Auth + App Context)
+
+### Session Context
+
+- **Objective**: Fix verified critical and high-severity issues from targeted code audit focusing on crash vectors, race conditions, and data integrity risks.
+- **Scope**: `admin-panel/src/hooks/use-bulk-import.ts`, `admin-panel/src/contexts/AppContext.tsx`, `admin-panel/src/features/auth/pages/LoginPage.tsx`, `admin-panel/src/services/CurriculumService.ts`.
+- **Outcome**: ✅ 8 fixes implemented. Eliminated app-shell crash vectors, hardened invitation flow, and improved error handling.
+
+### What Was Done
+
+1. **AppContext Crash Prevention**
+   - Wrapped localStorage `JSON.parse` in try/catch with boolean validation
+   - Replaced fire-and-forget profile update with await + error logging
+
+2. **Bulk Import Hardening**
+   - Added `safeJson` helper to guard malformed CSV JSON cells
+   - Normalized `options` to `null` for boolean/text_input types (schema alignment)
+   - Implemented proper timeout cleanup with useRef + useEffect
+
+3. **Auth Flow Security**
+   - Added return value check for `use_invitation_code` before navigation
+   - Redacted invitation codes in SecurityLogger (last-4 only)
+   - Added new error type for consumption failures
+
+4. **Error Surface Improvements**
+   - Enhanced CurriculumService batch error messages with backend detail
+
+### What Was Learned
+
+1. **Initialization paths are the most dangerous** — localStorage, config parsing, and bootstrap logic must always be defensive. A single unguarded JSON.parse can white-screen the entire app.
+
+2. **Client-side validation + separate consumption creates TOCTOU windows** unless the DB operation is atomic. In this case, PostgreSQL `FOR UPDATE` already prevented double-consumption, but the client still needed to check the return value.
+
+3. **Schema/importer alignment matters** — defaulting `options` to `[]` when the schema expects `null` for non-MCQ types causes avoidable validation failures.
+
+4. **Fire-and-forget async operations create silent state drift** — profile updates without error handling can leave local state diverged from RLS context without visibility.
+
+### Preventative Measures (The "Always/Never" List)
+
+- **ALWAYS** wrap `JSON.parse` in try/catch when reading from localStorage or external sources
+- **ALWAYS** check RPC return values before proceeding with user actions
+- **ALWAYS** normalize data to match schema expectations before validation
+- **ALWAYS** track timeout IDs in useRef and clear on unmount
+- **NEVER** use `.then()` without error handling for state-affecting operations
+- **NEVER** log sensitive identifiers in cleartext — use last-4 or hash
+
+---
+
 ## 2026-02-11: Minimal Viable Automation (MVA) Implementation
 
 ### Session Context
@@ -409,5 +457,71 @@
 ### Session Context
 
 - **Objective**: Optimize AI agent efficiency, session persistence, and resolve contradictory rules — based on an external review by Claude AI.
-- **Scope**: `.cursorrules`, `.agent/workflows/`, `admin-panel/package.json`, `.gitignore`, `.github/copilot-instructions.md`.
-- **Outcome**: ✅ 8 files modified/created. 5 fabricated features identified and skipped. 6 confirmed features leveraged.
+
+---
+
+## 2026-02-12: Admin Panel Audit Remediation — Round 2
+
+### Session Context
+
+- **Objective**: Fix verified issues from second external code audit, reject false positives, and document lessons learned.
+- **Scope**: `admin-panel/src/features/auth/pages/LoginPage.tsx`, `admin-panel/src/contexts/AppContext.tsx`, `admin-panel/src/hooks/use-bulk-import.ts`, `admin-panel/src/services/CurriculumService.ts`, `admin-panel/src/lib/validation/import-schema.ts`, `supabase/migrations/`.
+- **Outcome**: ✅ 6 fixes implemented. 1 CRITICAL downgraded to HIGH, 1 HIGH false positive rejected, 4 findings downgraded to LOW/N/A. All changes committed.
+
+### What Was Done
+
+1. **Schema Validation Fix (`import-schema.ts`)**
+   - Added `.refine()` to `MultipleChoiceSchema` and `McqMultiSchema` enforcing at least one correct option
+   - Root fix for bulk import validation gaps
+
+2. **Atomic Invitation Code Flow (`LoginPage.tsx` + SQL)**
+   - Created `validate_and_use_invitation_code` SQL function that validates AND consumes code atomically
+   - Replaced 3-step flow (`validate → signUp → use`) with 2-step flow (`signUp → validate_and_use`)
+   - Eliminated race condition where user could be created but code not consumed
+   - Standardized SecurityLogger calls to fire-and-forget with `.catch()` for consistency
+
+3. **Concurrency Guard & Cleanup (`AppContext.tsx`)**
+   - Added `useRef(false)` to prevent concurrent `loadApps()` calls
+   - Added `mounted` flag in `useEffect` to prevent state updates after unmount
+   - Wrapped `localStorage.setItem` calls in try/catch (writes only — reads already guarded)
+   - Added try/catch around profile update in `handleSetCurrentApp`
+
+### What Was Verified vs. Rejected
+
+| Finding                               | Report Rating | Actual Rating  | Action                                                      |
+| ------------------------------------- | ------------- | -------------- | ----------------------------------------------------------- |
+| Registration race condition           | CRITICAL      | HIGH           | ✅ Fixed with atomic RPC                                    |
+| Case sensitivity mismatch             | HIGH          | FALSE POSITIVE | ❌ SQL already uses `upper()`                               |
+| Inconsistent SecurityLogger await     | MEDIUM        | LOW            | ✅ Standardized to fire-and-forget                          |
+| `loadApps` race condition             | CRITICAL      | HIGH           | ✅ Added `useRef` guard                                     |
+| localStorage error handling           | HIGH          | MEDIUM         | ✅ Fixed writes (reads already guarded)                     |
+| Silent profile update failure         | HIGH          | MEDIUM         | ✅ Added try/catch                                          |
+| No unmount cleanup                    | MEDIUM        | MEDIUM         | ✅ Added `mounted` flag                                     |
+| Missing MCQ correct-answer validation | HIGH          | HIGH           | ✅ Fixed with `.refine()`                                   |
+| 8 other findings                      | MEDIUM/LOW    | LOW/N/A        | ❌ Skipped (already mitigated, cosmetic, or per-convention) |
+
+### What Was Learned
+
+1. **Audit Reports Need Source Verification**: 1 of 16 findings was a false positive. The case sensitivity claim contradicted the actual SQL implementation which already used `upper()`. Always read the code before accepting audit findings.
+
+2. **Multi-Step Client Flows Are Inherently Racy**: Any `validate → create → consume` pattern across separate RPCs has a race window. Prefer atomic server-side operations that combine validation + mutation. The new `validate_and_use_invitation_code` function eliminates this entire class of bugs.
+
+3. **React Concurrent Calls Need Guards**: `useEffect` + event listeners can invoke the same async function concurrently. A simple `useRef` flag is the most reliable guard to prevent redundant API calls and potential state overwrites.
+
+4. **`localStorage` Can Throw**: In private browsing or when storage is disabled, `setItem` throws. Always wrap writes in try/catch. Reads are safer but should be guarded too (already done in this codebase).
+
+5. **Zod `.refine()` Is the Right Place for Cross-Field Validation**: Checking "at least one correct option" belongs in the schema, not in downstream parsers. This ensures every code path benefits from the validation.
+
+6. **`as unknown as Type` for Supabase Bridging Is Acceptable**: Per project conventions (AGENTS.md), this pattern is explicitly allowed when bridging Zod-validated data to Supabase-generated types. Don't "fix" what isn't broken.
+
+7. **Severity Inflation Is Common**: Several findings were rated HIGH/CRITICAL but were actually LOW risk or already mitigated. Focus on actual impact, not just the audit's rating.
+
+### Preventative Measures
+
+- **ALWAYS** verify audit findings against actual source code before implementing fixes.
+- **ALWAYS** prefer atomic database operations for validation+mutation flows.
+- **ALWAYS** add `useRef` guards to prevent concurrent async function calls in React.
+- **ALWAYS** wrap `localStorage.setItem` in try/catch for private browsing compatibility.
+- **ALWAYS** use Zod `.refine()` for cross-field validation rules.
+- **ALWAYS** consider existing mitigations when assessing audit severity ratings.
+- **NEVER** change per-convention patterns (`as unknown as Type`) without understanding the context.

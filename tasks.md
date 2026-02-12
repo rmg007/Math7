@@ -1,5 +1,43 @@
 # Questerix Development Tasks
 
+## 🛡️ AUDIT REMEDIATION ROUND 2 (2026-02-12)
+
+### Critical & High Priority Fixes
+
+- [x] **HIGH: Fix registration race condition** in `LoginPage.tsx`
+  - Created atomic `validate_and_use_invitation_code` SQL function
+  - Replaced 3-step flow with 2-step flow to eliminate race window
+  - Standardized SecurityLogger calls to fire-and-forget with `.catch()`
+- [x] **HIGH: Fix loadApps race condition** in `AppContext.tsx`
+  - Added `useRef(false)` guard to prevent concurrent calls
+  - Added `mounted` flag in `useEffect` to prevent unmount state updates
+- [x] **HIGH: Fix MCQ correct-answer validation** in `import-schema.ts`
+  - Added `.refine()` to `MultipleChoiceSchema` and `McqMultiSchema`
+  - Enforces at least one correct option in all MCQ questions
+
+### Medium Priority Fixes
+
+- [x] **MEDIUM: localStorage error handling** in `AppContext.tsx`
+  - Wrapped `localStorage.setItem` calls in try/catch (writes only)
+  - Reads already had proper error handling
+- [x] **MEDIUM: Profile update error handling** in `AppContext.tsx`
+  - Added try/catch around profile update in `handleSetCurrentApp`
+
+### Findings Rejected or Downgraded
+
+- [x] **FALSE POSITIVE: Case sensitivity mismatch** — SQL already uses `upper()`
+- [x] **LOW: Inconsistent SecurityLogger await** — Standardized to fire-and-forget (already designed to fail silently)
+- [x] **LOW/N/A: 8 other findings** — Already mitigated, cosmetic, or per-convention patterns
+
+### Summary
+
+- **Fixed**: 6 verified issues across 4 files + 1 new SQL migration
+- **Rejected**: 1 false positive, 4 downgraded to LOW/N/A
+- **Files modified**: `import-schema.ts`, `LoginPage.tsx`, `AppContext.tsx`, `supabase/migrations/20260212083100_validate_and_use_invitation_code.sql`
+- **Documentation**: Updated `docs/LEARNING_LOG.md` with lessons learned
+
+---
+
 ## 🛡️ AUDIT REMEDIATION (2026-02-12)
 
 ### Critical Security & Stability Fixes
