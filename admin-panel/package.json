@@ -114,5 +114,19 @@
     "*.{json,md}": [
       "prettier --write"
     ]
-  }
+  },
+  "size-limit": [
+    {
+      "path": "dist/index.html",
+      "limit": "500 KB"
+    },
+    {
+      "path": "dist/assets/index-*.js",
+      "limit": "1 MB"
+    },
+    {
+      "path": "dist/assets",
+      "limit": "5 MB"
+    }
+  ]
 }

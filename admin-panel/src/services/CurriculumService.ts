@@ -77,7 +77,7 @@ export class CurriculumService {
           return {
             success: false,
             count: totalInserted,
-            error: `Batch ${i + 1} rejected by database: Unknown error. ${totalInserted} rows were previously inserted.`,
+            error: `Batch ${i + 1} rejected by database: ${totalInserted} rows were previously inserted.`,
           };
         }
 

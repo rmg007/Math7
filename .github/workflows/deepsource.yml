@@ -21,7 +21,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: "stable"
           cache: true
 
       - name: Install Dependencies (questerix_domain)
@@ -64,14 +64,9 @@ jobs:
         env:
           DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
 
-      - name: Report Coverage to DeepSource (questerix_domain)
+      - name: Report Coverage to DeepSource
         run: |
-          ./bin/deepsource report --analyzer test-coverage --key dart --value-file questerix_domain/coverage/lcov.info
-        env:
-          DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
-
-      - name: Report Coverage to DeepSource (student-app)
-        run: |
-          ./bin/deepsource report --analyzer test-coverage --key dart --value-file student-app/coverage/lcov.info
+          echo "DeepSource does not support Dart coverage reporting"
+          echo "Skipping coverage upload for questerix_domain and student-app"
         env:
           DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
