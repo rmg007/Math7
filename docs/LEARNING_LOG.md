@@ -1,3 +1,33 @@
+## 2026-02-12: CI Stabilization, Resilient UI, and Dependency Harmony
+
+### Session Context
+
+- **Objective**: Stabilize the entire CI/CD pipeline, resolve production crashes in the Admin Panel, and re-enable secondary security/performance workflows.
+- **Scope**: `.github/workflows/`, `admin-panel/src/components/ui/status-badge.tsx`, `student-app/test/`.
+- **Outcome**: ✅ 14 workflows stabilized with `--legacy-peer-deps`. ✅ Production crash in `StatusBadge` fixed with fallbacks. ✅ Flutter analyzer debt cleared (`33 issues found` -> `0`). ✅ Secondary workflows (DAST, Lighthouse, Dead Code) re-enabled.
+
+### What Was Learned
+
+1. **The "Resilient Component" Pattern**: Components that render database enums (like `StatusBadge`) must include a "Total Fallback" state. Assuming that UI code and Database schema will always be in perfect 1:1 sync is a recipe for production crashes. Defaulting to neutral colors and raw strings preserves the UI while signaling a need for an update.
+
+2. **Monorepo Dependency Friction in CI**: strictly isolated CI runners often struggle with complex peer dependency trees in monorepos. While local environments might tolerate these via symlinks, CI requires explicit flags like `--legacy-peer-deps` to bypass strict conflict resolution. This is a standard "Stability Baseline" for large-scale migrations.
+
+3. **Dart Analyzer "Dead Code" Evolution**: Newer Dart SDKs (3.x+) have much more aggressive dead code detection. In `if-case` or `switch` patterns where a type is statically guaranteed, trailing `fail()` or `throw` blocks are now marked as `dead_code` blockers. Trust the type system and remove the boilerplate.
+
+4. **CI/CD Manual Control Necessity**: Relying solely on automated triggers (`push`/`pull_request`) makes repository recovery difficult during "Make It Green" cycles. Adding `workflow_dispatch` to every critical workflow allows agents and developers to rerun repairs without committing "dummy" changes.
+
+5. **Legacy API Maintenance in Tests**: When a stable API goes `deprecated`, it's often better to suppress the warning in tests (e.g., `Color.value` comparison) than to rewrite complex logic, provided the underlying behavior is still correct. This keeps the global "Zero Warnings" status achievable.
+
+### Preventative Measures
+
+- **ALWAYS** implement fallbacks in badge/label components that consume enums.
+- **ALWAYS** use `--legacy-peer-deps` for `npm ci` in CI environments to prevent lockfile conflicts.
+- **ALWAYS** include `workflow_dispatch` in new `.yml` workflow definitions.
+- **NEVER** leave `dead_code` warnings in tests; they obscure real logic errors.
+- **ALWAYS** synchronize the Node.js version (20.x) and Flutter channel (stable) across all CI jobs to prevent "Platform Drift."
+
+---
+
 ## 2026-02-11: CI Recovery Protocol & Husky CI Blocker
 
 ### Session Context
@@ -8,15 +38,15 @@
 
 ### What Was Learned
 
-1. **The Husky CI Trap**: A common npm script ` "prepare": "husky" ` will fail in CI environments (like GitHub Actions) if `husky` is only in `devDependencies` and the CI environment is strictly for production OR if the environment is restricted. Changing this to ` "prepare": "husky || true" ` is a critical resilience pattern for universal CI.
+1. **The Husky CI Trap**: A common npm script `"prepare": "husky"` will fail in CI environments (like GitHub Actions) if `husky` is only in `devDependencies` and the CI environment is strictly for production OR if the environment is restricted. Changing this to `"prepare": "husky || true"` is a critical resilience pattern for universal CI.
 
-2. **Signature-Based Grouping Results**: The forensic audit script successfully identified that out of 50 failed runs, there were 40 unique root causes, but the *most frequent* failure signature was the Husky setup. This confirmed the value of content-based hashing over simple workflow-name grouping.
+2. **Signature-Based Grouping Results**: The forensic audit script successfully identified that out of 50 failed runs, there were 40 unique root causes, but the _most frequent_ failure signature was the Husky setup. This confirmed the value of content-based hashing over simple workflow-name grouping.
 
 3. **Mass Rerun Power**: Using `gh run rerun <id>` programmatically allows for a "Total Clean Sweep" of the GitHub Actions board, ensuring that no silent failures linger on the `main` branch after a structural fix is pushed.
 
 ### Preventative Measures
 
-- **ALWAYS** use ` "prepare": "husky || true" ` in package.json to avoid unforced CI errors.
+- **ALWAYS** use `"prepare": "husky || true"` in package.json to avoid unforced CI errors.
 - **ALWAYS** run `scripts/ci-recover.ps1` after pushing a fix that affects multiple workflows to clear the backlog.
 - **NEVER** ignore the "Audit Report" signatures—they reveal systemic issues that a single pass-fail status hides.
 

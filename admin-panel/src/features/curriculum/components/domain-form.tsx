@@ -344,7 +344,7 @@ export function DomainForm() {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                      Executing...
+                      {isEditing ? 'Updating Signature...' : 'Initiating Provision...'}
                     </>
                   ) : isEditing ? (
                     'Update Signature'

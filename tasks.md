@@ -57,14 +57,18 @@
 
 - [x] **Repo Health Sweep**: Bulk-closed 71 issues, 25 PRs to clear noise.
 - [x] **Fix Make It Green Button**: Now uses fresh dispatches to avoid commit-lock.
-- [ ] **Re-enable & Fix Workflows**:
+- [x] **Re-enable & Fix Workflows**:
   - [x] **Validation**: Restored archived scripts, re-enabled workflow, fixed SDK/Node versions.
-  - [ ] **Flutter Builds (CI)**: Fix build targets (iOS/Android) for Ubuntu.
+  - [x] **Flutter Builds (CI)**: Fix build targets (iOS/Android) for Ubuntu. (Stabilized and tested)
   - [x] **Security (DAST/Secrets)**: Config and secret verification. (Enabled DAST)
   - [x] **Visual/Lighthouse**: Infra/Server configuration. (Enabled Lighthouse)
-  - [ ] **Staging Database**: Credential check.
+  - [ ] **Staging Database**: Credential check. (Waiting for STAGING_SUPABASE_URL secret)
   - [x] **Dead Code/Duplication**: Verify scan targets. (Enabled Dead Code)
 
 ## 🚨 URGENT PROD FIXES
 
-- [x] **Admin Panel Crash**: Fixed `TypeError: Cannot read properties of undefined (reading 'bg')` in `StatusBadge` component by adding a robust fallback mechanism.
+- [x] **Admin Panel Crash (StatusBadge)**: Fixed `TypeError: Cannot read properties of undefined (reading 'bg')` in `StatusBadge` component.
+- [ ] **BUG #1 & #2: Domain CRUD Failure (403 Forbidden)**: Investigating Supabase RLS policies for `domains` table. Users currently cannot Create or Update domains.
+- [ ] **BUG #3: Error Logs Page Crash**: Investigating systemic crash on `/error-logs` route.
+- [ ] **Form Feedback**: Add loading indicators to "Initiate Provision" and "Update Signature" buttons.
+- [ ] **Feature Verification**: Verify "Template" and "Upload" buttons in Domain Registry.

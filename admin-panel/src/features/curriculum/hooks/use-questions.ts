@@ -1,31 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { Database } from '@/lib/database.types';
 import { useApp } from '@/hooks/use-app';
+import { Database } from '@/lib/database.types';
+import { supabase } from '@/lib/supabase';
 import type { QuestionListItem } from '@/types';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+import { CurriculumStatus, PaginatedResponse, PaginationParams } from './shared';
 
 type Question = Database['public']['Tables']['questions']['Row'];
 export type QuestionInsert = Database['public']['Tables']['questions']['Insert'];
-
-export type CurriculumStatus = Database['public']['Enums']['curriculum_status'];
-
-export interface PaginationParams {
-  page: number;
-  pageSize: number;
-  search?: string;
-  status?: 'all' | 'draft' | 'published' | 'live';
-  skillId?: string;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
 
 export function useQuestions(skillId?: string) {
   const { currentApp } = useApp();
@@ -37,13 +19,15 @@ export function useQuestions(skillId?: string) {
 
       let query = supabase
         .from('questions')
-        .select(`
+        .select(
+          `
           *,
           skills (
             title,
             domains ( title )
           )
-        `)
+        `
+        )
         .eq('app_id', currentApp.app_id)
         .is('deleted_at', null)
         .order('created_at', { ascending: false });
@@ -51,9 +35,9 @@ export function useQuestions(skillId?: string) {
       if (skillId && skillId !== 'all') {
         query = query.eq('skill_id', skillId);
       }
-      
+
       const { data, error } = await query;
-      
+
       if (error) throw error;
       return (data || []) as unknown as QuestionListItem[];
     },
@@ -69,19 +53,30 @@ export function usePaginatedQuestions(params: PaginationParams) {
     queryFn: async (): Promise<PaginatedResponse<QuestionListItem>> => {
       if (!currentApp?.app_id) throw new Error('No app selected');
 
-      const { page, pageSize, search, status, skillId, sortBy = 'created_at', sortOrder = 'desc' } = params;
+      const {
+        page,
+        pageSize,
+        search,
+        status,
+        skillId,
+        sortBy = 'created_at',
+        sortOrder = 'desc',
+      } = params;
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
       let query = supabase
         .from('questions')
-        .select(`
+        .select(
+          `
           *,
           skills (
             title,
             domains ( title )
           )
-        `, { count: 'exact' })
+        `,
+          { count: 'exact' }
+        )
         .eq('app_id', currentApp.app_id)
         .is('deleted_at', null);
 
@@ -122,15 +117,16 @@ export function usePaginatedQuestions(params: PaginationParams) {
 }
 
 export function useQuestion(question_id: string) {
-    const { currentApp } = useApp();
-    return useQuery({
-        queryKey: ['question', question_id, currentApp?.app_id],
-        queryFn: async () => {
-             if (!currentApp?.app_id) throw new Error('No app selected');
+  const { currentApp } = useApp();
+  return useQuery({
+    queryKey: ['question', question_id, currentApp?.app_id],
+    queryFn: async () => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
 
-             const { data, error } = await supabase
-                .from('questions')
-                .select(`
+      const { data, error } = await supabase
+        .from('questions')
+        .select(
+          `
                     *,
                     skills (
                         title,
@@ -144,50 +140,47 @@ export function useQuestion(question_id: string) {
                             )
                         )
                     )
-                `)
-                .eq('question_id', question_id)
-                .eq('app_id', currentApp.app_id)
-                .single();
+                `
+        )
+        .eq('question_id', question_id)
+        .eq('app_id', currentApp.app_id)
+        .single();
 
-            if (error) throw error;
-            return data as unknown as Question & {
-                skills: {
-                    title: string;
-                    skill_id: string;
-                    domains: {
-                        title: string;
-                        domain_id: string;
-                        subjects: {
-                            title: string;
-                            subject_id: string;
-                        } | null;
-                    } | null;
-                } | null;
-            };
-        },
-        enabled: Boolean(question_id) && Boolean(currentApp?.app_id),
-    });
+      if (error) throw error;
+      return data as unknown as Question & {
+        skills: {
+          title: string;
+          skill_id: string;
+          domains: {
+            title: string;
+            domain_id: string;
+            subjects: {
+              title: string;
+              subject_id: string;
+            } | null;
+          } | null;
+        } | null;
+      };
+    },
+    enabled: Boolean(question_id) && Boolean(currentApp?.app_id),
+  });
 }
 
 export function useCreateQuestion() {
   const queryClient = useQueryClient();
   const { currentApp } = useApp();
-  
+
   return useMutation({
     mutationFn: async (question: QuestionInsert) => {
       if (!currentApp?.app_id) throw new Error('No app selected');
 
       const payload = {
         ...question,
-        app_id: currentApp.app_id
+        app_id: currentApp.app_id,
       };
 
-      const { data, error } = await supabase
-        .from('questions')
-        .insert(payload)
-        .select()
-        .single();
-      
+      const { data, error } = await supabase.from('questions').insert(payload).select().single();
+
       if (error) throw error;
       return data;
     },
@@ -207,15 +200,12 @@ export function useBulkCreateQuestions() {
     mutationFn: async (questions: QuestionInsert[]) => {
       if (!currentApp?.app_id) throw new Error('No app selected');
 
-      const payload = questions.map(q => ({
+      const payload = questions.map((q) => ({
         ...q,
-        app_id: currentApp.app_id
+        app_id: currentApp.app_id,
       }));
 
-      const { data, error } = await supabase
-        .from('questions')
-        .insert(payload)
-        .select();
+      const { data, error } = await supabase.from('questions').insert(payload).select();
 
       if (error) throw error;
       return data;
@@ -229,152 +219,155 @@ export function useBulkCreateQuestions() {
 }
 
 export function useUpdateQuestion() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: async ({ question_id, ...updates }: { question_id: string } & Partial<Question>) => {
-            const { data, error } = await supabase
-                .from('questions')
-                .update(updates)
-                .eq('question_id', question_id)
-                .select()
-                .single();
+  return useMutation({
+    mutationFn: async ({
+      question_id,
+      ...updates
+    }: { question_id: string } & Partial<Question>) => {
+      const { data, error } = await supabase
+        .from('questions')
+        .update(updates)
+        .eq('question_id', question_id)
+        .select()
+        .single();
 
-            if (error) throw error;
-            return data;
-        },
-        onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ['questions'] });
-            queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
-            queryClient.invalidateQueries({ queryKey: ['question', data.question_id] });
-        },
-    });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['questions'] });
+      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['question', data.question_id] });
+    },
+  });
 }
 
 export function useDeleteQuestion() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: async (question_id: string) => {
-            const { error } = await supabase
-                .from('questions')
-                .update({ deleted_at: new Date().toISOString() })
-                .eq('question_id', question_id);
+  return useMutation({
+    mutationFn: async (question_id: string) => {
+      const { error } = await supabase
+        .from('questions')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('question_id', question_id);
 
-            if (error) throw error;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['questions'] });
-            queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
-        },
-    });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['questions'] });
+      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
+    },
+  });
 }
 
 export function useBulkDeleteQuestions() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: async (question_ids: string[]) => {
-            const { error } = await supabase
-                .from('questions')
-                .update({ deleted_at: new Date().toISOString() })
-                .in('question_id', question_ids);
+  return useMutation({
+    mutationFn: async (question_ids: string[]) => {
+      const { error } = await supabase
+        .from('questions')
+        .update({ deleted_at: new Date().toISOString() })
+        .in('question_id', question_ids);
 
-            if (error) throw error;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['questions'] });
-            queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
-            queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-        },
-    });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['questions'] });
+      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+    },
+  });
 }
 
 export function useBulkUpdateQuestionsStatus() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: async ({ question_ids, status }: { question_ids: string[]; status: CurriculumStatus }) => {
-            const { error } = await supabase
-                .from('questions')
-                .update({ status })
-                .in('question_id', question_ids);
+  return useMutation({
+    mutationFn: async ({
+      question_ids,
+      status,
+    }: {
+      question_ids: string[];
+      status: CurriculumStatus;
+    }) => {
+      const { error } = await supabase
+        .from('questions')
+        .update({ status })
+        .in('question_id', question_ids);
 
-            if (error) throw error;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['questions'] });
-            queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
-            queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-            queryClient.invalidateQueries({ queryKey: ['publish-preview'] });
-        },
-    });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['questions'] });
+      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['publish-preview'] });
+    },
+  });
 }
 
 export function useDuplicateQuestion() {
-    const queryClient = useQueryClient();
-    const { currentApp } = useApp();
+  const queryClient = useQueryClient();
+  const { currentApp } = useApp();
 
-    return useMutation({
-        mutationFn: async (question_id: string) => {
-            if (!currentApp?.app_id) throw new Error('No app selected');
+  return useMutation({
+    mutationFn: async (question_id: string) => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
 
-            const { data: original, error: fetchError } = await supabase
-                .from('questions')
-                .select('*')
-                .eq('question_id', question_id)
-                .eq('app_id', currentApp.app_id)
-                .single();
+      const { data: original, error: fetchError } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('question_id', question_id)
+        .eq('app_id', currentApp.app_id)
+        .single();
 
-            if (fetchError) throw fetchError;
-            if (!original) throw new Error('Question not found');
+      if (fetchError) throw fetchError;
+      if (!original) throw new Error('Question not found');
 
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { question_id: _, created_at, updated_at, app_id, ...rest } = original;
-            const duplicate: QuestionInsert = {
-                ...rest,
-                app_id: currentApp.app_id,
-                content: rest.content || 'Question',
-                status: 'draft',
-            };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { question_id: _, created_at, updated_at, app_id, ...rest } = original;
+      const duplicate: QuestionInsert = {
+        ...rest,
+        app_id: currentApp.app_id,
+        content: rest.content || 'Question',
+        status: 'draft',
+      };
 
-            const { data, error } = await supabase
-                .from('questions')
-                .insert(duplicate)
-                .select()
-                .single();
+      const { data, error } = await supabase.from('questions').insert(duplicate).select().single();
 
-            if (error) throw error;
-            return data;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['questions'] });
-            queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
-            queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-        },
-    });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['questions'] });
+      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+    },
+  });
 }
 
 export function useUpdateQuestionOrder() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: async (updates: { question_id: string; sort_order: number }[]) => {
-            const promises = updates.map(({ question_id, sort_order }) =>
-                supabase.from('questions')
-                    .update({ sort_order })
-                    .eq('question_id', question_id)
-            );
+  return useMutation({
+    mutationFn: async (updates: { question_id: string; sort_order: number }[]) => {
+      const promises = updates.map(({ question_id, sort_order }) =>
+        supabase.from('questions').update({ sort_order }).eq('question_id', question_id)
+      );
 
-            const results = await Promise.all(promises);
-            const errors = results.filter(r => r.error);
-            if (errors.length > 0) {
-                throw errors[0].error;
-            }
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['questions'] });
-            queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
-        },
-    });
+      const results = await Promise.all(promises);
+      const errors = results.filter((r) => r.error);
+      if (errors.length > 0) {
+        throw errors[0].error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['questions'] });
+      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
+    },
+  });
 }

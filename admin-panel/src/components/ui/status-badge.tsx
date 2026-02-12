@@ -20,6 +20,7 @@ export type StatusType =
   | 'seen'
   | 'ignored'
   | 'promoted'
+  | 'new'
   | 'critical'
   | 'high'
   | 'low';
@@ -101,6 +102,12 @@ const STATUS_CONFIG: Record<
     text: 'text-purple-700',
     border: 'border-purple-200',
     label: 'Promoted',
+  },
+  new: {
+    bg: 'bg-indigo-100',
+    text: 'text-indigo-700',
+    border: 'border-indigo-200',
+    label: 'New',
   },
   critical: { bg: 'bg-red-200', text: 'text-red-900', border: 'border-red-300', label: 'Critical' },
   high: {

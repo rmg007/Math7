@@ -1,16 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase, supabaseAdmin } from '@/lib/supabase';
-import { Database } from '@/lib/database.types';
 import { useApp } from '@/hooks/use-app';
+import { Database } from '@/lib/database.types';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+import { CurriculumStatus, isValidUUID, PaginatedResponse, PaginationParams } from './shared';
 
 type Domain = Database['public']['Tables']['domains']['Row'];
-
-// UUID validation helper
-function isValidUUID(uuid: string | undefined | null): uuid is string {
-  if (!uuid) return false;
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(uuid);
-}
 
 // Form input type - excludes auto-generated fields
 export type DomainFormInput = {
@@ -20,25 +15,6 @@ export type DomainFormInput = {
   sort_order: number;
   status: CurriculumStatus;
 };
-
-export type CurriculumStatus = Database['public']['Enums']['curriculum_status'];
-
-export interface PaginationParams {
-  page: number;
-  pageSize: number;
-  search?: string;
-  status?: 'all' | CurriculumStatus;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
 
 export function useDomains() {
   const { currentApp } = useApp();
@@ -57,7 +33,7 @@ export function useDomains() {
         .eq('app_id', currentApp.app_id)
         .is('deleted_at', null)
         .order('sort_order', { ascending: true });
-      
+
       if (error) throw error;
       return data as Domain[];
     },
@@ -80,7 +56,7 @@ export function usePaginatedDomains(params: PaginationParams) {
       if (!isValidUUID(currentApp.app_id)) {
         console.error('usePaginatedDomains: Invalid app_id format:', {
           app_id: currentApp.app_id,
-          type: typeof currentApp.app_id
+          type: typeof currentApp.app_id,
         });
         throw new Error(`Invalid app ID format: ${currentApp.app_id}`);
       }
@@ -96,7 +72,9 @@ export function usePaginatedDomains(params: PaginationParams) {
         .is('deleted_at', null);
 
       if (search) {
-        query = query.or(`title.ilike.%${search}%,slug.ilike.%${search}%,description.ilike.%${search}%`);
+        query = query.or(
+          `title.ilike.%${search}%,slug.ilike.%${search}%,description.ilike.%${search}%`
+        );
       }
 
       if (status && status !== 'all') {
@@ -123,51 +101,47 @@ export function usePaginatedDomains(params: PaginationParams) {
 }
 
 export function useDomain(domainId: string) {
-    const { currentApp } = useApp();
-    return useQuery({
-        queryKey: ['domain', domainId, currentApp?.app_id],
-        queryFn: async () => {
-            if (!currentApp?.app_id) throw new Error('No app selected');
-            if (!isValidUUID(currentApp.app_id)) {
-                throw new Error(`Invalid app ID format: ${currentApp.app_id}`);
-            }
+  const { currentApp } = useApp();
+  return useQuery({
+    queryKey: ['domain', domainId, currentApp?.app_id],
+    queryFn: async () => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
+      if (!isValidUUID(currentApp.app_id)) {
+        throw new Error(`Invalid app ID format: ${currentApp.app_id}`);
+      }
 
-             const { data, error } = await supabase
-                .from('domains')
-                .select('*')
-                .eq('domain_id', domainId)
-                .eq('app_id', currentApp.app_id)
-                .single();
+      const { data, error } = await supabase
+        .from('domains')
+        .select('*')
+        .eq('domain_id', domainId)
+        .eq('app_id', currentApp.app_id)
+        .single();
 
-            if (error) throw error;
-            return data as Domain;
-        },
-        enabled: Boolean(domainId) && Boolean(currentApp?.app_id) && isValidUUID(currentApp?.app_id),
-    });
+      if (error) throw error;
+      return data as Domain;
+    },
+    enabled: Boolean(domainId) && Boolean(currentApp?.app_id) && isValidUUID(currentApp?.app_id),
+  });
 }
 
 export function useCreateDomain() {
   const queryClient = useQueryClient();
   const { currentApp } = useApp();
-  
+
   return useMutation({
     mutationFn: async (domain: DomainFormInput) => {
       if (!currentApp?.app_id) throw new Error('No app selected');
-      
+
       const payload = {
-          ...domain,
-          app_id: currentApp.app_id
+        ...domain,
+        app_id: currentApp.app_id,
       };
 
       // Use admin client if in test mode to bypass RLS issues during E2E testing
-      const client = (import.meta.env.MODE === 'test' && supabaseAdmin) ? supabaseAdmin : supabase;
+      const client = import.meta.env.MODE === 'test' && supabaseAdmin ? supabaseAdmin : supabase;
 
-      const { data, error } = await client
-        .from('domains')
-        .insert(payload)
-        .select()
-        .single();
-      
+      const { data, error } = await client.from('domains').insert(payload).select().single();
+
       if (error) throw error;
       return data as Domain;
     },
@@ -179,139 +153,140 @@ export function useCreateDomain() {
 }
 
 export function useUpdateDomain() {
-    const queryClient = useQueryClient();
-    const { currentApp } = useApp();
+  const queryClient = useQueryClient();
+  const { currentApp } = useApp();
 
-    return useMutation({
-        mutationFn: async ({ domain_id, ...updates }: { domain_id: string } & Partial<Domain>) => {
-            if (!currentApp?.app_id) throw new Error('No app selected');
+  return useMutation({
+    mutationFn: async ({ domain_id, ...updates }: { domain_id: string } & Partial<Domain>) => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
 
-            // Use admin client if in test mode to bypass RLS issues during E2E testing
-            const client = (import.meta.env.MODE === 'test' && supabaseAdmin) ? supabaseAdmin : supabase;
+      // Use admin client if in test mode to bypass RLS issues during E2E testing
+      const client = import.meta.env.MODE === 'test' && supabaseAdmin ? supabaseAdmin : supabase;
 
-            const { data, error } = await client
-                .from('domains')
-                .update(updates)
-                .eq('domain_id', domain_id)
-                .eq('app_id', currentApp.app_id)
-                .select()
-                .single();
+      const { data, error } = await client
+        .from('domains')
+        .update(updates)
+        .eq('domain_id', domain_id)
+        .eq('app_id', currentApp.app_id)
+        .select()
+        .single();
 
-            if (error) throw error;
-            return data as Domain;
-        },
-        onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ['domains'] });
-            queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
-            queryClient.invalidateQueries({ queryKey: ['domain', data.domain_id] });
-        },
-    });
+      if (error) throw error;
+      return data as Domain;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['domains'] });
+      queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['domain', data.domain_id] });
+    },
+  });
 }
 
 export function useDeleteDomain() {
-    const queryClient = useQueryClient();
-    const { currentApp } = useApp();
+  const queryClient = useQueryClient();
+  const { currentApp } = useApp();
 
-    return useMutation({
-        mutationFn: async (domain_id: string) => {
-            if (!currentApp?.app_id) throw new Error('No app selected');
+  return useMutation({
+    mutationFn: async (domain_id: string) => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
 
-            // Use admin client if in test mode to bypass RLS issues during E2E testing
-            const client = (import.meta.env.MODE === 'test' && supabaseAdmin) ? supabaseAdmin : supabase;
+      // Use admin client if in test mode to bypass RLS issues during E2E testing
+      const client = import.meta.env.MODE === 'test' && supabaseAdmin ? supabaseAdmin : supabase;
 
-            const { error } = await client
-                .from('domains')
-                .update({ deleted_at: new Date().toISOString() })
-                .eq('domain_id', domain_id)
-                .eq('app_id', currentApp.app_id);
-            
-            if (error) throw error;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['domains'] });
-            queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
-        },
-    });
+      const { error } = await client
+        .from('domains')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('domain_id', domain_id)
+        .eq('app_id', currentApp.app_id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['domains'] });
+      queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
+    },
+  });
 }
 
 export function useBulkDeleteDomains() {
-    const queryClient = useQueryClient();
-    const { currentApp } = useApp();
+  const queryClient = useQueryClient();
+  const { currentApp } = useApp();
 
-    return useMutation({
-        mutationFn: async (domain_ids: string[]) => {
-            if (!currentApp?.app_id) throw new Error('No app selected');
+  return useMutation({
+    mutationFn: async (domain_ids: string[]) => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
 
-            // Use admin client if in test mode to bypass RLS issues during E2E testing
-            const client = (import.meta.env.MODE === 'test' && supabaseAdmin) ? supabaseAdmin : supabase;
+      // Use admin client if in test mode to bypass RLS issues during E2E testing
+      const client = import.meta.env.MODE === 'test' && supabaseAdmin ? supabaseAdmin : supabase;
 
-            const { error } = await client
-                .from('domains')
-                .update({ deleted_at: new Date().toISOString() })
-                .in('domain_id', domain_ids)
-                .eq('app_id', currentApp.app_id);
+      const { error } = await client
+        .from('domains')
+        .update({ deleted_at: new Date().toISOString() })
+        .in('domain_id', domain_ids)
+        .eq('app_id', currentApp.app_id);
 
-            if (error) throw error;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['domains'] });
-            queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
-            queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-        },
-    });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['domains'] });
+      queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+    },
+  });
 }
 
 export function useBulkUpdateDomainsStatus() {
-    const queryClient = useQueryClient();
-    const { currentApp } = useApp();
+  const queryClient = useQueryClient();
+  const { currentApp } = useApp();
 
-    return useMutation({
-        mutationFn: async ({ ids, status }: { ids: string[]; status: CurriculumStatus }) => {
-            if (!currentApp?.app_id) throw new Error('No app selected');
+  return useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: CurriculumStatus }) => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
 
-            const { error } = await supabase
-                .from('domains')
-                .update({ status })
-                .in('domain_id', ids)
-                .eq('app_id', currentApp.app_id);
+      const { error } = await supabase
+        .from('domains')
+        .update({ status })
+        .in('domain_id', ids)
+        .eq('app_id', currentApp.app_id);
 
-            if (error) throw error;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['domains'] });
-            queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
-            queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-            queryClient.invalidateQueries({ queryKey: ['publish-preview'] });
-        },
-    });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['domains'] });
+      queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['publish-preview'] });
+    },
+  });
 }
 
 export function useUpdateDomainOrder() {
-    const queryClient = useQueryClient();
-    const { currentApp } = useApp();
+  const queryClient = useQueryClient();
+  const { currentApp } = useApp();
 
-    return useMutation({
-        mutationFn: async (updates: { domain_id: string; sort_order: number }[]) => {
-            if (!currentApp?.app_id) throw new Error('No app selected');
+  return useMutation({
+    mutationFn: async (updates: { domain_id: string; sort_order: number }[]) => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
 
-            const promises = updates.map(({ domain_id, sort_order }) =>
-                supabase.from('domains')
-                    .update({ sort_order })
-                    .eq('domain_id', domain_id)
-                    .eq('app_id', currentApp.app_id)
-            );
+      const promises = updates.map(({ domain_id, sort_order }) =>
+        supabase
+          .from('domains')
+          .update({ sort_order })
+          .eq('domain_id', domain_id)
+          .eq('app_id', currentApp.app_id)
+      );
 
-            const results = await Promise.all(promises);
-            const errors = results.filter(r => r.error);
-            if (errors.length > 0) {
-                throw errors[0].error;
-            }
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['domains'] });
-            queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
-        },
-    });
+      const results = await Promise.all(promises);
+      const errors = results.filter((r) => r.error);
+      if (errors.length > 0) {
+        throw errors[0].error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['domains'] });
+      queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
+    },
+  });
 }
 
 export function useBulkCreateDomains() {
@@ -322,9 +297,9 @@ export function useBulkCreateDomains() {
     mutationFn: async (domains: Record<string, unknown>[]) => {
       if (!currentApp?.app_id) throw new Error('No app selected');
 
-      const payload = domains.map(domain => ({
+      const payload = domains.map((domain) => ({
         ...domain,
-        app_id: currentApp.app_id
+        app_id: currentApp.app_id,
       }));
 
       const { data, error } = await supabase

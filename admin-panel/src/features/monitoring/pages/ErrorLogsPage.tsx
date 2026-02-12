@@ -1,40 +1,6 @@
-import { useState } from 'react';
-import { 
-  AlertTriangle, 
-  Eye, 
-  EyeOff, 
-  CheckCircle2, 
-  ArrowUpRight,
-  Search,
-  RefreshCw,
-  Monitor,
-  Smartphone,
-  Globe,
-  Clock
-} from 'lucide-react';
-import { Trash2, Info, Copy, Bug, X } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { AdminHeader } from '@/components/ui/admin-header';
-import { 
-  useErrorLogs, 
-  useErrorLogStats, 
-  useUpdateErrorStatus,
-  useDeleteErrorLog,
-  usePromoteToIssue,
-  ErrorLog 
-} from '../hooks/use-error-logs';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -43,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -52,6 +18,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  Bug,
+  CheckCircle2,
+  Clock,
+  Copy,
+  Eye,
+  EyeOff,
+  Globe,
+  Info,
+  Monitor,
+  RefreshCw,
+  Search,
+  Smartphone,
+  Trash2,
+  X,
+} from 'lucide-react';
+import { useState } from 'react';
+import {
+  ErrorLog,
+  useDeleteErrorLog,
+  useErrorLogs,
+  useErrorLogStats,
+  usePromoteToIssue,
+  useUpdateErrorStatus,
+} from '../hooks/use-error-logs';
 
 export function ErrorLogsPage() {
   const { toast } = useToast();
@@ -61,23 +66,27 @@ export function ErrorLogsPage() {
   const [promoteDialogOpen, setPromoteDialogOpen] = useState(false);
   const [promoteData, setPromoteData] = useState({ title: '', rootCause: '', resolution: '' });
 
-  const { data: errors, isLoading, refetch } = useErrorLogs(statusFilter);
+  const { data: errors, isLoading, refetch, isFetching } = useErrorLogs(statusFilter);
   const { data: stats } = useErrorLogStats();
   const updateStatus = useUpdateErrorStatus();
   const deleteError = useDeleteErrorLog();
   const promoteToIssue = usePromoteToIssue();
 
-  const filteredErrors = errors?.filter(error => 
-    error.error_message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    error.error_type.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredErrors = errors?.filter(
+    (error) =>
+      error.error_message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      error.error_type.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
-      case 'web': return <Globe className="w-4 h-4" />;
+      case 'web':
+        return <Globe className="w-4 h-4" />;
       case 'android':
-      case 'ios': return <Smartphone className="w-4 h-4" />;
-      default: return <Monitor className="w-4 h-4" />;
+      case 'ios':
+        return <Smartphone className="w-4 h-4" />;
+      default:
+        return <Monitor className="w-4 h-4" />;
     }
   };
 
@@ -97,14 +106,14 @@ export function ErrorLogsPage() {
 
   const submitPromote = async () => {
     if (!selectedError) return;
-    
+
     await promoteToIssue.mutateAsync({
       errorId: selectedError.id,
       title: promoteData.title,
       rootCause: promoteData.rootCause,
       resolution: promoteData.resolution,
     });
-    
+
     setPromoteDialogOpen(false);
     setSelectedError(null);
   };
@@ -114,9 +123,12 @@ export function ErrorLogsPage() {
     try {
       await deleteError.mutateAsync(error.id);
       setSelectedError(null);
-      toast({ title: "Trace Extinguished", description: "The diagnostic residue has been purged from the archive." });
+      toast({
+        title: 'Trace Extinguished',
+        description: 'The diagnostic residue has been purged from the archive.',
+      });
     } catch (error) {
-      toast({ title: "Error", description: "Failed to delete error log", variant: "destructive" });
+      toast({ title: 'Error', description: 'Failed to delete error log', variant: 'destructive' });
     }
   };
 
@@ -126,67 +138,100 @@ export function ErrorLogsPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
-      <AdminHeader 
+      <AdminHeader
         title="System Diagnostics"
         description="Monitor and triage application errors in real-time. Zero-cost observability."
         icon={Bug}
         breadcrumbs={[
           { label: 'Platform', href: '/apps' },
           { label: 'Monitoring', href: '/errors' },
-          { label: 'Error Logs', href: '/errors' }
+          { label: 'Error Logs', href: '/errors' },
         ]}
         actions={
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => refetch()}
+            disabled={isFetching}
             className="h-12 px-6 rounded-2xl border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-600 hover:bg-indigo-50 transition-all font-bold uppercase tracking-widest text-[10px] gap-2 shadow-sm"
           >
-            <RefreshCw className="w-4 h-4" />
-            Refresh Archive
+            <RefreshCw className={cn('w-4 h-4', isFetching && 'animate-spin')} />
+            {isFetching ? 'Refreshing Archive...' : 'Refresh Archive'}
           </Button>
         }
       />
 
       {/* Health Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-red-500/10 hover:border-red-500/20 transition-all group">
+        <div
+          className={cn(
+            'bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-red-500/10 hover:border-red-500/20 transition-all group'
+          )}
+        >
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-black text-red-900/40 uppercase tracking-widest">Unseen</p>
+            <p className="text-[10px] font-black text-red-900/40 uppercase tracking-widest">
+              Unseen
+            </p>
             <AlertTriangle className="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" />
           </div>
           <p className="text-3xl font-black text-red-600 tracking-tighter">{stats?.new ?? 0}</p>
         </div>
 
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-blue-500/10 hover:border-blue-500/20 transition-all group">
+        <div
+          className={cn(
+            'bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-blue-500/10 hover:border-blue-500/20 transition-all group'
+          )}
+        >
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest">Acknowledged</p>
+            <p className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest">
+              Acknowledged
+            </p>
             <Eye className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
           </div>
           <p className="text-3xl font-black text-blue-600 tracking-tighter">{stats?.seen ?? 0}</p>
         </div>
 
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-gray-500/10 hover:border-gray-500/20 transition-all group">
+        <div
+          className={cn(
+            'bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-gray-500/10 hover:border-gray-500/20 transition-all group'
+          )}
+        >
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-black text-gray-900/40 uppercase tracking-widest">Suppressed</p>
+            <p className="text-[10px] font-black text-gray-900/40 uppercase tracking-widest">
+              Suppressed
+            </p>
             <EyeOff className="w-4 h-4 text-gray-400 group-hover:scale-110 transition-transform" />
           </div>
-          <p className="text-3xl font-black text-gray-600 tracking-tighter">{stats?.ignored ?? 0}</p>
+          <p className="text-3xl font-black text-gray-600 tracking-tighter">
+            {stats?.ignored ?? 0}
+          </p>
         </div>
 
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-emerald-500/10 hover:border-emerald-500/20 transition-all group">
+        <div
+          className={cn(
+            'bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-emerald-500/10 hover:border-emerald-500/20 transition-all group'
+          )}
+        >
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-black text-emerald-900/40 uppercase tracking-widest">Resolved</p>
+            <p className="text-[10px] font-black text-emerald-900/40 uppercase tracking-widest">
+              Resolved
+            </p>
             <CheckCircle2 className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
           </div>
-          <p className="text-3xl font-black text-emerald-600 tracking-tighter">{stats?.resolved ?? 0}</p>
+          <p className="text-3xl font-black text-emerald-600 tracking-tighter">
+            {stats?.resolved ?? 0}
+          </p>
         </div>
 
         <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-purple-500/10 hover:border-purple-500/20 transition-all group">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-black text-purple-900/40 uppercase tracking-widest">Promoted</p>
+            <p className="text-[10px] font-black text-purple-900/40 uppercase tracking-widest">
+              Promoted
+            </p>
             <ArrowUpRight className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
           </div>
-          <p className="text-3xl font-black text-purple-600 tracking-tighter">{stats?.promoted ?? 0}</p>
+          <p className="text-3xl font-black text-purple-600 tracking-tighter">
+            {stats?.promoted ?? 0}
+          </p>
         </div>
       </div>
 
@@ -210,28 +255,46 @@ export function ErrorLogsPage() {
             </button>
           )}
         </div>
-        
+
         <div className="flex items-center gap-4 shrink-0">
           <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl">
-             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Filter:</span>
-             <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-auto min-w-[120px] h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-gray-700 hover:text-red-600 transition-colors uppercase italic tracking-tight">
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border-gray-100 shadow-xl p-2">
-                  <SelectItem value="all" className="rounded-xl py-2 font-bold text-xs">ALL DIAGNOSTICS</SelectItem>
-                  <SelectItem value="new" className="rounded-xl py-2 font-bold text-xs">NEW TRACES</SelectItem>
-                  <SelectItem value="seen" className="rounded-xl py-2 font-bold text-xs">ACKNOWLEDGED</SelectItem>
-                  <SelectItem value="ignored" className="rounded-xl py-2 font-bold text-xs">SUPPRESSED</SelectItem>
-                  <SelectItem value="resolved" className="rounded-xl py-2 font-bold text-xs">RESOLVED</SelectItem>
-                  <SelectItem value="promoted" className="rounded-xl py-2 font-bold text-xs">PROMOTED ISSUES</SelectItem>
-                </SelectContent>
-              </Select>
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+              Filter:
+            </span>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-auto min-w-[120px] h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-gray-700 hover:text-red-600 transition-colors uppercase italic tracking-tight">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-gray-100 shadow-xl p-2">
+                <SelectItem value="all" className="rounded-xl py-2 font-bold text-xs">
+                  ALL DIAGNOSTICS
+                </SelectItem>
+                <SelectItem value="new" className="rounded-xl py-2 font-bold text-xs">
+                  NEW TRACES
+                </SelectItem>
+                <SelectItem value="seen" className="rounded-xl py-2 font-bold text-xs">
+                  ACKNOWLEDGED
+                </SelectItem>
+                <SelectItem value="ignored" className="rounded-xl py-2 font-bold text-xs">
+                  SUPPRESSED
+                </SelectItem>
+                <SelectItem value="resolved" className="rounded-xl py-2 font-bold text-xs">
+                  RESOLVED
+                </SelectItem>
+                <SelectItem value="promoted" className="rounded-xl py-2 font-bold text-xs">
+                  PROMOTED ISSUES
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="px-4 py-2 bg-red-500/10 border border-red-500/10 rounded-xl flex items-center gap-2">
-             <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">Traces:</span>
-             <span className="text-sm font-black text-red-700 tracking-tight">{filteredErrors?.length || 0}</span>
+            <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">
+              Traces:
+            </span>
+            <span className="text-sm font-black text-red-700 tracking-tight">
+              {filteredErrors?.length || 0}
+            </span>
           </div>
         </div>
       </div>
@@ -257,7 +320,9 @@ export function ErrorLogsPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">Loading errors...</TableCell>
+                  <TableCell colSpan={5} className="h-24 text-center">
+                    Loading errors...
+                  </TableCell>
                 </TableRow>
               ) : filteredErrors?.length === 0 ? (
                 <TableRow>
@@ -268,8 +333,8 @@ export function ErrorLogsPage() {
                 </TableRow>
               ) : (
                 filteredErrors?.map((error) => (
-                  <TableRow 
-                    key={error.id} 
+                  <TableRow
+                    key={error.id}
                     className="group cursor-pointer hover:bg-red-50/20"
                     onClick={() => setSelectedError(error)}
                   >
@@ -292,14 +357,14 @@ export function ErrorLogsPage() {
                     <TableCell>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="w-3 h-3" />
-                        {new Date(error.created_at ?? '').toLocaleString()}
+                        {error.created_at ? new Date(error.created_at).toLocaleString() : 'N/A'}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         {error.status === 'new' && (
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
                             title="Mark as seen"
                             onClick={(e) => {
@@ -311,8 +376,8 @@ export function ErrorLogsPage() {
                           </Button>
                         )}
                         {error.status !== 'promoted' && (
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
                             className="text-purple-600"
                             title="Create issue"
@@ -324,8 +389,8 @@ export function ErrorLogsPage() {
                             <ArrowUpRight className="w-4 h-4" />
                           </Button>
                         )}
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           className="text-red-500 hover:text-red-700 hover:bg-red-50"
                           title="Delete error"
@@ -344,13 +409,20 @@ export function ErrorLogsPage() {
       </Card>
 
       {/* Error Detail Dialog */}
-      <Dialog open={Boolean(selectedError) && !promoteDialogOpen} onOpenChange={() => setSelectedError(null)}>
+      <Dialog
+        open={Boolean(selectedError) && !promoteDialogOpen}
+        onOpenChange={() => setSelectedError(null)}
+      >
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-mono text-red-600">{selectedError?.error_type}</DialogTitle>
-            <DialogDescription className="break-words">{selectedError?.error_message}</DialogDescription>
+            <DialogTitle className="font-mono text-red-600">
+              {selectedError?.error_type}
+            </DialogTitle>
+            <DialogDescription className="break-words">
+              {selectedError?.error_message}
+            </DialogDescription>
           </DialogHeader>
-          
+
           {selectedError && (
             <div className="space-y-4">
               {/* Metadata Grid */}
@@ -371,7 +443,12 @@ export function ErrorLogsPage() {
                   <div className="flex items-center gap-1">
                     <p className="font-mono text-xs">{selectedError.user_id || 'Anonymous'}</p>
                     {selectedError.user_id && (
-                      <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => copyToClipboard(selectedError.user_id ?? '')}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-5 w-5 p-0"
+                        onClick={() => copyToClipboard(selectedError.user_id ?? '')}
+                      >
                         <Copy className="w-3 h-3" />
                       </Button>
                     )}
@@ -383,11 +460,21 @@ export function ErrorLogsPage() {
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Occurred At</Label>
-                  <p className="text-xs">{new Date(selectedError.occurred_at || selectedError.created_at || '').toLocaleString()}</p>
+                  <p className="text-xs">
+                    {selectedError.occurred_at || selectedError.created_at
+                      ? new Date(
+                          selectedError.occurred_at || selectedError.created_at || ''
+                        ).toLocaleString()
+                      : 'Unknown'}
+                  </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Logged At</Label>
-                  <p className="text-xs">{new Date(selectedError.created_at ?? '').toLocaleString()}</p>
+                  <p className="text-xs">
+                    {selectedError.created_at
+                      ? new Date(selectedError.created_at).toLocaleString()
+                      : 'Unknown'}
+                  </p>
                 </div>
               </div>
 
@@ -395,7 +482,9 @@ export function ErrorLogsPage() {
               {selectedError.url && (
                 <div>
                   <Label className="text-muted-foreground">URL</Label>
-                  <p className="font-mono text-xs bg-gray-50 p-2 rounded mt-1 break-all">{selectedError.url}</p>
+                  <p className="font-mono text-xs bg-gray-50 p-2 rounded mt-1 break-all">
+                    {selectedError.url}
+                  </p>
                 </div>
               )}
 
@@ -403,7 +492,9 @@ export function ErrorLogsPage() {
               {selectedError.user_agent && (
                 <div>
                   <Label className="text-muted-foreground">User Agent</Label>
-                  <p className="font-mono text-xs bg-gray-50 p-2 rounded mt-1 break-all">{selectedError.user_agent}</p>
+                  <p className="font-mono text-xs bg-gray-50 p-2 rounded mt-1 break-all">
+                    {selectedError.user_agent}
+                  </p>
                 </div>
               )}
 
@@ -412,9 +503,9 @@ export function ErrorLogsPage() {
                 <div>
                   <div className="flex items-center justify-between">
                     <Label className="text-muted-foreground">Stack Trace</Label>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="h-6 text-xs"
                       onClick={() => copyToClipboard(selectedError.stack_trace ?? '')}
                     >
@@ -428,31 +519,34 @@ export function ErrorLogsPage() {
               )}
 
               {/* Extra Context */}
-              {selectedError.extra_context && Object.keys(selectedError.extra_context).length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between">
-                    <Label className="text-muted-foreground flex items-center gap-1">
-                      <Info className="w-3 h-3" /> Extra Context
-                    </Label>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-6 text-xs"
-                      onClick={() => copyToClipboard(JSON.stringify(selectedError.extra_context, null, 2))}
-                    >
-                      <Copy className="w-3 h-3 mr-1" /> Copy
-                    </Button>
+              {selectedError.extra_context &&
+                Object.keys(selectedError.extra_context).length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-muted-foreground flex items-center gap-1">
+                        <Info className="w-3 h-3" /> Extra Context
+                      </Label>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-xs"
+                        onClick={() =>
+                          copyToClipboard(JSON.stringify(selectedError.extra_context, null, 2))
+                        }
+                      >
+                        <Copy className="w-3 h-3 mr-1" /> Copy
+                      </Button>
+                    </div>
+                    <pre className="mt-1 p-3 bg-slate-800 text-emerald-300 rounded-lg text-xs overflow-auto max-h-40">
+                      {JSON.stringify(selectedError.extra_context, null, 2)}
+                    </pre>
                   </div>
-                  <pre className="mt-1 p-3 bg-slate-800 text-emerald-300 rounded-lg text-xs overflow-auto max-h-40">
-                    {JSON.stringify(selectedError.extra_context, null, 2)}
-                  </pre>
-                </div>
-              )}
+                )}
             </div>
           )}
 
           <DialogFooter className="gap-2 flex-wrap">
-            <Button 
+            <Button
               variant="outline"
               size="sm"
               className="text-red-600 hover:bg-red-50"
@@ -461,7 +555,7 @@ export function ErrorLogsPage() {
               <Trash2 className="w-4 h-4 mr-2" />
               Delete
             </Button>
-            <Button 
+            <Button
               variant="outline"
               size="sm"
               onClick={() => {
@@ -474,7 +568,7 @@ export function ErrorLogsPage() {
               <EyeOff className="w-4 h-4 mr-2" />
               Ignore
             </Button>
-            <Button 
+            <Button
               variant="outline"
               size="sm"
               onClick={() => {
@@ -488,7 +582,7 @@ export function ErrorLogsPage() {
               Mark Resolved
             </Button>
             {selectedError?.status !== 'promoted' && (
-              <Button 
+              <Button
                 size="sm"
                 className="bg-purple-600 hover:bg-purple-700"
                 onClick={() => selectedError && handlePromote(selectedError)}
@@ -510,32 +604,32 @@ export function ErrorLogsPage() {
               Document this error as a Known Issue for tracking and resolution.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div>
               <Label htmlFor="title">Title</Label>
-              <Input 
+              <Input
                 id="title"
                 value={promoteData.title}
-                onChange={(e) => setPromoteData(p => ({ ...p, title: e.target.value }))}
+                onChange={(e) => setPromoteData((p) => ({ ...p, title: e.target.value }))}
               />
             </div>
             <div>
               <Label htmlFor="rootCause">Root Cause (optional)</Label>
-              <Textarea 
+              <Textarea
                 id="rootCause"
                 placeholder="Why did this happen?"
                 value={promoteData.rootCause}
-                onChange={(e) => setPromoteData(p => ({ ...p, rootCause: e.target.value }))}
+                onChange={(e) => setPromoteData((p) => ({ ...p, rootCause: e.target.value }))}
               />
             </div>
             <div>
               <Label htmlFor="resolution">Resolution (optional)</Label>
-              <Textarea 
+              <Textarea
                 id="resolution"
                 placeholder="How was it fixed?"
                 value={promoteData.resolution}
-                onChange={(e) => setPromoteData(p => ({ ...p, resolution: e.target.value }))}
+                onChange={(e) => setPromoteData((p) => ({ ...p, resolution: e.target.value }))}
               />
             </div>
           </div>
@@ -544,7 +638,7 @@ export function ErrorLogsPage() {
             <Button variant="outline" onClick={() => setPromoteDialogOpen(false)}>
               Cancel
             </Button>
-            <Button 
+            <Button
               className="bg-purple-600 hover:bg-purple-700"
               onClick={submitPromote}
               disabled={promoteToIssue.isPending}
@@ -563,7 +657,9 @@ export function ErrorLogsPage() {
           </div>
           <div>
             <h4 className="font-semibold">Zero-Cost Error Tracking</h4>
-            <p className="text-sm text-emerald-100">Powered by your existing Supabase database. No external subscriptions.</p>
+            <p className="text-sm text-emerald-100">
+              Powered by your existing Supabase database. No external subscriptions.
+            </p>
           </div>
         </div>
         <div className="text-right hidden md:block">
