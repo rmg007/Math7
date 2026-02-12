@@ -33,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd admin-panel && npm ci --legacy-peer-deps
+          cd admin-panel && npm ci --legacy-peer-deps --legacy-peer-deps
           cd ../student-app && flutter pub get
 
           # Pre-download web sdk for flutter to avoid timeout in Phase 2

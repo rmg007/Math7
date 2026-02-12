@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd admin-panel
-          npm ci
+          npm ci --legacy-peer-deps
           npx playwright install --with-deps chromium
 
       - name: Build admin panel

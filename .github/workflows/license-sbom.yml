@@ -40,14 +40,14 @@ jobs:
       - name: Generate Admin Panel licenses
         run: |
           cd admin-panel
-          npm ci
+          npm ci --legacy-peer-deps
           license-checker --json > ../licenses-admin.json
           license-checker --summary > ../LICENSES-ADMIN.md
 
       - name: Generate Landing Pages licenses
         run: |
           cd landing-pages
-          npm ci
+          npm ci --legacy-peer-deps
           license-checker --json > ../licenses-landing.json
           license-checker --summary > ../LICENSES-LANDING.md
 

@@ -34,7 +34,7 @@ jobs:
         continue-on-error: true
         run: |
           cd admin-panel
-          npm ci
+          npm ci --legacy-peer-deps
           knip --reporter json > ../admin-dead-code.json || true
 
       - name: Analyze landing pages
@@ -42,7 +42,7 @@ jobs:
         continue-on-error: true
         run: |
           cd landing-pages
-          npm ci
+          npm ci --legacy-peer-deps
           knip --reporter json > ../landing-dead-code.json || true
 
       - name: Generate report

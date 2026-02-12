@@ -31,13 +31,13 @@ jobs:
       - name: Build Admin Panel
         run: |
           cd admin-panel
-          npm ci
+          npm ci --legacy-peer-deps --legacy-peer-deps
           npm run build
 
       - name: Build Landing Pages
         run: |
           cd landing-pages
-          npm ci
+          npm ci --legacy-peer-deps --legacy-peer-deps
           npm run build
 
       - name: Analyze bundle size

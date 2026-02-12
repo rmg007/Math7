@@ -9,20 +9,20 @@ on:
   push:
     branches: [main]
     paths:
-      - 'admin-panel/__checks__/**'
-      - 'admin-panel/package.json'
+      - "admin-panel/__checks__/**"
+      - "admin-panel/package.json"
 
   # 2. Scheduled autonomous health checks (every 6 hours)
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: "0 */6 * * *"
 
   # 3. Manual trigger with options
   workflow_dispatch:
     inputs:
       action:
-        description: 'Action to perform'
+        description: "Action to perform"
         required: true
-        default: 'health-check'
+        default: "health-check"
         type: choice
         options:
           - health-check
@@ -32,7 +32,7 @@ on:
 
   # 4. Trigger after other deployments complete
   workflow_run:
-    workflows: ['CI', 'Admin Panel E2E Tests']
+    workflows: ["CI", "Admin Panel E2E Tests"]
     types: [completed]
     branches: [main]
 
@@ -67,13 +67,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: admin-panel/package-lock.json
 
       - name: Install dependencies
         working-directory: admin-panel
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Deploy to Checkly
         id: deploy
@@ -290,7 +290,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install Wrangler
         run: npm install -g wrangler
@@ -300,7 +300,7 @@ jobs:
         run: |
           echo "🔧 Self-healing: Redeploying Admin Panel..."
           cd admin-panel
-          npm ci
+          npm ci --legacy-peer-deps
           npm run build
           npx wrangler pages deploy dist --project-name questerix-admin --branch main
         env:
@@ -314,7 +314,7 @@ jobs:
         run: |
           echo "🔧 Self-healing: Redeploying Landing Pages..."
           cd landing-pages
-          npm ci
+          npm ci --legacy-peer-deps
           npm run build
           npx wrangler pages deploy dist --project-name questerix-landing --branch main
         env:
@@ -390,14 +390,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Rebuild and redeploy Admin Panel (previous version)
         if: needs.health-check.outputs.admin-status == 'failure'
         run: |
           echo "🔄 Deploying previous version of Admin Panel..."
           cd admin-panel
-          npm ci
+          npm ci --legacy-peer-deps
           npm run build
           npx wrangler pages deploy dist --project-name questerix-admin --branch main
         env:
@@ -411,7 +411,7 @@ jobs:
         run: |
           echo "🔄 Deploying previous version of Landing Pages..."
           cd landing-pages
-          npm ci
+          npm ci --legacy-peer-deps
           npm run build
           npx wrangler pages deploy dist --project-name questerix-landing --branch main
         env:
@@ -592,13 +592,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: admin-panel/package-lock.json
 
       - name: Install dependencies
         working-directory: admin-panel
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Run Checkly synthetic tests
         working-directory: admin-panel
@@ -619,7 +619,16 @@ jobs:
   report:
     runs-on: ubuntu-latest
     name: 8. Health Report
-    needs: [deploy-checks, health-check, self-heal, auto-rollback, incident-report, auto-resolve, checkly-verify]
+    needs:
+      [
+        deploy-checks,
+        health-check,
+        self-heal,
+        auto-rollback,
+        incident-report,
+        auto-resolve,
+        checkly-verify,
+      ]
     if: always()
 
     steps:

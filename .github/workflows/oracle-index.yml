@@ -5,10 +5,10 @@ on:
     branches:
       - main
     paths:
-      - 'docs/**'
-      - 'README.md'
-      - 'scripts/knowledge-base/**'
-      - '.github/workflows/oracle-index.yml'
+      - "docs/**"
+      - "README.md"
+      - "scripts/knowledge-base/**"
+      - ".github/workflows/oracle-index.yml"
   workflow_dispatch:
 
 jobs:
@@ -24,11 +24,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install dependencies
         working-directory: scripts/knowledge-base
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Run Indexer
         working-directory: scripts/knowledge-base

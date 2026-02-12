@@ -36,7 +36,7 @@ jobs:
       - name: Run Admin Panel tests
         run: |
           cd admin-panel
-          npm ci
+          npm ci --legacy-peer-deps
           npm run test -- --coverage
 
       - name: Run Flutter tests

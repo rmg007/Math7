@@ -41,13 +41,13 @@ jobs:
       - name: Format Admin Panel
         run: |
           cd admin-panel
-          npm ci
+          npm ci --legacy-peer-deps
           npm run format || true
 
       - name: Format Landing Pages
         run: |
           cd landing-pages
-          npm ci
+          npm ci --legacy-peer-deps
           npm run format || true
 
       - name: Format Student App

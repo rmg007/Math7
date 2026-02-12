@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd admin-panel
-          npm ci
+          npm ci --legacy-peer-deps
 
       - name: Build
         run: |

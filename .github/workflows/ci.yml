@@ -140,9 +140,9 @@ jobs:
             admin-panel/package-lock.json
             package-lock.json
       - name: Install root deps (depcruise)
-        run: npm ci --legacy-peer-deps
+        run: npm ci --legacy-peer-deps --legacy-peer-deps
       - name: Install admin deps
-        run: cd admin-panel && npm ci --legacy-peer-deps
+        run: cd admin-panel && npm ci --legacy-peer-deps --legacy-peer-deps
       - name: Lint
         run: cd admin-panel && npm run lint
       - name: Service role leakage guard
@@ -261,7 +261,7 @@ jobs:
       - name: Install Oracle Plus CLI
         run: |
           cd tools/oracle-plus
-          npm ci --legacy-peer-deps
+          npm ci --legacy-peer-deps --legacy-peer-deps
           npm run build
           npm link
 

@@ -34,13 +34,13 @@ jobs:
       - name: Install Playwright
         run: |
           cd pr/admin-panel
-          npm ci
+          npm ci --legacy-peer-deps
           npx playwright install chromium
 
       - name: Build and screenshot base version
         run: |
           cd base/admin-panel
-          npm ci
+          npm ci --legacy-peer-deps
           npm run build
           npm run preview &
           npx wait-on http://localhost:4173
