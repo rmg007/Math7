@@ -1,3 +1,27 @@
+## 2026-02-11: CI Recovery Protocol & Husky CI Blocker
+
+### Session Context
+
+- **Objective**: Standardize the process of mass-rerunning and unblocking failed CI runs across the entire repository.
+- **Scope**: GitHub CLI (`gh`), PowerShell scripts, `package.json` prepare logic.
+- **Outcome**: ✅ `scripts/ci-recover.ps1` implemented. ✅ Husky CI blocker resolved. ✅ 16+ workflows rerunning smoothly.
+
+### What Was Learned
+
+1. **The Husky CI Trap**: A common npm script ` "prepare": "husky" ` will fail in CI environments (like GitHub Actions) if `husky` is only in `devDependencies` and the CI environment is strictly for production OR if the environment is restricted. Changing this to ` "prepare": "husky || true" ` is a critical resilience pattern for universal CI.
+
+2. **Signature-Based Grouping Results**: The forensic audit script successfully identified that out of 50 failed runs, there were 40 unique root causes, but the *most frequent* failure signature was the Husky setup. This confirmed the value of content-based hashing over simple workflow-name grouping.
+
+3. **Mass Rerun Power**: Using `gh run rerun <id>` programmatically allows for a "Total Clean Sweep" of the GitHub Actions board, ensuring that no silent failures linger on the `main` branch after a structural fix is pushed.
+
+### Preventative Measures
+
+- **ALWAYS** use ` "prepare": "husky || true" ` in package.json to avoid unforced CI errors.
+- **ALWAYS** run `scripts/ci-recover.ps1` after pushing a fix that affects multiple workflows to clear the backlog.
+- **NEVER** ignore the "Audit Report" signatures—they reveal systemic issues that a single pass-fail status hides.
+
+---
+
 ## 2026-02-11: Universal Repair Dispatch & Full Repository Health Monitoring
 
 ### Session Context
