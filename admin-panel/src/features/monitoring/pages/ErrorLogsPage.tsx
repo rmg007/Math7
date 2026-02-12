@@ -2,60 +2,60 @@ import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import {
-  AlertTriangle,
-  ArrowUpRight,
-  Bug,
-  CheckCircle2,
-  Clock,
-  Copy,
-  Eye,
-  EyeOff,
-  Globe,
-  Info,
-  Monitor,
-  RefreshCw,
-  Search,
-  Smartphone,
-  Trash2,
-  X,
+    AlertTriangle,
+    ArrowUpRight,
+    Bug,
+    CheckCircle2,
+    Clock,
+    Copy,
+    Eye,
+    EyeOff,
+    Globe,
+    Info,
+    Monitor,
+    RefreshCw,
+    Search,
+    Smartphone,
+    Trash2,
+    X,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
-  ErrorLog,
-  useDeleteErrorLog,
-  useErrorLogs,
-  useErrorLogStats,
-  usePromoteToIssue,
-  useUpdateErrorStatus,
+    ErrorLog,
+    useDeleteErrorLog,
+    useErrorLogs,
+    useErrorLogStats,
+    usePromoteToIssue,
+    useUpdateErrorStatus,
 } from '../hooks/use-error-logs';
 
 export function ErrorLogsPage() {
@@ -361,7 +361,7 @@ export function ErrorLogsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-end gap-1">
                         {error.status === 'new' && (
                           <Button
                             variant="ghost"

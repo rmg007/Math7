@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,11 +15,11 @@ import { DataToolbar } from '@/components/ui/data-toolbar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SortableHeader } from '@/components/ui/sortable-header';
@@ -31,49 +31,49 @@ import { sanitizeHtml } from '@/lib/sanitize';
 import { cn, formatIdentifier } from '@/lib/utils';
 import type { QuestionListItem } from '@/types';
 import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  CheckSquare,
-  Copy,
-  FileText,
-  Filter,
-  GripVertical,
-  Loader2,
-  Pencil,
-  Plus,
-  Search,
-  Sparkles,
-  Square,
-  Trash2,
-  X,
+    CheckSquare,
+    Copy,
+    FileText,
+    Filter,
+    GripVertical,
+    Loader2,
+    Pencil,
+    Plus,
+    Search,
+    Sparkles,
+    Square,
+    Trash2,
+    X,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  QuestionInsert,
-  useBulkCreateQuestions,
-  useBulkDeleteQuestions,
-  useBulkUpdateQuestionsStatus,
-  useDeleteQuestion,
-  useDuplicateQuestion,
-  usePaginatedQuestions,
-  useUpdateQuestionOrder,
+    QuestionInsert,
+    useBulkCreateQuestions,
+    useBulkDeleteQuestions,
+    useBulkUpdateQuestionsStatus,
+    useDeleteQuestion,
+    useDuplicateQuestion,
+    usePaginatedQuestions,
+    useUpdateQuestionOrder,
 } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 
@@ -201,7 +201,7 @@ const SortableRow = memo(
           />
         </td>
         <td className="pl-4 pr-10 py-5 text-right">
-          <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover/row:opacity-100 transition-all duration-300 transform translate-x-2 group-hover/row:translate-x-0">
+          <div className="flex items-center justify-end gap-1.5">
             <Link
               to={`/questions/${question.question_id}/edit`}
               className="p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-white border border-transparent hover:border-indigo-100 rounded-2xl transition-all shadow-none hover:shadow-lg hover:shadow-indigo-500/5"
@@ -292,7 +292,7 @@ const SortableCard = memo(
                 )}
               </button>
             </div>
-            <div className="flex gap-1.5 opacity-0 group-hover/card:opacity-100 transition-all duration-300 transform translate-y-2 group-hover/card:translate-y-0">
+            <div className="flex gap-1.5">
               <Link
                 to={`/questions/${question.question_id}/edit`}
                 className="p-3 rounded-2xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm hover:shadow-lg"

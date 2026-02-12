@@ -1,35 +1,35 @@
-import { useForm } from 'react-hook-form';
-import { useEffect, useRef } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useCreateQuestion, useUpdateQuestion } from '../hooks/use-questions';
-import { useSkills } from '../hooks/use-skills';
-import { useApp } from '@/hooks/use-app';
-import { useNavigate } from 'react-router-dom';
-import { Loader2, Plus, Trash, HelpCircle, FileText, Settings, Layers, CheckCircle2 } from 'lucide-react';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select"
-import { Card, CardContent } from "@/components/ui/card"
-import { Database } from '@/lib/database.types';
+} from "@/components/ui/select";
+import { useApp } from '@/hooks/use-app';
 import type { Json } from '@/lib/database.types';
-import { AdminHeader } from '@/components/ui/admin-header';
+import { Database } from '@/lib/database.types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CheckCircle2, FileText, HelpCircle, Layers, Loader2, Plus, Settings, Trash } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
+import { useCreateQuestion, useUpdateQuestion } from '../hooks/use-questions';
+import { useSkills } from '../hooks/use-skills';
 
 type Question = Database['public']['Tables']['questions']['Row'];
 
@@ -291,7 +291,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                                                     newOpts.splice(index, 1);
                                                     form.setValue('options', { options: newOpts });
                                                 }}
-                                                className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600 hover:bg-red-50"
+                                                className="text-red-400 hover:text-red-600 hover:bg-red-50"
                                             >
                                                 <Trash className="h-4 w-4" />
                                             </Button>

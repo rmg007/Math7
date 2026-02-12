@@ -1,16 +1,16 @@
-import { useState, useEffect, useCallback, memo } from 'react';
-import { supabase } from '@/lib/supabase';
-import { Users, Shield, ShieldAlert, UserX, Search, UserCog, X, Activity, Fingerprint, History, UserCheck } from 'lucide-react';
-import type { Tables } from '@/lib/database.types';
-import { Pagination } from '@/components/ui/pagination';
-import { StatusBadge } from '@/components/ui/status-badge';
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Pagination } from '@/components/ui/pagination';
+import { Skeleton } from '@/components/ui/skeleton';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useToast } from '@/hooks/use-toast';
+import type { Tables } from '@/lib/database.types';
+import { supabase } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
+import { Activity, Fingerprint, History, Search, Shield, ShieldAlert, UserCheck, UserCog, Users, UserX, X } from 'lucide-react';
+import { memo, useCallback, useEffect, useState } from 'react';
 
 type AdminUser = Tables<'profiles'>;
 
@@ -101,7 +101,7 @@ const UserRow = memo(({ user, currentUserId, onSelect, onDeactivate, onReactivat
       </TableCell>
       <TableCell className="px-8 py-5 text-right">
         {user.id !== currentUserId && (
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <div>
           {user.deleted_at ? (
             <Button
               variant="ghost"

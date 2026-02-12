@@ -1,48 +1,47 @@
-import { useParams, Link, useNavigate } from 'react-router-dom'
-import { Skeleton } from '@/components/ui/skeleton'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft, Plus, Users, School, Home, Trash2, Edit3, UserPlus, Copy, Check, ClipboardList, CheckCircle, Circle, Clock, LayoutDashboard, Settings, Layers } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { useState, useCallback, memo } from 'react'
-import { useToast } from '@/hooks/use-toast'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { AdminHeader } from '@/components/ui/admin-header'
+import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useToast } from '@/hooks/use-toast'
+import { supabase } from '@/lib/supabase'
+import { cn } from '@/lib/utils'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { ArrowLeft, Check, CheckCircle, Circle, ClipboardList, Clock, Copy, Edit3, Home, Layers, LayoutDashboard, Plus, School, Settings, Trash2, UserPlus, Users } from 'lucide-react'
+import { memo, useCallback, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 interface Assignment {
   id: string
-  type: string
-  scope: string | null
+  assigned_at: string
+  assigned_by: string
+  closed_at: string | null
+  created_at: string
+  description: string | null
   due_date: string | null
-  status: string | null
-  target_id: string
+  metadata: Record<string, unknown>
+  scope: "mandatory" | "suggested" | null
+  target_id?: string
+  type: string
+  updated_at: string
 }
 
 interface Member {
+  created_at: string
   group_id: string
-  user_id: string | null
-  nickname: string | null
-  joined_at: string | null
-  is_anonymous: boolean | null
+  id: string
+  role: "super_admin" | "admin" | "student" | "mentor" | null
+  updated_at: string
+  user_id: string
   profiles: {
     id: string
     email: string
     full_name: string | null
-  } | null
-}
-
-interface Skill {
-  skill_id: string
-  title: string
-}
-
-interface ProgressEntry {
-  user_id: string
-  skill_id: string
-  mastery_level: number | null
+  }
+  nickname?: string | null
+  joined_at?: string | null
+  is_anonymous?: boolean | null
 }
 
 const MemberRow = memo(({ 
@@ -125,7 +124,7 @@ const MemberRow = memo(({
       </div>
 
       {!isEditing && (
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1">
           <Button
             size="icon"
             variant="ghost"
@@ -268,7 +267,7 @@ export function GroupDetailPage() {
       if (!id) throw new Error('Group ID is required')
       const { error } = await supabase
         .from('group_members')
-        .update({ nickname })
+        .update({ nickname } as { nickname: string })
         .eq('group_id', id)
         .eq('user_id', memberId)
 
@@ -311,8 +310,8 @@ export function GroupDetailPage() {
 
   // Fetch skill details for assignments
   const assignmentSkillIds = assignments
-    ?.filter((a: Assignment) => a.type === 'skill_mastery')
-    .map((a: Assignment) => a.target_id) || []
+    ?.filter((a: Assignment) => a.type === 'skill_mastery' && a.target_id)
+    .map((a: Assignment) => a.target_id as string) || []
 
   const { data: assignmentSkills } = useQuery({
     queryKey: ['skills-details', assignmentSkillIds],
@@ -401,14 +400,20 @@ export function GroupDetailPage() {
   }, []);
 
   const getStatus = useCallback((memberId: string, skillId: string) => {
-    const entry = progress?.find((p: ProgressEntry) => p.user_id === memberId && p.skill_id === skillId)
-    // Assuming entry.mastery_score is 0-100.
-    if (!entry || entry.mastery_level === null) return 'not_started'
-    if (entry.mastery_level >= 100) return 'mastered'
+    const entry = progress?.find((p: { user_id: string; skill_id: string; mastery_level?: number | null; mastery_score: number | null }) => p.user_id === memberId && p.skill_id === skillId)
+    // Using mastery_score as fallback since mastery_level may not exist
+    if (!entry || (entry.mastery_level ?? entry.mastery_score) === null) return 'not_started'
+    if ((entry.mastery_level ?? entry.mastery_score) >= 100) return 'mastered'
     return 'in_progress'
   }, [progress]);
 
-  const getSkillTitle = useCallback((skillId: string) => assignmentSkills?.find((s: Skill) => s.skill_id === skillId)?.title || 'Skill', [assignmentSkills]);
+  const getSkillTitle = useCallback((skillId: string) => {
+    const skill = assignmentSkills?.find((s: { skill_id: string; title?: string } | { error: true }) => {
+      if ('error' in s) return false;
+      return s.skill_id === skillId;
+    });
+    return skill && 'title' in skill ? skill.title : 'Skill';
+  }, [assignmentSkills]);
 
   if (groupLoading) {
     return (
@@ -524,9 +529,9 @@ export function GroupDetailPage() {
               </div>
               <div className={cn(
                 "text-2xl font-black tracking-tight",
-                group.allow_anonymous_join ? "text-emerald-600" : "text-gray-300"
+                (group as any).allow_anonymous_join ? "text-emerald-600" : "text-gray-300"
               )}>
-                {group.allow_anonymous_join ? 'ENABLED' : 'DISABLED'}
+                {(group as any).allow_anonymous_join ? 'ENABLED' : 'DISABLED'}
               </div>
             </div>
           </div>

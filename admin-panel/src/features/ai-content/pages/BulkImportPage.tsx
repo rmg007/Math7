@@ -1,30 +1,30 @@
-import { useState } from 'react';
-import { 
-  FileUp, 
-  Trash2, 
-  Download,
-  Terminal,
-  Play,
-  X,
-  Sparkles,
-  Zap
-} from 'lucide-react';
 import { useBulkImport } from '@/hooks/use-bulk-import';
+import {
+    Download,
+    FileUp,
+    Play,
+    Sparkles,
+    Terminal,
+    Trash2,
+    X,
+    Zap
+} from 'lucide-react';
+import { useState } from 'react';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { AdminHeader } from '@/components/ui/admin-header';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { useSkills } from '@/features/curriculum/hooks/use-skills';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import type { QueuedQuestion } from '@/lib/validation/import-schema';
-import { useSkills } from '@/features/curriculum/hooks/use-skills';
-import { EmptyState } from '@/components/ui/empty-state';
 
 
 export default function BulkImportPage() {
@@ -263,7 +263,7 @@ export default function BulkImportPage() {
                         <Button 
                              variant="ghost" 
                              size="icon" 
-                             className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all rounded-xl"
+                             className="text-gray-300 hover:text-red-500 transition-all rounded-xl"
                              onClick={() => setImportQueue(q => q.filter((_, i) => i !== index))}
                            >
                              <X className="w-4 h-4" />

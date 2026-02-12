@@ -1,21 +1,21 @@
-import { useState, useCallback, memo } from 'react';
-import { Plus, Layout, Pencil, Trash2, Search, X, Layers, Globe, GraduationCap, Power, Activity } from 'lucide-react';
 import { AdminHeader } from '@/components/ui/admin-header';
-import { useApps, useCreateApp, useUpdateApp, useDeleteApp, type CompiledApp } from '../hooks/use-apps';
-import { useSubjects } from '../hooks/use-subjects';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/hooks/use-toast';
-import { StatusBadge } from '@/components/ui/status-badge';
 import { Pagination } from '@/components/ui/pagination';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { EmptyState } from '@/components/ui/empty-state';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { Switch } from '@/components/ui/switch';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Activity, Globe, GraduationCap, Layers, Layout, Pencil, Plus, Power, Search, Trash2, X } from 'lucide-react';
+import { memo, useCallback, useState } from 'react';
+import { useApps, useCreateApp, useDeleteApp, useUpdateApp, type CompiledApp } from '../hooks/use-apps';
+import { useSubjects } from '../hooks/use-subjects';
 
 interface AppRowProps {
   app: CompiledApp;
@@ -60,7 +60,7 @@ const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
         <StatusBadge status={app.is_active ? 'active' : 'inactive'} />
       </TableCell>
       <TableCell className="px-8 py-5 text-right">
-        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex justify-end gap-1">
            <Button 
              variant="ghost" 
              size="icon" 
