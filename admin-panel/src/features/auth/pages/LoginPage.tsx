@@ -79,6 +79,24 @@ export function LoginPage() {
   const onRegister = async (data: RegisterFormValues) => {
     setError(null);
 
+    // Step 1: Pre-validate invitation code (fast UX feedback, non-consuming)
+    const { data: isValid, error: validateError } = await supabase.rpc('validate_invitation_code', {
+      p_code: data.inviteCode,
+    });
+
+    if (validateError || !isValid) {
+      setError('Invalid or expired invitation code');
+      SecurityLogger.log({
+        eventType: 'failed_register_invite',
+        severity: 'medium',
+        metadata: { email: data.email, inviteCode: data.inviteCode.slice(-4) },
+      }).catch((err) => {
+        console.error('Failed to log security event:', err);
+      });
+      return;
+    }
+
+    // Step 2: Create user
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -123,7 +141,7 @@ export function LoginPage() {
       });
     }
 
-    // Validate AND consume invitation code atomically
+    // Step 3: Atomically validate AND consume invitation code (closes race window)
     // @ts-expect-error - New RPC function not in generated types yet
     const { data: consumeResult, error: consumeError } = await supabase.rpc(
       'validate_and_use_invitation_code',
