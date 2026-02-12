@@ -64,6 +64,76 @@
 
 ---
 
+## 2026-02-12: Tier 2 CI Repair - Final Batch
+
+### Session Context
+
+- **Trigger**: Final batch of remaining CI repair issues
+- **Issues Fixed**: 5 additional issues across 3 root cause categories
+- **Outcome**: ✅ Completed all major CI repair issue categories
+
+### What Was Done
+
+1. **Admin Panel E2E Test Failures (2 instances)**
+   - **Root Cause**: iPad Pro tests require webkit browser, but only chromium was installed
+   - **Fix**: Added webkit to Playwright browser installation
+   - **Issues Resolved**: #183, #161
+
+2. **Oracle Plus CLI Installation (1 instance)**
+   - **Root Cause**: Using `npm ci` without package-lock.json file
+   - **Fix**: Changed to `npm install` for oracle-plus tool
+   - **Issues Resolved**: #181
+
+3. **Lighthouse CI Build Failures (2 instances)**
+   - **Root Cause**: TypeScript errors - missing module export and type properties
+   - **Fixes**:
+     - Added `export { Database }` to database.types.ts
+     - Added missing properties to CompiledApp type
+   - **Issues Resolved**: #189, #184
+
+### Root Causes Identified
+
+1. **Incomplete Browser Installation**: Playwright tests need all browsers used in config
+   - **Prevention**: Install all browsers specified in playwright.config.ts
+   - **Prevention**: Review device configurations for browser dependencies
+
+2. **Package Management Inconsistency**: Some tools use npm install, others use npm ci
+   - **Prevention**: Generate package-lock.json for all npm packages
+   - **Prevention**: Use consistent package management approach
+
+3. **Type System Incompleteness**: Database types and custom types not fully synchronized
+   - **Prevention**: Ensure all type files have proper exports
+   - **Prevention**: Keep custom types in sync with database schema
+
+### Lessons Learned
+
+- **Device Testing Requires All Browsers**: iPad Pro device uses webkit, must be installed
+- **Module Exports Are Required**: TypeScript files must export to be modules
+- **Type Safety is Cumulative**: Missing properties cascade through the type system
+- **Package Management Must Be Consistent**: npm ci requires lockfile, npm install doesn't
+
+### Prevention Measures Implemented
+
+- Added webkit to Playwright installation for iPad Pro tests
+- Fixed oracle-plus CLI to use npm install instead of npm ci
+- Added proper module export to database.types.ts
+- Extended CompiledApp type with missing properties
+
+### Final Status
+
+- **Total CI Repair Issues Resolved**: ~25 out of 30 (83% reduction)
+- **Remaining**: ~5 single-instance issues requiring individual attention
+- **All Major Categories**: Successfully resolved
+
+### Overall Impact
+
+- Reduced CI repair issues from 30 to ~5 (83% total reduction)
+- All high-frequency issue categories resolved
+- CI system significantly more stable
+- Documentation comprehensive for future maintenance
+
+---
+
 ## 2026-02-12: Tier 2 CI Repair Workflow Execution
 
 ### Session Context
