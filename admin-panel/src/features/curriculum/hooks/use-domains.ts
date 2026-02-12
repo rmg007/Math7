@@ -3,8 +3,10 @@ import { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { escapePostgrestSearch } from '@/lib/postgrest-utils';
 import { CurriculumStatus, isValidUUID, PaginatedResponse, PaginationParams } from './shared';
 
+type Domain = Database['public']['Tables']['domains']['Row'];
 
 // Form input type - excludes auto-generated fields
 export type DomainFormInput = {

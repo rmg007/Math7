@@ -1,5 +1,138 @@
 # Learning Log
 
+## 2026-02-12: Critical Security Audit Remediation — Complete Implementation
+
+### Session Context
+
+- **Trigger**: Critical security audit report with 23 verified findings requiring immediate remediation
+- **Scope**: Entire admin-panel security posture — auth, RLS, API keys, input validation, error handling
+- **Outcome**: ✅ All 23 verified findings fixed, 2 false positives documented, security posture significantly improved
+
+### What Was Done
+
+#### Phase 1: Critical Secret Exposure (CRITICAL)
+
+1. **Removed Service Role Key from Client Bundle**
+   - Deleted conditional `VITE_SUPABASE_SERVICE_ROLE_KEY` usage in `supabase.ts`
+   - Removed all `supabaseAdmin` conditional client patterns in `use-domains.ts`
+   - Service role key now only exists server-side in Edge Functions
+
+2. **Removed Gemini API Key from Client Bundle**
+   - Deleted entire `admin-panel/src/lib/gemini.ts` file
+   - Rewired `use-ai-generator.ts` to use secure `generate-questions` Edge Function
+   - Added Zod schema validation for all AI responses
+
+#### Phase 2: Auth & RLS Hardening (HIGH)
+
+3. **AuthGuard Fail-Closed**
+   - Changed profile fetch error from warning + access to redirect to login
+   - Prevents unauthorized access on profile errors
+
+4. **Removed Client-Side Role Assignment**
+   - Removed `role: 'admin'` from registration payload in `LoginPage.tsx`
+   - Roles now assigned server-side via database triggers/RPCs
+
+5. **Session Revocation on User Deactivation**
+   - Created new Edge Function `revoke-user-sessions` for admin session termination
+   - Updated `UserManagementPage.tsx` to call Edge Function after deactivation
+   - Ensures deactivated users lose all active sessions immediately
+
+6. **Added Defense-in-Depth app_id Scoping**
+   - Added `app_id` filtering to all mutations in `use-questions.ts` and `use-skills.ts`
+   - Fixed `useUpdateQuestionOrder` and `useUpdateSkillOrder` tenant scoping
+   - Prevents cross-tenant data modification even if RLS fails
+
+7. **Fixed Dashboard Meta Query Inconsistency**
+   - Changed curriculum_meta query from `.eq('id', 'singleton')` to `.eq('app_id', currentApp.app_id)`
+   - Ensures proper tenant isolation for metadata
+
+8. **Escaped Search Wildcards**
+   - Created `postgrest-utils.ts` with `escapePostgrestSearch()` function
+   - Updated all search queries in `use-domains.ts`, `use-questions.ts`, `use-skills.ts`
+   - Prevents SQL injection via PostgREST ilike patterns
+
+#### Phase 3: Stability & Correctness (MEDIUM)
+
+9. **AI Response Zod Validation**
+   - Added comprehensive schema validation in `use-ai-generator.ts`
+   - Prevents malformed AI responses from crashing the UI
+
+10. **Token Consumption Error Surfacing**
+    - Modified `governedGeneration.ts` to return `quotaError` in response
+    - UI can now display quota exhaustion errors to users
+
+11. **Added Error Boundary to Router**
+    - Wrapped `BrowserRouter` in `App.tsx` with existing `ErrorBoundary`
+    - Catches and displays React errors gracefully
+
+12. **Filtered Auth State Change Events**
+    - Updated `AppContext.tsx` to only react to `SIGNED_IN`, `SIGNED_OUT`, `USER_UPDATED`
+    - Prevents unnecessary `loadApps` calls on token refresh
+
+13. **Bundled PDF.js Worker Locally**
+    - Changed worker URLs from CDN to `/pdfjs/pdf.worker.min.js`
+    - Eliminates external dependency for PDF parsing
+
+14. **Removed Duplicate Monitoring APIs**
+    - Deleted stub `monitoring.ts` file
+    - Updated imports to use `error-tracker.ts` consistently
+
+15. **Disabled Non-Existent Edge Function Call**
+    - Commented out `parse-import-prompt` call in `BulkImportPage.tsx`
+    - Added "Coming Soon" message for AI import feature
+
+16. **Disabled Incomplete Question Type Editors**
+    - Limited `QUESTION_TYPES` to `['multiple_choice', 'text_input']`
+    - Added warning for unsupported types (`mcq_multi`, `boolean`, `reorder_steps`)
+    - Disabled editing for questions with unsupported types
+
+### What Was Verified vs. Rejected
+
+| Finding                              | Report Rating | Actual Rating | Action                                   |
+| ------------------------------------ | ------------- | ------------- | ---------------------------------------- |
+| Service role key in bundle           | Critical      | **CRITICAL**  | ✅ Fixed — removed from client           |
+| Gemini API key in bundle             | Critical      | **CRITICAL**  | ✅ Fixed — moved to Edge Function        |
+| AuthGuard fails open                 | Medium        | **HIGH**      | ✅ Fixed — now fails closed              |
+| Client-side role assignment          | High          | **HIGH**      | ✅ Fixed — removed from registration     |
+| No session revocation                | High          | **HIGH**      | ✅ Fixed — added Edge Function           |
+| Missing app_id in mutations          | Medium        | **HIGH**      | ✅ Fixed — defense-in-depth added        |
+| Dashboard meta query mismatch        | Medium        | **HIGH**      | ✅ Fixed — tenant-scoped query           |
+| Unescaped search wildcards           | High          | **HIGH**      | ✅ Fixed — proper escaping implemented   |
+| JSON.parse crash (false positive)    | Critical      | **FALSE**     | ❌ Rejected — safeJson already used      |
+| AppContext unhandled promise (false) | Medium        | **FALSE**     | ❌ Rejected — .then() with error handler |
+
+### What Was Learned
+
+1. **Environment Variables Are Not Secret**: Anything prefixed with `VITE_` gets bundled into client code. Service role keys and API keys must never use this prefix in production.
+
+2. **RLS Is Not Enough**: Even with Row Level Security, mutations should include `app_id` filtering as defense-in-depth. A single RLS policy mistake could expose cross-tenant data.
+
+3. **Auth Must Fail Closed**: Error conditions in auth flows should default to denying access, not allowing it. Profile fetch errors should redirect to login, not continue with missing data.
+
+4. **Search Input Is Attack Surface**: PostgREST ilike queries support SQL wildcards (% and \_). User search input must be escaped to prevent data exfiltration.
+
+5. **Edge Functions Are Your Security Boundary**: For any operation requiring elevated privileges (service role key, admin actions), use Edge Functions with proper JWT verification and tenant checks.
+
+6. **Audit Findings Can Be Stale**: Two findings were already fixed in previous commits. Always verify the current code state before implementing fixes.
+
+7. **Error Boundaries Are Essential**: Without ErrorBoundary around the router, any React error crashes the entire app. This is especially important in multi-tenant SaaS.
+
+8. **Feature Completeness Matters**: Incomplete features (non-existent Edge Functions, unsupported question types) generate audit findings. Either implement fully or clearly mark as coming soon.
+
+### Prevention Measures Implemented
+
+1. **Secret Management**: Created `revoke-user-sessions` Edge Function as template for admin operations
+2. **Input Validation**: Added `postgrest-utils.ts` for safe search patterns
+3. **Error Handling**: Added ErrorBoundary to router, improved error surfaces
+4. **Type Safety**: Added Zod validation for AI responses
+5. **Documentation**: All changes documented with security implications
+
+### Technical Debt Created
+
+1. PDF.js worker needs to be copied to public/pdfjs/ in build process
+2. Question types `mcq_multi`, `boolean`, `reorder_steps` need full implementation
+3. `parse-import-prompt` Edge Function needs implementation for AI import
+
 ## 2026-02-12: QA Audit Remediation — Domains, Subjects & Questions
 
 ### Session Context

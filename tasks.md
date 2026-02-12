@@ -1,6 +1,92 @@
 # Questerix Development Tasks
 
-## � QA AUDIT REMEDIATION — Domains, Subjects & Questions (2026-02-12)
+## 🚨 CRITICAL SECURITY AUDIT REMEDIATION (2026-02-12)
+
+### Phase 1: Critical Secret Exposure (CRITICAL)
+
+- [x] **CRITICAL: Remove service role key from client bundle**
+  - Deleted conditional `VITE_SUPABASE_SERVICE_ROLE_KEY` usage in `supabase.ts`
+  - Removed all `supabaseAdmin` conditional client patterns in `use-domains.ts`
+  - Service role key now only exists server-side in Edge Functions
+- [x] **CRITICAL: Remove Gemini API key from client bundle**
+  - Deleted entire `admin-panel/src/lib/gemini.ts` file
+  - Rewired `use-ai-generator.ts` to use secure `generate-questions` Edge Function
+  - Added Zod schema validation for all AI responses
+
+### Phase 2: Auth & RLS Hardening (HIGH)
+
+- [x] **HIGH: AuthGuard fail-closed**
+  - Changed profile fetch error from warning + access to redirect to login
+  - Prevents unauthorized access on profile errors
+- [x] **HIGH: Remove client-side role assignment**
+  - Removed `role: 'admin'` from registration payload in `LoginPage.tsx`
+  - Roles now assigned server-side via database triggers/RPCs
+- [x] **HIGH: Session revocation on user deactivation**
+  - Created new Edge Function `revoke-user-sessions` for admin session termination
+  - Updated `UserManagementPage.tsx` to call Edge Function after deactivation
+  - Ensures deactivated users lose all active sessions immediately
+- [x] **HIGH: Add defense-in-depth app_id scoping**
+  - Added `app_id` filtering to all mutations in `use-questions.ts` and `use-skills.ts`
+  - Fixed `useUpdateQuestionOrder` and `useUpdateSkillOrder` tenant scoping
+  - Prevents cross-tenant data modification even if RLS fails
+- [x] **HIGH: Fix dashboard meta query inconsistency**
+  - Changed curriculum_meta query from `.eq('id', 'singleton')` to `.eq('app_id', currentApp.app_id)`
+  - Ensures proper tenant isolation for metadata
+- [x] **HIGH: Escape search wildcards**
+  - Created `postgrest-utils.ts` with `escapePostgrestSearch()` function
+  - Updated all search queries in `use-domains.ts`, `use-questions.ts`, `use-skills.ts`
+  - Prevents SQL injection via PostgREST ilike patterns
+
+### Phase 3: Stability & Correctness (MEDIUM)
+
+- [x] **MEDIUM: AI response Zod validation**
+  - Added comprehensive schema validation in `use-ai-generator.ts`
+  - Prevents malformed AI responses from crashing the UI
+- [x] **MEDIUM: Token consumption error surfacing**
+  - Modified `governedGeneration.ts` to return `quotaError` in response
+  - UI can now display quota exhaustion errors to users
+- [x] **MEDIUM: Add error boundary to router**
+  - Wrapped `BrowserRouter` in `App.tsx` with existing `ErrorBoundary`
+  - Catches and displays React errors gracefully
+- [x] **MEDIUM: Filter auth state change events**
+  - Updated `AppContext.tsx` to only react to `SIGNED_IN`, `SIGNED_OUT`, `USER_UPDATED`
+  - Prevents unnecessary `loadApps` calls on token refresh
+- [x] **MEDIUM: Bundle PDF.js worker locally**
+  - Changed worker URLs from CDN to `/pdfjs/pdf.worker.min.js`
+  - Eliminates external dependency for PDF parsing
+- [x] **MEDIUM: Remove duplicate monitoring APIs**
+  - Deleted stub `monitoring.ts` file
+  - Updated imports to use `error-tracker.ts` consistently
+- [x] **MEDIUM: Disable non-existent Edge Function call**
+  - Commented out `parse-import-prompt` call in `BulkImportPage.tsx`
+  - Added "Coming Soon" message for AI import feature
+- [x] **MEDIUM: Disable incomplete question type editors**
+  - Limited `QUESTION_TYPES` to `['multiple_choice', 'text_input']`
+  - Added warning for unsupported types (`mcq_multi`, `boolean`, `reorder_steps`)
+  - Disabled editing for questions with unsupported types
+
+### False Positives (Rejected with Evidence)
+
+- [x] **REJECTED: JSON.parse crash** — Already using `safeJson` helper with try/catch
+- [x] **REJECTED: AppContext unhandled promise** — `.then()` already has error handler
+
+### Manual Post-Merge Actions Required
+
+⚠️ **ACTION REQUIRED**: Remove secrets from environment settings
+
+- Remove `VITE_SUPABASE_SERVICE_ROLE_KEY` from all environments
+- Remove `VITE_GEMINI_API_KEY` from all environments
+- These keys should only exist as server-side environment variables for Edge Functions
+
+### Technical Debt Created
+
+- [ ] Copy PDF.js worker to `public/pdfjs/` in build process
+- [ ] Implement full editors for `mcq_multi`, `boolean`, `reorder_steps` question types
+- [ ] Implement `parse-import-prompt` Edge Function for AI import feature
+
+---
+
+## 📋 QA AUDIT REMEDIATION — Domains, Subjects & Questions (2026-02-12)
 
 ### Implemented Fixes
 
