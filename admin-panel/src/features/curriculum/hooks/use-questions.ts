@@ -1,5 +1,6 @@
 import { useApp } from '@/hooks/use-app';
 import { Database } from '@/lib/database.types';
+import { escapePostgrestSearch } from '@/lib/postgrest-utils';
 import { supabase } from '@/lib/supabase';
 import type { QuestionListItem } from '@/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -220,12 +221,15 @@ export function useBulkCreateQuestions() {
 
 export function useUpdateQuestion() {
   const queryClient = useQueryClient();
+  const { currentApp } = useApp();
 
   return useMutation({
     mutationFn: async ({
       question_id,
       ...updates
     }: { question_id: string } & Partial<Question>) => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
+
       const { data, error } = await supabase
         .from('questions')
         .update(updates)
@@ -247,9 +251,12 @@ export function useUpdateQuestion() {
 
 export function useDeleteQuestion() {
   const queryClient = useQueryClient();
+  const { currentApp } = useApp();
 
   return useMutation({
     mutationFn: async (question_id: string) => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
+
       const { error } = await supabase
         .from('questions')
         .update({ deleted_at: new Date().toISOString() })
@@ -267,9 +274,12 @@ export function useDeleteQuestion() {
 
 export function useBulkDeleteQuestions() {
   const queryClient = useQueryClient();
+  const { currentApp } = useApp();
 
   return useMutation({
     mutationFn: async (question_ids: string[]) => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
+
       const { error } = await supabase
         .from('questions')
         .update({ deleted_at: new Date().toISOString() })
@@ -296,7 +306,7 @@ export function useBulkUpdateQuestionsStatus() {
       status,
     }: {
       question_ids: string[];
-      status: 'draft' | 'approved' | 'published';
+      status: 'draft' | 'published' | 'live';
     }) => {
       if (!currentApp?.app_id) throw new Error('No app selected');
 
@@ -366,7 +376,11 @@ export function useUpdateQuestionOrder() {
       if (!currentApp?.app_id) throw new Error('No app selected');
 
       const promises = updates.map(({ question_id, sort_order }) =>
-        supabase.from('questions').update({ sort_order }).eq('question_id', question_id).eq('app_id', currentApp.app_id)
+        supabase
+          .from('questions')
+          .update({ sort_order })
+          .eq('question_id', question_id)
+          .eq('app_id', currentApp.app_id)
       );
 
       const results = await Promise.all(promises);

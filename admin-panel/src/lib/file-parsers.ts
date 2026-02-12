@@ -1,4 +1,5 @@
 // No types available for pdfjs-dist build
+import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
 
 // We need to set up the worker for PDF.js

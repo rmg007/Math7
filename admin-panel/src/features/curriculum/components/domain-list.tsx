@@ -427,13 +427,13 @@ export function DomainList() {
 
       const { data: skillRows } = await supabase
         .from('skills')
-        .select('id')
+        .select('skill_id')
         .in('domain_id', domainIds)
         .is('deleted_at', null);
 
       let questionCount = 0;
       if (skillRows && skillRows.length > 0) {
-        const skillIds = skillRows.map((s) => s.id);
+        const skillIds = skillRows.map((s) => s.skill_id);
         const { count } = await supabase
           .from('questions')
           .select('*', { count: 'exact', head: true })

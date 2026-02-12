@@ -281,6 +281,21 @@ CREATE TABLE IF NOT EXISTS public.curriculum_meta (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS public.curriculum_snapshots (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  app_id UUID NOT NULL REFERENCES public.apps(app_id),
+  version INTEGER NOT NULL,
+  content JSONB NOT NULL DEFAULT '{}'::jsonb,
+  domains_count INTEGER NOT NULL DEFAULT 0,
+  skills_count INTEGER NOT NULL DEFAULT 0,
+  questions_count INTEGER NOT NULL DEFAULT 0,
+  published_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  published_by UUID REFERENCES public.profiles(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(app_id, version)
+);
+
 CREATE TABLE IF NOT EXISTS public.ai_token_usage (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   app_id UUID NOT NULL REFERENCES public.apps(app_id),
@@ -307,6 +322,7 @@ ALTER TABLE public.assignments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.attempts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.skill_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.curriculum_meta ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.curriculum_snapshots ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ai_token_usage ENABLE ROW LEVEL SECURITY;
 
 -- 2. Policies: Profiles (Tenant Isolation)
@@ -356,6 +372,26 @@ USING (
     OR
     (student_id = auth.uid() AND EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = student_id AND p.app_id = current_app_id()))
 );
+
+-- 10. Policies: Curriculum Meta
+CREATE POLICY curriculum_meta_admin_all ON public.curriculum_meta
+FOR ALL TO authenticated
+USING (jwt_is_admin())
+WITH CHECK (jwt_is_admin());
+
+CREATE POLICY curriculum_meta_read ON public.curriculum_meta
+FOR SELECT TO authenticated
+USING (true);
+
+-- 11. Policies: Curriculum Snapshots
+CREATE POLICY curriculum_snapshots_admin_all ON public.curriculum_snapshots
+FOR ALL TO authenticated
+USING (jwt_is_admin())
+WITH CHECK (jwt_is_admin());
+
+CREATE POLICY curriculum_snapshots_read ON public.curriculum_snapshots
+FOR SELECT TO authenticated
+USING (true);
 
 -- ┌─────────────────────────────────────────────────────────────────────────────┐
 -- │ SECTION 10: TRIGGERS                                                         │

@@ -1,5 +1,70 @@
 # Learning Log
 
+## 2026-02-12: QA Report Deployment Fixes — Implemented
+
+### Session Context
+
+- **Trigger**: QA report identifying 4 deployment workflow issues affecting safety and UX
+- **Scope**: Publish workflow safety, RPC bug fixes, version history UX, landing page discoverability
+- **Outcome**: ✅ All 4 findings addressed with production-ready fixes
+
+### What Was Done
+
+#### 1. Publish Confirmation Modal (High Priority)
+
+- **File**: `admin-panel/src/features/curriculum/pages/publish-page.tsx`
+- **Change**: Added AlertDialog confirmation before deploying to production
+- **Impact**: Prevents accidental deployments with clear summary of entities to be published
+- **Details**: Shows version number, entity counts, and requires explicit confirmation
+
+#### 2. Landing Page Helper Link (Low Priority)
+
+- **File**: `admin-panel/src/features/platform/pages/LandingsPage.tsx`
+- **Change**: Added "Create New Application" button when no unmapped apps exist
+- **Impact**: Improves discoverability — users can create apps directly from empty state
+- **Details**: Links to `/platform/apps` with styled button in dropdown empty state
+
+#### 3. Version History Detail View (Medium Priority)
+
+- **File**: `admin-panel/src/features/curriculum/pages/version-history-page.tsx`
+- **Change**: Added clickable rows that open a detail modal
+- **Impact**: Users can inspect version metadata without downloading JSON
+- **Details**: Shows version info, publication date, and content counts in a styled dialog
+
+#### 4. Publish RPC Bug Fix (High Priority)
+
+- **Files**:
+  - `supabase/migrations/20260212_fix_publish_curriculum_rpc.sql` (new)
+  - `supabase/schema_master.sql` (updated)
+- **Change**: Fixed schema drift and restored snapshot creation
+- **Impact**: Resolves "RECORD 'NEW' HAS NO FIELD 'ID'" error
+- **Details**:
+  - Added missing `curriculum_snapshots` table to schema_master
+  - Fixed `publish_curriculum` RPC to create snapshots properly
+  - Added proper RLS policies for the snapshots table
+  - **Note**: Requires manual migration deployment to Supabase
+
+### Lessons Learned
+
+1. **Schema Drift Detection**: Multiple schema definitions existed for `curriculum_meta` (id vs app_id PK), causing trigger errors
+2. **Missing Table in Schema**: `curriculum_snapshots` was in migrations but not in `schema_master.sql`
+3. **RPC Regression**: Latest `publish_curriculum` version dropped snapshot creation entirely
+4. **Type Safety**: Using proper TypeScript types prevents runtime errors in complex state
+
+### Prevention Measures
+
+1. **Schema Synchronization**: Always keep `schema_master.sql` in sync with migration files
+2. **RPC Testing**: Add unit tests for critical RPC functions to catch regressions
+3. **Type Safety**: Use proper type inference for complex React state
+4. **Safety Gates**: Add confirmation dialogs for all destructive/critical operations
+
+### Technical Debt
+
+- The publish_curriculum RPC fix requires manual deployment to production
+- Consider adding CI check to ensure schema_master.sql includes all tables from migrations
+
+---
+
 ## 2026-02-12: Critical Security Audit Remediation — Complete Implementation
 
 ### Session Context

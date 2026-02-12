@@ -1,8 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { AppLayout } from './components/layout/app-layout';
 import { ToastProvider } from './components/ui/toast';
+import { Toaster } from './components/ui/toaster';
 import { AppProvider } from './contexts/AppContext';
 import { AuthGuard } from './features/auth/components/auth-guard';
 import { StandardAdminGuard } from './features/auth/components/standard-admin-guard';
@@ -214,129 +216,129 @@ function App() {
           <ErrorBoundary>
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <Suspense fallback={<LoadingPage />}>
-              <Routes>
-                <Route path="/login" element={<LoginPage />} />
-                <Route
-                  element={
-                    <AuthGuard>
-                      <AppLayout />
-                    </AuthGuard>
-                  }
-                >
-                  <Route path="/" element={<RoleRedirect />} />
+                <Routes>
+                  <Route path="/login" element={<LoginPage />} />
                   <Route
-                    path="/dashboard"
                     element={
-                      <SuperAdminGuard>
-                        <DashboardPage />
-                      </SuperAdminGuard>
+                      <AuthGuard>
+                        <AppLayout />
+                      </AuthGuard>
                     }
-                  />
-                  <Route path="/domains" element={<DomainsPage />} />
-                  <Route path="/domains/new" element={<DomainCreatePage />} />
-                  <Route path="/domains/:id/edit" element={<DomainEditPage />} />
+                  >
+                    <Route path="/" element={<RoleRedirect />} />
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <SuperAdminGuard>
+                          <DashboardPage />
+                        </SuperAdminGuard>
+                      }
+                    />
+                    <Route path="/domains" element={<DomainsPage />} />
+                    <Route path="/domains/new" element={<DomainCreatePage />} />
+                    <Route path="/domains/:id/edit" element={<DomainEditPage />} />
 
-                  <Route path="/skills" element={<SkillsPage />} />
-                  <Route path="/skills/new" element={<SkillCreatePage />} />
-                  <Route path="/skills/:id/edit" element={<SkillEditPage />} />
+                    <Route path="/skills" element={<SkillsPage />} />
+                    <Route path="/skills/new" element={<SkillCreatePage />} />
+                    <Route path="/skills/:id/edit" element={<SkillEditPage />} />
 
-                  <Route path="/questions" element={<QuestionsPage />} />
-                  <Route path="/questions/new" element={<QuestionCreatePage />} />
-                  <Route path="/questions/:id/edit" element={<QuestionEditPage />} />
+                    <Route path="/questions" element={<QuestionsPage />} />
+                    <Route path="/questions/new" element={<QuestionCreatePage />} />
+                    <Route path="/questions/:id/edit" element={<QuestionEditPage />} />
 
-                  <Route path="/publish" element={<PublishPage />} />
-                  <Route path="/versions" element={<VersionHistoryPage />} />
-                  <Route
-                    path="/invitation-codes"
-                    element={
-                      <SuperAdminGuard>
-                        <InvitationCodesPage />
-                      </SuperAdminGuard>
-                    }
-                  />
-                  <Route
-                    path="/groups"
-                    element={
-                      <StandardAdminGuard>
-                        <GroupsPage />
-                      </StandardAdminGuard>
-                    }
-                  />
-                  <Route
-                    path="/groups/new"
-                    element={
-                      <StandardAdminGuard>
-                        <GroupCreatePage />
-                      </StandardAdminGuard>
-                    }
-                  />
-                  <Route
-                    path="/groups/:id"
-                    element={
-                      <StandardAdminGuard>
-                        <GroupDetailPage />
-                      </StandardAdminGuard>
-                    }
-                  />
-                  <Route
-                    path="/groups/:groupId/assignments/new"
-                    element={
-                      <StandardAdminGuard>
-                        <AssignmentCreatePage />
-                      </StandardAdminGuard>
-                    }
-                  />
-                  <Route path="/ai-questions" element={<GenerationPage />} />
-                  <Route path="/ai-sessions" element={<SessionsPage />} />
-                  <Route path="/ai-import" element={<BulkImportPage />} />
-                  <Route
-                    path="/users"
-                    element={
-                      <SuperAdminGuard>
-                        <UserManagementPage />
-                      </SuperAdminGuard>
-                    }
-                  />
-                  <Route
-                    path="/governance"
-                    element={
-                      <SuperAdminGuard>
-                        <GovernancePage />
-                      </SuperAdminGuard>
-                    }
-                  />
-                  <Route
-                    path="/platform/subjects"
-                    element={
-                      <SuperAdminGuard>
-                        <SubjectsPage />
-                      </SuperAdminGuard>
-                    }
-                  />
-                  <Route
-                    path="/platform/apps"
-                    element={
-                      <SuperAdminGuard>
-                        <AppsPage />
-                      </SuperAdminGuard>
-                    }
-                  />
-                  <Route
-                    path="/platform/landings"
-                    element={
-                      <SuperAdminGuard>
-                        <LandingsPage />
-                      </SuperAdminGuard>
-                    }
-                  />
-                  <Route path="/settings" element={<AccountSettingsPage />} />
-                  <Route path="/known-issues" element={<KnownIssuesPage />} />
-                  <Route path="/error-logs" element={<ErrorLogsPage />} />
-                </Route>
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
+                    <Route path="/publish" element={<PublishPage />} />
+                    <Route path="/versions" element={<VersionHistoryPage />} />
+                    <Route
+                      path="/invitation-codes"
+                      element={
+                        <SuperAdminGuard>
+                          <InvitationCodesPage />
+                        </SuperAdminGuard>
+                      }
+                    />
+                    <Route
+                      path="/groups"
+                      element={
+                        <StandardAdminGuard>
+                          <GroupsPage />
+                        </StandardAdminGuard>
+                      }
+                    />
+                    <Route
+                      path="/groups/new"
+                      element={
+                        <StandardAdminGuard>
+                          <GroupCreatePage />
+                        </StandardAdminGuard>
+                      }
+                    />
+                    <Route
+                      path="/groups/:id"
+                      element={
+                        <StandardAdminGuard>
+                          <GroupDetailPage />
+                        </StandardAdminGuard>
+                      }
+                    />
+                    <Route
+                      path="/groups/:groupId/assignments/new"
+                      element={
+                        <StandardAdminGuard>
+                          <AssignmentCreatePage />
+                        </StandardAdminGuard>
+                      }
+                    />
+                    <Route path="/ai-questions" element={<GenerationPage />} />
+                    <Route path="/ai-sessions" element={<SessionsPage />} />
+                    <Route path="/ai-import" element={<BulkImportPage />} />
+                    <Route
+                      path="/users"
+                      element={
+                        <SuperAdminGuard>
+                          <UserManagementPage />
+                        </SuperAdminGuard>
+                      }
+                    />
+                    <Route
+                      path="/governance"
+                      element={
+                        <SuperAdminGuard>
+                          <GovernancePage />
+                        </SuperAdminGuard>
+                      }
+                    />
+                    <Route
+                      path="/platform/subjects"
+                      element={
+                        <SuperAdminGuard>
+                          <SubjectsPage />
+                        </SuperAdminGuard>
+                      }
+                    />
+                    <Route
+                      path="/platform/apps"
+                      element={
+                        <SuperAdminGuard>
+                          <AppsPage />
+                        </SuperAdminGuard>
+                      }
+                    />
+                    <Route
+                      path="/platform/landings"
+                      element={
+                        <SuperAdminGuard>
+                          <LandingsPage />
+                        </SuperAdminGuard>
+                      }
+                    />
+                    <Route path="/settings" element={<AccountSettingsPage />} />
+                    <Route path="/known-issues" element={<KnownIssuesPage />} />
+                    <Route path="/error-logs" element={<ErrorLogsPage />} />
+                  </Route>
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
           </ErrorBoundary>
         </AppProvider>
       </ToastProvider>

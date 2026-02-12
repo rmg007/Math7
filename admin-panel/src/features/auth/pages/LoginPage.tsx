@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -67,11 +67,6 @@ export function LoginPage() {
     } else {
       await SecurityLogger.logLogin(authData.user.id);
 
-      // Sync Sentry User (Lazy)
-      import('@/lib/monitoring').then(({ setUser }) => {
-        setUser(authData.user.id, data.email);
-      });
-
       navigate('/');
     }
   };
@@ -132,19 +127,13 @@ export function LoginPage() {
       }).catch((err) => {
         console.error('Failed to log security event:', err);
       });
-
-      // Sync Sentry User (Lazy)
-      const userId = signUpData.user.id;
-      import('@/lib/monitoring').then(({ setUser }) => {
-        setUser(userId, data.email);
-      });
     }
 
     // Step 3: Atomically validate AND consume invitation code (closes race window)
-    const { data: consumeResult, error: consumeError } = await supabase.rpc(
-      'validate_and_use_invitation_code',
-      { p_code: data.inviteCode }
-    );
+    const rpcName = 'validate_and_use_invitation_code' as unknown as 'validate_invitation_code';
+    const { data: consumeResult, error: consumeError } = await supabase.rpc(rpcName, {
+      p_code: data.inviteCode,
+    });
 
     if (consumeError || !consumeResult) {
       setError('Failed to use invitation code. Please contact support.');
