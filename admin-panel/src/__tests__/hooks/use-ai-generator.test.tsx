@@ -1,12 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { generateQuestions } from '@/features/ai-assistant/api/generateQuestions';
 import { useAIGenerator } from '@/hooks/use-ai-generator';
 import { useToast } from '@/hooks/use-toast';
-import { generateQuestionsFromAI, type AIQuestion } from '@/lib/gemini';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+interface AIQuestion {
+  content: string;
+  type: string;
+  points: number;
+  correct_answer: string;
+  explanation: string;
+  options: string[];
+}
+
 // Mock dependencies
-vi.mock('@/lib/gemini');
+vi.mock('@/features/ai-assistant/api/generateQuestions');
 vi.mock('@/hooks/use-toast');
 
 describe('useAIGenerator', () => {
@@ -33,7 +42,7 @@ describe('useAIGenerator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useToast).mockReturnValue({ toast: mockToast } as any);
-    vi.mocked(generateQuestionsFromAI).mockResolvedValue(mockQuestions);
+    vi.mocked(generateQuestions).mockResolvedValue({ questions: mockQuestions } as any);
   });
 
   describe('initial state', () => {
@@ -48,7 +57,7 @@ describe('useAIGenerator', () => {
 
   describe('generate', () => {
     it('should generate questions successfully', async () => {
-      vi.mocked(generateQuestionsFromAI).mockResolvedValue(mockQuestions);
+      vi.mocked(generateQuestions).mockResolvedValue({ questions: mockQuestions } as any);
 
       const { result } = renderHook(() => useAIGenerator());
 
@@ -66,7 +75,7 @@ describe('useAIGenerator', () => {
         generateResult = await result.current.generate(params);
       });
 
-      expect(generateQuestionsFromAI).toHaveBeenCalledWith({
+      expect(generateQuestions).toHaveBeenCalledWith({
         context: params.context,
         count: params.count,
         difficulty: params.difficulty,
@@ -85,7 +94,7 @@ describe('useAIGenerator', () => {
     });
 
     it('should inject skill context when missing from instruction', async () => {
-      vi.mocked(generateQuestionsFromAI).mockResolvedValue(mockQuestions);
+      vi.mocked(generateQuestions).mockResolvedValue({ questions: mockQuestions } as any);
 
       const { result } = renderHook(() => useAIGenerator());
 
@@ -102,7 +111,7 @@ describe('useAIGenerator', () => {
         await result.current.generate(params);
       });
 
-      expect(generateQuestionsFromAI).toHaveBeenCalledWith({
+      expect(generateQuestions).toHaveBeenCalledWith({
         context: params.context,
         count: params.count,
         difficulty: params.difficulty,
@@ -112,7 +121,7 @@ describe('useAIGenerator', () => {
     });
 
     it('should prepend skill context when not in instruction', async () => {
-      vi.mocked(generateQuestionsFromAI).mockResolvedValue(mockQuestions);
+      vi.mocked(generateQuestions).mockResolvedValue({ questions: mockQuestions } as any);
 
       const { result } = renderHook(() => useAIGenerator());
 
@@ -129,7 +138,7 @@ describe('useAIGenerator', () => {
         await result.current.generate(params);
       });
 
-      expect(generateQuestionsFromAI).toHaveBeenCalledWith({
+      expect(generateQuestions).toHaveBeenCalledWith({
         context: params.context,
         count: params.count,
         difficulty: params.difficulty,
@@ -139,7 +148,7 @@ describe('useAIGenerator', () => {
     });
 
     it('should handle empty prompt instruction', async () => {
-      vi.mocked(generateQuestionsFromAI).mockResolvedValue(mockQuestions);
+      vi.mocked(generateQuestions).mockResolvedValue({ questions: mockQuestions } as any);
 
       const { result } = renderHook(() => useAIGenerator());
 
@@ -156,7 +165,7 @@ describe('useAIGenerator', () => {
         await result.current.generate(params);
       });
 
-      expect(generateQuestionsFromAI).toHaveBeenCalledWith({
+      expect(generateQuestions).toHaveBeenCalledWith({
         context: params.context,
         count: params.count,
         difficulty: params.difficulty,
@@ -167,7 +176,7 @@ describe('useAIGenerator', () => {
 
     it('should handle generation errors', async () => {
       const errorMessage = 'API rate limit exceeded';
-      vi.mocked(generateQuestionsFromAI).mockRejectedValue(new Error(errorMessage));
+      vi.mocked(generateQuestions).mockRejectedValue(new Error(errorMessage));
 
       const { result } = renderHook(() => useAIGenerator());
 
@@ -195,8 +204,11 @@ describe('useAIGenerator', () => {
     });
 
     it('should set generating state during process', async () => {
-      vi.mocked(generateQuestionsFromAI).mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(mockQuestions), 100))
+      vi.mocked(generateQuestions).mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ questions: mockQuestions } as any), 100)
+          )
       );
 
       const { result } = renderHook(() => useAIGenerator());
@@ -225,7 +237,7 @@ describe('useAIGenerator', () => {
 
     it('should clear previous error on new generation attempt', async () => {
       // First call fails
-      vi.mocked(generateQuestionsFromAI).mockRejectedValueOnce(new Error('First error'));
+      vi.mocked(generateQuestions).mockRejectedValueOnce(new Error('First error'));
 
       const { result } = renderHook(() => useAIGenerator());
 
@@ -241,7 +253,7 @@ describe('useAIGenerator', () => {
       expect(result.current.error).toBe('First error');
 
       // Second call succeeds
-      vi.mocked(generateQuestionsFromAI).mockResolvedValueOnce(mockQuestions);
+      vi.mocked(generateQuestions).mockResolvedValueOnce({ questions: mockQuestions } as any);
 
       await act(async () => {
         await result.current.generate({
@@ -256,7 +268,7 @@ describe('useAIGenerator', () => {
     });
 
     it('should handle all question types', async () => {
-      vi.mocked(generateQuestionsFromAI).mockResolvedValue(mockQuestions);
+      vi.mocked(generateQuestions).mockResolvedValue({ questions: mockQuestions } as any);
 
       const { result } = renderHook(() => useAIGenerator());
 
@@ -277,14 +289,12 @@ describe('useAIGenerator', () => {
           });
         });
 
-        expect(generateQuestionsFromAI).toHaveBeenCalledWith(
-          expect.objectContaining({ questionType })
-        );
+        expect(generateQuestions).toHaveBeenCalledWith(expect.objectContaining({ questionType }));
       }
     });
 
     it('should handle all difficulty levels', async () => {
-      vi.mocked(generateQuestionsFromAI).mockResolvedValue(mockQuestions);
+      vi.mocked(generateQuestions).mockResolvedValue({ questions: mockQuestions } as any);
 
       const { result } = renderHook(() => useAIGenerator());
 
@@ -300,14 +310,12 @@ describe('useAIGenerator', () => {
           });
         });
 
-        expect(generateQuestionsFromAI).toHaveBeenCalledWith(
-          expect.objectContaining({ difficulty })
-        );
+        expect(generateQuestions).toHaveBeenCalledWith(expect.objectContaining({ difficulty }));
       }
     });
 
     it('should handle zero count', async () => {
-      vi.mocked(generateQuestionsFromAI).mockResolvedValue([]);
+      vi.mocked(generateQuestions).mockResolvedValue({ questions: [] } as any);
 
       const { result } = renderHook(() => useAIGenerator());
 
@@ -327,7 +335,7 @@ describe('useAIGenerator', () => {
     });
 
     it('should handle long skill titles', async () => {
-      vi.mocked(generateQuestionsFromAI).mockResolvedValue(mockQuestions);
+      vi.mocked(generateQuestions).mockResolvedValue({ questions: mockQuestions } as any);
 
       const { result } = renderHook(() => useAIGenerator());
 
@@ -343,7 +351,7 @@ describe('useAIGenerator', () => {
         });
       });
 
-      expect(generateQuestionsFromAI).toHaveBeenCalledWith(
+      expect(generateQuestions).toHaveBeenCalledWith(
         expect.objectContaining({
           skillTitle: undefined, // It's not passed to the lib function
           promptInstruction: expect.stringContaining(longSkillTitle),

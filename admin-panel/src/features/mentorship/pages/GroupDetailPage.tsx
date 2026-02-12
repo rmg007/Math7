@@ -39,34 +39,29 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 interface Assignment {
   id: string;
-  assigned_at: string;
-  assigned_by: string;
-  closed_at: string | null;
+  completion_trigger?: unknown;
   created_at: string;
-  description: string | null;
   due_date: string | null;
-  metadata: Record<string, unknown>;
+  group_id: string | null;
   scope: 'mandatory' | 'suggested' | null;
-  target_id?: string;
-  type: string;
+  status: 'pending' | 'completed' | 'late' | null;
+  student_id: string | null;
+  target_id: string;
+  type: 'skill_mastery' | 'time_goal' | 'custom';
   updated_at: string;
 }
 
 interface Member {
-  created_at: string;
   group_id: string;
-  id: string;
-  role: 'super_admin' | 'admin' | 'student' | 'mentor' | null;
-  updated_at: string;
+  is_anonymous: boolean | null;
+  joined_at: string;
+  nickname: string | null;
   user_id: string;
   profiles: {
     id: string;
     email: string;
     full_name: string | null;
   };
-  nickname?: string | null;
-  joined_at?: string | null;
-  is_anonymous?: boolean | null;
 }
 
 const MemberRow = memo(
@@ -295,7 +290,7 @@ export function GroupDetailPage() {
         .order('joined_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as unknown as Member[];
     },
     enabled: Boolean(id),
   });
@@ -342,7 +337,7 @@ export function GroupDetailPage() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as unknown as Assignment[];
     },
     enabled: Boolean(id),
   });
@@ -446,16 +441,11 @@ export function GroupDetailPage() {
   const getStatus = useCallback(
     (memberId: string, skillId: string) => {
       const entry = progress?.find(
-        (p: {
-          user_id: string;
-          skill_id: string;
-          mastery_level?: number | null;
-          mastery_score: number | null;
-        }) => p.user_id === memberId && p.skill_id === skillId
+        (p: { user_id: string; skill_id: string; mastery_level: number }) =>
+          p.user_id === memberId && p.skill_id === skillId
       );
-      // Using mastery_score as fallback since mastery_level may not exist
-      if (!entry || (entry.mastery_level ?? entry.mastery_score) === null) return 'not_started';
-      if ((entry.mastery_level ?? entry.mastery_score) >= 100) return 'mastered';
+      if (!entry || entry.mastery_level === null) return 'not_started';
+      if (entry.mastery_level >= 100) return 'mastered';
       return 'in_progress';
     },
     [progress]
