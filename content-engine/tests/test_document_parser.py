@@ -7,7 +7,7 @@ import pytest
 import tempfile
 import os
 from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import Mock, patch
 from PIL import Image
 
 from src.parsers.document_parser import DocumentParser
@@ -459,20 +459,24 @@ class TestDocumentParser:
             
             # Simple mock that handles common extensions and names
             def mock_suffix_side_effect():
-                if not self.mock_path.call_args: return '.pdf'
+                if not self.mock_path.call_args: 
+                    return '.pdf'
                 filename = str(self.mock_path.call_args[0][0])
                 if '.' in filename:
                     return '.' + filename.rsplit('.', 1)[1]
                 return ''
             
             def mock_name_side_effect():
-                if not self.mock_path.call_args: return 'test.pdf'
+                if not self.mock_path.call_args: 
+                    return 'test.pdf'
                 return Path(str(self.mock_path.call_args[0][0])).name
             
             def mock_exists_side_effect():
-                if not self.mock_path.call_args: return True
+                if not self.mock_path.call_args: 
+                    return True
                 filename = str(self.mock_path.call_args[0][0])
-                if "nonexistent" in filename: return False
+                if "nonexistent" in filename: 
+                    return False
                 return True
 
             p = self.mock_path.return_value
@@ -550,10 +554,13 @@ class TestDocumentParser:
             
             # Configure suffix mock
             def mock_suffix_side_effect():
-                if not self.mock_path.call_args: return '.pdf'
+                if not self.mock_path.call_args: 
+                    return '.pdf'
                 filename = self.mock_path.call_args[0][0]
-                if str(filename).endswith('.pdf'): return '.pdf'
-                if str(filename).endswith('.docx'): return '.docx'
+                if str(filename).endswith('.pdf'): 
+                    return '.pdf'
+                if str(filename).endswith('.docx'): 
+                    return '.docx'
                 return '.pdf'
                 
             type(self.mock_path.return_value).suffix = property(lambda x: mock_suffix_side_effect())

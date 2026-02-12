@@ -142,7 +142,6 @@ export function LoginPage() {
     }
 
     // Step 3: Atomically validate AND consume invitation code (closes race window)
-    // @ts-expect-error - New RPC function not in generated types yet
     const { data: consumeResult, error: consumeError } = await supabase.rpc(
       'validate_and_use_invitation_code',
       { p_code: data.inviteCode }

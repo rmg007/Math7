@@ -1,8 +1,6 @@
 import sys
-import json
 import pytest
 from unittest.mock import patch, MagicMock
-from pathlib import Path
 from src.__main__ import main, parse_distribution
 from src.validators.question_schema import DifficultyLevel
 
@@ -33,7 +31,7 @@ class TestMain:
         mock_parser = mock_parser_class.return_value
         mock_parser.parse.return_value = "Extracted text"
         
-        with patch('sys.stdout') as mock_stdout:
+        with patch('sys.stdout'):
             # Simulate CLI args: extract input.pdf
             test_args = ['prog', 'extract', 'input.pdf']
             with patch.object(sys, 'argv', test_args):
@@ -58,7 +56,7 @@ class TestMain:
         
         mock_path_class.return_value.read_text.return_value = "Source text"
         
-        with patch('sys.stdout') as mock_stdout:
+        with patch('sys.stdout'):
             # Simulate CLI args: generate input.txt --skill-id uuid --difficulty easy:1
             test_args = ['prog', 'generate', 'input.txt', '--skill-id', 'uuid', '--difficulty', 'easy:1']
             with patch.dict('os.environ', {'GEMINI_API_KEY': 'test-key'}):

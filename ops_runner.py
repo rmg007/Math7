@@ -144,7 +144,7 @@ def execute_manifest(manifest_path: str) -> bool:
         except subprocess.TimeoutExpired as e:
             print(f"  ✗ Command timed out after 5 minutes: {e}")
             result_entry['status'] = 'timeout'
-            result_entry['error'] = f'Command timed out after 5 minutes'
+            result_entry['error'] = 'Command timed out after 5 minutes'
             entry_duration = int((time.time() - task_start) * 1000)
             result_entry['duration_ms'] = entry_duration
             overall_success = False

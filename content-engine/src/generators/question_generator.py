@@ -6,7 +6,7 @@ import os
 import json
 import time
 import logging
-from typing import List, Dict, Optional
+from typing import Dict, Optional
 from pydantic import ValidationError
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 

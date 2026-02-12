@@ -6,8 +6,7 @@ Tests AI integration with mocked API responses.
 import pytest
 import json
 import time
-from unittest.mock import Mock, patch, MagicMock
-from pathlib import Path
+from unittest.mock import Mock, patch
 
 from src.generators.question_generator import QuestionGenerator
 from src.validators.question_schema import QuestionSchema, DifficultyLevel, GenerationResponse
