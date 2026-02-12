@@ -32,27 +32,27 @@ jobs:
             const branch = '${{ inputs.branch }}';
             const maintenance = ['auto-format.yml', 'type-generation.yml', 'auto-cleanup.yml'];
 
-            console.log(`🛠️ Maintenance pulse on branch: ${branch}\n`);
+            console.log(`Maintenance pulse on branch: ${branch}\n`);
             for (const wf of maintenance) {
               try {
                 await github.rest.actions.createWorkflowDispatch({
                   owner: context.repo.owner, repo: context.repo.repo,
                   workflow_id: wf, ref: branch
                 });
-                console.log(`  ✅ ${wf}`);
+                console.log(`  OK: ${wf}`);
               } catch (e) {
-                console.log(`  ⚠️ ${wf}: ${e.message}`);
+                console.log(`  SKIP: ${wf}: ${e.message}`);
               }
             }
 
-      - name: Fresh-dispatch all dispatchable workflows
-        id: dispatch
+      - name: Dispatch all workflows and write summary
         uses: actions/github-script@v7
         with:
           script: |
             const branch = '${{ inputs.branch }}';
+            const maintenance = '${{ inputs.run_maintenance }}';
 
-            // All workflows that support workflow_dispatch (minus self, maintenance, and meta)
+            // Workflows that support workflow_dispatch
             const dispatchable = [
               'admin-panel-e2e.yml',
               'bundle-size.yml',
@@ -72,7 +72,7 @@ jobs:
               'workflow-health.yml'
             ];
 
-            // Non-dispatchable workflows — try rerun if they failed
+            // Non-dispatchable — try rerun if failed
             const rerunOnly = [
               'commit-lint.yml',
               'database.yml',
@@ -84,36 +84,32 @@ jobs:
               'validate.yml'
             ];
 
-            console.log(`\n🚀 Dispatching ${dispatchable.length} workflows on branch: ${branch}\n`);
-
             const results = [];
 
             // Phase 1: Fresh dispatch
+            console.log(`Dispatching ${dispatchable.length} workflows on branch: ${branch}\n`);
             for (const wf of dispatchable) {
               try {
                 await github.rest.actions.createWorkflowDispatch({
                   owner: context.repo.owner, repo: context.repo.repo,
                   workflow_id: wf, ref: branch
                 });
-                console.log(`  🟢 Dispatched: ${wf}`);
-                results.push({ name: wf, status: '🟢 Dispatched' });
+                console.log(`  DISPATCH: ${wf}`);
+                results.push([wf, 'Dispatched']);
               } catch (e) {
-                console.log(`  ⚠️ ${wf}: ${e.message}`);
-                results.push({ name: wf, status: `⚠️ ${e.message.substring(0, 60)}` });
+                console.log(`  SKIP: ${wf}: ${e.message}`);
+                results.push([wf, 'Failed']);
               }
             }
 
-            // Phase 2: Rerun latest failure for non-dispatchable workflows
-            console.log(`\n🔄 Rerunning ${rerunOnly.length} non-dispatchable workflows\n`);
-
+            // Phase 2: Rerun non-dispatchable
+            console.log(`\nRerunning ${rerunOnly.length} non-dispatchable workflows\n`);
             const { data: failedRuns } = await github.rest.actions.listWorkflowRunsForRepo({
               owner: context.repo.owner, repo: context.repo.repo,
-              branch: branch, status: 'failure', per_page: 100
+              branch, status: 'failure', per_page: 100
             });
 
             for (const wfFile of rerunOnly) {
-              // Find the latest failed run for this workflow file
-              const wfName = wfFile.replace('.yml', '');
               const match = failedRuns.workflow_runs.find(r => {
                 const rFile = r.path ? r.path.split('/').pop() : '';
                 return rFile === wfFile;
@@ -125,53 +121,35 @@ jobs:
                     owner: context.repo.owner, repo: context.repo.repo,
                     run_id: match.id
                   });
-                  console.log(`  🔄 Rerun: ${match.name} (${match.id})`);
-                  results.push({ name: match.name, status: '🔄 Rerun' });
+                  console.log(`  RERUN: ${match.name}`);
+                  results.push([match.name, 'Rerun']);
                 } catch (e) {
-                  console.log(`  ⚠️ ${wfFile}: ${e.message}`);
-                  results.push({ name: wfFile, status: `⚠️ ${e.message.substring(0, 60)}` });
+                  console.log(`  SKIP: ${wfFile}: ${e.message}`);
+                  results.push([wfFile, 'Failed']);
                 }
               } else {
-                console.log(`  ⏭️ ${wfFile}: no failed run found`);
-                results.push({ name: wfFile, status: '⏭️ No failure found' });
+                console.log(`  SKIP: ${wfFile}: no failure found`);
+                results.push([wfFile, 'No failure']);
               }
             }
 
-            core.setOutput('total', results.length.toString());
-            core.setOutput('results', JSON.stringify(results));
+            // Write summary directly — no cross-step JSON passing
+            const dispatched = results.filter(r => r[1] === 'Dispatched').length;
+            const rerun = results.filter(r => r[1] === 'Rerun').length;
+            const failed = results.filter(r => r[1] === 'Failed').length;
 
-      - name: Write recovery summary
-        if: always()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const branch = '${{ inputs.branch }}';
-            const total = '${{ steps.dispatch.outputs.total }}';
-            const maintenance = '${{ inputs.run_maintenance }}';
+            let md = `## CI Recovery Report\n\n`;
+            md += `| Field | Value |\n|-------|-------|\n`;
+            md += `| Branch | \`${branch}\` |\n`;
+            md += `| Maintenance | ${maintenance === 'true' ? 'Triggered' : 'Skipped'} |\n`;
+            md += `| Dispatched | **${dispatched}** |\n`;
+            md += `| Rerun | **${rerun}** |\n`;
+            md += `| Failed | **${failed}** |\n\n`;
 
-            let results = [];
-            try { results = JSON.parse('${{ steps.dispatch.outputs.results }}'); } catch {}
-
-            let summary = `## 🚀 CI Recovery Report\n\n`;
-            summary += `| Field | Value |\n|-------|-------|\n`;
-            summary += `| Branch | \`${branch}\` |\n`;
-            summary += `| Maintenance | ${maintenance === 'true' ? '✅ Triggered' : '⏭️ Skipped'} |\n`;
-            summary += `| Workflows Processed | **${total}** |\n\n`;
-
-            if (results.length > 0) {
-              const dispatched = results.filter(r => r.status.includes('Dispatched'));
-              const rerun = results.filter(r => r.status.includes('Rerun'));
-              const failed = results.filter(r => r.status.includes('⚠️'));
-
-              summary += `### Results: ${dispatched.length} dispatched, ${rerun.length} rerun, ${failed.length} issues\n\n`;
-              summary += `| Workflow | Method |\n|----------|--------|\n`;
-              for (const r of results) {
-                summary += `| ${r.name} | ${r.status} |\n`;
-              }
-              summary += `\n`;
+            md += `| Workflow | Status |\n|----------|--------|\n`;
+            for (const [name, status] of results) {
+              md += `| ${name} | ${status} |\n`;
             }
 
-            summary += `---\n`;
-            summary += `*[Monitor progress →](https://github.com/${context.repo.owner}/${context.repo.repo}/actions?query=branch%3A${branch})*\n`;
-
-            await core.summary.addRaw(summary).write();
+            await core.summary.addRaw(md).write();
+            console.log(`\nDone: ${dispatched} dispatched, ${rerun} rerun, ${failed} failed`);
