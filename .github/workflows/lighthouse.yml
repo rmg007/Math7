@@ -4,7 +4,6 @@ on:
   pull_request:
     paths:
       - "admin-panel/**"
-      - "landing-pages/**"
   push:
     branches: [main]
   workflow_dispatch:

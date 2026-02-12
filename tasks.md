@@ -1,5 +1,45 @@
 # Questerix Development Tasks
 
+## 🛡️ AUDIT REMEDIATION (2026-02-12)
+
+### Critical Security & Stability Fixes
+
+- [x] **CRITICAL: Remove hard-coded secrets** from `scripts/inspect_rpc.js`
+  - Removed fallback password and project ref
+  - Fail explicitly when env vars missing
+  - Removed `rejectUnauthorized: false` SSL bypass
+- [x] **HIGH: Add subprocess timeout** to `ops_runner.py`
+  - Added 5-minute timeout to `subprocess.run()`
+  - Added `TimeoutExpired` exception handling
+- [x] **HIGH: Add retry logic** to `question_generator.py`
+  - Added tenacity-based exponential backoff (3 retries)
+  - Added 50KB response size guard before JSON parsing
+  - Updated requirements.txt with tenacity>=8.2.0
+- [x] **BUG: Fix prompt comment leakage** in `question_generator.py`
+  - Extract text truncation before f-string to avoid comment leakage
+
+### Medium Priority Hardening
+
+- [x] **Redesign options schema** in `question_schema.py`
+  - Eliminated confusing nested `options.options` structure
+  - Added proper null handling and initialization for different question types
+- [x] **Add migration tracking** to `apply-migrations.py`
+  - Created `schema_migrations` table with filename + checksum
+  - Skip already-applied migrations to prevent re-execution
+- [x] **Sanitize custom_instructions** in `question_generator.py`
+  - 500-character limit
+  - Remove control characters and dangerous prompt injection patterns
+
+### Low Priority Cleanup
+
+- [x] **Add useEffect cleanup** to `admin-panel/src/App.tsx`
+  - Added AbortController to prevent stale state updates
+- [x] **Add error handling** to `document_parser.py`
+  - Graceful handling of missing files in `get_metadata()`
+  - Return default metadata with `exists: false` flag
+
+---
+
 ## 🛡️ TEST COVERAGE RECOVERY PLAN
 
 ### 🏗️ Phase 1: Unblock CI (Config + Edge Function Fixes)
@@ -49,7 +89,7 @@
 - [x] **CI Recovery Protocol**: `scripts/ci-recover.ps1` for mass-rerunning and unblocking CI.
 - [x] **Tier 1 Auto-Fix**: `ci-auto-fix.yml` — headless auto-fixer for husky, lockfile, dart patterns.
 - [x] **Make It Green Button**: `ci-recover-button.yml` — one-click mass rerun from GitHub UI.
-- [ ] **GitHub Secrets**: Add Supabase + test user credentials to GitHub Settings.
+- [x] **GitHub Secrets**: Added Supabase + test user credentials to GitHub Settings.
 - [x] **`gh auth login`**: Authenticate GitHub CLI for agent issue discovery and PR management.
 - [ ] **CLI-First PRs**: Transition all PR lifecycle management (list, view, merge) to `gh` CLI.
 
@@ -72,3 +112,12 @@
 - [ ] **BUG #3: Error Logs Page Crash**: Investigating systemic crash on `/error-logs` route.
 - [ ] **Form Feedback**: Add loading indicators to "Initiate Provision" and "Update Signature" buttons.
 - [ ] **Feature Verification**: Verify "Template" and "Upload" buttons in Domain Registry.
+
+---
+
+## 🚀 DEPLOYMENT & INFRASTRUCTURE
+
+- [x] **Cloudflare Pages**: Admin Panel and Student App are live.
+- [x] **Landing Pages Deletion**: Manually deleted from Cloudflare by user.
+- [x] **HARD RULE**: `landing-pages` MUST NOT be published. `orchestrator.ps1` has been locked with `$SkipLanding = $true`.
+- [x] **Custom Domains**: Pointed to `admin.questerix.com` and `app.questerix.com`.

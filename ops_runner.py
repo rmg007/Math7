@@ -118,7 +118,8 @@ def execute_manifest(manifest_path: str) -> bool:
                 cwd=cwd if cwd else None,
                 capture_output=True,
                 text=True,
-                encoding='utf-8' # Ensure encoding is handled
+                encoding='utf-8', # Ensure encoding is handled
+                timeout=300  # 5 minute timeout
             )
             
             # Print output to console for the user to see in real-time (if watching)
@@ -140,6 +141,14 @@ def execute_manifest(manifest_path: str) -> bool:
                 result_entry['status'] = 'failed'
                 overall_success = False
 
+        except subprocess.TimeoutExpired as e:
+            print(f"  ✗ Command timed out after 5 minutes: {e}")
+            result_entry['status'] = 'timeout'
+            result_entry['error'] = f'Command timed out after 5 minutes'
+            entry_duration = int((time.time() - task_start) * 1000)
+            result_entry['duration_ms'] = entry_duration
+            overall_success = False
+        
         except Exception as e:
             print(f"  ✗ Error executing command: {e}")
             result_entry['status'] = 'error'

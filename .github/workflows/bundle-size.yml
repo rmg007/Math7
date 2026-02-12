@@ -4,7 +4,6 @@ on:
   pull_request:
     paths:
       - "admin-panel/**"
-      - "landing-pages/**"
       - "student-app/**"
   push:
     branches: [main]
@@ -26,17 +25,10 @@ jobs:
           cache: "npm"
           cache-dependency-path: |
             admin-panel/package-lock.json
-            landing-pages/package-lock.json
 
       - name: Build Admin Panel
         run: |
           cd admin-panel
-          npm ci --legacy-peer-deps --legacy-peer-deps
-          npm run build
-
-      - name: Build Landing Pages
-        run: |
-          cd landing-pages
           npm ci --legacy-peer-deps --legacy-peer-deps
           npm run build
 
@@ -70,22 +62,17 @@ jobs:
             }
 
             const adminSize = getDirectorySize('admin-panel/dist');
-            const landingSize = getDirectorySize('landing-pages/dist');
-
             const adminSizeMB = (adminSize / 1024 / 1024).toFixed(2);
-            const landingSizeMB = (landingSize / 1024 / 1024).toFixed(2);
 
             // Thresholds (in MB)
             const adminThreshold = 5;
-            const landingThreshold = 3;
 
             let comment = '## 📦 Bundle Size Report\n\n';
             comment += '| App | Size | Status |\n';
             comment += '|-----|------|--------|\n';
             comment += `| Admin Panel | ${adminSizeMB} MB | ${adminSize > adminThreshold * 1024 * 1024 ? '⚠️ Over threshold' : '✅ OK'} |\n`;
-            comment += `| Landing Pages | ${landingSizeMB} MB | ${landingSize > landingThreshold * 1024 * 1024 ? '⚠️ Over threshold' : '✅ OK'} |\n`;
 
-            if (adminSize > adminThreshold * 1024 * 1024 || landingSize > landingThreshold * 1024 * 1024) {
+            if (adminSize > adminThreshold * 1024 * 1024) {
               comment += '\n⚠️ **Warning**: Bundle size exceeded threshold! Consider code splitting or lazy loading.';
             }
 

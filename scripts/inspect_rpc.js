@@ -1,12 +1,18 @@
 const { Client } = require('pg');
-const dbPassword = process.env.DB_PASSWORD || 'QpJIzi2r6vaoghG5';
-const projectRef = process.env.SUPABASE_PROJECT_REF || 'qvslbiceoonrgjxzkotb';
+
+const dbPassword = process.env.DB_PASSWORD;
+const projectRef = process.env.SUPABASE_PROJECT_REF;
+
+if (!dbPassword || !projectRef) {
+  console.error('❌ ERROR: DB_PASSWORD and SUPABASE_PROJECT_REF environment variables are required');
+  process.exit(1);
+}
+
 const dbUrl = `postgresql://postgres:${dbPassword}@db.${projectRef}.supabase.co:5432/postgres`;
 
 async function check() {
   const client = new Client({
-    connectionString: dbUrl,
-    ssl: { rejectUnauthorized: false }
+    connectionString: dbUrl
   });
 
   try {

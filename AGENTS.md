@@ -7,6 +7,7 @@
 1. **No TODO/FIXME/HACK in code.** All work items go in `tasks.md`.
 2. **Document after every task.** Append a session entry to `docs/LEARNING_LOG.md` (what was done, what was learned).
 3. **Tasks only in `tasks.md`.** No rules, docs, or history in that file.
+4. **DO NOT PUBLISH landing-pages.** This component is for local development only. Orchestrator scripts are locked to skip it.
 
 ## File Placement
 

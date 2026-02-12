@@ -8,6 +8,7 @@ import time
 import logging
 from typing import List, Dict, Optional
 from pydantic import ValidationError
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 try:
     import google.generativeai as genai
@@ -124,12 +125,28 @@ Return a JSON array of question objects ONLY. Example:
             text: Source material to generate questions from
             skill_id: Target skill UUID (for metadata)
             difficulty_distribution: How many questions per difficulty level
-            custom_instructions: Optional user-specific instructions
+            custom_instructions: Optional user-specific instructions (will be sanitized)
             
         Returns:
             GenerationResponse with validated questions
         """
         start_time = time.time()
+        
+        # Sanitize custom_instructions to prevent prompt injection
+        if custom_instructions:
+            # Limit length and remove control characters
+            custom_instructions = custom_instructions[:500]  # 500 char limit
+            custom_instructions = ''.join(char for char in custom_instructions if ord(char) >= 32 or char in '\n\t')
+            # Remove potential prompt injection patterns
+            dangerous_patterns = [
+                'system:', 'assistant:', 'user:', 
+                'ignore previous', 'disregard', 'forget',
+                'new instruction:', 'override', '<|im_end|>'
+            ]
+            for pattern in dangerous_patterns:
+                if pattern.lower() in custom_instructions.lower():
+                    logger.warning(f"Potentially dangerous pattern detected in custom_instructions: {pattern}")
+                    custom_instructions = custom_instructions.replace(pattern, '')
         
         # Build prompt
         prompt = self._build_prompt(text, difficulty_distribution, custom_instructions)
@@ -145,6 +162,10 @@ Return a JSON array of question objects ONLY. Example:
         
         # Parse and validate
         try:
+            # Validate response size before parsing
+            if len(raw_response) > 50000:  # 50KB limit
+                raise ValueError(f"AI response too large: {len(raw_response)} chars")
+            
             questions_data = json.loads(raw_response)
             
             if not isinstance(questions_data, list):
@@ -188,13 +209,16 @@ Return a JSON array of question objects ONLY. Example:
             if count > 0
         ])
         
+        # Truncate text before the f-string to avoid comment leakage
+        truncated_text = text[:4000]
+        
         user_prompt = f"""Generate exactly {total_questions} questions from the following text.
 
 **Distribution Required:**
 {distribution_text}
 
 **Source Text:**
-{text[:4000]}  # Limit to ~4000 chars to stay within context
+{truncated_text}
 
 {f"**Additional Instructions:** {custom_instructions}" if custom_instructions else ""}
 
@@ -203,8 +227,13 @@ Remember: Output ONLY the JSON array. No markdown, no explanations.
         
         return f"{self.DEFAULT_SYSTEM_PROMPT}\n\n{user_prompt}"
     
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_exception_type((Exception,))
+    )
     def _call_gemini(self, prompt: str) -> str:
-        """Call Gemini API."""
+        """Call Gemini API with retry logic."""
         try:
             response = self.client.generate_content(
                 prompt,
@@ -219,8 +248,13 @@ Remember: Output ONLY the JSON array. No markdown, no explanations.
             logger.error(f"Gemini API error: {e}")
             raise
     
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_exception_type((Exception,))
+    )
     def _call_openai(self, prompt: str) -> str:
-        """Call OpenAI API."""
+        """Call OpenAI API with retry logic."""
         try:
             response = self.client.chat.completions.create(
                 model=self.model,

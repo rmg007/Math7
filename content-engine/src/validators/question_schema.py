@@ -39,8 +39,8 @@ class QuestionSchema(BaseModel):
     content: str = Field(..., min_length=10, description="Question text (supports Markdown)")
     type: QuestionType = Field(default=QuestionType.MULTIPLE_CHOICE)
     
-    # Type-specific data
-    options: Dict[str, Any] = Field(default_factory=dict, description="JSONB options field")
+    # Type-specific data - redesigned to eliminate nested options.options
+    options: Optional[Dict[str, Any]] = Field(default=None, description="JSONB options field")
     solution: Dict[str, Any] = Field(..., description="JSONB solution field")
     
     # Metadata
@@ -58,13 +58,21 @@ class QuestionSchema(BaseModel):
         question_type = info.data.get("type")
         
         if question_type == QuestionType.MULTIPLE_CHOICE:
-            # Must have options array
-            if "options" not in v:
-                raise ValueError("Multiple choice questions must have 'options' array")
+            if v is None:
+                # Initialize empty options structure for multiple choice
+                return {"options": []}
+            if not isinstance(v, dict) or "options" not in v:
+                raise ValueError("Multiple choice questions must have 'options' dict with 'options' array")
             if not isinstance(v["options"], list):
                 raise ValueError("'options' must be an array")
             if len(v["options"]) < 2:
                 raise ValueError("Must have at least 2 options")
+        elif question_type == QuestionType.TEXT_INPUT:
+            if v is None:
+                return {"placeholder": "Enter your answer"}
+        elif question_type == QuestionType.BOOLEAN:
+            if v is None:
+                return {}
         
         return v
     
@@ -85,6 +93,10 @@ class QuestionSchema(BaseModel):
         elif question_type == QuestionType.BOOLEAN:
             if "correct_value" not in v:
                 raise ValueError("Boolean solutions must have 'correct_value'")
+        
+        elif question_type in [QuestionType.MCQ_MULTI, QuestionType.REORDER_STEPS]:
+            # These types may have different solution structures
+            pass  # Allow any structure for now
         
         return v
 

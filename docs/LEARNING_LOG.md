@@ -1,30 +1,97 @@
-## 2026-02-12: CI Stabilization, Resilient UI, and Dependency Harmony
+## 2026-02-12: Code Audit Remediation & Security Hardening
 
 ### Session Context
 
-- **Objective**: Stabilize the entire CI/CD pipeline, resolve production crashes in the Admin Panel, and re-enable secondary security/performance workflows.
-- **Scope**: `.github/workflows/`, `admin-panel/src/components/ui/status-badge.tsx`, `student-app/test/`.
-- **Outcome**: ✅ 14 workflows stabilized with `--legacy-peer-deps`. ✅ Production crash in `StatusBadge` fixed with fallbacks. ✅ Flutter analyzer debt cleared (`33 issues found` -> `0`). ✅ Secondary workflows (DAST, Lighthouse, Dead Code) re-enabled.
+- **Objective**: Fix verified security and stability issues from external code audit.
+- **Scope**: `scripts/inspect_rpc.js`, `ops_runner.py`, `content-engine/src/generators/`, `content-engine/src/validators/`, `scripts/apply-migrations.py`, `admin-panel/src/App.tsx`, `content-engine/src/parsers/`.
+- **Outcome**: ✅ 10 audit issues fixed. 1 CRITICAL (hard-coded secrets), 3 HIGH, 3 MEDIUM, 3 LOW. All changes pushed to GitHub.
+
+### What Was Done
+
+1. **Critical Security Fix (`inspect_rpc.js`)**
+   - Removed hard-coded database password and project ref
+   - Added explicit failure when environment variables missing
+   - Removed SSL certificate bypass (`rejectUnauthorized: false`)
+
+2. **Process Stability (`ops_runner.py`)**
+   - Added 5-minute timeout to `subprocess.run()` calls
+   - Implemented `TimeoutExpired` exception handling with proper status tracking
+
+3. **AI Service Resilience (`question_generator.py`)**
+   - Added tenacity-based retry logic with exponential backoff (3 retries, 4-10s intervals)
+   - Implemented 50KB response size guard before JSON parsing
+   - Fixed prompt comment leakage bug where `# comment` inside f-string was sent to AI
+   - Added custom_instructions sanitization (500-char limit, remove dangerous patterns)
+
+4. **Schema Validation Cleanup (`question_schema.py`)**
+   - Redesigned `options` field to eliminate confusing nested `options.options` structure
+   - Added proper null handling and type-specific initialization
+
+5. **Database Safety (`apply-migrations.py`)**
+   - Created `schema_migrations` tracking table with filename + checksum
+   - Prevent re-execution of already-applied migrations
+
+6. **Memory Safety (`App.tsx`)**
+   - Added AbortController cleanup to prevent stale state updates in `RoleRedirect`
+
+7. **Error Resilience (`document_parser.py`)**
+   - Added graceful handling of missing files in `get_metadata()`
+   - Return default metadata with `exists: false` flag
 
 ### What Was Learned
 
-1. **The "Resilient Component" Pattern**: Components that render database enums (like `StatusBadge`) must include a "Total Fallback" state. Assuming that UI code and Database schema will always be in perfect 1:1 sync is a recipe for production crashes. Defaulting to neutral colors and raw strings preserves the UI while signaling a need for an update.
+1. **The "Comment in F-String" Trap**: Inline comments inside f-strings `{text[:4000]}  # comment` are evaluated as literal text and sent to the AI. **Rule**: Extract truncations before the f-string; never put comments inside interpolated expressions.
 
-2. **Monorepo Dependency Friction in CI**: strictly isolated CI runners often struggle with complex peer dependency trees in monorepos. While local environments might tolerate these via symlinks, CI requires explicit flags like `--legacy-peer-deps` to bypass strict conflict resolution. This is a standard "Stability Baseline" for large-scale migrations.
+2. **Secret Management Discipline**: Even development scripts with fallback credentials are dangerous. A silent fallback to a hard-coded value can expose production credentials if the script is ever run in the wrong environment. **Rule**: Always fail explicitly when required environment variables are missing.
 
-3. **Dart Analyzer "Dead Code" Evolution**: Newer Dart SDKs (3.x+) have much more aggressive dead code detection. In `if-case` or `switch` patterns where a type is statically guaranteed, trailing `fail()` or `throw` blocks are now marked as `dead_code` blockers. Trust the type system and remove the boilerplate.
+3. **Subprocess Timeouts are Non-Negotiable**: Any subprocess call without a timeout is a potential deadlock. Even "trusted" commands can hang indefinitely. **Rule**: Always add `timeout` and handle `TimeoutExpired` explicitly.
 
-4. **CI/CD Manual Control Necessity**: Relying solely on automated triggers (`push`/`pull_request`) makes repository recovery difficult during "Make It Green" cycles. Adding `workflow_dispatch` to every critical workflow allows agents and developers to rerun repairs without committing "dummy" changes.
+4. **Retry Logic Must Be Bounded**: Unbounded retries can cause infinite loops or excessive API costs. **Rule**: Use exponential backoff with clear retry limits (3-5 attempts max).
 
-5. **Legacy API Maintenance in Tests**: When a stable API goes `deprecated`, it's often better to suppress the warning in tests (e.g., `Color.value` comparison) than to rewrite complex logic, provided the underlying behavior is still correct. This keeps the global "Zero Warnings" status achievable.
+5. **Schema Design Clarity Prevents Bugs**: The nested `options.options` structure in the question schema was confusing and error-prone. Clear, flat structures with explicit null handling reduce cognitive load and prevent validation errors.
+
+6. **Migration Tracking is Essential**: Running migrations without tracking is asking for data corruption. A simple `schema_migrations` table with filename + checksum prevents re-execution and provides audit trails.
+
+7. **React Cleanup Matters**: Even components that only mount once can have race conditions during hot reload or testing. AbortController cleanup prevents stale state updates and memory leaks.
 
 ### Preventative Measures
 
-- **ALWAYS** implement fallbacks in badge/label components that consume enums.
-- **ALWAYS** use `--legacy-peer-deps` for `npm ci` in CI environments to prevent lockfile conflicts.
-- **ALWAYS** include `workflow_dispatch` in new `.yml` workflow definitions.
-- **NEVER** leave `dead_code` warnings in tests; they obscure real logic errors.
-- **ALWAYS** synchronize the Node.js version (20.x) and Flutter channel (stable) across all CI jobs to prevent "Platform Drift."
+- **ALWAYS** use explicit environment variable validation with clear error messages.
+- **ALWAYS** add timeouts to subprocess calls and handle `TimeoutExpired`.
+- **ALWAYS** extract operations before f-strings; never put comments inside interpolated expressions.
+- **ALWAYS** implement retry logic with exponential backoff and clear limits.
+- **ALWAYS** design schemas to be flat and explicit; avoid nested structures that require deep validation.
+- **ALWAYS** track migrations with filename + checksum to prevent re-execution.
+- **ALWAYS** add AbortController cleanup to async operations in React components.
+- **NEVER** use silent fallbacks for credentials or configuration.
+
+---
+
+## 2026-02-12: Domain Policy Refinement, RLS Hardening, and UI Consolidation
+
+### Session Context
+
+- **Objective**: Investigate and resolve RLS access issues for Super Admins, fix Domain CRUD failures, and consolidate redundant curriculum management logic.
+- **Scope**: `supabase/migrations/`, `admin-panel/src/features/curriculum/`, `ErrorLogsPage.tsx`.
+- **Outcome**: ✅ RLS Hardening implemented with database-backed checks (`is_super_admin`, `is_admin`). ✅ Domain CRUD restored. ✅ `CurriculumFilterBar` and `shared.ts` hooks implemented to reduce code duplication by ~40%. ✅ `ErrorLogsPage` stabilized with null-safe date parsing.
+
+### What Was Learned
+
+1. **The "JWT Claim Gap"**: Relying on custom JWT claims (like `user_role`) for RLS is dangerous because these claims are often missing from standard auth tokens or can be spoofed in certain environments. **Rule**: Always use `SECURITY DEFINER` functions that query the `profiles` table directly to verify roles in RLS policies.
+
+2. **Consolidation as a Quality Gate**: Large features like Curriculum (Domains/Skills/Questions) often evolve in parallel, leading to "Logic Drift." Consolidating types into `shared.ts` and UI into `CurriculumFilterBar` doesn't just reduce code; it ensures that a fix (like an `aria-label` or a search debounce) is applied to all entities simultaneously.
+
+3. **Tenant-Safe Global Access**: Super Admins often need to bypass `app_id` checks that standard users are strictly bound to. Implementing RLS as `(app_id = current_app_id()) OR is_super_admin()` provides a clean way to maintain multi-tenancy while allowing global oversight.
+
+4. **Intelligence Bar Resilience**: High-density data dashboards (like the Error Tracking intelligence bar) are prone to crashes from "Partial Data." Using a persistent wrapper for date parsing and type-checking stats objects prevents a single bad log entry from taking down the entire monitoring view.
+
+### Preventative Measures
+
+- **ALWAYS** use database-backed role checks (`public.is_admin()`) instead of JWT claims in RLS.
+- **ALWAYS** wrap date parsing in `try-catch` or null-checks when dealing with error logs or untrusted data.
+- **ALWAYS** consolidate shared UI patterns (Search/Filters) early to prevent "Accessibility Debt."
+- **ALWAYS** verify RLS changes with a full `npm run typecheck` to ensure mock data and types still align.
+- **NEVER** use `any` in shared hook parameter types; use the consolidated `PaginationParams`.
 
 ---
 

@@ -142,11 +142,30 @@ class DocumentParser:
         """Extract file metadata."""
         path = Path(file_path)
         
-        metadata = {
+        # Default metadata for missing files
+        default_metadata = {
             "filename": path.name,
-            "file_size": path.stat().st_size,
+            "file_size": 0,
             "extension": path.suffix.lower(),
+            "exists": False
         }
+        
+        try:
+            stat_info = path.stat()
+            metadata = {
+                "filename": path.name,
+                "file_size": stat_info.st_size,
+                "extension": path.suffix.lower(),
+                "exists": True,
+                "modified_time": stat_info.st_mtime,
+                "created_time": stat_info.st_ctime
+            }
+        except FileNotFoundError:
+            logger.warning(f"File not found for metadata extraction: {file_path}")
+            return default_metadata
+        except Exception as e:
+            logger.error(f"Error accessing file metadata for {file_path}: {e}")
+            return default_metadata
         
         # PDF-specific metadata
         if path.suffix.lower() == '.pdf' and PdfReader:

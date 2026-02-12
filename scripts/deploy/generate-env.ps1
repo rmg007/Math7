@@ -93,6 +93,8 @@ Set-Content -Path $adminEnvPath -Value $adminEnvContent
 Write-Host "  ✅ Created: $adminEnvPath" -ForegroundColor Green
 
 
+<# 
+# [DEPRECATED] DO NOT PUBLISH LANDING PAGES
 # Generate Landing Pages .env
 Write-Host "⚙️  Generating landing-pages/.env..." -ForegroundColor Cyan
 $landingEnvContent = @()
@@ -111,6 +113,7 @@ foreach ($prop in $configJson.landing.PSObject.Properties) {
 $landingEnvPath = Join-Path $RootDir "landing-pages\.env"
 Set-Content -Path $landingEnvPath -Value $landingEnvContent
 Write-Host "  ✅ Created: $landingEnvPath" -ForegroundColor Green
+#>
 
 
 # Generate Student App .flutter-defines.tmp

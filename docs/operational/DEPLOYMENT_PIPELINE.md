@@ -1,42 +1,29 @@
 # Questerix Deployment Pipeline
 
-> **Version:** 1.0.0  
-> **Last Updated:** 2026-02-02  
-> **Status:** Ready for Configuration
+> **Version:** 1.0.0
+> **Last Updated:** 2026-02-12
+> **Status:** Production Ready
 
 ## Overview
 
-This document describes the unified deployment orchestration system for the Questerix platform. The system enables single-command deployment of all three applications with synchronized configuration.
+This document describes the unified deployment orchestration system for the Questerix platform. The system enables single-command deployment of the core applications with synchronized configuration.
 
 ### Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        DEPLOYMENT PIPELINE                                   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌──────────────────┐      ┌──────────────────┐      ┌──────────────────┐  │
-│  │  master-config   │──────│   orchestrator   │──────│   Cloudflare     │  │
-│  │     .json        │      │      .ps1        │      │     Pages        │  │
-│  └──────────────────┘      └──────────────────┘      └──────────────────┘  │
-│           │                         │                                        │
-│           ▼                         ▼                                        │
-│  ┌──────────────────┐      ┌──────────────────┐                             │
-│  │    .secrets      │      │  generate-env    │                             │
-│  │  (git-ignored)   │      │     .ps1         │                             │
-│  └──────────────────┘      └──────────────────┘                             │
-│                                     │                                        │
-│           ┌─────────────────────────┼─────────────────────────┐             │
-│           ▼                         ▼                         ▼             │
-│  ┌──────────────────┐      ┌──────────────────┐      ┌──────────────────┐  │
-│  │  Landing Pages   │      │   Admin Panel    │      │   Student App    │  │
-│  │  (Static HTML)   │      │  (React+Vite)    │      │  (Flutter Web)   │  │
-│  └──────────────────┘      └──────────────────┘      └──────────────────┘  │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    MC[master-config.json] --> OR[orchestrator.ps1]
+    S[.secrets] --> OR
+    OR --> GE[generate-env.ps1]
+    GE --> AP_ENV[admin-panel/.env.local]
+    GE --> SA_ENV[.flutter-defines.tmp]
+    OR --> AP_BUILD[Admin Panel Build]
+    OR --> SA_BUILD[Student App Build]
+    AP_BUILD --> CF[Cloudflare Pages]
+    SA_BUILD --> CF
 ```
 
-## Quick Start
+> **CRITICAL:** `landing-pages` must NEVER be published. It is intentionally excluded from the orchestration cycle and restricted to local development only.
 
 ### 1. First-Time Setup
 
@@ -72,7 +59,7 @@ notepad master-config.json
 
 ## File Structure
 
-```
+```text
 questerix/
 ├── master-config.json          # Single source of truth (production)
 ├── master-config.staging.json  # Staging environment variant
@@ -108,28 +95,29 @@ The master configuration file is the **single source of truth** for all environm
 {
   "version": "1.0.0",
   "environment": "production",
-  
+
   "global": {
     "SUPABASE_URL": "https://YOUR-PROJECT.supabase.co",
     "SUPABASE_ANON_KEY": "YOUR-ANON-KEY",
-    "API_BASE_URL": "https://api.questerix.com"
+    "API_BASE_URL": "https://api.questerix.com",
+    "STUDENT_APP_URL": "https://app.questerix.com",
+    "ADMIN_PANEL_URL": "https://admin.questerix.com"
   },
-  
+
   "admin": {
     "VITE_APP_NAME": "Questerix Admin",
     "VITE_SUPABASE_URL": "${global.SUPABASE_URL}",
-    ...
+    "...": "..."
   },
-  
+
   "student": {
     "APP_NAME": "Questerix",
     "SUPABASE_URL": "${global.SUPABASE_URL}",
-    ...
+    "...": "..."
   },
-  
+
   "cloudflare": {
     "account_id": "YOUR-ACCOUNT-ID",
-    "landing_project": "questerix-landing",
     "admin_project": "questerix-admin",
     "student_project": "questerix-student"
   }
@@ -140,10 +128,10 @@ The master configuration file is the **single source of truth** for all environm
 
 The configuration supports template variables that are resolved during environment generation:
 
-| Variable | Description |
-|----------|-------------|
-| `${version}` | Replaced with the `version` field from config |
-| `${global.SUPABASE_URL}` | Replaced with `global.SUPABASE_URL` value |
+| Variable                      | Description                                    |
+| :---------------------------- | :--------------------------------------------- |
+| `${version}`                  | Replaced with the `version` field from config  |
+| `${global.SUPABASE_URL}`      | Replaced with `global.SUPABASE_URL` value      |
 | `${global.SUPABASE_ANON_KEY}` | Replaced with `global.SUPABASE_ANON_KEY` value |
 
 ### .secrets File
@@ -170,30 +158,34 @@ GEMINI_API_KEY=your-gemini-key
 The orchestrator executes 5 phases in sequence:
 
 ### Phase 1: Validation
+
 - Checks required tools (node, npm, flutter, wrangler)
 - Validates `.secrets` file exists and is in `.gitignore`
 - Loads secrets into environment (RAM only)
 - Validates JSON configuration syntax
 
 ### Phase 2: Environment Generation
+
 - Resolves template variables (`${version}`, `${global.*}`)
 - Generates `admin-panel/.env.local`
 - Generates `.flutter-defines.tmp`
 
 ### Phase 3: Parallel Build
+
 - Cleans previous build artifacts
-- Builds Admin Panel (`npm run build`) in parallel
-- Builds Student App (`flutter build web`) in parallel
+- Builds Admin Panel (`npm run build`) sequentially
+- Builds Student App (`flutter build web`) sequentially
 - Verifies build outputs exist
 
 ### Phase 4: Parallel Deploy
-- Deploys Landing Pages to Cloudflare Pages
+
 - Deploys Admin Panel to Cloudflare Pages
 - Deploys Student App to Cloudflare Pages
 
 ### Phase 5: Cleanup & Report
+
 - Removes generated environment files
-- **Syncs AI Performance Registry**: Updates `kb_registry` and `kb_metrics` in Supabase (deterministic agent performance)
+- **Syncs AI Performance Registry**: Updates `kb_registry` and `kb_metrics` in Supabase
 - Displays deployment summary with live URLs
 - Logs all output to `deploy-{timestamp}.log`
 
@@ -218,7 +210,7 @@ void main() {
 ### React (admin-panel)
 
 ```typescript
-import { env, validateEnv } from '@/config/env';
+import { env, validateEnv } from "@/config/env";
 
 // Access configuration
 const version = env.appVersion;
@@ -232,21 +224,20 @@ validateEnv(); // Throws if required vars missing
 
 ### Prerequisites
 
-1. **Create Cloudflare Account**: https://dash.cloudflare.com
+1. **Create Cloudflare Account**: [dash.cloudflare.com](https://dash.cloudflare.com)
 2. **Install Wrangler**: `npm install -g wrangler`
 3. **Login to Wrangler**: `wrangler login`
 
 ### Create Pages Projects
 
-Create three Cloudflare Pages projects:
+Create two Cloudflare Pages projects:
 
-1. `questerix-landing` - Landing Pages (static)
-2. `questerix-admin` - Admin Panel (SPA)
-3. `questerix-student` - Student App (SPA)
+1. `questerix-admin` - Admin Panel (SPA)
+2. `questerix-student` - Student App (SPA)
 
 ### Generate API Token
 
-1. Go to https://dash.cloudflare.com/profile/api-tokens
+1. Go to [dash.cloudflare.com/profile/api-tokens](https://dash.cloudflare.com/profile/api-tokens)
 2. Create token with **Cloudflare Pages: Edit** permission
 3. Copy token to `.secrets` file
 
@@ -254,14 +245,13 @@ Create three Cloudflare Pages projects:
 
 ### Common Errors
 
-| Error | Cause | Solution |
-|-------|-------|----------|
-| `.secrets file not found` | Missing secrets | Copy `.secrets.template` to `.secrets` |
-| `CLOUDFLARE_API_TOKEN not set` | Empty token | Fill in your API token in `.secrets` |
-| `Invalid JSON in master-config.json` | Syntax error | Validate JSON: `Get-Content master-config.json \| ConvertFrom-Json` |
-| `Admin Panel build output not found` | npm build failed | Check `admin-panel/` for errors |
-| `Student App build output not found` | Flutter build failed | Check `flutter build web` output |
-| `wrangler: command not found` | Wrangler not installed | Run `npm install -g wrangler` |
+| Error                                | Cause                | Solution                               |
+| :----------------------------------- | :------------------- | :------------------------------------- |
+| `.secrets file not found`            | Missing secrets      | Copy `.secrets.template` to `.secrets` |
+| `CLOUDFLARE_API_TOKEN not set`       | Empty token          | Fill in your API token in `.secrets`   |
+| `Invalid JSON in master-config.json` | Syntax error         | Validate JSON with `ConvertFrom-Json`  |
+| `Admin Panel build output not found` | npm build failed     | Check `admin-panel/` for errors        |
+| `Student App build output not found` | Flutter build failed | Check `flutter build web` output       |
 
 ### Verification Commands
 
@@ -299,6 +289,7 @@ Before first deployment, verify:
 For local development without the orchestrator:
 
 ### Admin Panel
+
 ```powershell
 cd admin-panel
 # Create .env.local manually or run:
@@ -307,6 +298,7 @@ npm run dev
 ```
 
 ### Student App
+
 ```powershell
 cd student-app
 # Run with dart-define flags:
@@ -315,7 +307,15 @@ flutter run -d chrome --dart-define=SUPABASE_URL=https://... --dart-define=SUPAB
 
 ## Changelog
 
+### v1.1.0 (2026-02-12)
+
+- Replaced `questerix-landing` with professional custom domains
+- Standardized URLs: `admin.questerix.com` and `app.questerix.com`
+- Excluded landing-pages from CI/CD and Orchestration
+- Fixed markdown lint violations across operational docs
+
 ### v1.0.0 (2026-02-02)
+
 - Initial deployment pipeline implementation
 - PowerShell scripts for Windows compatibility
 - Parallel build and deploy support
