@@ -37,8 +37,14 @@ fi
 # 3. Confirm sdkmanager
 SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
 if [ ! -x "$SDKMANAGER" ]; then
-   handle_skip "sdkmanager not found at $SDKMANAGER"
+   # Fallback: try finding it
+   SDKMANAGER=$(find "$SDK_ROOT" -name sdkmanager -perm -u+x | head -n 1)
 fi
+
+if [ -z "$SDKMANAGER" ] || [ ! -x "$SDKMANAGER" ]; then
+   handle_skip "sdkmanager not found in $SDK_ROOT"
+fi
+echo "  Using sdkmanager: $SDKMANAGER"
 
 # 4. Check Packages (36)
 # Faster check than running sdkmanager --list
