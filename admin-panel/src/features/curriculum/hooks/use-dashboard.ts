@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { useApp } from '@/hooks/use-app';
 import { Database } from '@/lib/database.types';
+import { supabase } from '@/lib/supabase';
+import { useQuery } from '@tanstack/react-query';
 
 type CurriculumMeta = Database['public']['Tables']['curriculum_meta']['Row'];
 
@@ -70,7 +70,7 @@ export function useDashboardStats() {
         // If meta is global, we can't really version per app easily without changing schema.
         // Current schema for curriculum_meta likely assumes one curriculum. 
         // For now, let's just keep using the singleton as is, but acknowledged as a limitation.
-        supabase.from('curriculum_meta').select('version, last_published_at').eq('id', 'singleton').single(),
+        supabase.from('curriculum_meta').select('version, last_published_at').eq('app_id', currentApp.app_id).maybeSingle(),
       ]);
 
       if (domainsResult.error) throw domainsResult.error;

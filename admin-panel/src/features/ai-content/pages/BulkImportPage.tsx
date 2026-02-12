@@ -23,8 +23,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useSkills } from '@/features/curriculum/hooks/use-skills';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase';
-import type { QueuedQuestion } from '@/lib/validation/import-schema';
 
 
 export default function BulkImportPage() {
@@ -43,7 +41,7 @@ export default function BulkImportPage() {
   const { data: skills } = useSkills();
   const [selectedSkillId, setSelectedSkillId] = useState<string>('');
   const [importPrompt, setImportPrompt] = useState('');
-  const [isAiParsing, setIsAiParsing] = useState(false);
+  const [isAiParsing, _setIsAiParsing] = useState(false);
 
   const downloadTemplate = async () => {
     const { downloadBulkImportTemplate } = await import('@/utils/csv-templates');
@@ -51,31 +49,34 @@ export default function BulkImportPage() {
   };
 
   const handleAiImport = async () => {
-    if (!importPrompt.trim()) return;
-    setIsAiParsing(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('parse-import-prompt', {
-        body: { prompt: importPrompt, skill_id: selectedSkillId }
+    // TODO: Implement parse-import-prompt Edge Function
+    // Currently this function doesn't exist on the server
+    toast({
+      title: "Coming Soon",
+      description: "AI-powered import is not yet available. Please use manual upload for now.",
+      variant: "default"
+    });
+    return;
+    
+    // Original code (commented out until Edge Function exists):
+    /*
+    const { data, error } = await supabase.functions.invoke('parse-import-prompt', {
+      body: { prompt }
+    });
+
+    if (error) {
+      toast({
+        title: "Import failed",
+        description: error.message,
+        variant: "destructive"
       });
-      if (error) throw error;
-      
-      const newQuestions = data.questions as QueuedQuestion[];
-      setImportQueue(prev => [...prev, ...newQuestions]);
-      toast({ 
-        title: "AI Analysis Complete", 
-        description: `Successfully extracted ${newQuestions.length} questions.`,
-        className: "bg-indigo-600 text-white"
-      });
-      setImportPrompt('');
-    } catch (err) {
-      toast({ 
-        title: "Extraction Failed", 
-        description: "The AI was unable to parse that prompt.", 
-        variant: "destructive" 
-      });
-    } finally {
-      setIsAiParsing(false);
+      return;
     }
+    
+    if (data) {
+      setImportPrompt('');
+    }
+    */
   };
 
   return (

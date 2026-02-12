@@ -1,11 +1,11 @@
+import { CheckCircle2, File, Loader2, Upload, XCircle } from 'lucide-react';
+import mammoth from 'mammoth';
+import * as pdfjsLib from 'pdfjs-dist';
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, File, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
-import * as pdfjsLib from 'pdfjs-dist';
-import mammoth from 'mammoth';
 
 // Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.js';
 
 interface DocumentUploaderProps {
   onTextExtracted: (text: string, filename: string) => void;

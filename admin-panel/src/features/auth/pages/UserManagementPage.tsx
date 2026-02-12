@@ -213,7 +213,17 @@ export function UserManagementPage() {
 
       if (error) throw error;
       
-      toast({ title: "Operator Deactivated", description: "Access has been revoked." });
+      // Revoke all active sessions for the user
+      const { error: revokeError } = await supabase.functions.invoke('revoke-user-sessions', {
+        body: { userId }
+      });
+      
+      if (revokeError) {
+        console.error('Failed to revoke user sessions:', revokeError);
+        // Continue anyway - profile is deactivated
+      }
+      
+      toast({ title: "Operator Deactivated", description: "Access has been revoked and all sessions terminated." });
       fetchUsers();
     } catch (err) {
       toast({ title: "Error", description: "Failed to deactivate operator", variant: "destructive" });

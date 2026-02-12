@@ -3,8 +3,7 @@ import { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import type { QuestionListItem } from '@/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-
-import { CurriculumStatus, PaginatedResponse, PaginationParams } from './shared';
+import { PaginatedResponse, PaginationParams } from './shared';
 
 type Question = Database['public']['Tables']['questions']['Row'];
 export type QuestionInsert = Database['public']['Tables']['questions']['Insert'];
@@ -81,7 +80,8 @@ export function usePaginatedQuestions(params: PaginationParams) {
         .is('deleted_at', null);
 
       if (search) {
-        query = query.ilike('content', `%${search}%`);
+        const escapedSearch = escapePostgrestSearch(search);
+        query = query.ilike('content', `%${escapedSearch}%`);
       }
 
       if (status && status !== 'all') {
@@ -230,6 +230,7 @@ export function useUpdateQuestion() {
         .from('questions')
         .update(updates)
         .eq('question_id', question_id)
+        .eq('app_id', currentApp.app_id)
         .select()
         .single();
 
@@ -252,7 +253,8 @@ export function useDeleteQuestion() {
       const { error } = await supabase
         .from('questions')
         .update({ deleted_at: new Date().toISOString() })
-        .eq('question_id', question_id);
+        .eq('question_id', question_id)
+        .eq('app_id', currentApp.app_id);
 
       if (error) throw error;
     },
@@ -271,7 +273,8 @@ export function useBulkDeleteQuestions() {
       const { error } = await supabase
         .from('questions')
         .update({ deleted_at: new Date().toISOString() })
-        .in('question_id', question_ids);
+        .in('question_id', question_ids)
+        .eq('app_id', currentApp.app_id);
 
       if (error) throw error;
     },
@@ -285,6 +288,7 @@ export function useBulkDeleteQuestions() {
 
 export function useBulkUpdateQuestionsStatus() {
   const queryClient = useQueryClient();
+  const { currentApp } = useApp();
 
   return useMutation({
     mutationFn: async ({
@@ -292,12 +296,15 @@ export function useBulkUpdateQuestionsStatus() {
       status,
     }: {
       question_ids: string[];
-      status: CurriculumStatus;
+      status: 'draft' | 'approved' | 'published';
     }) => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
+
       const { error } = await supabase
         .from('questions')
         .update({ status })
-        .in('question_id', question_ids);
+        .in('question_id', question_ids)
+        .eq('app_id', currentApp.app_id);
 
       if (error) throw error;
     },
@@ -352,11 +359,14 @@ export function useDuplicateQuestion() {
 
 export function useUpdateQuestionOrder() {
   const queryClient = useQueryClient();
+  const { currentApp } = useApp();
 
   return useMutation({
     mutationFn: async (updates: { question_id: string; sort_order: number }[]) => {
+      if (!currentApp?.app_id) throw new Error('No app selected');
+
       const promises = updates.map(({ question_id, sort_order }) =>
-        supabase.from('questions').update({ sort_order }).eq('question_id', question_id)
+        supabase.from('questions').update({ sort_order }).eq('question_id', question_id).eq('app_id', currentApp.app_id)
       );
 
       const results = await Promise.all(promises);

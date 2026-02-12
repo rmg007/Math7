@@ -1,6 +1,6 @@
+import { supabase } from '@/lib/supabase'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate()
@@ -22,8 +22,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           .single()
         
         if (profileError) {
-          console.warn('Could not fetch profile, allowing access:', profileError)
-          setLoading(false)
+          console.error('Could not fetch profile, redirecting to login:', profileError)
+          window.location.href = '/login'
           return
         }
         

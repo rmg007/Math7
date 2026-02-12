@@ -33,7 +33,8 @@ import { useSkills } from '../hooks/use-skills';
 
 type Question = Database['public']['Tables']['questions']['Row'];
 
-const QUESTION_TYPES = ['multiple_choice', 'mcq_multi', 'text_input', 'boolean', 'reorder_steps'] as const;
+const QUESTION_TYPES = ['multiple_choice', 'text_input'] as const;
+const UNSUPPORTED_TYPES = ['mcq_multi', 'boolean', 'reorder_steps'] as const;
 
 const STATUS_OPTIONS: { value: 'draft' | 'live'; label: string; description?: string }[] = [
   { value: 'draft', label: 'Draft', description: 'Not visible to students' },
@@ -111,6 +112,9 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
   };
 
   const initialType = initialData?.type || 'multiple_choice';
+  
+  // Check if editing an unsupported question type
+  const isUnsupportedType = initialData && UNSUPPORTED_TYPES.includes(initialData.type as any);
   
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),

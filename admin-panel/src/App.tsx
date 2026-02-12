@@ -211,8 +211,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
         <AppProvider>
-          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <Suspense fallback={<LoadingPage />}>
+          <ErrorBoundary>
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <Suspense fallback={<LoadingPage />}>
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route
@@ -336,8 +337,10 @@ function App() {
               </Routes>
             </Suspense>
           </BrowserRouter>
+          </ErrorBoundary>
         </AppProvider>
       </ToastProvider>
+      <Toaster />
     </QueryClientProvider>
   );
 }

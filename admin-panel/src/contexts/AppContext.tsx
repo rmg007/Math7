@@ -92,8 +92,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      if (mounted) loadAppsSafe();
+    } = supabase.auth.onAuthStateChange((event, _session) => {
+      // Only react to meaningful auth events, not token refreshes
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+        if (mounted) loadAppsSafe();
+      }
     });
 
     return () => {
@@ -153,3 +156,4 @@ export function AppProvider({ children }: { children: ReactNode }) {
 // Re-export useApp hook for compatibility
 // eslint-disable-next-line react-refresh/only-export-components
 export { useApp } from '@/hooks/use-app';
+

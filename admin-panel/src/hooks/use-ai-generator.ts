@@ -1,6 +1,18 @@
-import { useState } from 'react';
-import { generateQuestionsFromAI } from '@/lib/gemini';
+import { generateQuestions } from '@/features/ai-assistant/api/generateQuestions';
 import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
+import { z } from 'zod';
+
+const AIQuestionSchema = z.object({
+  text: z.string(),
+  question_type: z.enum(['mcq', 'mcq_multi', 'text_input', 'boolean', 'reorder_steps']),
+  difficulty: z.enum(['easy', 'medium', 'hard']),
+  metadata: z.object({
+    options: z.array(z.string()).optional(),
+    correct_answer: z.union([z.string(), z.array(z.string())]).optional(),
+    explanation: z.string().optional(),
+  }),
+});
 
 export function useAIGenerator() {
     const [isGenerating, setIsGenerating] = useState(false);
@@ -19,24 +31,37 @@ export function useAIGenerator() {
         setError(null);
 
         try {
-            const { skillTitle, ...rest } = params;
-            const tempInstruction = rest.promptInstruction || '';
-            // Inject skill context if missing
-            const instructionWithSkill = tempInstruction.includes(skillTitle) 
-                ? tempInstruction 
-                : `Focus on the skill/topic: "${skillTitle}". ${tempInstruction}`;
+            const { skillTitle, context, count, difficulty, promptInstruction } = params;
+            
+            // Build custom instructions
+            let customInstructions = promptInstruction || '';
+            if (!customInstructions.includes(skillTitle)) {
+                customInstructions = `Focus on the skill/topic: "${skillTitle}". ${customInstructions}`;
+            }
 
-            const questions = await generateQuestionsFromAI({
-                ...rest,
-                promptInstruction: instructionWithSkill
+            // Map difficulty to distribution
+            const difficulty_distribution = {
+                easy: difficulty === 'easy' ? count : difficulty === 'medium' ? Math.floor(count * 0.3) : Math.floor(count * 0.2),
+                medium: difficulty === 'medium' ? count : difficulty === 'easy' ? Math.floor(count * 0.3) : Math.floor(count * 0.3),
+                hard: difficulty === 'hard' ? count : difficulty === 'easy' ? Math.floor(count * 0.2) : Math.floor(count * 0.5),
+            };
+
+            const response = await generateQuestions({
+                text: context,
+                difficulty_distribution,
+                custom_instructions: customInstructions,
+                model: 'gemini-1.5-flash',
             });
+
+            // Validate response with Zod
+            const validatedQuestions = z.array(AIQuestionSchema).parse(response.questions);
 
             toast({
                 title: "Generation Complete",
-                description: `Successfully generated ${questions.length} questions.`,
+                description: `Successfully generated ${validatedQuestions.length} questions.`,
             });
             
-            return questions;
+            return validatedQuestions;
         } catch (err) {
             const msg = (err as Error).message;
             setError(msg);

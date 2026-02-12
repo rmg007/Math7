@@ -7,8 +7,6 @@ export interface CompiledApp extends App {
   subjects: {
     name: string;
   } | null;
-  display_name: string;
-  subdomain: string;
 }
 export type AppInsert = TablesInsert<'apps'>;
 export type AppUpdate = TablesUpdate<'apps'>;
@@ -30,7 +28,7 @@ export function useApps() {
         .order('display_name');
 
       if (error) throw error;
-      return (data || []) as unknown as CompiledApp[];
+      return (data || []) as CompiledApp[];
     },
   });
 }
@@ -46,13 +44,11 @@ export function useCreateApp() {
       if (!data) throw new Error('Failed to create app');
 
       // Automatically create a landing page entry for the new app
-      // Bridge cast needed: DB has display_name column but generated types are stale
-      const created = data as unknown as CompiledApp;
       await supabase.from('app_landing_pages').insert({
-        app_id: created.app_id,
-        meta_title: `${created.display_name} | Questerix`,
-        meta_description: `Learn ${created.display_name} with Questerix.`,
-        hero_headline: `Ace ${created.display_name}`,
+        app_id: data.app_id,
+        meta_title: `${data.display_name} | Questerix`,
+        meta_description: `Learn ${data.display_name} with Questerix.`,
+        hero_headline: `Ace ${data.display_name}`,
         hero_subheadline: `Master your subjects with adaptive practice.`,
       });
 

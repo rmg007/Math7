@@ -1,11 +1,10 @@
 import { useApp } from '@/hooks/use-app';
 import { Database } from '@/lib/database.types';
-import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { CurriculumStatus, isValidUUID, PaginatedResponse, PaginationParams } from './shared';
 
-type Domain = Database['public']['Tables']['domains']['Row'];
 
 // Form input type - excludes auto-generated fields
 export type DomainFormInput = {
@@ -72,8 +71,9 @@ export function usePaginatedDomains(params: PaginationParams) {
         .is('deleted_at', null);
 
       if (search) {
+        const escapedSearch = escapePostgrestSearch(search);
         query = query.or(
-          `title.ilike.%${search}%,slug.ilike.%${search}%,description.ilike.%${search}%`
+          `title.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%,description.ilike.%${escapedSearch}%`
         );
       }
 
@@ -137,10 +137,7 @@ export function useCreateDomain() {
         app_id: currentApp.app_id,
       };
 
-      // Use admin client if in test mode to bypass RLS issues during E2E testing
-      const client = import.meta.env.MODE === 'test' && supabaseAdmin ? supabaseAdmin : supabase;
-
-      const { data, error } = await client.from('domains').insert(payload).select().single();
+      const { data, error } = await supabase.from('domains').insert(payload).select().single();
 
       if (error) throw error;
       return data as Domain;
@@ -160,10 +157,7 @@ export function useUpdateDomain() {
     mutationFn: async ({ domain_id, ...updates }: { domain_id: string } & Partial<Domain>) => {
       if (!currentApp?.app_id) throw new Error('No app selected');
 
-      // Use admin client if in test mode to bypass RLS issues during E2E testing
-      const client = import.meta.env.MODE === 'test' && supabaseAdmin ? supabaseAdmin : supabase;
-
-      const { data, error } = await client
+      const { data, error } = await supabase
         .from('domains')
         .update(updates)
         .eq('domain_id', domain_id)
@@ -190,10 +184,7 @@ export function useDeleteDomain() {
     mutationFn: async (domain_id: string) => {
       if (!currentApp?.app_id) throw new Error('No app selected');
 
-      // Use admin client if in test mode to bypass RLS issues during E2E testing
-      const client = import.meta.env.MODE === 'test' && supabaseAdmin ? supabaseAdmin : supabase;
-
-      const { error } = await client
+      const { error } = await supabase
         .from('domains')
         .update({ deleted_at: new Date().toISOString() })
         .eq('domain_id', domain_id)
@@ -216,10 +207,7 @@ export function useBulkDeleteDomains() {
     mutationFn: async (domain_ids: string[]) => {
       if (!currentApp?.app_id) throw new Error('No app selected');
 
-      // Use admin client if in test mode to bypass RLS issues during E2E testing
-      const client = import.meta.env.MODE === 'test' && supabaseAdmin ? supabaseAdmin : supabase;
-
-      const { error } = await client
+      const { error } = await supabase
         .from('domains')
         .update({ deleted_at: new Date().toISOString() })
         .in('domain_id', domain_ids)

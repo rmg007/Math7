@@ -1,6 +1,6 @@
+import { supabase } from '@/lib/supabase';
 import { generateQuestions, GenerateQuestionsRequest, GenerateQuestionsResponse } from './generateQuestions';
 import { validateContent, ValidationResponse } from './validateContent';
-import { supabase } from '@/lib/supabase';
 
 export interface GovernedGenerationResponse extends GenerateQuestionsResponse {
   validation?: ValidationResponse;
@@ -9,6 +9,7 @@ export interface GovernedGenerationResponse extends GenerateQuestionsResponse {
     quota_remaining: number;
     throttled: boolean;
   };
+  quotaError?: string | null;
 }
 
 export async function governedGenerateQuestions(
@@ -47,9 +48,7 @@ export async function governedGenerateQuestions(
     p_token_count: actualTokens,
   });
 
-  if (finalQuotaError) console.error('Failed to log final token usage:', finalQuotaError);
-
-
+  // Return response with quota error info
   return {
     ...generationResult,
     validation: validationResult,
@@ -57,6 +56,7 @@ export async function governedGenerateQuestions(
       tokens_consumed: actualTokens,
       quota_remaining: -1, // Not returned by void procedure
       throttled: false,
-    }
+    },
+    quotaError: finalQuotaError ? finalQuotaError.message : null,
   };
 }
