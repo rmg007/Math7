@@ -25,9 +25,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g supabase
+          # Official Supabase CLI install script
+          curl -fsSL https://raw.githubusercontent.com/supabase/cli/main/install.sh | sh
+          sudo mv bin/supabase /usr/local/bin/supabase
+
           cd admin-panel && npm ci
           cd ../student-app && flutter pub get
+
           # Pre-download web sdk for flutter to avoid timeout in Phase 2
           flutter precache --web
 

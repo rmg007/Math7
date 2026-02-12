@@ -46,21 +46,21 @@ if [ -z "$SDKMANAGER" ] || [ ! -x "$SDKMANAGER" ]; then
 fi
 echo "  Using sdkmanager: $SDKMANAGER"
 
-# 4. Check Packages (36)
+# 4. Check Packages (34)
 # Faster check than running sdkmanager --list
 STATUS=0
-if [ ! -d "$SDK_ROOT/platforms/android-36" ]; then
-    echo "  Missing: platforms;android-36"
+if [ ! -d "$SDK_ROOT/platforms/android-34" ]; then
+    echo "  Missing: platforms;android-34"
     STATUS=1
 fi
-# Check build tools 36.*
-if ! ls "$SDK_ROOT/build-tools/36."* >/dev/null 2>&1; then
-    echo "  Missing: build-tools;36.x"
+# Check build tools 34.*
+if ! ls "$SDK_ROOT/build-tools/34."* >/dev/null 2>&1; then
+    echo "  Missing: build-tools;34.x"
     STATUS=1
 fi
 
 if [ "$STATUS" -eq 1 ]; then
-    handle_skip "Required Android packages (API 36) missing"
+    handle_skip "Required Android packages (API 34) missing"
 fi
 
 # 5. Build
