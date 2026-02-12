@@ -1,6 +1,34 @@
 # Questerix Development Tasks
 
-## 🛡️ AUDIT REMEDIATION ROUND 2 (2026-02-12)
+## � QA AUDIT REMEDIATION — Domains, Subjects & Questions (2026-02-12)
+
+### Implemented Fixes
+
+- [x] **HIGH: Cascade delete impact warning** in `domain-list.tsx`
+  - Delete confirmation now queries and displays dependent skill/question counts
+  - Prevents silent data loss from `ON DELETE CASCADE` on skills and questions
+- [x] **HIGH: KaTeX math rendering** in `rich-text-editor.tsx`
+  - Replaced stub `insertMath` with proper KaTeX `renderToString` integration
+  - Added live preview panel for LaTeX expressions
+  - Added LaTeX template shortcuts (x², fractions, sqrt, sum, integral, limit)
+  - Kept existing Unicode symbol picker intact
+- [x] **LOW: Fix misleading label** in `SubjectsPage.tsx`
+  - Changed "Domain Name" → "Subject Name" (subjects ≠ domains in the data model)
+  - This label caused the QA auditor to misreport a relational integrity bug
+
+### Rejected Findings (with evidence)
+
+- [x] **REJECTED: "Subject-to-Domain relational integrity"** — Misdiagnosed. Subjects (Section 4, platform-level) and Domains (Section 5, curriculum-level) are architecturally separate. Hierarchy: Subject → App → Domain → Skill → Question. The confusing label caused the misdiagnosis.
+- [x] **REJECTED: "Filter Subjects by Domain"** — Wrong relationship. Subjects aren't children of domains. Skills ARE children of domains, and `use-skills.ts` already supports `domainId` filtering.
+
+### Discovered (pre-existing, not in scope)
+
+- [ ] **TYPE DRIFT: SubjectsPage.tsx** — Supabase-generated types use `id` but code references `subject_id`, `color_hex`, `slug`, `icon_url`, `display_order`. Needs `database.types.ts` regeneration or schema alignment.
+- [ ] **TYPE DRIFT: domain-list.tsx** — Similar issue: code uses `domain_id` but generated types have `id`. Widespread across curriculum components.
+
+---
+
+## �🛡️ AUDIT REMEDIATION ROUND 2 (2026-02-12)
 
 ### Critical & High Priority Fixes
 

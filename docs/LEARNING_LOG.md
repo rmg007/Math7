@@ -1,5 +1,67 @@
 # Learning Log
 
+## 2026-02-12: QA Audit Remediation — Domains, Subjects & Questions
+
+### Session Context
+
+- **Trigger**: External QA audit report covering Domains, Subjects, and Questions pages
+- **Scope**: `admin-panel/src/features/curriculum/components/domain-list.tsx`, `admin-panel/src/components/ui/rich-text-editor.tsx`, `admin-panel/src/features/platform/pages/SubjectsPage.tsx`
+- **Outcome**: ✅ 3 fixes implemented (cascade delete warning, KaTeX math rendering, label fix). 2 findings rejected with evidence. 2 pre-existing type drift issues discovered and documented.
+
+### What Was Done
+
+1. **Cascade Delete Impact Warning (`domain-list.tsx`)**
+   - Added `fetchDeleteImpact` that queries Supabase for dependent skill and question counts before showing the delete confirmation dialog
+   - AlertDialog now displays: "This will also delete X skill(s) and Y question(s)"
+   - Applies to both single and bulk delete flows
+   - Uses correct generated-type column names (`id` for skills PK, `skill_id` for questions FK)
+
+2. **KaTeX Math Rendering (`rich-text-editor.tsx`)**
+   - Imported `katex` and `katex/dist/katex.min.css`
+   - Replaced stub `insertMath` with `katex.renderToString()` — expressions now render as proper mathematical notation
+   - Added live preview panel that updates on every keystroke with error feedback for invalid LaTeX
+   - Added 6 LaTeX template shortcuts (x², fractions, sqrt, sum, integral, limit)
+   - Kept existing Unicode symbol picker (π, √, ∑, etc.) intact
+   - Insert button disabled when expression has errors; Enter key triggers insert
+
+3. **Label Fix (`SubjectsPage.tsx`)**
+   - Changed "Domain Name" → "Subject Name" on the subject creation/edit form
+   - This single wrong label caused the QA auditor to report a non-existent relational integrity bug
+
+### What Was Verified vs. Rejected
+
+| Finding                                | Report Rating    | Actual Rating    | Action                                    |
+| -------------------------------------- | ---------------- | ---------------- | ----------------------------------------- |
+| No cascade delete warning              | Medium           | **HIGH**         | ✅ Fixed — silent data loss risk          |
+| Broken LaTeX rendering                 | High             | **HIGH**         | ✅ Fixed — KaTeX integration              |
+| Misleading form label                  | N/A (root cause) | **LOW**          | ✅ Fixed — one-line label rename          |
+| Subject-to-Domain relational integrity | Critical         | **MISDIAGNOSED** | ❌ Rejected — separate entities in schema |
+| Filter Subjects by Domain              | Low              | **N/A**          | ❌ Rejected — wrong relationship          |
+
+### What Was Learned
+
+1. **"Label Drift" Causes Audit Misdiagnosis**: A wrong form label ("Domain Name" on a Subject form) led the auditor to report a critical relational integrity bug that didn't exist. The actual data model has `Subject → App → Domain → Skill → Question`, where subjects and domains are in different schema sections (Section 4 vs Section 5). **Rule**: Form labels must exactly match the underlying data model entity names.
+
+2. **CASCADE DELETE Is a Silent Data Destroyer**: PostgreSQL `ON DELETE CASCADE` on `skills.domain_id` and `questions.skill_id` means deleting a domain silently wipes its entire skill tree AND all linked questions. Combined with a generic "Are you sure?" dialog, this creates a high risk of unintentional data loss. **Rule**: Always surface the blast radius of destructive operations.
+
+3. **Stub Features Get Reported as Bugs**: The math editor had UI buttons (superscript, subscript, math symbols panel) but no actual rendering backend — `insertMath` wrapped text in `<span data-math="...">` that nothing rendered. Shipping UI for unimplemented features creates false expectations and generates audit findings. **Rule**: Either implement the feature or clearly mark it as "coming soon."
+
+4. **Audit Reports Need Schema Verification**: 1 of 4 "critical" findings was based on a misunderstanding of the data model. The auditor assumed subjects should be children of domains, but they're architecturally separate platform-level entities. **Rule**: Always cross-reference audit findings against `schema_master.sql` before implementing fixes.
+
+5. **Type Drift Is Systemic**: Both `SubjectsPage.tsx` and `domain-list.tsx` reference columns (`subject_id`, `domain_id`, `color_hex`, `slug`) that don't exist in the Supabase-generated types. The generated types use `id` as the primary key, but hooks use entity-specific names like `skill_id`. This widespread mismatch suggests the database schema evolved but `database.types.ts` wasn't regenerated. **Rule**: Run type generation after every schema migration.
+
+### Preventative Measures
+
+- **ALWAYS** match form labels to the underlying data model entity names.
+- **ALWAYS** show dependent object counts before cascade deletes.
+- **ALWAYS** implement rendering backends before shipping math/rich-text UI buttons.
+- **ALWAYS** verify audit findings against `schema_master.sql` before accepting them.
+- **ALWAYS** regenerate `database.types.ts` after schema changes to prevent type drift.
+- **NEVER** ship UI buttons for unimplemented features without a "coming soon" indicator.
+- **NEVER** accept audit severity ratings at face value — verify actual impact against source code.
+
+---
+
 ## 2026-02-12: Tier 2 CI Repair - Batch Fix Session
 
 ### Session Context

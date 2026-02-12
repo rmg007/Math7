@@ -18,6 +18,7 @@ import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
+import { supabase } from '@/lib/supabase';
 import {
   Book,
   CheckSquare,
@@ -288,6 +289,11 @@ export function DomainList() {
     type: 'single' | 'bulk';
     id?: string;
   } | null>(null);
+  const [deleteImpact, setDeleteImpact] = useState<{
+    skillCount: number;
+    questionCount: number;
+    loading: boolean;
+  }>({ skillCount: 0, questionCount: 0, loading: false });
 
   const {
     data: paginatedData,
@@ -410,8 +416,41 @@ export function DomainList() {
     });
   }, []);
 
+  const fetchDeleteImpact = useCallback(async (domainIds: string[]) => {
+    setDeleteImpact({ skillCount: 0, questionCount: 0, loading: true });
+    try {
+      const { count: skillCount } = await supabase
+        .from('skills')
+        .select('*', { count: 'exact', head: true })
+        .in('domain_id', domainIds)
+        .is('deleted_at', null);
+
+      const { data: skillRows } = await supabase
+        .from('skills')
+        .select('id')
+        .in('domain_id', domainIds)
+        .is('deleted_at', null);
+
+      let questionCount = 0;
+      if (skillRows && skillRows.length > 0) {
+        const skillIds = skillRows.map((s) => s.id);
+        const { count } = await supabase
+          .from('questions')
+          .select('*', { count: 'exact', head: true })
+          .in('skill_id', skillIds)
+          .is('deleted_at', null);
+        questionCount = count ?? 0;
+      }
+
+      setDeleteImpact({ skillCount: skillCount ?? 0, questionCount, loading: false });
+    } catch {
+      setDeleteImpact({ skillCount: 0, questionCount: 0, loading: false });
+    }
+  }, []);
+
   const handleDelete = (id: string) => {
     setDeleteConfirmation({ type: 'single', id });
+    fetchDeleteImpact([id]);
   };
 
   const confirmDelete = async () => {
@@ -606,7 +645,10 @@ export function DomainList() {
               variant="ghost"
               size="sm"
               disabled={bulkDelete.isPending}
-              onClick={() => setDeleteConfirmation({ type: 'bulk' })}
+              onClick={() => {
+                setDeleteConfirmation({ type: 'bulk' });
+                fetchDeleteImpact(Array.from(selectedIds));
+              }}
               className="h-10 px-4 rounded-xl text-red-400 font-black text-[9px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all gap-2"
             >
               {bulkDelete.isPending ? (
@@ -827,7 +869,18 @@ export function DomainList() {
             <AlertDialogDescription>
               {deleteConfirmation?.type === 'bulk'
                 ? `This will permanently delete ${selectedIds.size} selected domain(s).`
-                : 'This action cannot be undone. This will permanently delete the domain and remove it from our servers.'}
+                : 'This action cannot be undone. This will permanently delete the domain.'}
+              {deleteImpact.loading ? (
+                <span className="block mt-2 text-gray-500 text-sm">
+                  Checking for dependent items...
+                </span>
+              ) : deleteImpact.skillCount > 0 || deleteImpact.questionCount > 0 ? (
+                <span className="block mt-2 font-semibold text-red-600 text-sm">
+                  This will also delete {deleteImpact.skillCount} skill(s) and{' '}
+                  {deleteImpact.questionCount} question(s) linked to{' '}
+                  {deleteConfirmation?.type === 'bulk' ? 'these domains' : 'this domain'}.
+                </span>
+              ) : null}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

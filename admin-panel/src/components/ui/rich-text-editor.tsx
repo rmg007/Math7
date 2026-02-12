@@ -1,41 +1,43 @@
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Placeholder from '@tiptap/extension-placeholder'
-import Underline from '@tiptap/extension-underline'
-import { 
-  Bold, 
-  Italic, 
-  Underline as UnderlineIcon, 
-  List, 
-  ListOrdered, 
+import { cn } from '@/lib/utils';
+import Placeholder from '@tiptap/extension-placeholder';
+import Underline from '@tiptap/extension-underline';
+import { EditorContent, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+import {
+  Bold,
   Heading2,
-  Undo,
+  Italic,
+  List,
+  ListOrdered,
   Redo,
+  Subscript,
   Superscript,
-  Subscript
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { useEffect, useState } from 'react'
+  Underline as UnderlineIcon,
+  Undo,
+} from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface RichTextEditorProps {
-  value: string
-  onChange: (value: string) => void
-  placeholder?: string
-  className?: string
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
 }
 
-const MenuButton = ({ 
-  onClick, 
-  isActive = false, 
+const MenuButton = ({
+  onClick,
+  isActive = false,
   disabled = false,
   children,
-  title
-}: { 
-  onClick: () => void
-  isActive?: boolean
-  disabled?: boolean
-  children: React.ReactNode
-  title: string
+  title,
+}: {
+  onClick: () => void;
+  isActive?: boolean;
+  disabled?: boolean;
+  children: React.ReactNode;
+  title: string;
 }) => (
   <button
     type="button"
@@ -43,18 +45,18 @@ const MenuButton = ({
     disabled={disabled}
     title={title}
     className={cn(
-      "p-2 rounded hover:bg-gray-200 transition-colors",
-      isActive && "bg-purple-100 text-purple-700",
-      disabled && "opacity-50 cursor-not-allowed"
+      'p-2 rounded hover:bg-gray-200 transition-colors',
+      isActive && 'bg-purple-100 text-purple-700',
+      disabled && 'opacity-50 cursor-not-allowed'
     )}
   >
     {children}
   </button>
-)
+);
 
 export function RichTextEditor({ value, onChange, placeholder, className }: RichTextEditorProps) {
-  const [showMathInput, setShowMathInput] = useState(false)
-  const [mathExpression, setMathExpression] = useState('')
+  const [showMathInput, setShowMathInput] = useState(false);
+  const [mathExpression, setMathExpression] = useState('');
 
   const editor = useEditor({
     extensions: [
@@ -70,66 +72,99 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
     ],
     content: value,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML())
+      onChange(editor.getHTML());
     },
     editorProps: {
       attributes: {
         class: 'prose prose-sm max-w-none focus:outline-none min-h-[120px] px-3 py-2',
       },
     },
-  })
+  });
 
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value)
+      editor.commands.setContent(value);
     }
-  }, [value, editor])
+  }, [value, editor]);
+
+  const [mathPreviewHtml, setMathPreviewHtml] = useState('');
+  const [mathError, setMathError] = useState('');
+
+  const renderMathPreview = useCallback((expr: string) => {
+    if (!expr.trim()) {
+      setMathPreviewHtml('');
+      setMathError('');
+      return;
+    }
+    try {
+      const html = katex.renderToString(expr, { throwOnError: true, displayMode: false });
+      setMathPreviewHtml(html);
+      setMathError('');
+    } catch (e: unknown) {
+      setMathPreviewHtml('');
+      setMathError(e instanceof Error ? e.message : 'Invalid LaTeX');
+    }
+  }, []);
+
+  const handleMathExpressionChange = (expr: string) => {
+    setMathExpression(expr);
+    renderMathPreview(expr);
+  };
 
   const insertMath = () => {
     if (mathExpression && editor) {
-      const mathHtml = `<span class="math-inline" data-math="${mathExpression}">[${mathExpression}]</span>`
-      editor.chain().focus().insertContent(mathHtml).run()
-      setMathExpression('')
-      setShowMathInput(false)
+      try {
+        const renderedHtml = katex.renderToString(mathExpression, {
+          throwOnError: true,
+          displayMode: false,
+        });
+        const mathHtml = `<span class="math-inline" data-math="${mathExpression.replace(/"/g, '&quot;')}" contenteditable="false">${renderedHtml}</span>&nbsp;`;
+        editor.chain().focus().insertContent(mathHtml).run();
+        setMathExpression('');
+        setMathPreviewHtml('');
+        setShowMathInput(false);
+      } catch {
+        setMathError('Cannot render this expression. Check your LaTeX syntax.');
+      }
     }
-  }
+  };
 
   const insertFraction = () => {
     if (editor) {
-      editor.chain().focus().insertContent('<sup>a</sup>/<sub>b</sub>').run()
+      editor.chain().focus().insertContent('<sup>a</sup>/<sub>b</sub>').run();
     }
-  }
+  };
 
   const insertSuperscript = () => {
     if (editor) {
-      const { from, to } = editor.state.selection
+      const { from, to } = editor.state.selection;
       if (from === to) {
-        editor.chain().focus().insertContent('<sup>x</sup>').run()
+        editor.chain().focus().insertContent('<sup>x</sup>').run();
       } else {
-        const selectedText = editor.state.doc.textBetween(from, to)
-        editor.chain().focus().deleteSelection().insertContent(`<sup>${selectedText}</sup>`).run()
+        const selectedText = editor.state.doc.textBetween(from, to);
+        editor.chain().focus().deleteSelection().insertContent(`<sup>${selectedText}</sup>`).run();
       }
     }
-  }
+  };
 
   const insertSubscript = () => {
     if (editor) {
-      const { from, to } = editor.state.selection
+      const { from, to } = editor.state.selection;
       if (from === to) {
-        editor.chain().focus().insertContent('<sub>x</sub>').run()
+        editor.chain().focus().insertContent('<sub>x</sub>').run();
       } else {
-        const selectedText = editor.state.doc.textBetween(from, to)
-        editor.chain().focus().deleteSelection().insertContent(`<sub>${selectedText}</sub>`).run()
+        const selectedText = editor.state.doc.textBetween(from, to);
+        editor.chain().focus().deleteSelection().insertContent(`<sub>${selectedText}</sub>`).run();
       }
     }
-  }
+  };
 
   if (!editor) {
-    return null
+    return null;
   }
 
   return (
-    <div className={cn("border rounded-md bg-white", className)}>
+    <div className={cn('border rounded-md bg-white', className)}>
       <div className="flex flex-wrap items-center gap-1 p-2 border-b bg-gray-50">
         <MenuButton
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -138,7 +173,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
         >
           <Bold className="h-4 w-4" />
         </MenuButton>
-        
+
         <MenuButton
           onClick={() => editor.chain().focus().toggleItalic().run()}
           isActive={editor.isActive('italic')}
@@ -146,7 +181,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
         >
           <Italic className="h-4 w-4" />
         </MenuButton>
-        
+
         <MenuButton
           onClick={() => editor.chain().focus().toggleUnderline().run()}
           isActive={editor.isActive('underline')}
@@ -156,7 +191,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
         </MenuButton>
 
         <div className="w-px h-6 bg-gray-300 mx-1" />
-        
+
         <MenuButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           isActive={editor.isActive('heading', { level: 2 })}
@@ -164,7 +199,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
         >
           <Heading2 className="h-4 w-4" />
         </MenuButton>
-        
+
         <MenuButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           isActive={editor.isActive('bulletList')}
@@ -172,7 +207,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
         >
           <List className="h-4 w-4" />
         </MenuButton>
-        
+
         <MenuButton
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           isActive={editor.isActive('orderedList')}
@@ -183,29 +218,20 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
 
         <div className="w-px h-6 bg-gray-300 mx-1" />
 
-        <MenuButton
-          onClick={insertSuperscript}
-          title="Superscript (x²)"
-        >
+        <MenuButton onClick={insertSuperscript} title="Superscript (x²)">
           <Superscript className="h-4 w-4" />
         </MenuButton>
 
-        <MenuButton
-          onClick={insertSubscript}
-          title="Subscript (x₂)"
-        >
+        <MenuButton onClick={insertSubscript} title="Subscript (x₂)">
           <Subscript className="h-4 w-4" />
         </MenuButton>
 
-        <MenuButton
-          onClick={insertFraction}
-          title="Fraction (a/b)"
-        >
+        <MenuButton onClick={insertFraction} title="Fraction (a/b)">
           <span className="text-sm font-medium">⅟</span>
         </MenuButton>
 
         <div className="w-px h-6 bg-gray-300 mx-1" />
-        
+
         <MenuButton
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().undo()}
@@ -213,7 +239,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
         >
           <Undo className="h-4 w-4" />
         </MenuButton>
-        
+
         <MenuButton
           onClick={() => editor.chain().focus().redo().run()}
           disabled={!editor.can().redo()}
@@ -233,50 +259,87 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           >
             π √ ∑
           </button>
-          
+
           {showMathInput && (
             <div className="absolute top-full left-0 mt-1 p-3 bg-white border rounded-lg shadow-lg z-50 min-w-[280px]">
               <p className="text-xs text-gray-500 mb-2">Common Math Symbols (click to insert):</p>
               <div className="flex flex-wrap gap-1 mb-3">
-                {['π', '√', '∑', '∞', '≠', '≤', '≥', '±', '×', '÷', '°', 'α', 'β', 'θ', 'Δ'].map(symbol => (
-                  <button
-                    key={symbol}
-                    type="button"
-                    onClick={() => {
-                      editor.chain().focus().insertContent(symbol).run()
-                      setShowMathInput(false)
-                    }}
-                    className="w-8 h-8 flex items-center justify-center border rounded hover:bg-purple-100 text-lg"
-                  >
-                    {symbol}
-                  </button>
-                ))}
+                {['π', '√', '∑', '∞', '≠', '≤', '≥', '±', '×', '÷', '°', 'α', 'β', 'θ', 'Δ'].map(
+                  (symbol) => (
+                    <button
+                      key={symbol}
+                      type="button"
+                      onClick={() => {
+                        editor.chain().focus().insertContent(symbol).run();
+                        setShowMathInput(false);
+                      }}
+                      className="w-8 h-8 flex items-center justify-center border rounded hover:bg-purple-100 text-lg"
+                    >
+                      {symbol}
+                    </button>
+                  )
+                )}
               </div>
               <div className="border-t pt-2">
-                <p className="text-xs text-gray-500 mb-1">Custom expression:</p>
+                <p className="text-xs text-gray-500 mb-1">LaTeX expression:</p>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={mathExpression}
-                    onChange={(e) => setMathExpression(e.target.value)}
-                    placeholder="e.g., x² + y²"
-                    className="flex-1 px-2 py-1 border rounded text-sm"
+                    onChange={(e) => handleMathExpressionChange(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        insertMath();
+                      }
+                    }}
+                    placeholder="e.g., x^2 + \\frac{a}{b}"
+                    className="flex-1 px-2 py-1 border rounded text-sm font-mono"
                   />
                   <button
                     type="button"
                     onClick={insertMath}
-                    className="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700"
+                    disabled={!mathExpression.trim() || Boolean(mathError)}
+                    className="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Insert
                   </button>
+                </div>
+                {mathPreviewHtml && (
+                  <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-200 text-center">
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">
+                      Preview
+                    </p>
+                    <div dangerouslySetInnerHTML={{ __html: mathPreviewHtml }} />
+                  </div>
+                )}
+                {mathError && <p className="mt-1 text-xs text-red-500">{mathError}</p>}
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {[
+                    { label: 'x²', tex: 'x^2' },
+                    { label: 'a/b', tex: '\\frac{a}{b}' },
+                    { label: '√x', tex: '\\sqrt{x}' },
+                    { label: 'Σ', tex: '\\sum_{i=1}^{n}' },
+                    { label: '∫', tex: '\\int_{a}^{b}' },
+                    { label: 'lim', tex: '\\lim_{x \\to \\infty}' },
+                  ].map(({ label, tex }) => (
+                    <button
+                      key={tex}
+                      type="button"
+                      onClick={() => handleMathExpressionChange(tex)}
+                      className="px-2 py-1 text-xs border rounded hover:bg-purple-100 font-mono"
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
           )}
         </div>
       </div>
-      
+
       <EditorContent editor={editor} />
     </div>
-  )
+  );
 }
