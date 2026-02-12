@@ -26,12 +26,14 @@ jobs:
       - name: Make scripts executable
         run: chmod +x scripts/*.sh
 
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
       - name: Install dependencies
         run: |
-          # Official Supabase CLI install script - install to /usr/local/bin
-          curl -fsSL https://raw.githubusercontent.com/supabase/cli/main/install.sh | sh -s -- -b /usr/local/bin
-
-          cd admin-panel && npm ci
+          cd admin-panel && npm ci --legacy-peer-deps
           cd ../student-app && flutter pub get
 
           # Pre-download web sdk for flutter to avoid timeout in Phase 2
