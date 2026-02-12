@@ -1,5 +1,69 @@
 # Learning Log
 
+## 2026-02-12: Tier 2 CI Repair - Batch Fix Session
+
+### Session Context
+
+- **Trigger**: Continuation of Tier 2 CI repair for remaining 30 issues
+- **Issues Fixed**: 15 issues across 4 root cause categories
+- **Outcome**: ✅ Successfully resolved 50% of remaining CI repair issues
+
+### What Was Done
+
+1. **DeepSource Dart Reporting Issues (6 instances)**
+   - **Root Cause**: DeepSource doesn't support Dart as a language key
+   - **Fix**: Removed Dart coverage reporting from deepsource.yml workflow
+   - **Issues Resolved**: #188, #186, #179, #172, #152, #179
+
+2. **Bundle Size Monitoring Issues (5 instances)**
+   - **Root Cause**: Missing size-limit configuration in package.json
+   - **Fix**: Added size-limit configuration with appropriate thresholds
+   - **Issues Resolved**: #175, #171, #160, #158, #153
+
+3. **Validation Workflow Failures (4 instances)**
+   - **Root Cause**: TypeScript errors in admin-panel code
+   - **Fixes**:
+     - Corrected RPC function name from `validate_and_use_invitation_code` to `validate_invitation_code`
+     - Removed non-existent `message` property reference in CurriculumService.ts
+   - **Issues Resolved**: #187, #180, #163, #156
+
+### Root Causes Identified
+
+1. **Third-party Service Limitations**: DeepSource doesn't support all languages
+   - **Prevention**: Check service documentation before integration
+   - **Prevention**: Have fallback plans for unsupported features
+
+2. **Missing Configuration**: size-limit action requires explicit configuration
+   - **Prevention**: Include configuration files in initial setup
+   - **Prevention**: Document all required configurations for CI actions
+
+3. **Type Safety Drift**: TypeScript errors accumulate over time
+   - **Prevention**: Run `tsc --noEmit` in CI before build
+   - **Prevention**: Keep database types in sync with actual schema
+
+### Lessons Learned
+
+- **Batch Fixing Efficiency**: Grouping issues by root cause allows fixing multiple issues with one change
+- **Service Compatibility**: Always verify third-party service support before integration
+- **Configuration Management**: Missing configurations are a common CI failure point
+- **Type Safety Importance**: TypeScript errors block builds and must be fixed immediately
+
+### Prevention Measures Implemented
+
+- Removed unsupported DeepSource Dart coverage reporting
+- Added comprehensive size-limit configuration
+- Fixed TypeScript errors to ensure type safety
+- All fixes address multiple issues with the same root cause
+
+### Remaining Issues
+
+- Admin Panel E2E test failures (2 instances)
+- Oracle Plus CLI installation (1 instance)
+- Lighthouse CI build failures (2 instances)
+- Various single-instance issues (Type Generation, Semgrep, etc.)
+
+---
+
 ## 2026-02-12: Tier 2 CI Repair Workflow Execution
 
 ### Session Context
