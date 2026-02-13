@@ -107,5 +107,8 @@ deps-output.txt
 !.gemini/antigravity/knowledge/.keep
 
 
+# Tool binaries (install via package manager, never commit)
+tools/bin/
+
 # CI Failure Audit (local forensic data)
 _gh_failures/
