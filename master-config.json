@@ -2,7 +2,7 @@
   "version": "0.9.0",
   "environment": "production",
   "global": {
-    "SUPABASE_URL": "https://qvslbiceoonrgjxzkotb.supabase.co",
+    "SUPABASE_URL": "https://bkfhorslctqieetzqdtd.supabase.co",
     "API_BASE_URL": "https://api.questerix.com",
     "STUDENT_APP_URL": "https://app.questerix.com",
     "ADMIN_PANEL_URL": "https://admin.questerix.com",
