@@ -1,8 +1,16 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://qvslbiceoonrgjxzkotb.supabase.co';
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2c2xiaWNlb29ucmdqeHprb3RiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTUxMTk2OSwiZXhwIjoyMDg1MDg3OTY5fQ.Q9LagVfNQ2Zc7EeMpehBU5IUeI1ENy5pguueSsD1FAQ';
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!SUPABASE_URL || !SERVICE_KEY) {
+  console.error('ERROR: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env vars are required.');
+  console.error('Set them before running this script:');
+  console.error('  $env:SUPABASE_URL = "https://your-project.supabase.co"');
+  console.error('  $env:SUPABASE_SERVICE_ROLE_KEY = "your-service-role-key"');
+  process.exit(1);
+}
 
 const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
   auth: {
