@@ -289,17 +289,19 @@
 
 ### Phase 1: Database Restoration (Missing Objects)
 
-- [ ] **P0: Implement missing RPC functions** (Requirement for `tsc` recovery)
-  - [ ] `deactivate_own_account` & `delete_own_account` (AccountSettings)
-  - [ ] `generate_invitation_code` & `deactivate_invitation_code` (InvitationMgmt)
-  - [ ] `validate_invitation_code` (User Registration)
-  - [ ] `promote_error_to_issue` (Observability)
-  - [ ] `import_questions_bulk` (Curriculum Service)
-- [ ] **P1: Align Column Schema**
-  - [ ] `apps`: Reconcile `grade_level` (code) vs `grade_number` (DB)
-  - [ ] `subjects`: Add missing `color_hex` and `icon_url` columns
-  - [ ] `group_members`: Add missing `nickname` column
-  - [ ] `groups`: Reconcile `allow_anonymous_join` (code) vs `allow_anonymous` (DB)
+- [x] **P0: All RPC functions verified present** in QuesterixDB-v2 (2026-02-13)
+  - [x] `deactivate_own_account` & `delete_own_account` (AccountSettings)
+  - [x] `generate_invitation_code` & `deactivate_invitation_code` (InvitationMgmt)
+  - [x] `validate_invitation_code` & `validate_and_use_invitation_code` (User Registration)
+  - [x] `promote_error_to_issue` (Observability)
+  - [x] `import_questions_bulk` (Curriculum Service)
+  - [x] `log_error` & `log_security_event` (Error Tracking)
+  - [x] `consume_tenant_tokens` & `publish_curriculum` (Platform)
+- [x] **P1: Column Schema Aligned** — `database.types.ts` regenerated with all columns
+  - [x] `apps`: Has both `grade_level` and `grade_number`
+  - [x] `subjects`: Has `color_hex` and `icon_url`
+  - [x] `group_members`: Has `nickname`
+  - [x] `groups`: Has `allow_anonymous_join`
 
 ### Phase 2: Code Cleanup & Type Safety
 
@@ -312,5 +314,124 @@
 ### Recent Fixes (2026-02-13)
 
 - [x] **BUG: Domain Visibility Fixed** (Relaxed UUID validation regex in `isValidUUID`)
-- [x] **TYPE REGEN**: Updated `database.types.ts` to sync with new project schema
+- [x] **TYPE REGEN**: Updated `database.types.ts` with full Functions/Enums/Constants from QuesterixDB-v2
 - [x] **DEPLOY**: Standardized routes (removed `/platform` prefix) and deployed Admin/Student apps
+- [x] **REPO CLEANUP**: Removed dead projects (landing-pages), duplicate docs, stale configs
+- [x] **GITIGNORE**: Added patterns for Python caches, Wrangler, tsc dumps, landing-pages
+
+---
+
+## 🛡️ DEPLOYMENT SAFETY & SECRET PROTECTION (2026-02-13)
+
+### Pre-Deploy Requirements
+
+- [ ] **P0: Run full test suite before every deployment**
+  - [ ] Admin panel unit tests (`npm run test -- --coverage`)
+  - [ ] Admin panel E2E tests (Playwright: chromium + firefox + webkit)
+  - [ ] Flutter student app tests (`flutter test --coverage`)
+  - [ ] Python content-engine tests (`pytest + coverage`)
+  - [ ] Supabase SQL regression tests
+  - [ ] Architecture tests (`npm run test:arch`)
+  - [ ] TypeScript type check (`npx tsc --noEmit`)
+  - [ ] Update `scripts/preflight.ps1` and deploy scripts to gate on test pass
+- [ ] **P0: Block deployment if any tests fail** — Add gate to `orchestrator.ps1`
+
+### Secret Protection (NEVER Leak Again)
+
+- [ ] **P0: Add local gitleaks pre-push hook** via Husky
+  - `.husky/pre-push` should run `npx gitleaks detect --source . --verbose`
+  - Blocks push if secrets found locally BEFORE they hit GitHub
+- [ ] **P0: Verify GitHub secret scanning is active and enforced** (push protection)
+  - Existing: `gitleaks.yml` (runs on push/PR to main)
+  - Existing: `secrets.yml` (runs on every push)
+  - Need: Ensure both are not failing silently (check GITLEAKS_LICENSE secret)
+- [ ] **P1: Add `service_role` leakage guard to pre-commit**
+  - Extend `.husky/pre-commit` with grep check for forbidden secrets patterns
+  - Validate: no `.env` files with real keys are committable
+
+### Secret Scanning Pipeline (Defense-in-Depth)
+
+```
+Layer 1: pre-commit → lint-staged + forbidden-pattern grep
+Layer 2: pre-push   → gitleaks local scan (NEW)
+Layer 3: GitHub CI   → gitleaks.yml + secrets.yml (EXISTING ✅)
+Layer 4: GitHub      → Native secret scanning + push protection (VERIFY)
+```
+
+---
+
+## 🧪 TEST COVERAGE EXPANSION (2026-02-13)
+
+### Coverage Analysis
+
+- [ ] **P1: Run and evaluate current coverage reports**
+  - [ ] Admin panel coverage: target minimum 70% (CI gate set at 70%)
+  - [ ] Flutter student app: target minimum 60% (CI gate set at 60%)
+  - [ ] Python content-engine: target minimum 80% (CI gate set at 80%)
+- [ ] **P1: Identify untested critical paths**
+  - [ ] Multi-tenant isolation edge cases (cross-app data access)
+  - [ ] RLS policy bypass attempts
+  - [ ] Error boundary recovery flows
+  - [ ] Offline sync conflict resolution (Flutter)
+  - [ ] Token quota exhaustion handling
+  - [ ] Invitation code validation edge cases (expired, maxed-out, inactive)
+  - [ ] AI question generation error paths and malformed responses
+
+### New Tests Needed
+
+- [ ] **P1: Admin Panel — Hook edge cases**
+  - [ ] `use-domains` / `use-skills` / `use-questions`: empty states, error states, pagination
+  - [ ] `use-error-logs`: status filtering, promote-to-issue flow
+  - [ ] `use-ai-generator`: Zod validation failures, timeout, quota exceeded
+- [ ] **P1: Admin Panel — Page-level integration tests**
+  - [ ] Dashboard: verify stats load correctly for current tenant
+  - [ ] GroupCreatePage / GroupDetailPage: multi-tenant member management
+  - [ ] SubjectsPage / AppsPage: CRUD with type-safe mutations
+- [ ] **P2: Student App — Critical flows**
+  - [ ] Sync service: conflict resolution, tombstone propagation
+  - [ ] Practice engine: attempt tracking, streak calculation
+  - [ ] Offline-first: queue management, retry logic
+- [ ] **P2: Supabase SQL Tests — RLS hardening**
+  - [ ] Cross-tenant query isolation for all tables
+  - [ ] RPC function permission checks (student vs admin vs mentor)
+  - [ ] Edge cases: deactivated users, expired invitations, deleted records
+- [ ] **P3: E2E (Playwright) — User journey coverage**
+  - [ ] Full admin workflow: login → create app → add curriculum → publish
+  - [ ] Student enrollment: registration → join group → practice → mastery
+
+---
+
+## 📊 ERROR LOGGING & OBSERVABILITY REVIEW (2026-02-13)
+
+### Current Implementation Status ✅
+
+Error logging to database is **fully implemented** across both apps:
+
+**Admin Panel (React)**:
+
+- ✅ `lib/error-tracker.ts` — `captureException()` logs to `error_logs` table via `log_error` RPC
+- ✅ `ErrorBoundary.tsx` — Catches React component crashes, logs to Supabase
+- ✅ `main.tsx` — `initErrorTracking()` captures `unhandledrejection` and global `error` events
+- ✅ Admin UI for viewing/triaging errors (`use-error-logs.ts`, monitoring pages)
+- ✅ Promote-to-issue flow (`promote_error_to_issue` RPC)
+
+**Student App (Flutter)**:
+
+- ✅ `error_tracker.dart` — `captureException()` logs to `error_logs` via `log_error` RPC
+- ✅ `main.dart` — Catches all Flutter zone errors + unhandled platform exceptions
+- ✅ Platform auto-detection (web/android/ios/windows/macos/linux)
+
+**Database (Supabase)**:
+
+- ✅ `error_logs` table with: platform, error_type, error_message, stack_trace, url, user_agent, app_version, extra_context, status
+- ✅ `known_issues` table for promoted errors with root cause analysis
+- ✅ `log_error` RPC function (auto-sets user_id from auth.uid())
+- ✅ `promote_error_to_issue` RPC function
+- ✅ `security_logs` table + `log_security_event` RPC for security-specific events
+
+### Remaining Observability Tasks
+
+- [ ] **P2: Verify 30-day auto-pruning** — Check if pg_cron job exists for old error_logs cleanup
+- [ ] **P2: Critical alert trigger** — Verify `critical_alert` Edge Function fires on HIGH severity errors
+- [ ] **P2: Dashboard error widget** — Verify DashboardPage 24-hour error count query works
+- [ ] **P3: Add client-side breadcrumb logging** — Log navigation events before errors for better context
