@@ -305,11 +305,13 @@
 
 ### Phase 2: Code Cleanup & Type Safety
 
-- [ ] **P1: Evaluation of Dead Features**
-  - [ ] Decide status of `app_landing_pages` relation (Restore Table or Remove Code)
-  - [ ] Audit `CurriculumService.ts` for unused bulk import logic
-- [ ] **P0: Restore Production Build Gate**
-  - [ ] Fix all type errors and re-enable `tsc` in `admin-panel/package.json` build script
+- [x] **P1: Evaluation of Dead Features** (2026-02-14)
+  - [x] `app_landing_pages`: Hook + page retained (routed in App.tsx, useful for future landing page editing)
+  - [x] `CurriculumService.ts`: **Not dead** — actively used by bulk import via `import_questions_bulk` RPC
+- [x] **P0: Restore Production Build Gate** (2026-02-14)
+  - [x] `tsc` already active in build script: `"build": "tsc && vite build"`
+  - [x] Verified: `tsc --noEmit` passes with zero errors
+  - [x] Verified: `tsc && vite build` completes successfully
 
 ### Recent Fixes (2026-02-13)
 
@@ -326,6 +328,9 @@
 - [x] **Bulk Import E2E (4 tests fixed)**: Fixed login selectors (`input[type=email]` vs `#login-email`) and post-login URL (`/` vs `/dashboard`)
 - [x] **Env Credential Update**: `.env.test.local` updated to QuesterixDB-v2 URL/anon key (service role key needs manual dashboard update)
 - [x] **Stale Code Removal**: Removed `VITE_GEMINI_API_KEY` from `.env.local`, `vite-env.d.ts`, and AI generator page warning
+- [x] **React Performance**: Wrapped `AppContext.Provider` value in `useMemo`, handlers in `useCallback` to prevent unnecessary re-renders
+- [x] **Dashboard Mock Data**: Replaced hardcoded chart data with live Supabase queries (question type distribution, curriculum stats, error counts). Activity chart remains placeholder (TODO: time-series data)
+- [x] **Accessibility**: Added `aria-label` to icon-only buttons in `question-list.tsx` (Duplicate, Delete, Clear search)
 - [x] **Workflow Consolidation**: Deleted duplicate `secrets.yml`, kept `gitleaks.yml` (more specific triggers + GITLEAKS_LICENSE support)
 
 ---
@@ -441,5 +446,5 @@ Error logging to database is **fully implemented** across both apps:
 
 - [ ] **P2: Verify 30-day auto-pruning** — Check if pg_cron job exists for old error_logs cleanup
 - [ ] **P2: Critical alert trigger** — Verify `critical_alert` Edge Function fires on HIGH severity errors
-- [ ] **P2: Dashboard error widget** — Verify DashboardPage 24-hour error count query works
+- [x] **P2: Dashboard error widget** — DashboardPage now queries real 24h error counts, domain/skill/question totals, and question type distribution from Supabase (2026-02-14)
 - [ ] **P3: Add client-side breadcrumb logging** — Log navigation events before errors for better context
