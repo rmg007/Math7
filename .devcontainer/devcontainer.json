@@ -1,36 +1,71 @@
 {
-  "name": "Math7",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+  "name": "Questerix Development Environment",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
-      "version": "lts"
+      "version": "18"
     },
-    "ghcr.io/devcontainers/features/java:1": {
-      "version": "17",
-      "jdkDistro": "ms"
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
     },
-    "ghcr.io/devcontainers-extra/features/flutter:1": {
+    "ghcr.io/devcontainers/features/flutter:1": {
       "version": "latest"
     },
-    "ghcr.io/devcontainers-extra/features/supabase-cli:1": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/common-utils:2": {
-      "configureZshAsDefaultShell": true
-    },
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "enableNonRootDocker": "true",
-      "moby": "true"
+    "ghcr.io/devcontainers/features/powershell:1": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "Dart-Code.dart-code",
+        "Dart-Code.flutter",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "GitHub.copilot",
+        "eamodio.gitlens",
+        "ms-vscode.powershell"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true
+        },
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.python"
+        },
+        "files.exclude": {
+          "**/.git": true,
+          "**/.DS_Store": true,
+          "**/node_modules": true,
+          "**/.dart_tool": true,
+          "**/build": true
+        }
+      }
     }
   },
-  "mounts": [
-    "source=math7-pub-cache,target=/home/vscode/.pub-cache,type=volume",
-    "source=math7-npm-cache,target=/home/vscode/.npm,type=volume",
-    "source=math7-node-modules,target=${containerWorkspaceFolder}/admin-panel/node_modules,type=volume",
-    "source=math7-android-sdk,target=/home/vscode/android-sdk,type=volume",
-    "source=math7-docker-graph,target=/var/lib/docker,type=volume"
-  ],
-  "remoteUser": "vscode",
-  "postCreateCommand": "bash .devcontainer/setup-android.sh",
-  "postStartCommand": "bash scripts/cleanup_disk.sh"
+
+  "postCreateCommand": "echo '🚀 Codespace ready! Run: cat CODESPACES.md for setup instructions'",
+
+  "forwardPorts": [5173, 3000, 8000],
+  "portsAttributes": {
+    "5173": {
+      "label": "Admin Panel (Vite)",
+      "onAutoForward": "notify"
+    },
+    "3000": {
+      "label": "Student App (Flutter)",
+      "onAutoForward": "notify"
+    },
+    "8000": {
+      "label": "Content Engine (Python)",
+      "onAutoForward": "ignore"
+    }
+  },
+
+  "remoteUser": "codespace"
 }
