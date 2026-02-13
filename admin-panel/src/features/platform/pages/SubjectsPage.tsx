@@ -5,22 +5,22 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { Activity, Boxes, Layers, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import {
-  useCreateSubject,
-  useDeleteSubject,
-  useSubjects,
-  useUpdateSubject,
-  type Subject,
+    useCreateSubject,
+    useDeleteSubject,
+    useSubjects,
+    useUpdateSubject,
+    type Subject,
 } from '../hooks/use-subjects';
 
 interface SubjectRowProps {
@@ -51,7 +51,7 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
               {subject.title}
             </p>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
-              ID: {subject.subject_id.split('-')[0]}
+              ID: {subject.subject_id ? subject.subject_id.split('-')[0] : 'N/A'}
             </p>
           </div>
         </div>
@@ -230,6 +230,7 @@ export function SubjectsPage() {
             <button
               onClick={() => setSearchQuery('')}
               className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-purple-50 text-gray-400 hover:text-purple-600 rounded-xl transition-all"
+              title="Clear search"
             >
               <X className="h-4 w-4" />
             </button>

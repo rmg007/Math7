@@ -1,20 +1,31 @@
-import React from 'react';
-import { 
-  BookOpen, AlertCircle, 
-  BrainCircuit, Activity, Layers,
-  ArrowUpRight, ArrowDownRight, Database
-} from 'lucide-react';
-import { 
-  XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer, AreaChart, Area,
-  Cell, PieChart, Pie
-} from 'recharts';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { AdminHeader } from '@/components/ui/admin-header';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/contexts/AppContext';
+import { supabase } from '@/lib/supabase';
+import { useQuery } from '@tanstack/react-query';
+import {
+    Activity,
+    AlertCircle,
+    ArrowDownRight,
+    ArrowUpRight,
+    BookOpen,
+    BrainCircuit,
+    Database,
+    Layers
+} from 'lucide-react';
+import React from 'react';
+import {
+    Area,
+    AreaChart,
+    CartesianGrid,
+    Cell,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis, YAxis
+} from 'recharts';
 
 const COLORS = ['#6366f1', '#a855f7', '#ec4899', '#f43f5e'];
 
@@ -26,9 +37,9 @@ export function DashboardPage() {
     queryKey: ['dashboard-stats', currentApp?.app_id],
     queryFn: async () => {
       const results = await Promise.all([
-        supabase.from('domains').select('id', { count: 'exact', head: true }).eq('app_id', currentApp?.app_id || ''),
-        supabase.from('skills').select('id', { count: 'exact', head: true }).eq('app_id', currentApp?.app_id || ''),
-        supabase.from('questions').select('id', { count: 'exact', head: true }).eq('app_id', currentApp?.app_id || ''),
+        supabase.from('domains').select('domain_id', { count: 'exact', head: true }).eq('app_id', currentApp?.app_id || ''),
+        supabase.from('skills').select('skill_id', { count: 'exact', head: true }).eq('app_id', currentApp?.app_id || ''),
+        supabase.from('questions').select('question_id', { count: 'exact', head: true }).eq('app_id', currentApp?.app_id || ''),
         supabase.from('error_logs').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
         supabase.from('ai_generation_sessions').select('token_count, questions_generated').eq('status', 'approved')
       ]);

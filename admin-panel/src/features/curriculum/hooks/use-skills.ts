@@ -3,7 +3,7 @@ import { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { CurriculumStatus, PaginatedResponse, PaginationParams } from './shared';
+import { CurriculumStatus, PaginatedResponse, PaginationParams } from '../types';
 
 type Skill = Database['public']['Tables']['skills']['Row'];
 

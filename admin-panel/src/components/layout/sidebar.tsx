@@ -1,14 +1,34 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { 
-  Book, Layers, FileText, Upload, LogOut, Settings, Key, History, 
-  Users, UserCog, Shield, Bug, AlertTriangle, Globe, Boxes, Layout,
-  ChevronDown, ChevronRight, ChevronLeft, FileUp, MessageSquare, BarChart3, LifeBuoy
-} from 'lucide-react'
-import { useApp } from '@/contexts/AppContext'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { cn } from '@/lib/utils'
+import { useApp } from '@/contexts/AppContext'
 import { supabase } from '@/lib/supabase'
-import { useState, useEffect } from 'react'
+import { cn } from '@/lib/utils'
+import {
+    AlertTriangle,
+    BarChart3,
+    Book,
+    Boxes,
+    Bug,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    FileText,
+    FileUp,
+    Globe,
+    History,
+    Key,
+    Layers,
+    Layout,
+    LifeBuoy,
+    LogOut,
+    MessageSquare,
+    Settings,
+    Shield,
+    Upload,
+    UserCog,
+    Users
+} from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 // Separator removed as it was unused
 
 interface SidebarProps {
@@ -64,6 +84,7 @@ const navigationGroups: NavGroup[] = [
       { name: 'Error Logs', href: '/error-logs', icon: AlertTriangle },
       { name: 'Known Issues', href: '/known-issues', icon: Bug },
       { name: 'AI Governance', href: '/governance', icon: Shield, superAdminOnly: true },
+      { name: 'AI Sessions', href: '/ai-sessions', icon: History },
     ]
   },
   {
@@ -388,7 +409,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
                 </div>
                 <button
                   onClick={handleLogout}
-                  id="logout-button"
+                  id="logout-button-desktop"
                   className="p-1.5 text-purple-400/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors flex-shrink-0"
                   title="Sign Out"
                 >
@@ -405,7 +426,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
                 </div>
                 <button
                   onClick={handleLogout}
-                  id="logout-button"
+                  id="logout-button-mobile"
                   className="p-1.5 text-purple-300 hover:text-white transition-colors hover:bg-white/10 rounded-lg"
                   title="Sign Out"
                 >

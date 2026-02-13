@@ -18,7 +18,7 @@ interface GenerationRequest {
   model?: 'gemini-1.5-flash' | 'gpt-4o-mini';
 }
 
-export async function generateQuestionsHandler(req: Request, deps?: { supabase?: any; genAI?: any }): Promise<Response> {
+export async function generateQuestionsHandler(req: Request, deps?: { supabase?: Record<string, unknown>; genAI?: Record<string, unknown> }): Promise<Response> {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -38,7 +38,7 @@ export async function generateQuestionsHandler(req: Request, deps?: { supabase?:
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = deps?.supabase || createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = (deps?.supabase as any) || createClient(supabaseUrl, supabaseServiceKey);
 
     // Verify the user's JWT
     const token = authHeader.replace('Bearer ', '');
@@ -54,7 +54,7 @@ export async function generateQuestionsHandler(req: Request, deps?: { supabase?:
     // Get user's app_id for tenant isolation
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('app_id, is_admin')
+      .select('app_id, role')
       .eq('id', user.id)
       .single();
 
@@ -66,7 +66,7 @@ export async function generateQuestionsHandler(req: Request, deps?: { supabase?:
     }
 
     // Only admins can generate questions
-    if (!profile.is_admin) {
+    if (profile.role !== 'admin' && profile.role !== 'super_admin') {
       return new Response(
         JSON.stringify({ error: 'Only administrators can generate questions' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
@@ -92,7 +92,7 @@ export async function generateQuestionsHandler(req: Request, deps?: { supabase?:
       throw new Error('GEMINI_API_KEY not configured');
     }
 
-    const genAI = deps?.genAI || new GoogleGenerativeAI(apiKey!);
+    const genAI = (deps?.genAI as any) || new GoogleGenerativeAI(apiKey!);
     const geminiModel = genAI.getGenerativeModel({ 
       model: model, // ✅ FIX P1: Use variable, not hardcoded literal
       generationConfig: {
@@ -112,7 +112,7 @@ export async function generateQuestionsHandler(req: Request, deps?: { supabase?:
     const generationTime = Date.now() - startTime;
 
     // FIX T5: Use actual usage metadata from Gemini API instead of heuristic
-    const usageMetadata = response.usageMetadata;
+    const usageMetadata = (response as any).usageMetadata;
     const actualTokenCount = usageMetadata?.totalTokenCount ?? 
       Math.ceil((prompt.length + generatedText.length) / 4); // Fallback to estimate
 
@@ -160,7 +160,7 @@ export async function generateQuestionsHandler(req: Request, deps?: { supabase?:
     console.error('Generation error:', error);
     return new Response(
       JSON.stringify({
-        error: error.message || 'Failed to generate questions',
+        error: error instanceof Error ? error.message : 'Failed to generate questions',
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -171,7 +171,8 @@ export async function generateQuestionsHandler(req: Request, deps?: { supabase?:
 }
 
 // Start the server only if run as main
-if (import.meta.main) {
+// deno-lint-ignore no-explicit-any
+if ((import.meta as any).main) {
   serve(generateQuestionsHandler);
 }
 

@@ -17,7 +17,7 @@ interface ValidationRequest {
   }[];
 }
 
-export async function validateContentHandler(req: Request, deps?: { supabase?: any; genAI?: any }): Promise<Response> {
+export async function validateContentHandler(req: Request, deps?: { supabase?: Record<string, unknown>; genAI?: Record<string, unknown> }): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -36,7 +36,7 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: a
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = deps?.supabase || createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = (deps?.supabase as any) || createClient(supabaseUrl, supabaseServiceKey);
 
     // Verify the user's JWT
     const token = authHeader.replace('Bearer ', '');
@@ -52,7 +52,7 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: a
     // Get user's app_id for tenant isolation
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('app_id, is_admin')
+      .select('app_id, role')
       .eq('id', user.id)
       .single();
 
@@ -64,7 +64,7 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: a
     }
 
     // Only admins can validate content
-    if (!profile.is_admin) {
+    if (profile.role !== 'admin' && profile.role !== 'super_admin') {
       return new Response(
         JSON.stringify({ error: 'Only administrators can validate content' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
@@ -82,9 +82,9 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: a
       throw new Error('GEMINI_API_KEY not configured');
     }
 
-    const genAI = deps?.genAI || new GoogleGenerativeAI(apiKey!);
+    const genAI = (deps?.genAI as any) || new GoogleGenerativeAI(apiKey!);
     // Use Gemini Pro for validation (Stronger reasoning than Flash)
-    const model = genAI.getGenerativeModel({ 
+    const geminiModel = genAI.getGenerativeModel({ 
       model: 'gemini-1.5-pro',
       generationConfig: {
         temperature: 0.1,
@@ -94,13 +94,13 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: a
     const prompt = buildValidationPrompt(questions, source_text, rules);
 
     const startTime = Date.now();
-    const result = await model.generateContent(prompt); // enforced-temp
+    const result = await geminiModel.generateContent(prompt); // enforced-temp
     const response = await result.response;
     const validationText = response.text();
     const duration = Date.now() - startTime;
 
     // FIX T5: Use actual usage metadata from Gemini API
-    const usageMetadata = response.usageMetadata;
+    const usageMetadata = (response as any).usageMetadata;
     const actualTokenCount = usageMetadata?.totalTokenCount ?? 
       Math.ceil((prompt.length + validationText.length) / 4);
 
@@ -145,7 +145,7 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: a
     console.error('Validation error:', error);
     return new Response(
       JSON.stringify({
-        error: error.message || 'Failed to validate content',
+        error: error instanceof Error ? error.message : 'Failed to validate content',
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -156,7 +156,8 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: a
 }
 
 // Start the server only if run as main
-if (import.meta.main) {
+// deno-lint-ignore no-explicit-any
+if ((import.meta as any).main) {
   serve(validateContentHandler);
 }
 

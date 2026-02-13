@@ -1,5 +1,6 @@
 import 'package:questerix_domain/questerix_domain.dart' as model;
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'curriculum_repositories.dart';
 
 /// Consolidated Remote Repository for all Curriculum entities via Supabase
@@ -23,8 +24,11 @@ class SupabaseCurriculumRepository implements CurriculumRepository {
 
   @override
   Future<model.Domain?> getDomainById(String id) async {
-    final response =
-        await _supabase.from('domains').select().eq('id', id).maybeSingle();
+    final response = await _supabase
+        .from('domains')
+        .select()
+        .eq('domain_id', id)
+        .maybeSingle();
     return response != null ? model.Domain.fromJson(response) : null;
   }
 
@@ -43,8 +47,11 @@ class SupabaseCurriculumRepository implements CurriculumRepository {
 
   @override
   Future<model.Skill?> getSkillById(String id) async {
-    final response =
-        await _supabase.from('skills').select().eq('id', id).maybeSingle();
+    final response = await _supabase
+        .from('skills')
+        .select()
+        .eq('skill_id', id)
+        .maybeSingle();
     return response != null ? model.Skill.fromJson(response) : null;
   }
 
@@ -62,8 +69,11 @@ class SupabaseCurriculumRepository implements CurriculumRepository {
 
   @override
   Future<model.Question?> getQuestionById(String id) async {
-    final response =
-        await _supabase.from('questions').select().eq('id', id).maybeSingle();
+    final response = await _supabase
+        .from('questions')
+        .select()
+        .eq('question_id', id)
+        .maybeSingle();
     return response != null ? model.Question.fromJson(response) : null;
   }
 

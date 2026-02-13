@@ -1,31 +1,31 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useApp } from '@/hooks/use-app';
 import { cn } from '@/lib/utils';
 import {
-  Activity,
-  AlertCircle,
-  AlertTriangle,
-  BookOpen,
-  CheckCircle,
-  HelpCircle,
-  History,
-  Layers,
-  Rocket,
-  Send,
-  ShieldCheck,
-  Upload,
+    Activity,
+    AlertCircle,
+    AlertTriangle,
+    BookOpen,
+    CheckCircle,
+    HelpCircle,
+    History,
+    Layers,
+    Rocket,
+    Send,
+    ShieldCheck,
+    Upload,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -48,7 +48,7 @@ export function PublishPage() {
   const handlePublish = async () => {
     setSuccess(false);
     setError(null);
-    const newVersion = (preview?.meta.version || 0) + 1;
+    const newVersion = (preview?.meta?.version || 0) + 1;
     try {
       await publishMutation.mutateAsync();
       setPublishedVersion(newVersion);
@@ -118,7 +118,7 @@ export function PublishPage() {
             <div className="space-y-4">
               <div className="flex items-baseline gap-3">
                 <span className="text-5xl font-black text-purple-600 tracking-tighter">
-                  v{preview?.meta.version || 0}
+                  v{preview?.meta?.version || 0}
                 </span>
                 {preview?.canPublish && (
                   <>
@@ -126,7 +126,7 @@ export function PublishPage() {
                       <span className="text-gray-300 font-light text-2xl">→</span>
                     </div>
                     <span className="text-3xl font-black text-emerald-600 tracking-tight opacity-50">
-                      v{(preview?.meta.version || 0) + 1}
+                      v{(preview?.meta?.version || 0) + 1}
                     </span>
                   </>
                 )}
@@ -449,7 +449,7 @@ export function PublishPage() {
               Confirm Production Deployment
             </AlertDialogTitle>
             <AlertDialogDescription className="text-gray-500 font-medium">
-              You are about to deploy curriculum version {(preview?.meta.version || 0) + 1} to
+              You are about to deploy curriculum version {(preview?.meta?.version || 0) + 1} to
               production for{' '}
               <span className="font-black text-gray-900">
                 {currentApp?.display_name || 'the active context'}

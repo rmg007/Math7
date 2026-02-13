@@ -1,5 +1,49 @@
 # Learning Log
 
+## 2026-02-13: Supabase Migration Recovery & Schema Consistency
+
+### Session Context
+
+- **Trigger**: 500 Login Error and 400 Bad Request errors after Supabase project recreation
+- **Scope**: Auth record recovery, schema naming synchronization across Admin and Student apps
+- **Outcome**: ✅ Admin login restored, ✅ Dashboard stats fixed, ✅ Student app curriculum sync fixed.
+
+### What Was Done
+
+#### 1. Auth Record Recovery (Critical)
+
+- **Issue**: Manual creation of `auth.users` records resulted in `NULL` values for internal token columns (`confirmation_token`, etc.).
+- **Impact**: Supabase Auth server threw 500 errors because the internal Go handlers could not scan `NULL` into string variables.
+- **Fix**: Updated `auth.users` record for the primary admin to use empty strings (`''`) instead of `NULL` for `confirmation_token`, `recovery_token`, and `email_change_token`.
+- **Lesson**: **NEVER manually `INSERT` into `auth.users`** using simplified SQL. Use the Supabase API/Dashboard or ensure full structural parity with auto-generated records.
+
+#### 2. Curriculum Schema Alignment (High)
+
+- **Issue**: Admin Panel and Student App were hardcoded to select `id` from `domains`, `skills`, and `questions` tables.
+- **Database Reality**: The actual schema uses entity-specific names: `domain_id`, `skill_id`, and `question_id`.
+- **Impact**: All curriculum-related queries returned 400 Bad Request errors ("column id does not exist").
+- **Fix**:
+  - Updated `DashboardPage.tsx` to use correct column names.
+  - Updated `remote_curriculum_repository.dart` in the Student App to use correct column names.
+- **Lesson**: **Entity-specific naming is safer but requires strict synchronization.** The common "generic `id`" assumption is a major source of runtime failures when switching database environments.
+
+#### 3. Infrastructure Gap Remediation (Medium)
+
+- **Issue**: 404/400 errors for secondary features (AI Governance, Error Tracking).
+- **Fix**:
+  - Re-applied migrations for `ai_generation_sessions`, `source_documents`, `error_logs`, and `security_logs`.
+  - Re-implemented `log_error` and `log_security_event` RPC functions.
+- **Lesson**: A "Project Re-creation" must include a full audit of utility tables and RPCs, not just the "Core" business tables.
+
+### Prevention Measures
+
+1. **Automated Schema Validation**: Run `supabase gen types typescript` as a mandatory step after migrations and verify that expected columns (like `id`) actually exist.
+2. **Bootstrapping Checklist**: Maintain a `PROJECT_BOOTSTRAP.md` list of all secondary infrastructure (Logs, Security, AI tables).
+3. **Fail-Fast Auth Checks**: If a user is manually created for testing, verify their session validity via a simple `supabase.auth.getUser()` script before handing off to the UI.
+4. **Naming Consistency**: Standardize on either `id` OR `{entity}_id` globally. Mixed patterns lead to the "Generic ID Trap."
+
+---
+
 ## 2026-02-12: Admin Section QA Audit — UX & Terminology Fixes
 
 ### Session Context

@@ -6,45 +6,45 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Pagination } from '@/components/ui/pagination';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Switch } from '@/components/ui/switch';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import {
-  Activity,
-  Globe,
-  GraduationCap,
-  Layers,
-  Layout,
-  Pencil,
-  Plus,
-  Power,
-  Search,
-  Trash2,
-  X,
+    Activity,
+    Globe,
+    GraduationCap,
+    Layers,
+    Layout,
+    Pencil,
+    Plus,
+    Power,
+    Search,
+    Trash2,
+    X
 } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import {
-  useApps,
-  useCreateApp,
-  useDeleteApp,
-  useUpdateApp,
-  type CompiledApp,
+    useApps,
+    useCreateApp,
+    useDeleteApp,
+    useUpdateApp,
+    type CompiledApp,
 } from '../hooks/use-apps';
 import { useSubjects } from '../hooks/use-subjects';
 
@@ -106,6 +106,7 @@ const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
             size="icon"
             onClick={() => onEdit(app)}
             className="h-10 w-10 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl"
+            title="Edit Application"
           >
             <Pencil className="w-4 h-4" />
           </Button>
@@ -114,6 +115,7 @@ const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
             size="icon"
             onClick={() => onDelete(app.app_id)}
             className="h-10 w-10 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl"
+            title="Delete Application"
           >
             <Trash2 className="w-4 h-4" />
           </Button>
@@ -258,6 +260,7 @@ export function AppsPage() {
                 setCurrentPage(1);
               }}
               className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
+              title="Clear search"
             >
               <X className="h-4 w-4" />
             </button>

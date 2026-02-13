@@ -4,7 +4,7 @@ import { escapePostgrestSearch } from '@/lib/postgrest-utils';
 import { supabase } from '@/lib/supabase';
 import type { QuestionListItem } from '@/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { PaginatedResponse, PaginationParams } from './shared';
+import { PaginatedResponse, PaginationParams } from '../types';
 
 type Question = Database['public']['Tables']['questions']['Row'];
 export type QuestionInsert = Database['public']['Tables']['questions']['Insert'];

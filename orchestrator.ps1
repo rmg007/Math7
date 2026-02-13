@@ -176,7 +176,7 @@ function Invoke-PhaseGenerateEnv {
     & (Join-Path $ScriptDir 'scripts\deploy\generate-env.ps1') -ConfigFile $script:ConfigFile
     
     $definesPath = Join-Path $ScriptDir '.flutter-defines.tmp'
-    if (Test-Path $definesPath) {
+    if (Test-Path "$definesPath") {
         Write-Success "Environment files generated and verified: $definesPath"
     } else {
         Write-Err "Environment files generated but verification failed: $definesPath NOT FOUND"
@@ -211,7 +211,9 @@ function Invoke-PhaseBuild {
 
     Write-Host "⚙️  Building Student App..." -ForegroundColor Cyan
     Set-Location (Join-Path $ScriptDir 'student-app')
-    # Properly format dart defines
+    flutter clean
+    # Proper format dart defines
+
     $definesList = Get-Content (Join-Path $ScriptDir '.flutter-defines.tmp')
     $definesArg = ""
     foreach ($line in $definesList) {

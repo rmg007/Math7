@@ -1,8 +1,8 @@
  
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { useApp } from '@/hooks/use-app';
 import type { Tables } from '@/lib/database.types';
+import { supabase } from '@/lib/supabase';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 type CurriculumMeta = Pick<Tables<'curriculum_meta'>, 'version' | 'last_published_at'>;
 
@@ -112,12 +112,12 @@ export function usePublishPreview() {
         liveQuestionsResult,
       ] = await Promise.all([
         supabase.from('curriculum_meta').select('version, last_published_at').eq('app_id', currentApp.app_id).maybeSingle(),
-        supabase.from('domains').select('*', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'draft'),
-        supabase.from('domains').select('*', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'live'),
-        supabase.from('skills').select('*', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'draft'),
-        supabase.from('skills').select('*', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'live'),
-        supabase.from('questions').select('*', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'draft'),
-        supabase.from('questions').select('*', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'live'),
+        supabase.from('domains').select('domain_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'draft'),
+        supabase.from('domains').select('domain_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'live'),
+        supabase.from('skills').select('skill_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'draft'),
+        supabase.from('skills').select('skill_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'live'),
+        supabase.from('questions').select('question_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'draft'),
+        supabase.from('questions').select('question_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'live'),
       ]);
 
       if (metaResult.error && metaResult.error.code !== 'PGRST116') {
@@ -152,7 +152,7 @@ export function usePublishPreview() {
       }
 
       return {
-        meta: metaResult.data as CurriculumMeta,
+        meta: (metaResult.data as CurriculumMeta) ?? { version: 0, last_published_at: null },
         stats,
         validationIssues,
         canPublish: liveCount > 0,

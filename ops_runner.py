@@ -118,8 +118,9 @@ def execute_manifest(manifest_path: str) -> bool:
                 cwd=cwd if cwd else None,
                 capture_output=True,
                 text=True,
-                encoding='utf-8', # Ensure encoding is handled
-                timeout=300  # 5 minute timeout
+                encoding='utf-8',
+                errors='replace', # Prevent UnicodeDecodeError on non-UTF8 output
+                timeout=600  # Increase timeout to 10 minutes for slow builds
             )
             
             # Print output to console for the user to see in real-time (if watching)

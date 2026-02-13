@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Clock, DollarSign, FileText, AlertCircle, Search, X, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Clock, DollarSign, FileText, Search, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
-import { Database } from '@/lib/database.types';
 import { AdminHeader } from '@/components/ui/admin-header';
-import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import { EmptyState } from '@/components/ui/empty-state';
+import { StatusBadge, StatusType } from '@/components/ui/status-badge';
+import { Database } from '@/lib/database.types';
 
 type GenerationSession = Database['public']['Tables']['ai_generation_sessions']['Row'];
 
@@ -100,9 +100,9 @@ export const SessionsPage: React.FC = () => {
         description="Track and audit AI generation sessions, token consumption, and model efficiency."
         icon={Clock}
         breadcrumbs={[
-          { label: 'Platform', href: '/apps' },
-          { label: 'Intelligence', href: '/sessions' },
-          { label: 'Telemetry', href: '/sessions' }
+          { label: 'Platform', href: '/platform/apps' },
+          { label: 'Intelligence', href: '/ai-sessions' },
+          { label: 'Telemetry', href: '/ai-sessions' }
         ]}
       />
 
@@ -199,6 +199,7 @@ export const SessionsPage: React.FC = () => {
             <button
               onClick={() => setSearchTerm('')}
               className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
+              title="Clear search"
             >
               <X className="h-4 w-4" />
             </button>

@@ -267,11 +267,10 @@
   - [ ] **Staging Database**: Credential check. (Waiting for STAGING_SUPABASE_URL secret)
   - [x] **Dead Code/Duplication**: Verify scan targets. (Enabled Dead Code)
 
-## 🚨 URGENT PROD FIXES
-
-- [x] **Admin Panel Crash (StatusBadge)**: Fixed `TypeError: Cannot read properties of undefined (reading 'bg')` in `StatusBadge` component.
-- [ ] **BUG #1 & #2: Domain CRUD Failure (403 Forbidden)**: Investigating Supabase RLS policies for `domains` table. Users currently cannot Create or Update domains.
-- [ ] **BUG #3: Error Logs Page Crash**: Investigating systemic crash on `/error-logs` route.
+- [x] **BUG #1 & #2: Domain CRUD Failure (403 Forbidden)**: Resolved via RLS policy updates and schema alignment.
+- [x] **BUG #3: Error Logs Page Crash**: Resolved by creating missing error_logs table and adding RPC functions.
+- [x] **BUG #4: Admin Login 500 Error**: Resolved by fixing NULL tokens in auth.users record.
+- [x] **BUG #5: Dashboard 400 Errors**: Resolved by syncing column names (id -> domain_id/skill_id) in DashboardPage.tsx.
 - [ ] **Form Feedback**: Add loading indicators to "Initiate Provision" and "Update Signature" buttons.
 - [ ] **Feature Verification**: Verify "Template" and "Upload" buttons in Domain Registry.
 

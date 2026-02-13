@@ -1,5 +1,5 @@
 import { Filter, Search } from 'lucide-react';
-import { CurriculumStatus } from '../hooks/shared';
+import { CurriculumStatus } from '../types';
 
 interface CurriculumFilterBarProps {
   searchPlaceholder: string;

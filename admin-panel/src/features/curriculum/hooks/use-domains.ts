@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { escapePostgrestSearch } from '@/lib/postgrest-utils';
-import { CurriculumStatus, isValidUUID, PaginatedResponse, PaginationParams } from './shared';
+import { CurriculumStatus, isValidUUID, PaginatedResponse, PaginationParams } from '../types';
 
 type Domain = Database['public']['Tables']['domains']['Row'];
 

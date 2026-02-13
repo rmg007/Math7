@@ -1,10 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 // API Health Checks
 // P1 Important: Verifies Supabase REST API, Auth, and Edge Functions are responding
 // Tests backend connectivity without requiring authentication
 
-const supabaseUrl = process.env.SUPABASE_URL || 'https://qvslbiceoonrgjxzkotb.supabase.co';
+const supabaseUrl = process.env.SUPABASE_URL || 'https://bkfhorslctqieetzqdtd.supabase.co';
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
 
 test('API health — Supabase REST, Auth, and Edge Functions', async ({ request }) => {
