@@ -6,11 +6,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  useCreateDomain,
-  useDeleteDomain,
-  useDomain,
-  useDomains,
-  usePaginatedDomains,
+    useCreateDomain,
+    useDeleteDomain,
+    useDomain,
+    useDomains,
+    usePaginatedDomains,
 } from '../use-domains';
 
 // Mock dependencies
@@ -73,14 +73,15 @@ describe('useDomains', () => {
         app_id: mockAppId,
         created_at: new Date().toISOString(),
         display_name: 'Test App',
-        full_domain: 'test.example.com',
         grade_level: 'K-12',
         grade_number: 1,
         is_active: true,
-        launch_date: null,
         subdomain: 'test',
         subject_id: 'subject-1',
         updated_at: new Date().toISOString(),
+        ai_token_limit: 0,
+        branding: {},
+        description: '',
       },
       apps: [],
       isLoading: false,

@@ -24,7 +24,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
-import { useApp } from '@/contexts/AppContext';
+import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
 import { sanitizeHtml } from '@/lib/sanitize';
@@ -170,7 +170,7 @@ const SortableRow = memo(
           <div className="flex flex-col gap-1.5">
             <div
               className="font-bold text-gray-900 text-[15px] tracking-tight line-clamp-2 group-hover/row:text-indigo-700 transition-colors prose-sm"
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(question.content) }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(typeof question.content === 'string' ? question.content : JSON.stringify(question.content)) }}
             />
             {question.skills?.domains?.title && (
               <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-1.5">
@@ -318,7 +318,7 @@ const SortableCard = memo(
           <div className="min-w-0">
             <div
               className="font-black text-gray-900 text-lg tracking-tight leading-relaxed mb-4 line-clamp-3 prose-sm"
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(question.content) }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(typeof question.content === 'string' ? question.content : JSON.stringify(question.content)) }}
             />
             <div className="space-y-3">
               {question.skills?.domains?.title && (
@@ -624,7 +624,7 @@ export function QuestionList() {
 
         return {
           app_id: currentApp?.app_id || '',
-          content: String(item.content || ''),
+          content: typeof item.content === 'object' ? item.content : String(item.content || ''),
           type: (item.type || 'multiple_choice') as QuestionInsert['type'],
           points: parseInt(item.points as string) || 1,
           status: (item.status || 'draft') as QuestionInsert['status'],
