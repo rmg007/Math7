@@ -103,7 +103,7 @@ $$ LANGUAGE plpgsql;
 -- SUBJECTS
 CREATE TABLE IF NOT EXISTS public.subjects (
   subject_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
+  title TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
   description TEXT,
   icon_name TEXT,
@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS public.apps (
   app_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   subject_id UUID REFERENCES subjects(subject_id),
   subdomain TEXT NOT NULL UNIQUE,
-  app_name TEXT NOT NULL,
+  display_name TEXT NOT NULL,
   grade_number INTEGER NOT NULL,
   description TEXT,
   is_active BOOLEAN DEFAULT true,
@@ -147,10 +147,10 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 -- └─────────────────────────────────────────────────────────────────────────────┘
 
 CREATE TABLE IF NOT EXISTS public.domains (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  domain_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   app_id UUID NOT NULL REFERENCES public.apps(app_id),
   slug TEXT NOT NULL,
-  name TEXT NOT NULL,
+  title TEXT NOT NULL,
   description TEXT,
   icon TEXT,
   sort_order INTEGER DEFAULT 0,
@@ -162,15 +162,16 @@ CREATE TABLE IF NOT EXISTS public.domains (
   UNIQUE(app_id, slug)
 );
 
+-- SKILLS
 CREATE TABLE IF NOT EXISTS public.skills (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  domain_id UUID NOT NULL REFERENCES domains(id) ON DELETE CASCADE,
+  skill_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  domain_id UUID NOT NULL REFERENCES domains(domain_id) ON DELETE CASCADE,
   app_id UUID NOT NULL REFERENCES public.apps(app_id),
   slug TEXT NOT NULL,
-  name TEXT NOT NULL,
+  title TEXT NOT NULL,
   description TEXT,
   sort_order INTEGER DEFAULT 0,
-  difficulty INTEGER DEFAULT 1,
+  difficulty_level INTEGER DEFAULT 1,
   status curriculum_status DEFAULT 'draft',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -179,8 +180,8 @@ CREATE TABLE IF NOT EXISTS public.skills (
 );
 
 CREATE TABLE IF NOT EXISTS public.questions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  skill_id UUID NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
+  question_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  skill_id UUID NOT NULL REFERENCES skills(skill_id) ON DELETE CASCADE,
   app_id UUID NOT NULL REFERENCES public.apps(app_id),
   type question_type NOT NULL,
   content JSONB NOT NULL,
@@ -245,7 +246,7 @@ CREATE TABLE IF NOT EXISTS public.assignments (
 CREATE TABLE IF NOT EXISTS public.attempts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  question_id UUID NOT NULL REFERENCES public.questions(id) ON DELETE CASCADE,
+  question_id UUID NOT NULL REFERENCES public.questions(question_id) ON DELETE CASCADE,
   answered JSONB NOT NULL,
   is_correct BOOLEAN NOT NULL,
   points_earned INTEGER NOT NULL DEFAULT 0,
@@ -256,7 +257,7 @@ CREATE TABLE IF NOT EXISTS public.attempts (
 CREATE TABLE IF NOT EXISTS public.skill_progress (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  skill_id UUID NOT NULL REFERENCES public.skills(id) ON DELETE CASCADE,
+  skill_id UUID NOT NULL REFERENCES public.skills(skill_id) ON DELETE CASCADE,
   mastery_level DECIMAL(5,2) DEFAULT 0,
   total_attempts INTEGER DEFAULT 0,
   correct_attempts INTEGER DEFAULT 0,

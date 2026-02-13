@@ -48,7 +48,7 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
           </div>
           <div>
             <p className="font-black text-gray-900 tracking-tight text-base italic leading-none">
-              {subject.name}
+              {subject.title}
             </p>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
               ID: {subject.subject_id.split('-')[0]}
@@ -115,7 +115,7 @@ export function SubjectsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
   const [formData, setFormData] = useState({
-    name: '',
+    title: '',
     slug: '',
     description: '',
     color_hex: '',
@@ -127,7 +127,7 @@ export function SubjectsPage() {
       if (subject) {
         setEditingSubject(subject);
         setFormData({
-          name: subject.name,
+          title: subject.title,
           slug: subject.slug,
           description: subject.description || '',
           color_hex: subject.color_hex || '',
@@ -136,7 +136,7 @@ export function SubjectsPage() {
       } else {
         setEditingSubject(null);
         setFormData({
-          name: '',
+          title: '',
           slug: '',
           description: '',
           color_hex: '',
@@ -191,7 +191,7 @@ export function SubjectsPage() {
   const filteredSubjects =
     subjects?.filter(
       (s) =>
-        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.slug.toLowerCase().includes(searchQuery.toLowerCase())
     ) || [];
 
@@ -359,8 +359,8 @@ export function SubjectsPage() {
                     </Label>
                     <Input
                       id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       placeholder="e.g. Mathematics"
                       required
                       className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-bold italic"

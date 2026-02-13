@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 export type App = Tables<'apps'>;
 export interface CompiledApp extends App {
   subjects: {
-    name: string;
+    title: string;
   } | null;
 }
 export type AppInsert = TablesInsert<'apps'>;
@@ -21,7 +21,7 @@ export function useApps() {
           `
           *,
           subjects (
-            name
+            title
           )
         `
         )
