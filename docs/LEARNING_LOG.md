@@ -1,5 +1,46 @@
 # Learning Log
 
+## 2026-02-13: AI Generation Type Drift & Edge Function Deployment
+
+### Session Context
+
+- **Trigger**: TypeScript compilation errors in AI generation pipeline (5 TS errors, 0 after fix)
+- **Scope**: `database.types.ts` drift, `governedGeneration.ts` schema mismatch, Sidebar icon import, Edge Function redeployment
+- **Outcome**: ✅ Zero TS errors, ✅ Edge functions v2 deployed, ✅ Admin panel deployed to admin.questerix.com, ✅ GitHub pushed
+
+### Root Causes Identified
+
+#### 1. `database.types.ts` Drift from Live DB (Critical)
+
+- **Issue**: The `consume_tenant_tokens` RPC was typed as `{ p_app_id: string; p_token_count: number }` in `database.types.ts`, but the actual Supabase function signature is `(p_app_id uuid, p_tokens_used integer, p_operation text DEFAULT 'generate_questions')`.
+- **Impact**: TypeScript type-checked successfully against the _wrong_ type, so the RPC call would fail at runtime with a parameter mismatch.
+- **Fix**: Updated `database.types.ts` line 1928 to `{ p_app_id: string; p_tokens_used: number; p_operation?: string }`.
+- **Lesson**: **`database.types.ts` must be regenerated after ANY DB function signature change.** Manual edits are a last resort. The canonical command is: `supabase gen types typescript --project-id <id> > admin-panel/src/lib/database.types.ts`. Consider adding this to the deployment checklist.
+
+#### 2. Inserting Non-Existent Columns into `ai_generation_sessions` (High)
+
+- **Issue**: The `governedGeneration.ts` insert included `app_id` (not a column on the table) and `metadata` (field doesn't exist — the JSONB column is `raw_response`). It also referenced `prompt_tokens` and `completion_tokens` which don't exist on `GenerateQuestionsResponse.metadata`.
+- **Impact**: TypeScript caught these at compile time, but the code was written assuming a different table schema than what was actually deployed.
+- **Fix**: Removed `app_id` (stored in `raw_response` instead), added required `prompt_text` field, used correct `raw_response` JSONB column, removed non-existent metadata properties.
+- **Lesson**: **Always verify the actual DB schema (`SELECT column_name FROM information_schema.columns WHERE table_name = '...'`) before writing insert/update code.** Don't assume column names from memory or other tables.
+
+#### 3. Missing Icon Import (Low)
+
+- **Issue**: Sidebar used `Clock` icon from lucide-react but it was never imported. Only `History` (which is visually equivalent) was imported.
+- **Fix**: Changed the icon reference to `History`.
+- **Lesson**: **After adding a new nav item, verify the icon is actually in the import list.** The TypeScript compiler catches this, but it should be obvious during code authoring.
+
+### Preventive Checklist (AI Generation Pipeline)
+
+1. After modifying any Supabase RPC → regenerate `database.types.ts`
+2. Before inserting into a table → verify columns with `information_schema.columns`
+3. Before referencing a type's properties → check the actual interface definition
+4. After adding sidebar nav items → verify the icon is in the import block
+5. After deploying edge functions → verify with `list_edge_functions` MCP tool
+6. Always run `npx tsc --noEmit` before committing
+
+---
+
 ## 2026-02-13: Supabase Migration Recovery & Schema Consistency
 
 ### Session Context
