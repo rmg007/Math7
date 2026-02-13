@@ -1,5 +1,15 @@
 # Questerix Development Tasks
 
+## Admin Section QA Audit Fixes (2026-02-12)
+
+- [x] **P0: Rename "INITIATE SIGNATURE" → "GENERATE CODE"** on InvitationCodesPage
+- [x] **P0: Rename "EXTRACT" → "COPY" and "VERIFIED" → "COPIED"** on invitation code copy button
+- [x] **P0: Clarify generator subtitle** from jargon to plain language
+- [x] **P1: Add empty state CTA** on UserManagementPage linking to invitation codes
+- [x] **P1: Clarify settings scope** — updated description to say "personal profile"
+- [ ] **P2: Broader terminology pass** across all admin pages (deferred)
+- [ ] **P3: Platform Settings page** — separate from Account Settings (deferred, feature request)
+
 ## 🚨 CRITICAL SECURITY AUDIT REMEDIATION (2026-02-12)
 
 ### Phase 1: Critical Secret Exposure (CRITICAL)

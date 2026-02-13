@@ -1,26 +1,33 @@
-import { useState, useEffect, useCallback, memo } from "react"
-import { supabase } from "@/lib/supabase"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import type { Tables } from '@/lib/database.types'
-import { StatusBadge, type StatusType } from '@/components/ui/status-badge'
-import { Pagination } from '@/components/ui/pagination'
-import { AdminHeader } from '@/components/ui/admin-header'
-import { Key, Search, X, ShieldCheck, Zap, Copy, Power, Activity } from 'lucide-react'
+import { AdminHeader } from '@/components/ui/admin-header';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Pagination } from '@/components/ui/pagination';
+import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
+import type { Tables } from '@/lib/database.types';
+import { supabase } from '@/lib/supabase';
+import { Activity, Copy, Key, Power, Search, ShieldCheck, X, Zap } from 'lucide-react';
+import { memo, useCallback, useEffect, useState } from 'react';
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Skeleton } from '@/components/ui/skeleton'
-import { EmptyState } from '@/components/ui/empty-state'
+import { EmptyState } from '@/components/ui/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
-type InvitationCode = Tables<'invitation_codes'>
+type InvitationCode = Tables<'invitation_codes'>;
 
 function formatDate(dateStr: string | null) {
-  if (!dateStr) return 'INF'
+  if (!dateStr) return 'INF';
   return new Date(dateStr).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
-  })
+    day: 'numeric',
+  });
 }
 
 interface InvitationCodeRowProps {
@@ -32,196 +39,219 @@ interface InvitationCodeRowProps {
   copiedId: string | null;
 }
 
-const InvitationCodeRow = memo(({ code, onSelect, onCopy, onDeactivate, isSelected, copiedId }: InvitationCodeRowProps) => {
-  const isExpired = code.expires_at && new Date(code.expires_at) < new Date()
-  const isExhausted = (code.times_used ?? 0) >= (code.max_uses ?? 1)
+const InvitationCodeRow = memo(
+  ({ code, onSelect, onCopy, onDeactivate, isSelected, copiedId }: InvitationCodeRowProps) => {
+    const isExpired = code.expires_at && new Date(code.expires_at) < new Date();
+    const isExhausted = (code.times_used ?? 0) >= (code.max_uses ?? 1);
 
-  return (
-    <TableRow key={code.id} className="group hover:bg-indigo-50/30 transition-colors border-b border-gray-50/50 last:border-0">
-      <TableCell className="pl-8 pr-2 py-5">
-        <button onClick={() => onSelect(code.id)} className="text-gray-300 hover:text-indigo-600 transition-colors">
-          {isSelected ? <ShieldCheck className="h-5 w-5 text-indigo-600" /> : <Activity className="h-5 w-5 opacity-20" />}
-        </button>
-      </TableCell>
-      <TableCell className="py-5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
-             <Key className="w-5 h-5 text-indigo-600" />
+    return (
+      <TableRow
+        key={code.id}
+        className="group hover:bg-indigo-50/30 transition-colors border-b border-gray-50/50 last:border-0"
+      >
+        <TableCell className="pl-8 pr-2 py-5">
+          <button
+            onClick={() => onSelect(code.id)}
+            className="text-gray-300 hover:text-indigo-600 transition-colors"
+          >
+            {isSelected ? (
+              <ShieldCheck className="h-5 w-5 text-indigo-600" />
+            ) : (
+              <Activity className="h-5 w-5 opacity-20" />
+            )}
+          </button>
+        </TableCell>
+        <TableCell className="py-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+              <Key className="w-5 h-5 text-indigo-600" />
+            </div>
+            <code className="px-4 py-2 rounded-xl bg-gray-100/50 text-indigo-600 font-mono text-sm font-black tracking-widest">
+              {code.code}
+            </code>
           </div>
-          <code className="px-4 py-2 rounded-xl bg-gray-100/50 text-indigo-600 font-mono text-sm font-black tracking-widest">
-            {code.code}
-          </code>
-        </div>
-      </TableCell>
-      <TableCell className="py-5">
-        {(() => {
-          const status: StatusType = !code.is_active ? 'inactive' : isExpired ? 'error' : isExhausted ? 'exhausted' : 'active';
-          const label = !code.is_active ? 'Deactivated' : isExpired ? 'Expired' : isExhausted ? 'Exhausted' : 'Active';
-          return <StatusBadge status={status} label={label} />;
-        })()}
-      </TableCell>
-      <TableCell className="py-5 font-black text-xs text-gray-600 tracking-tight">
-        {code.times_used} / {code.max_uses}
-      </TableCell>
-      <TableCell className="py-5 font-black text-xs text-gray-400 uppercase tracking-tighter">
-        {formatDate(code.expires_at)}
-      </TableCell>
-      <TableCell className="py-5 font-black text-[10px] text-gray-400 uppercase tracking-widest">
-        {formatDate(code.created_at)}
-      </TableCell>
-      <TableCell className="px-8 py-5 text-right space-x-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onCopy(code.code, code.id)}
-          className="h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 gap-2"
-        >
-          <Copy className="h-3.5 w-3.5" />
-          {copiedId === code.id ? 'VERIFIED' : 'EXTRACT'}
-        </Button>
-        {code.is_active && (
+        </TableCell>
+        <TableCell className="py-5">
+          {(() => {
+            const status: StatusType = !code.is_active
+              ? 'inactive'
+              : isExpired
+                ? 'error'
+                : isExhausted
+                  ? 'exhausted'
+                  : 'active';
+            const label = !code.is_active
+              ? 'Deactivated'
+              : isExpired
+                ? 'Expired'
+                : isExhausted
+                  ? 'Exhausted'
+                  : 'Active';
+            return <StatusBadge status={status} label={label} />;
+          })()}
+        </TableCell>
+        <TableCell className="py-5 font-black text-xs text-gray-600 tracking-tight">
+          {code.times_used} / {code.max_uses}
+        </TableCell>
+        <TableCell className="py-5 font-black text-xs text-gray-400 uppercase tracking-tighter">
+          {formatDate(code.expires_at)}
+        </TableCell>
+        <TableCell className="py-5 font-black text-[10px] text-gray-400 uppercase tracking-widest">
+          {formatDate(code.created_at)}
+        </TableCell>
+        <TableCell className="px-8 py-5 text-right space-x-2">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onDeactivate(code.id)}
-            className="h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest text-red-400 hover:bg-red-50 hover:text-red-600 gap-2"
+            onClick={() => onCopy(code.code, code.id)}
+            className="h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 gap-2"
           >
-            <Power className="h-3.5 w-3.5" />
-            VOID
+            <Copy className="h-3.5 w-3.5" />
+            {copiedId === code.id ? 'COPIED' : 'COPY'}
           </Button>
-        )}
-      </TableCell>
-    </TableRow>
-  );
-});
+          {code.is_active && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDeactivate(code.id)}
+              className="h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest text-red-400 hover:bg-red-50 hover:text-red-600 gap-2"
+            >
+              <Power className="h-3.5 w-3.5" />
+              VOID
+            </Button>
+          )}
+        </TableCell>
+      </TableRow>
+    );
+  }
+);
 
 export function InvitationCodesPage() {
-  const [codes, setCodes] = useState<InvitationCode[]>([])
-  const [loading, setLoading] = useState(true)
-  const [generating, setGenerating] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const [maxUses, setMaxUses] = useState("1")
+  const [codes, setCodes] = useState<InvitationCode[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [maxUses, setMaxUses] = useState('1');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [expiresDays, setExpiresDays] = useState("")
-  const [copiedId, setCopiedId] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [expiresDays, setExpiresDays] = useState('');
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const filteredCodes = codes.filter(c => 
+  const filteredCodes = codes.filter((c) =>
     c.code.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  );
 
-  const paginatedCodes = filteredCodes.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  const paginatedCodes = filteredCodes.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const fetchCodes = useCallback(async () => {
-    setLoading(true)
+    setLoading(true);
     const { data, error } = await supabase
       .from('invitation_codes')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false });
 
     if (error) {
-      setError('Failed to load invitation codes')
-      console.error(error)
+      setError('Failed to load invitation codes');
+      console.error(error);
     } else {
-      setCodes((data as InvitationCode[]) || [])
+      setCodes((data as InvitationCode[]) || []);
     }
-    setLoading(false)
+    setLoading(false);
   }, []);
 
   useEffect(() => {
-    fetchCodes()
-  }, [fetchCodes])
+    fetchCodes();
+  }, [fetchCodes]);
 
   const handleGenerateCode = useCallback(async () => {
-    setGenerating(true)
-    setError(null)
-    setSuccess(null)
+    setGenerating(true);
+    setError(null);
+    setSuccess(null);
 
     try {
-      const { data: newCode, error: genError } = await supabase.rpc(
-        'generate_invitation_code',
-        {
-          p_max_uses: parseInt(maxUses) || 1,
-          p_expires_days: expiresDays ? parseInt(expiresDays) : undefined
-        }
-      )
+      const { data: newCode, error: genError } = await supabase.rpc('generate_invitation_code', {
+        p_max_uses: parseInt(maxUses) || 1,
+        p_expires_days: expiresDays ? parseInt(expiresDays) : undefined,
+      });
 
-      if (genError) throw genError
+      if (genError) throw genError;
 
-      setSuccess(`New invitation code generated: ${newCode}`)
-      await fetchCodes()
-      setMaxUses("1")
-      setExpiresDays("")
+      setSuccess(`New invitation code generated: ${newCode}`);
+      await fetchCodes();
+      setMaxUses('1');
+      setExpiresDays('');
     } catch (err) {
-      setError('Failed to generate invitation code. Make sure you are a super admin.')
-      console.error(err)
+      setError('Failed to generate invitation code. Make sure you are a super admin.');
+      console.error(err);
     } finally {
-      setGenerating(false)
+      setGenerating(false);
     }
   }, [maxUses, expiresDays, fetchCodes]);
 
-  const handleDeactivateCode = useCallback(async (codeId: string) => {
-    try {
-      const { error: deactError } = await supabase.rpc(
-        'deactivate_invitation_code',
-        { p_code_id: codeId }
-      )
+  const handleDeactivateCode = useCallback(
+    async (codeId: string) => {
+      try {
+        const { error: deactError } = await supabase.rpc('deactivate_invitation_code', {
+          p_code_id: codeId,
+        });
 
-      if (deactError) throw deactError
+        if (deactError) throw deactError;
 
-      await fetchCodes()
-    } catch (err) {
-      setError('Failed to deactivate code')
-      console.error(err)
-    }
-  }, [fetchCodes]);
+        await fetchCodes();
+      } catch (err) {
+        setError('Failed to deactivate code');
+        console.error(err);
+      }
+    },
+    [fetchCodes]
+  );
 
   const handleCopyCode = useCallback(async (code: string, codeId: string) => {
     try {
-      await navigator.clipboard.writeText(code)
-      setCopiedId(codeId)
-      setTimeout(() => setCopiedId(null), 2000)
+      await navigator.clipboard.writeText(code);
+      setCopiedId(codeId);
+      setTimeout(() => setCopiedId(null), 2000);
     } catch (err) {
-      console.error('Failed to copy:', err)
+      console.error('Failed to copy:', err);
     }
   }, []);
 
   const handleBulkDeactivate = useCallback(async () => {
-    if (selectedIds.size === 0) return
-    setError(null)
-    setSuccess(null)
-    
+    if (selectedIds.size === 0) return;
+    setError(null);
+    setSuccess(null);
+
     try {
-      const ids = Array.from(selectedIds)
+      const ids = Array.from(selectedIds);
       const results = await Promise.all(
-        ids.map(id => supabase.rpc('deactivate_invitation_code', { p_code_id: id }))
-      )
+        ids.map((id) => supabase.rpc('deactivate_invitation_code', { p_code_id: id }))
+      );
 
-      const errors = results.filter(r => r.error)
-      if (errors.length > 0) throw new Error('Some codes failed to deactivate')
+      const errors = results.filter((r) => r.error);
+      if (errors.length > 0) throw new Error('Some codes failed to deactivate');
 
-      setSuccess(`${ids.length - errors.length} signatures successfully voided.`)
-      setSelectedIds(new Set())
-      await fetchCodes()
+      setSuccess(`${ids.length - errors.length} codes successfully deactivated.`);
+      setSelectedIds(new Set());
+      await fetchCodes();
     } catch (err) {
-      setError('Bulk deactivation process encountered errors.')
-      console.error(err)
+      setError('Bulk deactivation process encountered errors.');
+      console.error(err);
     }
   }, [selectedIds, fetchCodes]);
 
   const handleSelectAll = useCallback(() => {
     if (selectedIds.size === paginatedCodes.length && paginatedCodes.length > 0) {
-      setSelectedIds(new Set())
+      setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(paginatedCodes.map(c => c.id)));
+      setSelectedIds(new Set(paginatedCodes.map((c) => c.id)));
     }
   }, [paginatedCodes, selectedIds.size]);
 
   const handleSelectOne = useCallback((id: string) => {
-    setSelectedIds(prev => {
+    setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -229,16 +259,15 @@ export function InvitationCodesPage() {
     });
   }, []);
 
-
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
-      <AdminHeader 
+      <AdminHeader
         title="Admin Invitation Registry"
         description="Provision and manage high-authority access tokens for new administrative operators."
         icon={Key}
         breadcrumbs={[
           { label: 'Admin', href: '/users' },
-          { label: 'Invitations', href: '/invitation-codes' }
+          { label: 'Invitations', href: '/invitation-codes' },
         ]}
       />
 
@@ -264,13 +293,17 @@ export function InvitationCodesPage() {
           </div>
           <div>
             <h2 className="text-xl font-black text-gray-900 tracking-tight">Provision Access</h2>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">Initialize new authorization signatures</p>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
+              Generate new invitation codes for admin onboarding
+            </p>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-8 items-end">
           <div className="space-y-2 group">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Authority Uses</label>
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+              Authority Uses
+            </label>
             <Input
               type="number"
               min="1"
@@ -281,7 +314,9 @@ export function InvitationCodesPage() {
             />
           </div>
           <div className="space-y-2 group">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">TTL (Days)</label>
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+              TTL (Days)
+            </label>
             <Input
               type="number"
               min="1"
@@ -296,7 +331,7 @@ export function InvitationCodesPage() {
             disabled={generating}
             className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl px-10 h-12 shadow-lg shadow-indigo-600/20 font-black text-xs uppercase tracking-[0.2em] transition-all hover:-translate-y-0.5"
           >
-            {generating ? 'EXECUTING...' : 'INITIATE SIGNATURE'}
+            {generating ? 'GENERATING...' : 'GENERATE CODE'}
           </Button>
         </div>
       </div>
@@ -327,11 +362,15 @@ export function InvitationCodesPage() {
             </button>
           )}
         </div>
-        
+
         <div className="flex items-center gap-3 shrink-0">
           <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
-             <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Signatures:</span>
-             <span className="text-sm font-black text-indigo-700 tracking-tight">{filteredCodes.length} REGISTERED</span>
+            <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
+              Signatures:
+            </span>
+            <span className="text-sm font-black text-indigo-700 tracking-tight">
+              {filteredCodes.length} REGISTERED
+            </span>
           </div>
         </div>
       </div>
@@ -340,7 +379,9 @@ export function InvitationCodesPage() {
       {selectedIds.size > 0 && (
         <div className="flex items-center justify-between p-4 bg-indigo-600 rounded-[2rem] shadow-xl shadow-indigo-600/20 animate-in slide-in-from-top-4 duration-500">
           <div className="flex items-center gap-4 pl-4">
-            <span className="text-white font-black text-xs uppercase tracking-[0.2em]">{selectedIds.size} SELECTED FOR BATCH PROCESSING</span>
+            <span className="text-white font-black text-xs uppercase tracking-[0.2em]">
+              {selectedIds.size} SELECTED FOR BATCH PROCESSING
+            </span>
           </div>
           <div className="flex gap-2">
             <Button
@@ -368,26 +409,47 @@ export function InvitationCodesPage() {
         <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
           <div>
             <h3 className="text-xl font-black text-gray-900 tracking-tight">Access Registry</h3>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1 italic">Verified Invitation Signatures</p>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1 italic">
+              Verified Invitation Signatures
+            </p>
           </div>
           <Activity className="h-5 w-5 text-gray-200" />
         </div>
-        
+
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b-2 border-gray-100/50">
                 <TableHead className="w-12 h-14 pl-8 pr-2">
-                  <button onClick={handleSelectAll} className="text-gray-300 hover:text-indigo-600 transition-colors">
-                    {selectedIds.size > 0 && selectedIds.size === paginatedCodes.length ? <ShieldCheck className="h-5 w-5 text-indigo-600" /> : <Activity className="h-5 w-5" />}
+                  <button
+                    onClick={handleSelectAll}
+                    className="text-gray-300 hover:text-indigo-600 transition-colors"
+                  >
+                    {selectedIds.size > 0 && selectedIds.size === paginatedCodes.length ? (
+                      <ShieldCheck className="h-5 w-5 text-indigo-600" />
+                    ) : (
+                      <Activity className="h-5 w-5" />
+                    )}
                   </button>
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">Signature Code</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">Status</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">Utilization</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">Expiration</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">Created</TableHead>
-                <TableHead className="text-right px-8 h-14 font-black text-[10px] uppercase tracking-widest text-gray-400">Execution</TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                  Signature Code
+                </TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                  Status
+                </TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                  Utilization
+                </TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                  Expiration
+                </TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                  Created
+                </TableHead>
+                <TableHead className="text-right px-8 h-14 font-black text-[10px] uppercase tracking-widest text-gray-400">
+                  Execution
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -405,43 +467,47 @@ export function InvitationCodesPage() {
                     <EmptyState
                       icon={Key}
                       title="No Signatures Found"
-                      description={searchQuery 
-                        ? `No invitation signatures match your search term "${searchQuery}".` 
-                        : "Initialize new authorization signatures to populate this registry."}
+                      description={
+                        searchQuery
+                          ? `No invitation signatures match your search term "${searchQuery}".`
+                          : 'Initialize new authorization signatures to populate this registry.'
+                      }
                     />
                   </TableCell>
                 </TableRow>
               ) : (
                 paginatedCodes.map((code) => (
-                   <InvitationCodeRow 
-                     key={code.id}
-                     code={code}
-                     onSelect={handleSelectOne}
-                     onCopy={handleCopyCode}
-                     onDeactivate={handleDeactivateCode}
-                     isSelected={selectedIds.has(code.id)}
-                     copiedId={copiedId}
-                   />
+                  <InvitationCodeRow
+                    key={code.id}
+                    code={code}
+                    onSelect={handleSelectOne}
+                    onCopy={handleCopyCode}
+                    onDeactivate={handleDeactivateCode}
+                    isSelected={selectedIds.has(code.id)}
+                    copiedId={copiedId}
+                  />
                 ))
               )}
             </TableBody>
           </Table>
         </div>
-        
+
         {filteredCodes.length > 0 && (
           <div className="px-8 py-6 bg-gray-50/30 border-t border-gray-100/50">
-             <Pagination
+            <Pagination
               currentPage={currentPage}
               totalPages={Math.ceil(filteredCodes.length / pageSize)}
               totalCount={filteredCodes.length}
               pageSize={pageSize}
               onPageChange={setCurrentPage}
-              onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setCurrentPage(1);
+              }}
             />
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
-

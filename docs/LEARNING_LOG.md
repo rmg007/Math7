@@ -1,5 +1,53 @@
 # Learning Log
 
+## 2026-02-12: Admin Section QA Audit — UX & Terminology Fixes
+
+### Session Context
+
+- **Trigger**: QA audit of Admin section (User Management, Invitation Codes, Settings)
+- **Scope**: Jargon-heavy button labels, missing empty state guidance, settings scope clarity
+- **Outcome**: ✅ All P0/P1 findings addressed across 3 files
+
+### What Was Done
+
+#### 1. Invitation Codes — Label Clarity (P0)
+
+- **File**: `admin-panel/src/features/auth/pages/InvitationCodesPage.tsx`
+- **Changes**:
+  - Renamed `INITIATE SIGNATURE` → `GENERATE CODE` (main CTA button)
+  - Renamed `EXTRACT` → `COPY` and `VERIFIED` → `COPIED` (clipboard button)
+  - Clarified generator subtitle from "Initialize new authorization signatures" to "Generate new invitation codes for admin onboarding"
+  - Fixed bulk deactivation success message from "signatures successfully voided" to "codes successfully deactivated"
+- **Impact**: Buttons now communicate their action instantly without requiring users to learn custom jargon
+
+#### 2. User Management — Empty State Guidance (P1)
+
+- **File**: `admin-panel/src/features/auth/pages/UserManagementPage.tsx`
+- **Changes**:
+  - Updated empty state description to explain the invitation code workflow
+  - Added actionable CTA button linking to `/invitation-codes` using the existing `EmptyState` `action` prop
+  - Added `Key` icon import and `Link` import
+- **Impact**: Empty directory now guides admins to the correct next step instead of being a dead end
+
+#### 3. Account Settings — Scope Clarity (P1)
+
+- **File**: `admin-panel/src/features/auth/pages/AccountSettingsPage.tsx`
+- **Change**: Updated description from "professional profile" to "personal profile"
+- **Impact**: Sets correct expectation that this is user-scoped, not platform-wide
+
+### What Was Learned
+
+- **Jargon-heavy UI reduces usability**: The military/spy aesthetic ("INITIATE SIGNATURE", "EXTRACT", "VOID") looks cool but confuses new admins. Standard labels ("GENERATE CODE", "COPY") are always preferable for primary actions.
+- **EmptyState `action` prop was underutilized**: The component already supported CTA buttons, but several pages weren't using it. This is a pattern to check across other pages.
+- **QA audit found a false positive**: The auditor reported "no copy icon" but a `<Copy>` icon already existed — it was just hidden behind the "EXTRACT" label. Always cross-reference audit findings against actual code before implementing.
+- **Settings page scope confusion is a design gap**: When a page is named "Settings" in the sidebar but only covers personal account, users expect platform-wide controls. Consider renaming to "Account" in the sidebar or adding a separate "Platform Settings" page.
+
+### Prevention Measures
+
+- Use clear, standard labels for all primary action buttons
+- Always populate the `action` prop on `EmptyState` components with a relevant next step
+- When sidebar labels are generic (e.g., "Settings"), ensure the page content matches the implied scope
+
 ## 2026-02-12: System Health QA Fixes — Implemented
 
 ### Session Context
