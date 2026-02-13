@@ -308,7 +308,7 @@ function App() {
                       }
                     />
                     <Route
-                      path="/platform/subjects"
+                      path="/subjects"
                       element={
                         <SuperAdminGuard>
                           <SubjectsPage />
@@ -316,7 +316,7 @@ function App() {
                       }
                     />
                     <Route
-                      path="/platform/apps"
+                      path="/apps"
                       element={
                         <SuperAdminGuard>
                           <AppsPage />
@@ -324,7 +324,7 @@ function App() {
                       }
                     />
                     <Route
-                      path="/platform/landings"
+                      path="/landings"
                       element={
                         <SuperAdminGuard>
                           <LandingsPage />

@@ -66,6 +66,7 @@ export function usePaginatedDomains(params: PaginationParams) {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
+
       let query = supabase
         .from('domains')
         .select('*', { count: 'exact' })
@@ -87,6 +88,7 @@ export function usePaginatedDomains(params: PaginationParams) {
       query = query.range(from, to);
 
       const { data, error, count } = await query;
+
 
       if (error) throw error;
 

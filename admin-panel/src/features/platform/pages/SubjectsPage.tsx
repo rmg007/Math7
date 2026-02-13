@@ -203,7 +203,7 @@ export function SubjectsPage() {
         icon={Boxes}
         breadcrumbs={[
           { label: 'Curriculum', href: '/domains' },
-          { label: 'Taxonomy', href: '/platform/subjects' },
+          { label: 'Taxonomy', href: '/subjects' },
         ]}
         actions={
           <Button

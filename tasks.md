@@ -282,3 +282,35 @@
 - [x] **Landing Pages Deletion**: Manually deleted from Cloudflare by user.
 - [x] **HARD RULE**: `landing-pages` MUST NOT be published. `orchestrator.ps1` has been locked with `$SkipLanding = $true`.
 - [x] **Custom Domains**: Pointed to `admin.questerix.com` and `app.questerix.com`.
+
+---
+
+## 🛠️ SCHEMA RECONCILIATION & BUILD GATE RECOVERY (2026-02-13)
+
+### Phase 1: Database Restoration (Missing Objects)
+
+- [ ] **P0: Implement missing RPC functions** (Requirement for `tsc` recovery)
+  - [ ] `deactivate_own_account` & `delete_own_account` (AccountSettings)
+  - [ ] `generate_invitation_code` & `deactivate_invitation_code` (InvitationMgmt)
+  - [ ] `validate_invitation_code` (User Registration)
+  - [ ] `promote_error_to_issue` (Observability)
+  - [ ] `import_questions_bulk` (Curriculum Service)
+- [ ] **P1: Align Column Schema**
+  - [ ] `apps`: Reconcile `grade_level` (code) vs `grade_number` (DB)
+  - [ ] `subjects`: Add missing `color_hex` and `icon_url` columns
+  - [ ] `group_members`: Add missing `nickname` column
+  - [ ] `groups`: Reconcile `allow_anonymous_join` (code) vs `allow_anonymous` (DB)
+
+### Phase 2: Code Cleanup & Type Safety
+
+- [ ] **P1: Evaluation of Dead Features**
+  - [ ] Decide status of `app_landing_pages` relation (Restore Table or Remove Code)
+  - [ ] Audit `CurriculumService.ts` for unused bulk import logic
+- [ ] **P0: Restore Production Build Gate**
+  - [ ] Fix all type errors and re-enable `tsc` in `admin-panel/package.json` build script
+
+### Recent Fixes (2026-02-13)
+
+- [x] **BUG: Domain Visibility Fixed** (Relaxed UUID validation regex in `isValidUUID`)
+- [x] **TYPE REGEN**: Updated `database.types.ts` to sync with new project schema
+- [x] **DEPLOY**: Standardized routes (removed `/platform` prefix) and deployed Admin/Student apps

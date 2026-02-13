@@ -26,6 +26,8 @@ export interface PaginatedResponse<T> {
  */
 export function isValidUUID(uuid: string | undefined | null): uuid is string {
   if (!uuid) return false;
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  // Relaxed UUID format: accept any 8-4-4-4-12 hex string
+  // The strict RFC 4122 pattern rejects synthetic UUIDs like those used as app_ids
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   return uuidRegex.test(uuid);
 }

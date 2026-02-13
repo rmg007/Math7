@@ -100,7 +100,7 @@ export const SessionsPage: React.FC = () => {
         description="Track and audit AI generation sessions, token consumption, and model efficiency."
         icon={Clock}
         breadcrumbs={[
-          { label: 'Platform', href: '/platform/apps' },
+          { label: 'Platform', href: '/apps' },
           { label: 'Intelligence', href: '/ai-sessions' },
           { label: 'Telemetry', href: '/ai-sessions' }
         ]}

@@ -227,8 +227,8 @@ export function AppsPage() {
         description="Manage the multi-tenant subject ecosystem and specialized deployments."
         icon={Layout}
         breadcrumbs={[
-          { label: 'Deployment', href: '/platform/apps' },
-          { label: 'Applications', href: '/platform/apps' },
+          { label: 'Deployment', href: '/apps' },
+          { label: 'Applications', href: '/apps' },
         ]}
         actions={
           <Button

@@ -63,7 +63,7 @@ const navigationGroups: NavGroup[] = [
     items: [
       { name: 'My Groups', href: '/groups', icon: Users, hideForSuperAdmin: true }, // Hide from super admins
       { name: 'Domains', href: '/domains', icon: Book },
-      { name: 'Subjects', href: '/platform/subjects', icon: Boxes, superAdminOnly: true },
+      { name: 'Subjects', href: '/subjects', icon: Boxes, superAdminOnly: true },
       { name: 'Skills', href: '/skills', icon: Layers },
       { name: 'Questions', href: '/questions', icon: FileText },
       { name: 'Bulk Import', href: '/ai-import', icon: FileUp },
@@ -74,8 +74,8 @@ const navigationGroups: NavGroup[] = [
     items: [
       { name: 'Publish', href: '/publish', icon: Upload },
       { name: 'Version History', href: '/versions', icon: History },
-      { name: 'Apps', href: '/platform/apps', icon: Layout, superAdminOnly: true },
-      { name: 'Landing Pages', href: '/platform/landings', icon: Globe, superAdminOnly: true },
+      { name: 'Apps', href: '/apps', icon: Layout, superAdminOnly: true },
+      { name: 'Landing Pages', href: '/landings', icon: Globe, superAdminOnly: true },
     ]
   },
   {

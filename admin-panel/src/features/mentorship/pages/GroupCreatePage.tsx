@@ -1,19 +1,20 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Switch } from '@/components/ui/switch'
+import { useApp } from '@/hooks/use-app'
 import { useToast } from '@/hooks/use-toast'
-import { ArrowLeft, Loader2, School, Home } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
+import { ArrowLeft, Home, Loader2, School } from 'lucide-react'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
 export function GroupCreatePage() {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { currentApp } = useApp()
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   const [name, setName] = useState('')
@@ -41,12 +42,15 @@ export function GroupCreatePage() {
 
         const joinCode = generateJoinCode() 
 
+        if (!currentApp) throw new Error("No application context")
+
         const { error } = await supabase.from('groups').insert({
             name,
             type,
             allow_anonymous_join: allowAnonymous,
             owner_id: user.id,
             join_code: joinCode,
+            app_id: currentApp.app_id,
         })
 
         if (error) throw error

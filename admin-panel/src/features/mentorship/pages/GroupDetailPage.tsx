@@ -3,12 +3,12 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -16,23 +16,23 @@ import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowLeft,
-  Check,
-  CheckCircle,
-  Circle,
-  ClipboardList,
-  Clock,
-  Copy,
-  Edit3,
-  Home,
-  Layers,
-  LayoutDashboard,
-  Plus,
-  School,
-  Settings,
-  Trash2,
-  UserPlus,
-  Users,
+    ArrowLeft,
+    Check,
+    CheckCircle,
+    Circle,
+    ClipboardList,
+    Clock,
+    Copy,
+    Edit3,
+    Home,
+    Layers,
+    LayoutDashboard,
+    Plus,
+    School,
+    Settings,
+    Trash2,
+    UserPlus,
+    Users,
 } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -440,9 +440,9 @@ export function GroupDetailPage() {
 
   const getStatus = useCallback(
     (memberId: string, skillId: string) => {
-      const entry = progress?.find(
-        (p: { user_id: string; skill_id: string; mastery_level: number }) =>
-          p.user_id === memberId && p.skill_id === skillId
+      if (!progress) return 'not_started';
+      const entry = (progress as any).find(
+        (p: any) => p.user_id === memberId && p.skill_id === skillId
       );
       if (!entry || entry.mastery_level === null) return 'not_started';
       if (entry.mastery_level >= 100) return 'mastered';
@@ -453,13 +453,8 @@ export function GroupDetailPage() {
 
   const getSkillTitle = useCallback(
     (skillId: string) => {
-      const skill = assignmentSkills?.find(
-        (s: { skill_id: string; title?: string } | { error: true }) => {
-          if ('error' in s) return false;
-          return s.skill_id === skillId;
-        }
-      );
-      return skill && 'title' in skill ? skill.title : 'Skill';
+      const skill = (assignmentSkills as any)?.find((s: any) => !('error' in s) && s.skill_id === skillId);
+      return (skill as any)?.title || 'Skill';
     },
     [assignmentSkills]
   );

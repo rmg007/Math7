@@ -162,12 +162,13 @@ export function useRecentActivity() {
         });
       });
 
-      (questionsResult.data)?.forEach((q) => {
+        (questionsResult.data)?.forEach((q) => {
         const isNew = q.created_at === q.updated_at;
+        const contentStr = typeof q.content === 'string' ? q.content : JSON.stringify(q.content);
         activities.push({
           id: q.question_id,
           type: 'question',
-          title: q.content.substring(0, 50) + (q.content.length > 50 ? '...' : ''),
+          title: contentStr.substring(0, 50) + (contentStr.length > 50 ? '...' : ''),
           action: isNew ? 'created' : 'updated',
           timestamp: q.updated_at,
         });
