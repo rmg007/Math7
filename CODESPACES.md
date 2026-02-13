@@ -4,7 +4,50 @@ This file is automatically displayed when you open this project in GitHub Codesp
 
 ## 🚀 First-Time Setup (5 minutes)
 
-### 1. Install Dependencies
+### 1. Configure GitHub Codespaces Secrets (RECOMMENDED)
+
+**Before opening Codespaces**, set up your environment variables for automatic configuration:
+
+1. Go to: **GitHub Settings → Codespaces → Secrets**
+   - Direct URL: https://github.com/settings/codespaces
+
+2. Click **"New secret"** and add these required secrets:
+
+| Secret Name              | Value                                      | Where to Get It                                     |
+| ------------------------ | ------------------------------------------ | --------------------------------------------------- |
+| `VITE_SUPABASE_URL`      | `https://zrxvlcvdtfqzqvgqjjvt.supabase.co` | Supabase Dashboard → Settings → API                 |
+| `VITE_SUPABASE_ANON_KEY` | `eyJhbGc...` (long string)                 | Supabase Dashboard → Settings → API → "anon public" |
+
+**Optional test secrets:**
+
+| Secret Name               | Value              | Purpose           |
+| ------------------------- | ------------------ | ----------------- |
+| `VITE_TEST_USER_EMAIL`    | `test@example.com` | E2E test account  |
+| `VITE_TEST_USER_PASSWORD` | `test123`          | E2E test password |
+
+**✅ Benefits:**
+
+- Secrets are automatically injected into your Codespace
+- The setup script creates `.env.local` files automatically
+- No manual file creation needed
+
+**⚠️ Security:**
+
+- **NEVER** add `SERVICE_ROLE_KEY` to Codespaces Secrets
+- Service role keys belong ONLY on the server (Edge Functions, CI/CD)
+- Anon key is safe for client-side use
+
+### 2. Install Dependencies
+
+```bash
+# The setup script runs automatically when Codespace is created
+# It will install all dependencies and create .env files from secrets
+
+# If you need to re-run the setup:
+bash scripts/setup-codespaces.sh
+```
+
+**Manual installation (if setup script didn't run):**
 
 ```bash
 # Install root dependencies
@@ -20,7 +63,32 @@ cd student-app && flutter pub get && cd ..
 cd content-engine && pip install -r requirements.txt && cd ..
 ```
 
-### 2. Configure Environment Variables
+### 3. Configure Environment Variables (If Not Using Codespaces Secrets)
+
+If you skipped step 1, manually create environment files:
+
+```bash
+# Create admin panel env file
+cat > admin-panel/.env.local << 'EOF'
+VITE_SUPABASE_URL=https://zrxvlcvdtfqzqvgqjjvt.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key_here
+EOF
+
+# Create test env file
+cat > admin-panel/.env.test.local << 'EOF'
+VITE_SUPABASE_URL=https://zrxvlcvdtfqzqvgqjjvt.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key_here
+VITE_TEST_USER_EMAIL=test@example.com
+VITE_TEST_USER_PASSWORD=your_test_password
+EOF
+```
+
+**⚠️ Get your actual keys from:**
+
+- Supabase Dashboard → Project Settings → API
+- Never commit these files (they're in .gitignore)
+
+### 4. Verify Setup
 
 Create environment files with your Supabase credentials:
 

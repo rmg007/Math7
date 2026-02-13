@@ -49,7 +49,7 @@
     }
   },
 
-  "postCreateCommand": "echo '🚀 Codespace ready! Run: cat CODESPACES.md for setup instructions'",
+  "postCreateCommand": "bash scripts/setup-codespaces.sh",
 
   "forwardPorts": [5173, 3000, 8000],
   "portsAttributes": {
@@ -67,5 +67,24 @@
     }
   },
 
-  "remoteUser": "codespace"
+  "remoteUser": "codespace",
+
+  "secrets": {
+    "VITE_SUPABASE_URL": {
+      "description": "Supabase project URL (https://zrxvlcvdtfqzqvgqjjvt.supabase.co)",
+      "documentationUrl": "https://supabase.com/dashboard/project/zrxvlcvdtfqzqvgqjjvt/settings/api"
+    },
+    "VITE_SUPABASE_ANON_KEY": {
+      "description": "Supabase anon/public key (safe for client-side)",
+      "documentationUrl": "https://supabase.com/dashboard/project/zrxvlcvdtfqzqvgqjjvt/settings/api"
+    },
+    "VITE_TEST_USER_EMAIL": {
+      "description": "Test user email for E2E tests (optional)",
+      "documentationUrl": "https://github.com/rmg007/Questerix/blob/main/CODESPACES.md"
+    },
+    "VITE_TEST_USER_PASSWORD": {
+      "description": "Test user password for E2E tests (optional)",
+      "documentationUrl": "https://github.com/rmg007/Questerix/blob/main/CODESPACES.md"
+    }
+  }
 }
