@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# ==========================================
+# PRE-PUSH HOOK: Secret Scanning Gate
+# ==========================================
+# Runs gitleaks locally BEFORE pushing to remote.
+# This is Layer 2 of the defense-in-depth pipeline:
+#   Layer 1: pre-commit (lint-staged + forbidden pattern grep)
+#   Layer 2: pre-push   (gitleaks local scan) ← THIS HOOK
+#   Layer 3: GitHub CI  (gitleaks.yml + secrets.yml)
+#   Layer 4: GitHub     (native secret scanning + push protection)
+
+echo "🔒 Running pre-push secret scan..."
+
+# Check if gitleaks is available
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks detect --source . --verbose --redact --config .gitleaks.toml
+  if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ SECRET LEAK DETECTED! Push blocked."
+    echo "   Fix the leaked secret and amend your commit before pushing."
+    echo "   If this is a false positive, update .gitleaks.toml allowlist."
+    exit 1
+  fi
+  echo "✅ No secrets detected. Push allowed."
+elif npx --no-install gitleaks >/dev/null 2>&1; then
+  npx gitleaks detect --source . --verbose --redact --config .gitleaks.toml
+  if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ SECRET LEAK DETECTED! Push blocked."
+    exit 1
+  fi
+  echo "✅ No secrets detected. Push allowed."
+else
+  echo "⚠️  gitleaks not installed locally. Skipping local scan."
+  echo "   GitHub CI will still run gitleaks on the remote."
+  echo "   Install: brew install gitleaks  OR  choco install gitleaks"
+fi
+
+# Service role key guard (fast grep check)
+echo "🔍 Checking for forbidden secret patterns in source..."
+if grep -rn --include="*.ts" --include="*.tsx" --include="*.dart" \
+   -E "(SUPABASE_SERVICE_ROLE_KEY|service_role|GEMINI_API_KEY)" \
+   admin-panel/src/ student-app/lib/ 2>/dev/null | grep -v "node_modules" | grep -v ".example" | grep -v "env.ts" | grep -v "__tests__"; then
+  echo ""
+  echo "❌ FORBIDDEN PATTERN DETECTED in source code!"
+  echo "   service_role keys and API keys must NEVER appear in client bundles."
+  echo "   Use Edge Functions for server-side operations."
+  exit 1
+fi
+echo "✅ No forbidden patterns found."

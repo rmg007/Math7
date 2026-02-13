@@ -338,16 +338,16 @@
 
 ### Secret Protection (NEVER Leak Again)
 
-- [ ] **P0: Add local gitleaks pre-push hook** via Husky
-  - `.husky/pre-push` should run `npx gitleaks detect --source . --verbose`
+- [x] **P0: Add local gitleaks pre-push hook** via Husky (2026-02-13)
+  - `.husky/pre-push` runs gitleaks + forbidden-pattern grep
   - Blocks push if secrets found locally BEFORE they hit GitHub
 - [ ] **P0: Verify GitHub secret scanning is active and enforced** (push protection)
   - Existing: `gitleaks.yml` (runs on push/PR to main)
   - Existing: `secrets.yml` (runs on every push)
   - Need: Ensure both are not failing silently (check GITLEAKS_LICENSE secret)
-- [ ] **P1: Add `service_role` leakage guard to pre-commit**
-  - Extend `.husky/pre-commit` with grep check for forbidden secrets patterns
-  - Validate: no `.env` files with real keys are committable
+- [x] **P1: Add `service_role` leakage guard to pre-commit** (2026-02-13)
+  - Enhanced `.husky/pre-commit` with JWT/API key pattern detection on staged files
+  - Catches `service_role`, long JWTs, and `sk-` prefixed API keys
 
 ### Secret Scanning Pipeline (Defense-in-Depth)
 
