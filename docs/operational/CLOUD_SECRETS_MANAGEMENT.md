@@ -7,12 +7,14 @@ This document describes the comprehensive cloud-based secrets management system 
 ## Architecture
 
 ### Security Layers
+
 1. **Cloudflare Secrets** - Primary encrypted storage
 2. **Local Cache** - Temporary `.secrets` file (git-ignored)
 3. **Runtime Access** - Environment variables with validation
 4. **Application Layer** - Secure access with audit logging
 
 ### Environment Isolation
+
 - **Production**: Full secrets, strict validation, complete audit trail
 - **Staging**: Isolated secrets, limited scope, automated rotation
 - **Development**: Mock secrets, safe defaults, no production data
@@ -20,31 +22,41 @@ This document describes the comprehensive cloud-based secrets management system 
 ## Scripts Usage
 
 ### 1. Upload Secrets
+
 Uploads your local `.secrets` file to Cloudflare.
+
 ```powershell
 .\scripts\secrets\Upload-Secrets.ps1 -Environment production
 ```
 
 ### 2. Download Secrets (Verification Only)
+
 **Note**: Cloudflare secrets are write-only. This script validates that the secrets exist in the cloud but cannot retrieve their values. You must maintain a secure local backup (e.g., 1Password).
+
 ```powershell
 .\scripts\secrets\Download-Secrets.ps1 -Environment production
 ```
 
 ### 3. Switch Environment
+
 Configures your local environment by generating `.env` files from `master-config.json` and your local `.secrets`.
+
 ```powershell
 .\scripts\secrets\Switch-Environment.ps1 -TargetEnvironment staging
 ```
 
 ### 4. Backup Secrets
+
 Creates a local backup of your `.secrets` file.
+
 ```powershell
 .\scripts\secrets\Backup-Secrets.ps1
 ```
 
 ### 5. Audit Log
+
 View the local audit log of secret operations.
+
 ```powershell
 .\scripts\secrets\Get-AuditLog.ps1 -Summary
 ```

@@ -116,3 +116,22 @@ tools/bin/
 
 # CI Failure Audit (local forensic data)
 _gh_failures/
+
+# Python tool caches
+.pytest_cache/
+.ruff_cache/
+__pycache__/
+*.pyc
+
+# Wrangler deployment temp
+.wrangler/
+
+# Dead projects (DO NOT PUBLISH)
+landing-pages/
+
+# TypeScript error dumps
+tsc_errors*.txt
+
+# One-off audit/debug files
+git_status.txt
+*.tmp
