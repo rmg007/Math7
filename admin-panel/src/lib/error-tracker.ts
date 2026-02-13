@@ -1,5 +1,5 @@
-import { supabase } from './supabase';
 import type { Json } from './database.types';
+import { supabase } from './supabase';
 
 interface ErrorContext {
   url?: string;
@@ -7,6 +7,35 @@ interface ErrorContext {
   appVersion?: string;
   appId?: string;
   extra?: Record<string, unknown>;
+}
+
+const MAX_BREADCRUMBS = 20;
+const breadcrumbs: Array<{
+  timestamp: string;
+  message: string;
+  category?: string;
+  data?: Record<string, unknown>;
+}> = [];
+
+/**
+ * Adds a breadcrumb to the current session context.
+ * Useful for tracking user actions leading up to an error.
+ */
+export function addBreadcrumb(
+  message: string,
+  category?: string,
+  data?: Record<string, unknown>
+): void {
+  breadcrumbs.push({
+    timestamp: new Date().toISOString(),
+    message,
+    category,
+    data,
+  });
+
+  if (breadcrumbs.length > MAX_BREADCRUMBS) {
+    breadcrumbs.shift();
+  }
 }
 
 /**
@@ -29,7 +58,10 @@ export async function captureException(
       p_user_agent: context?.userAgent || navigator.userAgent,
       p_app_version: context?.appVersion || import.meta.env.VITE_APP_VERSION || '1.0.0',
       p_app_id: context?.appId || undefined,
-      p_extra_context: (context?.extra || {}) as Json,
+      p_extra_context: {
+        ...context?.extra,
+        breadcrumbs: [...breadcrumbs],
+      } as Json,
     });
 
     if (rpcError) {
@@ -67,7 +99,7 @@ export async function captureMessage(
  * Sets user context for future error reports.
  * This is a no-op in our system since we use auth.uid() server-side.
  */
- 
+
 export function setUser(_userId: string, _email?: string): void {
   // User context is automatically captured via Supabase auth
   // This function exists for API compatibility

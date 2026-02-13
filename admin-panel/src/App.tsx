@@ -151,7 +151,7 @@ const LoadingPage = () => (
       </div>
       <div className="flex flex-col items-center gap-1">
         <h2 className="text-xl font-black text-slate-900 tracking-tight italic">INITIALIZING</h2>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1">
+        <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] ml-1">
           Secure Environment
         </p>
       </div>

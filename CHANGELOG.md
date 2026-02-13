@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - **Beta Prep**: Content Security Policy (CSP) and `robots.txt` for security hardening.
 - **Admin Panel**: Bulk Import feature for Questions (CSV support).
 - **Admin Panel**: "Feedback" button in sidebar for direct support access.
@@ -21,8 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Auth**: Role-based redirection logic added to prevent access loops for non-super-admins.
 - **UI**: Standardized `EmptyState` components across all management features for premium consistency.
 - **UI**: Implemented conditional sidebar navigation groups based on user role visibility.
+- **UX**: Added loading indicators with animated spinners to async buttons in Invitation Codes page (GENERATE CODE and Deactivate Selected buttons).
+- **UX**: Verified Template and Upload buttons in Domain Registry DataToolbar component are fully functional with proper error handling.
 
 ### Fixed
+
 - **Testing**: Resolved 7 critical failures in the Admin Panel test suite (Vite/Vitest).
 - **Testing**: Fixed race conditions in `useBulkImport` progress tracking using fake timers.
 - **Testing**: Corrected Zod validation expectations and UUID format tests.
@@ -31,14 +35,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Backend**: Refactored Supabase Edge Functions to use handlers and guarded server loops for unit test compatibility.
 
 ### Changed
+
 - **Governance**: Updated `LEARNING_LOG.md` and `tasks.md` to reflect the shift from "Assumed 100% Coverage" to "Verified Stabilization."
 
 ## [0.9.0] - 2026-02-10
+
 ### Added
+
 - **AI Pipeline**: Completed the end-to-end AI content generation workflow.
 - **RPC**: `import_questions_bulk` for transactional batch imports.
 - **UI**: New `BulkImportPage` wizard.
 
 ### Verification
+
 - **Quality**: 100% Pass on Code Quality Audit (Phase 18).
 - **Security**: Passed Supabase Advisor Audit (Phase 19).

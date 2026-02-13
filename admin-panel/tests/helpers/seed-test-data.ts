@@ -1,6 +1,6 @@
 /**
  * Test Data Seeding Helpers for E2E Tests
- * 
+ *
  * Aligned with the ACTUAL Supabase schema (database.types.ts).
  * All column names here match the physical DB exactly.
  */
@@ -39,11 +39,7 @@ export async function cleanTestData(supabase: SupabaseClient<Database>) {
  */
 async function getTestContext(supabase: SupabaseClient<Database>) {
   // Try to find an existing app
-  const { data: apps } = await supabase
-    .from('apps')
-    .select('app_id, subject_id')
-    .limit(1)
-    .single();
+  const { data: apps } = await supabase.from('apps').select('app_id, subject_id').limit(1).single();
 
   if (apps) {
     return { appId: apps.app_id, subjectId: apps.subject_id ?? undefined };
@@ -102,7 +98,7 @@ async function getTestContext(supabase: SupabaseClient<Database>) {
 /**
  * Generate test data aligned to the current schema
  */
-export function generateTestData(appId: string, subjectId?: string): SeedData {
+export function generateTestData(appId: string): SeedData {
   const domains: Tables['domains']['Insert'][] = [
     {
       title: 'E2E Test Algebra',
@@ -110,7 +106,6 @@ export function generateTestData(appId: string, subjectId?: string): SeedData {
       description: 'Algebraic concepts for E2E testing',
       sort_order: 900,
       app_id: appId,
-      subject_id: subjectId,
     },
     {
       title: 'E2E Test Geometry',
@@ -118,7 +113,6 @@ export function generateTestData(appId: string, subjectId?: string): SeedData {
       description: 'Shapes and spatial relationships for E2E testing',
       sort_order: 901,
       app_id: appId,
-      subject_id: subjectId,
     },
     {
       title: 'E2E Test Statistics',
@@ -126,7 +120,6 @@ export function generateTestData(appId: string, subjectId?: string): SeedData {
       description: 'Data analysis for E2E testing',
       sort_order: 902,
       app_id: appId,
-      subject_id: subjectId,
     },
   ];
 
@@ -201,7 +194,9 @@ export function generateTestData(appId: string, subjectId?: string): SeedData {
       type: 'multiple_choice',
       content: 'E2E Test: What are the solutions to x² - 5x + 6 = 0?',
       solution: JSON.parse('{"correct_answer": "x = 2 or x = 3"}'),
-      options: JSON.parse('["x = 1 or x = 6", "x = 2 or x = 3", "x = -2 or x = -3", "No real solutions"]'),
+      options: JSON.parse(
+        '["x = 1 or x = 6", "x = 2 or x = 3", "x = -2 or x = -3", "No real solutions"]'
+      ),
       explanation: 'Factor: (x - 2)(x - 3) = 0. Solutions: x = 2 or x = 3',
       points: 15,
       sort_order: 1,
@@ -249,15 +244,13 @@ export function generateTestData(appId: string, subjectId?: string): SeedData {
  * Seed test data into database.
  * Returns IDs of created records for reference in tests.
  */
-export async function seedTestData(
-  supabase: SupabaseClient<Database>
-): Promise<{
+export async function seedTestData(supabase: SupabaseClient<Database>): Promise<{
   domainIds: Record<string, string>;
   skillIds: Record<string, string>;
   questionIds: string[];
 }> {
-  const { appId, subjectId } = await getTestContext(supabase);
-  const data = generateTestData(appId, subjectId);
+  const { appId } = await getTestContext(supabase);
+  const data = generateTestData(appId);
   const domainIds: Record<string, string> = {};
   const skillIds: Record<string, string> = {};
   const questionIds: string[] = [];
@@ -287,11 +280,7 @@ export async function seedTestData(
   ];
 
   for (const skill of skillsWithDomains) {
-    const { data: inserted, error } = await supabase
-      .from('skills')
-      .insert(skill)
-      .select()
-      .single();
+    const { data: inserted, error } = await supabase.from('skills').insert(skill).select().single();
 
     if (error) {
       throw new Error(`Failed to insert skill "${skill.title}": ${error.message}`);
@@ -331,11 +320,30 @@ export async function seedTestData(
  * Verify seed data exists
  */
 export async function verifySeedData(supabase: SupabaseClient<Database>): Promise<boolean> {
-  const { data: domains } = await supabase.from('domains').select('domain_id').like('slug', `${TEST_SLUG_PREFIX}_%`).limit(1);
-  const { data: skills } = await supabase.from('skills').select('skill_id').like('slug', `${TEST_SLUG_PREFIX}_%`).limit(1);
-  const { data: questions } = await supabase.from('questions').select('question_id').like('content', '%E2E Test%').limit(1);
+  const { data: domains } = await supabase
+    .from('domains')
+    .select('domain_id')
+    .like('slug', `${TEST_SLUG_PREFIX}_%`)
+    .limit(1);
+  const { data: skills } = await supabase
+    .from('skills')
+    .select('skill_id')
+    .like('slug', `${TEST_SLUG_PREFIX}_%`)
+    .limit(1);
+  const { data: questions } = await supabase
+    .from('questions')
+    .select('question_id')
+    .like('content', '%E2E Test%')
+    .limit(1);
 
-  return Boolean(domains && domains.length > 0 && skills && skills.length > 0 && questions && questions.length > 0);
+  return Boolean(
+    domains &&
+    domains.length > 0 &&
+    skills &&
+    skills.length > 0 &&
+    questions &&
+    questions.length > 0
+  );
 }
 
 /**

@@ -5,7 +5,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
 import type { Tables } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
-import { Activity, Copy, Key, Power, Search, ShieldCheck, X, Zap } from 'lucide-react';
+import { Activity, Copy, Key, Loader2, Power, Search, ShieldCheck, X, Zap } from 'lucide-react';
 import { memo, useCallback, useEffect, useState } from 'react';
 
 import { EmptyState } from '@/components/ui/empty-state';
@@ -130,6 +130,7 @@ export function InvitationCodesPage() {
   const [codes, setCodes] = useState<InvitationCode[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [deactivating, setDeactivating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [maxUses, setMaxUses] = useState('1');
@@ -223,6 +224,7 @@ export function InvitationCodesPage() {
     if (selectedIds.size === 0) return;
     setError(null);
     setSuccess(null);
+    setDeactivating(true);
 
     try {
       const ids = Array.from(selectedIds);
@@ -239,6 +241,8 @@ export function InvitationCodesPage() {
     } catch (err) {
       setError('Bulk deactivation process encountered errors.');
       console.error(err);
+    } finally {
+      setDeactivating(false);
     }
   }, [selectedIds, fetchCodes]);
 
@@ -329,8 +333,9 @@ export function InvitationCodesPage() {
           <Button
             onClick={handleGenerateCode}
             disabled={generating}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl px-10 h-12 shadow-lg shadow-indigo-600/20 font-black text-xs uppercase tracking-[0.2em] transition-all hover:-translate-y-0.5"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl px-10 h-12 shadow-lg shadow-indigo-600/20 font-black text-xs uppercase tracking-[0.2em] transition-all hover:-translate-y-0.5 gap-2"
           >
+            {generating && <Loader2 className="h-4 w-4 animate-spin" />}
             {generating ? 'GENERATING...' : 'GENERATE CODE'}
           </Button>
         </div>
@@ -388,10 +393,15 @@ export function InvitationCodesPage() {
               variant="ghost"
               size="sm"
               onClick={handleBulkDeactivate}
+              disabled={deactivating}
               className="h-10 px-6 rounded-xl text-red-100 font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all gap-2"
             >
-              <Power className="h-4 w-4" />
-              Deactivate Selected
+              {deactivating ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Power className="h-4 w-4" />
+              )}
+              {deactivating ? 'DEACTIVATING...' : 'Deactivate Selected'}
             </Button>
             <Button
               variant="ghost"

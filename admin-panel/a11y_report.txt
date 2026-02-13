@@ -1,0 +1,278 @@
+[dotenv@17.2.3] injecting env (10) from .env.test.local -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+
+Running 5 tests using 5 workers
+
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒôí add observability to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: Γ£à audit secrets and track compliance: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒôí add observability to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöæ add access controls to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöæ add access controls to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+  Γ£ô  4 [chromium] ΓÇ║ tests\accessibility.spec.ts:59:3 ΓÇ║ Accessibility Audit ΓÇ║ Login page (10.8s)
+Dashboard violations:
+[CRITICAL] button-name: Ensure buttons have discernible text
+  Help: https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright
+    ΓåÆ <button class="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/20 flex-shrink-0">
+
+[SERIOUS] color-contrast: Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds
+  Help: https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright
+    ΓåÆ <p class="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Elevating Authority</p>
+  Γ£ÿ  5 [chromium] ΓÇ║ tests\accessibility.spec.ts:79:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Dashboard (13.9s)
+Questions violations:
+[CRITICAL] button-name: Ensure buttons have discernible text
+  Help: https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright
+    ΓåÆ <button class="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/20 flex-shrink-0">
+Bulk Import violations:
+[CRITICAL] button-name: Ensure buttons have discernible text
+  Help: https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright
+    ΓåÆ <button class="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/20 flex-shrink-0">
+  Γ£ÿ  2 [chromium] ΓÇ║ tests\accessibility.spec.ts:111:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Questions List (21.3s)
+Domains violations:
+[CRITICAL] button-name: Ensure buttons have discernible text
+  Help: https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright
+    ΓåÆ <button class="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/20 flex-shrink-0">
+
+[SERIOUS] color-contrast: Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds
+  Help: https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright
+    ΓåÆ <th class="text-right px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">ACTIONS</th>
+    ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: ed10a795...</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: 1430a6df...</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: 653c7cf5...</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: c5feeed9...</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: 9a4932e9...</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: 7403ef2e...</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: cd7cbc57...</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: a3f97b08...</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: d2df219c...</span>
+  Γ£ÿ  3 [chromium] ΓÇ║ tests\accessibility.spec.ts:127:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Bulk Import (22.2s)
+  Γ£ÿ  1 [chromium] ΓÇ║ tests\accessibility.spec.ts:95:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Domains List (23.4s)
+
+
+  1) [chromium] ΓÇ║ tests\accessibility.spec.ts:79:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Dashboard 
+
+    Error: Found 2 critical/serious violations on /dashboard:
+    [CRITICAL] button-name: Ensure buttons have discernible text
+      Help: https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright
+        ΓåÆ <button class="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/20 flex-shrink-0">
+
+    [SERIOUS] color-contrast: Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds
+      Help: https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright
+        ΓåÆ <p class="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Elevating Authority</p>
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoHaveLength[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected length: [32m0[39m
+    Received length: [31m2[39m
+    Received array:  [31m[{"description": "Ensure buttons have discernible text", "help": "Buttons must have discernible text", "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright", "id": "button-name", "impact": "critical", "nodes": [{"all": [], "any": [{"data": null, "id": "button-has-visible-text", "impact": "critical", "message": "Element does not have inner text that is visible to screen readers", "relatedNodes": []}, {"data": null, "id": "aria-label", "impact": "critical", "message": "aria-label attribute does not exist or is empty", "relatedNodes": []}, {"data": null, "id": "aria-labelledby", "impact": "critical", "message": "aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty", "relatedNodes": []}, {"data": {"messageKey": "noAttr"}, "id": "non-empty-title", "impact": "critical", "message": "Element has no title attribute", "relatedNodes": []}, {"data": null, "id": "implicit-label", "impact": "critical", "message": "Element does not have an implicit (wrapped) <label>", "relatedNodes": []}, {"data": null, "id": "explicit-label", "impact": "critical", "message": "Element does not have an explicit <label>", "relatedNodes": []}, {"data": null, "id": "presentational-role", "impact": "critical", "message": "Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"", "relatedNodes": []}], "failureSummary": "Fix any of the following:[39m
+    [31m  Element does not have inner text that is visible to screen readers[39m
+    [31m  aria-label attribute does not exist or is empty[39m
+    [31m  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty[39m
+    [31m  Element has no title attribute[39m
+    [31m  Element does not have an implicit (wrapped) <label>[39m
+    [31m  Element does not have an explicit <label>[39m
+    [31m  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"", "html": "<button class=\"flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/20 flex-shrink-0\">", "impact": "critical", "none": [], "target": [".hidden > .h-screen.border-r.bg-gradient-to-b > .backdrop-blur-sm.px-5.h-16 > .overflow-hidden.gap-3 > .w-9.bg-gradient-to-br.to-blue-600"]}], "tags": ["cat.name-role-value", "wcag2a", "wcag412", "section508", "section508.22.a", "TTv5", "TT6.a", "EN-301-549", "EN-9.4.1.2", "ACT", ΓÇª]}, {"description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds", "help": "Elements must meet minimum color contrast ratio thresholds", "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright", "id": "color-contrast", "impact": "serious", "nodes": [{"all": [], "any": [{"data": {"bgColor": "#f9fafb", "contrastRatio": 2.45, "expectedContrastRatio": "4.5:1", "fgColor": "#94a3b8", "fontSize": "7.5pt (10px)", "fontWeight": "bold", "messageKey": null}, "id": "color-contrast", "impact": "serious", "message": "Element has insufficient color contrast of 2.45 (foreground color: #94a3b8, background color: #f9fafb, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1", "relatedNodes": [{"html": "<div class=\"flex min-h-screen bg-gray-50\">", "target": [".min-h-screen"]}]}], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.45 (foreground color: #94a3b8, background color: #f9fafb, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1", "html": "<p class=\"mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]\">Elevating Authority</p>", "impact": "serious", "none": [], "target": ["p"]}], "tags": ["cat.color", "wcag2aa", "wcag143", "TTv5", "TT13.c", "EN-301-549", "EN-9.1.4.3", "ACT", "RGAAv4", "RGAA-3.2.1"]}][39m
+
+      90 |         console.log('Dashboard violations:\n' + formatViolations(serious));
+      91 |       }
+    > 92 |       expect(serious, `Found ${serious.length} critical/serious violations on /dashboard:\n${formatViolations(serious)}`).toHaveLength(0);
+         |                                                                                                                           ^
+      93 |     });
+      94 |
+      95 |     test('Domains List', async ({ page }) => {
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\accessibility.spec.ts:92:123
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-a99b1-thenticated-pages-Dashboard-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-a99b1-thenticated-pages-Dashboard-chromium\video-1.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #3: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-a99b1-thenticated-pages-Dashboard-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\accessibility-Accessibilit-a99b1-thenticated-pages-Dashboard-chromium\error-context.md
+
+  2) [chromium] ΓÇ║ tests\accessibility.spec.ts:95:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Domains List 
+
+    Error: Found 2 critical/serious violations on /domains:
+    [CRITICAL] button-name: Ensure buttons have discernible text
+      Help: https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright
+        ΓåÆ <button class="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/20 flex-shrink-0">
+
+    [SERIOUS] color-contrast: Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds
+      Help: https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright
+        ΓåÆ <th class="text-right px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">ACTIONS</th>
+        ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: ed10a795...</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: 1430a6df...</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: 653c7cf5...</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: c5feeed9...</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: 9a4932e9...</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: 7403ef2e...</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: cd7cbc57...</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: a3f97b08...</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 font-mono tracking-wide uppercase">ID: d2df219c...</span>
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoHaveLength[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected length: [32m0[39m
+    Received length: [31m2[39m
+    Received array:  [31m[{"description": "Ensure buttons have discernible text", "help": "Buttons must have discernible text", "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright", "id": "button-name", "impact": "critical", "nodes": [{"all": [], "any": [[Object], [Object], [Object], [Object], [Object], [Object], [Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element does not have inner text that is visible to screen readers[39m
+    [31m  aria-label attribute does not exist or is empty[39m
+    [31m  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty[39m
+    [31m  Element has no title attribute[39m
+    [31m  Element does not have an implicit (wrapped) <label>[39m
+    [31m  Element does not have an explicit <label>[39m
+    [31m  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"", "html": "<button class=\"flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/20 flex-shrink-0\">", "impact": "critical", "none": [], "target": [".md\\:block.hidden > .h-screen.border-r.from-\\[\\#1a1b4b\\] > .px-5.h-16.backdrop-blur-sm > .overflow-hidden.gap-3.flex > .w-9.shadow-purple-500\\/20.to-blue-600"]}], "tags": ["cat.name-role-value", "wcag2a", "wcag412", "section508", "section508.22.a", "TTv5", "TT6.a", "EN-301-549", "EN-9.4.1.2", "ACT", ΓÇª]}, {"description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds", "help": "Elements must meet minimum color contrast ratio thresholds", "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright", "id": "color-contrast", "impact": "serious", "nodes": [{"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1", "html": "<th class=\"text-right px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider\">ACTIONS</th>", "impact": "serious", "none": [], "target": ["th:nth-child(7)"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 font-mono tracking-wide uppercase\">ID: ed10a795...</span>", "impact": "serious", "none": [], "target": [".hover\\:bg-gray-50:nth-child(1) > .px-6:nth-child(4) > .flex-col.gap-1.flex > .font-mono.tracking-wide.text-\\[10px\\]"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 font-mono tracking-wide uppercase\">ID: 1430a6df...</span>", "impact": "serious", "none": [], "target": [".hover\\:bg-gray-50:nth-child(2) > .px-6:nth-child(4) > .flex-col.gap-1.flex > .font-mono.tracking-wide.text-\\[10px\\]"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 font-mono tracking-wide uppercase\">ID: 653c7cf5...</span>", "impact": "serious", "none": [], "target": [".hover\\:bg-gray-50:nth-child(3) > .px-6:nth-child(4) > .flex-col.gap-1.flex > .font-mono.tracking-wide.text-\\[10px\\]"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 font-mono tracking-wide uppercase\">ID: c5feeed9...</span>", "impact": "serious", "none": [], "target": [".hover\\:bg-gray-50:nth-child(4) > .px-6:nth-child(4) > .flex-col.gap-1.flex > .font-mono.tracking-wide.text-\\[10px\\]"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 font-mono tracking-wide uppercase\">ID: 9a4932e9...</span>", "impact": "serious", "none": [], "target": [".hover\\:bg-gray-50:nth-child(5) > .px-6:nth-child(4) > .flex-col.gap-1.flex > .font-mono.tracking-wide.text-\\[10px\\]"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.42 (foreground color: #9ca3af, background color: #f9fafb, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 font-mono tracking-wide uppercase\">ID: 7403ef2e...</span>", "impact": "serious", "none": [], "target": [".hover\\:bg-gray-50:nth-child(6) > .px-6:nth-child(4) > .flex-col.gap-1.flex > .font-mono.tracking-wide.text-\\[10px\\]"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 font-mono tracking-wide uppercase\">ID: cd7cbc57...</span>", "impact": "serious", "none": [], "target": [".hover\\:bg-gray-50:nth-child(7) > .px-6:nth-child(4) > .flex-col.gap-1.flex > .font-mono.tracking-wide.text-\\[10px\\]"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 font-mono tracking-wide uppercase\">ID: a3f97b08...</span>", "impact": "serious", "none": [], "target": [".hover\\:bg-gray-50:nth-child(8) > .px-6:nth-child(4) > .flex-col.gap-1.flex > .font-mono.tracking-wide.text-\\[10px\\]"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 font-mono tracking-wide uppercase\">ID: d2df219c...</span>", "impact": "serious", "none": [], "target": [".hover\\:bg-gray-50:nth-child(9) > .px-6:nth-child(4) > .flex-col.gap-1.flex > .font-mono.tracking-wide.text-\\[10px\\]"]}], "tags": ["cat.color", "wcag2aa", "wcag143", "TTv5", "TT13.c", "EN-301-549", "EN-9.1.4.3", "ACT", "RGAAv4", "RGAA-3.2.1"]}][39m
+
+      106 |         console.log('Domains violations:\n' + formatViolations(serious));
+      107 |       }
+    > 108 |       expect(serious, `Found ${serious.length} critical/serious violations on /domains:\n${formatViolations(serious)}`).toHaveLength(0);
+          |                                                                                                                         ^
+      109 |     });
+      110 |
+      111 |     test('Questions List', async ({ page }) => {
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\accessibility.spec.ts:108:121
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-5b338-nticated-pages-Domains-List-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-5b338-nticated-pages-Domains-List-chromium\video-1.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #3: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-5b338-nticated-pages-Domains-List-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\accessibility-Accessibilit-5b338-nticated-pages-Domains-List-chromium\error-context.md
+
+  3) [chromium] ΓÇ║ tests\accessibility.spec.ts:111:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Questions List 
+
+    Error: Found 1 critical/serious violations on /questions:
+    [CRITICAL] button-name: Ensure buttons have discernible text
+      Help: https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright
+        ΓåÆ <button class="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/20 flex-shrink-0">
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoHaveLength[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected length: [32m0[39m
+    Received length: [31m1[39m
+    Received array:  [31m[{"description": "Ensure buttons have discernible text", "help": "Buttons must have discernible text", "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright", "id": "button-name", "impact": "critical", "nodes": [{"all": [], "any": [{"data": null, "id": "button-has-visible-text", "impact": "critical", "message": "Element does not have inner text that is visible to screen readers", "relatedNodes": []}, {"data": null, "id": "aria-label", "impact": "critical", "message": "aria-label attribute does not exist or is empty", "relatedNodes": []}, {"data": null, "id": "aria-labelledby", "impact": "critical", "message": "aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty", "relatedNodes": []}, {"data": {"messageKey": "noAttr"}, "id": "non-empty-title", "impact": "critical", "message": "Element has no title attribute", "relatedNodes": []}, {"data": null, "id": "implicit-label", "impact": "critical", "message": "Element does not have an implicit (wrapped) <label>", "relatedNodes": []}, {"data": null, "id": "explicit-label", "impact": "critical", "message": "Element does not have an explicit <label>", "relatedNodes": []}, {"data": null, "id": "presentational-role", "impact": "critical", "message": "Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"", "relatedNodes": []}], "failureSummary": "Fix any of the following:[39m
+    [31m  Element does not have inner text that is visible to screen readers[39m
+    [31m  aria-label attribute does not exist or is empty[39m
+    [31m  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty[39m
+    [31m  Element has no title attribute[39m
+    [31m  Element does not have an implicit (wrapped) <label>[39m
+    [31m  Element does not have an explicit <label>[39m
+    [31m  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"", "html": "<button class=\"flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/20 flex-shrink-0\">", "impact": "critical", "none": [], "target": [".md\\:block.hidden > .h-screen.border-r.from-\\[\\#1a1b4b\\] > .backdrop-blur-sm.bg-white\\/5.h-16 > .overflow-hidden.gap-3 > .w-9.shadow-purple-500\\/20.to-blue-600"]}], "tags": ["cat.name-role-value", "wcag2a", "wcag412", "section508", "section508.22.a", "TTv5", "TT6.a", "EN-301-549", "EN-9.4.1.2", "ACT", ΓÇª]}][39m
+
+      122 |         console.log('Questions violations:\n' + formatViolations(serious));
+      123 |       }
+    > 124 |       expect(serious, `Found ${serious.length} critical/serious violations on /questions:\n${formatViolations(serious)}`).toHaveLength(0);
+          |                                                                                                                           ^
+      125 |     });
+      126 |
+      127 |     test('Bulk Import', async ({ page }) => {
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\accessibility.spec.ts:124:123
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-9641c-icated-pages-Questions-List-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-9641c-icated-pages-Questions-List-chromium\video-1.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #3: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-9641c-icated-pages-Questions-List-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\accessibility-Accessibilit-9641c-icated-pages-Questions-List-chromium\error-context.md
+
+  4) [chromium] ΓÇ║ tests\accessibility.spec.ts:127:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Bulk Import 
+
+    Error: Found 1 critical/serious violations on /ai-import:
+    [CRITICAL] button-name: Ensure buttons have discernible text
+      Help: https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright
+        ΓåÆ <button class="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/20 flex-shrink-0">
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoHaveLength[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected length: [32m0[39m
+    Received length: [31m1[39m
+    Received array:  [31m[{"description": "Ensure buttons have discernible text", "help": "Buttons must have discernible text", "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright", "id": "button-name", "impact": "critical", "nodes": [{"all": [], "any": [{"data": null, "id": "button-has-visible-text", "impact": "critical", "message": "Element does not have inner text that is visible to screen readers", "relatedNodes": []}, {"data": null, "id": "aria-label", "impact": "critical", "message": "aria-label attribute does not exist or is empty", "relatedNodes": []}, {"data": null, "id": "aria-labelledby", "impact": "critical", "message": "aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty", "relatedNodes": []}, {"data": {"messageKey": "noAttr"}, "id": "non-empty-title", "impact": "critical", "message": "Element has no title attribute", "relatedNodes": []}, {"data": null, "id": "implicit-label", "impact": "critical", "message": "Element does not have an implicit (wrapped) <label>", "relatedNodes": []}, {"data": null, "id": "explicit-label", "impact": "critical", "message": "Element does not have an explicit <label>", "relatedNodes": []}, {"data": null, "id": "presentational-role", "impact": "critical", "message": "Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"", "relatedNodes": []}], "failureSummary": "Fix any of the following:[39m
+    [31m  Element does not have inner text that is visible to screen readers[39m
+    [31m  aria-label attribute does not exist or is empty[39m
+    [31m  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty[39m
+    [31m  Element has no title attribute[39m
+    [31m  Element does not have an implicit (wrapped) <label>[39m
+    [31m  Element does not have an explicit <label>[39m
+    [31m  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"", "html": "<button class=\"flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/20 flex-shrink-0\">", "impact": "critical", "none": [], "target": [".hidden > .h-screen.border-r.from-\\[\\#1a1b4b\\] > .backdrop-blur-sm.px-5.h-16 > .overflow-hidden.gap-3.items-center > .shadow-purple-500\\/20.w-9.to-blue-600"]}], "tags": ["cat.name-role-value", "wcag2a", "wcag412", "section508", "section508.22.a", "TTv5", "TT6.a", "EN-301-549", "EN-9.4.1.2", "ACT", ΓÇª]}][39m
+
+      138 |         console.log('Bulk Import violations:\n' + formatViolations(serious));
+      139 |       }
+    > 140 |       expect(serious, `Found ${serious.length} critical/serious violations on /ai-import:\n${formatViolations(serious)}`).toHaveLength(0);
+          |                                                                                                                           ^
+      141 |     });
+      142 |   });
+      143 | });
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\accessibility.spec.ts:140:123
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-b1c33-enticated-pages-Bulk-Import-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-b1c33-enticated-pages-Bulk-Import-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #3: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-b1c33-enticated-pages-Bulk-Import-chromium\video-1.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\accessibility-Accessibilit-b1c33-enticated-pages-Bulk-Import-chromium\error-context.md
+
+  4 failed
+    [chromium] ΓÇ║ tests\accessibility.spec.ts:79:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Dashboard 
+    [chromium] ΓÇ║ tests\accessibility.spec.ts:95:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Domains List 
+    [chromium] ΓÇ║ tests\accessibility.spec.ts:111:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Questions List 
+    [chromium] ΓÇ║ tests\accessibility.spec.ts:127:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Bulk Import 
+  1 passed (43.9s)
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m

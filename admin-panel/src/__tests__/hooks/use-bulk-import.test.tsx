@@ -99,7 +99,7 @@ describe('useBulkImport', () => {
 
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Parsing Error',
-        description: 'Invalid CSV format',
+        description: 'Parse error',
         variant: 'destructive',
       });
     });
@@ -172,7 +172,7 @@ describe('useBulkImport', () => {
         skill_id: 'skill-2',
         solution: 'Answer 2',
         metadata: { category: 'math' },
-        options: [{ text: 'True', is_correct: true }],
+        options: null,
       });
     });
   });

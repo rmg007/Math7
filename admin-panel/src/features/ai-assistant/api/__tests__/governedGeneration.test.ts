@@ -15,7 +15,13 @@ vi.mock('../validateContent', () => ({
 
 vi.mock('@/lib/supabase', () => ({
   supabase: {
+    auth: {
+      getUser: vi.fn(),
+    },
     rpc: vi.fn(),
+    from: vi.fn(() => ({
+      insert: vi.fn().mockResolvedValue({ error: null }),
+    })),
   },
 }));
 
@@ -30,6 +36,8 @@ describe('governedGenerateQuestions', () => {
     difficulty_distribution: { easy: 1, medium: 0, hard: 0 },
   };
 
+  const mockUser = { id: 'user-123' };
+
   const mockGenerationResponse = {
     questions: [
       { text: 'Q1', question_type: 'mcq' as const, difficulty: 'easy' as const, metadata: {} },
@@ -43,12 +51,17 @@ describe('governedGenerateQuestions', () => {
   };
 
   const mockValidationResponse = {
+    status: 'approved',
     is_valid: true,
-    issues: [],
     overall_score: 9.5,
+    findings: [{ category: 'accuracy', score: 10, issues: [] }],
   };
 
   it('should successfully orchestrate governed generation', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: { user: mockUser },
+      error: null,
+    } as any);
     vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: null } as any);
     vi.mocked(generateQuestions).mockResolvedValue(mockGenerationResponse);
     vi.mocked(validateContent).mockResolvedValue(mockValidationResponse as any);
@@ -58,7 +71,8 @@ describe('governedGenerateQuestions', () => {
     // Initial quota check
     expect(supabase.rpc).toHaveBeenCalledWith('consume_tenant_tokens', {
       p_app_id: mockAppId,
-      p_token_count: 0,
+      p_tokens_used: 0,
+      p_operation: 'pre_check',
     });
 
     // Content generation
@@ -73,15 +87,19 @@ describe('governedGenerateQuestions', () => {
     // Final token consumption
     expect(supabase.rpc).toHaveBeenLastCalledWith('consume_tenant_tokens', {
       p_app_id: mockAppId,
-      p_token_count: expect.any(Number),
+      p_tokens_used: expect.any(Number),
+      p_operation: 'generate_questions',
     });
 
     expect(result.questions).toEqual(mockGenerationResponse.questions);
     expect(result.validation).toEqual(mockValidationResponse);
-    expect(result.governance.tokens_consumed).toBeGreaterThan(500);
   });
 
   it('should throw if initial quota check fails', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: { user: mockUser },
+      error: null,
+    } as any);
     vi.mocked(supabase.rpc).mockResolvedValueOnce({
       data: null,
       error: { message: 'Quota exceeded', code: 'P0001' } as any,

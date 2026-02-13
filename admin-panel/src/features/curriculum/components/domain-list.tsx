@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
@@ -20,44 +20,44 @@ import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
 import { supabase } from '@/lib/supabase';
 import {
-    Book,
-    CheckSquare,
-    GripVertical,
-    Loader2,
-    Pencil,
-    Plus,
-    Square,
-    Trash2,
-    X,
+  Book,
+  CheckSquare,
+  GripVertical,
+  Loader2,
+  Pencil,
+  Plus,
+  Square,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-    useBulkCreateDomains,
-    useBulkDeleteDomains,
-    useBulkUpdateDomainsStatus,
-    useDeleteDomain,
-    usePaginatedDomains,
-    useUpdateDomainOrder,
+  useBulkCreateDomains,
+  useBulkDeleteDomains,
+  useBulkUpdateDomainsStatus,
+  useDeleteDomain,
+  usePaginatedDomains,
+  useUpdateDomainOrder,
 } from '../hooks/use-domains';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 import {
-    closestCenter,
-    DndContext,
-    DragEndEvent,
-    KeyboardSensor,
-    PointerSensor,
-    TouchSensor,
-    useSensor,
-    useSensors,
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
 import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -134,7 +134,7 @@ function SortableRow({
         <button
           onClick={() => onSelect(domain.domain_id)}
           className="text-gray-400 hover:text-gray-600"
-          title={isSelected ? "Deselect domain" : "Select domain"}
+          title={isSelected ? 'Deselect domain' : 'Select domain'}
         >
           {isSelected ? (
             <CheckSquare className="h-5 w-5 text-purple-600" />
@@ -151,7 +151,7 @@ function SortableRow({
       <td className="px-6 py-3">
         <div className="flex flex-col gap-1">
           <span className="font-bold text-gray-900 text-sm tracking-tight">{domain.title}</span>
-          <span className="text-[10px] text-gray-400 font-mono tracking-wide uppercase">
+          <span className="text-[10px] text-gray-600 font-mono tracking-wide uppercase">
             ID: {domain.domain_id.substring(0, 8)}...
           </span>
         </div>
@@ -238,7 +238,7 @@ function SortableCard({
         <button
           onClick={() => onSelect(domain.domain_id)}
           className="p-2 text-gray-400 hover:text-gray-600 flex-shrink-0"
-          title={isSelected ? "Deselect domain" : "Select domain"}
+          title={isSelected ? 'Deselect domain' : 'Select domain'}
         >
           {isSelected ? (
             <CheckSquare className="h-5 w-5 text-purple-600" />
@@ -691,7 +691,7 @@ export function DomainList() {
                       <button
                         onClick={handleSelectAll}
                         className="text-gray-400 hover:text-gray-600"
-                        title={isAllSelected ? "Deselect all domains" : "Select all domains"}
+                        title={isAllSelected ? 'Deselect all domains' : 'Select all domains'}
                       >
                         {isAllSelected && domains.length > 0 ? (
                           <CheckSquare className="h-5 w-5 text-purple-600" />
@@ -707,7 +707,7 @@ export function DomainList() {
                         currentSortBy={sortBy}
                         currentSortOrder={sortOrder}
                         onSort={handleSort}
-                        className="text-xs font-bold text-gray-400 uppercase tracking-wider"
+                        className="text-xs font-bold text-gray-600 uppercase tracking-wider"
                       />
                     </th>
                     <th className="text-left px-6 py-3">
@@ -717,7 +717,7 @@ export function DomainList() {
                         currentSortBy={sortBy}
                         currentSortOrder={sortOrder}
                         onSort={handleSort}
-                        className="text-xs font-bold text-gray-400 uppercase tracking-wider"
+                        className="text-xs font-bold text-gray-600 uppercase tracking-wider"
                       />
                     </th>
                     <th className="text-left px-6 py-3">
@@ -727,7 +727,7 @@ export function DomainList() {
                         currentSortBy={sortBy}
                         currentSortOrder={sortOrder}
                         onSort={handleSort}
-                        className="text-xs font-bold text-gray-400 uppercase tracking-wider"
+                        className="text-xs font-bold text-gray-600 uppercase tracking-wider"
                       />
                     </th>
                     <th className="text-left px-6 py-3">
@@ -737,10 +737,10 @@ export function DomainList() {
                         currentSortBy={sortBy}
                         currentSortOrder={sortOrder}
                         onSort={handleSort}
-                        className="text-xs font-bold text-gray-400 uppercase tracking-wider"
+                        className="text-xs font-bold text-gray-600 uppercase tracking-wider"
                       />
                     </th>
-                    <th className="text-right px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    <th className="text-right px-6 py-3 text-xs font-bold text-gray-600 uppercase tracking-wider">
                       ACTIONS
                     </th>
                   </tr>

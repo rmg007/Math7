@@ -47,7 +47,7 @@ foreach ($file in $files) {
     $relPath = $file.FullName.Replace($PWD.Path, "").TrimStart("\")
     
     try {
-        $hits = Select-String -Path $file.FullName -Pattern "signInAnonymously|POLICY.*mentor|process\.env|import\.meta\.env|catch.*\{\}|test\.skip|xtest|as any|PromptTemplate|generateContent" -ErrorAction SilentlyContinue
+        $hits = Select-String -Path $file.FullName -Pattern "signInAnonymously|POLICY.*mentor|process\.env|import\.meta\.env|catch.*\{\}|test\.skip|xtest|as any|PromptTemplate|generateContent|service_role|prune_old_error_logs|cleanup_security_logs" -ErrorAction SilentlyContinue
         
         foreach ($h in $hits) {
             $loc = "$($relPath):$($h.LineNumber)"
@@ -61,6 +61,11 @@ foreach ($file in $files) {
             if ($h.Line -match "POLICY.*mentor" -and $h.Line -notmatch "domain_id") { 
                 $report.taxonomy += "VUL-002 (RLS Leakage): $loc" 
             }
+
+            # VUL-003 (Secret Leakage): Flag service_role key usage outside of secure scripts/test env
+            if ($h.Line -match "service_role" -and $relPath -notmatch "env.test.local|secrets|supabase/migrations") {
+                $report.taxonomy += "VUL-003 (Service Role Leak): $loc"
+            }
             
             # Pattern matches for other risks
             if ($h.Line -match "(process\.env|import\.meta\.env)\.(VITE_[A-Z0-9_]+)") {
@@ -73,6 +78,11 @@ foreach ($file in $files) {
             if ($h.Line -match "as any\b") { $report.stability_risks += "Type Hole ($loc)" }
             if ($h.Line -match "PromptTemplate") { $report.ai_governance += "Prompt Template ($loc)" }
             if ($h.Line -match "generateContent" -and $h.Line -notmatch "temperature" -and $h.Line -notmatch "// enforced-temp") { $report.ai_governance += "Missing Temp ($loc)" }
+
+            # Observability alignment
+            if ($h.Line -match "prune_old_error_logs|cleanup_security_logs" -and $relPath -match "migrations") {
+                Write-Host "✅ Found Maintenance Function: $loc" -ForegroundColor Gray
+            }
         }
 
         # Step 2: Hollow Check (only for small files)

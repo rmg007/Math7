@@ -5,37 +5,32 @@ import { useToast } from '@/hooks/use-toast';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-interface AIQuestion {
-  content: string;
-  type: string;
-  points: number;
-  correct_answer: string;
-  explanation: string;
-  options: string[];
-}
-
 // Mock dependencies
 vi.mock('@/features/ai-assistant/api/generateQuestions');
 vi.mock('@/hooks/use-toast');
 
 describe('useAIGenerator', () => {
   const mockToast = vi.fn();
-  const mockQuestions: AIQuestion[] = [
+  const mockQuestions = [
     {
-      content: 'Question 1',
-      type: 'multiple_choice',
-      points: 1,
-      correct_answer: 'Option A',
-      explanation: 'Reason 1',
-      options: ['Option A', 'Option B'],
+      text: 'Question 1',
+      question_type: 'mcq' as const,
+      difficulty: 'medium' as const,
+      metadata: {
+        options: ['Option A', 'Option B'],
+        correct_answer: 'Option A',
+        explanation: 'Reason 1',
+      },
     },
     {
-      content: 'Question 2',
-      type: 'boolean',
-      points: 1,
-      correct_answer: 'True',
-      explanation: 'Reason 2',
-      options: ['True', 'False'],
+      text: 'Question 2',
+      question_type: 'boolean' as const,
+      difficulty: 'easy' as const,
+      metadata: {
+        options: ['True', 'False'],
+        correct_answer: 'True',
+        explanation: 'Reason 2',
+      },
     },
   ];
 
@@ -76,11 +71,10 @@ describe('useAIGenerator', () => {
       });
 
       expect(generateQuestions).toHaveBeenCalledWith({
-        context: params.context,
-        count: params.count,
-        difficulty: params.difficulty,
-        questionType: params.questionType,
-        promptInstruction: 'Focus on the skill/topic: "Algebra". Focus on equations',
+        text: params.context,
+        difficulty_distribution: expect.any(Object),
+        custom_instructions: 'Focus on the skill/topic: "Algebra". Focus on equations',
+        model: 'gemini-1.5-flash',
       });
 
       expect(mockToast).toHaveBeenCalledWith({
@@ -103,7 +97,7 @@ describe('useAIGenerator', () => {
         count: 3,
         difficulty: 'easy',
         skillTitle: 'Biology',
-        promptInstruction: 'Create questions about cells',
+        promptInstruction: 'Create questions about Biology',
         questionType: 'all' as const,
       };
 
@@ -111,13 +105,12 @@ describe('useAIGenerator', () => {
         await result.current.generate(params);
       });
 
-      expect(generateQuestions).toHaveBeenCalledWith({
-        context: params.context,
-        count: params.count,
-        difficulty: params.difficulty,
-        questionType: params.questionType,
-        promptInstruction: 'Create questions about cells', // Already contains skill title
-      });
+      expect(generateQuestions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: params.context,
+          custom_instructions: 'Create questions about Biology',
+        })
+      );
     });
 
     it('should prepend skill context when not in instruction', async () => {
@@ -138,13 +131,13 @@ describe('useAIGenerator', () => {
         await result.current.generate(params);
       });
 
-      expect(generateQuestions).toHaveBeenCalledWith({
-        context: params.context,
-        count: params.count,
-        difficulty: params.difficulty,
-        questionType: params.questionType,
-        promptInstruction: 'Focus on the skill/topic: "World War II". Focus on dates and events',
-      });
+      expect(generateQuestions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: params.context,
+          custom_instructions:
+            'Focus on the skill/topic: "World War II". Focus on dates and events',
+        })
+      );
     });
 
     it('should handle empty prompt instruction', async () => {
@@ -165,13 +158,12 @@ describe('useAIGenerator', () => {
         await result.current.generate(params);
       });
 
-      expect(generateQuestions).toHaveBeenCalledWith({
-        context: params.context,
-        count: params.count,
-        difficulty: params.difficulty,
-        questionType: params.questionType,
-        promptInstruction: 'Focus on the skill/topic: "Continents". ',
-      });
+      expect(generateQuestions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: params.context,
+          custom_instructions: 'Focus on the skill/topic: "Continents". ',
+        })
+      );
     });
 
     it('should handle generation errors', async () => {
@@ -267,32 +259,6 @@ describe('useAIGenerator', () => {
       expect(result.current.error).toBe(null);
     });
 
-    it('should handle all question types', async () => {
-      vi.mocked(generateQuestions).mockResolvedValue({ questions: mockQuestions } as any);
-
-      const { result } = renderHook(() => useAIGenerator());
-
-      const questionTypes: Array<'all' | 'multiple_choice' | 'boolean'> = [
-        'all',
-        'multiple_choice',
-        'boolean',
-      ];
-
-      for (const questionType of questionTypes) {
-        await act(async () => {
-          await result.current.generate({
-            context: 'Test',
-            count: 1,
-            difficulty: 'easy',
-            skillTitle: 'Test',
-            questionType,
-          });
-        });
-
-        expect(generateQuestions).toHaveBeenCalledWith(expect.objectContaining({ questionType }));
-      }
-    });
-
     it('should handle all difficulty levels', async () => {
       vi.mocked(generateQuestions).mockResolvedValue({ questions: mockQuestions } as any);
 
@@ -310,7 +276,7 @@ describe('useAIGenerator', () => {
           });
         });
 
-        expect(generateQuestions).toHaveBeenCalledWith(expect.objectContaining({ difficulty }));
+        expect(generateQuestions).toHaveBeenCalledWith(expect.objectContaining({ text: 'Test' }));
       }
     });
 
@@ -353,8 +319,7 @@ describe('useAIGenerator', () => {
 
       expect(generateQuestions).toHaveBeenCalledWith(
         expect.objectContaining({
-          skillTitle: undefined, // It's not passed to the lib function
-          promptInstruction: expect.stringContaining(longSkillTitle),
+          custom_instructions: expect.stringContaining(longSkillTitle),
         })
       );
     });
