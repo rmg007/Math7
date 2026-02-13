@@ -117,7 +117,7 @@ const InvitationCodeRow = memo(
               className="h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest text-red-400 hover:bg-red-50 hover:text-red-600 gap-2"
             >
               <Power className="h-3.5 w-3.5" />
-              VOID
+              DEACTIVATE
             </Button>
           )}
         </TableCell>
@@ -342,7 +342,7 @@ export function InvitationCodesPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
           <input
             type="text"
-            placeholder="Search active signatures by code value..."
+            placeholder="Search invitation codes by value..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -366,10 +366,10 @@ export function InvitationCodesPage() {
         <div className="flex items-center gap-3 shrink-0">
           <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
             <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
-              Signatures:
+              Codes:
             </span>
             <span className="text-sm font-black text-indigo-700 tracking-tight">
-              {filteredCodes.length} REGISTERED
+              {filteredCodes.length} TOTAL
             </span>
           </div>
         </div>
@@ -391,7 +391,7 @@ export function InvitationCodesPage() {
               className="h-10 px-6 rounded-xl text-red-100 font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all gap-2"
             >
               <Power className="h-4 w-4" />
-              Void Selected
+              Deactivate Selected
             </Button>
             <Button
               variant="ghost"
@@ -410,7 +410,7 @@ export function InvitationCodesPage() {
           <div>
             <h3 className="text-xl font-black text-gray-900 tracking-tight">Access Registry</h3>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1 italic">
-              Verified Invitation Signatures
+              Invitation Codes
             </p>
           </div>
           <Activity className="h-5 w-5 text-gray-200" />
@@ -433,7 +433,7 @@ export function InvitationCodesPage() {
                   </button>
                 </TableHead>
                 <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
-                  Signature Code
+                  Invitation Code
                 </TableHead>
                 <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
                   Status
@@ -466,11 +466,11 @@ export function InvitationCodesPage() {
                   <TableCell colSpan={7} className="py-20 p-0">
                     <EmptyState
                       icon={Key}
-                      title="No Signatures Found"
+                      title="No Invitation Codes Found"
                       description={
                         searchQuery
-                          ? `No invitation signatures match your search term "${searchQuery}".`
-                          : 'Initialize new authorization signatures to populate this registry.'
+                          ? `No invitation codes match your search term "${searchQuery}".`
+                          : 'Generate a new invitation code to populate this registry.'
                       }
                     />
                   </TableCell>
