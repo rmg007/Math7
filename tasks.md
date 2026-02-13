@@ -444,7 +444,7 @@ Error logging to database is **fully implemented** across both apps:
 
 ### Remaining Observability Tasks
 
-- [ ] **P2: Verify 30-day auto-pruning** — Check if pg_cron job exists for old error_logs cleanup
-- [ ] **P2: Critical alert trigger** — Verify `critical_alert` Edge Function fires on HIGH severity errors
+- [ ] **P2: Verify 30-day auto-pruning** — `prune_old_error_logs()` function exists in archived migration but was NOT migrated to QuesterixDB-v2. Needs new migration + `pg_cron` schedule: `cron.schedule('prune-errors-daily', '0 0 * * *', 'SELECT public.prune_old_error_logs()')`
+- [ ] **P2: Critical alert trigger** — `critical-alert` Edge Function exists but the DB trigger (`on_critical_error`) was NOT migrated to QuesterixDB-v2. Needs: (1) migration to create trigger on `error_logs` INSERT, (2) verify Edge Function is deployed
 - [x] **P2: Dashboard error widget** — DashboardPage now queries real 24h error counts, domain/skill/question totals, and question type distribution from Supabase (2026-02-14)
 - [ ] **P3: Add client-side breadcrumb logging** — Log navigation events before errors for better context
