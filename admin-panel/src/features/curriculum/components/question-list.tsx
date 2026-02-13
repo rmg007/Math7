@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,11 +15,11 @@ import { DataToolbar } from '@/components/ui/data-toolbar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SortableHeader } from '@/components/ui/sortable-header';
@@ -31,49 +31,49 @@ import { sanitizeHtml } from '@/lib/sanitize';
 import { cn, formatIdentifier } from '@/lib/utils';
 import type { QuestionListItem } from '@/types';
 import {
-    closestCenter,
-    DndContext,
-    DragEndEvent,
-    KeyboardSensor,
-    PointerSensor,
-    TouchSensor,
-    useSensor,
-    useSensors,
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
 import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-    CheckSquare,
-    Copy,
-    FileText,
-    Filter,
-    GripVertical,
-    Loader2,
-    Pencil,
-    Plus,
-    Search,
-    Sparkles,
-    Square,
-    Trash2,
-    X,
+  CheckSquare,
+  Copy,
+  FileText,
+  Filter,
+  GripVertical,
+  Loader2,
+  Pencil,
+  Plus,
+  Search,
+  Sparkles,
+  Square,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-    QuestionInsert,
-    useBulkCreateQuestions,
-    useBulkDeleteQuestions,
-    useBulkUpdateQuestionsStatus,
-    useDeleteQuestion,
-    useDuplicateQuestion,
-    usePaginatedQuestions,
-    useUpdateQuestionOrder,
+  QuestionInsert,
+  useBulkCreateQuestions,
+  useBulkDeleteQuestions,
+  useBulkUpdateQuestionsStatus,
+  useDeleteQuestion,
+  useDuplicateQuestion,
+  usePaginatedQuestions,
+  useUpdateQuestionOrder,
 } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 
@@ -170,7 +170,13 @@ const SortableRow = memo(
           <div className="flex flex-col gap-1.5">
             <div
               className="font-bold text-gray-900 text-[15px] tracking-tight line-clamp-2 group-hover/row:text-indigo-700 transition-colors prose-sm"
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(typeof question.content === 'string' ? question.content : JSON.stringify(question.content)) }}
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(
+                  typeof question.content === 'string'
+                    ? question.content
+                    : JSON.stringify(question.content)
+                ),
+              }}
             />
             {question.skills?.domains?.title && (
               <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-1.5">
@@ -302,12 +308,14 @@ const SortableCard = memo(
               <button
                 onClick={() => onDuplicate(question.question_id)}
                 disabled={isDuplicating}
+                aria-label="Duplicate question"
                 className="p-3 rounded-2xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm hover:shadow-lg disabled:opacity-50"
               >
                 <Copy className="h-4 w-4" />
               </button>
               <button
                 onClick={() => onDelete(question.question_id)}
+                aria-label="Delete question"
                 className="p-3 rounded-2xl bg-white border border-gray-100 text-red-500 hover:bg-red-50 transition-all shadow-sm hover:shadow-lg"
               >
                 <Trash2 className="h-4 w-4" />
@@ -318,7 +326,13 @@ const SortableCard = memo(
           <div className="min-w-0">
             <div
               className="font-black text-gray-900 text-lg tracking-tight leading-relaxed mb-4 line-clamp-3 prose-sm"
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(typeof question.content === 'string' ? question.content : JSON.stringify(question.content)) }}
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(
+                  typeof question.content === 'string'
+                    ? question.content
+                    : JSON.stringify(question.content)
+                ),
+              }}
             />
             <div className="space-y-3">
               {question.skills?.domains?.title && (
@@ -786,6 +800,7 @@ export function QuestionList() {
           {searchQuery && (
             <button
               onClick={clearFilters}
+              aria-label="Clear search"
               className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
             >
               <X className="h-4 w-4" />

@@ -70,6 +70,31 @@ function Write-Phase {
 }
 
 # =============================================================================
+# PHASE 0: PRE-DEPLOY TESTING
+# =============================================================================
+function Invoke-PhaseTesting {
+    Write-Phase "PHASE 0: PRE-DEPLOY TESTING"
+    
+    # 1. Run Preflight (Typecheck, Lint)
+    Write-Info "Running fast preflight checks..."
+    & (Join-Path $ScriptDir 'scripts\preflight.ps1')
+    if ($LASTEXITCODE -ne 0) {
+        Write-Err "Preflight failed. Aborting deployment."
+        exit 1
+    }
+    
+    # 2. Run Full Test Suite
+    Write-Info "Running full test suite (Parallel)..."
+    & (Join-Path $ScriptDir 'scripts\run-all-tests.ps1')
+    if ($LASTEXITCODE -ne 0) {
+        Write-Err "Test suite failed. Aborting deployment."
+        exit 1
+    }
+    
+    Write-Success "All pre-deploy tests passed"
+}
+
+# =============================================================================
 # PHASE 1: VALIDATION
 # =============================================================================
 function Invoke-PhaseValidation {
@@ -317,6 +342,7 @@ function Main {
     Write-Info "Started at: $(Get-Date)"
     Write-Host ""
     
+    Invoke-PhaseTesting
     Invoke-PhaseValidation
     Invoke-PhaseGenerateEnv
     Invoke-PhaseBuild

@@ -1,6 +1,6 @@
 import { App } from '@/features/platform/hooks/use-apps';
 import { supabase } from '@/lib/supabase';
-import { ReactNode, useContext, useEffect, useRef, useState } from 'react';
+import { ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AppContext } from './AppContextDefinition';
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAppContext = () => useContext(AppContext);
@@ -23,7 +23,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  async function loadApps() {
+  const loadApps = useCallback(async () => {
     if (isLoadingRef.current) return; // Prevent concurrent calls
     isLoadingRef.current = true;
     setIsLoading(true);
@@ -78,7 +78,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
       isLoadingRef.current = false;
     }
-  }
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -103,9 +103,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [loadApps]);
 
-  const handleSetCurrentApp = async (app: App) => {
+  const handleSetCurrentApp = useCallback(async (app: App) => {
     setCurrentApp(app);
     try {
       localStorage.setItem(STORAGE_KEY, app.app_id);
@@ -124,36 +124,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
         console.error('Failed to sync app preference to profile:', err);
       }
     }
-  };
+  }, []);
 
-  const toggleSidebar = () => {
-    const newState = !isSidebarCollapsed;
-    setIsSidebarCollapsed(newState);
-    try {
-      localStorage.setItem(SIDEBAR_COLLAPSE_KEY, JSON.stringify(newState));
-    } catch (err) {
-      console.error('Failed to save sidebar state to localStorage:', err);
-    }
-  };
+  const toggleSidebar = useCallback(() => {
+    setIsSidebarCollapsed((prev) => {
+      const newState = !prev;
+      try {
+        localStorage.setItem(SIDEBAR_COLLAPSE_KEY, JSON.stringify(newState));
+      } catch (err) {
+        console.error('Failed to save sidebar state to localStorage:', err);
+      }
+      return newState;
+    });
+  }, []);
 
-  return (
-    <AppContext.Provider
-      value={{
-        currentApp,
-        setCurrentApp: handleSetCurrentApp,
-        apps,
-        isLoading,
-        refreshApps: loadApps,
-        isSidebarCollapsed,
-        toggleSidebar,
-      }}
-    >
-      {children}
-    </AppContext.Provider>
+  const contextValue = useMemo(
+    () => ({
+      currentApp,
+      setCurrentApp: handleSetCurrentApp,
+      apps,
+      isLoading,
+      refreshApps: loadApps,
+      isSidebarCollapsed,
+      toggleSidebar,
+    }),
+    [currentApp, apps, isLoading, isSidebarCollapsed, handleSetCurrentApp, loadApps, toggleSidebar]
   );
+
+  return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
 }
 
 // Re-export useApp hook for compatibility
 // eslint-disable-next-line react-refresh/only-export-components
 export { useApp } from '@/hooks/use-app';
-

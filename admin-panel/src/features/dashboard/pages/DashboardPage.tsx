@@ -5,26 +5,27 @@ import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 import {
-    Activity,
-    AlertCircle,
-    ArrowDownRight,
-    ArrowUpRight,
-    BookOpen,
-    BrainCircuit,
-    Database,
-    Layers
+  Activity,
+  AlertCircle,
+  ArrowDownRight,
+  ArrowUpRight,
+  BookOpen,
+  BrainCircuit,
+  Database,
+  Layers,
 } from 'lucide-react';
 import React from 'react';
 import {
-    Area,
-    AreaChart,
-    CartesianGrid,
-    Cell,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis, YAxis
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts';
 
 const COLORS = ['#6366f1', '#a855f7', '#ec4899', '#f43f5e'];
@@ -37,25 +38,63 @@ export function DashboardPage() {
     queryKey: ['dashboard-stats', currentApp?.app_id],
     queryFn: async () => {
       const results = await Promise.all([
-        supabase.from('domains').select('domain_id', { count: 'exact', head: true }).eq('app_id', currentApp?.app_id || ''),
-        supabase.from('skills').select('skill_id', { count: 'exact', head: true }).eq('app_id', currentApp?.app_id || ''),
-        supabase.from('questions').select('question_id', { count: 'exact', head: true }).eq('app_id', currentApp?.app_id || ''),
-        supabase.from('error_logs').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
-        supabase.from('ai_generation_sessions').select('token_count, questions_generated').eq('status', 'approved')
+        supabase
+          .from('domains')
+          .select('domain_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp?.app_id || ''),
+        supabase
+          .from('skills')
+          .select('skill_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp?.app_id || ''),
+        supabase
+          .from('questions')
+          .select('question_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp?.app_id || ''),
+        supabase
+          .from('error_logs')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
+        supabase
+          .from('questions')
+          .select('type')
+          .eq('app_id', currentApp?.app_id || ''),
       ]);
+
+      // Compute question type distribution from real data
+      const questionTypes = results[4].data || [];
+      const typeCounts: Record<string, number> = {};
+      questionTypes.forEach((q) => {
+        const type = q.type || 'unknown';
+        typeCounts[type] = (typeCounts[type] || 0) + 1;
+      });
+
+      const TYPE_LABELS: Record<string, string> = {
+        multiple_choice: 'MCQ',
+        text_input: 'Input',
+        boolean: 'Boolean',
+        mcq_multi: 'Multi-MCQ',
+        reorder_steps: 'Reorder',
+      };
+
+      const questionDistribution = Object.entries(typeCounts)
+        .map(([type, count]) => ({
+          name: TYPE_LABELS[type] || type,
+          value: count,
+        }))
+        .sort((a, b) => b.value - a.value);
 
       return {
         domains: results[0].count || 0,
         skills: results[1].count || 0,
         questions: results[2].count || 0,
         errors24h: results[3].count || 0,
-        aiSessions: results[4].data || []
+        questionDistribution,
       };
     },
-    enabled: Boolean(currentApp)
+    enabled: Boolean(currentApp),
   });
 
-  // Mock data for charts
+  // TODO: Replace with real time-series data when import/error logging tracks daily counts
   const activityData = [
     { name: 'Mon', imports: 40, errors: 24 },
     { name: 'Tue', imports: 30, errors: 13 },
@@ -66,12 +105,9 @@ export function DashboardPage() {
     { name: 'Sun', imports: 34, errors: 43 },
   ];
 
-  const aiUsageData = [
-    { name: 'MCQ', value: 450 },
-    { name: 'Boolean', value: 300 },
-    { name: 'Input', value: 200 },
-    { name: 'Other', value: 80 },
-  ];
+  const aiUsageData = stats?.questionDistribution?.length
+    ? stats.questionDistribution
+    : [{ name: 'No data', value: 1 }];
 
   if (statsLoading) {
     return (
@@ -90,9 +126,17 @@ export function DashboardPage() {
     );
   }
 
+  const errorStatus =
+    (stats?.errors24h || 0) === 0
+      ? { trend: '0 errors', trendUp: true }
+      : {
+          trend: `${stats?.errors24h} error${(stats?.errors24h || 0) > 1 ? 's' : ''}`,
+          trendUp: false,
+        };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      <AdminHeader 
+      <AdminHeader
         title="Command Center"
         description="Real-time curriculum intelligence and platform stability matrix."
         icon={Activity}
@@ -100,38 +144,38 @@ export function DashboardPage() {
 
       {/* Primary Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          title="Question Bank" 
-          value={stats?.questions || 0} 
-          icon={BookOpen} 
-          trend="+12%" 
+        <StatCard
+          title="Question Bank"
+          value={stats?.questions || 0}
+          icon={BookOpen}
+          trend={`${stats?.questions || 0} total`}
           trendUp={true}
           color="indigo"
           isLoading={statsLoading}
         />
-        <StatCard 
-          title="Active Skills" 
-          value={stats?.skills || 0} 
-          icon={BrainCircuit} 
-          trend="+5" 
+        <StatCard
+          title="Active Skills"
+          value={stats?.skills || 0}
+          icon={BrainCircuit}
+          trend={`${stats?.skills || 0} total`}
           trendUp={true}
           color="purple"
           isLoading={statsLoading}
         />
-        <StatCard 
-          title="Stability (24h)" 
-          value={stats?.errors24h || 0} 
-          icon={AlertCircle} 
-          trend="-15%" 
-          trendUp={false}
+        <StatCard
+          title="Stability (24h)"
+          value={stats?.errors24h || 0}
+          icon={AlertCircle}
+          trend={errorStatus.trend}
+          trendUp={errorStatus.trendUp}
           color="rose"
           isLoading={statsLoading}
         />
-        <StatCard 
-          title="App Coverage" 
-          value={stats?.domains || 0} 
-          icon={Layers} 
-          trend="Stable" 
+        <StatCard
+          title="Domains"
+          value={stats?.domains || 0}
+          icon={Layers}
+          trend={`${stats?.domains || 0} active`}
           trendUp={true}
           color="blue"
           isLoading={statsLoading}
@@ -139,16 +183,30 @@ export function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Core Activity Chart */}
+        {/* Core Activity Chart — TODO: wire to real time-series data */}
         <Card className="lg:col-span-2 border-white/40 shadow-xl shadow-indigo-500/5 bg-white/60 backdrop-blur-xl overflow-hidden group">
           <CardHeader className="flex flex-row items-center justify-between pb-8">
             <div>
-              <CardTitle className="text-xl font-black text-slate-900 tracking-tight italic">Platform Velocity</CardTitle>
-              <CardDescription>Curriculum imports vs runtime anomalies (7-day window)</CardDescription>
+              <CardTitle className="text-xl font-black text-slate-900 tracking-tight italic">
+                Platform Velocity
+              </CardTitle>
+              <CardDescription>
+                Curriculum imports vs runtime anomalies (7-day window)
+              </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-               <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-100 font-bold group-hover:bg-indigo-600 group-hover:text-white transition-colors">Imports</Badge>
-               <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-100 font-bold group-hover:bg-rose-600 group-hover:text-white transition-colors">Errors</Badge>
+              <Badge
+                variant="outline"
+                className="bg-indigo-50 text-indigo-700 border-indigo-100 font-bold group-hover:bg-indigo-600 group-hover:text-white transition-colors"
+              >
+                Imports
+              </Badge>
+              <Badge
+                variant="outline"
+                className="bg-rose-50 text-rose-700 border-rose-100 font-bold group-hover:bg-rose-600 group-hover:text-white transition-colors"
+              >
+                Errors
+              </Badge>
             </div>
           </CardHeader>
           <CardContent>
@@ -157,47 +215,51 @@ export function DashboardPage() {
                 <AreaChart data={activityData}>
                   <defs>
                     <linearGradient id="colorImports" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorErrors" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 700}}
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }}
                     dy={10}
                   />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 700}}
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }}
                     dx={-10}
                   />
-                  <Tooltip 
-                    contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'}}
-                    itemStyle={{color: '#1e293b'}}
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: '16px',
+                      border: 'none',
+                      boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+                    }}
+                    itemStyle={{ color: '#1e293b' }}
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="imports" 
-                    stroke="#6366f1" 
+                  <Area
+                    type="monotone"
+                    dataKey="imports"
+                    stroke="#6366f1"
                     strokeWidth={4}
-                    fillOpacity={1} 
-                    fill="url(#colorImports)" 
+                    fillOpacity={1}
+                    fill="url(#colorImports)"
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="errors" 
-                    stroke="#f43f5e" 
+                  <Area
+                    type="monotone"
+                    dataKey="errors"
+                    stroke="#f43f5e"
                     strokeWidth={4}
-                    fillOpacity={1} 
-                    fill="url(#colorErrors)" 
+                    fillOpacity={1}
+                    fill="url(#colorErrors)"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -205,88 +267,127 @@ export function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* AI Distribution Pie */}
+        {/* AI Distribution Pie — uses real question type data */}
         <Card className="border-white/40 shadow-xl shadow-purple-500/5 bg-white/60 backdrop-blur-xl group">
-             <CardHeader>
-                <CardTitle className="text-xl font-black text-slate-900 tracking-tight italic">Content DNA</CardTitle>
-                <CardDescription>AI-generated question distribution</CardDescription>
-             </CardHeader>
-             <CardContent className="flex flex-col items-center">
-                <div className="h-[240px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={aiUsageData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={80}
-                                paddingAngle={5}
-                                dataKey="value"
-                                stroke="none"
-                            >
-                                {aiUsageData.map((_entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip 
-                                contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'}}
-                                itemStyle={{color: '#1e293b'}}
-                            />
-                        </PieChart>
-                    </ResponsiveContainer>
-                </div>
-                <div className="grid grid-cols-2 gap-4 w-full mt-4">
-                    {aiUsageData.map((d, i) => (
-                        <div key={d.name} className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i] }} />
-                            <span className="text-[10px] font-black uppercase text-slate-500 truncate">{d.name}</span>
-                        </div>
+          <CardHeader>
+            <CardTitle className="text-xl font-black text-slate-900 tracking-tight italic">
+              Content DNA
+            </CardTitle>
+            <CardDescription>Question type distribution</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center">
+            <div className="h-[240px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={aiUsageData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {aiUsageData.map((_entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: '16px',
+                      border: 'none',
+                      boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+                    }}
+                    itemStyle={{ color: '#1e293b' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="grid grid-cols-2 gap-4 w-full mt-4">
+              {aiUsageData.map((d, i) => (
+                <div key={d.name} className="flex items-center gap-2">
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: COLORS[i % COLORS.length] }}
+                  />
+                  <span className="text-[10px] font-black uppercase text-slate-500 truncate">
+                    {d.name}
+                  </span>
                 </div>
-             </CardContent>
+              ))}
+            </div>
+          </CardContent>
         </Card>
       </div>
 
-      {/* AI Performance Registry Details */}
+      {/* Platform Health Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card className="border-indigo-100 shadow-md">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-indigo-900 text-base">
-                    <Database className="w-5 h-5" />
-                    Oracle Registry Health
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <ul className="space-y-4">
-                    <RegistryItem label="Semantic Chunks" value="742" status="Synced" />
-                    <RegistryItem label="RAG Coverage" value="98.2%" status="Optimized" />
-                    <RegistryItem label="Sync Latency" value="1.2s" status="Good" />
-                </ul>
-            </CardContent>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-indigo-900 text-base">
+              <Database className="w-5 h-5" />
+              Curriculum Summary
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-4">
+              <RegistryItem
+                label="Total Domains"
+                value={String(stats?.domains || 0)}
+                status="Active"
+              />
+              <RegistryItem
+                label="Total Skills"
+                value={String(stats?.skills || 0)}
+                status="Active"
+              />
+              <RegistryItem
+                label="Total Questions"
+                value={String(stats?.questions || 0)}
+                status="Active"
+              />
+            </ul>
+          </CardContent>
         </Card>
 
         <Card className="border-purple-100 shadow-md">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-purple-900 text-base">
-                    <BrainCircuit className="w-5 h-5" />
-                    AI Governance Report
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <ul className="space-y-4">
-                    <RegistryItem label="Avg Generation Time" value="4.8s" status="Stable" />
-                    <RegistryItem label="Validation Rate" value="94.1%" status="High" />
-                    <RegistryItem label="Cost per Unit" value="$0.002" status="Optimal" />
-                </ul>
-            </CardContent>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-purple-900 text-base">
+              <BrainCircuit className="w-5 h-5" />
+              Platform Health
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-4">
+              <RegistryItem
+                label="Errors (24h)"
+                value={String(stats?.errors24h || 0)}
+                status={(stats?.errors24h || 0) === 0 ? 'Healthy' : 'Review'}
+              />
+              <RegistryItem
+                label="Question Types"
+                value={String(stats?.questionDistribution?.length || 0)}
+                status="Active"
+              />
+              <RegistryItem label="Database" value="QuesterixDB-v2" status="Connected" />
+            </ul>
+          </CardContent>
         </Card>
       </div>
     </div>
   );
 }
 
-function StatCard({ title, value, icon: Icon, trend, trendUp, color, isLoading }: {
+function StatCard({
+  title,
+  value,
+  icon: Icon,
+  trend,
+  trendUp,
+  color,
+  isLoading,
+}: {
   title: string;
   value: string | number;
   icon: React.ElementType;
@@ -304,22 +405,34 @@ function StatCard({ title, value, icon: Icon, trend, trendUp, color, isLoading }
 
   return (
     <Card className="relative overflow-hidden border-none shadow-xl shadow-gray-200/50 group hover:scale-[1.02] transition-transform duration-500">
-      <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${colors[color].split(' ').slice(0, 2).join(' ')}`} />
+      <div
+        className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${colors[color].split(' ').slice(0, 2).join(' ')}`}
+      />
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
-          <div className={`p-3 rounded-2xl ${colors[color].split(' ').slice(3).join(' ')} mb-4 transition-transform group-hover:scale-110`}>
+          <div
+            className={`p-3 rounded-2xl ${colors[color].split(' ').slice(3).join(' ')} mb-4 transition-transform group-hover:scale-110`}
+          >
             <Icon className="w-6 h-6" />
           </div>
-          <div className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${trendUp ? 'text-emerald-700' : 'text-rose-600'}`}>
-            {trendUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+          <div
+            className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${trendUp ? 'text-emerald-700' : 'text-rose-600'}`}
+          >
+            {trendUp ? (
+              <ArrowUpRight className="w-3 h-3" />
+            ) : (
+              <ArrowDownRight className="w-3 h-3" />
+            )}
             {trend}
           </div>
         </div>
         <div>
           <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tighter mb-1">
-            {isLoading ? '...' : (typeof value === 'number' ? value.toLocaleString() : value)}
+            {isLoading ? '...' : typeof value === 'number' ? value.toLocaleString() : value}
           </h3>
-          <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] italic">{title}</p>
+          <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] italic">
+            {title}
+          </p>
         </div>
       </CardContent>
     </Card>
@@ -327,15 +440,18 @@ function StatCard({ title, value, icon: Icon, trend, trendUp, color, isLoading }
 }
 
 function RegistryItem({ label, value, status }: { label: string; value: string; status: string }) {
-    return (
-        <li className="flex items-center justify-between p-3 rounded-xl bg-gray-50/50 border border-gray-100/50">
-            <div>
-                <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">{label}</p>
-                <p className="text-sm font-bold text-slate-900">{value}</p>
-            </div>
-            <Badge variant="outline" className="bg-white text-emerald-700 border-emerald-100 text-[10px] font-bold">
-                {status}
-            </Badge>
-        </li>
-    );
+  return (
+    <li className="flex items-center justify-between p-3 rounded-xl bg-gray-50/50 border border-gray-100/50">
+      <div>
+        <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">{label}</p>
+        <p className="text-sm font-bold text-slate-900">{value}</p>
+      </div>
+      <Badge
+        variant="outline"
+        className="bg-white text-emerald-700 border-emerald-100 text-[10px] font-bold"
+      >
+        {status}
+      </Badge>
+    </li>
+  );
 }
