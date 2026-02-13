@@ -66,7 +66,7 @@ jobs:
     steps:
       - name: Monitor API response times
         run: |
-          SUPABASE_URL="https://qvslbiceoonrgjxzkotb.supabase.co"
+          SUPABASE_URL="${{ secrets.SUPABASE_URL }}"
           ADMIN_URL="https://questerix-admin.pages.dev"
 
           echo "=== Response Time Report ===" > perf-report.txt

@@ -45,7 +45,7 @@ env:
   ADMIN_URL: https://questerix-admin.pages.dev
   LANDING_URL: https://questerix-landing.pages.dev
   STUDENT_URL: https://questerix-student.pages.dev
-  SUPABASE_URL: https://qvslbiceoonrgjxzkotb.supabase.co
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
 
 jobs:
   # =========================================================================
@@ -325,10 +325,10 @@ jobs:
         if: needs.health-check.outputs.edge-functions-status == 'failure'
         run: |
           echo "🔧 Self-healing: Redeploying Edge Functions..."
-          npx supabase functions deploy validate-content --project-ref qvslbiceoonrgjxzkotb
-          npx supabase functions deploy generate-questions --project-ref qvslbiceoonrgjxzkotb
-          npx supabase functions deploy analyze-spec-drift --project-ref qvslbiceoonrgjxzkotb
-          npx supabase functions deploy critical-alert --project-ref qvslbiceoonrgjxzkotb
+          npx supabase functions deploy validate-content --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+          npx supabase functions deploy generate-questions --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+          npx supabase functions deploy analyze-spec-drift --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+          npx supabase functions deploy critical-alert --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
