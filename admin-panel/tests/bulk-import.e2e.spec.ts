@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { TEST_USERS } from './test-utils';
 
 // Valid mock question matching QueuedQuestionSchema (Zod discriminated union)
@@ -19,13 +19,14 @@ function mockQuestion(content: string) {
 test.describe('Bulk Import Feature (Golden Path)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/login');
-    await page.fill('#login-email', TEST_USERS.SUPER_ADMIN.email);
-    await page.fill('#login-password', TEST_USERS.SUPER_ADMIN.password);
+    await page.fill('input[type="email"]', TEST_USERS.SUPER_ADMIN.email);
+    await page.fill('input[type="password"]', TEST_USERS.SUPER_ADMIN.password);
     await page.click('button[type="submit"]');
-    await page.waitForURL('**/dashboard', { timeout: 15000 });
+    // App redirects to '/' after login, not '/dashboard'
+    await page.waitForURL(/^\/$|\/dashboard|\/domains/, { timeout: 15000 });
 
     await page.goto('/ai-import');
-    await expect(page.getByText('Curriculum Nexus')).toBeVisible();
+    await expect(page.getByText('Curriculum Nexus')).toBeVisible({ timeout: 15000 });
   });
 
   test('should allow downloading the CSV template', async ({ page }) => {

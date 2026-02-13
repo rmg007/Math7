@@ -24,29 +24,79 @@ export interface SeedData {
  * Clean all E2E test data from database (identified by slug prefix)
  */
 export async function cleanTestData(supabase: SupabaseClient<Database>) {
-  // Delete in FK order: questions → skills → domains
+  // Delete in FK order: questions → skills → domains → apps → subjects
   await supabase.from('questions').delete().like('content', '%E2E Test%');
   await supabase.from('skills').delete().like('slug', `${TEST_SLUG_PREFIX}_%`);
   await supabase.from('domains').delete().like('slug', `${TEST_SLUG_PREFIX}_%`);
+  // Clean up auto-created test apps and subjects
+  await supabase.from('apps').delete().eq('subdomain', `${TEST_SLUG_PREFIX}_app`);
+  await supabase.from('subjects').delete().like('slug', `${TEST_SLUG_PREFIX}_%`);
 }
 
 /**
- * Resolve (or create) an app_id and subject_id for test data.
- * Uses the first available app in the system.
+ * Resolve (or auto-create) an app_id and subject_id for test data.
+ * Falls back to creating a test app if the database is empty.
  */
 async function getTestContext(supabase: SupabaseClient<Database>) {
-  // Get an existing app
+  // Try to find an existing app
   const { data: apps } = await supabase
     .from('apps')
     .select('app_id, subject_id')
     .limit(1)
     .single();
 
-  if (!apps) {
-    throw new Error('No apps found in database. Seed at least one app before running E2E tests.');
+  if (apps) {
+    return { appId: apps.app_id, subjectId: apps.subject_id ?? undefined };
   }
 
-  return { appId: apps.app_id, subjectId: apps.subject_id ?? undefined };
+  // No app found — auto-create a test app so E2E tests can run
+  console.warn('No apps found. Auto-creating a test app for E2E tests...');
+
+  // First ensure we have a subject
+  const { data: existingSubject } = await supabase
+    .from('subjects')
+    .select('subject_id')
+    .limit(1)
+    .single();
+
+  let subjectId: string | undefined;
+
+  if (!existingSubject) {
+    const { data: newSubject, error: subjectError } = await supabase
+      .from('subjects')
+      .insert({
+        name: 'E2E Test Mathematics',
+        slug: `${TEST_SLUG_PREFIX}_math_subject`,
+        description: 'Auto-created subject for E2E tests',
+      })
+      .select('subject_id')
+      .single();
+
+    if (subjectError) {
+      throw new Error(`Failed to auto-create test subject: ${subjectError.message}`);
+    }
+    subjectId = newSubject.subject_id;
+  } else {
+    subjectId = existingSubject.subject_id;
+  }
+
+  const { data: newApp, error: appError } = await supabase
+    .from('apps')
+    .insert({
+      display_name: 'E2E Test App',
+      subdomain: `${TEST_SLUG_PREFIX}_app`,
+      subject_id: subjectId,
+      is_active: true,
+    })
+    .select('app_id, subject_id')
+    .single();
+
+  if (appError) {
+    throw new Error(`Failed to auto-create test app: ${appError.message}`);
+  }
+
+  console.log(`Created test app: ${newApp.app_id}`);
+  return { appId: newApp.app_id, subjectId: newApp.subject_id ?? undefined };
 }
 
 /**

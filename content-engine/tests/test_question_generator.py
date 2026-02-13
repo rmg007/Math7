@@ -7,6 +7,7 @@ import pytest
 import json
 import time
 from unittest.mock import Mock, patch
+from tenacity import RetryError
 
 from src.generators.question_generator import QuestionGenerator
 from src.validators.question_schema import QuestionSchema, DifficultyLevel, GenerationResponse
@@ -160,19 +161,21 @@ class TestQuestionGenerator:
         @patch('src.generators.question_generator.genai')
         @patch.dict('os.environ', {'GEMINI_API_KEY': 'test-key'})
         def test_gemini_api_error(self, mock_genai):
-            """Test handling of Gemini API errors."""
+            """Test handling of Gemini API errors (wrapped by tenacity RetryError)."""
             mock_model = Mock()
             mock_model.generate_content.side_effect = Exception("API Error")
             mock_genai.GenerativeModel.return_value = mock_model
             
             generator = QuestionGenerator(model="gemini-1.5-flash")
             
-            with pytest.raises(Exception, match="API Error"):
+            with pytest.raises(RetryError) as exc_info:
                 generator.generate(
                     text="Test text",
                     skill_id="123e4567-e89b-12d3-a456-426614174000",
                     difficulty_distribution={DifficultyLevel.EASY: 1}
                 )
+            # Verify the original exception is preserved in the retry chain
+            assert "API Error" in str(exc_info.value)
 
     class TestOpenAIIntegration:
         """Test OpenAI API integration."""
@@ -231,19 +234,21 @@ class TestQuestionGenerator:
         @patch('src.generators.question_generator.OpenAI')
         @patch.dict('os.environ', {'OPENAI_API_KEY': 'test-key'})
         def test_openai_api_error(self, mock_openai):
-            """Test handling of OpenAI API errors."""
+            """Test handling of OpenAI API errors (wrapped by tenacity RetryError)."""
             mock_client = Mock()
             mock_client.chat.completions.create.side_effect = Exception("OpenAI Error")
             mock_openai.return_value = mock_client
             
             generator = QuestionGenerator(model="gpt-4o-mini")
             
-            with pytest.raises(Exception, match="OpenAI Error"):
+            with pytest.raises(RetryError) as exc_info:
                 generator.generate(
                     text="Test text",
                     skill_id="123e4567-e89b-12d3-a456-426614174000",
                     difficulty_distribution={DifficultyLevel.EASY: 1}
                 )
+            # Verify the original exception is preserved in the retry chain
+            assert "OpenAI Error" in str(exc_info.value)
 
     class TestPromptBuilding:
         """Test prompt construction logic."""
