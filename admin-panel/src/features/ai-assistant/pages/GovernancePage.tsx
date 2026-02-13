@@ -1,17 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { Shield, Zap, Search, Activity, X } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
-import ReactMarkdown from 'react-markdown';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useToast } from '@/hooks/use-toast';
 import { Database } from '@/lib/database.types';
+import { supabase } from '@/lib/supabase';
+import { Activity, Search, Shield, X, Zap } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 type AIGenerationSession = Database['public']['Tables']['ai_generation_sessions']['Row'] & {
   created_by_profile?: {
@@ -50,7 +44,8 @@ export const GovernancePage: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('ai_generation_sessions')
-        .select(`
+        .select(
+          `
           *,
           created_by_profile:created_by (
             app_id,
@@ -59,19 +54,21 @@ export const GovernancePage: React.FC = () => {
               display_name
             )
           )
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       const aggMap = new Map<string, TenantUsage>();
-      const sessions = (data as unknown) as AIGenerationSession[];
+      const sessions = data as unknown as AIGenerationSession[];
 
-      sessions.forEach(session => {
+      sessions.forEach((session) => {
         const profile = session.created_by_profile;
-        const profileApps = profile && typeof profile === 'object' && 'apps' in profile
-          ? (profile as { apps?: { display_name: string } | null }).apps
-          : null;
+        const profileApps =
+          profile && typeof profile === 'object' && 'apps' in profile
+            ? (profile as { apps?: { display_name: string } | null }).apps
+            : null;
         const appName = profileApps?.display_name || 'Unknown App';
         const appId = profile?.app_id || 'unknown';
 
@@ -82,7 +79,7 @@ export const GovernancePage: React.FC = () => {
             total_tokens: 0,
             total_questions: 0,
             session_count: 0,
-            last_active: session.created_at
+            last_active: session.created_at,
           });
         }
 
@@ -91,7 +88,7 @@ export const GovernancePage: React.FC = () => {
           entry.total_tokens += session.token_count || 0;
           entry.total_questions += session.questions_generated || 0;
           entry.session_count += 1;
-          
+
           if (new Date(session.created_at) > new Date(entry.last_active)) {
             entry.last_active = session.created_at;
           }
@@ -99,22 +96,22 @@ export const GovernancePage: React.FC = () => {
       });
 
       setUsageData(Array.from(aggMap.values()));
-
     } catch (err) {
       console.error('Failed to fetch AI usage:', err);
       toast({
         title: 'Error',
         description: 'Failed to load AI governance data',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const filteredData = usageData.filter(d => 
-    d.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    d.app_id.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredData = usageData.filter(
+    (d) =>
+      d.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      d.app_id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalTokens = usageData.reduce((acc, curr) => acc + curr.total_tokens, 0);
@@ -130,19 +127,22 @@ export const GovernancePage: React.FC = () => {
             <h1 className="text-3xl font-bold tracking-tight">AI Governance</h1>
           </div>
           <p className="text-blue-100/80 max-w-xl">
-            Monitor AI resource allocation, content quality standards, and token consumption across all tenants.
+            Monitor AI resource allocation, content quality standards, and token consumption across
+            all tenants.
           </p>
         </div>
         <div className="flex items-center gap-6">
           <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-wider text-blue-300/60 mb-1">Global Tokens</p>
-            <p className="text-2xl font-bold">
-              {totalTokens.toLocaleString()}
+            <p className="text-xs font-semibold uppercase tracking-wider text-blue-300/60 mb-1">
+              Global Tokens
             </p>
+            <p className="text-2xl font-bold">{totalTokens.toLocaleString()}</p>
           </div>
           <div className="h-10 w-px bg-white/10" />
           <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-wider text-blue-300/60 mb-1">Sessions</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-blue-300/60 mb-1">
+              Sessions
+            </p>
             <p className="text-2xl font-bold">{totalSessions}</p>
           </div>
         </div>
@@ -150,7 +150,6 @@ export const GovernancePage: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
         {/* Left Col: Tenant Usage */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -178,10 +177,10 @@ export const GovernancePage: React.FC = () => {
               <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Results:</span>
-                    <span className="text-xs font-bold text-gray-700">
-                      {filteredData.length}
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      Results:
                     </span>
+                    <span className="text-xs font-bold text-gray-700">{filteredData.length}</span>
                   </div>
                 </div>
               </div>
@@ -190,20 +189,40 @@ export const GovernancePage: React.FC = () => {
             {isLoading ? (
               <div className="p-12 text-center text-gray-500">Loading AI usage data...</div>
             ) : filteredData.length === 0 ? (
-               <div className="p-12 text-center text-gray-500">No AI usage data found. Start generating content to see metrics here.</div>
+              <div className="p-12 text-center space-y-4">
+                <div className="w-16 h-16 mx-auto bg-indigo-50 rounded-full flex items-center justify-center">
+                  <Activity className="w-8 h-8 text-indigo-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">No AI Usage Data Found</h3>
+                  <p className="text-sm text-gray-600 max-w-md mx-auto">
+                    This dashboard displays AI generation activity aggregated from the{' '}
+                    <code className="px-1.5 py-0.5 bg-gray-100 rounded text-xs font-mono">
+                      ai_generation_sessions
+                    </code>{' '}
+                    table.
+                  </p>
+                  <p className="text-sm text-gray-600 max-w-md mx-auto mt-2">
+                    Data will appear here once tenants start generating questions using the
+                    AI-powered content engine.
+                  </p>
+                </div>
+              </div>
             ) : (
               <div className="divide-y divide-gray-50">
                 {filteredData.map((usage) => (
                   <div key={usage.app_id} className="p-6 hover:bg-gray-50/50 transition-colors">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
-                            {usage.display_name.substring(0,2).toUpperCase()}
-                         </div>
-                         <div>
-                            <h3 className="font-bold text-gray-900">{usage.display_name}</h3>
-                            <code className="text-[10px] text-gray-400 uppercase tracking-tighter">{usage.app_id}</code>
-                         </div>
+                        <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                          {usage.display_name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-gray-900">{usage.display_name}</h3>
+                          <code className="text-[10px] text-gray-400 uppercase tracking-tighter">
+                            {usage.app_id}
+                          </code>
+                        </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <StatusBadge
@@ -215,16 +234,28 @@ export const GovernancePage: React.FC = () => {
 
                     <div className="grid grid-cols-3 gap-4">
                       <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                         <p className="text-[10px] text-gray-500 uppercase font-bold text-center">Tokens</p>
-                         <p className="text-lg font-mono font-bold text-center text-indigo-600">{usage.total_tokens.toLocaleString()}</p>
+                        <p className="text-[10px] text-gray-500 uppercase font-bold text-center">
+                          Tokens
+                        </p>
+                        <p className="text-lg font-mono font-bold text-center text-indigo-600">
+                          {usage.total_tokens.toLocaleString()}
+                        </p>
                       </div>
                       <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                         <p className="text-[10px] text-gray-500 uppercase font-bold text-center">Questions</p>
-                         <p className="text-lg font-mono font-bold text-center text-emerald-600">{usage.total_questions.toLocaleString()}</p>
+                        <p className="text-[10px] text-gray-500 uppercase font-bold text-center">
+                          Questions
+                        </p>
+                        <p className="text-lg font-mono font-bold text-center text-emerald-600">
+                          {usage.total_questions.toLocaleString()}
+                        </p>
                       </div>
                       <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                         <p className="text-[10px] text-gray-500 uppercase font-bold text-center">Sessions</p>
-                         <p className="text-lg font-mono font-bold text-center text-blue-600">{usage.session_count}</p>
+                        <p className="text-[10px] text-gray-500 uppercase font-bold text-center">
+                          Sessions
+                        </p>
+                        <p className="text-lg font-mono font-bold text-center text-blue-600">
+                          {usage.session_count}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -237,15 +268,17 @@ export const GovernancePage: React.FC = () => {
         {/* Right Col: Stats & Info */}
         <div className="space-y-6">
           <Card>
-             <CardHeader className="pb-2">
-                <CardDescription>Cost Estimation (Approx)</CardDescription>
-                <CardTitle className="text-3xl font-mono">
-                   ${((totalTokens / 1000) * 0.0005).toFixed(4)}
-                </CardTitle>
-             </CardHeader>
-             <CardContent>
-                <div className="text-xs text-muted-foreground">Based on Gemini Flash input/output mix (~$0.50/1M tokens)</div>
-             </CardContent>
+            <CardHeader className="pb-2">
+              <CardDescription>Cost Estimation (Approx)</CardDescription>
+              <CardTitle className="text-3xl font-mono">
+                ${((totalTokens / 1000) * 0.0005).toFixed(4)}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-xs text-muted-foreground">
+                Based on Gemini Flash input/output mix (~$0.50/1M tokens)
+              </div>
+            </CardContent>
           </Card>
 
           <div className="bg-white rounded-xl shadow-sm border border-[#1a1b4b]/10 overflow-hidden">
@@ -259,7 +292,7 @@ export const GovernancePage: React.FC = () => {
               <div className="prose prose-sm prose-purple max-w-none text-gray-700 leading-relaxed">
                 <div className="space-y-4">
                   <ReactMarkdown>
-{`
+                    {`
 ### 🛡️ Enterprise-Grade Security Architecture
 
 Our AI generation infrastructure is built on **Privacy-by-Design** principles, ensuring that your data remains secure throughout the entire curriculum generation lifecycle.
@@ -284,12 +317,12 @@ Each application instance operates within a strictly isolated vector namespace. 
 
           <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-6 shadow-inner">
             <h3 className="text-sm font-bold text-indigo-900 uppercase tracking-widest mb-2 flex items-center gap-2">
-               <Zap className="w-4 h-4" />
-               Live Monitoring
+              <Zap className="w-4 h-4" />
+              Live Monitoring
             </h3>
             <p className="text-sm text-indigo-800 leading-relaxed">
-              Usage data is aggregated from the \`ai_generation_sessions\` table. 
-              Costs are estimated based on public Gemini pricing and may vary.
+              Usage data is aggregated from the \`ai_generation_sessions\` table. Costs are
+              estimated based on public Gemini pricing and may vary.
             </p>
           </div>
         </div>

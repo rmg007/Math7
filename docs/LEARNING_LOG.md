@@ -1,5 +1,90 @@
 # Learning Log
 
+## 2026-02-12: System Health QA Fixes — Implemented
+
+### Session Context
+
+- **Trigger**: QA report identifying 4 critical issues in System Health section (Error Logs, Known Issues, AI Governance)
+- **Scope**: Error Logs page crash, input sanitization, empty state clarity, UI consistency
+- **Outcome**: ✅ All 4 findings addressed with production-ready fixes
+
+### What Was Done
+
+#### 1. Error Logs Page Crash Protection (Critical)
+
+- **File**: `admin-panel/src/App.tsx`
+- **Change**: Wrapped ErrorLogsPage route with ErrorBoundary and custom fallback UI
+- **Impact**: Prevents "Something went wrong" blank screen; provides actionable error message
+- **Details**:
+  - Added ErrorBoundary wrapper specifically for `/error-logs` route
+  - Custom fallback explains potential causes (missing tables, permissions)
+  - "Try Again" button allows recovery without full app reload
+  - Prevents entire app crash if error_logs table is missing or misconfigured
+
+#### 2. Known Issues Input Sanitization (High Priority)
+
+- **File**: `admin-panel/src/features/monitoring/pages/KnownIssuesPage.tsx`
+- **Change**: Added DOMPurify sanitization for issue descriptions
+- **Impact**: Prevents raw HTML (`<script>` tags) from displaying as text in UI
+- **Details**:
+  - Imported DOMPurify (already in dependencies)
+  - Created `sanitizeHtml()` helper that strips all HTML tags but keeps content
+  - Applied to description field in table rows
+  - Configuration: `ALLOWED_TAGS: []`, `ALLOWED_ATTR: []`, `KEEP_CONTENT: true`
+
+#### 3. AI Governance Empty State Clarity (Medium Priority)
+
+- **File**: `admin-panel/src/features/ai-assistant\pages\GovernancePage.tsx`
+- **Change**: Enhanced empty state with detailed explanation of data source
+- **Impact**: Users understand what the page displays and when data will appear
+- **Details**:
+  - Added icon, heading, and multi-paragraph explanation
+  - Explicitly mentions `ai_generation_sessions` table as data source
+  - Explains data appears after tenants generate questions
+  - Replaces generic "No AI usage data found" message
+
+#### 4. Button Style Standardization (Medium Priority)
+
+- **File**: `admin-panel/src/features/monitoring/pages/KnownIssuesPage.tsx`
+- **Change**: Removed `hover:scale-105` from "Record Issue" button
+- **Impact**: Consistent button behavior across System Health modules
+- **Details**:
+  - Error Logs uses static button (no scale effect)
+  - Known Issues now matches this pattern
+  - Both use same height, padding, border-radius, and typography
+
+### Root Causes Identified
+
+1. **Missing Error Boundaries**: Error Logs page had no route-level error boundary, causing full app crash
+2. **Unsanitized User Input**: Known Issues accepted and displayed raw HTML without sanitization
+3. **Generic Empty States**: AI Governance used placeholder text without context
+4. **Inconsistent Design Patterns**: Different button styles across related modules
+
+### Lessons Learned
+
+1. **Route-Level Error Boundaries**: Critical pages (especially monitoring/diagnostics) need dedicated error boundaries with helpful fallback UI
+2. **Always Sanitize Display**: Even if XSS doesn't execute, raw HTML tags in UI look unprofessional and confusing
+3. **Empty States Need Context**: Users need to understand what data a page shows and where it comes from
+4. **Design System Consistency**: Related modules should use identical component patterns for similar actions
+5. **DOMPurify Configuration**: Use `KEEP_CONTENT: true` to strip tags but preserve text for better UX
+
+### Prevention Measures
+
+- **Add error boundaries to all monitoring/diagnostic pages** that query database tables
+- **Audit all user-generated content displays** for sanitization (descriptions, notes, comments)
+- **Standardize empty state patterns** with icon + heading + explanation format
+- **Document button style patterns** in design system for consistency
+- **Test error scenarios** during QA (missing tables, malformed data, permission errors)
+
+### Testing Recommendations
+
+1. **Error Logs**: Test with missing `error_logs` table to verify fallback UI
+2. **Known Issues**: Create issue with `<script>alert('test')</script>` in description
+3. **AI Governance**: Verify empty state shows before any AI generation sessions exist
+4. **Button Consistency**: Visual regression test across System Health pages
+
+---
+
 ## 2026-02-12: QA Report Deployment Fixes — Implemented
 
 ### Session Context
@@ -60,7 +145,7 @@
 
 ### Technical Debt
 
-- The publish_curriculum RPC fix requires manual deployment to production
+- ✅ **RESOLVED**: The publish_curriculum RPC fix has been deployed via `supabase db push`
 - Consider adding CI check to ensure schema_master.sql includes all tables from migrations
 
 ---
