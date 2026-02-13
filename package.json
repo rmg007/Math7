@@ -9,10 +9,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "test:e2e": "npm run test:e2e --prefix admin-panel",
-    "deps:validate": "depcruise admin-panel/src landing-pages/src --config .dependency-cruiser.cjs",
-    "deps:graph": "depcruise admin-panel/src landing-pages/src --config .dependency-cruiser.cjs --output-type dot > dependency-graph.dot",
-    "deps:archi": "depcruise admin-panel/src landing-pages/src --config .dependency-cruiser.cjs --output-type archi > architecture-graph.dot",
-    "deps:report": "depcruise admin-panel/src landing-pages/src --config .dependency-cruiser.cjs --output-type html > dependency-report.html",
+    "deps:validate": "depcruise admin-panel/src --config .dependency-cruiser.cjs",
+    "deps:graph": "depcruise admin-panel/src --config .dependency-cruiser.cjs --output-type dot > dependency-graph.dot",
+    "deps:archi": "depcruise admin-panel/src --config .dependency-cruiser.cjs --output-type archi > architecture-graph.dot",
+    "deps:report": "depcruise admin-panel/src --config .dependency-cruiser.cjs --output-type html > dependency-report.html",
     "prepare": "husky || true"
   },
   "keywords": [],
