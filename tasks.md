@@ -319,6 +319,15 @@
 - [x] **REPO CLEANUP**: Removed dead projects (landing-pages), duplicate docs, stale configs
 - [x] **GITIGNORE**: Added patterns for Python caches, Wrangler, tsc dumps, landing-pages
 
+### Test Fix Sprint (2026-02-13)
+
+- [x] **Content Engine (2 tests fixed)**: `test_gemini_api_error` + `test_openai_api_error` — catch `RetryError` instead of raw `Exception` (tenacity wraps after 3 retries)
+- [x] **Admin E2E Seed (15 tests unblocked)**: `seed-test-data.ts` auto-creates test app if none exists (was crashing with "No apps found")
+- [x] **Bulk Import E2E (4 tests fixed)**: Fixed login selectors (`input[type=email]` vs `#login-email`) and post-login URL (`/` vs `/dashboard`)
+- [x] **Env Credential Update**: `.env.test.local` updated to QuesterixDB-v2 URL/anon key (service role key needs manual dashboard update)
+- [x] **Stale Code Removal**: Removed `VITE_GEMINI_API_KEY` from `.env.local`, `vite-env.d.ts`, and AI generator page warning
+- [x] **Workflow Consolidation**: Deleted duplicate `secrets.yml`, kept `gitleaks.yml` (more specific triggers + GITLEAKS_LICENSE support)
+
 ---
 
 ## 🛡️ DEPLOYMENT SAFETY & SECRET PROTECTION (2026-02-13)
@@ -342,9 +351,8 @@
   - `.husky/pre-push` runs gitleaks + forbidden-pattern grep
   - Blocks push if secrets found locally BEFORE they hit GitHub
 - [ ] **P0: Verify GitHub secret scanning is active and enforced** (push protection)
-  - Existing: `gitleaks.yml` (runs on push/PR to main)
-  - Existing: `secrets.yml` (runs on every push)
-  - Need: Ensure both are not failing silently (check GITLEAKS_LICENSE secret)
+  - ✅ Consolidated: `gitleaks.yml` (runs on push/PR to main) — removed duplicate `secrets.yml`
+  - Need: Ensure `GITLEAKS_LICENSE` secret is set in GitHub repo settings
 - [x] **P1: Add `service_role` leakage guard to pre-commit** (2026-02-13)
   - Enhanced `.husky/pre-commit` with JWT/API key pattern detection on staged files
   - Catches `service_role`, long JWTs, and `sk-` prefixed API keys
@@ -352,9 +360,9 @@
 ### Secret Scanning Pipeline (Defense-in-Depth)
 
 ```
-Layer 1: pre-commit → lint-staged + forbidden-pattern grep
-Layer 2: pre-push   → gitleaks local scan (NEW)
-Layer 3: GitHub CI   → gitleaks.yml + secrets.yml (EXISTING ✅)
+Layer 1: pre-commit → lint-staged + forbidden-pattern grep ✅
+Layer 2: pre-push   → gitleaks local scan ✅
+Layer 3: GitHub CI   → gitleaks.yml (consolidated, secrets.yml removed) ✅
 Layer 4: GitHub      → Native secret scanning + push protection (VERIFY)
 ```
 
