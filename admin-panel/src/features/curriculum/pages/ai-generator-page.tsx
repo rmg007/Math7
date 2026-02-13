@@ -2,16 +2,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useAIGenerator } from '@/hooks/use-ai-generator';
 import { downloadFile } from '@/lib/data-utils';
-import { AlertTriangle, CheckCircle2, Download, FileText, RefreshCw, Wand2 } from 'lucide-react';
+import { CheckCircle2, Download, FileText, RefreshCw, Wand2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FileUploader } from '../components/file-uploader';
@@ -146,18 +146,8 @@ Ensure questions are clear, concise, and suitable for the curriculum.`;
         <p className="text-gray-500">
           Generate curriculum-aligned questions from your documents in minutes.
         </p>
-        {!import.meta.env.VITE_GEMINI_API_KEY && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3 mt-2">
-            <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-amber-800">Missing API Key</h4>
-              <p className="text-sm text-amber-700 mt-1">
-                VITE_GEMINI_API_KEY is not detected. The AI generation will fail. Please add your
-                Google Gemini API key to your .env file.
-              </p>
-            </div>
-          </div>
-        )}
+        {/* AI generation is handled server-side via Edge Functions. No client API key needed. */}
+
       </div>
 
       {/* Stepper / Progress */}

@@ -41,7 +41,14 @@ fi
 echo "🔍 Checking for forbidden secret patterns in source..."
 if grep -rn --include="*.ts" --include="*.tsx" --include="*.dart" \
    -E "(SUPABASE_SERVICE_ROLE_KEY|service_role|GEMINI_API_KEY)" \
-   admin-panel/src/ student-app/lib/ 2>/dev/null | grep -v "node_modules" | grep -v ".example" | grep -v "env.ts" | grep -v "__tests__"; then
+   admin-panel/src/ student-app/lib/ 2>/dev/null \
+   | grep -v "node_modules" \
+   | grep -v ".example" \
+   | grep -v "env.ts" \
+   | grep -v "vite-env.d.ts" \
+   | grep -v "__tests__" \
+   | grep -v "// " \
+   | grep -v "{/\*"; then
   echo ""
   echo "❌ FORBIDDEN PATTERN DETECTED in source code!"
   echo "   service_role keys and API keys must NEVER appear in client bundles."

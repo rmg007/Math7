@@ -27,10 +27,6 @@ interface ImportMetaEnv {
   readonly VITE_ENABLE_OFFLINE_MODE: string;
   /** Analytics tracking ID (optional) */
   readonly VITE_ANALYTICS_ID?: string;
-  /** Gemini API key for AI features (optional) */
-  readonly VITE_GEMINI_API_KEY?: string;
-  /** Sentry DSN for error tracking (optional) */
-  readonly VITE_SENTRY_DSN?: string;
   
   // Index signature for dynamic access
   readonly [key: string]: string | boolean | undefined;
