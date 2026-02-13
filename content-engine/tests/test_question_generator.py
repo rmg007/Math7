@@ -175,7 +175,9 @@ class TestQuestionGenerator:
                     difficulty_distribution={DifficultyLevel.EASY: 1}
                 )
             # Verify the original exception is preserved in the retry chain
-            assert "API Error" in str(exc_info.value)
+            original = exc_info.value.last_attempt.exception()
+            assert original is not None
+            assert "API Error" in str(original)
 
     class TestOpenAIIntegration:
         """Test OpenAI API integration."""
@@ -248,7 +250,9 @@ class TestQuestionGenerator:
                     difficulty_distribution={DifficultyLevel.EASY: 1}
                 )
             # Verify the original exception is preserved in the retry chain
-            assert "OpenAI Error" in str(exc_info.value)
+            original = exc_info.value.last_attempt.exception()
+            assert original is not None
+            assert "OpenAI Error" in str(original)
 
     class TestPromptBuilding:
         """Test prompt construction logic."""
