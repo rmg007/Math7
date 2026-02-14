@@ -1,1 +1,140 @@
-{"result":[]}
+{
+  "result": [
+    {
+      "scriptId": "1391",
+      "url": "file:///workspaces/Questerix/admin-panel/src/__tests__/services/OracleService.test.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 14062, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 14062, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 332, "endOffset": 406, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 612, "endOffset": 4512, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 633, "endOffset": 668, "count": 8 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 692, "endOffset": 3005, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 752, "endOffset": 1011, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1066, "endOffset": 1270, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1346, "endOffset": 1990, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 2031, "endOffset": 2527, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 2305, "endOffset": 2320, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 2572, "endOffset": 2999, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 2763, "endOffset": 2778, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 3043, "endOffset": 4508, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 3102, "endOffset": 3493, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 3534, "endOffset": 3963, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 4012, "endOffset": 4502, "count": 1 }],
+          "isBlockCoverage": true
+        }
+      ]
+    },
+    {
+      "scriptId": "1393",
+      "url": "file:///workspaces/Questerix/admin-panel/src/services/OracleService.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 4364, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 4364, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "search",
+          "ranges": [
+            { "startOffset": 529, "endOffset": 983, "count": 9 },
+            { "startOffset": 566, "endOffset": 592, "count": 8 },
+            { "startOffset": 594, "endOffset": 604, "count": 3 },
+            { "startOffset": 604, "endOffset": 750, "count": 6 },
+            { "startOffset": 750, "endOffset": 768, "count": 5 },
+            { "startOffset": 768, "endOffset": 852, "count": 1 },
+            { "startOffset": 852, "endOffset": 879, "count": 4 },
+            { "startOffset": 879, "endOffset": 884, "count": 0 },
+            { "startOffset": 892, "endOffset": 979, "count": 1 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "findSolutionForError",
+          "ranges": [
+            { "startOffset": 1084, "endOffset": 1288, "count": 3 },
+            { "startOffset": 1166, "endOffset": 1173, "count": 2 },
+            { "startOffset": 1174, "endOffset": 1189, "count": 1 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "get",
+          "ranges": [{ "startOffset": 1392, "endOffset": 1421, "count": 9 }],
+          "isBlockCoverage": true
+        }
+      ]
+    }
+  ]
+}

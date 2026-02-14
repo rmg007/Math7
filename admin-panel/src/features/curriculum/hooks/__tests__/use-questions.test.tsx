@@ -6,11 +6,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-    useCreateQuestion,
-    useDeleteQuestion,
-    usePaginatedQuestions,
-    useQuestion,
-    useQuestions,
+  useCreateQuestion,
+  useDeleteQuestion,
+  usePaginatedQuestions,
+  useQuestion,
+  useQuestions,
 } from '../use-questions';
 
 // Mock dependencies
@@ -86,6 +86,8 @@ describe('useQuestions', () => {
       refreshApps: vi.fn(),
       isSidebarCollapsed: false,
       toggleSidebar: vi.fn(),
+      userRole: null,
+      isSuperAdmin: false,
     });
   });
 
@@ -159,6 +161,7 @@ describe('useQuestions', () => {
         type: 'multiple_choice' as const,
         points: 10,
         status: 'draft' as const,
+        solution: '',
       };
 
       await result.current.mutateAsync(newQuestion as any);

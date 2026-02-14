@@ -6,46 +6,46 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Pagination } from '@/components/ui/pagination';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { StatusBadge } from '@/components/ui/status-badge';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import {
-    Activity,
-    ArrowRight,
-    ChevronLeft,
-    Globe,
-    LayoutPanelTop,
-    Megaphone,
-    Monitor,
-    Pencil,
-    Plus,
-    Save,
-    Search,
-    Terminal,
-    X,
+  Activity,
+  ArrowRight,
+  ChevronLeft,
+  Globe,
+  LayoutPanelTop,
+  Megaphone,
+  Monitor,
+  Pencil,
+  Plus,
+  Save,
+  Search,
+  Terminal,
+  X,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApps } from '../hooks/use-apps';
 import {
-    useCreateLandingPage,
-    useLandingPages,
-    useUpdateLandingPage,
-    type LandingPageWithApp,
+  useCreateLandingPage,
+  useLandingPages,
+  useUpdateLandingPage,
+  type LandingPageWithApp,
 } from '../hooks/use-landings';
 
 export function LandingsPage() {
@@ -81,10 +81,10 @@ export function LandingsPage() {
   };
 
   const handleSave = async () => {
-    if (!editingLanding) return;
+    if (!editingLanding || !editingLanding.landing_page_id) return;
     try {
       await updateLanding.mutateAsync({
-        id: editingLanding.landing_page_id!,
+        id: editingLanding.landing_page_id,
         ...formData,
       });
       toast({ title: 'Success', description: 'Landing page configuration updated' });

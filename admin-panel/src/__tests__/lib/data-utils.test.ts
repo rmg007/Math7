@@ -1,15 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
+  downloadFile,
+  downloadTemplate,
   exportToCSV,
   exportToJSON,
-  downloadTemplate,
   parseCSV,
   parseJSON,
   readFileAsText,
-  downloadFile,
   type DataColumn,
 } from '@/lib/data-utils';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock DOM APIs
 const mockCreateElement = vi.fn();
@@ -22,8 +21,8 @@ const mockClick = vi.fn();
 Object.defineProperty(global, 'Blob', {
   value: class Blob {
     constructor(
-      public content: any[],
-      public options: any
+      public content: string[],
+      public options: { type: string }
     ) {}
   },
 });
@@ -295,18 +294,24 @@ describe('data-utils', () => {
 
       // Mock FileReader to simulate error
       const mockFileReader = {
-        onload: null as any,
-        onerror: null as any,
+        onload: null as ((this: FileReader, ev: ProgressEvent<FileReader>) => void) | null,
+        onerror: null as ((this: FileReader, ev: ProgressEvent<FileReader>) => void) | null,
         readAsText: vi.fn().mockImplementation(() => {
           setTimeout(() => {
             if (mockFileReader.onerror) {
-              mockFileReader.onerror({ target: mockFileReader });
+              // Invoke with a generic error event and proper this context
+              mockFileReader.onerror.call(
+                mockFileReader as unknown as FileReader,
+                new Event('error') as unknown as ProgressEvent<FileReader>
+              );
             }
           }, 0);
         }),
       };
 
-      global.FileReader = vi.fn().mockImplementation(() => mockFileReader) as any;
+      global.FileReader = vi
+        .fn()
+        .mockImplementation(() => mockFileReader) as unknown as typeof FileReader;
 
       await expect(readFileAsText(file)).rejects.toThrow('Failed to read file');
     });

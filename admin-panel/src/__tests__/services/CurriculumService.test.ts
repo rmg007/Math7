@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { supabase } from '@/lib/supabase';
 import { CurriculumService } from '@/services/CurriculumService';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -142,7 +141,7 @@ describe('CurriculumService', () => {
         status: 400,
         statusText: 'Bad Request',
         count: null,
-      } as any);
+      } as Awaited<ReturnType<typeof supabase.rpc>>);
 
       const result = await CurriculumService.importQuestionsBulk([mockValidQuestion]);
 
@@ -160,7 +159,7 @@ describe('CurriculumService', () => {
         status: 200,
         statusText: 'OK',
         count: null,
-      } as any);
+      } as Awaited<ReturnType<typeof supabase.rpc>>);
 
       const result = await CurriculumService.importQuestionsBulk([mockValidQuestion]);
 
@@ -186,14 +185,14 @@ describe('CurriculumService', () => {
           status: 200,
           statusText: 'OK',
           count: null,
-        } as any)
+        } as Awaited<ReturnType<typeof supabase.rpc>>)
         .mockResolvedValueOnce({
           data: null,
           error: { message: 'Connection timeout', details: '', hint: '', code: 'timeout' },
           status: 504,
           statusText: 'Gateway Timeout',
           count: null,
-        } as any);
+        } as Awaited<ReturnType<typeof supabase.rpc>>);
 
       const questions = [
         mockValidQuestion,
@@ -240,7 +239,7 @@ describe('CurriculumService', () => {
         status: 200,
         statusText: 'OK',
         count: null,
-      } as any);
+      } as Awaited<ReturnType<typeof supabase.rpc>>);
 
       // Create 60 questions (should be 2 batches with default size 50)
       const questions = Array(60).fill(mockValidQuestion);

@@ -1,8 +1,8 @@
-import { renderHook } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import { useApp } from '@/hooks/use-app';
 import { AppContext, type AppContextType } from '@/contexts/AppContextDefinition';
+import { useApp } from '@/hooks/use-app';
+import { renderHook } from '@testing-library/react';
 import React from 'react';
+import { describe, expect, it, vi } from 'vitest';
 
 describe('useApp', () => {
   const mockContextValue: AppContextType = {
@@ -13,13 +13,13 @@ describe('useApp', () => {
     refreshApps: vi.fn(),
     isSidebarCollapsed: false,
     toggleSidebar: vi.fn(),
+    userRole: null,
+    isSuperAdmin: false,
   };
 
   it('should return context value when used within AppProvider', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <AppContext.Provider value={mockContextValue}>
-        {children}
-      </AppContext.Provider>
+      <AppContext.Provider value={mockContextValue}>{children}</AppContext.Provider>
     );
 
     const { result } = renderHook(() => useApp(), { wrapper });
@@ -30,7 +30,7 @@ describe('useApp', () => {
   it('should throw error when used outside AppProvider', () => {
     // Silence console.error for expected error
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
+
     expect(() => {
       renderHook(() => useApp());
     }).toThrow('useApp must be used within an AppProvider');
@@ -46,9 +46,7 @@ describe('useApp', () => {
     };
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <AppContext.Provider value={customContext}>
-        {children}
-      </AppContext.Provider>
+      <AppContext.Provider value={customContext}>{children}</AppContext.Provider>
     );
 
     const { result } = renderHook(() => useApp(), { wrapper });
@@ -59,9 +57,7 @@ describe('useApp', () => {
 
   it('should preserve function references in context', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <AppContext.Provider value={mockContextValue}>
-        {children}
-      </AppContext.Provider>
+      <AppContext.Provider value={mockContextValue}>{children}</AppContext.Provider>
     );
 
     const { result } = renderHook(() => useApp(), { wrapper });

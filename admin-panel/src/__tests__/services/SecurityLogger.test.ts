@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { SecurityLogger } from '@/services/SecurityLogger';
 import { supabase } from '@/lib/supabase';
+import { SecurityLogger } from '@/services/SecurityLogger';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock Supabase
 vi.mock('@/lib/supabase', () => ({
@@ -22,7 +21,9 @@ describe('SecurityLogger', () => {
 
   describe('log', () => {
     it('should call log_security_event RPC with correct parameters', async () => {
-      vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: null } as any);
+      vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: null } as Awaited<
+        ReturnType<typeof supabase.rpc>
+      >);
 
       await SecurityLogger.log({
         eventType: 'test_event',
@@ -41,7 +42,9 @@ describe('SecurityLogger', () => {
     });
 
     it('should handle optional fields', async () => {
-      vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: null } as any);
+      vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: null } as Awaited<
+        ReturnType<typeof supabase.rpc>
+      >);
 
       await SecurityLogger.log({
         eventType: 'minimal_event',
@@ -59,7 +62,9 @@ describe('SecurityLogger', () => {
 
     it('should log to console in development on success', async () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: null } as any);
+      vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: null } as Awaited<
+        ReturnType<typeof supabase.rpc>
+      >);
 
       await SecurityLogger.log({ eventType: 'dev_event', severity: 'info' });
 
@@ -69,7 +74,9 @@ describe('SecurityLogger', () => {
     it('should log to console.error in development on failure', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const mockError = { message: 'RPC Error' };
-      vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: mockError as any } as any);
+      vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: mockError } as Awaited<
+        ReturnType<typeof supabase.rpc>
+      >);
 
       await SecurityLogger.log({ eventType: 'fail_event', severity: 'high' });
 
@@ -94,7 +101,9 @@ describe('SecurityLogger', () => {
 
   describe('Convenience Methods', () => {
     beforeEach(() => {
-      vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: null } as any);
+      vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: null } as Awaited<
+        ReturnType<typeof supabase.rpc>
+      >);
     });
 
     it('should log login', async () => {

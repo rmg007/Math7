@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { supabase } from '@/lib/supabase';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { generateQuestions } from '../generateQuestions';
@@ -61,10 +60,24 @@ describe('governedGenerateQuestions', () => {
     vi.mocked(supabase.auth.getUser).mockResolvedValue({
       data: { user: mockUser },
       error: null,
-    } as any);
-    vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: null } as any);
+    } as Awaited<ReturnType<typeof supabase.auth.getUser>>);
+    vi.mocked(supabase.rpc).mockResolvedValue({
+      data: null,
+      error: null,
+      count: null,
+      status: 200,
+      statusText: 'OK',
+    } as Awaited<ReturnType<typeof supabase.rpc>>);
     vi.mocked(generateQuestions).mockResolvedValue(mockGenerationResponse);
-    vi.mocked(validateContent).mockResolvedValue(mockValidationResponse as any);
+    vi.mocked(validateContent).mockResolvedValue({
+      status: 'approved',
+      is_valid: true,
+      overall_score: 9.5,
+      consensus_reached: true,
+      findings: [],
+      summary: '',
+      metadata: { model: 'gemini-1.5-flash', validation_time_ms: 50 },
+    } as Awaited<ReturnType<typeof validateContent>>);
 
     const result = await governedGenerateQuestions(mockAppId, mockRequest);
 
@@ -99,11 +112,14 @@ describe('governedGenerateQuestions', () => {
     vi.mocked(supabase.auth.getUser).mockResolvedValue({
       data: { user: mockUser },
       error: null,
-    } as any);
+    } as Awaited<ReturnType<typeof supabase.auth.getUser>>);
     vi.mocked(supabase.rpc).mockResolvedValueOnce({
       data: null,
-      error: { message: 'Quota exceeded', code: 'P0001' } as any,
-    } as any);
+      error: { message: 'Quota exceeded', code: 'P0001' } as unknown,
+      count: null,
+      status: 400,
+      statusText: 'Bad Request',
+    } as Awaited<ReturnType<typeof supabase.rpc>>);
 
     await expect(governedGenerateQuestions(mockAppId, mockRequest)).rejects.toThrow(
       'Quota exceeded'

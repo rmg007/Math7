@@ -1,9 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useBulkImport } from '@/hooks/use-bulk-import';
 import { useToast } from '@/hooks/use-toast';
+import type { QueuedQuestion } from '@/lib/validation/import-schema';
 import { CurriculumService } from '@/services/CurriculumService';
 import { act, renderHook } from '@testing-library/react';
 import Papa from 'papaparse';
+import type { MockedFunction } from 'vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock dependencies
@@ -22,9 +23,11 @@ describe('useBulkImport', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
-    vi.mocked(useToast).mockReturnValue({ toast: mockToast } as unknown as ReturnType<
-      typeof useToast
-    >);
+    vi.mocked(useToast).mockReturnValue({
+      toasts: [],
+      toast: mockToast,
+      dismiss: vi.fn(),
+    });
     vi.mocked(CurriculumService.importQuestionsBulk).mockResolvedValue({
       success: true,
       count: 5,
@@ -58,8 +61,14 @@ describe('useBulkImport', () => {
         { content: 'Question 2', points: '15', skill_id: 'skill-2' },
       ];
 
-      (Papa.parse as any).mockImplementation((_file: File, options: any) => {
-        options?.complete?.({ data: mockData, errors: [], meta: {} });
+      type ParseConfigWithError = Papa.ParseConfig & { error?: (err: Error) => void };
+      (
+        Papa.parse as unknown as MockedFunction<(file: File, options: Papa.ParseConfig) => void>
+      ).mockImplementation((_file: File, options: Papa.ParseConfig) => {
+        (options as ParseConfigWithError)?.complete?.(
+          { data: mockData, errors: [], meta: {} },
+          mockFile
+        );
       });
 
       const { result } = renderHook(() => useBulkImport());
@@ -83,8 +92,11 @@ describe('useBulkImport', () => {
     it('should handle parsing errors', async () => {
       const mockFile = new File([''], 'test.csv', { type: 'text/csv' });
 
-      (Papa.parse as any).mockImplementation((_file: File, options: any) => {
-        options?.error?.(new Error('Parse error'));
+      type ParseConfigWithError = Papa.ParseConfig & { error?: (err: Error) => void };
+      (
+        Papa.parse as unknown as MockedFunction<(file: File, options: Papa.ParseConfig) => void>
+      ).mockImplementation((_file: File, options: Papa.ParseConfig) => {
+        (options as ParseConfigWithError)?.error?.(new Error('Parse error'));
       });
 
       const { result } = renderHook(() => useBulkImport());
@@ -134,8 +146,14 @@ describe('useBulkImport', () => {
         },
       ];
 
-      (Papa.parse as any).mockImplementation((_file: File, options: any) => {
-        options?.complete?.({ data: mockData, errors: [], meta: {} });
+      type ParseConfigWithError = Papa.ParseConfig & { error?: (err: Error) => void };
+      (
+        Papa.parse as unknown as MockedFunction<(file: File, options: Papa.ParseConfig) => void>
+      ).mockImplementation((_file: File, options: Papa.ParseConfig) => {
+        (options as ParseConfigWithError)?.complete?.(
+          { data: mockData, errors: [], meta: {} },
+          mockFile
+        );
       });
 
       const { result } = renderHook(() => useBulkImport());
@@ -190,7 +208,17 @@ describe('useBulkImport', () => {
       // Set up some questions in queue
       act(() => {
         result.current.setImportQueue([
-          { type: 'multiple_choice', content: 'Test', points: 10 } as unknown as any,
+          {
+            type: 'multiple_choice',
+            content: 'Test',
+            points: 10,
+            skill_id: '123e4567-e89b-12d3-a456-426614174000',
+            is_published: false,
+            options: [
+              { text: 'Option 1', is_correct: true },
+              { text: 'Option 2', is_correct: false },
+            ],
+          } as QueuedQuestion,
         ]);
       });
 
@@ -230,7 +258,17 @@ describe('useBulkImport', () => {
       act(() => {
         result.current.setIsDryRun(false);
         result.current.setImportQueue([
-          { type: 'multiple_choice', content: 'Test' } as unknown as any,
+          {
+            type: 'multiple_choice',
+            content: 'Test',
+            skill_id: '123e4567-e89b-12d3-a456-426614174000',
+            is_published: false,
+            points: 10,
+            options: [
+              { text: 'Option 1', is_correct: true },
+              { text: 'Option 2', is_correct: false },
+            ],
+          } as QueuedQuestion,
         ]);
       });
 
@@ -262,7 +300,19 @@ describe('useBulkImport', () => {
       const { result } = renderHook(() => useBulkImport());
 
       act(() => {
-        result.current.setImportQueue([{ type: 'multiple_choice', content: 'Test' } as any]);
+        result.current.setImportQueue([
+          {
+            type: 'multiple_choice',
+            content: 'Test',
+            skill_id: '123e4567-e89b-12d3-a456-426614174000',
+            is_published: false,
+            points: 10,
+            options: [
+              { text: 'Option 1', is_correct: true },
+              { text: 'Option 2', is_correct: false },
+            ],
+          } as QueuedQuestion,
+        ]);
       });
 
       await act(async () => {
@@ -286,7 +336,19 @@ describe('useBulkImport', () => {
       const { result } = renderHook(() => useBulkImport());
 
       act(() => {
-        result.current.setImportQueue([{ type: 'multiple_choice', content: 'Test' } as any]);
+        result.current.setImportQueue([
+          {
+            type: 'multiple_choice',
+            content: 'Test',
+            skill_id: '123e4567-e89b-12d3-a456-426614174000',
+            is_published: false,
+            points: 10,
+            options: [
+              { text: 'Option 1', is_correct: true },
+              { text: 'Option 2', is_correct: false },
+            ],
+          } as QueuedQuestion,
+        ]);
       });
 
       await act(async () => {
@@ -322,7 +384,19 @@ describe('useBulkImport', () => {
       const { result } = renderHook(() => useBulkImport());
 
       act(() => {
-        result.current.setImportQueue([{ type: 'multiple_choice', content: 'Test' } as any]);
+        result.current.setImportQueue([
+          {
+            type: 'multiple_choice',
+            content: 'Test',
+            skill_id: '123e4567-e89b-12d3-a456-426614174000',
+            is_published: false,
+            points: 10,
+            options: [
+              { text: 'Option 1', is_correct: true },
+              { text: 'Option 2', is_correct: false },
+            ],
+          } as QueuedQuestion,
+        ]);
       });
 
       await act(async () => {
@@ -345,7 +419,19 @@ describe('useBulkImport', () => {
       const { result } = renderHook(() => useBulkImport());
 
       act(() => {
-        result.current.setImportQueue([{ type: 'multiple_choice', content: 'Test' } as any]);
+        result.current.setImportQueue([
+          {
+            type: 'multiple_choice',
+            content: 'Test',
+            skill_id: '123e4567-e89b-12d3-a456-426614174000',
+            is_published: false,
+            points: 10,
+            options: [
+              { text: 'Option 1', is_correct: true },
+              { text: 'Option 2', is_correct: false },
+            ],
+          } as QueuedQuestion,
+        ]);
       });
 
       expect(result.current.importQueue).toHaveLength(1);

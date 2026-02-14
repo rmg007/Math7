@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   BooleanSchema,
   McqMultiSchema,
@@ -293,7 +292,7 @@ describe('import-schema validation', () => {
         points: 10,
         is_published: true,
         type: 'boolean' as const,
-        solution: null as any,
+        solution: null as unknown as boolean,
       };
 
       const result = BooleanSchema.safeParse(invalid);
@@ -418,7 +417,7 @@ describe('import-schema validation', () => {
         content: 'Invalid type question',
         points: 10,
         is_published: true,
-        type: 'invalid_type' as any,
+        type: 'invalid_type' as unknown as QueuedQuestion['type'],
         options: [],
       };
 

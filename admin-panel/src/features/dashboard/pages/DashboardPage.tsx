@@ -1,5 +1,6 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/lib/supabase';
@@ -14,7 +15,7 @@ import {
   Database,
   Layers,
 } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -31,33 +32,39 @@ import {
 const COLORS = ['#6366f1', '#a855f7', '#ec4899', '#f43f5e'];
 
 export function DashboardPage() {
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
+  const [viewMode, setViewMode] = useState<'current' | 'all'>('current');
 
   // Fetch Global Stats
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['dashboard-stats', currentApp?.app_id],
+    queryKey: ['dashboard-stats', currentApp?.app_id, isSuperAdmin, viewMode],
     queryFn: async () => {
+      const shouldFilterByApp = !isSuperAdmin || viewMode === 'current';
+
+      type CountableTable = 'domains' | 'skills' | 'questions';
+      const createQuery = (table: CountableTable, select: string) => {
+        let query = supabase.from(table).select(select, { count: 'exact', head: true });
+        if (shouldFilterByApp && currentApp?.app_id) {
+          query = query.eq('app_id', currentApp.app_id);
+        }
+        return query;
+      };
+
       const results = await Promise.all([
-        supabase
-          .from('domains')
-          .select('domain_id', { count: 'exact', head: true })
-          .eq('app_id', currentApp?.app_id || ''),
-        supabase
-          .from('skills')
-          .select('skill_id', { count: 'exact', head: true })
-          .eq('app_id', currentApp?.app_id || ''),
-        supabase
-          .from('questions')
-          .select('question_id', { count: 'exact', head: true })
-          .eq('app_id', currentApp?.app_id || ''),
+        createQuery('domains', 'domain_id'),
+        createQuery('skills', 'skill_id'),
+        createQuery('questions', 'question_id'),
         supabase
           .from('error_logs')
           .select('id', { count: 'exact', head: true })
           .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
-        supabase
-          .from('questions')
-          .select('type')
-          .eq('app_id', currentApp?.app_id || ''),
+        (() => {
+          let query = supabase.from('questions').select('type');
+          if (shouldFilterByApp && currentApp?.app_id) {
+            query = query.eq('app_id', currentApp.app_id);
+          }
+          return query;
+        })(),
       ]);
 
       // Compute question type distribution from real data
@@ -141,6 +148,33 @@ export function DashboardPage() {
         description="Real-time curriculum intelligence and platform stability matrix."
         icon={Activity}
       />
+
+      {isSuperAdmin && (
+        <div className="flex items-center gap-4 p-4 bg-white/70 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl">
+          <span className="text-sm font-semibold text-gray-700">View Mode:</span>
+          <div className="flex rounded-lg bg-gray-100 p-1">
+            <Button
+              variant={viewMode === 'current' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('current')}
+              className="rounded-md px-3 py-1 text-xs font-semibold"
+            >
+              Current App
+            </Button>
+            <Button
+              variant={viewMode === 'all' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('all')}
+              className="rounded-md px-3 py-1 text-xs font-semibold"
+            >
+              All Apps
+            </Button>
+          </div>
+          <Badge variant="secondary" className="text-xs">
+            Super Admin
+          </Badge>
+        </div>
+      )}
 
       {/* Primary Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

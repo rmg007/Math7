@@ -45,14 +45,12 @@ export function useQuestions(skillId?: string) {
   });
 }
 
-export function usePaginatedQuestions(params: PaginationParams) {
+export function usePaginatedQuestions(params: PaginationParams, appFilter?: string) {
   const { currentApp } = useApp();
 
   return useQuery({
-    queryKey: ['questions-paginated', params, currentApp?.app_id],
+    queryKey: ['questions-paginated', params, currentApp?.app_id, appFilter],
     queryFn: async (): Promise<PaginatedResponse<QuestionListItem>> => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
-
       const {
         page,
         pageSize,
@@ -77,8 +75,20 @@ export function usePaginatedQuestions(params: PaginationParams) {
         `,
           { count: 'exact' }
         )
-        .eq('app_id', currentApp.app_id)
         .is('deleted_at', null);
+
+      // For super admin, filter by app_id if specified, otherwise show all apps
+      // For regular users, always filter by current app
+      if (appFilter && appFilter !== 'all') {
+        query = query.eq('app_id', appFilter);
+      } else if (!appFilter || appFilter === 'all') {
+        // If no app filter or 'all', show current app for regular users
+        if (currentApp?.app_id) {
+          query = query.eq('app_id', currentApp.app_id);
+        } else {
+          throw new Error('No app selected');
+        }
+      }
 
       if (search) {
         const escapedSearch = escapePostgrestSearch(search);
@@ -113,7 +123,7 @@ export function usePaginatedQuestions(params: PaginationParams) {
         totalPages: Math.ceil((count ?? 0) / pageSize),
       };
     },
-    enabled: Boolean(currentApp?.app_id),
+    enabled: Boolean(currentApp?.app_id) || Boolean(appFilter),
   });
 }
 

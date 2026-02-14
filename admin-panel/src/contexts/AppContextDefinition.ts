@@ -1,5 +1,5 @@
-import { createContext } from 'react';
 import { App } from '@/features/platform/hooks/use-apps';
+import { createContext } from 'react';
 
 export interface AppContextType {
   apps: App[];
@@ -9,6 +9,8 @@ export interface AppContextType {
   refreshApps: () => void;
   isSidebarCollapsed: boolean;
   toggleSidebar: () => void;
+  userRole: string | null;
+  isSuperAdmin: boolean;
 }
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);

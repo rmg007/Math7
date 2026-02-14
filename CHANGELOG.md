@@ -38,6 +38,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Governance**: Updated `LEARNING_LOG.md` and `tasks.md` to reflect the shift from "Assumed 100% Coverage" to "Verified Stabilization."
 
+## [2.0.1] - 2026-02-14
+
+### Added
+
+- **Super Admin Cross-Tenant Access**: Complete platform-wide visibility for super admin role
+  - Cross-tenant data access across domains, skills, and questions
+  - App filtering UI in curriculum management pages
+  - Dashboard view toggle ("Current App" vs "All Apps")
+  - User management with cross-tenant visibility
+  - Database RLS policies with JWT helper functions
+- **Database Migration**: `20260214210000_super_admin_jwt_claims.sql`
+  - JWT helper functions: `jwt_is_admin()`, `jwt_is_super_admin()`, `jwt_is_mentor()`
+  - Database-backed role verification for enhanced security
+- **AppContext Enhancements**: Added `userRole` and `isSuperAdmin` properties
+- **UI Components**: Super admin controls and role-based feature visibility
+
+### Fixed
+
+- **Type Safety**: Eliminated all explicit 'any' types across test suite (40+ instances)
+  - `use-bulk-import.test.tsx`: Replaced 'any' with `QueuedQuestion` interfaces
+  - `file-parsers.test.tsx`: Fixed PDF.js and FileReader types
+  - `data-utils.test.tsx`: Fixed Blob and FileReader event handlers
+  - `governedGeneration.test.ts`: Fixed Supabase return types
+  - `sanitize.test.ts`: Removed unnecessary type assertions
+  - `import-schema.test.ts`: Fixed discriminated union types
+- **Accessibility**: Achieved WCAG 2 AA compliance across all pages
+  - Fixed color contrast violations (5 components)
+  - Added aria-labels to icon-only buttons (2 components)
+  - All accessibility tests now passing (5/5)
+- **Build**: Fixed TypeScript compilation errors
+  - Restored database.types.ts
+  - Fixed dependency cruiser configuration
+- **Lint**: Replaced explicit 'any' types with proper database types
+
+### Changed
+
+- Cleaned up tasks.md organization
+- Enhanced documentation for GitHub Codespaces workflow
+
+### Documentation
+
+- Added comprehensive Codespaces setup guide
+- Documented accessibility testing procedures
+- Created documentation best practices guide
+
 ## [0.9.0] - 2026-02-10
 
 ### Added

@@ -22,6 +22,7 @@ import { supabase } from '@/lib/supabase';
 import {
   Book,
   CheckSquare,
+  Filter,
   GripVertical,
   Loader2,
   Pencil,
@@ -278,7 +279,7 @@ function SortableCard({
 }
 
 export function DomainList() {
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin, apps } = useApp();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'live'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -296,19 +297,23 @@ export function DomainList() {
     questionCount: number;
     loading: boolean;
   }>({ skillCount: 0, questionCount: 0, loading: false });
+  const [appFilter, setAppFilter] = useState<string>('all');
 
   const {
     data: paginatedData,
     isLoading,
     error,
-  } = usePaginatedDomains({
-    page,
-    pageSize,
-    search: debouncedSearch,
-    status: statusFilter,
-    sortBy,
-    sortOrder,
-  });
+  } = usePaginatedDomains(
+    {
+      page,
+      pageSize,
+      search: debouncedSearch,
+      status: statusFilter,
+      sortBy,
+      sortOrder,
+    },
+    appFilter !== 'all' ? appFilter : undefined
+  );
 
   const deleteDomain = useDeleteDomain();
   const bulkDelete = useBulkDeleteDomains();
@@ -671,6 +676,26 @@ export function DomainList() {
           setSearchQuery={setSearchQuery}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
+          extraFilters={
+            isSuperAdmin ? (
+              <div className="relative w-full md:w-56">
+                <select
+                  aria-label="Filter by app"
+                  value={appFilter}
+                  onChange={(e) => setAppFilter(e.target.value)}
+                  className="w-full h-14 appearance-none pl-6 pr-12 text-sm font-black uppercase tracking-widest rounded-[1.25rem] border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer"
+                >
+                  <option value="all">ALL APPS</option>
+                  {apps.map((app) => (
+                    <option key={app.app_id} value={app.app_id}>
+                      {app.display_name}
+                    </option>
+                  ))}
+                </select>
+                <Filter className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-indigo-500 pointer-events-none" />
+              </div>
+            ) : undefined
+          }
         />
 
         <div className="p-0">

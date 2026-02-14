@@ -1,0 +1,111 @@
+name: Merge All Branches Into Main
+
+on:
+  workflow_dispatch:
+    inputs:
+      simulate:
+        description: "Dry-run without merging/pushing"
+        type: boolean
+        default: true
+      strategy:
+        description: 'Merge strategy: normal | ours | theirs ("ours" keeps main authoritative)'
+        type: choice
+        options:
+          - normal
+          - ours
+          - theirs
+        default: ours
+
+permissions:
+  contents: write
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main with full history
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Collect branches via GitHub API
+        id: list
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: rmg007
+          REPO: Questerix
+        run: |
+          set -euo pipefail
+          branches_json="[]"
+          page=1
+          while true; do
+            resp=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${OWNER}/${REPO}/branches?per_page=100&page=${page}")
+            count=$(echo "$resp" | jq length)
+            if [ "$count" -eq 0 ]; then break; fi
+            branches_json=$(jq -c -s 'add' <(echo "$branches_json") <(echo "$resp"))
+            page=$((page+1))
+          done
+          echo "$branches_json" > branches.json
+          to_merge=$(jq -r '.[] | select(.name != "main") | .name' branches.json | paste -sd, -)
+          echo "branches=$(cat branches.json)" >> $GITHUB_OUTPUT
+          echo "to_merge=$to_merge" >> $GITHUB_OUTPUT
+          echo "Found branches:" && jq -r '.[].name' branches.json
+          echo "Branches to merge into main:" && echo "$to_merge" | tr ',' '\n'
+
+      - name: Merge branches into main
+        if: ${{ steps.list.outputs.to_merge != '' }}
+        env:
+          TO_MERGE: ${{ steps.list.outputs.to_merge }}
+          STRATEGY: ${{ github.event.inputs.strategy }}
+          SIMULATE: ${{ github.event.inputs.simulate }}
+        run: |
+          set -euo pipefail
+          IFS="," read -ra branches <<< "$TO_MERGE"
+          for br in "${branches[@]}"; do
+            if [ "$SIMULATE" = "true" ]; then
+              echo "DRY-RUN: would merge $br into main"
+              continue
+            fi
+            echo "Fetching $br"
+            git fetch origin "$br:$br" || true
+            echo "Merging $br with strategy $STRATEGY"
+            case "$STRATEGY" in
+              normal)
+                if ! git merge --no-ff -m "Merge branch '$br' into main" "$br"; then
+                  echo "Conflict merging $br. Aborting merge and continuing."
+                  git merge --abort || true
+                fi
+                ;;
+              ours)
+                if ! git merge -s ours -m "Merge (ours) branch '$br' into main" "$br"; then
+                  echo "Conflict merging $br (ours). Aborting merge and continuing."
+                  git merge --abort || true
+                fi
+                ;;
+              theirs)
+                if ! git merge -X theirs -m "Merge (theirs) branch '$br' into main" "$br"; then
+                  echo "Conflict merging $br (theirs). Aborting merge and continuing."
+                  git merge --abort || true
+                fi
+                ;;
+              *)
+                echo "Unknown strategy: $STRATEGY" && exit 1
+                ;;
+            esac
+          done
+
+      - name: Push updated main
+        if: ${{ steps.list.outputs.to_merge != '' && github.event.inputs.simulate != 'true' }}
+        run: |
+          git push origin main
+
+      - name: Summary
+        run: |
+          echo "Merge workflow complete."

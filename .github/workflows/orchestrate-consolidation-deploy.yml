@@ -1,0 +1,274 @@
+name: Orchestrate Consolidation and Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      simulate:
+        description: "Dry-run merges/purge (no changes)"
+        type: boolean
+        default: true
+      merge_strategy:
+        description: "Merge strategy: normal | ours | theirs"
+        type: choice
+        options:
+          - normal
+          - ours
+          - theirs
+        default: ours
+      run_gate:
+        description: "Run post-consolidation validation gate"
+        type: boolean
+        default: true
+      run_deploy:
+        description: "Deploy Supabase migration and verify RLS"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  consolidate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main with full history
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Collect branches via GitHub API
+        id: list
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: rmg007
+          REPO: Questerix
+        run: |
+          set -euo pipefail
+          branches_json="[]"
+          page=1
+          while true; do
+            resp=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${OWNER}/${REPO}/branches?per_page=100&page=${page}")
+            count=$(echo "$resp" | jq length)
+            if [ "$count" -eq 0 ]; then break; fi
+            branches_json=$(jq -c -s 'add' <(echo "$branches_json") <(echo "$resp"))
+            page=$((page+1))
+          done
+          echo "$branches_json" > branches.json
+          to_merge=$(jq -r '.[] | select(.name != "main") | .name' branches.json | paste -sd, -)
+          echo "branches=$(cat branches.json)" >> $GITHUB_OUTPUT
+          echo "to_merge=$to_merge" >> $GITHUB_OUTPUT
+          echo "Found branches:" && jq -r '.[].name' branches.json
+          echo "Branches to merge into main:" && echo "$to_merge" | tr ',' '\n'
+
+      - name: Merge branches into main
+        if: ${{ steps.list.outputs.to_merge != '' }}
+        env:
+          TO_MERGE: ${{ steps.list.outputs.to_merge }}
+          STRATEGY: ${{ github.event.inputs.merge_strategy }}
+          SIMULATE: ${{ github.event.inputs.simulate }}
+        run: |
+          set -euo pipefail
+          IFS="," read -ra branches <<< "$TO_MERGE"
+          for br in "${branches[@]}"; do
+            if [ "$SIMULATE" = "true" ]; then
+              echo "DRY-RUN: would merge $br into main"
+              continue
+            fi
+            echo "Fetching $br"
+            git fetch origin "$br:$br" || true
+            echo "Merging $br with strategy $STRATEGY"
+            case "$STRATEGY" in
+              normal)
+                if ! git merge --no-ff -m "Merge branch '$br' into main" "$br"; then
+                  echo "Conflict merging $br. Aborting merge and continuing."
+                  git merge --abort || true
+                fi
+                ;;
+              ours)
+                if ! git merge -s ours -m "Merge (ours) branch '$br' into main" "$br"; then
+                  echo "Conflict merging $br (ours). Aborting merge and continuing."
+                  git merge --abort || true
+                fi
+                ;;
+              theirs)
+                if ! git merge -X theirs -m "Merge (theirs) branch '$br' into main" "$br"; then
+                  echo "Conflict merging $br (theirs). Aborting merge and continuing."
+                  git merge --abort || true
+                fi
+                ;;
+              *)
+                echo "Unknown strategy: $STRATEGY" && exit 1
+                ;;
+            esac
+          done
+
+      - name: Push updated main
+        if: ${{ steps.list.outputs.to_merge != '' && github.event.inputs.simulate != 'true' }}
+        run: |
+          git push origin main
+
+      - name: Purge non-main branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: rmg007
+          REPO: Questerix
+          SIMULATE: ${{ github.event.inputs.simulate }}
+        run: |
+          set -euo pipefail
+          page=1
+          del_count=0
+          while true; do
+            resp=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${OWNER}/${REPO}/branches?per_page=100&page=${page}")
+            names=$(echo "$resp" | jq -r '.[].name')
+            [ -z "$names" ] && break
+            while read -r name; do
+              [ -z "$name" ] && continue
+              [ "$name" = "main" ] && continue
+              if [ "$SIMULATE" = "true" ]; then
+                echo "DRY-RUN: would delete branch $name"
+              else
+                code=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE \
+                  -H "Authorization: Bearer ${GH_TOKEN}" \
+                  -H "Accept: application/vnd.github+json" \
+                  "https://api.github.com/repos/${OWNER}/${REPO}/git/refs/heads/${name}")
+                if [ "$code" = "204" ]; then
+                  echo "Deleted $name"
+                  del_count=$((del_count+1))
+                else
+                  echo "Failed to delete $name (HTTP $code)"
+                fi
+              fi
+            done <<< "$names"
+            page=$((page+1))
+          done
+          echo "Total deletions: $del_count"
+
+      - name: Set branch protection (main)
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          OWNER: rmg007
+          REPO: Questerix
+        run: |
+          set -euo pipefail
+          if [ -z "$ADMIN_TOKEN" ]; then
+            echo "ADMIN_TOKEN secret not set; skipping protection." && exit 0
+          fi
+          payload=$(jq -n '{
+            required_status_checks: { strict: false, contexts: [] },
+            enforce_admins: true,
+            required_pull_request_reviews: null,
+            restrictions: null,
+            required_linear_history: true,
+            allow_force_pushes: false,
+            allow_deletions: false,
+            block_creations: false
+          }')
+          code=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
+            -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/json" \
+            -d "$payload" \
+            "https://api.github.com/repos/${OWNER}/${REPO}/branches/main/protection")
+          if [ "$code" != "200" ]; then
+            echo "Failed to set branch protection (HTTP $code)" && exit 1
+          fi
+          echo "Branch protection applied to main."
+
+  gate:
+    runs-on: ubuntu-latest
+    needs: consolidate
+    if: ${{ github.event.inputs.run_gate == 'true' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install Admin Panel dependencies
+        working-directory: admin-panel
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: TypeScript type check
+        working-directory: admin-panel
+        run: npx tsc --noEmit
+
+      - name: Install Playwright browsers
+        working-directory: admin-panel
+        run: npx playwright install --with-deps
+
+      - name: Unit tests (Vitest)
+        working-directory: admin-panel
+        run: npm test -- --coverage
+
+      - name: Accessibility tests (WCAG 2 AA)
+        working-directory: admin-panel
+        run: npx playwright test tests/accessibility.spec.ts
+
+      - name: E2E tests (Admin critical flows)
+        working-directory: admin-panel
+        run: npx playwright test tests/admin-panel.e2e.spec.ts
+
+      - name: Visual regression (optional)
+        working-directory: admin-panel
+        run: |
+          if [ -f tests/visual-regression.spec.ts ]; then npx playwright test tests/visual-regression.spec.ts; else echo "No visual regression suite found."; fi
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [consolidate]
+    if: ${{ github.event.inputs.run_deploy == 'true' }}
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate secrets
+        run: |
+          set -euo pipefail
+          : "${SUPABASE_ACCESS_TOKEN:?Missing SUPABASE_ACCESS_TOKEN secret}"
+          : "${SUPABASE_PROJECT_REF:?Missing SUPABASE_PROJECT_REF secret}"
+          : "${SUPABASE_DB_URL:?Missing SUPABASE_DB_URL secret}"
+          echo "Secrets validated."
+
+      - name: Install Supabase CLI
+        run: |
+          set -euo pipefail
+          curl -sL https://app.supabase.com/api/product/install/supabase-cli?os=linux | sh
+          echo "Supabase CLI version:" && supabase --version
+
+      - name: Apply migrations to project
+        working-directory: supabase
+        run: |
+          set -euo pipefail
+          supabase link --project-ref "$SUPABASE_PROJECT_REF"
+          supabase db push
+
+      - name: Install PostgreSQL client
+        run: |
+          set -euo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+
+      - name: Verify RLS policies
+        working-directory: supabase/scripts
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f verify_rls.sql

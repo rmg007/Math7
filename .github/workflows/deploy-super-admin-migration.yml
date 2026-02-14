@@ -1,0 +1,65 @@
+name: Deploy Super Admin Migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      verify_rls:
+        description: "Run RLS verification after migration"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate secrets
+        run: |
+          set -euo pipefail
+          : "${SUPABASE_ACCESS_TOKEN:?Missing SUPABASE_ACCESS_TOKEN secret}"
+          : "${SUPABASE_PROJECT_REF:?Missing SUPABASE_PROJECT_REF secret}"
+          : "${SUPABASE_DB_URL:?Missing SUPABASE_DB_URL secret}"
+          echo "Secrets validated."
+
+      - name: Install Supabase CLI
+        run: |
+          set -euo pipefail
+          curl -sL https://app.supabase.com/api/product/install/supabase-cli?os=linux | sh
+          echo "Supabase CLI version:" && supabase --version
+
+      - name: Apply migrations to project
+        working-directory: supabase
+        run: |
+          set -euo pipefail
+          # Link to the Supabase project
+          supabase link --project-ref "$SUPABASE_PROJECT_REF"
+          # Apply migrations in supabase/migrations
+          supabase db push
+
+      - name: Install PostgreSQL client
+        run: |
+          set -euo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+
+      - name: Verify RLS policies (optional)
+        if: ${{ github.event.inputs.verify_rls == 'true' }}
+        working-directory: supabase/scripts
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f verify_rls.sql
+
+      - name: Summary
+        run: |
+          echo "Deployment complete."

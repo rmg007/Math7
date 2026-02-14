@@ -1,1 +1,84 @@
-{"result":[]}
+{
+  "result": [
+    {
+      "scriptId": "1391",
+      "url": "file:///workspaces/Questerix/admin-panel/src/__tests__/lib/file-parsers.test.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 23592, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [
+            { "startOffset": 13, "endOffset": 23592, "count": 1 },
+            { "startOffset": 603, "endOffset": 23591, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 349, "endOffset": 456, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 478, "endOffset": 515, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 875, "endOffset": 884, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 912, "endOffset": 7406, "count": 0 }],
+          "isBlockCoverage": false
+        }
+      ]
+    },
+    {
+      "scriptId": "1393",
+      "url": "file:///workspaces/Questerix/admin-panel/src/lib/file-parsers.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 7162, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 7162, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "parseFile",
+          "ranges": [{ "startOffset": 494, "endOffset": 1131, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "get",
+          "ranges": [{ "startOffset": 1229, "endOffset": 1254, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "parsePdf",
+          "ranges": [{ "startOffset": 1258, "endOffset": 1729, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "parseDocx",
+          "ranges": [{ "startOffset": 1730, "endOffset": 1921, "count": 0 }],
+          "isBlockCoverage": false
+        },
+        {
+          "functionName": "parseTxt",
+          "ranges": [{ "startOffset": 1922, "endOffset": 2150, "count": 0 }],
+          "isBlockCoverage": false
+        }
+      ]
+    }
+  ]
+}

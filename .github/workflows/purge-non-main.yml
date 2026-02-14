@@ -1,0 +1,91 @@
+name: Purge Non-Main Branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      simulate:
+        description: "Dry-run without deleting branches"
+        type: boolean
+        default: true
+      remote:
+        description: "Remote name (ignored; GitHub API used)"
+        type: string
+        default: "origin"
+
+permissions:
+  contents: write
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup context
+        id: ctx
+        run: |
+          echo "owner=rmg007" >> $GITHUB_OUTPUT
+          echo "repo=Questerix" >> $GITHUB_OUTPUT
+          echo "simulate=${{ github.event.inputs.simulate }}" >> $GITHUB_OUTPUT
+
+      - name: List branches via GitHub API
+        id: list
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ steps.ctx.outputs.owner }}
+          REPO: ${{ steps.ctx.outputs.repo }}
+        run: |
+          set -euo pipefail
+          branches_json="[]"
+          page=1
+          while true; do
+            resp=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${OWNER}/${REPO}/branches?per_page=100&page=${page}")
+            count=$(echo "$resp" | jq length)
+            if [ "$count" -eq 0 ]; then break; fi
+            branches_json=$(jq -c -s 'add' <(echo "$branches_json") <(echo "$resp"))
+            page=$((page+1))
+          done
+          echo "$branches_json" > branches.json
+          to_delete=$(jq -r '.[] | select(.name != "main") | .name' branches.json | paste -sd, -)
+          echo "branches=$(cat branches.json)" >> $GITHUB_OUTPUT
+          echo "to_delete=$to_delete" >> $GITHUB_OUTPUT
+          echo "Found branches:" && jq -r '.[].name' branches.json
+          echo "Branches to delete:" && echo "$to_delete" | tr ',' '\n'
+
+      - name: Purge non-main branches
+        if: ${{ steps.list.outputs.to_delete != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ steps.ctx.outputs.owner }}
+          REPO: ${{ steps.ctx.outputs.repo }}
+          TO_DELETE: ${{ steps.list.outputs.to_delete }}
+          SIMULATE: ${{ steps.ctx.outputs.simulate }}
+        run: |
+          set -euo pipefail
+          IFS="," read -ra branches <<< "$TO_DELETE"
+          for br in "${branches[@]}"; do
+            if [ "$SIMULATE" = "true" ]; then
+              echo "DRY-RUN: would delete $br"
+            else
+              echo "Deleting $br"
+              code=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE \
+                -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/${OWNER}/${REPO}/git/refs/heads/${br}")
+              if [ "$code" != "204" ]; then
+                echo "Failed to delete $br (HTTP $code)" && exit 1
+              fi
+              echo "Deleted $br"
+            fi
+          done
+
+      - name: Verify deletion
+        if: ${{ steps.list.outputs.to_delete != '' && steps.ctx.outputs.simulate != 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ steps.ctx.outputs.owner }}
+          REPO: ${{ steps.ctx.outputs.repo }}
+        run: |
+          set -euo pipefail
+          resp=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${OWNER}/${REPO}/branches?per_page=100")
+          echo "$resp" | jq -r '.[].name'
+          echo "Verification done."

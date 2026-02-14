@@ -1,12 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import type { Tables } from '@/lib/database.types';
+import { supabase } from '@/lib/supabase';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export type ErrorLog = Tables<'error_logs'>;
 
-export function useErrorLogs(status?: string) {
+export function useErrorLogs(status?: string, appId?: string) {
   return useQuery({
-    queryKey: ['error-logs', status],
+    queryKey: ['error-logs', status, appId],
     queryFn: async () => {
       let query = supabase
         .from('error_logs')
@@ -16,6 +16,10 @@ export function useErrorLogs(status?: string) {
 
       if (status && status !== 'all') {
         query = query.eq('status', status);
+      }
+
+      if (appId) {
+        query = query.eq('app_id', appId);
       }
 
       const { data, error } = await query;
@@ -30,20 +34,18 @@ export function useErrorLogStats() {
   return useQuery({
     queryKey: ['error-log-stats'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('error_logs')
-        .select('status');
+      const { data, error } = await supabase.from('error_logs').select('status');
 
       if (error) throw error;
 
       const logs = data ?? [];
       const stats = {
         total: logs.length,
-        new: logs.filter(e => e.status === 'new').length,
-        seen: logs.filter(e => e.status === 'seen').length,
-        ignored: logs.filter(e => e.status === 'ignored').length,
-        resolved: logs.filter(e => e.status === 'resolved').length,
-        promoted: logs.filter(e => e.status === 'promoted').length,
+        new: logs.filter((e) => e.status === 'new').length,
+        seen: logs.filter((e) => e.status === 'seen').length,
+        ignored: logs.filter((e) => e.status === 'ignored').length,
+        resolved: logs.filter((e) => e.status === 'resolved').length,
+        promoted: logs.filter((e) => e.status === 'promoted').length,
       };
 
       return stats;
@@ -56,10 +58,7 @@ export function useUpdateErrorStatus() {
 
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase
-        .from('error_logs')
-        .update({ status })
-        .eq('id', id);
+      const { error } = await supabase.from('error_logs').update({ status }).eq('id', id);
 
       if (error) throw error;
     },
@@ -75,10 +74,7 @@ export function useDeleteErrorLog() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('error_logs')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from('error_logs').delete().eq('id', id);
 
       if (error) throw error;
     },
@@ -93,15 +89,15 @@ export function usePromoteToIssue() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      errorId, 
-      title, 
-      rootCause, 
-      resolution 
-    }: { 
-      errorId: string; 
-      title: string; 
-      rootCause?: string; 
+    mutationFn: async ({
+      errorId,
+      title,
+      rootCause,
+      resolution,
+    }: {
+      errorId: string;
+      title: string;
+      rootCause?: string;
       resolution?: string;
     }) => {
       const { data, error } = await supabase.rpc('promote_error_to_issue', {

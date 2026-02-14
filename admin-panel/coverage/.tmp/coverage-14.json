@@ -1,1 +1,103 @@
-{"result":[{"scriptId":"1383","url":"file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/admin-panel/__checks__/admin-pages.spec.ts","functions":[{"functionName":"","ranges":[{"startOffset":0,"endOffset":6779,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":13,"endOffset":6779,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":485,"endOffset":2137,"count":0}],"isBlockCoverage":false}]}]}
+{
+  "result": [
+    {
+      "scriptId": "1391",
+      "url": "file:///workspaces/Questerix/admin-panel/src/features/ai-assistant/api/__tests__/governedGeneration.test.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 11004, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 11004, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 338, "endOffset": 378, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 411, "endOffset": 449, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 478, "endOffset": 657, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 577, "endOffset": 649, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1123, "endOffset": 3718, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1144, "endOffset": 1179, "count": 2 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1880, "endOffset": 3160, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 3213, "endOffset": 3714, "count": 1 }],
+          "isBlockCoverage": true
+        }
+      ]
+    },
+    {
+      "scriptId": "1393",
+      "url": "file:///workspaces/Questerix/admin-panel/src/features/ai-assistant/api/governedGeneration.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 9214, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 9214, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "governedGenerateQuestions",
+          "ranges": [
+            { "startOffset": 603, "endOffset": 2764, "count": 2 },
+            { "startOffset": 757, "endOffset": 789, "count": 0 },
+            { "startOffset": 986, "endOffset": 1745, "count": 1 },
+            { "startOffset": 1745, "endOffset": 1766, "count": 0 },
+            { "startOffset": 2056, "endOffset": 2068, "count": 1 },
+            { "startOffset": 2069, "endOffset": 2080, "count": 0 },
+            { "startOffset": 2343, "endOffset": 2364, "count": 1 },
+            { "startOffset": 2364, "endOffset": 2441, "count": 0 },
+            { "startOffset": 2441, "endOffset": 2725, "count": 1 },
+            { "startOffset": 2725, "endOffset": 2750, "count": 0 },
+            { "startOffset": 2751, "endOffset": 2757, "count": 1 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 2273, "endOffset": 2306, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "get",
+          "ranges": [{ "startOffset": 2878, "endOffset": 2919, "count": 2 }],
+          "isBlockCoverage": true
+        }
+      ]
+    }
+  ]
+}

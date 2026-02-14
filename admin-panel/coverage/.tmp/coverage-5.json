@@ -1,1 +1,145 @@
-{"result":[{"scriptId":"1383","url":"file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/admin-panel/src/__tests__/lib/data-utils.test.ts","functions":[{"functionName":"","ranges":[{"startOffset":0,"endOffset":13645,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":13,"endOffset":13645,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":564,"endOffset":4779,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":859,"endOffset":1601,"count":7}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":1199,"endOffset":1393,"count":3},{"startOffset":1370,"endOffset":1392,"count":0}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":1480,"endOffset":1494,"count":3}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":1581,"endOffset":1595,"count":3}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":1638,"endOffset":1746,"count":7}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":1797,"endOffset":3118,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":2118,"endOffset":2427,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":2493,"endOffset":2737,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":2818,"endOffset":3112,"count":1}],"isBlockCoverage":true},{"functionName":"transform","ranges":[{"startOffset":2913,"endOffset":2938,"count":2}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":3166,"endOffset":3673,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":3230,"endOffset":3485,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":3555,"endOffset":3667,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":3598,"endOffset":3649,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":3727,"endOffset":4059,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":3792,"endOffset":4053,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":4111,"endOffset":4775,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":4195,"endOffset":4769,"count":1}],"isBlockCoverage":true}]},{"scriptId":"1385","url":"file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/admin-panel/src/lib/data-utils.ts","functions":[{"functionName":"","ranges":[{"startOffset":0,"endOffset":15301,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":13,"endOffset":15301,"count":1}],"isBlockCoverage":true},{"functionName":"exportToCSV","ranges":[{"startOffset":185,"endOffset":757,"count":3},{"startOffset":258,"endOffset":307,"count":1},{"startOffset":307,"endOffset":756,"count":2}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":338,"endOffset":357,"count":4}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":389,"endOffset":601,"count":4}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":411,"endOffset":600,"count":8},{"startOffset":482,"endOffset":544,"count":2},{"startOffset":544,"endOffset":586,"count":6},{"startOffset":586,"endOffset":591,"count":0}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":660,"endOffset":682,"count":4}],"isBlockCoverage":true},{"functionName":"get","ranges":[{"startOffset":857,"endOffset":884,"count":3}],"isBlockCoverage":true},{"functionName":"exportToJSON","ranges":[{"startOffset":888,"endOffset":1126,"count":0}],"isBlockCoverage":false},{"functionName":"get","ranges":[{"startOffset":1227,"endOffset":1255,"count":0}],"isBlockCoverage":false},{"functionName":"downloadTemplate","ranges":[{"startOffset":1259,"endOffset":1855,"count":0}],"isBlockCoverage":false},{"functionName":"get","ranges":[{"startOffset":1960,"endOffset":1992,"count":0}],"isBlockCoverage":false},{"functionName":"parseCSV","ranges":[{"startOffset":1996,"endOffset":2613,"count":2},{"startOffset":2093,"endOffset":2278,"count":1},{"startOffset":2365,"endOffset":2468,"count":0}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":2509,"endOffset":2570,"count":4}],"isBlockCoverage":true},{"functionName":"get","ranges":[{"startOffset":2710,"endOffset":2734,"count":2}],"isBlockCoverage":true},{"functionName":"parseJSON","ranges":[{"startOffset":2738,"endOffset":2908,"count":0}],"isBlockCoverage":false},{"functionName":"get","ranges":[{"startOffset":3006,"endOffset":3031,"count":0}],"isBlockCoverage":false},{"functionName":"readFileAsText","ranges":[{"startOffset":3035,"endOffset":3309,"count":1}],"isBlockCoverage":true},{"functionName":"","ranges":[{"startOffset":3094,"endOffset":3305,"count":1}],"isBlockCoverage":true},{"functionName":"reader.onload","ranges":[{"startOffset":3174,"endOffset":3202,"count":1}],"isBlockCoverage":true},{"functionName":"reader.onerror","ranges":[{"startOffset":3225,"endOffset":3271,"count":0}],"isBlockCoverage":false},{"functionName":"get","ranges":[{"startOffset":3412,"endOffset":3442,"count":1}],"isBlockCoverage":true},{"functionName":"escapeCSVValue","ranges":[{"startOffset":3446,"endOffset":3621,"count":8},{"startOffset":3553,"endOffset":3603,"count":0}],"isBlockCoverage":true},{"functionName":"parseCSVLine","ranges":[{"startOffset":3622,"endOffset":4292,"count":3},{"startOffset":3757,"endOffset":4242,"count":22},{"startOffset":3837,"endOffset":4034,"count":0},{"startOffset":4066,"endOffset":4100,"count":0},{"startOffset":4124,"endOffset":4192,"count":3},{"startOffset":4192,"endOffset":4232,"count":19}],"isBlockCoverage":true},{"functionName":"downloadFile","ranges":[{"startOffset":4293,"endOffset":4649,"count":3}],"isBlockCoverage":true},{"functionName":"get","ranges":[{"startOffset":4750,"endOffset":4778,"count":1}],"isBlockCoverage":true}]}]}
+{
+  "result": [
+    {
+      "scriptId": "1391",
+      "url": "file:///workspaces/Questerix/admin-panel/src/__tests__/services/CurriculumService.test.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 24448, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 24448, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 332, "endOffset": 378, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 423, "endOffset": 487, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 701, "endOffset": 7474, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 722, "endOffset": 757, "count": 9 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 794, "endOffset": 7470, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1169, "endOffset": 1673, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1734, "endOffset": 2486, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 2538, "endOffset": 2724, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 2790, "endOffset": 3809, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 3858, "endOffset": 4431, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 4477, "endOffset": 4981, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 5031, "endOffset": 6176, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 6221, "endOffset": 6726, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 6416, "endOffset": 6487, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 6775, "endOffset": 7464, "count": 1 }],
+          "isBlockCoverage": true
+        }
+      ]
+    },
+    {
+      "scriptId": "1393",
+      "url": "file:///workspaces/Questerix/admin-panel/src/services/CurriculumService.ts",
+      "functions": [
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 0, "endOffset": 9741, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 13, "endOffset": 9741, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "importQuestionsBulk",
+          "ranges": [
+            { "startOffset": 638, "endOffset": 2857, "count": 9 },
+            { "startOffset": 843, "endOffset": 1284, "count": 73 },
+            { "startOffset": 965, "endOffset": 1230, "count": 1 },
+            { "startOffset": 1230, "endOffset": 1284, "count": 71 },
+            { "startOffset": 1284, "endOffset": 1303, "count": 71 },
+            { "startOffset": 1303, "endOffset": 1434, "count": 1 },
+            { "startOffset": 1434, "endOffset": 1558, "count": 6 },
+            { "startOffset": 1558, "endOffset": 1632, "count": 8 },
+            { "startOffset": 1632, "endOffset": 1679, "count": 6 },
+            { "startOffset": 1679, "endOffset": 2507, "count": 8 },
+            { "startOffset": 1920, "endOffset": 2135, "count": 2 },
+            { "startOffset": 2135, "endOffset": 2168, "count": 6 },
+            { "startOffset": 2169, "endOffset": 2209, "count": 0 },
+            { "startOffset": 2240, "endOffset": 2451, "count": 1 },
+            { "startOffset": 2451, "endOffset": 2507, "count": 5 },
+            { "startOffset": 2507, "endOffset": 2590, "count": 3 },
+            { "startOffset": 2590, "endOffset": 2853, "count": 1 },
+            { "startOffset": 2787, "endOffset": 2838, "count": 0 }
+          ],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "",
+          "ranges": [{ "startOffset": 1018, "endOffset": 1060, "count": 1 }],
+          "isBlockCoverage": true
+        },
+        {
+          "functionName": "get",
+          "ranges": [{ "startOffset": 2965, "endOffset": 2998, "count": 9 }],
+          "isBlockCoverage": true
+        }
+      ]
+    }
+  ]
+}

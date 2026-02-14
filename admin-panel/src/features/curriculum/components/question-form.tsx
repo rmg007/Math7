@@ -2,36 +2,36 @@ import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { useApp } from '@/hooks/use-app';
 import type { Json } from '@/lib/database.types';
 import { Database } from '@/lib/database.types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-    CheckCircle2,
-    FileText,
-    HelpCircle,
-    Layers,
-    Loader2,
-    Plus,
-    Settings,
-    Trash,
+  CheckCircle2,
+  FileText,
+  HelpCircle,
+  Layers,
+  Loader2,
+  Plus,
+  Settings,
+  Trash,
 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -237,7 +237,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
       />
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-10 pb-20">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10 pb-20">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
               {/* Content Area */}

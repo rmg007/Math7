@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useApp } from '@/contexts/AppContext';
 import { useToast } from '@/hooks/use-toast';
 import type { Tables } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
@@ -52,10 +53,21 @@ interface UserRowProps {
   onDeactivate: (id: string) => void;
   onReactivate: (id: string) => void;
   isSelected: boolean;
+  isSuperAdmin: boolean;
+  apps: Array<{ app_id: string; display_name: string }>;
 }
 
 const UserRow = memo(
-  ({ user, currentUserId, onSelect, onDeactivate, onReactivate, isSelected }: UserRowProps) => {
+  ({
+    user,
+    currentUserId,
+    onSelect,
+    onDeactivate,
+    onReactivate,
+    isSelected,
+    isSuperAdmin,
+    apps,
+  }: UserRowProps) => {
     return (
       <TableRow
         key={user.id}
@@ -127,6 +139,19 @@ const UserRow = memo(
             )}
           </div>
         </TableCell>
+        {isSuperAdmin && (
+          <TableCell className="px-6 py-5">
+            <div className="flex items-center gap-2">
+              {user.app_id ? (
+                <span className="text-xs font-bold text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
+                  {apps.find((app) => app.app_id === user.app_id)?.display_name || user.app_id}
+                </span>
+              ) : (
+                <span className="text-xs font-bold text-gray-400 italic">No App</span>
+              )}
+            </div>
+          </TableCell>
+        )}
         <TableCell className="px-6 py-5">
           <div className="flex items-center gap-2 text-gray-400">
             <History className="w-3 h-3" />
@@ -173,6 +198,7 @@ const UserRow = memo(
 
 export function UserManagementPage() {
   const { toast } = useToast();
+  const { isSuperAdmin, apps } = useApp();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -223,12 +249,10 @@ export function UserManagementPage() {
 
       let query = supabase
         .from('profiles')
-        .select('id, email, full_name, role, created_at, deleted_at');
+        .select('id, email, full_name, role, created_at, deleted_at, app_id');
 
-      // Super admins should only see regular admins (and themselves)
-      if (userRole === 'super_admin') {
-        query = query.or(`role.eq.admin,id.eq.${authUser?.id}`);
-      } else {
+      // Super admins can see all users across all tenants
+      if (userRole !== 'super_admin') {
         query = query.in('role', ['admin']);
       }
 
@@ -526,6 +550,11 @@ export function UserManagementPage() {
                 <TableHead className="text-left px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest h-14">
                   Access Tier
                 </TableHead>
+                {isSuperAdmin && (
+                  <TableHead className="text-left px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest h-14">
+                    Application
+                  </TableHead>
+                )}
                 <TableHead className="text-left px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest h-14">
                   Enlistment
                 </TableHead>
@@ -541,14 +570,14 @@ export function UserManagementPage() {
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell colSpan={6} className="px-8 py-6">
+                    <TableCell colSpan={isSuperAdmin ? 7 : 6} className="px-8 py-6">
                       <Skeleton className="h-10 w-full rounded-2xl" />
                     </TableCell>
                   </TableRow>
                 ))
               ) : filteredUsers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-20 p-0">
+                  <TableCell colSpan={isSuperAdmin ? 7 : 6} className="py-20 p-0">
                     <EmptyState
                       icon={UserX}
                       title="Zero Operators Detected"
@@ -580,6 +609,8 @@ export function UserManagementPage() {
                     onDeactivate={handleDeactivate}
                     onReactivate={handleReactivate}
                     isSelected={selectedIds.has(user.id)}
+                    isSuperAdmin={isSuperAdmin}
+                    apps={apps}
                   />
                 ))
               )}

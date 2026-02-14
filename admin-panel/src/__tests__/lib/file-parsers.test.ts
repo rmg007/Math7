@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { parseFile } from '@/lib/file-parsers';
 // @ts-expect-error - No types available for pdfjs-dist build
@@ -48,7 +47,9 @@ describe('file-parsers', () => {
         }),
       };
 
-      vi.mocked(mockPdfJs.default.getDocument).mockReturnValue(mockPdf as any);
+      vi.mocked(mockPdfJs.default.getDocument).mockReturnValue(
+        mockPdf as unknown as pdfjs.PDFDocumentLoadingTask
+      );
 
       const file = new File(['pdf content'], 'test.pdf', { type: 'application/pdf' });
       const result = await parseFile(file);
@@ -119,7 +120,9 @@ describe('file-parsers', () => {
         }),
       };
 
-      vi.mocked(mockPdfJs.default.getDocument).mockReturnValue(mockPdf as any);
+      vi.mocked(mockPdfJs.default.getDocument).mockReturnValue(
+        mockPdf as unknown as pdfjs.PDFDocumentLoadingTask
+      );
 
       const file = new File(['pdf content'], 'multipage.pdf', { type: 'application/pdf' });
       const result = await parseFile(file);
@@ -144,7 +147,9 @@ describe('file-parsers', () => {
         }),
       };
 
-      vi.mocked(mockPdfJs.default.getDocument).mockReturnValue(mockPdf as any);
+      vi.mocked(mockPdfJs.default.getDocument).mockReturnValue(
+        mockPdf as unknown as pdfjs.PDFDocumentLoadingTask
+      );
 
       const file = new File(['pdf content'], 'empty.pdf', { type: 'application/pdf' });
       const result = await parseFile(file);
@@ -164,7 +169,9 @@ describe('file-parsers', () => {
         promise: Promise.reject(new Error('PDF parsing failed')),
       };
 
-      vi.mocked(mockPdfJs.default.getDocument).mockReturnValue(mockPdf as any);
+      vi.mocked(mockPdfJs.default.getDocument).mockReturnValue(
+        mockPdf as unknown as pdfjs.PDFDocumentLoadingTask
+      );
 
       const file = new File(['pdf content'], 'broken.pdf', { type: 'application/pdf' });
 
@@ -195,7 +202,9 @@ describe('file-parsers', () => {
         }),
       };
 
-      global.FileReader = vi.fn().mockImplementation(() => mockFileReader) as any;
+      global.FileReader = vi
+        .fn()
+        .mockImplementation(() => mockFileReader) as unknown as typeof FileReader;
 
       const file = new File(['content'], 'broken.txt', { type: 'text/plain' });
 
@@ -209,7 +218,7 @@ describe('file-parsers', () => {
       vi.mocked(mockMammoth.extractRawText).mockResolvedValue({
         value: 'Content with warnings',
         messages: [{ type: 'warning', message: 'Some warning' }],
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof mammoth.extractRawText>>);
 
       const file = new File(['content'], 'warnings.docx', {
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',

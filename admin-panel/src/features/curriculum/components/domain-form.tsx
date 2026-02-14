@@ -2,21 +2,21 @@ import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/hooks/use-app';
@@ -112,15 +112,24 @@ export function DomainForm() {
         await createDomain.mutateAsync(data);
       }
       navigate('/domains');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to save domain:', err);
-      let message = err instanceof Error ? err.message : 'An unexpected error occurred while saving.';
-      
+      let message =
+        err instanceof Error ? err.message : 'An unexpected error occurred while saving.';
+
       // Handle duplicate slug error (Postgres error code 23505)
-      if (err?.code === '23505' || err?.message?.includes('unique constraint "domains_app_id_slug_key"')) {
-        message = 'A domain with this slug already exists for this application. Please use a different slug.';
+      if (
+        (err && typeof err === 'object' && 'code' in err && err.code === '23505') ||
+        (err &&
+          typeof err === 'object' &&
+          'message' in err &&
+          typeof err.message === 'string' &&
+          err.message.includes('unique constraint "domains_app_id_slug_key"'))
+      ) {
+        message =
+          'A domain with this slug already exists for this application. Please use a different slug.';
       }
-      
+
       setError(message);
     }
   };

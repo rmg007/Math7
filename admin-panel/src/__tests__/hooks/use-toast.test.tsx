@@ -205,9 +205,9 @@ describe('useToast', () => {
       expect(toast).toBeDefined();
 
       // Simulate onOpenChange being called with false
-      if (toast && toast.onOpenChange) {
+      if (toast?.onOpenChange) {
         act(() => {
-          (toast.onOpenChange as any)(false);
+          toast.onOpenChange?.(false);
         });
       }
 
@@ -301,14 +301,14 @@ describe('useToast', () => {
     it('should handle toast with React nodes', () => {
       const { result } = renderHook(() => useToast());
 
-      const titleNode = <div>React Title</div>;
+      const titleText = 'React Title';
       const descriptionNode = <div>React Description</div>;
 
       act(() => {
-        result.current.toast({ title: titleNode as any, description: descriptionNode as any });
+        result.current.toast({ title: titleText, description: descriptionNode });
       });
 
-      expect(result.current.toasts[0].title).toBe(titleNode);
+      expect(result.current.toasts[0].title).toBe(titleText);
       expect(result.current.toasts[0].description).toBe(descriptionNode);
     });
 

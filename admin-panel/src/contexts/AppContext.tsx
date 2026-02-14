@@ -12,6 +12,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [currentApp, setCurrentApp] = useState<App | null>(null);
   const [apps, setApps] = useState<App[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const isLoadingRef = useRef(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem(SIDEBAR_COLLAPSE_KEY);
@@ -44,10 +45,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (user) {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('app_id')
+            .select('app_id, role')
             .eq('id', user.id)
             .single();
           profileAppId = profile?.app_id ?? undefined;
+          setUserRole(profile?.role ?? null);
         }
 
         const savedAppId = profileAppId || localStorage.getItem(STORAGE_KEY);
@@ -147,8 +149,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshApps: loadApps,
       isSidebarCollapsed,
       toggleSidebar,
+      userRole,
+      isSuperAdmin: userRole === 'super_admin',
     }),
-    [currentApp, apps, isLoading, isSidebarCollapsed, handleSetCurrentApp, loadApps, toggleSidebar]
+    [
+      currentApp,
+      apps,
+      isLoading,
+      isSidebarCollapsed,
+      handleSetCurrentApp,
+      loadApps,
+      toggleSidebar,
+      userRole,
+    ]
   );
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;

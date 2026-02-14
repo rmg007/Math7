@@ -6,11 +6,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-    useCreateDomain,
-    useDeleteDomain,
-    useDomain,
-    useDomains,
-    usePaginatedDomains,
+  useCreateDomain,
+  useDeleteDomain,
+  useDomain,
+  useDomains,
+  usePaginatedDomains,
 } from '../use-domains';
 
 // Mock dependencies
@@ -89,6 +89,8 @@ describe('useDomains', () => {
       refreshApps: vi.fn(),
       isSidebarCollapsed: false,
       toggleSidebar: vi.fn(),
+      userRole: null,
+      isSuperAdmin: false,
     });
   });
 
@@ -185,6 +187,7 @@ describe('useDomains', () => {
   describe('useDeleteDomain', () => {
     it('should mark a domain as deleted', async () => {
       const mockChain = supabase.from('domains') as any;
+      mockChain.update.mockReturnValue(mockChain);
       mockChain.then.mockImplementationOnce((onFulfilled: any) =>
         Promise.resolve({ data: null, error: null }).then(onFulfilled)
       );
@@ -199,6 +202,7 @@ describe('useDomains', () => {
         })
       );
       expect(mockChain.eq).toHaveBeenCalledWith('domain_id', '1');
+      expect(mockChain.eq).toHaveBeenCalledWith('app_id', mockAppId);
     });
   });
 });

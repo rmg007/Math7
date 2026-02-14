@@ -2,71 +2,78 @@ import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import { useApp } from '@/contexts/AppContext';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import {
-    AlertTriangle,
-    ArrowUpRight,
-    Bug,
-    CheckCircle2,
-    Clock,
-    Copy,
-    Eye,
-    EyeOff,
-    Globe,
-    Info,
-    Monitor,
-    RefreshCw,
-    Search,
-    Smartphone,
-    Trash2,
-    X,
+  AlertTriangle,
+  ArrowUpRight,
+  Bug,
+  CheckCircle2,
+  Clock,
+  Copy,
+  Eye,
+  EyeOff,
+  Globe,
+  Info,
+  Monitor,
+  RefreshCw,
+  Search,
+  Smartphone,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
-    ErrorLog,
-    useDeleteErrorLog,
-    useErrorLogs,
-    useErrorLogStats,
-    usePromoteToIssue,
-    useUpdateErrorStatus,
+  ErrorLog,
+  useDeleteErrorLog,
+  useErrorLogs,
+  useErrorLogStats,
+  usePromoteToIssue,
+  useUpdateErrorStatus,
 } from '../hooks/use-error-logs';
 
 export function ErrorLogsPage() {
   const { toast } = useToast();
+  const { currentApp, isSuperAdmin } = useApp();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedError, setSelectedError] = useState<ErrorLog | null>(null);
   const [promoteDialogOpen, setPromoteDialogOpen] = useState(false);
   const [promoteData, setPromoteData] = useState({ title: '', rootCause: '', resolution: '' });
 
-  const { data: errors, isLoading, refetch, isFetching } = useErrorLogs(statusFilter);
+  const {
+    data: errors,
+    isLoading,
+    refetch,
+    isFetching,
+  } = useErrorLogs(statusFilter, isSuperAdmin ? undefined : currentApp?.app_id);
   const { data: stats } = useErrorLogStats();
   const updateStatus = useUpdateErrorStatus();
   const deleteError = useDeleteErrorLog();

@@ -1,0 +1,53 @@
+name: Post-Consolidation Gate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install Admin Panel dependencies
+        working-directory: admin-panel
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: TypeScript type check
+        working-directory: admin-panel
+        run: npx tsc --noEmit
+
+      - name: Install Playwright browsers
+        working-directory: admin-panel
+        run: npx playwright install --with-deps
+
+      - name: Unit tests (Vitest)
+        working-directory: admin-panel
+        run: npm test -- --coverage
+
+      - name: Accessibility tests (WCAG 2 AA)
+        working-directory: admin-panel
+        run: npx playwright test tests/accessibility.spec.ts
+
+      - name: E2E tests (Admin critical flows)
+        working-directory: admin-panel
+        run: npx playwright test tests/admin-panel.e2e.spec.ts
+
+      - name: Visual regression (optional)
+        working-directory: admin-panel
+        run: |
+          if [ -f tests/visual-regression.spec.ts ]; then npx playwright test tests/visual-regression.spec.ts; else echo "No visual regression suite found."; fi
+
+      - name: Summary
+        run: echo "Post-Consolidation Gate completed."

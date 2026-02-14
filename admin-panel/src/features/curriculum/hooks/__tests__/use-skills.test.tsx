@@ -79,6 +79,8 @@ describe('useSkills', () => {
       refreshApps: vi.fn(),
       isSidebarCollapsed: false,
       toggleSidebar: vi.fn(),
+      userRole: null,
+      isSuperAdmin: false,
     });
   });
 

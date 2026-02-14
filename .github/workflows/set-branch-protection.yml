@@ -1,0 +1,91 @@
+name: Set Branch Protection (main)
+
+on:
+  workflow_dispatch:
+    inputs:
+      enforce_admins:
+        description: "Include administrators"
+        type: boolean
+        default: true
+      require_status_checks:
+        description: "Require status checks to pass before merging"
+        type: boolean
+        default: false
+      required_checks:
+        description: "Comma-separated list of required status checks (if enabled)"
+        type: string
+        default: ""
+      require_reviews:
+        description: "Require pull request reviews before merging"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  protect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate token
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: |
+          if [ -z "$ADMIN_TOKEN" ]; then
+            echo "ADMIN_TOKEN secret not set. Please add a Personal Access Token with repo admin scope as 'ADMIN_TOKEN' to use this workflow."
+            exit 1
+          fi
+
+      - name: Set branch protection via GitHub API
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          OWNER: rmg007
+          REPO: Questerix
+          ENFORCE_ADMINS: ${{ github.event.inputs.enforce_admins }}
+          REQUIRE_STATUS: ${{ github.event.inputs.require_status_checks }}
+          REQUIRED_CHECKS: ${{ github.event.inputs.required_checks }}
+          REQUIRE_REVIEWS: ${{ github.event.inputs.require_reviews }}
+        run: |
+          set -euo pipefail
+          # Build payload
+          admin_json=$( [ "$ENFORCE_ADMINS" = "true" ] && echo 'true' || echo 'false' )
+          if [ "$REQUIRE_STATUS" = "true" ]; then
+            # Split REQUIRED_CHECKS into array
+            IFS="," read -ra checks <<< "$REQUIRED_CHECKS"
+            contexts_json=$(printf '%s\n' "${checks[@]}" | jq -R . | jq -s .)
+            status_json=$(jq -n --argjson contexts "$contexts_json" '{strict: true, contexts: $contexts}')
+          else
+            status_json=$(jq -n '{strict: false, contexts: []}')
+          fi
+          if [ "$REQUIRE_REVIEWS" = "true" ]; then
+            reviews_json=$(jq -n '{dismiss_stale_reviews: true, require_code_owner_reviews: false, required_approving_review_count: 1}')
+          else
+            reviews_json=$(jq -n 'null')
+          fi
+          payload=$(jq -n \
+            --argjson status "$status_json" \
+            --argjson reviews "$reviews_json" \
+            --argjson restrictions null \
+            '{
+              required_status_checks: $status,
+              enforce_admins: true,
+              required_pull_request_reviews: $reviews,
+              restrictions: $restrictions,
+              required_linear_history: true,
+              allow_force_pushes: false,
+              allow_deletions: false,
+              block_creations: false
+            }')
+          echo "Payload:" && echo "$payload" | jq .
+
+          # Apply protection
+          code=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
+            -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/json" \
+            -d "$payload" \
+            "https://api.github.com/repos/${OWNER}/${REPO}/branches/main/protection")
+          if [ "$code" != "200" ]; then
+            echo "Failed to set branch protection (HTTP $code)" && exit 1
+          fi
+          echo "Branch protection applied to main."

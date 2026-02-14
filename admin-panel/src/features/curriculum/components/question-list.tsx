@@ -14,13 +14,6 @@ import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
@@ -57,11 +50,9 @@ import {
   Loader2,
   Pencil,
   Plus,
-  Search,
   Sparkles,
   Square,
   Trash2,
-  X,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -76,6 +67,7 @@ import {
   useUpdateQuestionOrder,
 } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
+import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 const QUESTION_COLUMNS: DataColumn[] = [
   { key: 'content', header: 'content' },
@@ -389,7 +381,7 @@ const SortableCard = memo(
 );
 
 export function QuestionList() {
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin, apps } = useApp();
   const [selectedSkillId, setSelectedSkillId] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'live'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -403,21 +395,25 @@ export function QuestionList() {
     type: 'single' | 'bulk';
     id?: string;
   } | null>(null);
+  const [appFilter, setAppFilter] = useState<string>('all');
 
   const {
     data: paginatedData,
     isLoading,
     isError,
     error,
-  } = usePaginatedQuestions({
-    page,
-    pageSize,
-    search: debouncedSearch,
-    status: statusFilter,
-    skillId: selectedSkillId,
-    sortBy,
-    sortOrder,
-  });
+  } = usePaginatedQuestions(
+    {
+      page,
+      pageSize,
+      search: debouncedSearch,
+      status: statusFilter,
+      skillId: selectedSkillId,
+      sortBy,
+      sortOrder,
+    },
+    appFilter !== 'all' ? appFilter : undefined
+  );
   const { data: skills } = useSkills();
 
   const deleteQuestion = useDeleteQuestion();
@@ -786,94 +782,51 @@ export function QuestionList() {
         }
       />
 
-      {/* Premium Filter Bar */}
-      <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 p-6 flex flex-col lg:flex-row gap-6 items-center">
-        <div className="relative flex-1 w-full group">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
-          <input
-            type="text"
-            placeholder="Query curriculum assets..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-14 pl-14 pr-12 rounded-[1.25rem] border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 placeholder:italic focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none font-bold"
-          />
-          {searchQuery && (
-            <button
-              onClick={clearFilters}
-              aria-label="Clear search"
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-4 shrink-0 w-full lg:w-auto">
-          <div className="flex items-center gap-3 px-5 py-3 bg-white/50 border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all">
-            <Filter className="h-4 w-4 text-indigo-600" />
-            <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">
-              Skill
-            </span>
-            <Select value={selectedSkillId} onValueChange={setSelectedSkillId}>
-              <SelectTrigger
+      <CurriculumFilterBar
+        searchPlaceholder="Query curriculum assets..."
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        extraFilters={
+          <>
+            <div className="relative w-full md:w-56">
+              <select
                 aria-label="Filter by skill"
-                className="w-auto h-auto border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-600 hover:text-indigo-700 transition-colors uppercase tracking-tight italic gap-2"
+                value={selectedSkillId}
+                onChange={(e) => setSelectedSkillId(e.target.value)}
+                className="w-full h-14 appearance-none pl-6 pr-12 text-sm font-black uppercase tracking-widest rounded-[1.25rem] border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer"
               >
-                <SelectValue placeholder="All Clusters" />
-              </SelectTrigger>
-              <SelectContent className="rounded-2xl border-white/20 backdrop-blur-xl bg-white/90">
-                <SelectItem value="all" className="font-black italic">
-                  ALL CLUSTERS
-                </SelectItem>
+                <option value="all">ALL CLUSTERS</option>
                 {skills?.map((skill: { skill_id: string; title: string }) => (
-                  <SelectItem key={skill.skill_id} value={skill.skill_id} className="font-bold">
+                  <option key={skill.skill_id} value={skill.skill_id}>
                     {skill.title.toUpperCase()}
-                  </SelectItem>
+                  </option>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center gap-3 px-5 py-3 bg-white/50 border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">
-              Status
-            </span>
-            <Select
-              value={statusFilter}
-              onValueChange={(v) => setStatusFilter(v as 'all' | 'draft' | 'published' | 'live')}
-            >
-              <SelectTrigger
-                aria-label="Filter by status"
-                className="w-auto h-auto border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-indigo-600 hover:text-indigo-700 transition-colors uppercase tracking-tight italic gap-2"
-              >
-                <SelectValue placeholder="All States" />
-              </SelectTrigger>
-              <SelectContent className="rounded-2xl border-white/20 backdrop-blur-xl bg-white/90">
-                <SelectItem value="all" className="font-black italic">
-                  ALL STATES
-                </SelectItem>
-                <SelectItem value="draft" className="font-bold">
-                  DRAFT
-                </SelectItem>
-                <SelectItem value="published" className="font-bold">
-                  PUBLISHED
-                </SelectItem>
-                <SelectItem value="live" className="font-bold">
-                  LIVE
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="px-5 py-3 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-600/20 flex items-center gap-3">
-            <span className="text-[10px] font-black text-white/90 uppercase tracking-widest">
-              Assets
-            </span>
-            <span className="text-sm font-black tracking-tight">{totalCount}</span>
-          </div>
-        </div>
-      </div>
+              </select>
+              <Filter className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-indigo-500 pointer-events-none" />
+            </div>
+            {isSuperAdmin ? (
+              <div className="relative w-full md:w-56">
+                <select
+                  aria-label="Filter by app"
+                  value={appFilter}
+                  onChange={(e) => setAppFilter(e.target.value)}
+                  className="w-full h-14 appearance-none pl-6 pr-12 text-sm font-black uppercase tracking-widest rounded-[1.25rem] border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer"
+                >
+                  <option value="all">ALL APPS</option>
+                  {apps.map((app) => (
+                    <option key={app.app_id} value={app.app_id}>
+                      {app.display_name}
+                    </option>
+                  ))}
+                </select>
+                <Filter className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-indigo-500 pointer-events-none" />
+              </div>
+            ) : undefined}
+          </>
+        }
+      />
 
       {/* Bulk Actions Bar */}
       {selectedIds.size > 0 && (

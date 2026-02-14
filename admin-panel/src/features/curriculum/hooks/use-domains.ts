@@ -42,36 +42,40 @@ export function useDomains() {
   });
 }
 
-export function usePaginatedDomains(params: PaginationParams) {
-  const { currentApp } = useApp();
+export function usePaginatedDomains(params: PaginationParams, appId?: string) {
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useQuery({
-    queryKey: ['domains-paginated', params, currentApp?.app_id],
+    queryKey: ['domains-paginated', params, appId || currentApp?.app_id, isSuperAdmin],
     queryFn: async (): Promise<PaginatedResponse<Domain>> => {
-      if (!currentApp?.app_id) {
+      const targetAppId = appId || currentApp?.app_id;
+
+      if (!isSuperAdmin && !targetAppId) {
         console.error('usePaginatedDomains: No app selected');
         throw new Error('No app selected');
       }
 
-      // Validate UUID format
-      if (!isValidUUID(currentApp.app_id)) {
+      // For super admins, we might not have a target app, so skip validation
+      if (!isSuperAdmin && targetAppId && !isValidUUID(targetAppId)) {
         console.error('usePaginatedDomains: Invalid app_id format:', {
-          app_id: currentApp.app_id,
-          type: typeof currentApp.app_id,
+          app_id: targetAppId,
+          type: typeof targetAppId,
         });
-        throw new Error(`Invalid app ID format: ${currentApp.app_id}`);
+        throw new Error(`Invalid app ID format: ${targetAppId}`);
       }
 
       const { page, pageSize, search, status, sortBy = 'sort_order', sortOrder = 'asc' } = params;
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
+      let query = supabase.from('domains').select('*', { count: 'exact' }).is('deleted_at', null);
 
-      let query = supabase
-        .from('domains')
-        .select('*', { count: 'exact' })
-        .eq('app_id', currentApp.app_id)
-        .is('deleted_at', null);
+      // Only filter by app_id if not super admin or if a specific app is requested
+      if (!isSuperAdmin || appId) {
+        if (targetAppId) {
+          query = query.eq('app_id', targetAppId);
+        }
+      }
 
       if (search) {
         const escapedSearch = escapePostgrestSearch(search);
@@ -88,7 +92,6 @@ export function usePaginatedDomains(params: PaginationParams) {
       query = query.range(from, to);
 
       const { data, error, count } = await query;
-
 
       if (error) throw error;
 

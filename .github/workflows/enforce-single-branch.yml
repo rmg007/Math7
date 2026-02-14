@@ -1,0 +1,54 @@
+name: Enforce Single Branch
+
+on:
+  push:
+    branches:
+      - "**"
+  create:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+
+permissions:
+  contents: write
+
+jobs:
+  delete-non-main-branch:
+    if: ${{ startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine branch name
+        id: branch
+        run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+      - name: Delete branch via GitHub API
+        env:
+          GH_OWNER: rmg007
+          GH_REPO: Questerix
+          BRANCH: ${{ steps.branch.outputs.branch }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Deleting branch: ${BRANCH}"
+          curl -s -X DELETE \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/git/refs/heads/${BRANCH}" \
+            | tee /dev/stderr
+      - name: Confirm deletion
+        env:
+          GH_OWNER: rmg007
+          GH_REPO: Questerix
+          BRANCH: ${{ steps.branch.outputs.branch }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Verifying branch deletion..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/git/refs/heads/${BRANCH}")
+          if [ "$STATUS" = "404" ]; then
+            echo "Branch ${BRANCH} deleted successfully."
+          else
+            echo "Branch ${BRANCH} still exists or deletion failed (HTTP ${STATUS})." && exit 1
+          fi

@@ -36,8 +36,20 @@ describe('useAIGenerator', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useToast).mockReturnValue({ toast: mockToast } as any);
-    vi.mocked(generateQuestions).mockResolvedValue({ questions: mockQuestions } as any);
+    vi.mocked(useToast).mockReturnValue({
+      toasts: [],
+      toast: mockToast,
+      dismiss: vi.fn(),
+    });
+    vi.mocked(generateQuestions).mockResolvedValue({
+      questions: mockQuestions,
+      metadata: {
+        model: 'gemini-1.5-flash',
+        generation_time_ms: 1000,
+        token_count: 500,
+        questions_generated: 2,
+      },
+    });
   });
 
   describe('initial state', () => {
