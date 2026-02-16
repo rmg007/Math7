@@ -1,10 +1,6 @@
----
-description: Activate Loki Mode - Full autonomous development with RARV cycles
----
+# 🐺 /loki — Autonomous Developer Mode
 
 // turbo-all
-
-# 🐺 /loki — Autonomous Developer Mode
 
 > **Loki Mode** transforms the agent from a "chatbot" into a "founding engineer."
 > It uses the **RARV cycle** (Reason → Act → Reflect → Verify) for zero-intervention development.
@@ -15,11 +11,11 @@ description: Activate Loki Mode - Full autonomous development with RARV cycles
 
 When `/loki` is invoked:
 
-1. **Read the Skill**: `view_file .antigravity/skills/loki-mode/SKILL.md` — this is your operational mandate
-2. **Load Config**: `view_file .antigravity/skills/loki-mode/config.json` — your permissions and boundaries
-3. **Load or Init State**: Check `.antigravity/skills/loki-mode/state.json`
-   - If exists → resume from last checkpoint
-   - If not → initialize fresh state
+1. **Read the Skill**: `view_file .agent/skills/loki-mode/SKILL.md` — this is your operational mandate
+2. **Load Config**: `view_file .agent/skills/loki-mode/config.json` — your permissions and boundaries
+3. **Load or Init State**: Check `.agent/skills/loki-mode/state.json`
+   - If exists with active session → resume from last checkpoint
+   - If idle → initialize fresh state with current mission
 
 ## Workflow
 
@@ -33,7 +29,7 @@ When `/loki` is invoked:
 
 For each sub-task, follow the RARV cycle defined in `SKILL.md`:
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │  REASON → ACT → REFLECT → VERIFY       │
 │     ↑                        │          │
@@ -55,7 +51,9 @@ Follow the `/process` lifecycle autonomously:
 
 - Save final state to `state.json`
 - Write session summary to `logs/`
-- Commit and push all changes
+- Clean up `tasks.md` by deleting all completed items (`[x]` or `✅`)
+- Perform **Repository Hygiene**: Delete temp files (`test_output.txt`, `*.log`) and consolidate files
+- Commit and push all changes with `docs:` or `fix:` prefix
 - Announce completion
 
 ## Circuit Breakers
@@ -83,7 +81,7 @@ cd student-app && flutter analyze && flutter test
 
 ## State Persistence
 
-After every completed sub-task, update `.antigravity/skills/loki-mode/state.json`:
+After every completed sub-task, update `.agent/skills/loki-mode/state.json`:
 
 ```json
 {
@@ -109,7 +107,7 @@ After every completed sub-task, update `.antigravity/skills/loki-mode/state.json
 
 Check progress via:
 
-- `.antigravity/skills/loki-mode/state.json` — current progress
-- `.antigravity/skills/loki-mode/logs/` — RARV reasoning traces
+- `.agent/skills/loki-mode/state.json` — current progress
+- `.agent/skills/loki-mode/logs/` — RARV reasoning traces
 - `git log --oneline` — commit history shows work done
 - Cloud sync folder — view logs remotely

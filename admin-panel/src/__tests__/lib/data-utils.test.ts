@@ -239,7 +239,7 @@ describe('data-utils', () => {
     it('should throw error for mismatched column counts', () => {
       const csv = 'Name,Age\nJohn,30,Extra';
 
-      expect(() => parseCSV(csv)).toThrow('Row 2 has 3 columns, expected 2');
+      expect(() => parseCSV(csv)).toThrow('TooManyFields error');
     });
 
     it('should handle empty values', () => {
@@ -369,11 +369,8 @@ describe('data-utils', () => {
       const result = parseCSV(csvWithEmptyLines);
 
       expect(result).toEqual([
-        { Name: '', Age: '' },
         { Name: 'John', Age: '30' },
-        { Name: '', Age: '' },
         { Name: 'Jane', Age: '25' },
-        { Name: '', Age: '' },
       ]);
     });
   });

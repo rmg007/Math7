@@ -1,5 +1,73 @@
 # Learning Log
 
+## 2026-02-15: Test Suite Stabilization & Loki Mode Infrastructure
+
+### Session Context
+
+- **Trigger**: Vitest suite hanging indefinitely, blocking all CI and local testing.
+- **Scope**: `file-parsers.test.ts`, `use-toast.test.tsx`, Loki Mode files (`.agent/skills/loki-mode/`).
+- **Outcome**: ✅ Full test suite passing (19 files, 0 failures), Loki Mode infrastructure created.
+
+### What Was Done
+
+#### 1. Fixed `file-parsers.test.ts` Hang (3 root causes)
+
+- **Mock path mismatch**: Tests mocked `pdfjs-dist/build/pdf` but source imports `pdfjs-dist`. The real pdfjs-dist module initialized in the test environment, creating a web worker that hung the runner forever.
+- **Missing `File.prototype.arrayBuffer` polyfill**: jsdom doesn't implement `arrayBuffer()` on File objects, causing all PDF/DOCX parsing tests to error. Added a polyfill in test setup.
+- **Unhandled rejection**: The PDF error test created `Promise.reject()` eagerly in mock setup. Changed to `mockImplementation(() => Promise.reject(...))` for lazy evaluation.
+- **FileReader mock leak**: The "file reading errors" test replaced `global.FileReader` without restoration, poisoning subsequent tests that use mammoth (which depends on FileReader).
+
+#### 2. Fixed `use-toast.test.tsx` Hang (1 root cause + 4 assertion bugs)
+
+- **Infinite loop**: `afterEach` contained `while (toast({ title: 'clear' })) {}`. Since `toast()` always returns a truthy object `{ id, dismiss, update }`, this never terminates.
+- **4 failing assertions**: Tests didn't account for `TOAST_LIMIT=1` — creating a 2nd toast evicts the 1st, so `find(t => t.id === oldId)` returns `undefined`. Also, `TOAST_REMOVE_DELAY=1,000,000ms` meant advancing 1000ms was insufficient to flush the removal queue.
+
+#### 3. Created Loki Mode Infrastructure
+
+- **SKILL.md**: RARV cycle definition, research protocol with priority domains, self-healing decision tree.
+- **config.json**: Circuit breaker limits, deny list, test commands, research priorities.
+- **state.json**: Session checkpoint template.
+- **GEMINI.md**: Global agent instructions with Watchdog rules.
+
+### Technical Learnings
+
+- **Mock Paths Must Match Source**: In Vitest, `vi.mock('pdfjs-dist/build/pdf')` does NOT intercept `import * as pdfjsLib from 'pdfjs-dist'`. The mock path must exactly match the import specifier.
+- **Worker Initialization Hangs**: When pdfjs-dist loads unmocked, it tries to create a Web Worker. In jsdom this doesn't error — it just hangs forever because the worker never responds.
+- **Truthy Return Values in While Loops**: `while (someFunction())` is an infinite loop if the function always returns a truthy value. Always validate loop termination conditions.
+- **TOAST_LIMIT Interactions**: With `TOAST_LIMIT=1`, every new `toast()` call evicts previous toasts from the array. Tests that save a toast ID, create another toast, then search for the old ID will find `undefined`.
+- **jsdom Missing APIs**: `File.prototype.arrayBuffer` is not implemented in jsdom. Other commonly missing APIs: `IntersectionObserver`, `ResizeObserver`, `matchMedia`.
+
+## 2026-02-14: CSV Parsing Robustness & Test/Lint Stabilization
+
+### Session Context
+
+- **Trigger**: CSV parsing errors with extra empty lines and persistent lint/test failures.
+- **Scope**: `data-utils.ts`, `use-bulk-import.test.tsx`, `use-toast.test.tsx`.
+- **Outcome**: ✅ Robust CSV parsing using PapaParse, all tests passing, and lint errors resolved.
+
+### What Was Done
+
+#### 1. CSV Parsing Infrastructure Improvements
+
+- **Integrated PapaParse**: Replaced custom, fragile CSV parsing logic in `data-utils.ts` with `Papa.parse` and `Papa.unparse`.
+- **Empty Line Resilience**: Configured `skipEmptyLines: true` and header/value trimming in the CSV parser.
+- **Standardized Error Reporting**: Improved error messages to include specific PapaParse error codes and better location information.
+
+#### 2. Test & Lint Stabilization
+
+- **Fixed use-toast.test.tsx**: Replaced non-null assertions with optional chaining and proper null checks.
+- **Fixed use-bulk-import.test.tsx**: Consolidated redundant ESLint overrides and refined types in mocks.
+- **Resolved Regressions**: Fixed `CurriculumService.test.ts` (punctuation mismatch) and `sanitize.test.ts` (early return logic mismatch).
+- **Test Suite Verification**: Confirmed all 28 tests in `data-utils.test.ts` pass, along with the broader suite.
+
+### Technical Learnings
+
+- **Robust CSV Handling**: Hand-writing CSV parsers is error-prone due to edge cases like quoted newlines and varied line endings. Using `PapaParse` consistently across the project (it was already a dependency) reduces maintenance overhead and bugs.
+- **Early Return Logic in Tests**: When adding early returns (like for empty strings in `sanitizeHtml`), existing tests that expect subsequent logic (like `DOMPurify` calls) must be updated to expect the _absence_ of those calls.
+- **Test Punctuation Sensitivity**: Even small changes in error message punctuation (e.g., `.` vs `:`) can break `toEqual` assertions. Using more generic `toThrow('Partial Message')` or `toMatch()` is often safer for complex error strings.
+
+---
+
 ## 2026-02-15 (PM): Advanced Curriculum Controls & Security Hardening
 
 ### Session Context

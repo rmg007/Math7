@@ -21,7 +21,8 @@ vi.mock('papaparse', () => ({
 describe('useBulkImport', () => {
   const mockToast = vi.fn();
   type CsvRow = Record<string, string>;
-  type ParseConfigForFile = Papa.ParseConfig<CsvRow, File>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type ParseConfigForFile = any;
   type ParseFn = (file: File, options: ParseConfigForFile) => void;
 
   beforeEach(() => {
@@ -106,9 +107,8 @@ describe('useBulkImport', () => {
     it('should handle parsing errors', async () => {
       const mockFile = new File([''], 'test.csv', { type: 'text/csv' });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (Papa.parse as unknown as MockedFunction<ParseFn>).mockImplementation(
-        (_file: File, options: any) => {
+        (_file: File, options: ParseConfigForFile) => {
           options.error?.(
             {
               code: 'UndetectableDelimiter',
@@ -116,7 +116,6 @@ describe('useBulkImport', () => {
               row: 0,
               type: 'Delimiter',
             },
-            undefined,
             undefined
           );
         }

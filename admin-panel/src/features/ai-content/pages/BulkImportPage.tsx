@@ -20,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useSkills } from '@/features/curriculum/hooks/use-skills';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 
 export default function BulkImportPage() {
   const {
@@ -37,7 +38,7 @@ export default function BulkImportPage() {
   const { data: skills } = useSkills();
   const [selectedSkillId, setSelectedSkillId] = useState<string>('');
   const [importPrompt, setImportPrompt] = useState('');
-  const [isAiParsing, _setIsAiParsing] = useState(false);
+  const [isAiParsing, setIsAiParsing] = useState(false);
 
   const downloadTemplate = async () => {
     const { downloadBulkImportTemplate } = await import('@/utils/csv-templates');
@@ -45,34 +46,40 @@ export default function BulkImportPage() {
   };
 
   const handleAiImport = async () => {
-    // TODO: Implement parse-import-prompt Edge Function
-    // Currently this function doesn't exist on the server
-    toast({
-      title: 'Coming Soon',
-      description: 'AI-powered import is not yet available. Please use manual upload for now.',
-      variant: 'default',
-    });
-    return;
+    if (!importPrompt.trim()) return;
 
-    // Original code (commented out until Edge Function exists):
-    /*
-    const { data, error } = await supabase.functions.invoke('parse-import-prompt', {
-      body: { prompt }
-    });
-
-    if (error) {
-      toast({
-        title: "Import failed",
-        description: error.message,
-        variant: "destructive"
+    setIsAiParsing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('parse-import-prompt', {
+        body: { prompt: importPrompt, skillId: selectedSkillId },
       });
-      return;
+
+      if (error) {
+        toast({
+          title: 'Import failed',
+          description: error.message,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (data?.questions) {
+        setImportQueue((prev) => [...prev, ...data.questions]);
+        setImportPrompt('');
+        toast({
+          title: 'AI Sync Successful',
+          description: `Extracted ${data.questions.length} questions from prompt.`,
+        });
+      }
+    } catch (err: unknown) {
+      toast({
+        title: 'Unexpected Error',
+        description: err instanceof Error ? err.message : 'An error occurred',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsAiParsing(false);
     }
-    
-    if (data) {
-      setImportPrompt('');
-    }
-    */
   };
 
   return (

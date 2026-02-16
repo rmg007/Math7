@@ -38,6 +38,7 @@ Every sub-task MUST follow this recursive loop. Never skip a step.
 - Prefer small, atomic changes over large rewrites
 - Commit frequently with semantic messages: `feat:`, `fix:`, `refactor:`, `test:`
 - If the IDE gates a command, use the `ops_runner.py` workaround:
+
   ```json
   [
     {
@@ -134,10 +135,9 @@ At the end of every Loki session — whether task completes, budget exhausts, or
    - What was learned (patterns, gotchas, architecture decisions)
    - Prevention measures (rules for future agents)
 2. **CHANGELOG.md** — Add entry if user-facing behavior changed
-3. **Workflow discoverability** — If you created a new workflow or skill:
-   - Add it to `.agent/workflows/help.md` (workflow table + details section)
-   - Cross-reference from related workflows (e.g., `autopilot.md`)
-4. **Commit and push** — All documentation changes committed with `docs:` prefix
+3. **Task Cleanup** — Clean up `tasks.md` by deleting all completed items (`[x]` or `✅`) and non-active priorities.
+4. **Repository Hygiene** — Delete temporary files created during the session (e.g., `test_output.txt`, `*.log`, `temp_*`) and consolidate related documentation or logs into their primary locations.
+5. **Commit and push** — All documentation changes committed with `docs:` prefix
 
 > **Why this matters**: Multiple agents work on this project. Documentation is the API between agents. If you don't document what you did, the next agent will repeat your mistakes or duplicate your work.
 
@@ -223,7 +223,7 @@ These conditions trigger an immediate stop and notification:
 
 RARV traces are written to `.antigravity/skills/loki-mode/logs/` as timestamped JSON:
 
-```
+```text
 logs/
 ├── 2026-02-15T17-55-00_session-start.json
 ├── 2026-02-15T18-00-00_rarv-phase1-reason.json

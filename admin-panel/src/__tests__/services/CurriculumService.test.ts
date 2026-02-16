@@ -166,7 +166,7 @@ describe('CurriculumService', () => {
       expect(result).toEqual({
         success: false,
         count: 0,
-        error: 'Batch 1 rejected by database. 0 rows were previously inserted.',
+        error: 'Batch 1 rejected by database: 0 rows were previously inserted.',
       });
     });
 

@@ -62,31 +62,9 @@ describe('sanitize', () => {
     });
 
     it('should return empty string for empty string input', () => {
-      vi.mocked(DOMPurify.sanitize).mockReturnValue('');
       const result = sanitizeHtml('');
       expect(result).toBe('');
-      expect(DOMPurify.sanitize).toHaveBeenCalledWith('', {
-        USE_PROFILES: { html: true },
-        ALLOWED_TAGS: [
-          'p',
-          'br',
-          'strong',
-          'em',
-          'u',
-          'ol',
-          'ul',
-          'li',
-          'h1',
-          'h2',
-          'h3',
-          'h4',
-          'h5',
-          'h6',
-          'blockquote',
-          'code',
-          'pre',
-        ],
-      });
+      expect(DOMPurify.sanitize).not.toHaveBeenCalled();
     });
 
     it('should handle string input with whitespace', () => {

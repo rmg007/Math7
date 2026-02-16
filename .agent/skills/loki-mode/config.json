@@ -1,0 +1,92 @@
+{
+  "name": "loki-mode",
+  "version": "1.0.0",
+  "description": "Autonomous developer configuration — boundaries, permissions, and research priorities",
+
+  "permissions": {
+    "turbo_all": true,
+    "auto_commit": true,
+    "auto_push": false,
+    "deploy": false,
+    "modify_env_files": false,
+    "delete_git_history": false
+  },
+
+  "circuit_breakers": {
+    "max_iterations_per_subtask": 5,
+    "max_same_error_consecutive": 3,
+    "max_total_iterations": 25,
+    "max_web_searches_per_bug": 3,
+    "max_files_per_bug": 8,
+    "max_lines_per_subtask": 200,
+    "test_timeout_seconds": 60,
+    "no_progress_timeout_minutes": 15
+  },
+
+  "research": {
+    "priority_domains": [
+      "supabase.com/docs",
+      "vitejs.dev",
+      "react.dev",
+      "flutter.dev",
+      "playwright.dev",
+      "vitest.dev",
+      "tailwindcss.com/docs",
+      "pub.dev",
+      "stackoverflow.com"
+    ],
+    "search_strategy": "exact_error_first",
+    "prefer_official_docs": true,
+    "avoid_blogs_older_than_months": 6
+  },
+
+  "test_commands": {
+    "admin_panel": {
+      "unit": "npx vitest run --bail",
+      "lint": "npm run lint",
+      "typecheck": "npx tsc --noEmit",
+      "e2e": "npx playwright test",
+      "a11y": "npx playwright test tests/accessibility.spec.ts"
+    },
+    "student_app": {
+      "unit": "flutter test",
+      "analyze": "flutter analyze"
+    },
+    "preflight": "./scripts/preflight.ps1",
+    "full_suite": "./scripts/run-all-tests.ps1"
+  },
+
+  "deny_list": [
+    "rm -rf /",
+    "git push --force",
+    "DROP TABLE",
+    "DROP DATABASE",
+    "TRUNCATE",
+    "git reset --hard HEAD~",
+    "Remove-Item -Recurse -Force .git"
+  ],
+
+  "paths": {
+    "admin_panel": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel",
+    "student_app": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/student-app",
+    "root": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix",
+    "state_file": ".agent/skills/loki-mode/state.json",
+    "logs_dir": ".agent/skills/loki-mode/logs",
+    "learning_log": "docs/LEARNING_LOG.md",
+    "tasks": "tasks.md",
+    "changelog": "CHANGELOG.md"
+  },
+
+  "process_phases": {
+    "autonomous": [1, 2, 3, 4, 5],
+    "requires_approval": [6],
+    "phase_names": {
+      "1": "Research & Plan",
+      "2": "Implement",
+      "3": "Test & Fix",
+      "4": "Document",
+      "5": "Review & Certify",
+      "6": "Deploy"
+    }
+  }
+}

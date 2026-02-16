@@ -1,6 +1,6 @@
-import { test, expect, Page } from '@playwright/test';
-import { TEST_USERS, generateTestSkill } from './test-utils';
+import { expect, Page, test } from '@playwright/test';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { generateTestSkill, TEST_USERS } from './test-utils';
 
 // Login helper
 async function login(page: Page, email: string, password: string) {
@@ -12,7 +12,11 @@ async function login(page: Page, email: string, password: string) {
 }
 
 // Radix Select helper
-async function selectOption(page: Page, triggerSelector: string, optionTextOrIndex: string | number) {
+async function selectOption(
+  page: Page,
+  triggerSelector: string,
+  optionTextOrIndex: string | number
+) {
   await page.click(triggerSelector);
   if (typeof optionTextOrIndex === 'number') {
     // Select by index (0-based)
@@ -43,7 +47,10 @@ test.describe('Admin Panel E2E Tests', () => {
     }
 
     const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.VITE_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
       throw new Error('Supabase credentials not found in environment. Cannot seed test data.');
@@ -97,29 +104,33 @@ test.describe('Admin Panel E2E Tests', () => {
 
     test('should logout successfully', async ({ page }) => {
       await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
-      
+
       // Wait for session to stabilize
       await page.waitForTimeout(1000);
-      
+
       // Find and click logout button by ID
       const logoutBtn = page.locator('#logout-button').first();
       if (await logoutBtn.isVisible()) {
-          await logoutBtn.click();
-          await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
+        await logoutBtn.click();
+        await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
       } else {
-          // Fallback
-          const sidebarLogout = page.locator('button[title*="Sign Out"], button:has-text("Sign Out")').first();
-          if (await sidebarLogout.isVisible()) {
-              await sidebarLogout.click();
-              await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
-          } else {
-              console.log('Logout button not found - skipping logout test');
-              test.skip();
-          }
+        // Fallback
+        const sidebarLogout = page
+          .locator('button[title*="Sign Out"], button:has-text("Sign Out")')
+          .first();
+        if (await sidebarLogout.isVisible()) {
+          await sidebarLogout.click();
+          await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
+        } else {
+          console.log('Logout button not found - skipping logout test');
+          test.skip();
+        }
       }
     });
 
-    test('should redirect to login when accessing protected route without auth', async ({ page }) => {
+    test('should redirect to login when accessing protected route without auth', async ({
+      page,
+    }) => {
       await page.goto('/domains');
       await expect(page).toHaveURL(/\/login/);
     });
@@ -153,93 +164,114 @@ test.describe('Admin Panel E2E Tests', () => {
 
     test('should list all domains', async ({ page }) => {
       await page.goto('/domains');
-      await expect(page.locator('button:has-text("New Domain"), a:has-text("New Domain")').first()).toBeVisible({ timeout: 15000 });
+      await expect(
+        page
+          .locator('button:has-text("Initialize Cluster"), a:has-text("Initialize Cluster")')
+          .first()
+      ).toBeVisible({ timeout: 15000 });
     });
 
     test('should create a new domain', async ({ page }) => {
       const testDomain = {
         name: `E2E Domain ${Date.now()}`,
-        description: 'Testing domain creation'
+        description: 'Testing domain creation',
       };
-      
+
       await page.goto('/domains/new');
-      
+
       // Use name attributes which are more stable
       const titleInput = page.locator('input[name="title"]');
       await expect(titleInput).toBeVisible({ timeout: 15000 });
       await titleInput.fill(testDomain.name);
-      
+
       const slugInput = page.locator('input[name="slug"]');
       if (await slugInput.isVisible()) {
         await slugInput.fill(`e2e_domain_${Date.now()}`);
       }
-      
+
       const descriptionInput = page.locator('textarea[name="description"]');
       if (await descriptionInput.isVisible()) {
         await descriptionInput.fill(testDomain.description);
       }
-      
+
       await page.waitForTimeout(500);
-      
+
       // Submit form
-      await page.getByRole('button', { name: /Create|Initiate|Provision/i }).click();
-      
+      await page.getByRole('button', { name: /Initiate Provision/i }).click();
+
       // Should redirect back to list
       await expect(page).toHaveURL(/\/domains$/, { timeout: 15000 });
 
       // Search for the domain to handle pagination
       await page.waitForTimeout(1000); // Wait for list to load/hydrate
-      const searchInput = page.getByPlaceholder(/Search domains/i);
+      const searchInput = page.getByPlaceholder(/Query curriculum domains/i);
       await searchInput.fill(testDomain.name);
       await page.waitForTimeout(500); // Wait for debounce
-      
+
       await expect(page.getByText(testDomain.name, { exact: false }).first()).toBeVisible();
     });
 
     test('should edit an existing domain', async ({ page }) => {
+      await page.goto('/domains');
+      await page.waitForSelector('table tbody tr', { timeout: 10000 });
+
+      const firstEditBtn = page
+        .locator(
+          'a[href^="/domains/"][href$="/edit"], button:has-text("Edit"), button[title*="Edit"]'
+        )
+        .first();
+      if (await firstEditBtn.isVisible()) {
+        await firstEditBtn.click();
+
+        const titleInput = page.locator('input[name="title"]');
+        await expect(titleInput).toBeVisible({ timeout: 15000 });
+
+        const updatedTitle = `Updated Domain ${Date.now()}`;
+        await titleInput.fill(updatedTitle);
+
+        await page.waitForTimeout(500);
+        await page.getByRole('button', { name: /Update Signature/i }).click();
+
+        // Search for the updated domain to ensure it's visible
         await page.goto('/domains');
-        await page.waitForSelector('table tbody tr', { timeout: 10000 }); 
-        
-        const firstEditBtn = page.locator('a[href^="/domains/"][href$="/edit"], button:has-text("Edit"), button[title*="Edit"]').first();
-        if (await firstEditBtn.isVisible()) {
-            await firstEditBtn.click();
-            
-            const titleInput = page.locator('input[name="title"]');
-            await expect(titleInput).toBeVisible({ timeout: 15000 });
-            
-            const updatedTitle = `Updated Domain ${Date.now()}`;
-            await titleInput.fill(updatedTitle);
-            
-            await page.waitForTimeout(500);
-            await page.getByRole('button', { name: /Update|Save|Modify/i }).click();
-            
-            await expect(page).toHaveURL(/\/domains/, { timeout: 15000 });
-            await expect(page.getByText(updatedTitle).first()).toBeVisible({ timeout: 10000 });
-        } else {
-            test.skip();
-        }
+        await page.waitForTimeout(2000);
+        const searchInput = page.getByPlaceholder(/Query curriculum domains/i);
+        await searchInput.click();
+        await searchInput.fill('');
+        await searchInput.fill(updatedTitle);
+        await page.keyboard.press('Enter');
+        await page.waitForTimeout(2000);
+
+        await expect(page.getByText(updatedTitle).first()).toBeVisible({ timeout: 15000 });
+      } else {
+        test.skip();
+      }
     });
 
     test('should delete a domain', async ({ page }) => {
-        await page.goto('/domains/new');
-        const tempTitle = `Delete Me ${Date.now()}`;
-        
-        await page.locator('input[name="title"]').fill(tempTitle);
-        await page.getByRole('button', { name: /Create|Initiate|Provision/i }).click();
-        
-        await expect(page).toHaveURL(/\/domains/, { timeout: 15000 });
+      await page.goto('/domains/new');
+      const tempTitle = `Delete Me ${Date.now()}`;
 
-        page.on('dialog', dialog => dialog.accept());
+      await page.locator('input[name="title"]').fill(tempTitle);
+      await page.getByRole('button', { name: /Initiate Provision/i }).click();
 
-        const row = page.locator('tr').filter({ hasText: tempTitle });
-        const deleteBtn = row.locator('button:has-text("Delete"), [aria-label*="delete"], button:has-text("Purge"), button[title*="Delete"]').first();
-        
-        if (await deleteBtn.isVisible()) {
-            await deleteBtn.click();
-            await expect(page.getByText(tempTitle)).toHaveCount(0, { timeout: 10000 });
-        } else {
-            test.skip();
-        }
+      await expect(page).toHaveURL(/\/domains/, { timeout: 15000 });
+
+      page.on('dialog', (dialog) => dialog.accept());
+
+      const row = page.locator('tr').filter({ hasText: tempTitle });
+      const deleteBtn = row
+        .locator(
+          'button:has-text("Delete"), [aria-label*="delete"], button:has-text("Purge"), button[title*="Delete"]'
+        )
+        .first();
+
+      if (await deleteBtn.isVisible()) {
+        await deleteBtn.click();
+        await expect(page.getByText(tempTitle)).toHaveCount(0, { timeout: 10000 });
+      } else {
+        test.skip();
+      }
     });
   });
 
@@ -250,7 +282,9 @@ test.describe('Admin Panel E2E Tests', () => {
 
     test('should list all skills', async ({ page }) => {
       await page.goto('/skills');
-      await expect(page.locator('a[href="/skills/new"], button:has-text("New Skill")').first()).toBeVisible({ timeout: 15000 });
+      await expect(
+        page.locator('a[href="/skills/new"], button:has-text("New Skill")').first()
+      ).toBeVisible({ timeout: 15000 });
     });
 
     test('should create a new skill', async ({ page }) => {
@@ -258,15 +292,15 @@ test.describe('Admin Panel E2E Tests', () => {
       await page.goto('/skills/new');
 
       await expect(page.locator('input[name="title"]')).toBeVisible({ timeout: 15000 });
-      
+
       const domainSelect = page.locator('button[role="combobox"]').first();
       if (await domainSelect.isVisible()) {
-        await selectOption(page, 'button[role="combobox"]', 0); 
+        await selectOption(page, 'button[role="combobox"]', 0);
       }
 
       await page.locator('input[name="title"]').fill(testSkill.name);
       await page.locator('textarea[name="description"]').fill(testSkill.description);
-      
+
       await page.waitForTimeout(500);
       await page.getByRole('button', { name: /Create|Skill|Provision/i }).click();
 
@@ -282,16 +316,20 @@ test.describe('Admin Panel E2E Tests', () => {
 
     test('should list all questions', async ({ page }) => {
       await page.goto('/questions');
-      await expect(page.locator('a[href="/questions/new"], button:has-text("New Question")').first()).toBeVisible({ timeout: 15000 });
+      await expect(
+        page.locator('a[href="/questions/new"], button:has-text("Initialize Asset")').first()
+      ).toBeVisible({ timeout: 15000 });
     });
 
     test('should create a new MCQ question', async ({ page }) => {
       await page.goto('/questions/new');
-      
+
       const contentEditor = page.locator('.ProseMirror, textarea[name="content"]').first();
       await expect(contentEditor).toBeVisible({ timeout: 15000 });
 
-      const skillTrigger = page.locator('button[role="combobox"]').filter({ hasText: /Skill|ontology/i });
+      const skillTrigger = page
+        .locator('button[role="combobox"]')
+        .filter({ hasText: /Skill|ontology/i });
       if (await skillTrigger.isVisible()) {
         await skillTrigger.click();
         const firstOption = page.locator('[role="option"]').first();
@@ -316,7 +354,7 @@ test.describe('Admin Panel E2E Tests', () => {
       }
 
       await page.waitForTimeout(500);
-      await page.getByRole('button', { name: /DEPLOY|Create|Save/i }).click();
+      await page.getByRole('button', { name: /DEPLOY QUESTION/i }).click();
 
       await expect(page).toHaveURL(/\/questions/, { timeout: 15000 });
       await expect(page.getByText(`${questionId}`).first()).toBeVisible({ timeout: 10000 });

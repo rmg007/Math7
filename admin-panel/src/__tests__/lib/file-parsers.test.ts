@@ -1,26 +1,40 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { parseFile } from '@/lib/file-parsers';
-// @ts-expect-error - No types available for pdfjs-dist build
-import * as pdfjs from 'pdfjs-dist/build/pdf';
-import * as mammoth from 'mammoth';
+import mammoth from 'mammoth';
+import * as pdfjs from 'pdfjs-dist';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Mock PDF.js
-vi.mock('pdfjs-dist/build/pdf', () => ({
+// Mock PDF.js — must match the import path in file-parsers.ts ('pdfjs-dist')
+vi.mock('pdfjs-dist', () => ({
   default: {
     getDocument: vi.fn(),
-    GlobalWorkerOptions: {
-      workerSrc: '',
-    },
+  },
+  getDocument: vi.fn(),
+  GlobalWorkerOptions: {
+    workerSrc: '',
   },
 }));
 
-// Mock mammoth
+// Mock mammoth — source uses default import: import mammoth from 'mammoth'
 vi.mock('mammoth', () => ({
+  default: {
+    extractRawText: vi.fn(),
+  },
   extractRawText: vi.fn(),
 }));
 
 // Mock console.error
 const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+// Polyfill File.prototype.arrayBuffer for jsdom (not natively supported)
+if (!File.prototype.arrayBuffer) {
+  File.prototype.arrayBuffer = function () {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as ArrayBuffer);
+      reader.readAsArrayBuffer(this);
+    });
+  };
+}
 
 describe('file-parsers', () => {
   beforeEach(() => {
@@ -47,7 +61,7 @@ describe('file-parsers', () => {
         }),
       };
 
-      vi.mocked(mockPdfJs.default.getDocument).mockReturnValue(
+      vi.mocked(mockPdfJs.getDocument).mockReturnValue(
         mockPdf as unknown as pdfjs.PDFDocumentLoadingTask
       );
 
@@ -59,7 +73,7 @@ describe('file-parsers', () => {
         content: expect.stringContaining('Page 1 content with multiple text items'),
         type: 'pdf',
       });
-      expect(mockPdfJs.default.getDocument).toHaveBeenCalledWith({
+      expect(mockPdfJs.getDocument).toHaveBeenCalledWith({
         data: expect.any(ArrayBuffer),
       });
     });
@@ -120,7 +134,7 @@ describe('file-parsers', () => {
         }),
       };
 
-      vi.mocked(mockPdfJs.default.getDocument).mockReturnValue(
+      vi.mocked(mockPdfJs.getDocument).mockReturnValue(
         mockPdf as unknown as pdfjs.PDFDocumentLoadingTask
       );
 
@@ -147,7 +161,7 @@ describe('file-parsers', () => {
         }),
       };
 
-      vi.mocked(mockPdfJs.default.getDocument).mockReturnValue(
+      vi.mocked(mockPdfJs.getDocument).mockReturnValue(
         mockPdf as unknown as pdfjs.PDFDocumentLoadingTask
       );
 
@@ -165,12 +179,11 @@ describe('file-parsers', () => {
     });
 
     it('should handle PDF parsing errors', async () => {
-      const mockPdf = {
-        promise: Promise.reject(new Error('PDF parsing failed')),
-      };
-
-      vi.mocked(mockPdfJs.default.getDocument).mockReturnValue(
-        mockPdf as unknown as pdfjs.PDFDocumentLoadingTask
+      vi.mocked(mockPdfJs.getDocument).mockImplementation(
+        () =>
+          ({
+            promise: Promise.reject(new Error('PDF parsing failed')),
+          }) as unknown as pdfjs.PDFDocumentLoadingTask
       );
 
       const file = new File(['pdf content'], 'broken.pdf', { type: 'application/pdf' });
@@ -195,6 +208,9 @@ describe('file-parsers', () => {
     });
 
     it('should handle file reading errors for TXT files', async () => {
+      // Save original FileReader before mocking
+      const OriginalFileReader = global.FileReader;
+
       // Mock FileReader to simulate error
       const mockFileReader = {
         readAsText: vi.fn().mockImplementation(() => {
@@ -212,6 +228,9 @@ describe('file-parsers', () => {
         'Failed to parse broken.txt: File reading failed'
       );
       expect(mockConsoleError).toHaveBeenCalledWith('Error parsing file:', expect.any(Error));
+
+      // Restore original FileReader so subsequent tests aren't poisoned
+      global.FileReader = OriginalFileReader;
     });
 
     it('should handle mammoth warnings', async () => {

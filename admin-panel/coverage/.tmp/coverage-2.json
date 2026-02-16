@@ -1,156 +1,142 @@
 {
   "result": [
     {
-      "scriptId": "1391",
-      "url": "file:///workspaces/Questerix/admin-panel/src/__tests__/services/SecurityLogger.test.ts",
+      "scriptId": "1383",
+      "url": "file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/admin-panel/src/__tests__/services/CurriculumService.test.ts",
       "functions": [
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 0, "endOffset": 14072, "count": 1 }],
+          "ranges": [{ "startOffset": 0, "endOffset": 25352, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 13, "endOffset": 14072, "count": 1 }],
+          "ranges": [{ "startOffset": 13, "endOffset": 25352, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 343, "endOffset": 389, "count": 1 }],
+          "ranges": [{ "startOffset": 332, "endOffset": 378, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 597, "endOffset": 4626, "count": 1 }],
+          "ranges": [{ "startOffset": 423, "endOffset": 487, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 618, "endOffset": 682, "count": 8 }],
+          "ranges": [{ "startOffset": 701, "endOffset": 7474, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 697, "endOffset": 732, "count": 8 }],
+          "ranges": [{ "startOffset": 722, "endOffset": 757, "count": 9 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 753, "endOffset": 3407, "count": 1 }],
+          "ranges": [{ "startOffset": 794, "endOffset": 7470, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 830, "endOffset": 1378, "count": 1 }],
+          "ranges": [{ "startOffset": 1169, "endOffset": 1673, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 1421, "endOffset": 1894, "count": 1 }],
+          "ranges": [{ "startOffset": 1734, "endOffset": 2486, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 1955, "endOffset": 2343, "count": 1 }],
+          "ranges": [{ "startOffset": 2538, "endOffset": 2724, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 2038, "endOffset": 2053, "count": 4 }],
+          "ranges": [{ "startOffset": 2790, "endOffset": 3809, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 2410, "endOffset": 2861, "count": 1 }],
+          "ranges": [{ "startOffset": 3858, "endOffset": 4431, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 2495, "endOffset": 2510, "count": 1 }],
+          "ranges": [{ "startOffset": 4477, "endOffset": 4981, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 2923, "endOffset": 3401, "count": 1 }],
+          "ranges": [{ "startOffset": 5031, "endOffset": 6176, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 3008, "endOffset": 3023, "count": 1 }],
+          "ranges": [{ "startOffset": 6221, "endOffset": 6726, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 3444, "endOffset": 4622, "count": 1 }],
+          "ranges": [{ "startOffset": 6416, "endOffset": 6487, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 3467, "endOffset": 3574, "count": 3 }],
-          "isBlockCoverage": true
-        },
-        {
-          "functionName": "",
-          "ranges": [{ "startOffset": 3604, "endOffset": 3915, "count": 1 }],
-          "isBlockCoverage": true
-        },
-        {
-          "functionName": "",
-          "ranges": [{ "startOffset": 3946, "endOffset": 4203, "count": 1 }],
-          "isBlockCoverage": true
-        },
-        {
-          "functionName": "",
-          "ranges": [{ "startOffset": 4244, "endOffset": 4616, "count": 1 }],
+          "ranges": [{ "startOffset": 6775, "endOffset": 7464, "count": 1 }],
           "isBlockCoverage": true
         }
       ]
     },
     {
-      "scriptId": "1393",
-      "url": "file:///workspaces/Questerix/admin-panel/src/services/SecurityLogger.ts",
+      "scriptId": "1385",
+      "url": "file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/admin-panel/src/services/CurriculumService.ts",
       "functions": [
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 0, "endOffset": 5881, "count": 1 }],
+          "ranges": [{ "startOffset": 0, "endOffset": 9741, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 13, "endOffset": 5881, "count": 1 }],
+          "ranges": [{ "startOffset": 13, "endOffset": 9741, "count": 1 }],
           "isBlockCoverage": true
         },
         {
-          "functionName": "log",
+          "functionName": "importQuestionsBulk",
           "ranges": [
-            { "startOffset": 494, "endOffset": 1199, "count": 8 },
-            { "startOffset": 718, "endOffset": 723, "count": 5 },
-            { "startOffset": 754, "endOffset": 763, "count": 7 },
-            { "startOffset": 801, "endOffset": 819, "count": 7 },
-            { "startOffset": 819, "endOffset": 959, "count": 1 },
-            { "startOffset": 959, "endOffset": 1105, "count": 6 },
-            { "startOffset": 1112, "endOffset": 1195, "count": 1 }
+            { "startOffset": 638, "endOffset": 2857, "count": 9 },
+            { "startOffset": 843, "endOffset": 1284, "count": 73 },
+            { "startOffset": 965, "endOffset": 1230, "count": 1 },
+            { "startOffset": 1230, "endOffset": 1284, "count": 71 },
+            { "startOffset": 1284, "endOffset": 1303, "count": 71 },
+            { "startOffset": 1303, "endOffset": 1434, "count": 1 },
+            { "startOffset": 1434, "endOffset": 1558, "count": 6 },
+            { "startOffset": 1558, "endOffset": 1632, "count": 8 },
+            { "startOffset": 1632, "endOffset": 1679, "count": 6 },
+            { "startOffset": 1679, "endOffset": 2507, "count": 8 },
+            { "startOffset": 1920, "endOffset": 2135, "count": 2 },
+            { "startOffset": 2135, "endOffset": 2168, "count": 6 },
+            { "startOffset": 2169, "endOffset": 2209, "count": 0 },
+            { "startOffset": 2240, "endOffset": 2451, "count": 1 },
+            { "startOffset": 2451, "endOffset": 2507, "count": 5 },
+            { "startOffset": 2507, "endOffset": 2590, "count": 3 },
+            { "startOffset": 2590, "endOffset": 2853, "count": 1 },
+            { "startOffset": 2787, "endOffset": 2838, "count": 0 }
           ],
           "isBlockCoverage": true
         },
         {
-          "functionName": "logLogin",
-          "ranges": [{ "startOffset": 1202, "endOffset": 1337, "count": 1 }],
-          "isBlockCoverage": true
-        },
-        {
-          "functionName": "logLogout",
-          "ranges": [{ "startOffset": 1340, "endOffset": 1443, "count": 1 }],
-          "isBlockCoverage": true
-        },
-        {
-          "functionName": "logSensitiveAction",
-          "ranges": [{ "startOffset": 1446, "endOffset": 1627, "count": 1 }],
+          "functionName": "",
+          "ranges": [{ "startOffset": 1018, "endOffset": 1060, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "get",
-          "ranges": [{ "startOffset": 1784, "endOffset": 1814, "count": 8 }],
+          "ranges": [{ "startOffset": 2965, "endOffset": 2998, "count": 9 }],
           "isBlockCoverage": true
         }
       ]

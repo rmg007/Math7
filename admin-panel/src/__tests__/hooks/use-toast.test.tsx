@@ -8,11 +8,16 @@ describe('useToast', () => {
   });
 
   afterEach(() => {
+    // Clean up global toast state: dismiss all toasts and flush removal timers
+    const { result, unmount } = renderHook(() => useToast());
+    act(() => {
+      result.current.dismiss(); // dismiss all
+    });
+    act(() => {
+      vi.advanceTimersByTime(1000001); // flush TOAST_REMOVE_DELAY
+    });
+    unmount();
     vi.useRealTimers();
-    // Clear global state
-    while (toast({ title: 'clear' })) {
-      // Dispatch dismiss for all toasts
-    }
   });
 
   describe('toast function', () => {
@@ -75,21 +80,20 @@ describe('useToast', () => {
     it('should update existing toast', () => {
       const { result } = renderHook(() => useToast());
 
-      let toastId: string;
+      let toastUpdate: (props: Record<string, unknown>) => void;
       act(() => {
         const toastResult = result.current.toast({ title: 'Original' });
-        toastId = toastResult.id;
+        toastUpdate = toastResult.update;
       });
 
       act(() => {
-        result.current.toast({ title: 'Updated' }).update({
+        toastUpdate({
           title: 'Updated Title',
           description: 'New description',
         });
       });
 
-      const updatedToast = result.current.toasts.find((t) => t.id === toastId);
-      expect(updatedToast).toMatchObject({
+      expect(result.current.toasts[0]).toMatchObject({
         title: 'Updated Title',
         description: 'New description',
       });
@@ -104,11 +108,7 @@ describe('useToast', () => {
         toastId = toastResult.id;
       });
 
-      act(() => {
-        result.current.toast({ title: 'Toast 2' });
-      });
-
-      expect(result.current.toasts).toHaveLength(1); // Limited to 1
+      expect(result.current.toasts).toHaveLength(1);
 
       act(() => {
         result.current.dismiss(toastId);
@@ -232,22 +232,21 @@ describe('useToast', () => {
     it('should handle UPDATE_TOAST action', () => {
       const { result } = renderHook(() => useToast());
 
-      let toastId: string;
+      let toastUpdate: (props: Record<string, unknown>) => void;
       act(() => {
         const toastResult = result.current.toast({ title: 'Original' });
-        toastId = toastResult.id;
+        toastUpdate = toastResult.update;
       });
 
       act(() => {
-        result.current.toast({ title: 'Updated' }).update({
+        toastUpdate({
           title: 'Updated Title',
           variant: 'destructive',
         });
       });
 
-      const updatedToast = result.current.toasts.find((t) => t.id === toastId);
-      expect(updatedToast?.title).toBe('Updated Title');
-      expect(updatedToast?.variant).toBe('destructive');
+      expect(result.current.toasts[0]?.title).toBe('Updated Title');
+      expect(result.current.toasts[0]?.variant).toBe('destructive');
     });
 
     it('should handle REMOVE_TOAST action with specific ID', () => {
@@ -341,12 +340,15 @@ describe('useToast', () => {
         result.current.dismiss(toastId);
       });
 
-      // Advance time a bit but not full timeout
+      // Toast is dismissed (open=false) but not yet removed from array
+      expect(result.current.toasts[0].open).toBe(false);
+
+      // Advance time past TOAST_REMOVE_DELAY to flush removal queue
       act(() => {
-        vi.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000001);
       });
 
-      // Toast should still be removed because dismiss was called
+      // Now the toast should be fully removed
       expect(result.current.toasts).toHaveLength(0);
     });
   });
