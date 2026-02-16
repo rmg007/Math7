@@ -61,6 +61,18 @@ test.describe('Admin Panel E2E Tests', () => {
 
     supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Authenticate as super_admin so RLS allows seed operations
+    // (when using anon key without service_role, we need a real session)
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: TEST_USERS.SUPER_ADMIN.email,
+        password: TEST_USERS.SUPER_ADMIN.password,
+      });
+      if (authError) {
+        console.warn(`Auth failed (seeding may fail due to RLS): ${authError.message}`);
+      }
+    }
+
     // Clean and seed
     console.log('Seeding test data...');
     try {
@@ -230,18 +242,16 @@ test.describe('Admin Panel E2E Tests', () => {
         await titleInput.fill(updatedTitle);
 
         await page.waitForTimeout(500);
-        await page.getByRole('button', { name: /Update Signature/i }).click();
+        const submitBtn = page.getByRole('button', { name: /Update Signature/i });
+        await expect(submitBtn).toBeVisible({ timeout: 5000 });
+        await submitBtn.click();
 
-        // Search for the updated domain to ensure it's visible
-        await page.goto('/domains');
-        await page.waitForTimeout(2000);
-        const searchInput = page.getByPlaceholder(/Query curriculum domains/i);
-        await searchInput.click();
-        await searchInput.fill('');
-        await searchInput.fill(updatedTitle);
-        await page.keyboard.press('Enter');
+        // Wait for navigation back to the domains list (confirms form submitted)
+        await page.waitForURL('**/domains', { timeout: 20000 });
+        await page.waitForLoadState('networkidle');
         await page.waitForTimeout(2000);
 
+        // Verify the updated title appears in the domains list
         await expect(page.getByText(updatedTitle).first()).toBeVisible({ timeout: 15000 });
       } else {
         test.skip();
@@ -339,8 +349,8 @@ test.describe('Admin Panel E2E Tests', () => {
       }
 
       const questionId = Date.now();
-      if (await page.locator('.ProseMirror').isVisible()) {
-        await page.locator('.ProseMirror').click();
+      if (await page.locator('.ProseMirror').first().isVisible()) {
+        await page.locator('.ProseMirror').first().click();
         await page.keyboard.type(`E2E Quest ID ${questionId}`);
       } else {
         await page.locator('textarea[name="content"]').fill(`E2E Quest ID ${questionId}`);

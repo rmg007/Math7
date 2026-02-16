@@ -78,5 +78,4 @@ RETURNS BOOLEAN LANGUAGE sql STABLE AS $$
     ),
     false
   );
-$$;</content>
-<parameter name="filePath">/workspaces/Questerix/supabase/migrations/20260214210000_super_admin_jwt_claims.sql
+$$;

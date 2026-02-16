@@ -1,10 +1,23 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import react from '@vitejs/plugin-react';
+import path from 'path';
+import { defineConfig } from 'vite';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    viteStaticCopy({
+      targets: [
+        {
+          // Copy PDF.js worker to public directory at build time
+          // This ensures the worker version always matches pdfjs-dist
+          src: 'node_modules/pdfjs-dist/build/pdf.worker.mjs',
+          dest: 'pdfjs',
+        },
+      ],
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -37,7 +50,11 @@ export default defineConfig({
               return 'ui-vendor';
             }
             // Core React
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+            if (
+              id.includes('react') ||
+              id.includes('react-dom') ||
+              id.includes('react-router-dom')
+            ) {
               return 'react-vendor';
             }
             // Tanstack Query and Supabase
@@ -49,4 +66,4 @@ export default defineConfig({
       },
     },
   },
-})
+});

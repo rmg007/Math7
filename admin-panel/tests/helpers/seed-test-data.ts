@@ -61,7 +61,7 @@ async function getTestContext(supabase: SupabaseClient<Database>) {
     const { data: newSubject, error: subjectError } = await supabase
       .from('subjects')
       .insert({
-        name: 'E2E Test Mathematics',
+        title: 'E2E Test Mathematics',
         slug: `${TEST_SLUG_PREFIX}_math_subject`,
         description: 'Auto-created subject for E2E tests',
       })

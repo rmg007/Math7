@@ -1,0 +1,221 @@
+[dotenv@17.2.3] injecting env (6) from .env.test.local -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: Γ£à audit secrets and track compliance: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: Γ£à audit secrets and track compliance: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+
+Running 31 tests using 6 workers
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöæ add access controls to secrets: https://dotenvx.com/ops
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+
+[1A[2K[1/31] [chromium] ΓÇ║ tests\accessibility.spec.ts:59:3 ΓÇ║ Accessibility Audit ΓÇ║ Login page
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: Γ£à audit secrets and track compliance: https://dotenvx.com/ops
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+
+[1A[2K[2/31] [chromium] ΓÇ║ tests\accessibility.spec.ts:111:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Questions List
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+
+[1A[2K[3/31] [chromium] ΓÇ║ tests\accessibility.spec.ts:95:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Domains List
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+
+[1A[2K[4/31] [chromium] ΓÇ║ tests\accessibility.spec.ts:127:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Bulk Import
+[1A[2K[5/31] [chromium] ΓÇ║ tests\accessibility.spec.ts:79:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Dashboard
+[1A[2K[6/31] [chromium] ΓÇ║ tests\a11y-audit.spec.ts:30:1 ΓÇ║ Audit all pages
+[1A[2K[7/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:97:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should load login page
+[1A[2K[8/31] [chromium] ΓÇ║ tests\bulk-import.e2e.spec.ts:32:3 ΓÇ║ Bulk Import Feature (Golden Path) ΓÇ║ should allow downloading the CSV template
+[1A[2K[9/31] [chromium] ΓÇ║ tests\bulk-import.e2e.spec.ts:39:3 ΓÇ║ Bulk Import Feature (Golden Path) ΓÇ║ should successfully parse questions from AI prompt
+[1A[2K[chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:97:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should load login page
+Seeding test data...
+
+[1A[2KTest data seeded successfully.
+
+[1A[2K[10/31] [chromium] ΓÇ║ tests\bulk-import.e2e.spec.ts:58:3 ΓÇ║ Bulk Import Feature (Golden Path) ΓÇ║ should commit buffer to production matrix (Real Import)
+[1A[2K[11/31] [chromium] ΓÇ║ tests\bulk-import.e2e.spec.ts:103:3 ΓÇ║ Bulk Import Feature (Golden Path) ΓÇ║ should handle import errors gracefully
+[1A[2K[12/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:104:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should login with valid credentials
+[1A[2K[13/31] [chromium] ΓÇ║ tests\example.spec.ts:3:1 ΓÇ║ admin panel loads
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+
+[1A[2K[14/31] [chromium] ΓÇ║ tests\visual-regression.spec.ts:39:3 ΓÇ║ Visual Regression ΓÇö Key Pages ΓÇ║ Dashboard
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+
+[1A[2K[15/31] [chromium] ΓÇ║ tests\visual-regression.spec.ts:51:3 ΓÇ║ Visual Regression ΓÇö Key Pages ΓÇ║ Domains List
+[1A[2K[16/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:109:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should show error with invalid credentials
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+
+[1A[2K[17/31] [chromium] ΓÇ║ tests\visual-regression.spec.ts:64:3 ΓÇ║ Visual Regression ΓÇö Key Pages ΓÇ║ Skills List
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+
+[1A[2K[18/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:117:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should logout successfully
+[1A[2K[19/31] [chromium] ΓÇ║ tests\visual-regression.spec.ts:77:3 ΓÇ║ Visual Regression ΓÇö Key Pages ΓÇ║ Questions List
+[1A[2K[20/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:143:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should redirect to login when accessing protected route without auth
+[1A[2K[21/31] [chromium] ΓÇ║ tests\visual-regression.spec.ts:90:3 ΓÇ║ Visual Regression ΓÇö Key Pages ΓÇ║ Login Page (logged out)
+[1A[2K[chromium] ΓÇ║ tests\a11y-audit.spec.ts:30:1 ΓÇ║ Audit all pages
+# Accessibility Audit Report
+
+## Dashboard (/dashboard)
+Total violations: 0 | Critical/Serious: 0
+
+---
+
+## Domains (/domains)
+Total violations: 0 | Critical/Serious: 0
+
+---
+
+## Questions (/questions)
+Total violations: 0 | Critical/Serious: 0
+
+---
+
+## Bulk Import (/ai-import)
+Total violations: 0 | Critical/Serious: 0
+
+---
+
+
+[1A[2K[22/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:156:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Dashboard ΓÇ║ should load dashboard
+[1A[2K  1) [chromium] ΓÇ║ tests\visual-regression.spec.ts:64:3 ΓÇ║ Visual Regression ΓÇö Key Pages ΓÇ║ Skills List 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveScreenshot[2m([22m[32mexpected[39m[2m)[22m failed
+
+      401622 pixels (ratio 0.20 of all image pixels) are different.
+
+      Snapshot: skills-list.png
+
+    Call log:
+    [2m  - Expect "toHaveScreenshot(skills-list.png)" with timeout 10000ms[22m
+    [2m    - verifying given screenshot expectation[22m
+    [2m  - taking page screenshot[22m
+    [2m    - disabled all CSS animations[22m
+    [2m  - waiting for fonts to load...[22m
+    [2m  - fonts loaded[22m
+    [2m  - 401622 pixels (ratio 0.20 of all image pixels) are different.[22m
+    [2m  - waiting 100ms before taking screenshot[22m
+    [2m  - taking page screenshot[22m
+    [2m    - disabled all CSS animations[22m
+    [2m  - waiting for fonts to load...[22m
+    [2m  - fonts loaded[22m
+    [2m  - captured a stable screenshot[22m
+    [2m  - 401622 pixels (ratio 0.20 of all image pixels) are different.[22m
+
+
+      66 |     await page.waitForLoadState('networkidle');
+      67 |     await page.waitForTimeout(1000);
+    > 68 |     await expect(page).toHaveScreenshot('skills-list.png', {
+         |                        ^
+      69 |       fullPage: true,
+      70 |       mask: [
+      71 |         page.locator('time'),
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\visual-regression.spec.ts:68:24
+
+    attachment #1: skills-list (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    Expected: tests\__screenshots__\chromium\visual-regression.spec.ts\skills-list.png
+    Received: test-results\visual-regression-Visual-Regression-ΓÇö-Key-Pages-Skills-List-chromium\skills-list-actual.png
+    Diff:     test-results\visual-regression-Visual-Regression-ΓÇö-Key-Pages-Skills-List-chromium\skills-list-diff.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\visual-regression-Visual-Regression-ΓÇö-Key-Pages-Skills-List-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #3: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\visual-regression-Visual-Regression-ΓÇö-Key-Pages-Skills-List-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\visual-regression-Visual-Regression-ΓÇö-Key-Pages-Skills-List-chromium\error-context.md
+
+
+[1A[2K[23/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:161:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Dashboard ΓÇ║ should navigate to different sections from dashboard
+[1A[2K[24/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:177:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should list all domains
+[1A[2K[25/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:186:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should create a new domain
+[1A[2K  2) [chromium] ΓÇ║ tests\visual-regression.spec.ts:77:3 ΓÇ║ Visual Regression ΓÇö Key Pages ΓÇ║ Questions List 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+      navigated to "http://localhost:5000/"
+      navigated to "http://localhost:5000/login"
+    ============================================================
+
+      27 |   await page.fill('#login-password', TEST_USERS.SUPER_ADMIN.password);
+      28 |   await page.click('button[type="submit"]');
+    > 29 |   await page.waitForURL('**/dashboard', { timeout: 15000 });
+         |              ^
+      30 |   // Wait for any loading animations to settle
+      31 |   await page.waitForTimeout(1500);
+      32 | }
+        at login (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\visual-regression.spec.ts:29:14)
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\visual-regression.spec.ts:36:5
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\visual-regression-Visual-R-01616--ΓÇö-Key-Pages-Questions-List-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\visual-regression-Visual-R-01616--ΓÇö-Key-Pages-Questions-List-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\visual-regression-Visual-R-01616--ΓÇö-Key-Pages-Questions-List-chromium\error-context.md
+
+
+[1A[2K[26/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:226:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should edit an existing domain
+[1A[2K[27/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:261:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should delete a domain
+[1A[2K[28/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:293:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Skills Management ΓÇ║ should list all skills
+[1A[2K[29/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:300:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Skills Management ΓÇ║ should create a new skill
+[1A[2K[30/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:327:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Questions Management ΓÇ║ should list all questions
+[1A[2K[31/31] [chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:334:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Questions Management ΓÇ║ should create a new MCQ question
+[1A[2K[chromium] ΓÇ║ tests\admin-panel.e2e.spec.ts:334:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Questions Management ΓÇ║ should create a new MCQ question
+Cleaning up test data...
+
+[1A[2K  2 failed
+    [chromium] ΓÇ║ tests\visual-regression.spec.ts:64:3 ΓÇ║ Visual Regression ΓÇö Key Pages ΓÇ║ Skills List 
+    [chromium] ΓÇ║ tests\visual-regression.spec.ts:77:3 ΓÇ║ Visual Regression ΓÇö Key Pages ΓÇ║ Questions List 
+  1 skipped
+  28 passed (1.8m)
