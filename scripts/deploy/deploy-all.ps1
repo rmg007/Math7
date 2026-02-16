@@ -2,19 +2,21 @@
 .SYNOPSIS
     Parallel deployment to Cloudflare Pages
 .DESCRIPTION
-    Deploys all three Questerix applications to Cloudflare Pages in parallel
+    Deploys Questerix applications to Cloudflare Pages.
+    By default, ONLY Admin Panel and Student App are deployed.
+    Use -IncludeLanding to also deploy landing pages.
 .PARAMETER ConfigFile
     Path to the master-config.json file
+.PARAMETER IncludeLanding
+    If set, will also deploy the landing pages project
 #>
 
 param(
     [Parameter(Mandatory=$true)]
     [string]$ConfigFile,
 
-    [switch]$SkipLanding
+    [switch]$IncludeLanding
 )
-
-# SkipLanding is now controlled by the parameter
 
 $ErrorActionPreference = 'Stop'
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -32,12 +34,17 @@ Write-Host "Starting parallel deployments..." -ForegroundColor Cyan
 # =============================================================================
 # DEPLOY IN PARALLEL
 # =============================================================================
-if (-not $SkipLanding) {
+if ($IncludeLanding) {
+    if (-not $cfLanding) {
+        Write-Warning "Landing project not defined in config, but -IncludeLanding was specified."
+    }
     $landingJob = Start-Job -ScriptBlock {
         param($Dir, $ProjectName)
         $landingDir = Join-Path $Dir 'landing-pages\dist'
         npx -y wrangler pages deploy $landingDir --project-name $ProjectName --commit-dirty --branch main 2>&1
     } -ArgumentList $RootDir, $cfLanding
+} else {
+    Write-Host "ℹ️  Skipping Landing Pages (Default Behavior)" -ForegroundColor Gray
 }
 
 $adminJob = Start-Job -ScriptBlock {
@@ -57,7 +64,7 @@ $studentJob = Start-Job -ScriptBlock {
 # =============================================================================
 $deployStatus = 0
 
-if (-not $SkipLanding) {
+if ($IncludeLanding) {
     $landingResult = Receive-Job -Job $landingJob -Wait
     if ($landingJob.State -eq 'Completed') {
         Write-Host "✅ Landing Pages deployed successfully" -ForegroundColor Green
@@ -66,8 +73,6 @@ if (-not $SkipLanding) {
         Write-Host ($landingResult -join "`n") -ForegroundColor Red
         $deployStatus = 1
     }
-} else {
-    Write-Host "⚠️  Skipping Landing Pages deployment" -ForegroundColor Yellow
 }
 
 $adminResult = Receive-Job -Job $adminJob -Wait
@@ -90,7 +95,7 @@ if ($studentJob.State -eq 'Completed') {
 
 # Cleanup jobs
 $jobsToClean = @($adminJob, $studentJob)
-if (-not $SkipLanding) { $jobsToClean += $landingJob }
+if ($IncludeLanding) { $jobsToClean += $landingJob }
 Remove-Job -Job $jobsToClean
 
 # Cleanup temp files
@@ -100,5 +105,6 @@ if (Test-Path $flutterDefines) {
 }
 
 if ($deployStatus -ne 0) {
-    throw "One or more deployments failed"
+    Write-Host "One or more deployments failed" -ForegroundColor Red
+    exit 1
 }

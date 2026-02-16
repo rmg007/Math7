@@ -23,7 +23,7 @@ graph TD
     SA_BUILD --> CF
 ```
 
-> **CRITICAL:** `landing-pages` must NEVER be published. It is intentionally excluded from the orchestration cycle and restricted to local development only.
+> **CRITICAL:** `landing-pages` are **EXCLUDED** by default. To deploy them, you must explicitly use the `-IncludeLanding` flag. This is a safety measure to prevent unauthorized changes to public-facing pages.
 
 ### 1. First-Time Setup
 
@@ -46,6 +46,9 @@ notepad master-config.json
 ```powershell
 # Full deployment (all apps)
 ./orchestrator.ps1
+
+# Deploy ALL apps (including landing pages - CAUTION)
+./orchestrator.ps1 -IncludeLanding
 
 # Staging deployment
 ./orchestrator.ps1 -Env staging

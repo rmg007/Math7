@@ -1,6 +1,12 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -177,10 +183,23 @@ export function SubjectsPage() {
           description:
             'The subject and all associated metadata have been removed from the platform.',
         });
-      } catch (error) {
+      } catch (error: unknown) {
+        let description = 'Failed to delete subject';
+
+        // Handle constraint violation (Postgres error code 23503)
+        if (
+          typeof error === 'object' &&
+          error !== null &&
+          'code' in error &&
+          (error as { code: string }).code === '23503'
+        ) {
+          description =
+            'Cannot delete this subject because it is assigned to one or more Applications. Please reassign or delete the applications first.';
+        }
+
         toast({
           title: 'Error',
-          description: 'Failed to delete subject',
+          description,
           variant: 'destructive',
         });
       }
@@ -311,9 +330,6 @@ export function SubjectsPage() {
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="rounded-[2.5rem] border-none bg-white/90 backdrop-blur-2xl p-0 overflow-hidden shadow-2xl">
-          <DialogTitle className="sr-only">
-            {editingSubject ? 'Edit Subject' : 'Add Subject'}
-          </DialogTitle>
           <form onSubmit={handleSubmit}>
             <div className="p-10 space-y-8">
               <div className="flex items-center gap-4">
@@ -326,11 +342,11 @@ export function SubjectsPage() {
                 </div>
                 <div>
                   <h2 className="text-2xl font-black text-gray-900 tracking-tight italic">
-                    {editingSubject ? 'Edit Subject' : 'Add Subject'}
+                    <DialogTitle>{editingSubject ? 'Edit Subject' : 'Add Subject'}</DialogTitle>
                   </h2>
-                  <p className="text-2xs font-black text-gray-400 uppercase tracking-widest mt-1">
+                  <DialogDescription className="text-2xs font-black text-gray-400 uppercase tracking-widest mt-1">
                     {editingSubject ? `Editing subject` : 'Add a new subject'}
-                  </p>
+                  </DialogDescription>
                 </div>
               </div>
 

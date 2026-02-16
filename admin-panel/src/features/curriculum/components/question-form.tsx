@@ -289,7 +289,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                         <h3 className="text-xl font-black text-gray-900 tracking-tight">
                           Question Core
                         </h3>
-                        <p className="text-2xs font-black text-gray-400 uppercase tracking-widest">
+                        <p className="text-2xs font-black text-gray-500 uppercase tracking-widest">
                           Primary instructional text
                         </p>
                       </div>
@@ -327,7 +327,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                           <h3 className="text-xl font-black text-gray-900 tracking-tight">
                             Validation Logic
                           </h3>
-                          <p className="text-2xs font-black text-gray-400 uppercase tracking-widest">
+                          <p className="text-2xs font-black text-gray-500 uppercase tracking-widest">
                             Answer configuration
                           </p>
                         </div>
@@ -613,7 +613,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                     {/* Placeholder for other complex types to maintain UI consistency */}
                     {!(QUESTION_TYPES as readonly string[]).includes(questionType) && (
                       <div className="p-12 text-center bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
-                        <p className="text-gray-400 font-bold italic">
+                        <p className="text-gray-500 font-bold italic">
                           Dynamic configuration for {questionType.replace('_', ' ')} protocol
                           active.
                         </p>
@@ -633,7 +633,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                         <h3 className="text-xl font-black text-gray-900 tracking-tight">
                           Rationalization
                         </h3>
-                        <p className="text-2xs font-black text-gray-400 uppercase tracking-widest">
+                        <p className="text-2xs font-black text-gray-500 uppercase tracking-widest">
                           Solution explanation
                         </p>
                       </div>

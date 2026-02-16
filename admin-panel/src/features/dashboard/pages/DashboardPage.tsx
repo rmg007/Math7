@@ -241,7 +241,7 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+              <ResponsiveContainer width="100%" height="100%" minHeight={300}>
                 <AreaChart data={activityData}>
                   <defs>
                     <linearGradient id="colorImports" x1="0" y1="0" x2="0" y2="1">
@@ -307,7 +307,7 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent className="flex flex-col items-center">
             <div className="h-[240px] w-full">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+              <ResponsiveContainer width="100%" height="100%" minHeight={240}>
                 <PieChart>
                   <Pie
                     data={aiUsageData}

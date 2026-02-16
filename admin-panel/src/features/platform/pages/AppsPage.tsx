@@ -1,6 +1,12 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -380,9 +386,9 @@ export function AppsPage() {
               <DialogTitle className="text-2xl font-black text-white tracking-tight">
                 {editingApp ? 'RECONFIGURE APP' : 'INITIATE DEPLOYMENT'}
               </DialogTitle>
-              <p className="text-indigo-100 text-xs font-bold uppercase tracking-extra-wide mt-1 italic">
+              <DialogDescription className="text-indigo-100 text-xs font-bold uppercase tracking-extra-wide mt-1 italic">
                 Define cluster parameters
-              </p>
+              </DialogDescription>
             </div>
             <Layout className="w-10 h-10 text-white/20" />
           </div>
@@ -394,7 +400,7 @@ export function AppsPage() {
                   Primary Subject
                 </Label>
                 <Select
-                  value={formData.subject_id}
+                  value={formData.subject_id ?? ''}
                   onValueChange={(v) => setFormData({ ...formData, subject_id: v })}
                 >
                   <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:ring-indigo-500/10 font-bold">

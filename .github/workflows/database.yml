@@ -2,9 +2,9 @@ name: Database Safety
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   db-safety:
@@ -12,17 +12,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: supabase/setup-cli@v1
         with:
           version: latest
-      
+
       - name: Start Supabase (Ephemeral)
         run: supabase start
-      
+
       - name: Verify Migrations Apply Cleanly
         run: supabase db reset --db-url postgresql://postgres:postgres@localhost:54322/postgres
-      
+
       - name: Check for Destructive SQL Patterns
         run: |
           if grep -rE "DROP (TABLE|COLUMN)" ./supabase/migrations/*.sql 2>/dev/null; then
@@ -39,7 +39,29 @@ jobs:
           else
             echo "✅ No destructive SQL patterns detected."
           fi
-      
+
+      - name: Run RLS & Database Tests (pgTAP)
+        run: |
+          # Install pgTAP extension in the ephemeral CI database
+          supabase db reset --db-url postgresql://postgres:postgres@localhost:54322/postgres
+
+          # Run the tests
+          # We use pg_prove or simply psql to run the test file and check exit code
+          # Installing pg_prove in CI might be extra overhead, so we use psql + grep for now
+          # Note: A real implementation would use 'supabase test db' if available or pg_prove
+
+          echo "Running RLS Core Tests..."
+          psql postgresql://postgres:postgres@localhost:54322/postgres -f supabase/tests/rls/rls_core_tests.sql > test_output.txt 2>&1
+
+          cat test_output.txt
+
+          if grep -q "failed" test_output.txt; then
+            echo "❌ Tests FAILED"
+            exit 1
+          else
+            echo "✅ All RLS/Database tests passed"
+          fi
+
       - name: Stop Supabase
         if: always()
         run: supabase stop

@@ -680,6 +680,27 @@ export function DomainList() {
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-hidden">
               <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-100/50">
+                    <th className="w-12 px-6 py-4">
+                      <div className="flex items-center justify-center">
+                        <GripVertical className="h-4 w-4 text-gray-300" />
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-2xs font-black text-gray-400 uppercase tracking-widest">
+                      Domain
+                    </th>
+                    <th className="px-6 py-4 text-left text-2xs font-black text-gray-400 uppercase tracking-widest">
+                      Last Updated
+                    </th>
+                    <th className="px-6 py-4 text-left text-2xs font-black text-gray-400 uppercase tracking-widest">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-right text-2xs font-black text-gray-400 uppercase tracking-widest">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
                 <SortableContext items={domainIds} strategy={verticalListSortingStrategy}>
                   <tbody className="divide-y divide-gray-50">
                     {!domains.length ? (

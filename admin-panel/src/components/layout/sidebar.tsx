@@ -65,11 +65,12 @@ const navigationGroups: NavGroup[] = [
   {
     title: 'Curriculum',
     items: [
-      { name: 'My Groups', href: '/groups', icon: Users, hideForSuperAdmin: true }, // Hide from super admins
-      { name: 'Domains', href: '/domains', icon: Book },
       { name: 'Subjects', href: '/subjects', icon: Boxes, superAdminOnly: true },
+      { name: 'Apps', href: '/apps', icon: Layout, superAdminOnly: true },
+      { name: 'Domains', href: '/domains', icon: Book },
       { name: 'Skills', href: '/skills', icon: Layers },
       { name: 'Questions', href: '/questions', icon: FileText },
+      { name: 'Groups', href: '/groups', icon: Users },
       { name: 'Bulk Import', href: '/ai-import', icon: FileUp },
     ],
   },
@@ -78,7 +79,6 @@ const navigationGroups: NavGroup[] = [
     items: [
       { name: 'Publish', href: '/publish', icon: Upload },
       { name: 'Version History', href: '/versions', icon: History },
-      { name: 'Apps', href: '/apps', icon: Layout, superAdminOnly: true },
       { name: 'Landing Pages', href: '/landings', icon: Globe, superAdminOnly: true },
     ],
   },
@@ -286,7 +286,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
       >
         {!isSidebarCollapsed ? (
           <Select
-            value={currentApp?.app_id}
+            value={currentApp?.app_id || ''}
             onValueChange={(value) => {
               const app = apps.find((a) => a.app_id === value);
               if (app) setCurrentApp(app);

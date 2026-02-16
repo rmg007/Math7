@@ -2,11 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useAIGenerator } from '@/hooks/use-ai-generator';
@@ -147,7 +147,6 @@ Ensure questions are clear, concise, and suitable for the curriculum.`;
           Generate curriculum-aligned questions from your documents in minutes.
         </p>
         {/* AI generation is handled server-side via Edge Functions. No client API key needed. */}
-
       </div>
 
       {/* Stepper / Progress */}
@@ -161,7 +160,7 @@ Ensure questions are clear, concise, and suitable for the curriculum.`;
           return (
             <div
               key={step}
-              className={`flex items-center gap-2 z-10 ${isActive ? 'text-purple-700' : 'text-gray-400'}`}
+              className={`flex items-center gap-2 z-10 ${isActive ? 'text-purple-700' : 'text-gray-500'}`}
             >
               <div
                 className={`
@@ -172,7 +171,7 @@ Ensure questions are clear, concise, and suitable for the curriculum.`;
               >
                 {idx + 1}
               </div>
-              <span className={`font-medium ${isActive ? 'text-gray-900' : 'text-gray-400'}`}>
+              <span className={`font-medium ${isActive ? 'text-gray-900' : 'text-gray-500'}`}>
                 {step}
               </span>
             </div>

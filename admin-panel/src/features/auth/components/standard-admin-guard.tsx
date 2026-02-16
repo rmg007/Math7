@@ -1,6 +1,6 @@
+import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
 
 export function StandardAdminGuard({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -24,8 +24,8 @@ export function StandardAdminGuard({ children }: { children: React.ReactNode }) 
         .eq('id', user.id)
         .single();
 
-      // Redirect super admins away from standard admin pages (like Groups)
-      if (error || !profile || profile.role === 'super_admin') {
+      // Allow both standard admins and super admins
+      if (error || !profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
         navigate('/');
         return;
       }

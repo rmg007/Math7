@@ -1,5 +1,33 @@
 # Learning Log
 
+## 2026-02-16: Deployment Protocol Correction (Incidents & Fixes)
+
+### Session Context
+
+- **Trigger**: Unauthorized deployment of Landing Pages despite user instructions.
+- **Scope**: `scripts/deploy/deploy-all.ps1`, `master-config.json`, Documentation.
+- **Outcome**: ✅ Deployment script patched to exclude landing pages by default (`-IncludeLanding` required). ✅ Documentation updated to reflect strict protocol.
+
+### What Was Done
+
+#### 1. Deployment Script Hardening
+
+- **Refactored `deploy-all.ps1`**: Changed logic from opt-out (`-SkipLanding`) to opt-in (`-IncludeLanding`).
+- **Safety Default**: Running the script without flags now ONLY deploys Admin Panel and Student App.
+- **Warning System**: Added explicit warnings if landing pages are requested but not configured.
+
+### What Was Learned
+
+- **Opt-In vs Opt-Out**: Critical infrastructure scripts should always use "Opt-In" for potentially destructive or unauthorized actions. "Skip" flags are dangerous because they rely on the operator remembering to use them. "Include" flags are safe because forgetting them results in _less_ action, not _more_.
+- **Config Drift**: `master-config.json` lacked explicit landing page configuration, relying on legacy behavior.
+
+### Prevention Measures
+
+- **ALWAYS** default to minimal viable deployment.
+- **ALWAYS** check `Start-Job` logic for identifying what _exactly_ is being queued.
+
+---
+
 ## 2026-02-15: Test Suite Stabilization & Loki Mode Infrastructure
 
 ### Session Context
