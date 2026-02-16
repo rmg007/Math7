@@ -284,7 +284,7 @@ export function DomainList() {
   const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const sortBy = 'name';
+  const sortBy = 'title';
   const sortOrder = 'asc' as const;
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
     type: 'single' | 'bulk';
