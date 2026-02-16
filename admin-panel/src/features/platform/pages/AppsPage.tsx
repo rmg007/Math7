@@ -179,7 +179,7 @@ export function AppsPage() {
       } else {
         setEditingApp(null);
         setFormData({
-          subject_id: subjects?.[0]?.subject_id ?? '',
+          subject_id: subjects && subjects.length > 0 ? subjects[0].subject_id : '',
           display_name: '',
           subdomain: '',
           grade_level: '',
@@ -401,7 +401,7 @@ export function AppsPage() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl rounded-3xl p-0 overflow-hidden border-0 shadow-2xl backdrop-blur-3xl bg-white/90">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col rounded-3xl p-0 overflow-hidden border-0 shadow-2xl backdrop-blur-3xl bg-white/90">
           <div className="bg-indigo-600 px-8 py-10 flex items-center justify-between">
             <div>
               <DialogTitle className="text-2xl font-black text-white tracking-tight">
@@ -414,7 +414,10 @@ export function AppsPage() {
             <Layout className="w-10 h-10 text-white/20" />
           </div>
 
-          <form onSubmit={handleSubmit} className="px-8 py-8 space-y-8">
+          <form
+            onSubmit={handleSubmit}
+            className="flex-1 overflow-y-auto px-8 py-8 space-y-8 min-h-0"
+          >
             <div className="p-4 bg-orange-50/50 border border-orange-100 rounded-2xl flex gap-4">
               <div className="p-2 h-fit rounded-xl bg-orange-100 text-orange-600">
                 <AlertTriangle className="w-5 h-5" />
