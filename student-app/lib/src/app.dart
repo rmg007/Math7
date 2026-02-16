@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:student_app/src/core/config/app_config_service.dart'; // Import config service
 import 'package:student_app/src/core/core_providers.dart';
 import 'package:student_app/src/core/providers/settings_provider.dart';
 import 'package:student_app/src/core/theme/app_theme.dart';
 import 'package:student_app/src/features/auth/providers/auth_provider.dart';
 import 'package:student_app/src/features/auth/screens/welcome_screen.dart';
+import 'package:student_app/src/features/curriculum/screens/practice_screen.dart';
 import 'package:student_app/src/features/home/screens/main_shell.dart';
 import 'package:student_app/src/features/progress/repositories/session_repository.dart';
-import 'package:student_app/src/features/curriculum/screens/practice_screen.dart';
 
 class QuesterixApp extends ConsumerStatefulWidget {
   const QuesterixApp({super.key});
@@ -21,6 +22,32 @@ class _QuesterixAppState extends ConsumerState<QuesterixApp> {
 
   @override
   Widget build(BuildContext context) {
+    // Watch app config to ensure we have a valid tenant context
+    final appConfig = ref.watch(appConfigProvider);
+
+    // If config failed to load (and we are here), show error screen
+    // Note: main.dart catches the exception, so we might end up here with null config
+    if (appConfig == null) {
+      return const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 48, color: Colors.red),
+                SizedBox(height: 16),
+                Text('Failed to load application configuration.',
+                    style: TextStyle(fontSize: 18)),
+                SizedBox(height: 8),
+                Text('Please check your connection and reload.'),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final session = ref.watch(currentSessionProvider);
     final settings = ref.watch(settingsProvider);
     ref.listen(authStateProvider, (previous, next) {});
@@ -36,7 +63,7 @@ class _QuesterixAppState extends ConsumerState<QuesterixApp> {
     });
 
     return MaterialApp(
-      title: 'Questerix',
+      title: appConfig.appName, // Use dynamic app name
       debugShowCheckedModeBanner: false,
       theme: _getTheme(context, settings, false),
       darkTheme: _getTheme(context, settings, true),
@@ -134,6 +161,8 @@ class _QuesterixAppState extends ConsumerState<QuesterixApp> {
               child: const Text('Resume'),
             ),
           ],
+          backgroundColor:
+              Theme.of(context).colorScheme.surface, // Fix generic dialog color
         ),
       );
 

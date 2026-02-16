@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../core_providers.dart';
 import 'env.dart';
 
@@ -76,7 +77,7 @@ class AppConfigService extends StateNotifier<AppContext?> {
       final response = await _supabase
           .from('apps')
           .select('app_id, display_name, subdomain')
-          .eq('subdomain', subdomain)
+          .ilike('subdomain', subdomain) // FIXED: Case-insensitive lookup
           .eq('is_active', true)
           .maybeSingle();
 
@@ -89,16 +90,16 @@ class AppConfigService extends StateNotifier<AppContext?> {
 
         state = context;
         return context;
+      } else {
+        // Handle "App Not Found" explicitly
+        throw AppInitializationException(
+          'Tenant not found for subdomain: $subdomain',
+          subdomain: subdomain,
+        );
       }
     } catch (e) {
       debugPrint('Error loading app config for subdomain $subdomain: $e');
+      rethrow; // Rethrow so main.dart knows it failed
     }
-
-    // 3. No fallback - tenant context MUST be determined from network
-    // Using a hardcoded default would corrupt multi-tenant isolation
-    throw AppInitializationException(
-      'Unable to determine app context. Please check your internet connection and try again.',
-      subdomain: subdomain,
-    );
   }
 }
