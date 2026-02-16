@@ -26,7 +26,6 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import {
-  Activity,
   Globe,
   GraduationCap,
   Layers,
@@ -276,16 +275,6 @@ export function AppsPage() {
       </div>
 
       <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 overflow-hidden hover:shadow-xl transition-all duration-500">
-        <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-black text-gray-900 tracking-tight">Deployment Matrix</h3>
-            <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
-              Active Application Registry
-            </p>
-          </div>
-          <Activity className="h-5 w-5 text-gray-200" />
-        </div>
-
         <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
           <Table>
             <TableHeader>

@@ -179,7 +179,7 @@ const SortableRow = memo(
         </td>
         <td className="px-4 py-4">{renderStatusBadge(skill.status || 'draft')}</td>
         <td className="pl-4 pr-8 py-3 text-right">
-          <div className="flex items-center justify-end gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity">
+          <div className="flex items-center justify-end gap-1">
             <Link
               to={`/skills/${skill.skill_id}/edit`}
               className="p-2 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
@@ -272,7 +272,7 @@ const SortableCard = memo(
                 )}
               </button>
             </div>
-            <div className="flex gap-1.5 opacity-0 group-hover/card:opacity-100 transition-opacity">
+            <div className="flex gap-1.5">
               <Link
                 to={`/skills/${skill.skill_id}/edit`}
                 className="p-2.5 rounded-xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm"

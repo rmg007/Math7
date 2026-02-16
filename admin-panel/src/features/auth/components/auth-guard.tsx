@@ -17,17 +17,22 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       // When the tab/browser closes, sessionStorage is destroyed. On the
       // next visit, both flags are absent → the session should be evicted.
       if (session) {
+        // Always mark the current tab as having an active session.
+        // The "Remember Me" eviction only fires on a fresh browser
+        // open (i.e. a *new* tab after the browser was fully closed).
+        // Within the same browser session, navigation must never logout.
+        sessionStorage.setItem('questerix_session_active', '1');
+
         const rememberMe = localStorage.getItem('questerix_remember_me');
         const sessionActive = sessionStorage.getItem('questerix_session_active');
 
+        // Only evict if the browser was fully closed (sessionStorage
+        // was cleared) AND the user did not check "Remember Me".
         if (!rememberMe && !sessionActive) {
           await supabase.auth.signOut();
           navigate('/login');
           return;
         }
-
-        // Mark the current tab as "session in progress"
-        sessionStorage.setItem('questerix_session_active', '1');
       }
 
       if (!session) {

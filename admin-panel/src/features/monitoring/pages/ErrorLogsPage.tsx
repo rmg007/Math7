@@ -1,6 +1,6 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -300,12 +300,6 @@ export function ErrorLogsPage() {
       </div>
 
       <Card className="shadow-sm overflow-hidden">
-        <CardHeader className="bg-gray-50/50 border-b pb-4">
-          <div>
-            <CardTitle className="text-lg">Recent Errors</CardTitle>
-            <CardDescription>Click an error to view full details and context.</CardDescription>
-          </div>
-        </CardHeader>
         <CardContent className="p-0 overflow-x-auto">
           <Table className="min-w-[800px]">
             <TableHeader className="bg-gray-50/30">

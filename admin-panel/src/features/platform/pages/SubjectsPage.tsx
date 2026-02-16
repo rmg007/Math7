@@ -1,6 +1,6 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Activity, Boxes, Layers, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
+import { Boxes, Layers, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import {
   useCreateSubject,
@@ -246,18 +246,6 @@ export function SubjectsPage() {
       </div>
 
       <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 overflow-hidden hover:shadow-xl transition-all duration-500">
-        <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-black text-gray-900 tracking-tight italic">
-              Category Hierarchy
-            </h3>
-            <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
-              Knowledge Domain Configuration
-            </p>
-          </div>
-          <Activity className="h-5 w-5 text-gray-200" />
-        </div>
-
         <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
           <Table className="w-full">
             <TableHeader>
@@ -323,6 +311,9 @@ export function SubjectsPage() {
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="rounded-[2.5rem] border-none bg-white/90 backdrop-blur-2xl p-0 overflow-hidden shadow-2xl">
+          <DialogTitle className="sr-only">
+            {editingSubject ? 'Edit Taxonomy Node' : 'Provision Node'}
+          </DialogTitle>
           <form onSubmit={handleSubmit}>
             <div className="p-10 space-y-8">
               <div className="flex items-center gap-4">
