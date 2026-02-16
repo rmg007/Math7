@@ -159,23 +159,16 @@ const SortableRow = memo(
           </button>
         </td>
         <td className="px-6 py-5 max-w-[450px]">
-          <div className="flex items-center gap-3">
-            <div
-              className="font-bold text-gray-900 text-[15px] tracking-tight line-clamp-1 group-hover/row:text-indigo-700 transition-colors prose-sm min-w-0"
-              dangerouslySetInnerHTML={{
-                __html: sanitizeHtml(
-                  typeof question.content === 'string'
-                    ? question.content
-                    : JSON.stringify(question.content)
-                ),
-              }}
-            />
-            {question.skills?.domains?.title && (
-              <span className="text-2xs font-black text-gray-400 uppercase tracking-widest whitespace-nowrap shrink-0">
-                {question.skills.domains.title} / {question.skills.title}
-              </span>
-            )}
-          </div>
+          <div
+            className="font-bold text-gray-900 text-[15px] tracking-tight line-clamp-1 group-hover/row:text-indigo-700 transition-colors prose-sm min-w-0"
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtml(
+                typeof question.content === 'string'
+                  ? question.content
+                  : JSON.stringify(question.content)
+              ),
+            }}
+          />
         </td>
         <td className="px-4 py-5">
           <span className="px-3 py-1.5 bg-white border border-gray-100 text-gray-600 rounded-xl text-2xs font-black uppercase tracking-widest shadow-sm group-hover/row:border-indigo-100 group-hover/row:text-indigo-600 transition-all">

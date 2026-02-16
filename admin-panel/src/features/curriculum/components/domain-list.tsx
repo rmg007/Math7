@@ -149,12 +149,7 @@ function SortableRow({
         </span>
       </td>
       <td className="px-6 py-3">
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-gray-900 text-sm tracking-tight">{domain.title}</span>
-          <span className="text-2xs text-gray-400 font-mono tracking-wide uppercase shrink-0">
-            {domain.domain_id.substring(0, 8)}
-          </span>
-        </div>
+        <span className="font-bold text-gray-900 text-sm tracking-tight">{domain.title}</span>
       </td>
       <td className="px-6 py-3">
         <span className="text-sm text-gray-900 whitespace-nowrap">

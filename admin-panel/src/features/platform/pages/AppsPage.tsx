@@ -30,6 +30,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
+import { normalizeFormData } from '@/lib/normalization';
 import { cn } from '@/lib/utils';
 import {
   AlertTriangle,
@@ -72,14 +73,9 @@ const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
           <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
             <Layout className="w-5 h-5 text-indigo-600" />
           </div>
-          <div>
-            <div className="font-bold text-gray-900 tracking-tight text-base">
-              {app.display_name}
-            </div>
-            <div className="text-2xs font-black text-gray-400 uppercase tracking-widest">
-              ID: {app.app_id.slice(0, 8)}...
-            </div>
-          </div>
+          <span className="font-bold text-gray-900 tracking-tight text-base line-clamp-1">
+            {app.display_name}
+          </span>
         </div>
       </TableCell>
       <TableCell>
@@ -106,6 +102,11 @@ const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
           </span>
           <ExternalLink className="w-3 h-3 text-indigo-300 opacity-0 group-hover/link:opacity-100 transition-all -ml-1" />
         </a>
+      </TableCell>
+      <TableCell>
+        <span className="font-mono text-xs font-bold text-gray-500">
+          questerix-student.pages.dev
+        </span>
       </TableCell>
       <TableCell>
         <div className="px-3 py-1 bg-gray-100 rounded-lg text-xs font-black text-gray-500 uppercase tracking-widest inline-block border border-gray-200/50">
@@ -197,12 +198,18 @@ export function AppsPage() {
       toast({ title: 'Error', description: 'Please select a subject', variant: 'destructive' });
       return;
     }
+
+    // Normalize all text fields to lowercase to prevent case-mismatch issues
+    const normalizedData = normalizeFormData(formData, {
+      lowercase: ['display_name', 'subdomain', 'grade_level'],
+    });
+
     try {
       if (editingApp) {
-        await updateApp.mutateAsync({ id: editingApp.app_id, ...formData });
+        await updateApp.mutateAsync({ id: editingApp.app_id, ...normalizedData });
         toast({ title: 'Success', description: 'App updated successfully' });
       } else {
-        await createApp.mutateAsync(formData);
+        await createApp.mutateAsync(normalizedData);
         toast({ title: 'Success', description: 'App created successfully' });
       }
       setIsDialogOpen(false);
@@ -306,6 +313,9 @@ export function AppsPage() {
                   Subdomain / Link
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
+                  CNAME
+                </TableHead>
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Tier/Grade
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
@@ -320,14 +330,14 @@ export function AppsPage() {
               {appsLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell colSpan={6} className="px-8 py-6">
+                    <TableCell colSpan={7} className="px-8 py-6">
                       <Skeleton className="h-10 w-full rounded-2xl" />
                     </TableCell>
                   </TableRow>
                 ))
               ) : paginatedApps.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-24">
+                  <TableCell colSpan={7} className="py-24">
                     <EmptyState
                       icon={Layers}
                       title={searchQuery ? 'No matches discovered' : 'Zero Clusters Found'}
@@ -463,6 +473,7 @@ export function AppsPage() {
                 </Label>
                 <Input
                   id="display_name"
+                  data-testid="app-display-name"
                   value={formData.display_name}
                   onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
                   placeholder="e.g. Master Mathematics v7"
@@ -486,6 +497,7 @@ export function AppsPage() {
                 <div className="flex items-center gap-0 group">
                   <Input
                     id="subdomain"
+                    data-testid="app-subdomain"
                     value={formData.subdomain}
                     onChange={(e) =>
                       setFormData({
@@ -514,6 +526,7 @@ export function AppsPage() {
                 </Label>
                 <Input
                   id="grade_level"
+                  data-testid="app-grade-level"
                   value={formData.grade_level}
                   onChange={(e) => setFormData({ ...formData, grade_level: e.target.value })}
                   placeholder="e.g. Grade 12 Advanced"

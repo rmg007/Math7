@@ -158,14 +158,9 @@ const SortableRow = memo(
           </button>
         </td>
         <td className="px-4 py-4 min-w-[250px]">
-          <div className="flex items-center gap-2">
-            <span className="font-black text-gray-900 text-sm tracking-tight leading-none group-hover/row:text-indigo-700 transition-colors">
-              {skill.title}
-            </span>
-            <span className="text-2xs text-gray-400 font-black uppercase tracking-[0.1em] opacity-70 italic truncate shrink-0">
-              /{skill.slug}
-            </span>
-          </div>
+          <span className="font-bold text-gray-900 text-sm tracking-tight leading-none group-hover/row:text-indigo-700 transition-colors">
+            {skill.title}
+          </span>
         </td>
         <td className="px-4 py-4">
           <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-2xs font-black uppercase tracking-widest border border-indigo-100/50 shadow-sm">

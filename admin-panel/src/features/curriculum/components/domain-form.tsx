@@ -106,11 +106,19 @@ export function DomainForm() {
       return;
     }
 
+    // Normalize text fields: trim whitespace, lowercase the slug
+    const normalizedData = {
+      ...data,
+      title: data.title.trim(),
+      slug: data.slug.trim().toLowerCase(),
+      description: data.description?.trim() || '',
+    };
+
     try {
       if (isEditing && id) {
-        await updateDomain.mutateAsync({ domain_id: id, ...data });
+        await updateDomain.mutateAsync({ domain_id: id, ...normalizedData });
       } else {
-        await createDomain.mutateAsync(data);
+        await createDomain.mutateAsync(normalizedData);
       }
       navigate('/domains');
     } catch (err: unknown) {

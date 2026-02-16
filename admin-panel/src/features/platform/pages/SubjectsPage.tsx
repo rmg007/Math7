@@ -19,6 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
+import { normalizeFormData } from '@/lib/normalization';
 import { Boxes, Layers, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import {
@@ -52,14 +53,9 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
           >
             <Layers className="w-6 h-6" style={{ color: subject.color_hex || '#8b5cf6' }} />
           </div>
-          <div>
-            <p className="font-black text-gray-900 tracking-tight text-base italic leading-none">
-              {subject.title}
-            </p>
-            <p className="text-2xs font-black text-gray-400 uppercase tracking-widest mt-1">
-              ID: {subject.subject_id ? subject.subject_id.split('-')[0] : 'N/A'}
-            </p>
-          </div>
+          <span className="font-black text-gray-900 tracking-tight text-base italic leading-none">
+            {subject.title}
+          </span>
         </div>
       </TableCell>
       <TableCell className="py-5">
@@ -156,12 +152,19 @@ export function SubjectsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Normalize text fields: trim whitespace, lowercase the slug
+    const normalizedData = normalizeFormData(formData, {
+      trim: ['title', 'description'],
+      lowercase: ['slug', 'color_hex'],
+    });
+
     try {
       if (editingSubject) {
-        await updateSubject.mutateAsync({ id: editingSubject.subject_id, ...formData });
+        await updateSubject.mutateAsync({ id: editingSubject.subject_id, ...normalizedData });
         toast({ title: 'Success', description: 'Subject updated' });
       } else {
-        await createSubject.mutateAsync(formData);
+        await createSubject.mutateAsync(normalizedData);
         toast({ title: 'Success', description: 'Subject created' });
       }
       setIsDialogOpen(false);

@@ -1,4 +1,209 @@
-# Learning Log
+## 2026-02-16 (Night): Platform CRUD Verification & DNS Cleanup
+
+### Session Context
+
+- **Trigger**: Verification of CRUD operations on the Apps/Landings page and resolution of 522 errors.
+- **Scope**: `admin-panel`, `apps` table, Cloudflare DNS.
+- **Outcome**: ✅ Apps CRUD verified (Input normalization + RLS), ✅ `fmath` published in DB, ✅ DNS 522 root cause identified (Missing custom domain in Pages).
+
+### What Was Done
+
+#### 1. Platform CRUD Hardening
+
+- **Data Normalization**: Implemented `data-testid` attributes in `AppsPage.tsx` for robust testing. Verified that `display_name`, `subdomain`, and `grade_level` are correctly trimmed and lowercased before save.
+- **Role-Based Access**: confirmed that the Apps page is strictly guarded by `SuperAdminGuard`. Regular admins are correctly redirected to the dashboard to prevent unauthorized platform manipulation.
+- **RLS Verification**: Confirmed that Super Admins have full CRUD lifecycle permissions on the `apps` table.
+
+#### 3. Cloudflare Pages Automation (Zero-Touch Infrastructure)
+
+- **Architecture**: Implemented a "Hook-and-Sync" pattern using a PostgreSQL trigger → `net.http_post` → Supabase Edge Function → Cloudflare API.
+- **Trigger**: `tr_app_domain_change` on `public.apps` table captures `INSERT`, `UPDATE`, and `DELETE`.
+- **Edge Function**: `manage-app-domains` processes the delta. It handles:
+  - **Add**: New subdomain -> New Custom Domain in Cloudflare project.
+  - **Update**: If `subdomain` column changes, it deletes the old and adds the new.
+  - **Delete**: Cleanup of orphaned subdomains.
+- **Performance**: Used `pg_net` for non-blocking asynchronous execution. Database transactions are not slowed down by the external API call; the process happens in the background.
+
+### Technical Learnings
+
+- **pg_net Reliability**: Always wrap `net.http_post` in an `EXCEPTION` block within PL/pgSQL to prevent network issues from rolling back primary database transactions. Use `RAISE WARNING` to surface failures in logs.
+- **Cloudflare API Idempotency**: The Cloudflare API returns 400 for duplicate domains. The Edge Function now filters for error code `10045` (Already Exists) and `10046` (Not Found) to ensure smooth operations even if sync is re-run.
+- **Cloudflare Pages DNS Trap**: For multi-tenant systems using subdomains, pointing a CNAME to the `.pages.dev` origin is necessary but **insufficient**. Cloudflare ignores traffic for domains not explicitly listed in the "Custom Domains" tab of the specific Pages project.
+- **SuperAdmin Account Priority**: Many Platform-level pages (Apps, Landings, Users) are piped through the `SuperAdminGuard`. Testing these pages using a regular admin account will cause confusing "page not found" or "permission denied" redirects. Always verify the `profiles.role` in Supabase.
+
+---
+
+## 2026-02-16 (Late PM): Admin UI Standardization & Data Normalization
+
+### Session Context
+
+- **Trigger**: User request for cross-page UX consistency, clickable links, and input trimming.
+- **Scope**: `admin-panel` (Subjects, Skills, Questions, Apps, Landings, GroupCreate).
+- **Outcome**: ✅ Centralized normalization utility created, ✅ All curriculum/deployment pages hardened against whitespace/casing issues, ✅ Simplified table rows for high-density readability.
+
+### What Was Done
+
+#### 1. Centralized Data Normalization
+
+- **Utility Creation**: Built `src/lib/normalization.ts` with `normalizeFormData<T>` to provide a declarative way to sanitize inputs.
+- **Unit Testing**: Added `src/lib/__tests__/normalization.test.ts` (100% pass) to ensure stability of string manipulation logic.
+- **Widespread Adoption**: Refactored `AppsPage`, `SubjectsPage`, `LandingsPage`, `domain-form.tsx`, and `skill-form.tsx` to use the unified normalization engine.
+
+#### 2. UX Hardening & Readability
+
+- **Row Simplification**: Systematically removed redundant IDs, slugs, and two-line text entries in `domain-list.tsx`, `skill-list.tsx`, and `question-list.tsx`. Tables are now clean, single-line scanning interfaces.
+- **Clickable Deployment Links**: Subdomains in `LandingsPage` and `AppsPage` are now clickable, allowing admins to instantly verify live student application status.
+- **CNAME Clarity**: Renamed "DNS Config" to "CNAME" in `AppsPage` and simplified the cell to show only the target Cloudflare Pages address, eliminating visual noise.
+
+### Technical Learnings
+
+- **Declarative vs Imperative Sanitization**: Manual `.trim().toLowerCase()` calls spread across components are prone to drift. Moving this into the `onSubmit` handler using a config-driven `normalizeFormData` helper ensures that normalization rules are self-documenting and easier to modify.
+- **Single-Line Scannability**: In admin dashboards, vertical space is premium. Two-line entries (e.g., Title + ID) double the cognitive load. Hiding technical IDs or slugs behind hovering/details/editing is almost always preferred for high-density lists.
+
+---
+
+## 2026-02-16 (PM): App Record Corruption & DNS Configuration Gap
+
+### Incident
+
+- **Symptom**: `fmath.questerix.com` → Cloudflare 522 timeout; `app.questerix.com` → Uncaught Error in `main.dart.js`.
+- **Root Cause (fmath)**: No CNAME record in Cloudflare for `fmath.questerix.com` → `questerix-student.pages.dev`. The 522 is a DNS routing issue, not a code bug.
+- **Root Cause (app.questerix.com)**: Under investigation — likely related to student app build or RLS policy blocking anonymous SELECT on `apps` table during init.
+- **Contributing Factor**: Admin panel saved `display_name` and `grade_level` as mixed-case or identical values to `subdomain`, corrupting the app record.
+
+### Fixes Applied (Prevention)
+
+1. **Lowercase Enforcement**: All text fields (`display_name`, `subdomain`, `grade_level`) are now `.trim().toLowerCase()` before save in `AppsPage.tsx` `handleSubmit`.
+2. **Single-Line Table Rows**: Removed distracting two-line format (name + truncated ID) in favor of clean single-line display name.
+3. **DNS Config Column**: Added a dedicated column in the apps table showing `{subdomain}.questerix.com → CNAME → questerix-student.pages.dev` so admins always know what DNS record to create.
+
+### Key Lesson
+
+> **Every new subdomain requires a manual Cloudflare CNAME.** The admin panel now surfaces this requirement directly in the table, eliminating the knowledge gap that caused this incident.
+
+---
+
+## 2026-02-16: Critical Fixes & Hardening (RLS, Cloudflare, Flutter)
+
+### Session Context
+
+- **Trigger**: "Uncaught Error" in Student App, Admin App update bug, Cloudflare 1014 error.
+- **Scope**: `student-app`, `admin-panel`, Supabase RLS, Cloudflare Pages.
+- **Outcome**: ✅ Student App crash fixed (case-insensitive + null guard), ✅ Admin Apps page hardened (validation + DNS warnings), ✅ RLS recursion resolved.
+
+### What Was Done
+
+#### 1. Student App Crash Fix (Case Sensitivity)
+
+- **Problem**: App crashed with "Uncaught Error" when subdomain casing didn't match DB (e.g., `fmath` vs `FMath`).
+- **Fix**: Changed `AppConfigService` query from `.eq('subdomain', ...)` to `.ilike('subdomain', ...)`.
+- **Hardening**: Added a graceful error screen in `QuesterixApp` for when configuration fails to load, preventing white-screen crashes.
+- **Bonus**: Fixed `AlertDialog` parameter placement in `src/app.dart`.
+
+#### 2. Admin Panel Hardening (Apps Page)
+
+- **Problem**: Updating app name caused accessibility issues due to missing Cloudflare configuration.
+- **Fix**:
+  - Added **Clickable Links** to the Apps table (`{subdomain}.questerix.com`).
+  - Added **Strict Validation** for subdomains (lowercase, alphanumeric, hyphens only).
+  - Added **DNS Warnings** in the edit dialog to explicitly instruct users to update Cloudflare Custom Domains.
+
+#### 3. RLS Recursion Fix
+
+- **Problem**: `auth.users` policies were recursively querying `public.apps` or `public.user_roles`, which in turn queried `auth.users`, causing infinite recursion.
+- **Fix**:
+  - **Separate Policy**: Created `apps_public_read_config` for strict public read access to `apps` (subdomain/id only).
+  - **Avoid Circular logic**: Ensured public-facing queries do not depend on `auth.uid()` checks that trigger further auth queries.
+
+### Technical Learnings
+
+#### 1. RLS Recursion (The "Infinite Auth" Trap)
+
+- **Insight**: Never have a `public` table policy depend on `auth` table queries if the `auth` table policy depends on that `public` table.
+- **Solution**: Break the cycle by creating a dedicated, simplified policy for one side of the relationship (e.g., public lookup by subdomain).
+
+#### 2. Supabase `current_setting` Caching
+
+- **Insight**: `set_config` and `current_setting` in Supabase/Postgres are **transaction-scoped**. They do not persist across HTTP requests unless part of the same transaction block? Actually, in Supabase HTTP API, each request is a transaction.
+- **Gotcha**: You cannot "set" a variable in one RPC and "read" it in another unless they are called in a single batch.
+
+#### 3. Case-Sensitivity in `PostgrestFilterBuilder`
+
+- **Insight**: `.eq()` is strictly case-sensitive. For user-entered inputs like subdomains or usernames, ALWAYS use `.ilike()` or valid-casing enforcement (lowercase on save).
+- **Fix**: We implemented both `.ilike()` on fetch AND lowercase enforcement on save.
+
+#### 4. Cloudflare Error 1014 (CNAME Cross-User Ban)
+
+- **Insight**: Simply pointing a CNAME to `project.pages.dev` is NOT enough. Cloudflare forbids this to prevent domain hijacking.
+- **Requirement**: You MUST strictly add the custom domain to the production project in the Cloudflare Dashboard (`Pages > Custom Domains`).
+
+#### 5. Flutter Web `AlertDialog` Parameters
+
+- **Gotcha**: `backgroundColor` is a named parameter of the **constructor**, NOT the `build` method or `showDialog` options.
+- **Fix**: `AlertDialog(backgroundColor: ..., content: ...)` is correct. `showDialog(builder: (_) => AlertDialog(...), backgroundColor: ...)` is WRONG (that `backgroundColor` belongs to `barrierColor` or is invalid).
+
+---
+
+## 2026-02-16: Critical Fixes & Hardening (RLS, Cloudflare, Flutter)
+
+### Session Context
+
+- **Trigger**: "Uncaught Error" in Student App, Admin App update bug, Cloudflare 1014 error.
+- **Scope**: `student-app`, `admin-panel`, Supabase RLS, Cloudflare Pages.
+- **Outcome**: ✅ Student App crash fixed (case-insensitive + null guard), ✅ Admin Apps page hardened (validation + DNS warnings), ✅ RLS recursion resolved.
+
+### What Was Done
+
+#### 1. Student App Crash Fix (Case Sensitivity)
+
+- **Problem**: App crashed with "Uncaught Error" when subdomain casing didn't match DB (e.g., `fmath` vs `FMath`).
+- **Fix**: Changed `AppConfigService` query from `.eq('subdomain', ...)` to `.ilike('subdomain', ...)`.
+- **Hardening**: Added a graceful error screen in `QuesterixApp` for when configuration fails to load, preventing white-screen crashes.
+- **Bonus**: Fixed `AlertDialog` parameter placement in `src/app.dart`.
+
+#### 2. Admin Panel Hardening (Apps Page)
+
+- **Problem**: Updating app name caused accessibility issues due to missing Cloudflare configuration.
+- **Fix**:
+  - Added **Clickable Links** to the Apps table (`{subdomain}.questerix.com`).
+  - Added **Strict Validation** for subdomains (lowercase, alphanumeric, hyphens only).
+  - Added **DNS Warnings** in the edit dialog to explicitly instruct users to update Cloudflare Custom Domains.
+
+#### 3. RLS Recursion Fix
+
+- **Problem**: `auth.users` policies were recursively querying `public.apps` or `public.user_roles`, which in turn queried `auth.users`, causing infinite recursion.
+- **Fix**:
+  - **Separate Policy**: Created `apps_public_read_config` for strict public read access to `apps` (subdomain/id only).
+  - **Avoid Circular logic**: Ensured public-facing queries do not depend on `auth.uid()` checks that trigger further auth queries.
+
+### Technical Learnings
+
+#### 1. RLS Recursion (The "Infinite Auth" Trap)
+
+- **Insight**: Never have a `public` table policy depend on `auth` table queries if the `auth` table policy depends on that `public` table.
+- **Solution**: Break the cycle by creating a dedicated, simplified policy for one side of the relationship (e.g., public lookup by subdomain).
+
+#### 2. Supabase `current_setting` Caching
+
+- **Insight**: `set_config` and `current_setting` in Supabase/Postgres are **transaction-scoped**. They do not persist across HTTP requests unless part of the same transaction block? Actually, in Supabase HTTP API, each request is a transaction.
+- **Gotcha**: You cannot "set" a variable in one RPC and "read" it in another unless they are called in a single batch.
+
+#### 3. Case-Sensitivity in `PostgrestFilterBuilder`
+
+- **Insight**: `.eq()` is strictly case-sensitive. For user-entered inputs like subdomains or usernames, ALWAYS use `.ilike()` or valid-casing enforcement (lowercase on save).
+- **Fix**: We implemented both `.ilike()` on fetch AND lowercase enforcement on save.
+
+#### 4. Cloudflare Error 1014 (CNAME Cross-User Ban)
+
+- **Insight**: Simply pointing a CNAME to `project.pages.dev` is NOT enough. Cloudflare forbids this to prevent domain hijacking.
+- **Requirement**: You MUST strictly add the custom domain to the production project in the Cloudflare Dashboard (`Pages > Custom Domains`).
+
+#### 5. Flutter Web `AlertDialog` Parameters
+
+- **Gotcha**: `backgroundColor` is a named parameter of the **constructor**, NOT the `build` method or `showDialog` options.
+- **Fix**: `AlertDialog(backgroundColor: ..., content: ...)` is correct. `showDialog(builder: (_) => AlertDialog(...), backgroundColor: ...)` is WRONG (that `backgroundColor` belongs to `barrierColor` or is invalid).
+
+---
 
 ## 2026-02-16: Deployment Protocol Correction (Incidents & Fixes)
 

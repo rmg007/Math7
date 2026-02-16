@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Database } from '@/lib/database.types';
+import { normalizeFormData } from '@/lib/normalization';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FileText, Globe, Layers, ListOrdered, Loader2, ShieldCheck, Zap } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -80,16 +81,21 @@ export function SkillForm({ initialData }: SkillFormProps) {
       status: (initialData?.status as 'draft' | 'published' | 'live') || 'draft',
     },
   });
-
   const onSubmit = async (data: SkillFormData) => {
+    // Normalize text fields: trim whitespace, lowercase the slug
+    const normalizedData = normalizeFormData(data, {
+      trim: ['title', 'description'],
+      lowercase: ['slug'],
+    });
+
     try {
       if (initialData) {
         await updateSkill.mutateAsync({
           skill_id: initialData.skill_id,
-          ...data,
+          ...normalizedData,
         });
       } else {
-        await createSkill.mutateAsync(data);
+        await createSkill.mutateAsync(normalizedData);
       }
       navigate('/skills');
     } catch (error) {

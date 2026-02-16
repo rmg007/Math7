@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { normalizeFormData } from '@/lib/normalization';
 import {
   ArrowRight,
   ChevronLeft,
@@ -81,10 +82,16 @@ export function LandingsPage() {
 
   const handleSave = async () => {
     if (!editingLanding || !editingLanding.landing_page_id) return;
+
+    // Normalize text fields: trim whitespace
+    const normalizedData = normalizeFormData(formData, {
+      trim: ['hero_headline', 'hero_subheadline', 'meta_title', 'meta_description'],
+    });
+
     try {
       await updateLanding.mutateAsync({
         id: editingLanding.landing_page_id,
-        ...formData,
+        ...normalizedData,
       });
       toast({ title: 'Success', description: 'Landing page configuration updated' });
       setEditingLanding(null);
@@ -391,24 +398,24 @@ export function LandingsPage() {
                     className="group hover:bg-indigo-50/30 transition-colors border-b border-gray-50 last:border-0"
                   >
                     <TableCell className="px-8 py-5">
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center shrink-0">
                           <Monitor className="w-6 h-6 text-indigo-600" />
                         </div>
-                        <div>
-                          <p className="font-black text-gray-900 tracking-tight text-base italic leading-none">
-                            {l.apps?.display_name}
-                          </p>
-                          <p className="text-2xs font-black text-gray-400 uppercase tracking-widest mt-1">
-                            App ID: {l.app_id?.split('-')[0] || 'UNMAPPED'}
-                          </p>
-                        </div>
+                        <span className="font-black text-gray-900 tracking-tight text-base italic leading-none">
+                          {l.apps?.display_name}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell className="py-5">
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100/50 text-indigo-600 font-mono text-2xs font-black tracking-tight w-fit">
+                      <a
+                        href={`https://${l.apps?.subdomain}.questerix.com`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100/50 text-indigo-600 font-mono text-2xs font-black tracking-tight w-fit hover:underline underline-offset-4 decoration-indigo-200"
+                      >
                         {l.apps?.subdomain}.questerix.com
-                      </div>
+                      </a>
                     </TableCell>
                     <TableCell className="py-5">
                       <p className="font-black text-xs text-gray-600 tracking-tight italic line-clamp-1 max-w-[200px]">

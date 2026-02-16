@@ -23,6 +23,7 @@ import { Switch } from '@/components/ui/switch';
 import { useApp } from '@/hooks/use-app';
 import type { Json } from '@/lib/database.types';
 import { Database } from '@/lib/database.types';
+import { normalizeFormData } from '@/lib/normalization';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CheckCircle2,
@@ -188,9 +189,14 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
   }, [questionType, form, initialData]);
 
   const onSubmit = async (data: QuestionFormData) => {
+    // Normalize text fields: trim whitespace
+    const normalized = normalizeFormData(data, {
+      trim: ['content', 'explanation'],
+    });
+
     try {
       const submissionData: Database['public']['Tables']['questions']['Insert'] = {
-        ...data,
+        ...normalized,
         type: data.type as Database['public']['Enums']['question_type'],
         app_id: currentApp?.app_id || '',
         solution: data.solution as Json,

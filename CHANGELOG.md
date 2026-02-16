@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Admin Panel**: DNS Config column in Applications table showing required CNAME mapping for each app subdomain.
+
+### Fixed
+
+- **Admin Panel**: All app form fields now normalized to lowercase on save, preventing case-mismatch issues with subdomain resolution.
+- **Admin Panel**: Simplified Applications table row to single-line display name (removed redundant truncated ID).
+
 - **Beta Prep**: Content Security Policy (CSP) and `robots.txt` for security hardening.
 - **Admin Panel**: Bulk Import feature for Questions (CSV support).
 - **Admin Panel**: "Feedback" button in sidebar for direct support access.
