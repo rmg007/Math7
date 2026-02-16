@@ -17,14 +17,17 @@ $ErrorActionPreference = 'Stop'
 $ScriptDir = $PSScriptRoot
 $RootDir = Split-Path -Parent (Split-Path -Parent $ScriptDir)
 
-$configPath = Join-Path $RootDir $ConfigFile
-$secretsPath = Join-Path $RootDir '.secrets'
+$configPath = $ConfigFile
+if (-not (Test-Path $configPath)) {
+    $configPath = Join-Path $RootDir $ConfigFile
+}
 
 if (-not (Test-Path $configPath)) {
     Write-Host "❌ Config file not found: $configPath" -ForegroundColor Red
     exit 1
 }
 
+$secretsPath = Join-Path $RootDir '.secrets'
 if (-not (Test-Path $secretsPath)) {
     Write-Host "❌ Secrets file not found: $secretsPath" -ForegroundColor Red
     exit 1

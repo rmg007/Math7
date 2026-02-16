@@ -47,9 +47,9 @@ describe('useToast', () => {
 
       const { result } = renderHook(() => useToast());
 
-      // Should only have 1 toast (TOAST_LIMIT = 1)
-      expect(result.current.toasts).toHaveLength(1);
-      expect(result.current.toasts[0].title).toBe('Toast 4'); // Last one
+      // Should only have 3 toasts (TOAST_LIMIT = 3)
+      expect(result.current.toasts).toHaveLength(3);
+      expect(result.current.toasts[0].title).toBe('Toast 4'); // Last one (newest at index 0)
     });
   });
 
@@ -322,8 +322,8 @@ describe('useToast', () => {
         }
       });
 
-      // Should still only have 1 toast due to limit
-      expect(result.current.toasts).toHaveLength(1);
+      // Should still only have 3 toasts due to limit
+      expect(result.current.toasts).toHaveLength(3);
     });
 
     it('should handle dismiss before timeout', () => {

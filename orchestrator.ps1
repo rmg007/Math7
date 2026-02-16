@@ -25,6 +25,8 @@ param(
     
     [switch]$SkipBuild,
     
+    [switch]$SkipTesting,
+    
     [switch]$DryRun
 )
 
@@ -64,9 +66,9 @@ function Write-Err     { param([string]$Msg) Write-Log 'ERROR' $Msg }
 function Write-Phase {
     param([string]$Name)
     Write-Host ""
-    Write-Info "═══════════════════════════════════════════════════════"
+    Write-Info "-------------------------------------------------------"
     Write-Info $Name
-    Write-Info "═══════════════════════════════════════════════════════"
+    Write-Info "-------------------------------------------------------"
 }
 
 # =============================================================================
@@ -161,7 +163,11 @@ function Invoke-PhaseValidation {
         exit 1
     }
     
-    if (-not $env:CLOUDFLARE_API_TOKEN -or $env:CLOUDFLARE_API_TOKEN -eq 'REPLACE_ME') {
+    if ($env:CLOUDFLARE_API_TOKEN -eq 'REPLACE_ME') {
+        Remove-Item Env:CLOUDFLARE_API_TOKEN
+    }
+    
+    if (-not $env:CLOUDFLARE_API_TOKEN) {
         Write-Warn "CLOUDFLARE_API_TOKEN not set. Deployment will rely on local Wrangler login."
     } else {
         Write-Success "Cloudflare credentials loaded"
@@ -229,12 +235,12 @@ function Invoke-PhaseBuild {
     if (Test-Path $studentBuild) { Remove-Item -Recurse -Force $studentBuild }
     
     # Build sequentially for maximum reliability in this environment
-    Write-Host "⚙️  Building Admin Panel..." -ForegroundColor Cyan
+    Write-Host "[BUILD] Building Admin Panel..." -ForegroundColor Cyan
     Set-Location (Join-Path $ScriptDir 'admin-panel')
     npm run build
     Set-Location $ScriptDir
 
-    Write-Host "⚙️  Building Student App..." -ForegroundColor Cyan
+    Write-Host "[BUILD] Building Student App..." -ForegroundColor Cyan
     Set-Location (Join-Path $ScriptDir 'student-app')
     flutter clean
     # Proper format dart defines
@@ -319,9 +325,9 @@ function Invoke-PhaseCleanup {
     $cfStudent = $script:Config.cloudflare.student_project
     
     Write-Host ""
-    Write-Success "═══════════════════════════════════════════════════════"
+    Write-Success "-------------------------------------------------------"
     Write-Success "DEPLOYMENT COMPLETE"
-    Write-Success "═══════════════════════════════════════════════════════"
+    Write-Success "-------------------------------------------------------"
     Write-Info "Version: $($script:DeployVersion)"
     Write-Info "Environment: $Env"
     Write-Host ""
@@ -338,11 +344,15 @@ function Invoke-PhaseCleanup {
 # =============================================================================
 function Main {
     Write-Host ""
-    Write-Info "🚀 QUESTERIX UNIFIED DEPLOYMENT PIPELINE"
+    Write-Info "QUESTERIX UNIFIED DEPLOYMENT PIPELINE"
     Write-Info "Started at: $(Get-Date)"
     Write-Host ""
     
-    Invoke-PhaseTesting
+    if (-not $SkipTesting) {
+        Invoke-PhaseTesting
+    } else {
+        Write-Warn "Skipping testing phase (--SkipTesting flag)"
+    }
     Invoke-PhaseValidation
     Invoke-PhaseGenerateEnv
     Invoke-PhaseBuild

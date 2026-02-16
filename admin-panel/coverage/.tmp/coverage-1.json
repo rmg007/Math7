@@ -6,12 +6,12 @@
       "functions": [
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 0, "endOffset": 41160, "count": 1 }],
+          "ranges": [{ "startOffset": 0, "endOffset": 40132, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 13, "endOffset": 41160, "count": 1 }],
+          "ranges": [{ "startOffset": 13, "endOffset": 40132, "count": 1 }],
           "isBlockCoverage": true
         },
         {
@@ -262,12 +262,12 @@
       "functions": [
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 0, "endOffset": 12205, "count": 1 }],
+          "ranges": [{ "startOffset": 0, "endOffset": 11937, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 13, "endOffset": 12205, "count": 1 }],
+          "ranges": [{ "startOffset": 13, "endOffset": 11937, "count": 1 }],
           "isBlockCoverage": true
         },
         {
@@ -352,12 +352,12 @@
         {
           "functionName": "parseCSV",
           "ranges": [
-            { "startOffset": 2196, "endOffset": 2760, "count": 10 },
-            { "startOffset": 2458, "endOffset": 2621, "count": 1 },
-            { "startOffset": 2560, "endOffset": 2571, "count": 0 },
-            { "startOffset": 2621, "endOffset": 2654, "count": 9 },
-            { "startOffset": 2654, "endOffset": 2736, "count": 1 },
-            { "startOffset": 2736, "endOffset": 2759, "count": 8 }
+            { "startOffset": 2196, "endOffset": 2772, "count": 10 },
+            { "startOffset": 2458, "endOffset": 2633, "count": 1 },
+            { "startOffset": 2567, "endOffset": 2578, "count": 0 },
+            { "startOffset": 2633, "endOffset": 2666, "count": 9 },
+            { "startOffset": 2666, "endOffset": 2748, "count": 1 },
+            { "startOffset": 2748, "endOffset": 2771, "count": 8 }
           ],
           "isBlockCoverage": true
         },
@@ -373,55 +373,55 @@
         },
         {
           "functionName": "get",
-          "ranges": [{ "startOffset": 2857, "endOffset": 2881, "count": 10 }],
+          "ranges": [{ "startOffset": 2869, "endOffset": 2893, "count": 10 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "parseJSON",
           "ranges": [
-            { "startOffset": 2885, "endOffset": 3055, "count": 3 },
-            { "startOffset": 2985, "endOffset": 3054, "count": 1 }
+            { "startOffset": 2897, "endOffset": 3067, "count": 3 },
+            { "startOffset": 2997, "endOffset": 3066, "count": 1 }
           ],
           "isBlockCoverage": true
         },
         {
           "functionName": "get",
-          "ranges": [{ "startOffset": 3153, "endOffset": 3178, "count": 3 }],
+          "ranges": [{ "startOffset": 3165, "endOffset": 3190, "count": 3 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "readFileAsText",
-          "ranges": [{ "startOffset": 3182, "endOffset": 3456, "count": 2 }],
+          "ranges": [{ "startOffset": 3194, "endOffset": 3468, "count": 2 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "",
-          "ranges": [{ "startOffset": 3241, "endOffset": 3452, "count": 2 }],
+          "ranges": [{ "startOffset": 3253, "endOffset": 3464, "count": 2 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "reader.onload",
-          "ranges": [{ "startOffset": 3321, "endOffset": 3349, "count": 1 }],
+          "ranges": [{ "startOffset": 3333, "endOffset": 3361, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "reader.onerror",
-          "ranges": [{ "startOffset": 3372, "endOffset": 3418, "count": 1 }],
+          "ranges": [{ "startOffset": 3384, "endOffset": 3430, "count": 1 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "get",
-          "ranges": [{ "startOffset": 3559, "endOffset": 3589, "count": 2 }],
+          "ranges": [{ "startOffset": 3571, "endOffset": 3601, "count": 2 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "downloadFile",
-          "ranges": [{ "startOffset": 3593, "endOffset": 3949, "count": 11 }],
+          "ranges": [{ "startOffset": 3605, "endOffset": 3961, "count": 11 }],
           "isBlockCoverage": true
         },
         {
           "functionName": "get",
-          "ranges": [{ "startOffset": 4050, "endOffset": 4078, "count": 2 }],
+          "ranges": [{ "startOffset": 4062, "endOffset": 4090, "count": 2 }],
           "isBlockCoverage": true
         }
       ]

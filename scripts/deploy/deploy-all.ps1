@@ -1,21 +1,13 @@
-<#
-.SYNOPSIS
-    Parallel deployment to Cloudflare Pages
-.DESCRIPTION
-    Deploys Questerix applications to Cloudflare Pages.
-    By default, ONLY Admin Panel and Student App are deployed.
-    Use -IncludeLanding to also deploy landing pages.
-.PARAMETER ConfigFile
-    Path to the master-config.json file
-.PARAMETER IncludeLanding
-    If set, will also deploy the landing pages project
-#>
+# deploy-all.ps1 - Sequential Deployment to Cloudflare Pages
+# Hardened for reliability in this environment.
 
 param(
     [Parameter(Mandatory=$true)]
     [string]$ConfigFile,
 
-    [switch]$IncludeLanding
+    [switch]$IncludeLanding,
+    
+    [switch]$SkipLanding
 )
 
 $ErrorActionPreference = 'Stop'
@@ -29,74 +21,44 @@ $cfLanding = $config.cloudflare.landing_project
 $cfAdmin = $config.cloudflare.admin_project
 $cfStudent = $config.cloudflare.student_project
 
-Write-Host "Starting parallel deployments..." -ForegroundColor Cyan
+Write-Host "Starting deployments sequentially for reliability..." -ForegroundColor Cyan
 
-# =============================================================================
-# DEPLOY IN PARALLEL
-# =============================================================================
-if ($IncludeLanding) {
-    if (-not $cfLanding) {
-        Write-Warning "Landing project not defined in config, but -IncludeLanding was specified."
-    }
-    $landingJob = Start-Job -ScriptBlock {
-        param($Dir, $ProjectName)
-        $landingDir = Join-Path $Dir 'landing-pages\dist'
-        npx -y wrangler pages deploy $landingDir --project-name $ProjectName --commit-dirty --branch main 2>&1
-    } -ArgumentList $RootDir, $cfLanding
-} else {
-    Write-Host "ℹ️  Skipping Landing Pages (Default Behavior)" -ForegroundColor Gray
+# Use current environment's CLOUDFLARE_API_TOKEN if set
+if ($env:CLOUDFLARE_API_TOKEN) {
+    Write-Host "[INFO] Using CLOUDFLARE_API_TOKEN from environment." -ForegroundColor Gray
 }
 
-$adminJob = Start-Job -ScriptBlock {
-    param($Dir, $ProjectName)
-    $adminDist = Join-Path $Dir 'admin-panel\dist'
-    npx -y wrangler pages deploy $adminDist --project-name $ProjectName --commit-dirty --branch main 2>&1
-} -ArgumentList $RootDir, $cfAdmin
-
-$studentJob = Start-Job -ScriptBlock {
-    param($Dir, $ProjectName)
-    $studentBuild = Join-Path $Dir 'student-app\build\web'
-    npx -y wrangler pages deploy $studentBuild --project-name $ProjectName --commit-dirty --branch main 2>&1
-} -ArgumentList $RootDir, $cfStudent
-
-# =============================================================================
-# WAIT AND COLLECT RESULTS
-# =============================================================================
-$deployStatus = 0
-
-if ($IncludeLanding) {
-    $landingResult = Receive-Job -Job $landingJob -Wait
-    if ($landingJob.State -eq 'Completed') {
-        Write-Host "✅ Landing Pages deployed successfully" -ForegroundColor Green
+# 1. Landing Pages (Optional)
+if ($IncludeLanding -and $cfLanding) {
+    Write-Host "[DEPLOY] Deploying Landing Pages..." -ForegroundColor Cyan
+    $landingDir = Join-Path $RootDir 'landing-pages\dist'
+    npx -y wrangler pages deploy $landingDir --project-name $cfLanding --commit-dirty --branch main
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[PASS] Landing Pages deployed successfully" -ForegroundColor Green
     } else {
-        Write-Host "❌ Landing Pages deployment FAILED" -ForegroundColor Red
-        Write-Host ($landingResult -join "`n") -ForegroundColor Red
-        $deployStatus = 1
+        Write-Error "Landing Pages deployment FAILED"
     }
 }
 
-$adminResult = Receive-Job -Job $adminJob -Wait
-if ($adminJob.State -eq 'Completed') {
-    Write-Host "✅ Admin Panel deployed successfully" -ForegroundColor Green
+# 2. Admin Panel
+Write-Host "[DEPLOY] Deploying Admin Panel..." -ForegroundColor Cyan
+$adminDist = Join-Path $RootDir 'admin-panel\dist'
+npx -y wrangler pages deploy $adminDist --project-name $cfAdmin --commit-dirty --branch main
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "[PASS] Admin Panel deployed successfully" -ForegroundColor Green
 } else {
-    Write-Host "❌ Admin Panel deployment FAILED" -ForegroundColor Red
-    Write-Host ($adminResult -join "`n") -ForegroundColor Red
-    $deployStatus = 1
+    Write-Error "Admin Panel deployment FAILED"
 }
 
-$studentResult = Receive-Job -Job $studentJob -Wait
-if ($studentJob.State -eq 'Completed') {
-    Write-Host "✅ Student App deployed successfully" -ForegroundColor Green
+# 3. Student App
+Write-Host "[DEPLOY] Deploying Student App..." -ForegroundColor Cyan
+$studentBuild = Join-Path $RootDir 'student-app\build\web'
+npx -y wrangler pages deploy $studentBuild --project-name $cfStudent --commit-dirty --branch main
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "[PASS] Student App deployed successfully" -ForegroundColor Green
 } else {
-    Write-Host "❌ Student App deployment FAILED" -ForegroundColor Red
-    Write-Host ($studentResult -join "`n") -ForegroundColor Red
-    $deployStatus = 1
+    Write-Error "Student App deployment FAILED"
 }
-
-# Cleanup jobs
-$jobsToClean = @($adminJob, $studentJob)
-if ($IncludeLanding) { $jobsToClean += $landingJob }
-Remove-Job -Job $jobsToClean
 
 # Cleanup temp files
 $flutterDefines = Join-Path $RootDir '.flutter-defines.tmp'
@@ -104,7 +66,4 @@ if (Test-Path $flutterDefines) {
     Remove-Item -Force $flutterDefines
 }
 
-if ($deployStatus -ne 0) {
-    Write-Host "One or more deployments failed" -ForegroundColor Red
-    exit 1
-}
+Write-Host "All deployments complete." -ForegroundColor Green
