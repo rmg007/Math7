@@ -103,25 +103,25 @@ cd ..
   - [x] Application-level filtering implemented for domains, skills, questions
   - [x] UI toggles added for "Current App" vs "All Apps" view
   - [x] Migration created: `20260214210000_super_admin_jwt_claims.sql`
-- [ ] **Deploy Super Admin Changes** — Apply migration to production database
-- [ ] **Verify Super Admin Functionality** — Test cross-tenant access in production
+- [x] **Deploy Super Admin Changes** — Apply migration to production database
+- [x] **Verify Super Admin Functionality** — Test cross-tenant access in production
 
 #### Super Admin Deployment Runbook
 
-- [ ] Prepare Supabase CLI (logged into correct project)
-- [ ] Backup: `supabase db pull` (optional snapshot)
-- [ ] Apply migrations: `make db_migrate` (runs `supabase db push`)
-- [ ] Verify RLS policies: `make db_verify_rls`
-- [ ] Restart services if necessary
+- [x] Prepare Supabase CLI (logged into correct project)
+- [x] Backup: `supabase db pull` (optional snapshot)
+- [x] Apply migrations: `make db_migrate` (runs `supabase db push`)
+- [x] Verify RLS policies: `make db_verify_rls`
+- [x] Restart services if necessary
 
 #### Super Admin Verification Checklist
 
-- [ ] Sign in as super admin
-- [ ] Domains/Skills/Questions show cross-tenant data when "All Apps" view selected
-- [ ] App filter toggles correctly limit to current app when selected
-- [ ] Dashboard aggregates stats across apps for super admin
-- [ ] User Management lists users across tenants
-- [ ] RLS enforcement: non-super admins cannot access other tenants
+- [x] Sign in as super admin
+- [x] Domains/Skills/Questions show cross-tenant data when "All Apps" view selected
+- [x] App filter toggles correctly limit to current app when selected
+- [x] Dashboard aggregates stats across apps for super admin
+- [x] User Management lists users across tenants
+- [x] RLS enforcement: non-super admins cannot access other tenants
 
 ### P1: Accessibility & Quality Gates
 
@@ -220,7 +220,7 @@ cd ..
 - [x] **Super Admin Features**: Implementation complete, migration ready
 - [x] **Documentation**: CHANGELOG.md updated, tasks.md current
 - [ ] **Testing**: Run full test suite before deployment
-- [ ] **Migration**: Apply super admin database changes to production
+- [x] **Migration**: Apply super admin database changes to production
 
 ### Deployment Commands
 
