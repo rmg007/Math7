@@ -48,11 +48,25 @@ export async function captureException(
 ): Promise<string | null> {
   try {
     const errorObj = error instanceof Error ? error : new Error(String(error));
+    const message = errorObj.message || String(error);
+
+    // Filter out noisy/harmless browser errors (P1 Roadmap task)
+    if (
+      message.includes('ResizeObserver loop completed') ||
+      message.includes('ResizeObserver loop limit exceeded') ||
+      message.includes('signal aborted') ||
+      message.includes('user aborted a request')
+    ) {
+      if (import.meta.env.DEV) {
+        console.debug('[ErrorTracker] Filtered noisy error:', message);
+      }
+      return null;
+    }
 
     const { data, error: rpcError } = await supabase.rpc('log_error', {
       p_platform: 'web',
       p_error_type: errorObj.name || 'Error',
-      p_error_message: errorObj.message || String(error),
+      p_error_message: message,
       p_stack_trace: errorObj.stack || undefined,
       p_url: context?.url || window.location.href,
       p_user_agent: context?.userAgent || navigator.userAgent,

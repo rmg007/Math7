@@ -49,7 +49,10 @@ class Env {
   );
 
   /// Parsed theme color as integer
-  static int get themePrimaryColor => int.parse(_themePrimaryColorRaw);
+  static int get themePrimaryColor {
+    final hex = _themePrimaryColorRaw.replaceFirst('0x', '');
+    return int.parse(hex, radix: 16);
+  }
 
   /// Enable offline-first mode with Drift
   static const String _offlineFirstRaw = String.fromEnvironment(

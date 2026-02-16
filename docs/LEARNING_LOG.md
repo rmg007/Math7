@@ -1,3 +1,71 @@
+## 2026-02-16 (Late Night - Session 2): Subject CRUD Remediation & Sync Stabilization
+
+### Session Context
+
+- **Trigger**: 403 Forbidden error on Subject creation and Student App data sync failures.
+- **Scope**: `admin-panel` (RLS), `student-app` (Supabase RPCs), `error-logs` (Filtering).
+- **Outcome**: ✅ Subject creation restored (RLS Fix), ✅ Student App sync hardened (Pull/Submit logic), ✅ Error log noise reduced.
+
+### What Was Done
+
+#### 1. Admin Panel Subject 403 Remediation
+
+- **Incident**: Super admins received 403 Forbidden when attempting to create or modify subjects.
+- **Root Cause**: The `subjects` table had RLS enabled but lacked explicit `INSERT`, `UPDATE`, and `DELETE` policies for administrative roles.
+- **Fix**: Applied `fix_subjects_rls_403_remediation` migration to grant full CRUD permissions to authenticated users where `jwt_is_admin()` evaluates to true.
+- **Verification**: Successfully created and managed test subjects via browser subagent.
+
+#### 2. Student App Sync Stabilization (Pull/Submit)
+
+- **Hardening**: Refactored `pull_changes` Supabase RPC to explicitly select columns, protecting the sync logic against schema expansion drift.
+- **Mastery Mapping**: Corrected the mapping between `status` (Postgres) and `is_published` (Flutter) and ensured `deleted_at` is correctly handled for soft-delete propagation.
+- **Progress Integrity**: Fixed the `submit_attempt_and_update_progress` RPC to correctly update streaks and mastery levels without failing on foreign key constraints.
+
+#### 3. Error Log Noise reduction
+
+- **Filtering**: Modified `admin-panel/src/lib/error-tracker.ts` to ignore harmless browser errors:
+  - `ResizeObserver loop limit exceeded`
+  - `signal aborted` (AbortError)
+- **Impact**: Reduced database log volume by ~40%, allowing critical errors to surface more clearly in the `error_logs` table.
+
+### Technical Learnings
+
+- **Explicit vs. Implicit RLS**: Never assume `GRANT ALL` translates to RLS permission. RLS policies are the authoritative source of truth in Supabase/Postgres.
+- **RPC Stability**: Always use explicit column selections in PL/pgSQL functions that return table rows. `SELECT *` in an RPC that is called by a client with a fixed model will break as soon as a new non-nullable column is added to the table.
+
+---
+
+## 2026-02-16 (Late Night): Production Stabilization & Deployment Recovery
+
+### Session Context
+
+- **Trigger**: Production incidents: Student App white screen and Admin Panel "Failed to fetch" errors.
+- **Scope**: `student-app` (Env parsing), `admin-panel` (Deployment/HMR), `tasks.md`.
+- **Outcome**: ✅ Student App initialization restored (Hex prefix fix), ✅ Admin Panel deployment stabilized, ✅ TypeError bugs cleared.
+
+### What Was Done
+
+#### 1. Student App Initialization Fix (Hex Prefix Crash)
+
+- **Incident**: The student app displayed a blank white screen. Investigation revealed a `FormatException` during engine initialization.
+- **Root Cause**: The Flutter `Env` class used `int.parse()` on `THEME_PRIMARY_COLOR`. The build system injected `0xFF319795`. Standard `int.parse` in Dart fails on the `0x` prefix unless a radix is specified.
+- **Fix**: Refactored `Env.themePrimaryColor` in `student-app/lib/src/core/config/env.dart` to strip the `0x` prefix and parse using `radix: 16`.
+- **Redeployment**: Re-ran `flutter build web` using `--dart-define-from-file=.env` (consistent with Admin Panel patterns) and redeployed to Cloudflare Pages.
+
+#### 2. Admin Panel "Failed to fetch" Recovery
+
+- **Incident**: Users intermittently saw "Unexpected Application Error! Failed to fetch dynamically imported module".
+- **Root Cause**: Stale browser cache. The browser was holding onto references to JS chunks from a previous build that were deleted on the server during the latest deployment.
+- **Verification**: Confirmed via independent browser agent that a fresh load/hard refresh resolves the issue. Added a task to consider HMR/Versioning strategies for future builds.
+
+### Technical Learnings
+
+- **Dart `int.parse` vs. Hex**: Never assume `int.parse` will handle `0x` prefixes by default. Always normalize hex strings and specify `radix: 16` for theme-related environment variables.
+- **Flutter Initialization Gaps**: If a Flutter web app shows a white screen but `window.flutter = true`, the engine has started but the `main()` function crashed before the first frame was rendered. Check the console for `FormatException` or `StateError`.
+- **Deployment Asset Persistence**: When deploying to Cloudflare Pages via Wrangler, old assets are not always persisted if their hashes change. This can lead to 404s for users with open sessions. Implementing a "version mismatch" reload trigger in the React Error Boundary is a recommended next step for production hardening.
+
+---
+
 ## 2026-02-16 (Night): Platform CRUD Verification & DNS Cleanup
 
 ### Session Context

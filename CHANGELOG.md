@@ -9,31 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Admin Panel**: DNS Config column in Applications table showing required CNAME mapping for each app subdomain.
+- **Admin Panel**: DNS Config column in Applications table showing required CNAME mapping.
+- **Admin Panel**: Advanced Subject management with hardened RLS security.
 
 ### Fixed
 
-- **Admin Panel**: All app form fields now normalized to lowercase on save, preventing case-mismatch issues with subdomain resolution.
-- **Admin Panel**: Simplified Applications table row to single-line display name (removed redundant truncated ID).
-
-- **Beta Prep**: Content Security Policy (CSP) and `robots.txt` for security hardening.
-- **Admin Panel**: Bulk Import feature for Questions (CSV support).
-- **Admin Panel**: "Feedback" button in sidebar for direct support access.
-- **Admin Panel**: Premium High-Performance Dashboard with real-time stats and Recharts integration.
-- **Hardening**: Bulk Import module stabilization (type-safety, dry-run support, and PapaParse integration).
-- **Hardening**: Duplicate prevention for Bulk Import via `content_hash` matching.
-- **Hardening**: Self-Healing Error Boundary with Project Oracle (AI) integration.
-- **Admin Panel**: AI-powered "Import from Prompt" capability for unstructured curriculum sync.
-- **Observability**: RPC hardening and transactional batch logging for bulk operations.
-- **Architecture**: Implemented "One Brain, One Repo" unification, consolidating all documentation and pruning redundant logs.
-- **Auth**: Role-based redirection logic added to prevent access loops for non-super-admins.
-- **UI**: Standardized `EmptyState` components across all management features for premium consistency.
-- **UI**: Implemented conditional sidebar navigation groups based on user role visibility.
-- **UX**: Added loading indicators with animated spinners to async buttons in Invitation Codes page (GENERATE CODE and Deactivate Selected buttons).
-- **UX**: Verified Template and Upload buttons in Domain Registry DataToolbar component are fully functional with proper error handling.
-
-### Fixed
-
+- **Admin Panel**: Resolved 403 Forbidden error on Subject creation/deletion for administrators.
+- **Admin Panel**: Hardened error tracking by filtering `ResizeObserver` and `AbortError` noise.
+- **Admin Panel**: Applications now normalized to lowercase on save to prevent DNS mismatch.
+- **Student App**: Fixed `int.parse` crash on hex primary colors and enabled case-insensitive subdomain matching.
+- **Student App**: Hardened `pull_changes` and `submit_attempt` RPCs against schema drift.
+- **UI**: Standardized all content forms with integrated `isPending` loading states.
+- **UX**: Simplified table rows for high-density curriculum management.
 - **Testing**: Resolved 7 critical failures in the Admin Panel test suite (Vite/Vitest).
 - **Testing**: Fixed race conditions in `useBulkImport` progress tracking using fake timers.
 - **Testing**: Corrected Zod validation expectations and UUID format tests.

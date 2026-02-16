@@ -1,35 +1,37 @@
 {
-  "session_id": "2026-02-16T07:04:00",
-  "mission": "Admin Panel UI/UX Overhaul — P0 through P4",
+  "session_id": "2026-02-16T13:03:42",
+  "mission": "Student App Sync Fix & Admin Panel 403 Remediation",
   "status": "in_progress",
-  "current_subtask": "P0-A",
+  "current_subtask": "SYNC-01",
   "subtasks": [
     {
-      "id": "P0-A",
-      "description": "Remove breadcrumbs from all 20 files + AdminHeader",
-      "status": "in_progress",
+      "id": "SYNC-01",
+      "description": "Certify Student App Sync Stability",
+      "status": "pending",
       "iterations": 0,
       "files_changed": []
     },
     {
-      "id": "P0-B",
-      "description": "Remove table headers from 4 files",
-      "status": "pending"
+      "id": "ADMIN-01",
+      "description": "Remediate 403 Forbidden on Subject Creation (RLS Fix)",
+      "status": "pending",
+      "iterations": 0,
+      "files_changed": []
     },
     {
-      "id": "P0-C",
-      "description": "Shorten page descriptions in ~15 files",
-      "status": "pending"
-    },
-    {
-      "id": "P0-E",
-      "description": "Fix FormActions imports in domain-form/skill-form + apply to question-form",
-      "status": "pending"
+      "id": "ADMIN-02",
+      "description": "Verify Subject Creation via Browser",
+      "status": "pending",
+      "iterations": 0,
+      "files_changed": []
     }
   ],
-  "iterations": 0,
+  "total_iterations": 0,
   "circuit_breaker_counts": {
     "consecutive_failures": 0,
     "consecutive_identical_errors": 0
+  },
+  "pre_task_sweep": {
+    "timestamp": "2026-02-16T13:03:42Z"
   }
 }
