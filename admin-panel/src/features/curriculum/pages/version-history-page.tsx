@@ -1,6 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Pagination } from '@/components/ui/pagination';
-import { SortableHeader } from '@/components/ui/sortable-header';
 import { useApp } from '@/hooks/use-app';
 import { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
@@ -27,8 +26,8 @@ export function VersionHistoryPage() {
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [sortBy, setSortBy] = useState('version');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const sortBy = 'version';
+  const sortOrder = 'desc' as const;
   const [selectedVersion, setSelectedVersion] = useState<{
     version: number;
     published_at: string;
@@ -72,16 +71,6 @@ export function VersionHistoryPage() {
     },
     enabled: Boolean(currentApp?.app_id),
   });
-
-  const handleSort = (column: string) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(column);
-      setSortOrder('asc');
-    }
-    setPage(1);
-  };
 
   const handleExport = async (version: number) => {
     if (!currentApp?.app_id) return;
@@ -180,40 +169,6 @@ export function VersionHistoryPage() {
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100">
-                    <th className="text-left px-6 py-4">
-                      <SortableHeader
-                        label="Version"
-                        column="version"
-                        currentSortBy={sortBy}
-                        currentSortOrder={sortOrder}
-                        onSort={handleSort}
-                      />
-                    </th>
-                    <th className="text-left px-6 py-4">
-                      <SortableHeader
-                        label="Published At"
-                        column="published_at"
-                        currentSortBy={sortBy}
-                        currentSortOrder={sortOrder}
-                        onSort={handleSort}
-                      />
-                    </th>
-                    <th className="text-center px-6 py-4 font-semibold text-gray-600 text-sm">
-                      Domains
-                    </th>
-                    <th className="text-center px-6 py-4 font-semibold text-gray-600 text-sm">
-                      Skills
-                    </th>
-                    <th className="text-center px-6 py-4 font-semibold text-gray-600 text-sm">
-                      Questions
-                    </th>
-                    <th className="text-right px-6 py-4 font-semibold text-gray-600 text-sm">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
                 <tbody className="divide-y divide-gray-100">
                   {history?.map((snapshot, index) => (
                     <tr

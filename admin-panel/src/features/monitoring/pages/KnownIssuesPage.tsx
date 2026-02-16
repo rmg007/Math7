@@ -215,7 +215,7 @@ export function KnownIssuesPage() {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8 pb-20">
       <AdminHeader
         title="Stability Matrix"
-        description="Tracked vulnerabilities and Project Oracle intelligence."
+        description="Tracked issues and fixes."
         icon={Shield}
         actions={
           <div className="flex gap-3">

@@ -90,12 +90,8 @@ export function DashboardPage() {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader 
         title="Curriculum Intelligence"
-        description="Global overview of domains, skill clusters, and publication integrity."
+        description="Domains, skills, and publications."
         icon={LayoutDashboard}
-        breadcrumbs={[
-          { label: 'Curriculum', href: '/domains' },
-          { label: 'Dashboard', href: '/domains' }
-        ]}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

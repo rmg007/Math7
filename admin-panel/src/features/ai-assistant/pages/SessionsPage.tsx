@@ -97,13 +97,8 @@ export const SessionsPage: React.FC = () => {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader 
         title="Intelligence Telemetry"
-        description="Track and audit AI generation sessions, token consumption, and model efficiency."
+        description="AI generation history."
         icon={Clock}
-        breadcrumbs={[
-          { label: 'Platform', href: '/apps' },
-          { label: 'Intelligence', href: '/ai-sessions' },
-          { label: 'Telemetry', href: '/ai-sessions' }
-        ]}
       />
 
       {/* Summary Metrics */}
@@ -223,29 +218,16 @@ export const SessionsPage: React.FC = () => {
         
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50/50 hover:bg-gray-50/50 border-b-2 border-gray-100">
-                <th className="px-8 py-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">Date</th>
-                <th className="px-4 py-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-400">Model Node</th>
-                <th className="px-4 py-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">Artifacts</th>
-                <th className="px-4 py-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">Synced</th>
-                <th className="px-4 py-4 text-right font-black text-[10px] uppercase tracking-widest text-gray-400">Latency</th>
-                <th className="px-4 py-4 text-right font-black text-[10px] uppercase tracking-widest text-gray-400">Cost</th>
-                <th className="px-8 py-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">Status</th>
-              </tr>
-            </thead>
             <tbody className="divide-y divide-gray-50">
               {filteredSessions.map((session) => (
                 <tr key={session.id} className="hover:bg-indigo-50/30 transition-colors group">
                   <td className="px-8 py-5">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-900 tracking-tight italic">
-                        {new Date(session.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </span>
-                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                    <span className="text-sm font-bold text-gray-900 tracking-tight whitespace-nowrap">
+                      {new Date(session.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}{' '}
+                      <span className="text-gray-400 font-normal">
                         {new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
-                    </div>
+                    </span>
                   </td>
                   <td className="px-4 py-5 font-bold text-gray-700 text-sm truncate max-w-[150px] italic">
                     {session.model_used}
@@ -283,7 +265,7 @@ export const SessionsPage: React.FC = () => {
             <EmptyState 
               icon={Clock}
               title="No Telemetry Detected"
-              description="Generation events will materialize here once the AI engine is engaged."
+              description="No sessions yet."
             />
           </div>
         )}

@@ -12,6 +12,49 @@
 
 #### 1. Fixed `file-parsers.test.ts` Hang (3 root causes)
 
+### 2026-02-16 (PM): Multi-tenant Stress Testing & Type Safety Refinement
+
+### Session Context
+
+- **Trigger**: Security hardening review and refinement of curriculum feature implementation.
+- **Scope**: Multi-tenant isolation testing, JWT security unit tests, and curriculum-wide type safety.
+- **Outcome**: ✅ 100% tenant isolation verified, ✅ JWT security helpers confirmed, ✅ 'any' types eliminated in curriculum editors.
+
+### What Was Done
+
+#### 1. Multi-tenant Stress Testing (Security-First)
+
+- **Implemented `security-stress.e2e.spec.ts`**: A dedicated Playwright suite that proactively attempts to bypass RLS by manipulating IDs in API payloads.
+- **Cross-App Isolation Verified**: Confirmed that a user from App A cannot select, update, insert, or delete data belonging to App B, even if they know the UUID.
+- **Role Boundary Check**: Verified that regular admins are restricted to their tenant, while super admins correctly retain cross-tenant visibility.
+
+#### 2. SQL Security Unit Testing
+
+- **JWT Helper Validation**: Executed PL/pgSQL scripts to unit test `jwt_is_admin()` and `jwt_is_super_admin()`.
+- **Deterministic Role Mapping**: Confirmed that claims are correctly extracted from `app_metadata`, ensuring RLS policies reflect the database's authoritative role assignment.
+
+#### 3. Curriculum Type Safety Consolidation
+
+- **Zero-any Mandate**: Created `features/curriculum/types/question-types.ts` to define strict interfaces for all 5 question types (MCQ, Multi-MCQ, Boolean, TextInput, ReorderSteps).
+- **QuestionForm Refactor**: Eliminated all `any` casts in JSON parsing and form submission logic. Replaced `z.unknown()` in Zod schemas with typed assertions for options and solutions.
+
+#### 4. Terminology Standardization
+
+- **SSoT for Language**: Created `docs/standards/TERMINOLOGY.md` to define the hierarchy of Tenant vs. App vs. Platform.
+- **UI Consistency Pass**: Updated `GovernancePage.tsx` and other contexts to use "App" consistently for tenant instances.
+
+### Technical Learnings
+
+- **Proactive Threat Modeling**: End-to-end tests that "try to be evil" are more valuable than tests that only follow happy paths. Manually constructing `delete` calls for foreign IDs is the only way to truly verify RLS robustness.
+- **Discriminated Unions for Complex JSON**: Since Supabase stores options as `Json`, using discriminated unions in TypeScript based on a `type` field is the most elegant way to handle polymorphic UI editors without resorting to `any`.
+
+---
+
+- **RLS Bypass Testing**: Created `rls-bypass.e2e.spec.ts` for role-based security validation. Verified anon isolation, tenant isolation for regular admins, and cross-tenant access for super admins. Fixed several edge cases in `error_logs` and `profiles` policies.
+- **PDF.js Worker Automation**: Implemented `scripts/copy-worker.mjs` and updated `package.json` with a `postinstall` hook to automate copying the matching PDF.js worker to the `public` directory, ensuring consistent behavior across dev and build environments.
+- **AI Import Backend**: Developed and deployed `parse-import-prompt` Supabase Edge Function using Gemini 1.5 Flash. The function parses unstructured text into structured question JSON, supporting all active question types and enforcing tenant isolation/quotas.
+- **Question Editors**: Verified full implementation of `mcq_multi`, `boolean`, and `reorder_steps` editors in `question-form.tsx`.
+
 - **Mock path mismatch**: Tests mocked `pdfjs-dist/build/pdf` but source imports `pdfjs-dist`. The real pdfjs-dist module initialized in the test environment, creating a web worker that hung the runner forever.
 - **Missing `File.prototype.arrayBuffer` polyfill**: jsdom doesn't implement `arrayBuffer()` on File objects, causing all PDF/DOCX parsing tests to error. Added a polyfill in test setup.
 - **Unhandled rejection**: The PDF error test created `Promise.reject()` eagerly in mock setup. Changed to `mockImplementation(() => Promise.reject(...))` for lazy evaluation.

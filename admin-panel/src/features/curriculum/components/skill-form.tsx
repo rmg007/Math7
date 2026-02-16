@@ -1,31 +1,31 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
+import { AdminHeader } from '@/components/ui/admin-header';
+import { Card, CardContent } from '@/components/ui/card';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
+import { FormActions } from '@/components/ui/form-actions';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useCreateSkill, useUpdateSkill } from '../hooks/use-skills';
-import { useDomains } from '../hooks/use-domains';
-import { useNavigate } from 'react-router-dom';
-import { Loader2, Zap, Globe, ListOrdered, FileText, ShieldCheck, Layers } from 'lucide-react';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
+import { Textarea } from '@/components/ui/textarea';
 import { Database } from '@/lib/database.types';
-import { Card, CardContent } from '@/components/ui/card';
-import { AdminHeader } from '@/components/ui/admin-header';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { FileText, Globe, Layers, ListOrdered, Loader2, ShieldCheck, Zap } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
+import { useDomains } from '../hooks/use-domains';
+import { useCreateSkill, useUpdateSkill } from '../hooks/use-skills';
 
 type Skill = Database['public']['Tables']['skills']['Row'];
 
@@ -63,6 +63,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
   const isEditing = Boolean(initialData);
 
   const form = useForm<SkillFormData>({
+    mode: 'onBlur',
     resolver: zodResolver(skillSchema),
     defaultValues: {
       domain_id: initialData?.domain_id || '',
@@ -105,17 +106,13 @@ export function SkillForm({ initialData }: SkillFormProps) {
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <AdminHeader 
         title={isEditing ? 'Refine Skill' : 'Provision Skill'}
-        description={isEditing ? 'Modify the specific attributes and difficulty parameters of this skill.' : 'Anchor a new technical node within the curriculum hierarchy.'}
+        description={isEditing ? 'Edit skill details.' : 'Create a new skill.'}
         icon={Zap}
-        breadcrumbs={[
-          { label: 'Curriculum', href: '/domains' },
-          { label: 'Skills', href: '/skills' },
-          { label: isEditing ? 'Edit' : 'New', href: '#' }
-        ]}
       />
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <fieldset disabled={form.formState.isSubmitting} className="space-y-8 disabled:opacity-60">
           <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
             <CardContent className="p-8 md:p-10 space-y-8">
               <FormField
@@ -290,32 +287,15 @@ export function SkillForm({ initialData }: SkillFormProps) {
                 )}
               />
 
-              <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-4 pt-6">
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  onClick={() => navigate('/skills')}
-                  className="w-full sm:w-auto h-14 px-10 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-gray-400 hover:text-gray-900 hover:bg-gray-100/50 transition-all"
-                >
-                  Terminate
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="w-full sm:w-auto h-14 px-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all hover:-translate-y-0.5"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    isEditing ? 'Commit Update' : 'Anchor Skill'
-                  )}
-                </Button>
-              </div>
+              <FormActions
+                isSubmitting={isSubmitting}
+                submitLabel={isEditing ? 'Update Skill' : 'Create Skill'}
+                submittingLabel="Saving..."
+                onCancel={() => navigate('/skills')}
+              />
             </CardContent>
           </Card>
+          </fieldset>
         </form>
       </Form>
     </div>

@@ -199,12 +199,8 @@ export function SubjectsPage() {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
         title="Knowledge Taxonomy"
-        description="Architect the high-level semantic categories that govern the platform's multi-tenant curriculum shell."
+        description="Manage curriculum subject areas."
         icon={Boxes}
-        breadcrumbs={[
-          { label: 'Curriculum', href: '/domains' },
-          { label: 'Taxonomy', href: '/subjects' },
-        ]}
         actions={
           <Button
             onClick={() => handleOpenDialog()}
@@ -298,7 +294,7 @@ export function SubjectsPage() {
                     <EmptyState
                       icon={Boxes}
                       title="Taxonomy Vacuum Detected"
-                      description="No knowledge domains have been defined. Initiate a node to begin architecting the platform scope."
+                      description="No subjects defined yet. Create one to get started."
                       action={
                         <Button
                           onClick={() => handleOpenDialog()}

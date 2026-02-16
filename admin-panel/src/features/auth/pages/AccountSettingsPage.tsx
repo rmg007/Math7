@@ -121,13 +121,8 @@ export function AccountSettingsPage() {
     <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
         title="Account Settings"
-        description="Manage your personal profile, security preferences, and account status"
+        description="Your profile and security."
         icon={User}
-        breadcrumbs={[
-          { label: 'Platform', href: '/apps' },
-          { label: 'Security', href: '/settings' },
-          { label: 'Profile', href: '/settings' },
-        ]}
       />
 
       {error && (

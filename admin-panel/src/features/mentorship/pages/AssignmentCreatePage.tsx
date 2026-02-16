@@ -130,13 +130,8 @@ export function AssignmentCreatePage() {
     <div className="max-w-3xl mx-auto p-10 space-y-10 animate-in fade-in duration-700">
       <AdminHeader 
         title="Initialize Assignment"
-        description={`Scale group performance by provisioning targeted work for ${group.name}.`}
+        description={`New assignment for ${group.name}.`}
         icon={Target}
-        breadcrumbs={[
-          { label: 'Mentorship', href: '/groups' },
-          { label: group.name, href: `/groups/${groupId}` },
-          { label: 'New Assignment', href: `/groups/${groupId}/assignments/new` }
-        ]}
       />
 
       <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-10 shadow-sm hover:shadow-xl transition-all duration-500 space-y-12">

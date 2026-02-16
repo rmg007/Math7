@@ -3,21 +3,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useApp } from '@/hooks/use-app';
@@ -25,14 +25,14 @@ import type { Json } from '@/lib/database.types';
 import { Database } from '@/lib/database.types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  CheckCircle2,
-  FileText,
-  HelpCircle,
-  Layers,
-  Loader2,
-  Plus,
-  Settings,
-  Trash,
+    CheckCircle2,
+    FileText,
+    HelpCircle,
+    Layers,
+    Loader2,
+    Plus,
+    Settings,
+    Trash,
 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -40,6 +40,14 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useCreateQuestion, useUpdateQuestion } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
+import {
+    BooleanSolution,
+    McqMultiSolution,
+    McqSolution,
+    QuestionOptions,
+    ReorderStepsSolution,
+    TextInputSolution,
+} from '../types/question-types';
 
 type Question = Database['public']['Tables']['questions']['Row'];
 
@@ -80,7 +88,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
   const updateQuestion = useUpdateQuestion();
   const { data: skills, isLoading: isLoadingSkills } = useSkills();
 
-  const parseOptions = (data: Question | undefined, type: string) => {
+  const parseOptions = (data: Question | undefined, type: string): QuestionOptions => {
     if (!data?.options) {
       switch (type) {
         case 'multiple_choice':
@@ -111,7 +119,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
           };
       }
     }
-    return data.options;
+    return data.options as unknown as QuestionOptions;
   };
 
   const parseSolution = (data: Question | undefined, type: string) => {
@@ -131,31 +139,27 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
           return '';
       }
     }
-    let sol: Json = {};
-    try {
-      sol = typeof data.solution === 'string' ? JSON.parse(data.solution as string) : data.solution;
-    } catch {
-      sol = data.solution || {};
-    }
+    const sol = data.solution as Record<string, unknown>;
     switch (type) {
       case 'multiple_choice':
-        return (sol as Record<string, unknown>).correct_option_id || '';
+        return (sol as unknown as McqSolution).correct_option_id || '';
       case 'mcq_multi':
-        return (sol as Record<string, unknown>).correct_ids || [];
+        return (sol as unknown as McqMultiSolution).correct_ids || [];
       case 'boolean':
-        return (sol as Record<string, unknown>).correct_value ?? null;
+        return (sol as unknown as BooleanSolution).correct_value ?? null;
       case 'text_input':
-        return (sol as Record<string, unknown>).exact_match || '';
+        return (sol as unknown as TextInputSolution).exact_match || '';
       case 'reorder_steps':
-        return (sol as Record<string, unknown>).correct_order || [];
+        return (sol as unknown as ReorderStepsSolution).correct_order || [];
       default:
-        return (sol as Record<string, unknown>).correct_option_id || '';
+        return (sol as unknown as McqSolution).correct_option_id || '';
     }
   };
 
   const initialType = initialData?.type || 'multiple_choice';
 
   const form = useForm<QuestionFormData>({
+    mode: 'onBlur',
     resolver: zodResolver(questionSchema),
     defaultValues: {
       skill_id: initialData?.skill_id || '',
@@ -198,31 +202,41 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
           form.setError('solution', { message: 'Required' });
           return;
         }
-        submissionData.solution = { correct_option_id: data.solution } as unknown as Json;
+        submissionData.solution = {
+          correct_option_id: data.solution,
+        } as unknown as Json;
       } else if (data.type === 'mcq_multi') {
         if (!Array.isArray(data.solution) || data.solution.length === 0) {
           form.setError('solution', { message: 'Select at least one correct option' });
           return;
         }
-        submissionData.solution = { correct_ids: data.solution } as unknown as Json;
+        submissionData.solution = {
+          correct_ids: data.solution,
+        } as unknown as Json;
       } else if (data.type === 'text_input') {
         if (!data.solution) {
           form.setError('solution', { message: 'Required' });
           return;
         }
-        submissionData.solution = { exact_match: data.solution } as unknown as Json;
+        submissionData.solution = {
+          exact_match: data.solution,
+        } as unknown as Json;
       } else if (data.type === 'boolean') {
         if (data.solution === null || data.solution === undefined) {
           form.setError('solution', { message: 'Specify truth value' });
           return;
         }
-        submissionData.solution = { correct_value: data.solution } as unknown as Json;
+        submissionData.solution = {
+          correct_value: data.solution,
+        } as unknown as Json;
       } else if (data.type === 'reorder_steps') {
         if (!Array.isArray(data.solution) || data.solution.length === 0) {
           form.setError('solution', { message: 'Order sequence required' });
           return;
         }
-        submissionData.solution = { correct_order: data.solution } as unknown as Json;
+        submissionData.solution = {
+          correct_order: data.solution,
+        } as unknown as Json;
       }
 
       if (initialData) {
@@ -252,17 +266,13 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <AdminHeader
         title={initialData ? 'Refine Question' : 'Architect Question'}
-        description="Construct the pedagogical logic and validation rules for this inquiry."
+        description="Configure this question."
         icon={HelpCircle}
-        breadcrumbs={[
-          { label: 'Curriculum', href: '/domains' },
-          { label: 'Questions', href: '/questions' },
-          { label: initialData ? 'Edit' : 'New', href: '#' },
-        ]}
       />
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10 pb-20">
+          <fieldset disabled={form.formState.isSubmitting} className="space-y-10 disabled:opacity-60">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
               {/* Content Area */}
@@ -796,6 +806,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
               </div>
             </div>
           </div>
+          </fieldset>
         </form>
       </Form>
     </div>

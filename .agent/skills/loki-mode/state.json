@@ -1,76 +1,35 @@
 {
-  "session_id": "loki-2026-02-15-003",
-  "started_at": "2026-02-15T20:56:00-08:00",
-  "last_checkpoint": "2026-02-15T21:05:00-08:00",
-  "mission": "Complete all remaining tasks in tasks.md, clean up repo, update docs",
-  "status": "completed",
+  "session_id": "2026-02-16T07:04:00",
+  "mission": "Admin Panel UI/UX Overhaul — P0 through P4",
+  "status": "in_progress",
+  "current_subtask": "P0-A",
   "subtasks": [
     {
-      "id": 1,
-      "description": "Fix file-parsers.test.ts hang",
-      "status": "completed",
-      "iterations": 3
+      "id": "P0-A",
+      "description": "Remove breadcrumbs from all 20 files + AdminHeader",
+      "status": "in_progress",
+      "iterations": 0,
+      "files_changed": []
     },
     {
-      "id": 2,
-      "description": "Fix use-toast.test.tsx hang + 4 assertion bugs",
-      "status": "completed",
-      "iterations": 2
+      "id": "P0-B",
+      "description": "Remove table headers from 4 files",
+      "status": "pending"
     },
     {
-      "id": 3,
-      "description": "Create Loki Mode infrastructure",
-      "status": "completed",
-      "iterations": 1
+      "id": "P0-C",
+      "description": "Shorten page descriptions in ~15 files",
+      "status": "pending"
     },
     {
-      "id": 4,
-      "description": "Create GEMINI.md global agent instructions",
-      "status": "completed",
-      "iterations": 1
-    },
-    {
-      "id": 5,
-      "description": "Verify full test suite (Vitest + tsc + lint)",
-      "status": "completed",
-      "iterations": 1
-    },
-    {
-      "id": 6,
-      "description": "Clean up temp files and stale paths",
-      "status": "completed",
-      "iterations": 1
-    },
-    {
-      "id": 7,
-      "description": "Update tasks.md — mark completed, fix stale refs",
-      "status": "completed",
-      "iterations": 1
-    },
-    {
-      "id": 8,
-      "description": "Update LEARNING_LOG.md with session learnings",
-      "status": "completed",
-      "iterations": 1
-    },
-    {
-      "id": 9,
-      "description": "Commit and push all changes",
-      "status": "completed",
-      "iterations": 1
+      "id": "P0-E",
+      "description": "Fix FormActions imports in domain-form/skill-form + apply to question-form",
+      "status": "pending"
     }
   ],
-  "current_subtask": null,
-  "total_iterations": 12,
-  "errors_encountered": [],
-  "circuit_breaker_triggered": false,
-  "learnings": [
-    "Mock paths must exactly match source import paths",
-    "jsdom File doesn't implement arrayBuffer()",
-    "Promise.reject() in mock setup creates unhandled rejections",
-    "FileReader mocks must be restored after test",
-    "while (toast({...})) is infinite since toast() returns truthy",
-    "TOAST_LIMIT=1 means old toasts are evicted by new ones",
-    "lint-staged hooks can fail on coverage/.tmp files — use --no-verify when needed"
-  ]
+  "iterations": 0,
+  "circuit_breaker_counts": {
+    "consecutive_failures": 0,
+    "consecutive_identical_errors": 0
+  }
 }

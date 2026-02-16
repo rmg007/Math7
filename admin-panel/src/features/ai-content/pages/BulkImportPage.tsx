@@ -86,7 +86,7 @@ export default function BulkImportPage() {
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
         title="Curriculum Nexus"
-        description="Bulk synchronize educational content via CSV or AI Prompt."
+        description="Import content via CSV or AI."
         icon={Terminal}
         actions={
           <Button
@@ -262,7 +262,7 @@ export default function BulkImportPage() {
                 <EmptyState
                   icon={Terminal}
                   title="Buffer Empty"
-                  description="Initialize synchronize operations via CSV upload or AI prompt to populate this buffer."
+                  description="Upload a CSV or use AI to import content."
                   className="flex-1"
                 />
               ) : (

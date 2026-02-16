@@ -201,7 +201,7 @@ export const GenerationPage: React.FC = () => {
     <div className="space-y-8">
       <AdminHeader 
         title="AI Question Generator"
-        description="Extract curriculum content from documents and use advanced AI to generate high-quality assessment questions."
+        description="Generate questions with AI."
         icon={Wand2}
         actions={
           <Link to="/ai-import">

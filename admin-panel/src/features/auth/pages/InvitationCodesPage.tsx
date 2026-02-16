@@ -267,12 +267,8 @@ export function InvitationCodesPage() {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
         title="Admin Invitation Registry"
-        description="Provision and manage high-authority access tokens for new administrative operators."
+        description="Manage invitation codes."
         icon={Key}
-        breadcrumbs={[
-          { label: 'Admin', href: '/users' },
-          { label: 'Invitations', href: '/invitation-codes' },
-        ]}
       />
 
       {error && (

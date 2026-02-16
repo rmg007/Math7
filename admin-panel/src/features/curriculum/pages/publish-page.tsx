@@ -76,12 +76,8 @@ export function PublishPage() {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
         title="Curriculum Release"
-        description="Finalize and deploy approved content to the production environment."
+        description="Publish curriculum updates."
         icon={Send}
-        breadcrumbs={[
-          { label: 'Curriculum', href: '/domains' },
-          { label: 'Release', href: '/publish' },
-        ]}
         actions={
           <Button
             asChild
@@ -200,19 +196,6 @@ export function PublishPage() {
         ) : (
           <div className="overflow-hidden">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-50/50 border-b border-gray-100">
-                  <th className="text-left px-8 py-5 font-black text-gray-400 text-[10px] uppercase tracking-widest">
-                    Entity Signature
-                  </th>
-                  <th className="text-center px-4 py-5 font-black text-gray-400 text-[10px] uppercase tracking-widest">
-                    Staging Environment
-                  </th>
-                  <th className="text-center px-8 py-5 font-black text-gray-400 text-[10px] uppercase tracking-widest">
-                    Production Baseline
-                  </th>
-                </tr>
-              </thead>
               <tbody className="divide-y divide-gray-50">
                 <tr className="group hover:bg-purple-50/30 transition-colors">
                   <td className="px-8 py-6 flex items-center gap-4">

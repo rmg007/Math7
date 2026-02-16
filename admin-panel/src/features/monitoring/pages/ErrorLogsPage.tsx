@@ -147,13 +147,8 @@ export function ErrorLogsPage() {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
         title="System Diagnostics"
-        description="Monitor and triage application errors in real-time. Zero-cost observability."
+        description="Monitor application errors."
         icon={Bug}
-        breadcrumbs={[
-          { label: 'Platform', href: '/apps' },
-          { label: 'Monitoring', href: '/errors' },
-          { label: 'Error Logs', href: '/errors' },
-        ]}
         actions={
           <Button
             variant="outline"

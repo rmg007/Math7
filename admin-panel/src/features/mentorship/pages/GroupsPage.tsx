@@ -99,12 +99,8 @@ export function GroupsPage() {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
         title="Squad Registry"
-        description="Manage your classes, families, and specialized mentorship groups."
+        description="Manage mentorship groups."
         icon={Users}
-        breadcrumbs={[
-          { label: 'Mentorship', href: '/groups' },
-          { label: 'Registry', href: '/groups' }
-        ]}
         actions={
           <Button asChild size="lg" className="bg-gradient-to-br from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white rounded-2xl px-6 py-6 shadow-lg shadow-indigo-600/20 font-black text-sm uppercase tracking-widest gap-2 transition-all hover:-translate-y-0.5 border-0">
             <Link to="/groups/new">

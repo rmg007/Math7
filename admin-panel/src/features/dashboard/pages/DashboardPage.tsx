@@ -145,7 +145,7 @@ export function DashboardPage() {
     <div className="space-y-8 animate-in fade-in duration-700">
       <AdminHeader
         title="Command Center"
-        description="Real-time curriculum intelligence and platform stability matrix."
+        description="Platform overview."
         icon={Activity}
       />
 

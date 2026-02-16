@@ -493,12 +493,8 @@ export function GroupDetailPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <AdminHeader
         title={group.name}
-        description="Manage members, assignments, and group settings"
+        description="Group overview."
         icon={group.type === 'class' ? School : Home}
-        breadcrumbs={[
-          { label: 'Mentorship', href: '/groups' },
-          { label: group.name, href: `/groups/${id}` },
-        ]}
         actions={
           <div className="flex items-center gap-2">
             <span
@@ -687,7 +683,7 @@ export function GroupDetailPage() {
                 <EmptyState
                   icon={ClipboardList}
                   title="No Active Tasks"
-                  description="Create assignments to start monitoring mastery loops."
+                  description="No assignments yet."
                   className="py-20"
                   action={
                     <Button
@@ -720,7 +716,7 @@ export function GroupDetailPage() {
               <EmptyState
                 icon={Layers}
                 title="Matrix Not Initialized"
-                description="No curricula tracked in this matrix. Assign skills to see progress data."
+                description="No skills assigned yet."
                 className="py-24"
               />
             ) : (

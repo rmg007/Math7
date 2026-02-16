@@ -1,9 +1,10 @@
-import { Sidebar } from './sidebar'
-import { Outlet } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import { Menu } from 'lucide-react'
+import { KeyboardShortcutsDialog } from '@/components/ui/keyboard-shortcuts-dialog'
 import { useApp } from '@/contexts/AppContext'
 import { cn } from '@/lib/utils'
+import { Menu } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Outlet } from 'react-router-dom'
+import { Sidebar } from './sidebar'
 
 export function AppLayout() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
@@ -74,6 +75,9 @@ export function AppLayout() {
           </div>
         </main>
       </div>
+
+      <KeyboardShortcutsDialog />
     </div>
   )
 }
+

@@ -1,64 +1,63 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
-import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
 import { supabase } from '@/lib/supabase';
 import {
-  Book,
-  CheckSquare,
-  Filter,
-  GripVertical,
-  Loader2,
-  Pencil,
-  Plus,
-  Square,
-  Trash2,
-  X,
+    Book,
+    CheckSquare,
+    Filter,
+    GripVertical,
+    Loader2,
+    Pencil,
+    Plus,
+    Square,
+    Trash2,
+    X,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  useBulkCreateDomains,
-  useBulkDeleteDomains,
-  useBulkUpdateDomainsStatus,
-  useDeleteDomain,
-  usePaginatedDomains,
-  useUpdateDomainOrder,
+    useBulkCreateDomains,
+    useBulkDeleteDomains,
+    useBulkUpdateDomainsStatus,
+    useDeleteDomain,
+    usePaginatedDomains,
+    useUpdateDomainOrder,
 } from '../hooks/use-domains';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -150,25 +149,23 @@ function SortableRow({
         </span>
       </td>
       <td className="px-6 py-3">
-        <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
           <span className="font-bold text-gray-900 text-sm tracking-tight">{domain.title}</span>
-          <span className="text-[10px] text-gray-600 font-mono tracking-wide uppercase">
-            ID: {domain.domain_id.substring(0, 8)}...
+          <span className="text-[10px] text-gray-400 font-mono tracking-wide uppercase shrink-0">
+            {domain.domain_id.substring(0, 8)}
           </span>
         </div>
       </td>
       <td className="px-6 py-3">
-        <div className="flex flex-col">
-          <span className="text-sm text-gray-900">
-            {new Date(domain.updated_at).toLocaleDateString()}
-          </span>
-          <span className="text-xs text-gray-500">
+        <span className="text-sm text-gray-900 whitespace-nowrap">
+          {new Date(domain.updated_at).toLocaleDateString()}{' '}
+          <span className="text-gray-400">
             {new Date(domain.updated_at).toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',
             })}
           </span>
-        </div>
+        </span>
       </td>
       <td className="px-6 py-3">{renderStatusBadge(domain.status || 'draft')}</td>
       <td className="px-4 py-3 text-right">
@@ -270,6 +267,7 @@ function SortableCard({
         <button
           onClick={() => onDelete(domain.domain_id)}
           className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+          aria-label="Delete domain"
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -286,8 +284,8 @@ export function DomainList() {
   const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const [sortBy, setSortBy] = useState<string>('sort_order');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const sortBy = 'name';
+  const sortOrder = 'asc' as const;
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
     type: 'single' | 'bulk';
     id?: string;
@@ -366,7 +364,7 @@ export function DomainList() {
   const domainIds = useMemo(() => domains.map((d) => d.domain_id), [domains]);
 
   const isDragDisabled =
-    Boolean(debouncedSearch) || statusFilter !== 'all' || sortBy !== 'sort_order';
+    Boolean(debouncedSearch) || statusFilter !== 'all';
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -392,24 +390,6 @@ export function DomainList() {
       }
     }
   };
-
-  const handleSort = (column: string) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(column);
-      setSortOrder('asc');
-    }
-    setPage(1);
-  };
-
-  const handleSelectAll = useCallback(() => {
-    if (selectedIds.size === domains.length && domains.length > 0) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(domains.map((d) => d.domain_id)));
-    }
-  }, [domains, selectedIds.size]);
 
   const handleSelectOne = useCallback((id: string) => {
     setSelectedIds((prev) => {
@@ -563,8 +543,6 @@ export function DomainList() {
     );
   }
 
-  const isAllSelected = domains.length ? selectedIds.size === domains.length : false;
-
   if (!currentApp) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -581,12 +559,8 @@ export function DomainList() {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <AdminHeader
         title="Domain Registry"
-        description="Configure and organize the high-level educational clusters for curriculum delivery."
+        description="Organize domain categories."
         icon={Book}
-        breadcrumbs={[
-          { label: 'Curriculum', href: '/domains' },
-          { label: 'Domains', href: '/domains' },
-        ]}
         actions={
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <DataToolbar
@@ -707,69 +681,6 @@ export function DomainList() {
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-hidden">
               <table className="w-full">
-                <thead>
-                  <tr className="bg-white border-b border-gray-100">
-                    <th className="text-left px-4 py-3 w-10">
-                      <span className="sr-only">Drag handle</span>
-                    </th>
-                    <th className="text-left px-4 py-3 w-10">
-                      <button
-                        onClick={handleSelectAll}
-                        className="text-gray-400 hover:text-gray-600"
-                        title={isAllSelected ? 'Deselect all domains' : 'Select all domains'}
-                      >
-                        {isAllSelected && domains.length > 0 ? (
-                          <CheckSquare className="h-5 w-5 text-purple-600" />
-                        ) : (
-                          <Square className="h-5 w-5" />
-                        )}
-                      </button>
-                    </th>
-                    <th className="text-left px-6 py-3">
-                      <SortableHeader
-                        label="ORD."
-                        column="sort_order"
-                        currentSortBy={sortBy}
-                        currentSortOrder={sortOrder}
-                        onSort={handleSort}
-                        className="text-xs font-bold text-gray-600 uppercase tracking-wider"
-                      />
-                    </th>
-                    <th className="text-left px-6 py-3">
-                      <SortableHeader
-                        label="DOMAIN TITLE & ID"
-                        column="title"
-                        currentSortBy={sortBy}
-                        currentSortOrder={sortOrder}
-                        onSort={handleSort}
-                        className="text-xs font-bold text-gray-600 uppercase tracking-wider"
-                      />
-                    </th>
-                    <th className="text-left px-6 py-3">
-                      <SortableHeader
-                        label="MODIFIED"
-                        column="updated_at"
-                        currentSortBy={sortBy}
-                        currentSortOrder={sortOrder}
-                        onSort={handleSort}
-                        className="text-xs font-bold text-gray-600 uppercase tracking-wider"
-                      />
-                    </th>
-                    <th className="text-left px-6 py-3">
-                      <SortableHeader
-                        label="STATUS"
-                        column="status"
-                        currentSortBy={sortBy}
-                        currentSortOrder={sortOrder}
-                        onSort={handleSort}
-                        className="text-xs font-bold text-gray-600 uppercase tracking-wider"
-                      />
-                    </th>
-                    <th className="text-right px-6 py-3 text-xs font-bold text-gray-600 uppercase tracking-wider">
-                      ACTIONS
-                    </th>
-                  </tr>
-                </thead>
                 <SortableContext items={domainIds} strategy={verticalListSortingStrategy}>
                   <tbody className="divide-y divide-gray-50">
                     {!domains.length ? (

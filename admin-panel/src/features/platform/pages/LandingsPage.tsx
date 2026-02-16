@@ -284,7 +284,7 @@ export function LandingsPage() {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
         title="Marketing Registry"
-        description="Optimize multi-tenant growth by managing unique landing experiences for every application node."
+        description="Manage app landing pages."
         icon={Globe}
         actions={
           <Button
@@ -384,7 +384,7 @@ export function LandingsPage() {
                     <EmptyState
                       icon={LayoutPanelTop}
                       title="No Marketing Records Identified"
-                      description="Initialize your first landing registry to define the digital persona of an application node."
+                      description="Create your first landing page."
                       action={
                         <Button
                           onClick={() => setIsCreateDialogOpen(true)}

@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,47 +24,47 @@ import { sanitizeHtml } from '@/lib/sanitize';
 import { cn, formatIdentifier } from '@/lib/utils';
 import type { QuestionListItem } from '@/types';
 import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  CheckSquare,
-  Copy,
-  FileText,
-  Filter,
-  GripVertical,
-  Loader2,
-  Pencil,
-  Plus,
-  Sparkles,
-  Square,
-  Trash2,
+    CheckSquare,
+    Copy,
+    FileText,
+    Filter,
+    GripVertical,
+    Loader2,
+    Pencil,
+    Plus,
+    Sparkles,
+    Square,
+    Trash2,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  QuestionInsert,
-  useBulkCreateQuestions,
-  useBulkDeleteQuestions,
-  useBulkUpdateQuestionsStatus,
-  useDeleteQuestion,
-  useDuplicateQuestion,
-  usePaginatedQuestions,
-  useUpdateQuestionOrder,
+    QuestionInsert,
+    useBulkCreateQuestions,
+    useBulkDeleteQuestions,
+    useBulkUpdateQuestionsStatus,
+    useDeleteQuestion,
+    useDuplicateQuestion,
+    usePaginatedQuestions,
+    useUpdateQuestionOrder,
 } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
@@ -159,9 +159,9 @@ const SortableRow = memo(
           </button>
         </td>
         <td className="px-6 py-5 max-w-[450px]">
-          <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-3">
             <div
-              className="font-bold text-gray-900 text-[15px] tracking-tight line-clamp-2 group-hover/row:text-indigo-700 transition-colors prose-sm"
+              className="font-bold text-gray-900 text-[15px] tracking-tight line-clamp-1 group-hover/row:text-indigo-700 transition-colors prose-sm min-w-0"
               dangerouslySetInnerHTML={{
                 __html: sanitizeHtml(
                   typeof question.content === 'string'
@@ -171,11 +171,9 @@ const SortableRow = memo(
               }}
             />
             {question.skills?.domains?.title && (
-              <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-1.5">
-                <span className="text-indigo-600">{question.skills.domains.title}</span>
-                <span className="text-gray-300">/</span>
-                <span>{question.skills.title}</span>
-              </p>
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap shrink-0">
+                {question.skills.domains.title} / {question.skills.title}
+              </span>
             )}
           </div>
         </td>
@@ -185,12 +183,7 @@ const SortableRow = memo(
           </span>
         </td>
         <td className="px-4 py-5 text-center">
-          <div className="inline-flex flex-col items-center">
-            <span className="text-lg font-black text-gray-900 leading-none">{question.points}</span>
-            <span className="text-[8px] font-black text-gray-600 uppercase tracking-tighter">
-              PTS
-            </span>
-          </div>
+          <span className="text-sm font-black text-gray-900">{question.points} <span className="text-[8px] text-gray-400 uppercase tracking-tighter">PTS</span></span>
         </td>
         <td className="px-4 py-5">
           <StatusBadge
@@ -695,12 +688,8 @@ export function QuestionList() {
       <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
         <AdminHeader
           title="Question Registry"
-          description="Clustering evaluation assets for mission-critical curriculum delivery."
+          description="Manage assessment questions."
           icon={FileText}
-          breadcrumbs={[
-            { label: 'Curriculum', href: '/domains' },
-            { label: 'Questions', href: '/questions' },
-          ]}
         />
 
         {/* Skeleton Filter Bar */}
@@ -751,12 +740,8 @@ export function QuestionList() {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <AdminHeader
         title="Question Registry"
-        description="Clustering high-availability evaluation assets for mission-critical curriculum delivery."
+        description="Manage assessment questions."
         icon={FileText}
-        breadcrumbs={[
-          { label: 'Curriculum', href: '/domains' },
-          { label: 'Questions', href: '/questions' },
-        ]}
         actions={
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link to="/ai-questions">
@@ -766,6 +751,15 @@ export function QuestionList() {
               >
                 <Sparkles className="h-4 w-4 text-indigo-500 group-hover:rotate-12 transition-transform" />
                 <span>AI Accelerator</span>
+              </Button>
+            </Link>
+            <Link to="/ai-import">
+              <Button
+                variant="outline"
+                className="h-12 px-8 rounded-2xl bg-white/50 backdrop-blur-md border border-indigo-100 text-indigo-600 font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-indigo-500/5 transition-all hover:-translate-y-1 hover:bg-white gap-3 group"
+              >
+                <FileText className="h-4 w-4 text-indigo-500 group-hover:scale-110 transition-transform" />
+                <span>Bulk Import</span>
               </Button>
             </Link>
             <DataToolbar

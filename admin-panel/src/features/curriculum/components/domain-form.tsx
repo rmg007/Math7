@@ -1,22 +1,22 @@
 import { AdminHeader } from '@/components/ui/admin-header';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
+import { FormActions } from '@/components/ui/form-actions';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/hooks/use-app';
@@ -59,6 +59,7 @@ export function DomainForm() {
   const existingDomain = domains?.find((d) => d.domain_id === id);
 
   const form = useForm<DomainFormData>({
+    mode: 'onBlur',
     resolver: zodResolver(domainSchema),
     defaultValues: {
       title: '',
@@ -171,15 +172,11 @@ export function DomainForm() {
             : 'Initialize a new high-level educational category.'
         }
         icon={Book}
-        breadcrumbs={[
-          { label: 'Curriculum', href: '/domains' },
-          { label: 'Domains', href: '/domains' },
-          { label: isEditing ? 'Edit' : 'New', href: '#' },
-        ]}
       />
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <fieldset disabled={form.formState.isSubmitting} className="space-y-8 disabled:opacity-60">
           {error && (
             <div className="p-4 rounded-2xl bg-red-50 border border-red-100 flex items-start gap-4">
               <div className="p-2 bg-red-100 rounded-full shrink-0">
@@ -341,34 +338,15 @@ export function DomainForm() {
                 )}
               />
 
-              <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-4 pt-6">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => navigate('/domains')}
-                  className="w-full sm:w-auto h-14 px-10 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-gray-400 hover:text-gray-900 hover:bg-gray-100/50 transition-all"
-                >
-                  Terminate
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full sm:w-auto h-14 px-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all hover:-translate-y-0.5"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                      {isEditing ? 'Updating Signature...' : 'Initiating Provision...'}
-                    </>
-                  ) : isEditing ? (
-                    'Update Signature'
-                  ) : (
-                    'Initiate Provision'
-                  )}
-                </Button>
-              </div>
+              <FormActions
+                isSubmitting={isSubmitting}
+                submitLabel={isEditing ? 'Update Domain' : 'Create Domain'}
+                submittingLabel={isEditing ? 'Updating...' : 'Creating...'}
+                onCancel={() => navigate('/domains')}
+              />
             </CardContent>
           </Card>
+          </fieldset>
         </form>
       </Form>
     </div>

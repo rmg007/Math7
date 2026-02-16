@@ -224,12 +224,8 @@ export function AppsPage() {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
         title="Applications"
-        description="Manage the multi-tenant subject ecosystem and specialized deployments."
+        description="Manage apps and deployments."
         icon={Layout}
-        breadcrumbs={[
-          { label: 'Deployment', href: '/apps' },
-          { label: 'Applications', href: '/apps' },
-        ]}
         actions={
           <Button
             onClick={() => handleOpenDialog()}

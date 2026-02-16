@@ -409,12 +409,8 @@ export function UserManagementPage() {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
         title="Operator Directory"
-        description="Monitor and manage administrative personnel, roles, and deployment authority."
+        description="Manage admin users and roles."
         icon={UserCog}
-        breadcrumbs={[
-          { label: 'Admin', href: '/users' },
-          { label: 'Operators', href: '/users' },
-        ]}
         actions={
           <div className="flex items-center gap-3 px-6 py-3 bg-indigo-500/10 border border-indigo-500/10 rounded-2xl">
             <Users className="w-5 h-5 text-indigo-600" />

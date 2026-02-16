@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
@@ -21,46 +21,46 @@ import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
 import { cn } from '@/lib/utils';
 import {
-  CheckSquare,
-  Copy,
-  Filter,
-  GripVertical,
-  Layers,
-  Pencil,
-  Plus,
-  Square,
-  Trash2,
+    CheckSquare,
+    Copy,
+    Filter,
+    GripVertical,
+    Layers,
+    Pencil,
+    Plus,
+    Square,
+    Trash2,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDomains } from '../hooks/use-domains';
 import {
-  useBulkCreateSkills,
-  useBulkDeleteSkills,
-  useBulkUpdateSkillsStatus,
-  useDeleteSkill,
-  useDuplicateSkill,
-  usePaginatedSkills,
-  useUpdateSkillOrder,
+    useBulkCreateSkills,
+    useBulkDeleteSkills,
+    useBulkUpdateSkillsStatus,
+    useDeleteSkill,
+    useDuplicateSkill,
+    usePaginatedSkills,
+    useUpdateSkillOrder,
 } from '../hooks/use-skills';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -158,11 +158,11 @@ const SortableRow = memo(
           </button>
         </td>
         <td className="px-4 py-4 min-w-[250px]">
-          <div className="flex flex-col">
+          <div className="flex items-center gap-2">
             <span className="font-black text-gray-900 text-sm tracking-tight leading-none group-hover/row:text-indigo-700 transition-colors">
               {skill.title}
             </span>
-            <span className="text-[10px] text-gray-400 font-black uppercase tracking-[0.1em] mt-1.5 opacity-70 italic truncate">
+            <span className="text-[10px] text-gray-400 font-black uppercase tracking-[0.1em] opacity-70 italic truncate shrink-0">
               /{skill.slug}
             </span>
           </div>
@@ -283,12 +283,14 @@ const SortableCard = memo(
                 onClick={() => onDuplicate(skill.skill_id)}
                 disabled={isDuplicating}
                 className="p-2.5 rounded-xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm disabled:opacity-50"
+                aria-label="Duplicate skill"
               >
                 <Copy className="h-4 w-4" />
               </button>
               <button
                 onClick={() => onDelete(skill.skill_id)}
                 className="p-2.5 rounded-xl bg-white border border-gray-100 text-red-500 hover:bg-red-50 transition-all shadow-sm"
+                aria-label="Delete skill"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -584,12 +586,8 @@ export function SkillList() {
       <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <AdminHeader
           title="Curriculum Skills"
-          description="Configure and organize the detailed learning objectives for your curriculum."
+          description="Manage learning skills."
           icon={Layers}
-          breadcrumbs={[
-            { label: 'Curriculum', href: '/domains' },
-            { label: 'Skills', href: '/skills' },
-          ]}
         />
         <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 p-8 space-y-4">
           <Skeleton className="h-12 w-full rounded-2xl" />
@@ -614,12 +612,8 @@ export function SkillList() {
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <AdminHeader
         title="Curriculum Skills"
-        description="Manage and organize learning skills for your curriculum taxonomy."
+        description="Manage learning skills."
         icon={Layers}
-        breadcrumbs={[
-          { label: 'Curriculum', href: '/domains' },
-          { label: 'Skills', href: '/skills' },
-        ]}
         actions={
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <DataToolbar

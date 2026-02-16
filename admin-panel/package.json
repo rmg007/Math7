@@ -26,7 +26,8 @@
     "checkly": "checkly",
     "checkly:test": "checkly test",
     "checkly:deploy": "checkly deploy",
-    "prepare": "husky || true"
+    "prepare": "husky || true",
+    "postinstall": "node scripts/copy-worker.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

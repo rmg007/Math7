@@ -128,7 +128,7 @@ export const GovernancePage: React.FC = () => {
           </div>
           <p className="text-blue-100/80 max-w-xl">
             Monitor AI resource allocation, content quality standards, and token consumption across
-            all tenants.
+            all apps.
           </p>
         </div>
         <div className="flex items-center gap-6">
@@ -159,7 +159,7 @@ export const GovernancePage: React.FC = () => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Search tenants by name or ID..."
+                    placeholder="Search apps by name or ID..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none text-sm"
@@ -167,6 +167,7 @@ export const GovernancePage: React.FC = () => {
                   {searchTerm && (
                     <button
                       onClick={() => setSearchTerm('')}
+                      aria-label="Clear search"
                       className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
                     >
                       <X className="h-4 w-4" />
@@ -203,7 +204,7 @@ export const GovernancePage: React.FC = () => {
                     table.
                   </p>
                   <p className="text-sm text-gray-600 max-w-md mx-auto mt-2">
-                    Data will appear here once tenants start generating questions using the
+                    Data will appear here once apps start generating questions using the
                     AI-powered content engine.
                   </p>
                 </div>
@@ -298,7 +299,7 @@ export const GovernancePage: React.FC = () => {
 Our AI generation infrastructure is built on **Privacy-by-Design** principles, ensuring that your data remains secure throughout the entire curriculum generation lifecycle.
 
 #### 1. Data Isolation & Sovereignty
-Each application instance operates within a strictly isolated vector namespace. We enforce **Multi-Tenant Logical Isolation** at the database, embedding, and model routing layers to prevent cross-tenant data leakage.
+Each application instance operates within a strictly isolated vector namespace. We enforce **Multi-Tenant Logical Isolation** at the database, embedding, and model routing layers to prevent cross-app data leakage.
 
 #### 2. Advanced Security Features
 *   **Automatic PII Scrubbing**: Our proprietary pre-processing layer redacts Personally Identifiable Information (PII) using NIST-compliant patterns before any data is transmitted to inference models.
@@ -307,7 +308,7 @@ Each application instance operates within a strictly isolated vector namespace. 
 
 #### 3. Governance & Control
 *   **Intelligent Model Throttling**: Real-time monitoring of token consumption and session velocity prevents service degradation and manages operational costs.
-*   **Full Audit Traceability**: Every AI interaction is logged with precise timestamps, model metadata, and tenant IDs for comprehensive governance compliance.
+*   **Full Audit Traceability**: Every AI interaction is logged with precise timestamps, model metadata, and app IDs for comprehensive governance compliance.
 `}
                   </ReactMarkdown>
                 </div>
