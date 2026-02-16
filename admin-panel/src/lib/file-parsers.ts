@@ -5,7 +5,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 // We need to set up the worker for PDF.js
 // Ideally this should be handled by a vite plugin, or copy the worker to public
 // For this implementation we will use a CDN for the worker to avoid complex build config changes
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.mjs';
 
 export interface ParsedFile {
   name: string;

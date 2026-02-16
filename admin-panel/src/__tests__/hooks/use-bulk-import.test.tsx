@@ -106,8 +106,9 @@ describe('useBulkImport', () => {
     it('should handle parsing errors', async () => {
       const mockFile = new File([''], 'test.csv', { type: 'text/csv' });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (Papa.parse as unknown as MockedFunction<ParseFn>).mockImplementation(
-        (_file: File, options: ParseConfigForFile) => {
+        (_file: File, options: any) => {
           options.error?.(
             {
               code: 'UndetectableDelimiter',

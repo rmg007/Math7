@@ -5,7 +5,7 @@ import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 
 // Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.mjs';
 
 interface DocumentUploaderProps {
   onTextExtracted: (text: string, filename: string) => void;
@@ -19,7 +19,7 @@ interface UploadState {
   extractedText?: string;
 }
 
-export  const DocumentUploader: React.FC<DocumentUploaderProps> = ({
+export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
   onTextExtracted,
   maxSizeMB = 10,
 }) => {
@@ -28,9 +28,9 @@ export  const DocumentUploader: React.FC<DocumentUploaderProps> = ({
   const extractTextFromPDF = async (file: File): Promise<string> => {
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    
+
     const textChunks: string[] = [];
-    
+
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const textContent = await page.getTextContent();
@@ -40,7 +40,7 @@ export  const DocumentUploader: React.FC<DocumentUploaderProps> = ({
         .join(' ');
       textChunks.push(pageText);
     }
-    
+
     return textChunks.join('\n\n');
   };
 
@@ -56,55 +56,60 @@ export  const DocumentUploader: React.FC<DocumentUploaderProps> = ({
     return `[IMAGE: ${file.name}. Use Gemini Vision for OCR]`;
   };
 
-  const handleFileDrop = useCallback(async (acceptedFiles: File[]) => {
-    if (acceptedFiles.length === 0) return;
+  const handleFileDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      if (acceptedFiles.length === 0) return;
 
-    const file = acceptedFiles[0];
-    const fileSizeMB = file.size / (1024 * 1024);
-    
-    if (fileSizeMB > maxSizeMB) {
-      setUploadState({
-        status: 'error',
-        message: `File size (${fileSizeMB.toFixed(2)}MB) exceeds ${maxSizeMB}MB limit`,
-      });
-      return;
-    }
+      const file = acceptedFiles[0];
+      const fileSizeMB = file.size / (1024 * 1024);
 
-    setUploadState({
-      status: 'extracting',
-      message: 'Extracting text from document...',
-      filename: file.name,
-    });
-
-    try {
-      let extractedText: string;
-
-      if (file.type === 'application/pdf') {
-        extractedText = await extractTextFromPDF(file);
-      } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-        extractedText = await extractTextFromDOCX(file);
-      } else if (file.type.startsWith('image/')) {
-        extractedText = await extractTextFromImage(file);
-      } else {
-        throw new Error('Unsupported file type');
+      if (fileSizeMB > maxSizeMB) {
+        setUploadState({
+          status: 'error',
+          message: `File size (${fileSizeMB.toFixed(2)}MB) exceeds ${maxSizeMB}MB limit`,
+        });
+        return;
       }
 
       setUploadState({
-        status: 'success',
-        message: `Successfully extracted ${extractedText.length} characters`,
+        status: 'extracting',
+        message: 'Extracting text from document...',
         filename: file.name,
-        extractedText,
       });
 
-      onTextExtracted(extractedText, file.name);
-    } catch (error) {
-      console.error('Text extraction error:', error);
-      setUploadState({
-        status: 'error',
-        message: error instanceof Error ? error.message : 'Failed to extract text',
-      });
-    }
-  }, [maxSizeMB, onTextExtracted]);
+      try {
+        let extractedText: string;
+
+        if (file.type === 'application/pdf') {
+          extractedText = await extractTextFromPDF(file);
+        } else if (
+          file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ) {
+          extractedText = await extractTextFromDOCX(file);
+        } else if (file.type.startsWith('image/')) {
+          extractedText = await extractTextFromImage(file);
+        } else {
+          throw new Error('Unsupported file type');
+        }
+
+        setUploadState({
+          status: 'success',
+          message: `Successfully extracted ${extractedText.length} characters`,
+          filename: file.name,
+          extractedText,
+        });
+
+        onTextExtracted(extractedText, file.name);
+      } catch (error) {
+        console.error('Text extraction error:', error);
+        setUploadState({
+          status: 'error',
+          message: error instanceof Error ? error.message : 'Failed to extract text',
+        });
+      }
+    },
+    [maxSizeMB, onTextExtracted]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: handleFileDrop,
@@ -156,45 +161,39 @@ export  const DocumentUploader: React.FC<DocumentUploaderProps> = ({
         `}
       >
         <input {...getInputProps()} />
-        
+
         <div className="flex flex-col items-center gap-4">
           {getStatusIcon()}
-          
+
           <div>
             {uploadState.status === 'idle' && (
               <>
                 <p className="text-lg font-semibold text-gray-700 mb-1">
                   {isDragActive ? 'Drop the file here' : 'Upload Source Document'}
                 </p>
-                <p className="text-sm text-gray-500">
-                  Drag & drop or click to select
-                </p>
+                <p className="text-sm text-gray-500">Drag & drop or click to select</p>
                 <p className="text-xs text-gray-400 mt-2">
                   PDF, DOCX, PNG, JPG (max {maxSizeMB}MB)
                 </p>
               </>
             )}
-            
+
             {uploadState.status === 'extracting' && (
               <>
                 <p className="text-lg font-semibold text-blue-700 mb-1">
                   Processing {uploadState.filename}
                 </p>
-                <p className="text-sm text-blue-600">
-                  {uploadState.message}
-                </p>
+                <p className="text-sm text-blue-600">{uploadState.message}</p>
               </>
             )}
-            
+
             {uploadState.status === 'success' && (
               <>
                 <p className="text-lg font-semibold text-green-700 mb-1">
                   <File className="inline w-5 h-5 mr-2" />
                   {uploadState.filename}
                 </p>
-                <p className="text-sm text-green-600">
-                  {uploadState.message}
-                </p>
+                <p className="text-sm text-green-600">{uploadState.message}</p>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -206,15 +205,11 @@ export  const DocumentUploader: React.FC<DocumentUploaderProps> = ({
                 </button>
               </>
             )}
-            
+
             {uploadState.status === 'error' && (
               <>
-                <p className="text-lg font-semibold text-red-700 mb-1">
-                  Upload Failed
-                </p>
-                <p className="text-sm text-red-600">
-                  {uploadState.message}
-                </p>
+                <p className="text-lg font-semibold text-red-700 mb-1">Upload Failed</p>
+                <p className="text-sm text-red-600">{uploadState.message}</p>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -229,12 +224,10 @@ export  const DocumentUploader: React.FC<DocumentUploaderProps> = ({
           </div>
         </div>
       </div>
-      
+
       {uploadState.extractedText && (
         <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">
-            Extracted Text Preview
-          </h4>
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">Extracted Text Preview</h4>
           <div className="text-xs text-gray-600 font-mono max-h-32 overflow-y-auto whitespace-pre-wrap">
             {uploadState.extractedText.substring(0, 500)}
             {uploadState.extractedText.length > 500 && '...'}

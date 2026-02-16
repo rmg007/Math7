@@ -1,7 +1,9 @@
 import { App } from '@/features/platform/hooks/use-apps';
 import { supabase } from '@/lib/supabase';
+import { SecurityLogger } from '@/services/SecurityLogger';
 import { ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AppContext } from './AppContextDefinition';
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAppContext = () => useContext(AppContext);
 
@@ -94,7 +96,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, _session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      // Security logging
+      if (event === 'SIGNED_IN' && session?.user) {
+        SecurityLogger.logLogin(session.user.id);
+      } else if (event === 'SIGNED_OUT') {
+        SecurityLogger.logLogout();
+      }
+
       // Only react to meaningful auth events, not token refreshes
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
         if (mounted) loadAppsSafe();
