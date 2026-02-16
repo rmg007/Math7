@@ -51,9 +51,11 @@ describe('governedGenerateQuestions', () => {
 
   const mockValidationResponse = {
     status: 'approved',
-    is_valid: true,
     overall_score: 9.5,
-    findings: [{ category: 'accuracy', score: 10, issues: [] }],
+    consensus_reached: true,
+    findings: [{ question_id: 1, score: 10, issues: [], suggestions: '' }],
+    summary: '',
+    metadata: { model: 'gemini-1.5-flash', validation_time_ms: 50 },
   };
 
   it('should successfully orchestrate governed generation', async () => {
@@ -71,10 +73,9 @@ describe('governedGenerateQuestions', () => {
     vi.mocked(generateQuestions).mockResolvedValue(mockGenerationResponse);
     vi.mocked(validateContent).mockResolvedValue({
       status: 'approved',
-      is_valid: true,
       overall_score: 9.5,
       consensus_reached: true,
-      findings: [],
+      findings: [{ question_id: 1, score: 10, issues: [], suggestions: '' }],
       summary: '',
       metadata: { model: 'gemini-1.5-flash', validation_time_ms: 50 },
     } as Awaited<ReturnType<typeof validateContent>>);

@@ -286,6 +286,71 @@ RETURNS BOOLEAN LANGUAGE sql STABLE AS $$
 $$;
 ```
 
+## 2026-02-14: Admin Panel Build Stabilization (Null Row Guard)
+
+### Session Context
+
+- **Trigger**: Requested build + bug-fix pass for `admin-panel`
+- **Scope**: Fix likely TypeScript/runtime instability around nullable question rows
+- **Outcome**: Added null guards in both hook and component boundaries
+
+### What Was Done
+
+- Updated `admin-panel/src/features/curriculum/hooks/use-questions.ts`:
+  - Added `isNotNull` type guard.
+  - Filtered nullable rows in both `useQuestions` and `usePaginatedQuestions` return data.
+- Updated `admin-panel/src/features/curriculum/components/question-list.tsx`:
+  - Filtered `paginatedData?.data` with a type guard before mapping/rendering.
+
+### What Was Learned
+
+- Supabase joined queries can surface nullable row unions in TypeScript even when UI logic assumes non-null rows.
+- The most reliable fix is to normalize at the data hook and keep a second defensive filter at the view boundary.
+
+## 2026-02-14: Terminal Error Sweep (Tests + Typing)
+
+### Session Context
+
+- **Trigger**: Terminal build/test artifacts showed TypeScript/test failures in admin panel test files
+- **Scope**: Resolve strict typing breaks in toast, CSV parser mocks, and governed generation tests
+- **Outcome**: Patched files are clean in editor diagnostics
+
+### What Was Done
+
+- Updated `admin-panel/src/hooks/use-toast.ts`:
+  - Replaced `ToastProps & { title/description }` with `Omit<ToastProps, 'title' | 'description'> & {...}` to avoid intersected string-only title/description typing.
+- Updated `admin-panel/src/__tests__/hooks/use-bulk-import.test.tsx`:
+  - Tightened PapaParse mock types to `ParseConfig<..., File>` and `ParseResult`/`ParseError` callback shapes.
+  - Fixed error callback signature to match PapaParse expectations.
+- Updated `admin-panel/src/features/ai-assistant/api/__tests__/governedGeneration.test.ts`:
+  - Aligned validation mocks with `ValidationResponse` fields (`consensus_reached`, `findings`, `summary`, `metadata`).
+- Updated `admin-panel/src/__tests__/hooks/use-toast.test.tsx`:
+  - Converted optional callback invocation to asserted non-null invocation for strict null safety.
+
+### What Was Learned
+
+- Intersections with DOM-style props can silently narrow custom fields (`title`, `description`) to `string`; `Omit<>` is safer when overriding prop names.
+- For parser mocks, matching callback arity and payload types avoids false-negative TS failures in tests.
+
+## 2026-02-15: Delete Mutation Test Mock Alignment
+
+### Session Context
+
+- **Trigger**: Runtime test failure in `use-domains` suite (`update(...).eq is not a function`)
+- **Scope**: Fix mocking chain for update mutation flow
+- **Outcome**: `use-domains.test.tsx` now uses an update chain that explicitly supports chained `eq` calls
+
+### What Was Done
+
+- Updated `admin-panel/src/features/curriculum/hooks/__tests__/use-domains.test.tsx`:
+  - Replaced `mockChain.update.mockReturnValue(mockChain)` with a dedicated `updateChain` mock exposing `eq` and `then`.
+  - Updated assertions to check calls on `updateChain.eq`.
+
+### What Was Learned
+
+- Mutation-builder mocks should model the _returned chain object_ from `.update()` rather than assuming top-level chain reuse.
+- This avoids brittle tests when query builders are chained with filter methods (`eq`, `in`, etc.).
+
 **Migration Created**: `20260214210000_super_admin_jwt_claims.sql`
 
 **Benefits**:

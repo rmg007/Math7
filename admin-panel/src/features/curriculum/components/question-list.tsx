@@ -464,7 +464,10 @@ export function QuestionList() {
     setPage(1);
   }, [selectedSkillId, statusFilter]);
 
-  const questions = useMemo(() => paginatedData?.data ?? [], [paginatedData?.data]);
+  const questions = useMemo(
+    () => (paginatedData?.data ?? []).filter((q): q is QuestionListItem => q !== null),
+    [paginatedData?.data]
+  );
   const totalCount = paginatedData?.totalCount ?? 0;
   const totalPages = paginatedData?.totalPages ?? 1;
 

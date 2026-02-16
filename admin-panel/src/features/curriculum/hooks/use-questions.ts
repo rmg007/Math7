@@ -9,6 +9,10 @@ import { PaginatedResponse, PaginationParams } from '../types';
 type Question = Database['public']['Tables']['questions']['Row'];
 export type QuestionInsert = Database['public']['Tables']['questions']['Insert'];
 
+function isNotNull<T>(value: T | null): value is T {
+  return value !== null;
+}
+
 export function useQuestions(skillId?: string) {
   const { currentApp } = useApp();
 
@@ -39,7 +43,7 @@ export function useQuestions(skillId?: string) {
       const { data, error } = await query;
 
       if (error) throw error;
-      return (data || []) as unknown as QuestionListItem[];
+      return (data ?? []).filter(isNotNull) as unknown as QuestionListItem[];
     },
     enabled: Boolean(currentApp?.app_id),
   });
@@ -116,7 +120,7 @@ export function usePaginatedQuestions(params: PaginationParams, appFilter?: stri
       if (error) throw error;
 
       return {
-        data: (data || []) as unknown as QuestionListItem[],
+        data: (data ?? []).filter(isNotNull) as unknown as QuestionListItem[],
         totalCount: count ?? 0,
         page,
         pageSize,

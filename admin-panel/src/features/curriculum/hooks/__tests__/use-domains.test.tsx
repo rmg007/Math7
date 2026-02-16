@@ -187,7 +187,13 @@ describe('useDomains', () => {
   describe('useDeleteDomain', () => {
     it('should mark a domain as deleted', async () => {
       const mockChain = supabase.from('domains') as any;
-      mockChain.update.mockReturnValue(mockChain);
+      const updateChain = {
+        eq: vi.fn().mockReturnThis(),
+        then: vi.fn((onFulfilled: any) =>
+          Promise.resolve({ data: null, error: null }).then(onFulfilled)
+        ),
+      };
+      mockChain.update.mockReturnValue(updateChain);
       mockChain.then.mockImplementationOnce((onFulfilled: any) =>
         Promise.resolve({ data: null, error: null }).then(onFulfilled)
       );
@@ -201,8 +207,8 @@ describe('useDomains', () => {
           deleted_at: expect.any(String),
         })
       );
-      expect(mockChain.eq).toHaveBeenCalledWith('domain_id', '1');
-      expect(mockChain.eq).toHaveBeenCalledWith('app_id', mockAppId);
+      expect(updateChain.eq).toHaveBeenCalledWith('domain_id', '1');
+      expect(updateChain.eq).toHaveBeenCalledWith('app_id', mockAppId);
     });
   });
 });

@@ -205,11 +205,10 @@ describe('useToast', () => {
       expect(toast).toBeDefined();
 
       // Simulate onOpenChange being called with false
-      if (toast?.onOpenChange) {
-        act(() => {
-          toast.onOpenChange?.(false);
-        });
-      }
+      expect(toast?.onOpenChange).toBeDefined();
+      act(() => {
+        toast!.onOpenChange!(false);
+      });
 
       // Toast should be dismissed
       expect(result.current.toasts[0].open).toBe(false);

@@ -3,6 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { QueuedQuestion } from '@/lib/validation/import-schema';
 import { CurriculumService } from '@/services/CurriculumService';
 import { act, renderHook } from '@testing-library/react';
+import type { ParseError, ParseResult } from 'papaparse';
 import Papa from 'papaparse';
 import type { MockedFunction } from 'vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -19,6 +20,9 @@ vi.mock('papaparse', () => ({
 
 describe('useBulkImport', () => {
   const mockToast = vi.fn();
+  type CsvRow = Record<string, string>;
+  type ParseConfigForFile = Papa.ParseConfig<CsvRow, File>;
+  type ParseFn = (file: File, options: ParseConfigForFile) => void;
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -61,15 +65,25 @@ describe('useBulkImport', () => {
         { content: 'Question 2', points: '15', skill_id: 'skill-2' },
       ];
 
-      type ParseConfigWithError = Papa.ParseConfig & { error?: (err: Error) => void };
-      (
-        Papa.parse as unknown as MockedFunction<(file: File, options: Papa.ParseConfig) => void>
-      ).mockImplementation((_file: File, options: Papa.ParseConfig) => {
-        (options as ParseConfigWithError)?.complete?.(
-          { data: mockData, errors: [], meta: {} },
-          mockFile
-        );
-      });
+      (Papa.parse as unknown as MockedFunction<ParseFn>).mockImplementation(
+        (_file: File, options: ParseConfigForFile) => {
+          options.complete?.(
+            {
+              data: mockData as CsvRow[],
+              errors: [] as ParseError[],
+              meta: {
+                aborted: false,
+                cursor: 0,
+                delimiter: ',',
+                fields: ['content', 'points', 'skill_id'],
+                linebreak: '\n',
+                truncated: false,
+              },
+            } as ParseResult<CsvRow>,
+            mockFile
+          );
+        }
+      );
 
       const { result } = renderHook(() => useBulkImport());
 
@@ -92,12 +106,20 @@ describe('useBulkImport', () => {
     it('should handle parsing errors', async () => {
       const mockFile = new File([''], 'test.csv', { type: 'text/csv' });
 
-      type ParseConfigWithError = Papa.ParseConfig & { error?: (err: Error) => void };
-      (
-        Papa.parse as unknown as MockedFunction<(file: File, options: Papa.ParseConfig) => void>
-      ).mockImplementation((_file: File, options: Papa.ParseConfig) => {
-        (options as ParseConfigWithError)?.error?.(new Error('Parse error'));
-      });
+      (Papa.parse as unknown as MockedFunction<ParseFn>).mockImplementation(
+        (_file: File, options: ParseConfigForFile) => {
+          options.error?.(
+            {
+              code: 'UndetectableDelimiter',
+              message: 'Parse error',
+              row: 0,
+              type: 'Delimiter',
+            },
+            undefined,
+            undefined
+          );
+        }
+      );
 
       const { result } = renderHook(() => useBulkImport());
 
@@ -146,15 +168,25 @@ describe('useBulkImport', () => {
         },
       ];
 
-      type ParseConfigWithError = Papa.ParseConfig & { error?: (err: Error) => void };
-      (
-        Papa.parse as unknown as MockedFunction<(file: File, options: Papa.ParseConfig) => void>
-      ).mockImplementation((_file: File, options: Papa.ParseConfig) => {
-        (options as ParseConfigWithError)?.complete?.(
-          { data: mockData, errors: [], meta: {} },
-          mockFile
-        );
-      });
+      (Papa.parse as unknown as MockedFunction<ParseFn>).mockImplementation(
+        (_file: File, options: ParseConfigForFile) => {
+          options.complete?.(
+            {
+              data: mockData as CsvRow[],
+              errors: [] as ParseError[],
+              meta: {
+                aborted: false,
+                cursor: 0,
+                delimiter: ',',
+                fields: ['content'],
+                linebreak: '\n',
+                truncated: false,
+              },
+            } as ParseResult<CsvRow>,
+            mockFile
+          );
+        }
+      );
 
       const { result } = renderHook(() => useBulkImport());
 
