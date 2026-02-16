@@ -84,17 +84,17 @@ cd ..
 
 ### P0: Single-Branch Consolidation (Main-only)
 
-- [ ] Merge all branches into `main` (ours strategy)
-  - [ ] Actions → Merge All Branches Into Main → simulate=true, strategy=ours (preview)
-  - [ ] Actions → Merge All Branches Into Main → simulate=false, strategy=ours (apply)
-- [ ] Purge non-main branches
-  - [ ] Actions → Purge Non-Main Branches → simulate=true (preview)
-  - [ ] Actions → Purge Non-Main Branches → simulate=false (apply)
-- [ ] Enforce branch protection on `main`
-  - [ ] Actions → Set Branch Protection (main) with `ADMIN_TOKEN` secret
-  - [ ] Verify: linear history enforced, force-push blocked, admins enforced
-- [ ] Confirm enforcement workflow active
-  - [ ] .github/workflows/enforce-single-branch.yml deletes any non-main branches on push/create/PR
+- [x] Merge all branches into `main` (ours strategy) — ✅ COMPLETED
+  - [x] Actions → Merge All Branches Into Main → simulate=true, strategy=ours (preview)
+  - [x] Actions → Merge All Branches Into Main → simulate=false, strategy=ours (apply)
+- [x] Purge non-main branches — ✅ COMPLETED
+  - [x] Actions → Purge Non-Main Branches → simulate=true (preview)
+  - [x] Actions → Purge Non-Main Branches → simulate=false (apply)
+- [x] Enforce branch protection on `main` — ✅ COMPLETED
+  - [x] Actions → Set Branch Protection (main) with `ADMIN_TOKEN` secret
+  - [x] Verify: linear history enforced, force-push blocked, admins enforced
+- [x] Confirm enforcement workflow active — ✅ COMPLETED
+  - [x] .github/workflows/enforce-single-branch.yml deletes any non-main branches on push/create/PR
 
 ### P0: Deployment & Verification (2026-02-14)
 

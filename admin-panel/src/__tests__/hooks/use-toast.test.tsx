@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { toast, useToast } from '@/hooks/use-toast';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -207,7 +206,7 @@ describe('useToast', () => {
       // Simulate onOpenChange being called with false
       expect(toast?.onOpenChange).toBeDefined();
       act(() => {
-        toast!.onOpenChange!(false);
+        toast?.onOpenChange?.(false);
       });
 
       // Toast should be dismissed

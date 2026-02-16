@@ -1,0 +1,3 @@
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\hooks\use-bulk-import.test.tsx:111:32: Unexpected any. Specify a different type. [Error/@typescript-eslint/no-explicit-any]
+
+1 problem
