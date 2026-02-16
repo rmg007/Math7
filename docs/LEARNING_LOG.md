@@ -1,5 +1,94 @@
 # Learning Log
 
+## 2026-02-15: Loki Mode + Skills — Autonomous RARV Framework
+
+### Session Context
+
+- **Trigger**: User requested planning and implementation of Loki Mode, an autonomous multi-agent framework
+- **Scope**: New Antigravity Skill package + workflow integration + documentation
+- **Outcome**: ✅ Loki Mode fully implemented and pushed to GitHub (`3e86cd71`)
+
+### What Was Done
+
+#### 1. Infrastructure Audit
+
+Analyzed existing autonomous execution infrastructure to avoid duplication:
+
+| Existing Piece                       | Status        | Loki Relationship                            |
+| ------------------------------------ | ------------- | -------------------------------------------- |
+| `/autopilot` (turbo permissions)     | ✅ Kept as-is | Loki uses its permissions internally         |
+| `/superpower` (ops_runner.py bypass) | ✅ Kept as-is | Loki falls back to it when IDE gates         |
+| `/autoloop` (batch async execution)  | ✅ Kept as-is | Loki can batch commands via tasks.json       |
+| `/process` (6-phase lifecycle)       | ✅ Extended   | Loki follows same phases, removes human gate |
+
+**Key Insight**: 70% of the autonomous infrastructure already existed. Loki Mode unifies it with RARV intelligence rather than duplicating it.
+
+#### 2. Skill Package Created
+
+- `.antigravity/skills/loki-mode/SKILL.md` — Full RARV protocol (Reason → Act → Reflect → Verify), circuit breakers, self-healing rules, state persistence
+- `.antigravity/skills/loki-mode/config.json` — Allow/deny permission lists, $10 budget cap, 25 iteration limit, deployment gates
+- `.antigravity/skills/loki-mode/logs/.gitkeep` — RARV reasoning trace storage
+
+#### 3. Workflow Integration
+
+- `.agent/workflows/loki.md` — `/loki` slash command activation
+- `.agent/workflows/autopilot.md` — Updated with Loki Mode cross-reference
+- `.agent/workflows/help.md` — Updated workflow reference table and details
+
+### What Was Learned
+
+#### Architecture Decisions
+
+1. **Skill location: `.antigravity/skills/` (NOT `.agent/skills/`)**
+   - `.agent/` is for workflow definitions (slash commands)
+   - `.antigravity/` is for skill packages (SKILL.md + config + state + logs)
+   - This separation keeps agent-agnostic skills separate from workflow triggers
+
+2. **Extend, don't replace**: Loki Mode wraps `/process` rather than reimplementing the 6-phase lifecycle. This means improvements to `/process` automatically benefit Loki Mode.
+
+3. **Human gate at Phase 6 only**: All phases 1-5 run autonomously, but deployment always pauses. This is the safest default — the agent builds freely but never deploys without approval.
+
+#### Multi-Agent Coordination Patterns
+
+1. **Documentation is the API between agents**: Since multiple AI agents work on this project, the SKILL.md acts as a contract. Any agent can read it and know how to behave in Loki Mode.
+
+2. **State file is the handoff mechanism**: `state.json` persists progress across sessions and agents. Agent A can start a Loki task, and Agent B can resume it by reading the state.
+
+3. **Config.json is shared guardrails**: Deny lists and budget limits apply to ALL agents, not just the one that created them. This prevents a less careful agent from running destructive commands.
+
+4. **Workflow discoverability matters**: Adding Loki to `/help` and `autopilot.md` means agents that read those files (via `/default` or `/help`) will discover Loki Mode even if they've never seen it before.
+
+#### Circuit Breaker Design
+
+1. **Multiple layers of protection**:
+   - Command-level: deny list blocks `rm -rf`, `sudo`, etc.
+   - Subtask-level: 5 retries per subtask before stopping
+   - Session-level: 25 total iterations before graceful stop
+   - Budget-level: $10 USD cap (iteration-counted)
+   - Pattern-level: 3 consecutive same errors triggers alternate approach
+
+2. **Graceful degradation**: Circuit breakers save state before stopping, so work isn't lost.
+
+### Prevention Measures
+
+- **ALWAYS** check existing infrastructure before building new autonomous features
+- **ALWAYS** update `/help` when adding new workflows
+- **ALWAYS** update `LEARNING_LOG.md` at end of session
+- **ALWAYS** put skill packages in `.antigravity/skills/`, workflows in `.agent/workflows/`
+- **NEVER** allow autonomous deployment without human gate
+- **NEVER** put secrets in allow lists
+
+### Files Modified
+
+1. `.antigravity/skills/loki-mode/SKILL.md` — **NEW**: RARV protocol definition
+2. `.antigravity/skills/loki-mode/config.json` — **NEW**: Permissions and constraints
+3. `.antigravity/skills/loki-mode/logs/.gitkeep` — **NEW**: Log directory
+4. `.agent/workflows/loki.md` — **NEW**: `/loki` slash command
+5. `.agent/workflows/autopilot.md` — **MODIFIED**: Added Loki Mode section
+6. `.agent/workflows/help.md` — **MODIFIED**: Added Loki to workflow table and details
+
+---
+
 ## 2026-02-14: Comprehensive Type Safety & Super Admin Implementation
 
 ### Session Context
