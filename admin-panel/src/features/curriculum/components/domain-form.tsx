@@ -1,22 +1,22 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { FormActions } from '@/components/ui/form-actions';
 import { Input } from '@/components/ui/input';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/hooks/use-app';
@@ -176,176 +176,179 @@ export function DomainForm() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <fieldset disabled={form.formState.isSubmitting} className="space-y-8 disabled:opacity-60">
-          {error && (
-            <div className="p-4 rounded-2xl bg-red-50 border border-red-100 flex items-start gap-4">
-              <div className="p-2 bg-red-100 rounded-full shrink-0">
-                <ShieldCheck className="w-5 h-5 text-red-600" />
+          <fieldset
+            disabled={form.formState.isSubmitting}
+            className="space-y-8 disabled:opacity-60"
+          >
+            {error && (
+              <div className="p-4 rounded-2xl bg-red-50 border border-red-100 flex items-start gap-4">
+                <div className="p-2 bg-red-100 rounded-full shrink-0">
+                  <ShieldCheck className="w-5 h-5 text-red-600" />
+                </div>
+                <div className="space-y-1 pt-1">
+                  <h4 className="text-sm font-bold text-red-900 uppercase tracking-wider">
+                    Submission Failed
+                  </h4>
+                  <p className="text-sm text-red-700 font-medium">{error}</p>
+                </div>
               </div>
-              <div className="space-y-1 pt-1">
-                <h4 className="text-sm font-bold text-red-900 uppercase tracking-wider">
-                  Submission Failed
-                </h4>
-                <p className="text-sm text-red-700 font-medium">{error}</p>
-              </div>
-            </div>
-          )}
+            )}
 
-          <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
-            <CardContent className="p-8 md:p-10 space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <FileText className="w-4 h-4 text-purple-500" />
-                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-                          Display Title
-                        </FormLabel>
-                      </div>
-                      <FormControl>
-                        <Input
-                          placeholder="e.g. Advanced Mathematics"
-                          {...field}
-                          className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-purple-500/10 transition-all border"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-xs font-bold text-red-500 italic" />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="slug"
-                  render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Globe className="w-4 h-4 text-blue-500" />
-                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-                          Unique Slug
-                        </FormLabel>
-                      </div>
-                      <FormControl>
-                        <Input
-                          placeholder="e.g. math_advanced"
-                          {...field}
-                          disabled={isEditing}
-                          className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all border disabled:opacity-50"
-                        />
-                      </FormControl>
-                      <FormDescription className="text-[10px] font-medium text-gray-400">
-                        Lowercase, numbers, and underscores only.
-                      </FormDescription>
-                      <FormMessage className="text-xs font-bold text-red-500 italic" />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <FormField
-                  control={form.control}
-                  name="sort_order"
-                  render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <ListOrdered className="w-4 h-4 text-amber-500" />
-                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-                          Sort Priority
-                        </FormLabel>
-                      </div>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-amber-500/10 transition-all border"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-xs font-bold text-red-500 italic" />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-                          Protocol Status
-                        </FormLabel>
-                      </div>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        value={field.value}
-                      >
+            <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
+              <CardContent className="p-8 md:p-10 space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <FileText className="w-4 h-4 text-purple-500" />
+                          <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
+                            Display Title
+                          </FormLabel>
+                        </div>
                         <FormControl>
-                          <SelectTrigger className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all border">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
+                          <Input
+                            placeholder="e.g. Advanced Mathematics"
+                            {...field}
+                            className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-purple-500/10 transition-all border"
+                          />
                         </FormControl>
-                        <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
-                          {STATUS_OPTIONS.map((option) => (
-                            <SelectItem
-                              key={option.value}
-                              value={option.value}
-                              className="py-3 rounded-xl"
-                            >
-                              <div className="flex flex-col">
-                                <span className="font-bold text-gray-900">{option.label}</span>
-                                {option.description && (
-                                  <span className="text-[10px] text-gray-400 uppercase tracking-widest">
-                                    {option.description}
-                                  </span>
-                                )}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        <FormMessage className="text-xs font-bold text-red-500 italic" />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="slug"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Globe className="w-4 h-4 text-blue-500" />
+                          <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
+                            Unique Slug
+                          </FormLabel>
+                        </div>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g. math_advanced"
+                            {...field}
+                            disabled={isEditing}
+                            className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all border disabled:opacity-50"
+                          />
+                        </FormControl>
+                        <FormDescription className="text-2xs font-medium text-gray-400">
+                          Lowercase, numbers, and underscores only.
+                        </FormDescription>
+                        <FormMessage className="text-xs font-bold text-red-500 italic" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <FormField
+                    control={form.control}
+                    name="sort_order"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <ListOrdered className="w-4 h-4 text-amber-500" />
+                          <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
+                            Sort Priority
+                          </FormLabel>
+                        </div>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-amber-500/10 transition-all border"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-xs font-bold text-red-500 italic" />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                          <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
+                            Protocol Status
+                          </FormLabel>
+                        </div>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all border">
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
+                            {STATUS_OPTIONS.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                                className="py-3 rounded-xl"
+                              >
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-gray-900">{option.label}</span>
+                                  {option.description && (
+                                    <span className="text-2xs text-gray-400 uppercase tracking-widest">
+                                      {option.description}
+                                    </span>
+                                  )}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage className="text-xs font-bold text-red-500 italic" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FileText className="w-4 h-4 text-indigo-500" />
+                        <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
+                          Comprehensive Description
+                        </FormLabel>
+                      </div>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Define the scope and objectives for this domain..."
+                          className="min-h-[150px] rounded-[2rem] border-gray-100 bg-white/50 text-base font-medium leading-relaxed focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all border p-6"
+                          {...field}
+                        />
+                      </FormControl>
                       <FormMessage className="text-xs font-bold text-red-500 italic" />
                     </FormItem>
                   )}
                 />
-              </div>
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <FileText className="w-4 h-4 text-indigo-500" />
-                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-                        Comprehensive Description
-                      </FormLabel>
-                    </div>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Define the scope and objectives for this domain..."
-                        className="min-h-[150px] rounded-[2rem] border-gray-100 bg-white/50 text-base font-medium leading-relaxed focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all border p-6"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className="text-xs font-bold text-red-500 italic" />
-                  </FormItem>
-                )}
-              />
-
-              <FormActions
-                isSubmitting={isSubmitting}
-                submitLabel={isEditing ? 'Update Domain' : 'Create Domain'}
-                submittingLabel={isEditing ? 'Updating...' : 'Creating...'}
-                onCancel={() => navigate('/domains')}
-              />
-            </CardContent>
-          </Card>
+                <FormActions
+                  isSubmitting={isSubmitting}
+                  submitLabel={isEditing ? 'Update Domain' : 'Create Domain'}
+                  submittingLabel={isEditing ? 'Updating...' : 'Creating...'}
+                  onCancel={() => navigate('/domains')}
+                />
+              </CardContent>
+            </Card>
           </fieldset>
         </form>
       </Form>

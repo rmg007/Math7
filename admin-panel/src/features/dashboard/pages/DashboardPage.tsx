@@ -143,11 +143,7 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      <AdminHeader
-        title="Command Center"
-        description="Platform overview."
-        icon={Activity}
-      />
+      <AdminHeader title="Command Center" description="Platform overview." icon={Activity} />
 
       {isSuperAdmin && (
         <div className="flex items-center gap-4 p-4 bg-white/70 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl">
@@ -345,7 +341,7 @@ export function DashboardPage() {
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: COLORS[i % COLORS.length] }}
                   />
-                  <span className="text-[10px] font-black uppercase text-slate-500 truncate">
+                  <span className="text-2xs font-black uppercase text-slate-500 truncate">
                     {d.name}
                   </span>
                 </div>
@@ -450,7 +446,7 @@ function StatCard({
             <Icon className="w-6 h-6" />
           </div>
           <div
-            className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${trendUp ? 'text-emerald-700' : 'text-rose-600'}`}
+            className={`flex items-center gap-1 text-2xs font-black uppercase tracking-widest ${trendUp ? 'text-emerald-700' : 'text-rose-600'}`}
           >
             {trendUp ? (
               <ArrowUpRight className="w-3 h-3" />
@@ -464,7 +460,7 @@ function StatCard({
           <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tighter mb-1">
             {isLoading ? '...' : typeof value === 'number' ? value.toLocaleString() : value}
           </h3>
-          <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] italic">
+          <p className="text-2xs font-black text-slate-600 uppercase tracking-extra-wide italic">
             {title}
           </p>
         </div>
@@ -477,12 +473,12 @@ function RegistryItem({ label, value, status }: { label: string; value: string; 
   return (
     <li className="flex items-center justify-between p-3 rounded-xl bg-gray-50/50 border border-gray-100/50">
       <div>
-        <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">{label}</p>
+        <p className="text-2xs font-black text-gray-600 uppercase tracking-widest">{label}</p>
         <p className="text-sm font-bold text-slate-900">{value}</p>
       </div>
       <Badge
         variant="outline"
-        className="bg-white text-emerald-700 border-emerald-100 text-[10px] font-bold"
+        className="bg-white text-emerald-700 border-emerald-100 text-2xs font-bold"
       >
         {status}
       </Badge>

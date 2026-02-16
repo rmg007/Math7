@@ -1,39 +1,41 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
 
 export function StandardAdminGuard({ children }: { children: React.ReactNode }) {
-  const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
-  const [authorized, setAuthorized] = useState(false)
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
     const checkRole = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
-        navigate('/login')
-        return
+        navigate('/login');
+        return;
       }
 
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
-        .single()
+        .single();
 
       // Redirect super admins away from standard admin pages (like Groups)
       if (error || !profile || profile.role === 'super_admin') {
-        navigate('/')
-        return
+        navigate('/');
+        return;
       }
 
-      setAuthorized(true)
-      setLoading(false)
-    }
+      setAuthorized(true);
+      setLoading(false);
+    };
 
-    checkRole()
-  }, [navigate])
+    checkRole();
+  }, [navigate]);
 
   if (loading) {
     return (
@@ -41,14 +43,16 @@ export function StandardAdminGuard({ children }: { children: React.ReactNode }) 
         <div className="h-12 w-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center animate-bounce">
           <div className="h-6 w-6 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
         </div>
-        <p className="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Verifying Authority</p>
+        <p className="mt-4 text-2xs font-black text-slate-400 uppercase tracking-[0.3em]">
+          Verifying Authority
+        </p>
       </div>
-    )
+    );
   }
 
   if (!authorized) {
-    return null
+    return null;
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }

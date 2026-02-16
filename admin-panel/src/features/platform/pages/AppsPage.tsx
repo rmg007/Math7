@@ -6,45 +6,45 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Pagination } from '@/components/ui/pagination';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Switch } from '@/components/ui/switch';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import {
-    Activity,
-    Globe,
-    GraduationCap,
-    Layers,
-    Layout,
-    Pencil,
-    Plus,
-    Power,
-    Search,
-    Trash2,
-    X
+  Activity,
+  Globe,
+  GraduationCap,
+  Layers,
+  Layout,
+  Pencil,
+  Plus,
+  Power,
+  Search,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import {
-    useApps,
-    useCreateApp,
-    useDeleteApp,
-    useUpdateApp,
-    type CompiledApp,
+  useApps,
+  useCreateApp,
+  useDeleteApp,
+  useUpdateApp,
+  type CompiledApp,
 } from '../hooks/use-apps';
 import { useSubjects } from '../hooks/use-subjects';
 
@@ -69,7 +69,7 @@ const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
             <div className="font-bold text-gray-900 tracking-tight text-base">
               {app.display_name}
             </div>
-            <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+            <div className="text-2xs font-black text-gray-400 uppercase tracking-widest">
               ID: {app.app_id.slice(0, 8)}...
             </div>
           </div>
@@ -92,7 +92,7 @@ const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
         </div>
       </TableCell>
       <TableCell>
-        <div className="px-3 py-1 bg-gray-100 rounded-lg text-[11px] font-black text-gray-500 uppercase tracking-widest inline-block border border-gray-200/50">
+        <div className="px-3 py-1 bg-gray-100 rounded-lg text-xs font-black text-gray-500 uppercase tracking-widest inline-block border border-gray-200/50">
           {app.grade_level || 'N/A'}
         </div>
       </TableCell>
@@ -265,7 +265,7 @@ export function AppsPage() {
 
         <div className="flex items-center gap-3 shrink-0">
           <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
-            <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
+            <span className="text-2xs font-black text-indigo-500 uppercase tracking-widest">
               Telemetry:
             </span>
             <span className="text-sm font-black text-indigo-700 tracking-tight">
@@ -279,7 +279,7 @@ export function AppsPage() {
         <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
           <div>
             <h3 className="text-xl font-black text-gray-900 tracking-tight">Deployment Matrix</h3>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1 italic">
+            <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
               Active Application Registry
             </p>
           </div>
@@ -290,22 +290,22 @@ export function AppsPage() {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b-2 border-gray-100">
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 px-8 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 px-8 h-14">
                   Application Name
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Cluster Subject
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Subdomain
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Tier/Grade
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Status
                 </TableHead>
-                <TableHead className="text-right px-8 h-14 font-black text-[10px] uppercase tracking-widest text-gray-400">
+                <TableHead className="text-right px-8 h-14 font-black text-2xs uppercase tracking-widest text-gray-400">
                   Actions
                 </TableHead>
               </TableRow>
@@ -391,7 +391,7 @@ export function AppsPage() {
               <DialogTitle className="text-2xl font-black text-white tracking-tight">
                 {editingApp ? 'RECONFIGURE APP' : 'INITIATE DEPLOYMENT'}
               </DialogTitle>
-              <p className="text-indigo-100 text-xs font-bold uppercase tracking-[0.2em] mt-1 italic">
+              <p className="text-indigo-100 text-xs font-bold uppercase tracking-extra-wide mt-1 italic">
                 Define cluster parameters
               </p>
             </div>
@@ -401,7 +401,7 @@ export function AppsPage() {
           <form onSubmit={handleSubmit} className="px-8 py-8 space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-3">
-                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+                <Label className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
                   Primary Subject
                 </Label>
                 <Select
@@ -423,7 +423,7 @@ export function AppsPage() {
               <div className="space-y-3">
                 <Label
                   htmlFor="display_name"
-                  className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1"
+                  className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
                 >
                   Display Alias
                 </Label>
@@ -442,7 +442,7 @@ export function AppsPage() {
               <div className="space-y-3">
                 <Label
                   htmlFor="subdomain"
-                  className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1"
+                  className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
                 >
                   DNS Subdomain
                 </Label>
@@ -455,7 +455,7 @@ export function AppsPage() {
                     className="h-12 rounded-l-xl rounded-r-none border-gray-200 border-r-0 focus:ring-0 focus:border-gray-200 font-mono font-black text-indigo-600 focus:ring-indigo-500/10"
                     required
                   />
-                  <div className="h-12 px-3 flex items-center bg-gray-50 border border-gray-200 rounded-r-xl text-[10px] font-black text-gray-400 uppercase tracking-tighter">
+                  <div className="h-12 px-3 flex items-center bg-gray-50 border border-gray-200 rounded-r-xl text-2xs font-black text-gray-400 uppercase tracking-tighter">
                     .questerix.com
                   </div>
                 </div>
@@ -463,7 +463,7 @@ export function AppsPage() {
               <div className="space-y-3">
                 <Label
                   htmlFor="grade_level"
-                  className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1"
+                  className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
                 >
                   Target Grade/Tier
                 </Label>
@@ -492,7 +492,7 @@ export function AppsPage() {
                   <Label className="text-xs font-black text-indigo-900 uppercase tracking-widest">
                     Active Status
                   </Label>
-                  <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-tight italic">
+                  <p className="text-2xs text-indigo-400 font-bold uppercase tracking-tight italic">
                     Public availability toggle
                   </p>
                 </div>
@@ -509,7 +509,7 @@ export function AppsPage() {
                 type="button"
                 variant="ghost"
                 onClick={() => setIsDialogOpen(false)}
-                className="rounded-xl font-black text-[10px] uppercase tracking-widest text-gray-400"
+                className="rounded-xl font-black text-2xs uppercase tracking-widest text-gray-400"
               >
                 Abort Changes
               </Button>

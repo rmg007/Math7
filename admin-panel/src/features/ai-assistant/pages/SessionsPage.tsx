@@ -47,28 +47,38 @@ export const SessionsPage: React.FC = () => {
     const tokensInThousands = (session.token_count || 0) / 1000;
     // Assume 50/50 split input/output for simplicity
     const estimatedCost =
-      (tokensInThousands * 0.5 * pricing.input) + (tokensInThousands * 0.5 * pricing.output);
+      tokensInThousands * 0.5 * pricing.input + tokensInThousands * 0.5 * pricing.output;
     return estimatedCost;
   };
 
   const totalCost = sessions.reduce((sum, session) => sum + calculateCost(session), 0);
-  const totalQuestionsGenerated = sessions.reduce((sum, s) => sum + (s.questions_generated || 0), 0);
+  const totalQuestionsGenerated = sessions.reduce(
+    (sum, s) => sum + (s.questions_generated || 0),
+    0
+  );
   const totalQuestionsImported = sessions.reduce((sum, s) => sum + (s.questions_imported || 0), 0);
 
   const getStatusType = (status: string | null): StatusType => {
     if (!status) return 'pending';
     switch (status.toLowerCase()) {
-      case 'reviewing': return 'pending';
-      case 'approved': return 'resolved';
-      case 'imported': return 'published';
-      case 'rejected': return 'exhausted';
-      default: return 'pending';
+      case 'reviewing':
+        return 'pending';
+      case 'approved':
+        return 'resolved';
+      case 'imported':
+        return 'published';
+      case 'rejected':
+        return 'exhausted';
+      default:
+        return 'pending';
     }
   };
 
-  const filteredSessions = sessions.filter(session => {
-    return session.model_used.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (session.status?.toLowerCase() ?? '').includes(searchTerm.toLowerCase());
+  const filteredSessions = sessions.filter((session) => {
+    return (
+      session.model_used.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (session.status?.toLowerCase() ?? '').includes(searchTerm.toLowerCase())
+    );
   });
 
   if (loading) {
@@ -95,7 +105,7 @@ export const SessionsPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
-      <AdminHeader 
+      <AdminHeader
         title="Intelligence Telemetry"
         description="AI generation history."
         icon={Clock}
@@ -109,14 +119,20 @@ export const SessionsPage: React.FC = () => {
               <FileText className="h-6 w-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Total Artifacts</p>
-              <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">{totalQuestionsGenerated}</h3>
+              <p className="text-2xs font-black text-gray-400 uppercase tracking-widest leading-none">
+                Total Artifacts
+              </p>
+              <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
+                {totalQuestionsGenerated}
+              </h3>
             </div>
           </div>
           <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full bg-purple-500 w-[70%]" />
           </div>
-          <p className="text-[10px] text-gray-400 mt-3 font-bold uppercase tracking-widest">{sessions.length} sessions executed</p>
+          <p className="text-2xs text-gray-400 mt-3 font-bold uppercase tracking-widest">
+            {sessions.length} sessions executed
+          </p>
         </div>
 
         <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
@@ -125,7 +141,9 @@ export const SessionsPage: React.FC = () => {
               <CheckCircle2 className="h-6 w-6 text-emerald-600" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Import Rate</p>
+              <p className="text-2xs font-black text-gray-400 uppercase tracking-widest leading-none">
+                Import Rate
+              </p>
               <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
                 {totalQuestionsGenerated > 0
                   ? `${((totalQuestionsImported / totalQuestionsGenerated) * 100).toFixed(1)}%`
@@ -134,12 +152,16 @@ export const SessionsPage: React.FC = () => {
             </div>
           </div>
           <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-emerald-500" 
-              style={{ width: `${totalQuestionsGenerated > 0 ? (totalQuestionsImported / totalQuestionsGenerated) * 100 : 0}%` }} 
+            <div
+              className="h-full bg-emerald-500"
+              style={{
+                width: `${totalQuestionsGenerated > 0 ? (totalQuestionsImported / totalQuestionsGenerated) * 100 : 0}%`,
+              }}
             />
           </div>
-          <p className="text-[10px] text-emerald-600 mt-3 font-bold uppercase tracking-widest">{totalQuestionsImported} synced to production</p>
+          <p className="text-2xs text-emerald-600 mt-3 font-bold uppercase tracking-widest">
+            {totalQuestionsImported} synced to production
+          </p>
         </div>
 
         <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
@@ -148,14 +170,20 @@ export const SessionsPage: React.FC = () => {
               <DollarSign className="h-6 w-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Compute Cost</p>
-              <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">${totalCost.toFixed(3)}</h3>
+              <p className="text-2xs font-black text-gray-400 uppercase tracking-widest leading-none">
+                Compute Cost
+              </p>
+              <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
+                ${totalCost.toFixed(3)}
+              </h3>
             </div>
           </div>
           <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full bg-blue-500 w-[45%]" />
           </div>
-          <p className="text-[10px] text-blue-600 mt-3 font-bold uppercase tracking-widest">~${(totalCost / totalQuestionsGenerated || 0).toFixed(4)} Per Question</p>
+          <p className="text-2xs text-blue-600 mt-3 font-bold uppercase tracking-widest">
+            ~${(totalCost / totalQuestionsGenerated || 0).toFixed(4)} Per Question
+          </p>
         </div>
 
         <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
@@ -164,18 +192,27 @@ export const SessionsPage: React.FC = () => {
               <Clock className="h-6 w-6 text-orange-600" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Avg Latency</p>
+              <p className="text-2xs font-black text-gray-400 uppercase tracking-widest leading-none">
+                Avg Latency
+              </p>
               <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
                 {sessions.length > 0
-                  ? (sessions.reduce((sum, s) => sum + (s.generation_time_ms || 0), 0) / sessions.length / 1000).toFixed(1)
-                  : 0}s
+                  ? (
+                      sessions.reduce((sum, s) => sum + (s.generation_time_ms || 0), 0) /
+                      sessions.length /
+                      1000
+                    ).toFixed(1)
+                  : 0}
+                s
               </h3>
             </div>
           </div>
           <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full bg-orange-500 w-[60%]" />
           </div>
-          <p className="text-[10px] text-orange-600 mt-3 font-bold uppercase tracking-widest">Generation Velocity</p>
+          <p className="text-2xs text-orange-600 mt-3 font-bold uppercase tracking-widest">
+            Generation Velocity
+          </p>
         </div>
       </div>
 
@@ -200,11 +237,15 @@ export const SessionsPage: React.FC = () => {
             </button>
           )}
         </div>
-        
+
         <div className="flex items-center gap-3 shrink-0">
           <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
-             <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Sessions:</span>
-             <span className="text-sm font-black text-indigo-700 tracking-tight">{filteredSessions.length} TRACKED</span>
+            <span className="text-2xs font-black text-indigo-500 uppercase tracking-widest">
+              Sessions:
+            </span>
+            <span className="text-sm font-black text-indigo-700 tracking-tight">
+              {filteredSessions.length} TRACKED
+            </span>
           </div>
         </div>
       </div>
@@ -212,10 +253,14 @@ export const SessionsPage: React.FC = () => {
       {/* Sessions Table */}
       <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 overflow-hidden hover:shadow-xl transition-all duration-500">
         <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30">
-          <h3 className="text-xl font-black text-gray-900 tracking-tight italic">Execution Archive</h3>
-          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1 italic">Historical Generation Events</p>
+          <h3 className="text-xl font-black text-gray-900 tracking-tight italic">
+            Execution Archive
+          </h3>
+          <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
+            Historical Generation Events
+          </p>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <tbody className="divide-y divide-gray-50">
@@ -223,9 +268,15 @@ export const SessionsPage: React.FC = () => {
                 <tr key={session.id} className="hover:bg-indigo-50/30 transition-colors group">
                   <td className="px-8 py-5">
                     <span className="text-sm font-bold text-gray-900 tracking-tight whitespace-nowrap">
-                      {new Date(session.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}{' '}
+                      {new Date(session.created_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}{' '}
                       <span className="text-gray-400 font-normal">
-                        {new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(session.created_at).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                       </span>
                     </span>
                   </td>
@@ -249,8 +300,8 @@ export const SessionsPage: React.FC = () => {
                     ${calculateCost(session).toFixed(4)}
                   </td>
                   <td className="px-8 py-5 text-center">
-                    <StatusBadge 
-                      status={getStatusType(session.status)} 
+                    <StatusBadge
+                      status={getStatusType(session.status)}
                       label={(session.status || 'reviewing').toUpperCase()}
                     />
                   </td>
@@ -262,11 +313,7 @@ export const SessionsPage: React.FC = () => {
 
         {filteredSessions.length === 0 && (
           <div className="py-24">
-            <EmptyState 
-              icon={Clock}
-              title="No Telemetry Detected"
-              description="No sessions yet."
-            />
+            <EmptyState icon={Clock} title="No Telemetry Detected" description="No sessions yet." />
           </div>
         )}
       </div>

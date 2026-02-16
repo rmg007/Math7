@@ -73,6 +73,8 @@ export function AccountSettingsPage() {
         throw rpcError;
       }
 
+      localStorage.removeItem('questerix_remember_me');
+      sessionStorage.removeItem('questerix_session_active');
       await supabase.auth.signOut();
       navigate('/login');
     } catch (err) {
@@ -98,6 +100,8 @@ export function AccountSettingsPage() {
         throw rpcError;
       }
 
+      localStorage.removeItem('questerix_remember_me');
+      sessionStorage.removeItem('questerix_session_active');
       await supabase.auth.signOut();
       navigate('/login');
     } catch (err) {
@@ -119,11 +123,7 @@ export function AccountSettingsPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
-      <AdminHeader
-        title="Account Settings"
-        description="Your profile and security."
-        icon={User}
-      />
+      <AdminHeader title="Account Settings" description="Your profile and security." icon={User} />
 
       {error && (
         <div className="bg-red-500/10 border border-red-500/20 backdrop-blur-xl rounded-2xl p-4 flex items-center gap-3 animate-in shake duration-500">
@@ -140,7 +140,7 @@ export function AccountSettingsPage() {
           </div>
           <div>
             <h2 className="text-xl font-black text-gray-900 tracking-tight">Identity & Role</h2>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+            <p className="text-2xs font-black text-gray-400 uppercase tracking-widest">
               Verified profile details
             </p>
           </div>
@@ -150,7 +150,7 @@ export function AccountSettingsPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-gray-400">
               <User className="w-3.5 h-3.5" />
-              <label className="text-[10px] font-black uppercase tracking-[0.2em]">
+              <label className="text-2xs font-black uppercase tracking-extra-wide">
                 Legal Name
               </label>
             </div>
@@ -162,7 +162,7 @@ export function AccountSettingsPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-gray-400">
               <Mail className="w-3.5 h-3.5" />
-              <label className="text-[10px] font-black uppercase tracking-[0.2em]">
+              <label className="text-2xs font-black uppercase tracking-extra-wide">
                 Contact Email
               </label>
             </div>
@@ -172,7 +172,7 @@ export function AccountSettingsPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-gray-400">
               <Shield className="w-3.5 h-3.5" />
-              <label className="text-[10px] font-black uppercase tracking-[0.2em]">
+              <label className="text-2xs font-black uppercase tracking-extra-wide">
                 Access Authority
               </label>
             </div>
@@ -184,7 +184,7 @@ export function AccountSettingsPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-gray-400">
               <Calendar className="w-3.5 h-3.5" />
-              <label className="text-[10px] font-black uppercase tracking-[0.2em]">
+              <label className="text-2xs font-black uppercase tracking-extra-wide">
                 Enlistment Date
               </label>
             </div>
@@ -293,7 +293,7 @@ export function AccountSettingsPage() {
               </Button>
             ) : (
               <div className="bg-red-500/5 backdrop-blur-md border border-red-500/20 rounded-2xl p-6 space-y-4 animate-in zoom-in-95 duration-300">
-                <p className="text-[10px] font-black text-red-800 leading-relaxed uppercase tracking-widest">
+                <p className="text-2xs font-black text-red-800 leading-relaxed uppercase tracking-widest">
                   Type{' '}
                   <span className="bg-red-600 text-white px-1.5 py-0.5 rounded italic">DELETE</span>{' '}
                   to authorize absolute erasure.

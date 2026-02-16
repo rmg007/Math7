@@ -194,6 +194,9 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
   }, []);
 
   const handleLogout = async () => {
+    // Clean up Remember Me flags
+    localStorage.removeItem('questerix_remember_me');
+    sessionStorage.removeItem('questerix_session_active');
     await supabase.auth.signOut();
     navigate('/login');
   };
@@ -341,7 +344,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
                 <button
                   onClick={() => toggleGroup(group.title)}
                   className={cn(
-                    'flex items-center justify-between w-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-colors group mb-0.5',
+                    'flex items-center justify-between w-full px-3 py-1.5 text-2xs font-semibold uppercase tracking-wider transition-colors group mb-0.5',
                     matchGroupPath
                       ? 'text-purple-200/80'
                       : 'text-purple-400/40 hover:text-purple-300/70'
@@ -462,7 +465,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
                   <p className="text-xs font-semibold text-white truncate leading-tight">
                     {userInfo.fullName || userInfo.email.split('@')[0]}
                   </p>
-                  <p className="text-[10px] text-purple-300/50 truncate leading-tight">
+                  <p className="text-2xs text-purple-300/50 truncate leading-tight">
                     {userInfo.role === 'super_admin' ? 'Super Admin' : 'Admin'}
                   </p>
                 </div>

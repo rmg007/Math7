@@ -178,7 +178,7 @@ export const GovernancePage: React.FC = () => {
               <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    <span className="text-2xs font-bold text-gray-400 uppercase tracking-widest">
                       Results:
                     </span>
                     <span className="text-xs font-bold text-gray-700">{filteredData.length}</span>
@@ -204,8 +204,8 @@ export const GovernancePage: React.FC = () => {
                     table.
                   </p>
                   <p className="text-sm text-gray-600 max-w-md mx-auto mt-2">
-                    Data will appear here once apps start generating questions using the
-                    AI-powered content engine.
+                    Data will appear here once apps start generating questions using the AI-powered
+                    content engine.
                   </p>
                 </div>
               </div>
@@ -220,7 +220,7 @@ export const GovernancePage: React.FC = () => {
                         </div>
                         <div>
                           <h3 className="font-bold text-gray-900">{usage.display_name}</h3>
-                          <code className="text-[10px] text-gray-400 uppercase tracking-tighter">
+                          <code className="text-2xs text-gray-400 uppercase tracking-tighter">
                             {usage.app_id}
                           </code>
                         </div>
@@ -235,7 +235,7 @@ export const GovernancePage: React.FC = () => {
 
                     <div className="grid grid-cols-3 gap-4">
                       <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold text-center">
+                        <p className="text-2xs text-gray-500 uppercase font-bold text-center">
                           Tokens
                         </p>
                         <p className="text-lg font-mono font-bold text-center text-indigo-600">
@@ -243,7 +243,7 @@ export const GovernancePage: React.FC = () => {
                         </p>
                       </div>
                       <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold text-center">
+                        <p className="text-2xs text-gray-500 uppercase font-bold text-center">
                           Questions
                         </p>
                         <p className="text-lg font-mono font-bold text-center text-emerald-600">
@@ -251,7 +251,7 @@ export const GovernancePage: React.FC = () => {
                         </p>
                       </div>
                       <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold text-center">
+                        <p className="text-2xs text-gray-500 uppercase font-bold text-center">
                           Sessions
                         </p>
                         <p className="text-lg font-mono font-bold text-center text-blue-600">

@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AppLayout } from './components/layout/app-layout';
 import { ToastProvider } from './components/ui/toast';
@@ -151,7 +151,7 @@ const LoadingPage = () => (
       </div>
       <div className="flex flex-col items-center gap-1">
         <h2 className="text-xl font-black text-slate-900 tracking-tight italic">INITIALIZING</h2>
-        <p className="text-[10px] font-black text-slate-700 uppercase tracking-[0.3em] ml-1">
+        <p className="text-2xs font-black text-slate-700 uppercase tracking-[0.3em] ml-1">
           Secure Environment
         </p>
       </div>
@@ -208,179 +208,319 @@ const RoleRedirect = () => {
   return <Navigate to={target} replace />;
 };
 
+// ---------------------------------------------------------------------------
+// Route tree — data router format (enables useBlocker for unsaved-changes)
+// ---------------------------------------------------------------------------
+const router = createBrowserRouter([
+  {
+    path: '/login',
+    element: (
+      <Suspense fallback={<LoadingPage />}>
+        <LoginPage />
+      </Suspense>
+    ),
+  },
+  {
+    element: (
+      <AuthGuard>
+        <AppLayout />
+      </AuthGuard>
+    ),
+    children: [
+      { path: '/', element: <RoleRedirect /> },
+      {
+        path: '/dashboard',
+        element: (
+          <SuperAdminGuard>
+            <Suspense fallback={<LoadingPage />}>
+              <DashboardPage />
+            </Suspense>
+          </SuperAdminGuard>
+        ),
+      },
+      {
+        path: '/domains',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <DomainsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/domains/new',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <DomainCreatePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/domains/:id/edit',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <DomainEditPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/skills',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <SkillsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/skills/new',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <SkillCreatePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/skills/:id/edit',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <SkillEditPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/questions',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <QuestionsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/questions/new',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <QuestionCreatePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/questions/:id/edit',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <QuestionEditPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/publish',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <PublishPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/versions',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <VersionHistoryPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/invitation-codes',
+        element: (
+          <SuperAdminGuard>
+            <Suspense fallback={<LoadingPage />}>
+              <InvitationCodesPage />
+            </Suspense>
+          </SuperAdminGuard>
+        ),
+      },
+      {
+        path: '/groups',
+        element: (
+          <StandardAdminGuard>
+            <Suspense fallback={<LoadingPage />}>
+              <GroupsPage />
+            </Suspense>
+          </StandardAdminGuard>
+        ),
+      },
+      {
+        path: '/groups/new',
+        element: (
+          <StandardAdminGuard>
+            <Suspense fallback={<LoadingPage />}>
+              <GroupCreatePage />
+            </Suspense>
+          </StandardAdminGuard>
+        ),
+      },
+      {
+        path: '/groups/:id',
+        element: (
+          <StandardAdminGuard>
+            <Suspense fallback={<LoadingPage />}>
+              <GroupDetailPage />
+            </Suspense>
+          </StandardAdminGuard>
+        ),
+      },
+      {
+        path: '/groups/:groupId/assignments/new',
+        element: (
+          <StandardAdminGuard>
+            <Suspense fallback={<LoadingPage />}>
+              <AssignmentCreatePage />
+            </Suspense>
+          </StandardAdminGuard>
+        ),
+      },
+      {
+        path: '/ai-questions',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <GenerationPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/ai-sessions',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <SessionsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/ai-import',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <BulkImportPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/users',
+        element: (
+          <SuperAdminGuard>
+            <Suspense fallback={<LoadingPage />}>
+              <UserManagementPage />
+            </Suspense>
+          </SuperAdminGuard>
+        ),
+      },
+      {
+        path: '/governance',
+        element: (
+          <SuperAdminGuard>
+            <Suspense fallback={<LoadingPage />}>
+              <GovernancePage />
+            </Suspense>
+          </SuperAdminGuard>
+        ),
+      },
+      {
+        path: '/subjects',
+        element: (
+          <SuperAdminGuard>
+            <Suspense fallback={<LoadingPage />}>
+              <SubjectsPage />
+            </Suspense>
+          </SuperAdminGuard>
+        ),
+      },
+      {
+        path: '/apps',
+        element: (
+          <SuperAdminGuard>
+            <Suspense fallback={<LoadingPage />}>
+              <AppsPage />
+            </Suspense>
+          </SuperAdminGuard>
+        ),
+      },
+      {
+        path: '/landings',
+        element: (
+          <SuperAdminGuard>
+            <Suspense fallback={<LoadingPage />}>
+              <LandingsPage />
+            </Suspense>
+          </SuperAdminGuard>
+        ),
+      },
+      {
+        path: '/settings',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <AccountSettingsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/known-issues',
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <KnownIssuesPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/error-logs',
+        element: (
+          <ErrorBoundary
+            fallback={
+              <div className="min-h-screen flex items-center justify-center p-4">
+                <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-xl border border-red-100 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-red-50 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-8 h-8 text-red-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">Error Logs Unavailable</h2>
+                  <p className="text-gray-600 mb-6">
+                    The error logs page encountered an issue. This may be due to missing database
+                    tables or permissions.
+                  </p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all font-bold text-sm uppercase tracking-wide"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            }
+          >
+            <Suspense fallback={<LoadingPage />}>
+              <ErrorLogsPage />
+            </Suspense>
+          </ErrorBoundary>
+        ),
+      },
+    ],
+  },
+  { path: '*', element: <Navigate to="/" replace /> },
+]);
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
         <AppProvider>
           <ErrorBoundary>
-            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-              <Suspense fallback={<LoadingPage />}>
-                <Routes>
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route
-                    element={
-                      <AuthGuard>
-                        <AppLayout />
-                      </AuthGuard>
-                    }
-                  >
-                    <Route path="/" element={<RoleRedirect />} />
-                    <Route
-                      path="/dashboard"
-                      element={
-                        <SuperAdminGuard>
-                          <DashboardPage />
-                        </SuperAdminGuard>
-                      }
-                    />
-                    <Route path="/domains" element={<DomainsPage />} />
-                    <Route path="/domains/new" element={<DomainCreatePage />} />
-                    <Route path="/domains/:id/edit" element={<DomainEditPage />} />
-
-                    <Route path="/skills" element={<SkillsPage />} />
-                    <Route path="/skills/new" element={<SkillCreatePage />} />
-                    <Route path="/skills/:id/edit" element={<SkillEditPage />} />
-
-                    <Route path="/questions" element={<QuestionsPage />} />
-                    <Route path="/questions/new" element={<QuestionCreatePage />} />
-                    <Route path="/questions/:id/edit" element={<QuestionEditPage />} />
-
-                    <Route path="/publish" element={<PublishPage />} />
-                    <Route path="/versions" element={<VersionHistoryPage />} />
-                    <Route
-                      path="/invitation-codes"
-                      element={
-                        <SuperAdminGuard>
-                          <InvitationCodesPage />
-                        </SuperAdminGuard>
-                      }
-                    />
-                    <Route
-                      path="/groups"
-                      element={
-                        <StandardAdminGuard>
-                          <GroupsPage />
-                        </StandardAdminGuard>
-                      }
-                    />
-                    <Route
-                      path="/groups/new"
-                      element={
-                        <StandardAdminGuard>
-                          <GroupCreatePage />
-                        </StandardAdminGuard>
-                      }
-                    />
-                    <Route
-                      path="/groups/:id"
-                      element={
-                        <StandardAdminGuard>
-                          <GroupDetailPage />
-                        </StandardAdminGuard>
-                      }
-                    />
-                    <Route
-                      path="/groups/:groupId/assignments/new"
-                      element={
-                        <StandardAdminGuard>
-                          <AssignmentCreatePage />
-                        </StandardAdminGuard>
-                      }
-                    />
-                    <Route path="/ai-questions" element={<GenerationPage />} />
-                    <Route path="/ai-sessions" element={<SessionsPage />} />
-                    <Route path="/ai-import" element={<BulkImportPage />} />
-                    <Route
-                      path="/users"
-                      element={
-                        <SuperAdminGuard>
-                          <UserManagementPage />
-                        </SuperAdminGuard>
-                      }
-                    />
-                    <Route
-                      path="/governance"
-                      element={
-                        <SuperAdminGuard>
-                          <GovernancePage />
-                        </SuperAdminGuard>
-                      }
-                    />
-                    <Route
-                      path="/subjects"
-                      element={
-                        <SuperAdminGuard>
-                          <SubjectsPage />
-                        </SuperAdminGuard>
-                      }
-                    />
-                    <Route
-                      path="/apps"
-                      element={
-                        <SuperAdminGuard>
-                          <AppsPage />
-                        </SuperAdminGuard>
-                      }
-                    />
-                    <Route
-                      path="/landings"
-                      element={
-                        <SuperAdminGuard>
-                          <LandingsPage />
-                        </SuperAdminGuard>
-                      }
-                    />
-                    <Route path="/settings" element={<AccountSettingsPage />} />
-                    <Route path="/known-issues" element={<KnownIssuesPage />} />
-                    <Route
-                      path="/error-logs"
-                      element={
-                        <ErrorBoundary
-                          fallback={
-                            <div className="min-h-screen flex items-center justify-center p-4">
-                              <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-xl border border-red-100 text-center">
-                                <div className="w-16 h-16 mx-auto mb-4 bg-red-50 rounded-full flex items-center justify-center">
-                                  <svg
-                                    className="w-8 h-8 text-red-600"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                    />
-                                  </svg>
-                                </div>
-                                <h2 className="text-xl font-bold text-gray-900 mb-2">
-                                  Error Logs Unavailable
-                                </h2>
-                                <p className="text-gray-600 mb-6">
-                                  The error logs page encountered an issue. This may be due to
-                                  missing database tables or permissions.
-                                </p>
-                                <button
-                                  onClick={() => window.location.reload()}
-                                  className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all font-bold text-sm uppercase tracking-wide"
-                                >
-                                  Try Again
-                                </button>
-                              </div>
-                            </div>
-                          }
-                        >
-                          <ErrorLogsPage />
-                        </ErrorBoundary>
-                      }
-                    />
-                  </Route>
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </Suspense>
-            </BrowserRouter>
+            <RouterProvider router={router} />
           </ErrorBoundary>
         </AppProvider>
       </ToastProvider>

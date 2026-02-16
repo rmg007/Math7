@@ -222,13 +222,13 @@ export function KnownIssuesPage() {
             <Button
               onClick={() => setIsOracleDialogOpen(true)}
               variant="outline"
-              className="h-12 px-6 rounded-2xl border-indigo-200 text-indigo-600 hover:bg-indigo-50 font-bold uppercase tracking-widest text-[10px] gap-2 hidden md:flex"
+              className="h-12 px-6 rounded-2xl border-indigo-200 text-indigo-600 hover:bg-indigo-50 font-bold uppercase tracking-widest text-2xs gap-2 hidden md:flex"
             >
               <LifeBuoy className="w-4 h-4" /> Consult Oracle
             </Button>
             <Button
               onClick={() => handleOpenDialog()}
-              className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white transition-all font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-indigo-200"
+              className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white transition-all font-bold uppercase tracking-widest text-2xs gap-2 shadow-lg shadow-indigo-200"
             >
               <Plus className="w-4 h-4" /> Record Issue
             </Button>
@@ -243,7 +243,7 @@ export function KnownIssuesPage() {
               <Shield className="h-6 w-6 text-indigo-600" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">
+              <p className="text-2xs font-black text-gray-400 uppercase tracking-widest leading-none">
                 Total Tracked
               </p>
               <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
@@ -262,7 +262,7 @@ export function KnownIssuesPage() {
               <AlertCircle className="h-6 w-6 text-amber-600" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">
+              <p className="text-2xs font-black text-gray-400 uppercase tracking-widest leading-none">
                 Active Bugs
               </p>
               <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
@@ -286,7 +286,7 @@ export function KnownIssuesPage() {
               <CheckCircle2 className="h-6 w-6 text-emerald-600" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">
+              <p className="text-2xs font-black text-gray-400 uppercase tracking-widest leading-none">
                 Resolved
               </p>
               <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
@@ -327,7 +327,7 @@ export function KnownIssuesPage() {
 
         <div className="flex items-center shrink-0">
           <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl">
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+            <span className="text-2xs font-black text-gray-400 uppercase tracking-widest">
               Filter:
             </span>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -444,7 +444,7 @@ export function KnownIssuesPage() {
                 <div className="p-2 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
                   <Sparkles className="w-5 h-5 text-indigo-200" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">
+                <span className="text-2xs font-black uppercase tracking-[0.3em] text-white/60">
                   Project Oracle Plus
                 </span>
               </div>
@@ -466,7 +466,7 @@ export function KnownIssuesPage() {
                 onKeyDown={(e) => e.key === 'Enter' && handleOracleSearch()}
               />
               <Button
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-indigo-900 hover:bg-indigo-50 rounded-xl px-4 py-2 font-black text-[10px] uppercase tracking-widest gap-2 h-10 shadow-lg"
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-indigo-900 hover:bg-indigo-50 rounded-xl px-4 py-2 font-black text-2xs uppercase tracking-widest gap-2 h-10 shadow-lg"
                 onClick={handleOracleSearch}
                 disabled={isOracleSearching}
               >
@@ -490,7 +490,7 @@ export function KnownIssuesPage() {
               </div>
             ) : oracleResults.length > 0 ? (
               <div className="space-y-6">
-                <h4 className="text-[10px] font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
+                <h4 className="text-2xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
                   <div className="w-2 h-2 bg-indigo-500 rounded-full" />
                   Intelligence matches FOUND ({oracleResults.length})
                 </h4>

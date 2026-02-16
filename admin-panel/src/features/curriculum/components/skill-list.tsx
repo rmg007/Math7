@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
@@ -21,46 +21,46 @@ import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
 import { cn } from '@/lib/utils';
 import {
-    CheckSquare,
-    Copy,
-    Filter,
-    GripVertical,
-    Layers,
-    Pencil,
-    Plus,
-    Square,
-    Trash2,
+  CheckSquare,
+  Copy,
+  Filter,
+  GripVertical,
+  Layers,
+  Pencil,
+  Plus,
+  Square,
+  Trash2,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDomains } from '../hooks/use-domains';
 import {
-    useBulkCreateSkills,
-    useBulkDeleteSkills,
-    useBulkUpdateSkillsStatus,
-    useDeleteSkill,
-    useDuplicateSkill,
-    usePaginatedSkills,
-    useUpdateSkillOrder,
+  useBulkCreateSkills,
+  useBulkDeleteSkills,
+  useBulkUpdateSkillsStatus,
+  useDeleteSkill,
+  useDuplicateSkill,
+  usePaginatedSkills,
+  useUpdateSkillOrder,
 } from '../hooks/use-skills';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 import {
-    closestCenter,
-    DndContext,
-    DragEndEvent,
-    KeyboardSensor,
-    PointerSensor,
-    TouchSensor,
-    useSensor,
-    useSensors,
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
 import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -162,13 +162,13 @@ const SortableRow = memo(
             <span className="font-black text-gray-900 text-sm tracking-tight leading-none group-hover/row:text-indigo-700 transition-colors">
               {skill.title}
             </span>
-            <span className="text-[10px] text-gray-400 font-black uppercase tracking-[0.1em] opacity-70 italic truncate shrink-0">
+            <span className="text-2xs text-gray-400 font-black uppercase tracking-[0.1em] opacity-70 italic truncate shrink-0">
               /{skill.slug}
             </span>
           </div>
         </td>
         <td className="px-4 py-4">
-          <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-100/50 shadow-sm">
+          <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-2xs font-black uppercase tracking-widest border border-indigo-100/50 shadow-sm">
             {skill.domains?.title || 'ORPHAN'}
           </span>
         </td>
@@ -305,7 +305,7 @@ const SortableCard = memo(
               <h3 className="font-black text-gray-900 text-lg tracking-tight truncate leading-tight mb-1">
                 {skill.title}
               </h3>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic opacity-60 truncate">
+              <p className="text-2xs font-black text-gray-400 uppercase tracking-widest italic opacity-60 truncate">
                 /{skill.slug}
               </p>
             </div>
@@ -313,12 +313,12 @@ const SortableCard = memo(
 
           <div className="flex items-center justify-between pt-2 border-t border-gray-50">
             <div className="flex items-center gap-3">
-              <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-100/50">
+              <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-2xs font-black uppercase tracking-widest border border-indigo-100/50">
                 {skill.domains?.title?.substring(0, 12)}...
               </span>
               {renderStatusBadge(skill.status || 'draft')}
             </div>
-            <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest bg-gray-100 px-2 py-1 rounded">
+            <span className="text-2xs font-black text-gray-600 uppercase tracking-widest bg-gray-100 px-2 py-1 rounded">
               LVL {skill.difficulty_level}
             </span>
           </div>
@@ -624,7 +624,7 @@ export function SkillList() {
               importDisabled={false}
             />
             <Link to="/skills/new">
-              <Button className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 gap-2">
+              <Button className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 gap-2">
                 <Plus className="h-4 w-4" />
                 <span>New Skill</span>
               </Button>
@@ -683,7 +683,7 @@ export function SkillList() {
       {selectedIds.size > 0 && (
         <div className="flex items-center justify-between p-4 bg-indigo-600 rounded-[2rem] shadow-xl shadow-indigo-600/20 animate-in slide-in-from-top-4 duration-500">
           <div className="flex items-center gap-4 pl-4">
-            <span className="text-white font-black text-xs uppercase tracking-[0.2em]">
+            <span className="text-white font-black text-xs uppercase tracking-extra-wide">
               {selectedIds.size} SELECTED FOR BATCH PROCESSING
             </span>
           </div>
@@ -692,7 +692,7 @@ export function SkillList() {
               variant="ghost"
               size="sm"
               onClick={handleMarkPublished}
-              className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+              className="h-10 px-4 rounded-xl text-white font-black text-2xs uppercase tracking-widest hover:bg-white/10"
             >
               Publish
             </Button>
@@ -700,7 +700,7 @@ export function SkillList() {
               variant="ghost"
               size="sm"
               onClick={handleMarkLive}
-              className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+              className="h-10 px-4 rounded-xl text-white font-black text-2xs uppercase tracking-widest hover:bg-white/10"
             >
               Go Live
             </Button>
@@ -708,7 +708,7 @@ export function SkillList() {
               variant="ghost"
               size="sm"
               onClick={handleMarkDraft}
-              className="h-10 px-4 rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+              className="h-10 px-4 rounded-xl text-white font-black text-2xs uppercase tracking-widest hover:bg-white/10"
             >
               Draft
             </Button>
@@ -717,7 +717,7 @@ export function SkillList() {
               variant="ghost"
               size="sm"
               onClick={() => setDeleteConfirmation({ type: 'bulk' })}
-              className="h-10 px-4 rounded-xl text-red-200 font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all gap-2"
+              className="h-10 px-4 rounded-xl text-red-200 font-black text-2xs uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all gap-2"
             >
               <Trash2 className="h-4 w-4" />
               Purge
@@ -733,7 +733,7 @@ export function SkillList() {
             <table className="w-full">
               <thead className="bg-gray-50/50 border-b-2 border-gray-100">
                 <tr>
-                  <th className="w-12 h-14 pl-6 pr-2 font-black text-[10px] uppercase tracking-widest text-gray-600"></th>
+                  <th className="w-12 h-14 pl-6 pr-2 font-black text-2xs uppercase tracking-widest text-gray-600"></th>
                   <th className="w-12 h-14 px-4">
                     <button
                       onClick={handleSelectAll}
@@ -747,33 +747,33 @@ export function SkillList() {
                       )}
                     </button>
                   </th>
-                  <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">
+                  <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
                     <SortableHeader
                       label="Identity & Skill"
                       column="title"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-[10px]"
+                      className="text-2xs"
                     />
                   </th>
-                  <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">
+                  <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
                     Parent Domain
                   </th>
-                  <th className="h-14 px-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-600">
+                  <th className="h-14 px-4 text-center font-black text-2xs uppercase tracking-widest text-gray-600">
                     <SortableHeader
                       label="LVL"
                       column="difficulty_level"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-[10px] justify-center"
+                      className="text-2xs justify-center"
                     />
                   </th>
-                  <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">
+                  <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
                     Status
                   </th>
-                  <th className="h-14 pl-4 pr-8 text-right font-black text-[10px] uppercase tracking-widest text-gray-600">
+                  <th className="h-14 pl-4 pr-8 text-right font-black text-2xs uppercase tracking-widest text-gray-600">
                     Execution
                   </th>
                 </tr>
@@ -913,12 +913,12 @@ export function SkillList() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-8 gap-3">
-            <AlertDialogCancel className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest text-gray-400 hover:bg-gray-100 italic transition-all border-none">
+            <AlertDialogCancel className="h-12 px-8 rounded-2xl font-black text-2xs uppercase tracking-widest text-gray-400 hover:bg-gray-100 italic transition-all border-none">
               Abort
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmExecution}
-              className="h-12 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-red-600/20 transition-all hover:-translate-y-0.5"
+              className="h-12 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-red-600/20 transition-all hover:-translate-y-0.5"
             >
               Confirm Execution
             </AlertDialogAction>

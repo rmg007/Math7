@@ -307,9 +307,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
                 </div>
                 {mathPreviewHtml && (
                   <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-200 text-center">
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">
-                      Preview
-                    </p>
+                    <p className="text-2xs text-gray-400 uppercase tracking-wider mb-1">Preview</p>
                     <div dangerouslySetInnerHTML={{ __html: mathPreviewHtml }} />
                   </div>
                 )}

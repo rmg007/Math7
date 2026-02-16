@@ -1,31 +1,31 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useApp } from '@/hooks/use-app';
 import { cn } from '@/lib/utils';
 import {
-    Activity,
-    AlertCircle,
-    AlertTriangle,
-    BookOpen,
-    CheckCircle,
-    HelpCircle,
-    History,
-    Layers,
-    Rocket,
-    Send,
-    ShieldCheck,
-    Upload,
+  Activity,
+  AlertCircle,
+  AlertTriangle,
+  BookOpen,
+  CheckCircle,
+  HelpCircle,
+  History,
+  Layers,
+  Rocket,
+  Send,
+  ShieldCheck,
+  Upload,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -82,7 +82,7 @@ export function PublishPage() {
           <Button
             asChild
             variant="outline"
-            className="rounded-2xl border-gray-200 text-gray-400 hover:text-indigo-600 hover:border-indigo-600 hover:bg-indigo-50 transition-all font-bold uppercase tracking-widest text-[10px] h-12"
+            className="rounded-2xl border-gray-200 text-gray-400 hover:text-indigo-600 hover:border-indigo-600 hover:bg-indigo-50 transition-all font-bold uppercase tracking-widest text-2xs h-12"
           >
             <Link to="/versions">
               <History className="mr-2 h-4 w-4" />
@@ -100,7 +100,7 @@ export function PublishPage() {
             </div>
             <div>
               <h3 className="text-xl font-black text-gray-900 tracking-tight">Active Protocol</h3>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] italic">
+              <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide italic">
                 Current live version
               </p>
             </div>
@@ -147,7 +147,7 @@ export function PublishPage() {
             </div>
             <div>
               <h3 className="text-xl font-black text-gray-900 tracking-tight">Stage Manifest</h3>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] italic">
+              <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide italic">
                 Pending deployments
               </p>
             </div>
@@ -179,7 +179,7 @@ export function PublishPage() {
             </div>
             <div>
               <h3 className="text-xl font-black text-gray-900 tracking-tight">Integrity Matrix</h3>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] italic">
+              <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide italic">
                 Entity verification
               </p>
             </div>
@@ -331,7 +331,7 @@ export function PublishPage() {
               <h3 className="text-2xl font-black text-gray-900 tracking-tight">
                 Production Handover
               </h3>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] italic">
+              <p className="text-2xs font-black text-gray-400 uppercase tracking-[0.3em] italic">
                 Authorized synchronization
               </p>
             </div>
@@ -382,7 +382,7 @@ export function PublishPage() {
 
         <div className="p-8 bg-gray-50/50 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex flex-col">
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 pl-4">
+            <span className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mb-2 pl-4">
               System State:
             </span>
             <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-full border border-gray-100 shadow-sm">
@@ -409,12 +409,12 @@ export function PublishPage() {
             {publishMutation.isPending ? (
               <>
                 <div className="h-6 w-6 animate-spin rounded-full border-[3px] border-white border-r-transparent"></div>
-                <span className="text-sm uppercase tracking-[0.2em]">Executing Handover...</span>
+                <span className="text-sm uppercase tracking-extra-wide">Executing Handover...</span>
               </>
             ) : (
               <>
                 <Upload className="h-6 w-6 group-hover:-translate-y-1 transition-transform" />
-                <span className="text-sm uppercase tracking-[0.2em]">
+                <span className="text-sm uppercase tracking-extra-wide">
                   {preview?.canPublish
                     ? `Push ${preview.readyToPublishCount} Entities to Live`
                     : 'Awaiting Staging'}
@@ -475,13 +475,13 @@ export function PublishPage() {
           </div>
 
           <AlertDialogFooter className="mt-8 gap-3">
-            <AlertDialogCancel className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest text-gray-400 hover:bg-gray-100 italic transition-all border-none">
+            <AlertDialogCancel className="h-12 px-8 rounded-2xl font-black text-2xs uppercase tracking-widest text-gray-400 hover:bg-gray-100 italic transition-all border-none">
               Cancel Deployment
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handlePublish}
               disabled={publishMutation.isPending}
-              className="h-12 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-red-600/20 transition-all hover:-translate-y-0.5"
+              className="h-12 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-red-600/20 transition-all hover:-translate-y-0.5"
             >
               {publishMutation.isPending ? (
                 <>

@@ -5,22 +5,22 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { Activity, Boxes, Layers, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import {
-    useCreateSubject,
-    useDeleteSubject,
-    useSubjects,
-    useUpdateSubject,
-    type Subject,
+  useCreateSubject,
+  useDeleteSubject,
+  useSubjects,
+  useUpdateSubject,
+  type Subject,
 } from '../hooks/use-subjects';
 
 interface SubjectRowProps {
@@ -50,14 +50,14 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
             <p className="font-black text-gray-900 tracking-tight text-base italic leading-none">
               {subject.title}
             </p>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+            <p className="text-2xs font-black text-gray-400 uppercase tracking-widest mt-1">
               ID: {subject.subject_id ? subject.subject_id.split('-')[0] : 'N/A'}
             </p>
           </div>
         </div>
       </TableCell>
       <TableCell className="py-5">
-        <code className="px-3 py-1.5 rounded-xl bg-gray-100/50 text-purple-600 font-mono text-[10px] font-black tracking-tight border border-gray-100">
+        <code className="px-3 py-1.5 rounded-xl bg-gray-100/50 text-purple-600 font-mono text-2xs font-black tracking-tight border border-gray-100">
           {subject.slug}
         </code>
       </TableCell>
@@ -67,7 +67,7 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
             <img src={subject.icon_url} alt="" className="w-6 h-6 object-contain" />
           </div>
         ) : (
-          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center mx-auto shadow-sm italic text-[10px] font-black text-gray-300">
+          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center mx-auto shadow-sm italic text-2xs font-black text-gray-300">
             NONE
           </div>
         )}
@@ -204,7 +204,7 @@ export function SubjectsPage() {
         actions={
           <Button
             onClick={() => handleOpenDialog()}
-            className="h-12 px-8 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-purple-600/20 transition-all hover:-translate-y-0.5 gap-3"
+            className="h-12 px-8 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-purple-600/20 transition-all hover:-translate-y-0.5 gap-3"
           >
             <Plus className="w-4 h-4" /> Provision Taxonomy Node
           </Button>
@@ -235,7 +235,7 @@ export function SubjectsPage() {
 
         <div className="flex items-center gap-3 shrink-0">
           <div className="px-4 py-2 bg-purple-500/10 border border-purple-500/10 rounded-xl">
-            <span className="text-[10px] font-black text-purple-500 uppercase tracking-widest mr-2">
+            <span className="text-2xs font-black text-purple-500 uppercase tracking-widest mr-2">
               Nodes:
             </span>
             <span className="text-sm font-black text-purple-700 tracking-tight">
@@ -251,7 +251,7 @@ export function SubjectsPage() {
             <h3 className="text-xl font-black text-gray-900 tracking-tight italic">
               Category Hierarchy
             </h3>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1 italic">
+            <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
               Knowledge Domain Configuration
             </p>
           </div>
@@ -262,19 +262,19 @@ export function SubjectsPage() {
           <Table className="w-full">
             <TableHeader>
               <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b-2 border-gray-100">
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 px-8 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 px-8 h-14">
                   Domain Identity
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Semantic Slug
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14 text-center">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14 text-center">
                   Visual Anchor
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Display Rank
                 </TableHead>
-                <TableHead className="text-right px-8 h-14 font-black text-[10px] uppercase tracking-widest text-gray-400">
+                <TableHead className="text-right px-8 h-14 font-black text-2xs uppercase tracking-widest text-gray-400">
                   Execution
                 </TableHead>
               </TableRow>
@@ -337,7 +337,7 @@ export function SubjectsPage() {
                   <h2 className="text-2xl font-black text-gray-900 tracking-tight italic">
                     {editingSubject ? 'Edit Taxonomy Node' : 'Provision Node'}
                   </h2>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+                  <p className="text-2xs font-black text-gray-400 uppercase tracking-widest mt-1">
                     {editingSubject
                       ? `Refining ID: ${editingSubject.subject_id.split('-')[0]}`
                       : 'Initializing Knowledge category'}
@@ -350,7 +350,7 @@ export function SubjectsPage() {
                   <div className="space-y-2 group">
                     <Label
                       htmlFor="name"
-                      className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1"
+                      className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
                     >
                       Subject Name
                     </Label>
@@ -366,7 +366,7 @@ export function SubjectsPage() {
                   <div className="space-y-2 group">
                     <Label
                       htmlFor="slug"
-                      className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1"
+                      className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
                     >
                       Semantic Slug
                     </Label>
@@ -385,7 +385,7 @@ export function SubjectsPage() {
                   <div className="space-y-2 group">
                     <Label
                       htmlFor="color"
-                      className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1"
+                      className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
                     >
                       Color Palette (Hex)
                     </Label>
@@ -406,7 +406,7 @@ export function SubjectsPage() {
                   <div className="space-y-2 group">
                     <Label
                       htmlFor="order"
-                      className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1"
+                      className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
                     >
                       Display Rank
                     </Label>
@@ -426,7 +426,7 @@ export function SubjectsPage() {
                 <div className="space-y-2 group">
                   <Label
                     htmlFor="description"
-                    className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1"
+                    className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
                   >
                     Narrative Description
                   </Label>
@@ -446,14 +446,14 @@ export function SubjectsPage() {
                 type="button"
                 variant="ghost"
                 onClick={() => setIsDialogOpen(false)}
-                className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest text-gray-400 hover:bg-gray-200 italic transition-all"
+                className="h-12 px-8 rounded-2xl font-black text-2xs uppercase tracking-widest text-gray-400 hover:bg-gray-200 italic transition-all"
               >
                 Abort
               </Button>
               <Button
                 type="submit"
                 disabled={createSubject.isPending || updateSubject.isPending}
-                className="h-12 px-10 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-purple-600/20 transition-all hover:-translate-y-0.5"
+                className="h-12 px-10 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-purple-600/20 transition-all hover:-translate-y-0.5"
               >
                 {editingSubject ? 'COMMIT CHANGES' : 'EXECUTE PROVISIONING'}
               </Button>

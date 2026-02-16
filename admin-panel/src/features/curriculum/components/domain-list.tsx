@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
@@ -19,45 +19,45 @@ import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
 import { supabase } from '@/lib/supabase';
 import {
-    Book,
-    CheckSquare,
-    Filter,
-    GripVertical,
-    Loader2,
-    Pencil,
-    Plus,
-    Square,
-    Trash2,
-    X,
+  Book,
+  CheckSquare,
+  Filter,
+  GripVertical,
+  Loader2,
+  Pencil,
+  Plus,
+  Square,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-    useBulkCreateDomains,
-    useBulkDeleteDomains,
-    useBulkUpdateDomainsStatus,
-    useDeleteDomain,
-    usePaginatedDomains,
-    useUpdateDomainOrder,
+  useBulkCreateDomains,
+  useBulkDeleteDomains,
+  useBulkUpdateDomainsStatus,
+  useDeleteDomain,
+  usePaginatedDomains,
+  useUpdateDomainOrder,
 } from '../hooks/use-domains';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 import {
-    closestCenter,
-    DndContext,
-    DragEndEvent,
-    KeyboardSensor,
-    PointerSensor,
-    TouchSensor,
-    useSensor,
-    useSensors,
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
 import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -151,7 +151,7 @@ function SortableRow({
       <td className="px-6 py-3">
         <div className="flex items-center gap-2">
           <span className="font-bold text-gray-900 text-sm tracking-tight">{domain.title}</span>
-          <span className="text-[10px] text-gray-400 font-mono tracking-wide uppercase shrink-0">
+          <span className="text-2xs text-gray-400 font-mono tracking-wide uppercase shrink-0">
             {domain.domain_id.substring(0, 8)}
           </span>
         </div>
@@ -363,8 +363,7 @@ export function DomainList() {
 
   const domainIds = useMemo(() => domains.map((d) => d.domain_id), [domains]);
 
-  const isDragDisabled =
-    Boolean(debouncedSearch) || statusFilter !== 'all';
+  const isDragDisabled = Boolean(debouncedSearch) || statusFilter !== 'all';
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -571,7 +570,7 @@ export function DomainList() {
               importDisabled={false}
             />
             <Link to="/domains/new">
-              <Button className="h-12 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-0.5 gap-3">
+              <Button className="h-12 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-widest shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-0.5 gap-3">
                 <Plus className="h-5 w-5" />
                 <span>Initialize Cluster</span>
               </Button>
@@ -586,7 +585,7 @@ export function DomainList() {
             <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
               <span className="text-white font-black text-xs">{selectedIds.size}</span>
             </div>
-            <span className="text-white/70 font-black text-[10px] uppercase tracking-widest">
+            <span className="text-white/70 font-black text-2xs uppercase tracking-widest">
               Clustered Operations
             </span>
           </div>

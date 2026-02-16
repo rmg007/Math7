@@ -20,11 +20,11 @@ interface ErrorBoundaryProps {
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { 
-      hasError: false, 
+    this.state = {
+      hasError: false,
       error: null,
       oracleResults: [],
-      searching: false
+      searching: false,
     };
   }
 
@@ -69,11 +69,21 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
           <div className="max-w-2xl w-full p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 text-center">
             <div className="w-20 h-20 mx-auto mb-6 bg-red-50 dark:bg-red-900/10 rounded-3xl flex items-center justify-center rotate-3 hover:rotate-0 transition-transform">
-              <svg className="w-10 h-10 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              <svg
+                className="w-10 h-10 text-red-600 dark:text-red-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
               </svg>
             </div>
-            
+
             <h1 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
               System Interruption
             </h1>
@@ -83,13 +93,16 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
             {this.state.oracleResults.length > 0 ? (
               <div className="mb-8 text-left animate-in fade-in zoom-in duration-500">
-                <h3 className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <h3 className="text-2xs font-black text-indigo-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                   <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
                   Oracle Intel Matches
                 </h3>
                 <div className="space-y-4">
                   {this.state.oracleResults.slice(0, 3).map((res, i) => (
-                    <div key={i} className="p-4 bg-indigo-50/50 backdrop-blur-sm rounded-xl border border-indigo-100 group hover:border-indigo-300 transition-all">
+                    <div
+                      key={i}
+                      className="p-4 bg-indigo-50/50 backdrop-blur-sm rounded-xl border border-indigo-100 group hover:border-indigo-300 transition-all"
+                    >
                       <div className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                         {res.file_path.split('\\').pop()}
                       </div>
@@ -102,13 +115,13 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4 mb-8">
-                <button 
+                <button
                   onClick={() => window.location.reload()}
                   className="px-6 py-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all font-black text-xs uppercase tracking-widest shadow-lg shadow-gray-200"
                 >
                   Reload App
                 </button>
-                <button 
+                <button
                   onClick={this.handleOracleSearch}
                   disabled={this.state.searching}
                   className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 group shadow-lg shadow-indigo-100"
@@ -116,8 +129,18 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                   {this.state.searching ? (
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
-                    <svg className="w-4 h-4 group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    <svg
+                      className="w-4 h-4 group-hover:rotate-12 transition-transform"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
                     </svg>
                   )}
                   Consult Oracle
@@ -125,9 +148,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               </div>
             )}
 
-            <button 
+            <button
               onClick={() => this.setState({ hasError: false, error: null, oracleResults: [] })}
-              className="text-[10px] font-black text-gray-400 hover:text-gray-600 transition-colors uppercase tracking-widest underline decoration-2 underline-offset-4"
+              className="text-2xs font-black text-gray-400 hover:text-gray-600 transition-colors uppercase tracking-widest underline decoration-2 underline-offset-4"
             >
               Dismiss
             </button>
@@ -138,7 +161,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                   <div className="w-1 h-1 bg-gray-300 rounded-full" />
                   Technical Trace
                 </summary>
-                <pre className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl text-[10px] overflow-auto max-h-40 font-mono text-red-500 border border-red-50">
+                <pre className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl text-2xs overflow-auto max-h-40 font-mono text-red-500 border border-red-50">
                   {this.state.error.message}
                 </pre>
               </details>

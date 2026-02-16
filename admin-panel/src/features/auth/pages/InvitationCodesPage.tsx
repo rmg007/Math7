@@ -96,7 +96,7 @@ const InvitationCodeRow = memo(
         <TableCell className="py-5 font-black text-xs text-gray-400 uppercase tracking-tighter">
           {formatDate(code.expires_at)}
         </TableCell>
-        <TableCell className="py-5 font-black text-[10px] text-gray-400 uppercase tracking-widest">
+        <TableCell className="py-5 font-black text-2xs text-gray-400 uppercase tracking-widest">
           {formatDate(code.created_at)}
         </TableCell>
         <TableCell className="px-8 py-5 text-right space-x-2">
@@ -104,7 +104,7 @@ const InvitationCodeRow = memo(
             variant="ghost"
             size="sm"
             onClick={() => onCopy(code.code, code.id)}
-            className="h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 gap-2"
+            className="h-10 px-4 rounded-xl font-black text-2xs uppercase tracking-widest text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 gap-2"
           >
             <Copy className="h-3.5 w-3.5" />
             {copiedId === code.id ? 'COPIED' : 'COPY'}
@@ -114,7 +114,7 @@ const InvitationCodeRow = memo(
               variant="ghost"
               size="sm"
               onClick={() => onDeactivate(code.id)}
-              className="h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest text-red-400 hover:bg-red-50 hover:text-red-600 gap-2"
+              className="h-10 px-4 rounded-xl font-black text-2xs uppercase tracking-widest text-red-400 hover:bg-red-50 hover:text-red-600 gap-2"
             >
               <Power className="h-3.5 w-3.5" />
               DEACTIVATE
@@ -293,7 +293,7 @@ export function InvitationCodesPage() {
           </div>
           <div>
             <h2 className="text-xl font-black text-gray-900 tracking-tight">Provision Access</h2>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
+            <p className="text-2xs font-black text-gray-400 uppercase tracking-widest italic">
               Generate new invitation codes for admin onboarding
             </p>
           </div>
@@ -301,7 +301,7 @@ export function InvitationCodesPage() {
 
         <div className="flex flex-wrap gap-8 items-end">
           <div className="space-y-2 group">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+            <label className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
               Authority Uses
             </label>
             <Input
@@ -314,7 +314,7 @@ export function InvitationCodesPage() {
             />
           </div>
           <div className="space-y-2 group">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+            <label className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
               TTL (Days)
             </label>
             <Input
@@ -329,7 +329,7 @@ export function InvitationCodesPage() {
           <Button
             onClick={handleGenerateCode}
             disabled={generating}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl px-10 h-12 shadow-lg shadow-indigo-600/20 font-black text-xs uppercase tracking-[0.2em] transition-all hover:-translate-y-0.5 gap-2"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl px-10 h-12 shadow-lg shadow-indigo-600/20 font-black text-xs uppercase tracking-extra-wide transition-all hover:-translate-y-0.5 gap-2"
           >
             {generating && <Loader2 className="h-4 w-4 animate-spin" />}
             {generating ? 'GENERATING...' : 'GENERATE CODE'}
@@ -366,7 +366,7 @@ export function InvitationCodesPage() {
 
         <div className="flex items-center gap-3 shrink-0">
           <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
-            <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
+            <span className="text-2xs font-black text-indigo-500 uppercase tracking-widest">
               Codes:
             </span>
             <span className="text-sm font-black text-indigo-700 tracking-tight">
@@ -380,7 +380,7 @@ export function InvitationCodesPage() {
       {selectedIds.size > 0 && (
         <div className="flex items-center justify-between p-4 bg-indigo-600 rounded-[2rem] shadow-xl shadow-indigo-600/20 animate-in slide-in-from-top-4 duration-500">
           <div className="flex items-center gap-4 pl-4">
-            <span className="text-white font-black text-xs uppercase tracking-[0.2em]">
+            <span className="text-white font-black text-xs uppercase tracking-extra-wide">
               {selectedIds.size} SELECTED FOR BATCH PROCESSING
             </span>
           </div>
@@ -390,7 +390,7 @@ export function InvitationCodesPage() {
               size="sm"
               onClick={handleBulkDeactivate}
               disabled={deactivating}
-              className="h-10 px-6 rounded-xl text-red-100 font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all gap-2"
+              className="h-10 px-6 rounded-xl text-red-100 font-black text-2xs uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all gap-2"
             >
               {deactivating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -403,7 +403,7 @@ export function InvitationCodesPage() {
               variant="ghost"
               size="sm"
               onClick={() => setSelectedIds(new Set())}
-              className="h-10 px-4 rounded-xl text-indigo-200 font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+              className="h-10 px-4 rounded-xl text-indigo-200 font-black text-2xs uppercase tracking-widest hover:bg-white/10"
             >
               Cancel
             </Button>
@@ -415,7 +415,7 @@ export function InvitationCodesPage() {
         <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
           <div>
             <h3 className="text-xl font-black text-gray-900 tracking-tight">Access Registry</h3>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1 italic">
+            <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
               Invitation Codes
             </p>
           </div>
@@ -438,22 +438,22 @@ export function InvitationCodesPage() {
                     )}
                   </button>
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Invitation Code
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Status
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Utilization
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Expiration
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Created
                 </TableHead>
-                <TableHead className="text-right px-8 h-14 font-black text-[10px] uppercase tracking-widest text-gray-400">
+                <TableHead className="text-right px-8 h-14 font-black text-2xs uppercase tracking-widest text-gray-400">
                   Execution
                 </TableHead>
               </TableRow>

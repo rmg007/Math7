@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,47 +24,47 @@ import { sanitizeHtml } from '@/lib/sanitize';
 import { cn, formatIdentifier } from '@/lib/utils';
 import type { QuestionListItem } from '@/types';
 import {
-    closestCenter,
-    DndContext,
-    DragEndEvent,
-    KeyboardSensor,
-    PointerSensor,
-    TouchSensor,
-    useSensor,
-    useSensors,
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
 import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-    CheckSquare,
-    Copy,
-    FileText,
-    Filter,
-    GripVertical,
-    Loader2,
-    Pencil,
-    Plus,
-    Sparkles,
-    Square,
-    Trash2,
+  CheckSquare,
+  Copy,
+  FileText,
+  Filter,
+  GripVertical,
+  Loader2,
+  Pencil,
+  Plus,
+  Sparkles,
+  Square,
+  Trash2,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-    QuestionInsert,
-    useBulkCreateQuestions,
-    useBulkDeleteQuestions,
-    useBulkUpdateQuestionsStatus,
-    useDeleteQuestion,
-    useDuplicateQuestion,
-    usePaginatedQuestions,
-    useUpdateQuestionOrder,
+  QuestionInsert,
+  useBulkCreateQuestions,
+  useBulkDeleteQuestions,
+  useBulkUpdateQuestionsStatus,
+  useDeleteQuestion,
+  useDuplicateQuestion,
+  usePaginatedQuestions,
+  useUpdateQuestionOrder,
 } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
@@ -171,19 +171,22 @@ const SortableRow = memo(
               }}
             />
             {question.skills?.domains?.title && (
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap shrink-0">
+              <span className="text-2xs font-black text-gray-400 uppercase tracking-widest whitespace-nowrap shrink-0">
                 {question.skills.domains.title} / {question.skills.title}
               </span>
             )}
           </div>
         </td>
         <td className="px-4 py-5">
-          <span className="px-3 py-1.5 bg-white border border-gray-100 text-gray-600 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm group-hover/row:border-indigo-100 group-hover/row:text-indigo-600 transition-all">
+          <span className="px-3 py-1.5 bg-white border border-gray-100 text-gray-600 rounded-xl text-2xs font-black uppercase tracking-widest shadow-sm group-hover/row:border-indigo-100 group-hover/row:text-indigo-600 transition-all">
             {formatIdentifier(question.type)}
           </span>
         </td>
         <td className="px-4 py-5 text-center">
-          <span className="text-sm font-black text-gray-900">{question.points} <span className="text-[8px] text-gray-400 uppercase tracking-tighter">PTS</span></span>
+          <span className="text-sm font-black text-gray-900">
+            {question.points}{' '}
+            <span className="text-[8px] text-gray-400 uppercase tracking-tighter">PTS</span>
+          </span>
         </td>
         <td className="px-4 py-5">
           <StatusBadge
@@ -338,7 +341,7 @@ const SortableCard = memo(
                 </div>
               )}
               <div className="flex flex-wrap items-center gap-2">
-                <span className="px-3 py-1.5 bg-white border border-gray-100 text-gray-600 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm">
+                <span className="px-3 py-1.5 bg-white border border-gray-100 text-gray-600 rounded-xl text-2xs font-black uppercase tracking-widest shadow-sm">
                   {formatIdentifier(question.type)}
                 </span>
               </div>
@@ -747,7 +750,7 @@ export function QuestionList() {
             <Link to="/ai-questions">
               <Button
                 variant="outline"
-                className="h-12 px-8 rounded-2xl bg-white/50 backdrop-blur-md border border-indigo-100 text-indigo-600 font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-indigo-500/5 transition-all hover:-translate-y-1 hover:bg-white gap-3 group"
+                className="h-12 px-8 rounded-2xl bg-white/50 backdrop-blur-md border border-indigo-100 text-indigo-600 font-black text-2xs uppercase tracking-extra-wide shadow-lg shadow-indigo-500/5 transition-all hover:-translate-y-1 hover:bg-white gap-3 group"
               >
                 <Sparkles className="h-4 w-4 text-indigo-500 group-hover:rotate-12 transition-transform" />
                 <span>AI Accelerator</span>
@@ -756,7 +759,7 @@ export function QuestionList() {
             <Link to="/ai-import">
               <Button
                 variant="outline"
-                className="h-12 px-8 rounded-2xl bg-white/50 backdrop-blur-md border border-indigo-100 text-indigo-600 font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-indigo-500/5 transition-all hover:-translate-y-1 hover:bg-white gap-3 group"
+                className="h-12 px-8 rounded-2xl bg-white/50 backdrop-blur-md border border-indigo-100 text-indigo-600 font-black text-2xs uppercase tracking-extra-wide shadow-lg shadow-indigo-500/5 transition-all hover:-translate-y-1 hover:bg-white gap-3 group"
               >
                 <FileText className="h-4 w-4 text-indigo-500 group-hover:scale-110 transition-transform" />
                 <span>Bulk Import</span>
@@ -770,7 +773,7 @@ export function QuestionList() {
               importDisabled={false}
             />
             <Link to="/questions/new">
-              <Button className="h-12 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-1 gap-3">
+              <Button className="h-12 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-extra-wide shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-1 gap-3">
                 <Plus className="h-5 w-5" />
                 <span>Initialize Asset</span>
               </Button>
@@ -832,7 +835,7 @@ export function QuestionList() {
             <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
               <span className="text-white font-black text-xs">{selectedIds.size}</span>
             </div>
-            <span className="text-white/70 font-black text-[10px] uppercase tracking-widest group-hover:text-white transition-colors">
+            <span className="text-white/70 font-black text-2xs uppercase tracking-widest group-hover:text-white transition-colors">
               Clustered Operations
             </span>
           </div>
@@ -882,7 +885,7 @@ export function QuestionList() {
             <table className="w-full">
               <thead className="bg-gray-50/50 border-b-2 border-gray-100">
                 <tr>
-                  <th className="w-12 h-14 pl-6 pr-2 font-black text-[10px] uppercase tracking-widest text-gray-600"></th>
+                  <th className="w-12 h-14 pl-6 pr-2 font-black text-2xs uppercase tracking-widest text-gray-600"></th>
                   <th className="w-12 h-14 px-4">
                     <button
                       onClick={handleSelectAll}
@@ -896,53 +899,53 @@ export function QuestionList() {
                       )}
                     </button>
                   </th>
-                  <th className="h-14 px-6 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">
+                  <th className="h-14 px-6 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
                     <SortableHeader
                       label="Question Content"
                       column="content"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-[10px]"
+                      className="text-2xs"
                     />
                   </th>
-                  <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">
+                  <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
                     <SortableHeader
                       label="Asset Type"
                       column="type"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-[10px]"
+                      className="text-2xs"
                     />
                   </th>
-                  <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">
+                  <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
                     <div className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors cursor-default">
                       <Filter className="h-3 w-3" />
                       Target Skill
                     </div>
                   </th>
-                  <th className="h-14 px-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-600">
+                  <th className="h-14 px-4 text-center font-black text-2xs uppercase tracking-widest text-gray-600">
                     <SortableHeader
                       label="Weight"
                       column="points"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-[10px] justify-center"
+                      className="text-2xs justify-center"
                     />
                   </th>
-                  <th className="h-14 px-4 text-left font-black text-[10px] uppercase tracking-widest text-gray-600">
+                  <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
                     <SortableHeader
                       label="Status"
                       column="status"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-[10px]"
+                      className="text-2xs"
                     />
                   </th>
-                  <th className="h-14 pl-4 pr-10 text-right font-black text-[10px] uppercase tracking-widest text-gray-600">
+                  <th className="h-14 pl-4 pr-10 text-right font-black text-2xs uppercase tracking-widest text-gray-600">
                     Execution
                   </th>
                 </tr>
@@ -1069,13 +1072,13 @@ export function QuestionList() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-8 gap-3">
-            <AlertDialogCancel className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest text-gray-400 hover:bg-gray-100 italic transition-all border-none">
+            <AlertDialogCancel className="h-12 px-8 rounded-2xl font-black text-2xs uppercase tracking-widest text-gray-400 hover:bg-gray-100 italic transition-all border-none">
               Abort
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmExecution}
               disabled={bulkDelete.isPending || deleteQuestion.isPending}
-              className="h-12 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-red-600/20 transition-all hover:-translate-y-0.5"
+              className="h-12 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-red-600/20 transition-all hover:-translate-y-0.5"
             >
               {(bulkDelete.isPending || deleteQuestion.isPending) && (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

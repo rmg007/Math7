@@ -7,13 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/lib/supabase';
 import { SecurityLogger } from '@/services/SecurityLogger';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, Eye, EyeOff, Loader2, Rocket } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import * as z from 'zod';
@@ -39,6 +40,24 @@ export function LoginPage() {
   const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+
+  // Manage the "Remember Me" preference via localStorage.
+  // When unchecked, we set a sessionStorage flag. On the *next* page load
+  // (new tab or after browser restart), sessionStorage is empty so the
+  // auth-guard can detect "no persist" and call signOut. This avoids the
+  // unreliable pattern of calling async signOut() in beforeunload.
+  useEffect(() => {
+    if (rememberMe) {
+      // Mark that this session should persist
+      localStorage.setItem('questerix_remember_me', '1');
+      sessionStorage.setItem('questerix_session_active', '1');
+    } else {
+      // Mark that session should NOT persist across tab close
+      localStorage.removeItem('questerix_remember_me');
+      sessionStorage.setItem('questerix_session_active', '1');
+    }
+  }, [rememberMe]);
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -321,6 +340,20 @@ export function LoginPage() {
                     {error}
                   </div>
                 )}
+
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="remember-me"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked === true)}
+                  />
+                  <Label
+                    htmlFor="remember-me"
+                    className="text-sm font-normal text-muted-foreground cursor-pointer"
+                  >
+                    Remember me
+                  </Label>
+                </div>
 
                 <Button
                   className="w-full"

@@ -105,7 +105,7 @@ export default function BulkImportPage() {
             <CardHeader className="bg-indigo-600 text-white p-8">
               <div className="flex items-center gap-3 mb-2">
                 <Zap className="w-5 h-5 text-indigo-200" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-100">
+                <span className="text-2xs font-black uppercase tracking-extra-wide text-indigo-100">
                   Synchronizer
                 </span>
               </div>
@@ -113,7 +113,7 @@ export default function BulkImportPage() {
             </CardHeader>
             <CardContent className="p-8 space-y-8">
               <div className="space-y-4">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-gray-600">
+                <Label className="text-2xs font-black uppercase tracking-widest text-gray-600">
                   Target Skill (Optional)
                 </Label>
                 <Select value={selectedSkillId} onValueChange={setSelectedSkillId}>
@@ -137,13 +137,13 @@ export default function BulkImportPage() {
                 <TabsList className="grid w-full grid-cols-2 rounded-xl h-12 p-1 bg-gray-100 mb-6">
                   <TabsTrigger
                     value="file"
-                    className="rounded-lg font-bold text-[10px] uppercase tracking-widest"
+                    className="rounded-lg font-bold text-2xs uppercase tracking-widest"
                   >
                     CSV File
                   </TabsTrigger>
                   <TabsTrigger
                     value="ai"
-                    className="rounded-lg font-bold text-[10px] uppercase tracking-widest flex gap-2"
+                    className="rounded-lg font-bold text-2xs uppercase tracking-widest flex gap-2"
                   >
                     <Sparkles className="w-3 h-3" /> AI Prompt
                   </TabsTrigger>
@@ -194,7 +194,7 @@ export default function BulkImportPage() {
               <div className="pt-8 border-t border-gray-100 space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-gray-600">
+                    <Label className="text-2xs font-black uppercase tracking-widest text-gray-600">
                       Execution Mode
                     </Label>
                     <p className="text-xs font-bold text-gray-700">
@@ -251,7 +251,7 @@ export default function BulkImportPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setImportQueue([])}
-                  className="text-red-500 hover:bg-red-50 font-black text-[10px] uppercase tracking-widest gap-2"
+                  className="text-red-500 hover:bg-red-50 font-black text-2xs uppercase tracking-widest gap-2"
                 >
                   <Trash2 className="w-3 h-3" /> Purge
                 </Button>
@@ -270,7 +270,7 @@ export default function BulkImportPage() {
                   {importQueue.map((item, index) => (
                     <div key={index} className="p-6 hover:bg-gray-50/50 transition-colors group">
                       <div className="flex items-start gap-4">
-                        <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[10px] font-black text-gray-600 shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-2xs font-black text-gray-600 shrink-0">
                           {index + 1}
                         </div>
                         <div className="flex-1 space-y-2">
@@ -287,7 +287,7 @@ export default function BulkImportPage() {
                               <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest">
                                 Skill ID:
                               </span>
-                              <span className="text-[10px] font-mono text-gray-700">
+                              <span className="text-2xs font-mono text-gray-700">
                                 {(item.skill_id as string)?.slice(0, 8)}...
                               </span>
                             </div>
@@ -295,7 +295,7 @@ export default function BulkImportPage() {
                               <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest">
                                 Points:
                               </span>
-                              <span className="text-[10px] font-black text-gray-700">
+                              <span className="text-2xs font-black text-gray-700">
                                 {item.points}
                               </span>
                             </div>

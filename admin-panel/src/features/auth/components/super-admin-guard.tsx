@@ -42,7 +42,7 @@ export function SuperAdminGuard({ children }: { children: React.ReactNode }) {
         <div className="h-12 w-12 rounded-2xl bg-purple-500/10 flex items-center justify-center animate-bounce">
           <div className="h-6 w-6 rounded-full border-2 border-purple-600 border-t-transparent animate-spin" />
         </div>
-        <p className="mt-4 text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">
+        <p className="mt-4 text-2xs font-black text-slate-600 uppercase tracking-[0.3em]">
           Elevating Authority
         </p>
       </div>

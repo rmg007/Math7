@@ -161,7 +161,7 @@ export function VersionHistoryPage() {
           <div>
             <div className="p-4 border-b border-gray-100 bg-gray-50/50">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-gray-100 w-fit">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                <span className="text-2xs font-bold text-gray-400 uppercase tracking-widest">
                   Results:
                 </span>
                 <span className="text-xs font-bold text-gray-700">{totalCount}</span>
@@ -312,7 +312,7 @@ export function VersionHistoryPage() {
                   className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-br from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white font-black rounded-[1.5rem] transition-all duration-300 shadow-2xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transform active:scale-95"
                 >
                   <Download className="w-5 h-5" />
-                  <span className="text-sm uppercase tracking-[0.2em]">Download Full JSON</span>
+                  <span className="text-sm uppercase tracking-extra-wide">Download Full JSON</span>
                 </button>
               </div>
             </div>

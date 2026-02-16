@@ -230,6 +230,111 @@ When `/loki` is invoked:
 2. Read `config.json` for boundaries
 3. Check `state.json` — resume or init fresh
 4. Break user's request into sub-tasks
-5. Execute RARV loop per sub-task
-6. Checkpoint progress after each sub-task
-7. When done: commit, push, announce completion
+5. Run the **Pre-Task Research Sweep** (see below)
+6. Execute RARV loop per sub-task
+7. On failure, trigger **Self-Evolving Lessons** (see below)
+8. Checkpoint progress after each sub-task
+9. When done: commit, push, announce completion
+
+---
+
+## 🧠 Self-Evolving Lessons
+
+When a circuit breaker triggers or a sub-task requires > 3 iterations, Loki **automatically learns** from the mistake:
+
+### Trigger Conditions
+
+- Circuit breaker fires (5 consecutive failures / 3 identical errors)
+- A sub-task exceeds 3 RARV iterations before passing
+- A test failure reveals a _category_ of mistake (not a one-off typo)
+
+### Process
+
+1. **Classify** the mistake into a category:
+   - `import-path` — wrong module path or missing dependency
+   - `type-error` — TypeScript type mismatch
+   - `hook-rules` — React hook violation (deps, conditionals, etc.)
+   - `async-race` — race condition or missing await
+   - `config-drift` — env var, build config, or schema mismatch
+   - `pattern-violation` — broke an established project convention
+   - `other` — document the new category
+
+2. **Log** the lesson to `state.json` under `learnings[]`:
+
+   ```json
+   {
+     "category": "hook-rules",
+     "lesson": "Always include cleanup in useEffect when adding event listeners",
+     "subtask_id": "P3-13",
+     "date": "2026-02-16"
+   }
+   ```
+
+3. **Append** a guardrail to `.agent/skills/loki-mode/guardrails.md`:
+
+   ```markdown
+   ## [hook-rules] useEffect Cleanup (2026-02-16)
+
+   Always return a cleanup function from useEffect when adding event listeners.
+   Example: `window.addEventListener` must have a paired `removeEventListener` in the return.
+   ```
+
+4. **Before each future RARV ACT phase**, scan `guardrails.md` for rules matching the current file type.
+
+### Guardrails File
+
+The file `.agent/skills/loki-mode/guardrails.md` accumulates lessons over time. It is the agent's "muscle memory" — rules learned from past mistakes that prevent repeat failures.
+
+---
+
+## 🔍 Pre-Task Research Sweep
+
+Before starting any RARV task, run a quick diagnostics sweep to surface issues early:
+
+### Steps
+
+1. **Dependency Health** (admin-panel):
+
+   ```bash
+   npm outdated --json 2>/dev/null | head -20
+   ```
+
+   If major versions are outdated, log a warning but don't block.
+
+2. **Build Warnings**:
+
+   ```bash
+   npx tsc --noEmit 2>&1 | head -10
+   ```
+
+   If there are existing errors, note them so you don't introduce regressions.
+
+3. **Deprecation Scan**:
+
+   ```bash
+   grep -r "deprecated" node_modules/.package-lock.json 2>/dev/null | head -5
+   ```
+
+   Surface any deprecated packages the project depends on.
+
+4. **Git Status**:
+   ```bash
+   git status --porcelain | head -10
+   ```
+   If there are uncommitted changes, note them to avoid merge conflicts.
+
+### Output
+
+Log the sweep results in `state.json` under `pre_task_sweep`:
+
+```json
+{
+  "outdated_packages": 3,
+  "existing_tsc_errors": 0,
+  "dirty_files": 0,
+  "deprecation_warnings": 1,
+  "timestamp": "2026-02-16T00:00:00Z"
+}
+```
+
+This sweep takes < 30 seconds and prevents the most common "surprise" failures during RARV execution.

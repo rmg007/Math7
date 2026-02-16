@@ -158,7 +158,7 @@ export function LandingsPage() {
               <h2 className="text-3xl font-black text-gray-900 tracking-tight italic">
                 Content Editor
               </h2>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">
+              <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1">
                 Refining: {editingLanding.apps?.display_name}
               </p>
             </div>
@@ -168,13 +168,13 @@ export function LandingsPage() {
             <Button
               variant="ghost"
               onClick={() => setEditingLanding(null)}
-              className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest text-gray-400 hover:bg-gray-100 italic transition-all"
+              className="h-12 px-8 rounded-2xl font-black text-2xs uppercase tracking-widest text-gray-400 hover:bg-gray-100 italic transition-all"
             >
               Abort Editing
             </Button>
             <Button
               onClick={handleSave}
-              className="h-12 px-10 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5"
+              className="h-12 px-10 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5"
               disabled={updateLanding.isPending}
             >
               <Save className="w-4 h-4 mr-2" />
@@ -191,7 +191,7 @@ export function LandingsPage() {
               </div>
               <div>
                 <h3 className="text-xl font-black text-gray-900 tracking-tight">Hero Narrative</h3>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
+                <p className="text-2xs font-black text-gray-400 uppercase tracking-widest italic">
                   User-facing brand messaging
                 </p>
               </div>
@@ -199,7 +199,7 @@ export function LandingsPage() {
 
             <div className="space-y-6">
               <div className="space-y-2 group">
-                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+                <Label className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
                   Primary Headline
                 </Label>
                 <Input
@@ -210,7 +210,7 @@ export function LandingsPage() {
                 />
               </div>
               <div className="space-y-2 group">
-                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+                <Label className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
                   Secondary Narrative
                 </Label>
                 <Textarea
@@ -231,7 +231,7 @@ export function LandingsPage() {
               </div>
               <div>
                 <h3 className="text-xl font-black text-gray-900 tracking-tight">SEO Metadata</h3>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
+                <p className="text-2xs font-black text-gray-400 uppercase tracking-widest italic">
                   Search engine index parameters
                 </p>
               </div>
@@ -239,7 +239,7 @@ export function LandingsPage() {
 
             <div className="space-y-6">
               <div className="space-y-2 group">
-                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+                <Label className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
                   Meta Title Tag
                 </Label>
                 <Input
@@ -250,7 +250,7 @@ export function LandingsPage() {
                 />
               </div>
               <div className="space-y-2 group">
-                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+                <Label className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
                   Crawler Description
                 </Label>
                 <Textarea
@@ -289,7 +289,7 @@ export function LandingsPage() {
         actions={
           <Button
             onClick={() => setIsCreateDialogOpen(true)}
-            className="h-12 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 gap-3"
+            className="h-12 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 gap-3"
           >
             <Plus className="w-4 h-4" /> Provision Landing Registry
           </Button>
@@ -325,7 +325,7 @@ export function LandingsPage() {
 
         <div className="flex items-center gap-3 shrink-0">
           <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
-            <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
+            <span className="text-2xs font-black text-indigo-500 uppercase tracking-widest">
               Registries:
             </span>
             <span className="text-sm font-black text-indigo-700 tracking-tight">
@@ -341,7 +341,7 @@ export function LandingsPage() {
             <h3 className="text-xl font-black text-gray-900 tracking-tight italic">
               Content Distribution Network
             </h3>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1 italic">
+            <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
               Multi-Tenant Marketing Nodes
             </p>
           </div>
@@ -352,19 +352,19 @@ export function LandingsPage() {
           <Table className="w-full">
             <TableHeader>
               <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b-2 border-gray-100">
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 px-8 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 px-8 h-14">
                   Target Application
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Deployment URL
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Primary Hook
                 </TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-gray-400 h-14">
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Node Status
                 </TableHead>
-                <TableHead className="text-right px-8 h-14 font-black text-[10px] uppercase tracking-widest text-gray-400">
+                <TableHead className="text-right px-8 h-14 font-black text-2xs uppercase tracking-widest text-gray-400">
                   Execution
                 </TableHead>
               </TableRow>
@@ -411,14 +411,14 @@ export function LandingsPage() {
                           <p className="font-black text-gray-900 tracking-tight text-base italic leading-none">
                             {l.apps?.display_name}
                           </p>
-                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+                          <p className="text-2xs font-black text-gray-400 uppercase tracking-widest mt-1">
                             Tenant ID: {l.app_id?.split('-')[0] || 'UNMAPPED'}
                           </p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell className="py-5">
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100/50 text-indigo-600 font-mono text-[10px] font-black tracking-tight w-fit">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100/50 text-indigo-600 font-mono text-2xs font-black tracking-tight w-fit">
                         {l.apps?.subdomain}.questerix.com
                       </div>
                     </TableCell>
@@ -438,7 +438,7 @@ export function LandingsPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEdit(l)}
-                        className="h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 gap-2 overflow-hidden group/btn"
+                        className="h-10 px-4 rounded-xl font-black text-2xs uppercase tracking-widest text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 gap-2 overflow-hidden group/btn"
                       >
                         <Pencil className="w-3.5 h-3.5" />
                         REWRITE
@@ -480,7 +480,7 @@ export function LandingsPage() {
                 <h2 className="text-2xl font-black text-gray-900 tracking-tight italic">
                   Initialize Registry
                 </h2>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+                <p className="text-2xs font-black text-gray-400 uppercase tracking-widest mt-1">
                   Select application endpoint
                 </p>
               </div>
@@ -488,7 +488,7 @@ export function LandingsPage() {
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+                <Label className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
                   Target Tenant
                 </Label>
                 <Select value={selectedAppId} onValueChange={setSelectedAppId}>
@@ -518,7 +518,7 @@ export function LandingsPage() {
                             asChild
                             variant="outline"
                             size="sm"
-                            className="rounded-xl font-black text-[10px] uppercase tracking-widest"
+                            className="rounded-xl font-black text-2xs uppercase tracking-widest"
                           >
                             <Link to="/apps">Create New Application</Link>
                           </Button>
@@ -535,13 +535,13 @@ export function LandingsPage() {
             <Button
               variant="ghost"
               onClick={() => setIsCreateDialogOpen(false)}
-              className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest text-gray-400 hover:bg-gray-200 italic transition-all"
+              className="h-12 px-8 rounded-2xl font-black text-2xs uppercase tracking-widest text-gray-400 hover:bg-gray-200 italic transition-all"
             >
               Abort
             </Button>
             <Button
               onClick={handleCreate}
-              className="h-12 px-10 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5"
+              className="h-12 px-10 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5"
               disabled={createLanding.isPending}
             >
               {createLanding.isPending ? 'EXECUTING...' : 'INITIATE REGISTRY'}
