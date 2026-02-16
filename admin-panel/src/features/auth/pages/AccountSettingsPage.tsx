@@ -123,7 +123,11 @@ export function AccountSettingsPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
-      <AdminHeader title="Account Settings" description="Your profile and security." icon={User} />
+      <AdminHeader
+        title="Settings"
+        description="Manage your profile and account security."
+        icon={User}
+      />
 
       {error && (
         <div className="bg-red-500/10 border border-red-500/20 backdrop-blur-xl rounded-2xl p-4 flex items-center gap-3 animate-in shake duration-500">
@@ -139,9 +143,9 @@ export function AccountSettingsPage() {
             <BadgeCheck className="h-6 w-6 text-indigo-600" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-gray-900 tracking-tight">Identity & Role</h2>
+            <h2 className="text-xl font-black text-gray-900 tracking-tight">Profile</h2>
             <p className="text-2xs font-black text-gray-400 uppercase tracking-widest">
-              Verified profile details
+              Your personal information
             </p>
           </div>
         </div>
@@ -155,7 +159,7 @@ export function AccountSettingsPage() {
               </label>
             </div>
             <p className="text-lg font-bold text-gray-900 tracking-tight ml-5.5">
-              {user?.full_name || 'Anonymous Operator'}
+              {user?.full_name || 'Anonymous User'}
             </p>
           </div>
 
@@ -172,9 +176,7 @@ export function AccountSettingsPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-gray-400">
               <Shield className="w-3.5 h-3.5" />
-              <label className="text-2xs font-black uppercase tracking-extra-wide">
-                Access Authority
-              </label>
+              <label className="text-2xs font-black uppercase tracking-extra-wide">Role</label>
             </div>
             <p className="text-lg font-black text-indigo-600 tracking-tight ml-5.5 uppercase italic">
               {formatIdentifier(user?.role)}
@@ -184,9 +186,7 @@ export function AccountSettingsPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-gray-400">
               <Calendar className="w-3.5 h-3.5" />
-              <label className="text-2xs font-black uppercase tracking-extra-wide">
-                Enlistment Date
-              </label>
+              <label className="text-2xs font-black uppercase tracking-extra-wide">Joined</label>
             </div>
             <p className="text-lg font-bold text-gray-900 tracking-tight ml-5.5">
               {user?.created_at
@@ -195,7 +195,7 @@ export function AccountSettingsPage() {
                     month: 'long',
                     day: 'numeric',
                   })
-                : 'Archive Initialized'}
+                : 'Account Created'}
               {user?.created_at && (
                 <span className="text-xs text-gray-400 font-medium ml-2 font-mono tracking-tighter">
                   ({new Date(user.created_at).toLocaleDateString()})
@@ -211,7 +211,7 @@ export function AccountSettingsPage() {
         <div className="flex items-center gap-3 px-2">
           <ShieldAlert className="w-5 h-5 text-red-500/50" />
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em]">
-            Critical Guardrails (Danger Zone)
+            Danger Zone
           </h3>
         </div>
 
@@ -224,12 +224,11 @@ export function AccountSettingsPage() {
                   <BadgeCheck className="h-6 w-6 opacity-20" />
                 </div>
                 <h2 className="text-lg font-black text-gray-900 tracking-tight">
-                  Deactivate Access
+                  Deactivate Account
                 </h2>
               </div>
               <p className="text-sm text-gray-500 font-medium leading-relaxed mb-8">
-                Temporarily suspend your authority and access. Your data remains archived and can be
-                restored via administrative override.
+                Temporarily disable your account. Your data will be preserved.
               </p>
             </div>
 
@@ -239,13 +238,13 @@ export function AccountSettingsPage() {
                 variant="outline"
                 className="w-full h-12 rounded-2xl border-amber-500/20 text-amber-600 hover:bg-amber-50/50 font-black text-xs uppercase tracking-widest transition-all"
               >
-                Request Deactivation
+                Deactivate Account
               </Button>
             ) : (
               <div className="bg-amber-500/5 backdrop-blur-md border border-amber-500/20 rounded-2xl p-6 space-y-4 animate-in zoom-in-95 duration-300">
                 <p className="text-xs font-bold text-amber-800 leading-relaxed uppercase tracking-tight">
-                  CONFIRM ACCESS SUSPENSION? YOU WILL BE TERMINATED FROM THE ACTIVE SESSION
-                  IMMEDIATELY.
+                  Are you sure you want to deactivate your account? You will be signed out
+                  immediately.
                 </p>
                 <div className="flex flex-col gap-2">
                   <Button
@@ -253,7 +252,7 @@ export function AccountSettingsPage() {
                     disabled={actionLoading}
                     className="w-full bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest h-10 shadow-lg shadow-amber-600/20"
                   >
-                    {actionLoading ? 'SUSPENDING...' : 'YES, TERMINATE ACCESS'}
+                    {actionLoading ? 'Deactivating...' : 'Yes, Deactivate'}
                   </Button>
                   <Button
                     onClick={() => setShowDeactivateConfirm(false)}
@@ -275,11 +274,11 @@ export function AccountSettingsPage() {
                 <div className="p-2.5 rounded-xl bg-red-500/10 text-red-600">
                   <Trash2 className="h-6 w-6 opacity-20" />
                 </div>
-                <h2 className="text-lg font-black text-gray-900 tracking-tight">Erase Identity</h2>
+                <h2 className="text-lg font-black text-gray-900 tracking-tight">Delete Account</h2>
               </div>
               <p className="text-sm text-gray-500 font-medium leading-relaxed mb-8">
-                Permanently purge your digital signature and all associated telemetry.{' '}
-                <span className="text-red-600 font-black">This execution is irreversible.</span>
+                Permanently delete your account and all associated data.{' '}
+                <span className="text-red-600 font-black">This action cannot be undone.</span>
               </p>
             </div>
 
@@ -289,14 +288,14 @@ export function AccountSettingsPage() {
                 variant="outline"
                 className="w-full h-12 rounded-2xl border-red-500/20 text-red-600 hover:bg-red-50/50 font-black text-xs uppercase tracking-widest transition-all"
               >
-                Initialize Purge
+                Delete Account
               </Button>
             ) : (
               <div className="bg-red-500/5 backdrop-blur-md border border-red-500/20 rounded-2xl p-6 space-y-4 animate-in zoom-in-95 duration-300">
                 <p className="text-2xs font-black text-red-800 leading-relaxed uppercase tracking-widest">
                   Type{' '}
                   <span className="bg-red-600 text-white px-1.5 py-0.5 rounded italic">DELETE</span>{' '}
-                  to authorize absolute erasure.
+                  to confirm deletion.
                 </p>
                 <Input
                   value={deleteConfirmText}
@@ -310,7 +309,7 @@ export function AccountSettingsPage() {
                     disabled={actionLoading || deleteConfirmText !== 'DELETE'}
                     className="w-full bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest h-10 shadow-lg shadow-red-600/20 disabled:opacity-30"
                   >
-                    {actionLoading ? 'EXECUTING...' : 'AUTHORIZE PURGE'}
+                    {actionLoading ? 'Deleting...' : 'Delete Account'}
                   </Button>
                   <Button
                     onClick={() => {

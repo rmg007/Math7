@@ -131,8 +131,8 @@ export function ErrorLogsPage() {
       await deleteError.mutateAsync(error.id);
       setSelectedError(null);
       toast({
-        title: 'Trace Extinguished',
-        description: 'The diagnostic residue has been purged from the archive.',
+        title: 'Error Log Deleted',
+        description: 'The error log has been permanently removed.',
       });
     } catch (error) {
       toast({ title: 'Error', description: 'Failed to delete error log', variant: 'destructive' });
@@ -146,8 +146,8 @@ export function ErrorLogsPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
-        title="System Diagnostics"
-        description="Monitor application errors."
+        title="Error Logs"
+        description="View and manage application errors."
         icon={Bug}
         actions={
           <Button
@@ -157,7 +157,7 @@ export function ErrorLogsPage() {
             className="h-12 px-6 rounded-2xl border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-600 hover:bg-indigo-50 transition-all font-bold uppercase tracking-widest text-2xs gap-2 shadow-sm"
           >
             <RefreshCw className={cn('w-4 h-4', isFetching && 'animate-spin')} />
-            {isFetching ? 'Refreshing Archive...' : 'Refresh Archive'}
+            {isFetching ? 'Refreshing...' : 'Refresh'}
           </Button>
         }
       />
@@ -170,7 +170,7 @@ export function ErrorLogsPage() {
           )}
         >
           <div className="flex items-center justify-between mb-2">
-            <p className="text-2xs font-black text-red-900/40 uppercase tracking-widest">Unseen</p>
+            <p className="text-2xs font-black text-red-900/40 uppercase tracking-widest">New</p>
             <AlertTriangle className="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" />
           </div>
           <p className="text-3xl font-black text-red-600 tracking-tighter">{stats?.new ?? 0}</p>
@@ -182,9 +182,7 @@ export function ErrorLogsPage() {
           )}
         >
           <div className="flex items-center justify-between mb-2">
-            <p className="text-2xs font-black text-blue-900/40 uppercase tracking-widest">
-              Acknowledged
-            </p>
+            <p className="text-2xs font-black text-blue-900/40 uppercase tracking-widest">Seen</p>
             <Eye className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
           </div>
           <p className="text-3xl font-black text-blue-600 tracking-tighter">{stats?.seen ?? 0}</p>
@@ -197,7 +195,7 @@ export function ErrorLogsPage() {
         >
           <div className="flex items-center justify-between mb-2">
             <p className="text-2xs font-black text-gray-900/40 uppercase tracking-widest">
-              Suppressed
+              Ignored
             </p>
             <EyeOff className="w-4 h-4 text-gray-400 group-hover:scale-110 transition-transform" />
           </div>
@@ -225,7 +223,7 @@ export function ErrorLogsPage() {
         <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-purple-500/10 hover:border-purple-500/20 transition-all group">
           <div className="flex items-center justify-between mb-2">
             <p className="text-2xs font-black text-purple-900/40 uppercase tracking-widest">
-              Promoted
+              Issues
             </p>
             <ArrowUpRight className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
           </div>
@@ -241,7 +239,7 @@ export function ErrorLogsPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-red-500 transition-colors" />
           <input
             type="text"
-            placeholder="Search diagnostic traces by type or message..."
+            placeholder="Search error logs..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all outline-none text-sm font-medium"
@@ -250,6 +248,7 @@ export function ErrorLogsPage() {
             <button
               onClick={() => setSearchTerm('')}
               className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded-xl transition-all"
+              title="Clear search"
             >
               <X className="h-4 w-4" />
             </button>
@@ -259,7 +258,7 @@ export function ErrorLogsPage() {
         <div className="flex items-center gap-4 shrink-0">
           <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl">
             <span className="text-2xs font-black text-gray-400 uppercase tracking-widest">
-              Filter:
+              Status:
             </span>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-auto min-w-[120px] h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-gray-700 hover:text-red-600 transition-colors uppercase italic tracking-tight">
@@ -267,22 +266,22 @@ export function ErrorLogsPage() {
               </SelectTrigger>
               <SelectContent className="rounded-2xl border-gray-100 shadow-xl p-2">
                 <SelectItem value="all" className="rounded-xl py-2 font-bold text-xs">
-                  ALL DIAGNOSTICS
+                  All
                 </SelectItem>
                 <SelectItem value="new" className="rounded-xl py-2 font-bold text-xs">
-                  NEW TRACES
+                  New
                 </SelectItem>
                 <SelectItem value="seen" className="rounded-xl py-2 font-bold text-xs">
-                  ACKNOWLEDGED
+                  Seen
                 </SelectItem>
                 <SelectItem value="ignored" className="rounded-xl py-2 font-bold text-xs">
-                  SUPPRESSED
+                  Ignored
                 </SelectItem>
                 <SelectItem value="resolved" className="rounded-xl py-2 font-bold text-xs">
-                  RESOLVED
+                  Resolved
                 </SelectItem>
                 <SelectItem value="promoted" className="rounded-xl py-2 font-bold text-xs">
-                  PROMOTED ISSUES
+                  Issues
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -290,7 +289,7 @@ export function ErrorLogsPage() {
 
           <div className="px-4 py-2 bg-red-500/10 border border-red-500/10 rounded-xl flex items-center gap-2">
             <span className="text-2xs font-black text-red-500 uppercase tracking-widest">
-              Traces:
+              Count:
             </span>
             <span className="text-sm font-black text-red-700 tracking-tight">
               {filteredErrors?.length || 0}
@@ -650,7 +649,7 @@ export function ErrorLogsPage() {
             <span className="text-xl">💚</span>
           </div>
           <div>
-            <h4 className="font-semibold">Zero-Cost Error Tracking</h4>
+            <h4 className="font-semibold">Error Tracking</h4>
             <p className="text-sm text-emerald-100">
               Powered by your existing Supabase database. No external subscriptions.
             </p>

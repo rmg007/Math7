@@ -169,7 +169,7 @@ const SortableRow = memo(
         </td>
         <td className="px-4 py-4">
           <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-2xs font-black uppercase tracking-widest border border-indigo-100/50 shadow-sm">
-            {skill.domains?.title || 'ORPHAN'}
+            {skill.domains?.title || 'No Domain'}
           </span>
         </td>
         <td className="px-4 py-4 text-center">
@@ -611,8 +611,8 @@ export function SkillList() {
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <AdminHeader
-        title="Curriculum Skills"
-        description="Manage learning skills."
+        title="Skills"
+        description="Manage skills."
         icon={Layers}
         actions={
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -626,7 +626,7 @@ export function SkillList() {
             <Link to="/skills/new">
               <Button className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 gap-2">
                 <Plus className="h-4 w-4" />
-                <span>New Skill</span>
+                <span>Add Skill</span>
               </Button>
             </Link>
           </div>
@@ -634,7 +634,7 @@ export function SkillList() {
       />
 
       <CurriculumFilterBar
-        searchPlaceholder="Search skills by title, slug, or identifier..."
+        searchPlaceholder="Search skills..."
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         statusFilter={statusFilter}
@@ -684,7 +684,7 @@ export function SkillList() {
         <div className="flex items-center justify-between p-4 bg-indigo-600 rounded-[2rem] shadow-xl shadow-indigo-600/20 animate-in slide-in-from-top-4 duration-500">
           <div className="flex items-center gap-4 pl-4">
             <span className="text-white font-black text-xs uppercase tracking-extra-wide">
-              {selectedIds.size} SELECTED FOR BATCH PROCESSING
+              {selectedIds.size} Selected
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -749,7 +749,7 @@ export function SkillList() {
                   </th>
                   <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
                     <SortableHeader
-                      label="Identity & Skill"
+                      label="Title"
                       column="title"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
@@ -758,11 +758,11 @@ export function SkillList() {
                     />
                   </th>
                   <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
-                    Parent Domain
+                    Domain
                   </th>
                   <th className="h-14 px-4 text-center font-black text-2xs uppercase tracking-widest text-gray-600">
                     <SortableHeader
-                      label="LVL"
+                      label="Level"
                       column="difficulty_level"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
@@ -774,7 +774,7 @@ export function SkillList() {
                     Status
                   </th>
                   <th className="h-14 pl-4 pr-8 text-right font-black text-2xs uppercase tracking-widest text-gray-600">
-                    Execution
+                    Actions
                   </th>
                 </tr>
               </thead>

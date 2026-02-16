@@ -547,7 +547,7 @@ export function DomainList() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center bg-white/50 backdrop-blur-md rounded-3xl p-12 border border-white/20 shadow-xl">
           <p className="text-gray-500 font-bold uppercase tracking-widest italic">
-            Select an active app to access Domain Registry
+            Select an active app to access Domains
           </p>
         </div>
       </div>
@@ -557,7 +557,7 @@ export function DomainList() {
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <AdminHeader
-        title="Domain Registry"
+        title="Domains"
         description="Organize domain categories."
         icon={Book}
         actions={
@@ -572,7 +572,7 @@ export function DomainList() {
             <Link to="/domains/new">
               <Button className="h-12 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-widest shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-0.5 gap-3">
                 <Plus className="h-5 w-5" />
-                <span>Initialize Cluster</span>
+                <span>Add Domain</span>
               </Button>
             </Link>
           </div>
@@ -586,7 +586,7 @@ export function DomainList() {
               <span className="text-white font-black text-xs">{selectedIds.size}</span>
             </div>
             <span className="text-white/70 font-black text-2xs uppercase tracking-widest">
-              Clustered Operations
+              Bulk Actions
             </span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -644,7 +644,7 @@ export function DomainList() {
 
       <div className="bg-white rounded-[2.5rem] shadow-xl border border-gray-100 overflow-hidden">
         <CurriculumFilterBar
-          searchPlaceholder="Query curriculum domains..."
+          searchPlaceholder="Search domains..."
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           statusFilter={statusFilter}

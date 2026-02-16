@@ -124,24 +124,21 @@ export const GovernancePage: React.FC = () => {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <Shield className="w-8 h-8 text-blue-400" />
-            <h1 className="text-3xl font-bold tracking-tight">AI Governance</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Governance</h1>
           </div>
-          <p className="text-blue-100/80 max-w-xl">
-            Monitor AI resource allocation, content quality standards, and token consumption across
-            all apps.
-          </p>
+          <p className="text-blue-100/80 max-w-xl">Monitor AI usage and resource consumption.</p>
         </div>
         <div className="flex items-center gap-6">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-wider text-blue-300/60 mb-1">
-              Global Tokens
+              Total Tokens
             </p>
             <p className="text-2xl font-bold">{totalTokens.toLocaleString()}</p>
           </div>
           <div className="h-10 w-px bg-white/10" />
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-wider text-blue-300/60 mb-1">
-              Sessions
+              Total Sessions
             </p>
             <p className="text-2xl font-bold">{totalSessions}</p>
           </div>

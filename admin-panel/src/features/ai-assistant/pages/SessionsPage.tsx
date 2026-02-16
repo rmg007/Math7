@@ -106,8 +106,8 @@ export const SessionsPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
-        title="Intelligence Telemetry"
-        description="AI generation history."
+        title="AI Sessions"
+        description="View and manage AI generation history."
         icon={Clock}
       />
 
@@ -244,7 +244,7 @@ export const SessionsPage: React.FC = () => {
               Sessions:
             </span>
             <span className="text-sm font-black text-indigo-700 tracking-tight">
-              {filteredSessions.length} TRACKED
+              {filteredSessions.length}
             </span>
           </div>
         </div>
@@ -254,10 +254,10 @@ export const SessionsPage: React.FC = () => {
       <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 overflow-hidden hover:shadow-xl transition-all duration-500">
         <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30">
           <h3 className="text-xl font-black text-gray-900 tracking-tight italic">
-            Execution Archive
+            Session History
           </h3>
           <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
-            Historical Generation Events
+            Past AI generation sessions
           </p>
         </div>
 

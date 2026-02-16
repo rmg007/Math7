@@ -262,7 +262,7 @@ export function UserManagementPage() {
       setUsers((data as AdminUser[]) || []);
     } catch (err) {
       console.error('Error fetching users:', err);
-      setError('Failed to retrieve operator directory');
+      setError('Failed to retrieve user directory');
     } finally {
       setLoading(false);
     }
@@ -297,14 +297,14 @@ export function UserManagementPage() {
         }
 
         toast({
-          title: 'Operator Deactivated',
+          title: 'User Deactivated',
           description: 'Access has been revoked and all sessions terminated.',
         });
         fetchUsers();
       } catch (err) {
         toast({
           title: 'Error',
-          description: 'Failed to deactivate operator',
+          description: 'Failed to deactivate user',
           variant: 'destructive',
         });
       }
@@ -322,12 +322,12 @@ export function UserManagementPage() {
 
         if (error) throw error;
 
-        toast({ title: 'Operator Reinstated', description: 'Access has been restored.' });
+        toast({ title: 'User Reactivated', description: 'Access has been restored.' });
         fetchUsers();
       } catch (err) {
         toast({
           title: 'Error',
-          description: 'Failed to restore operator access',
+          description: 'Failed to restore user access',
           variant: 'destructive',
         });
       }
@@ -356,14 +356,14 @@ export function UserManagementPage() {
 
         toast({
           title: `Batch Process Complete`,
-          description: `${ids.length} operators ${status === 'deactivate' ? 'deactivated' : 'reinstated'}.`,
+          description: `${ids.length} users ${status === 'deactivate' ? 'deactivated' : 'reactivated'}.`,
         });
         setSelectedIds(new Set());
         fetchUsers();
       } catch (err) {
         toast({
           title: 'Batch Error',
-          description: 'Operation failed for one or more operators.',
+          description: 'Operation failed for one or more users.',
           variant: 'destructive',
         });
       }
@@ -408,8 +408,8 @@ export function UserManagementPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
-        title="Operator Directory"
-        description="Manage admin users and roles."
+        title="Users"
+        description="Manage system access."
         icon={UserCog}
         actions={
           <div className="flex items-center gap-3 px-6 py-3 bg-indigo-500/10 border border-indigo-500/10 rounded-2xl">
@@ -419,7 +419,7 @@ export function UserManagementPage() {
                 {activeUsersCount} ACTIVE
               </span>
               <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">
-                Operators
+                Users
               </span>
             </div>
           </div>
@@ -439,7 +439,7 @@ export function UserManagementPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
           <input
             type="text"
-            placeholder="Identify operator by name or secure email..."
+            placeholder="Search users..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -454,6 +454,7 @@ export function UserManagementPage() {
                 setCurrentPage(1);
               }}
               className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
+              title="Clear search"
             >
               <X className="h-4 w-4" />
             </button>
@@ -514,9 +515,9 @@ export function UserManagementPage() {
       <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 overflow-hidden hover:shadow-xl transition-all duration-500">
         <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-black text-gray-900 tracking-tight">Active Duty List</h3>
+            <h3 className="text-xl font-black text-gray-900 tracking-tight">All Users</h3>
             <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
-              Verified System Personnel
+              System Users
             </p>
           </div>
           <Activity className="h-5 w-5 text-gray-200" />
@@ -541,10 +542,10 @@ export function UserManagementPage() {
                   </button>
                 </TableHead>
                 <TableHead className="text-left py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
-                  Operator Identity
+                  User
                 </TableHead>
                 <TableHead className="text-left px-6 py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
-                  Access Tier
+                  Role
                 </TableHead>
                 {isSuperAdmin && (
                   <TableHead className="text-left px-6 py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
@@ -552,10 +553,10 @@ export function UserManagementPage() {
                   </TableHead>
                 )}
                 <TableHead className="text-left px-6 py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
-                  Enlistment
+                  Date Added
                 </TableHead>
                 <TableHead className="text-left px-6 py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
-                  Duty Status
+                  Status
                 </TableHead>
                 <TableHead className="text-right px-8 py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
                   Commands
@@ -576,11 +577,11 @@ export function UserManagementPage() {
                   <TableCell colSpan={isSuperAdmin ? 7 : 6} className="py-20 p-0">
                     <EmptyState
                       icon={UserX}
-                      title="Zero Operators Detected"
+                      title="No Users Found"
                       description={
                         searchQuery
-                          ? `No administrative personnel match your search for "${searchQuery}".`
-                          : 'No admin users have registered yet. Generate an invitation code to onboard new admins.'
+                          ? `No users match your search for "${searchQuery}".`
+                          : 'No users found. Create an invitation code to onboard new users.'
                       }
                       action={
                         !searchQuery ? (
@@ -635,7 +636,7 @@ export function UserManagementPage() {
         <div className="flex items-center gap-2 px-6 py-3 bg-gray-50/50 rounded-2xl border border-gray-100 w-fit">
           <Activity className="w-4 h-4 text-gray-300" />
           <p className="text-2xs font-black text-gray-400 uppercase tracking-widest">
-            Archive Status: {users.filter((u) => u.deleted_at).length} VOIDED OPERATORS SHOWN
+            Archive Status: {users.filter((u) => u.deleted_at).length} DEACTIVATED USERS SHOWN
           </p>
         </div>
       )}

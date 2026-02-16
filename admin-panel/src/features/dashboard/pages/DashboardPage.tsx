@@ -143,7 +143,7 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      <AdminHeader title="Command Center" description="Platform overview." icon={Activity} />
+      <AdminHeader title="Dashboard" description="Platform overview." icon={Activity} />
 
       {isSuperAdmin && (
         <div className="flex items-center gap-4 p-4 bg-white/70 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl">
@@ -175,7 +175,7 @@ export function DashboardPage() {
       {/* Primary Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Question Bank"
+          title="Questions"
           value={stats?.questions || 0}
           icon={BookOpen}
           trend={`${stats?.questions || 0} total`}
@@ -184,7 +184,7 @@ export function DashboardPage() {
           isLoading={statsLoading}
         />
         <StatCard
-          title="Active Skills"
+          title="Skills"
           value={stats?.skills || 0}
           icon={BrainCircuit}
           trend={`${stats?.skills || 0} total`}
@@ -193,7 +193,7 @@ export function DashboardPage() {
           isLoading={statsLoading}
         />
         <StatCard
-          title="Stability (24h)"
+          title="Errors (24h)"
           value={stats?.errors24h || 0}
           icon={AlertCircle}
           trend={errorStatus.trend}
@@ -218,7 +218,7 @@ export function DashboardPage() {
           <CardHeader className="flex flex-row items-center justify-between pb-8">
             <div>
               <CardTitle className="text-xl font-black text-slate-900 tracking-tight italic">
-                Platform Velocity
+                Activity
               </CardTitle>
               <CardDescription>
                 Curriculum imports vs runtime anomalies (7-day window)
@@ -301,7 +301,7 @@ export function DashboardPage() {
         <Card className="border-white/40 shadow-xl shadow-purple-500/5 bg-white/60 backdrop-blur-xl group">
           <CardHeader>
             <CardTitle className="text-xl font-black text-slate-900 tracking-tight italic">
-              Content DNA
+              Question Types
             </CardTitle>
             <CardDescription>Question type distribution</CardDescription>
           </CardHeader>
@@ -362,18 +362,10 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-4">
+              <RegistryItem label="Domains" value={String(stats?.domains || 0)} status="Active" />
+              <RegistryItem label="Skills" value={String(stats?.skills || 0)} status="Active" />
               <RegistryItem
-                label="Total Domains"
-                value={String(stats?.domains || 0)}
-                status="Active"
-              />
-              <RegistryItem
-                label="Total Skills"
-                value={String(stats?.skills || 0)}
-                status="Active"
-              />
-              <RegistryItem
-                label="Total Questions"
+                label="Questions"
                 value={String(stats?.questions || 0)}
                 status="Active"
               />

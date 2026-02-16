@@ -166,11 +166,7 @@ export function DomainForm() {
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <AdminHeader
         title={isEditing ? 'Modify Domain' : 'Create Domain'}
-        description={
-          isEditing
-            ? 'Update the structural parameters of this educational area.'
-            : 'Initialize a new high-level educational category.'
-        }
+        description={isEditing ? 'Update domain details.' : 'Add a new domain.'}
         icon={Book}
       />
 
@@ -205,7 +201,7 @@ export function DomainForm() {
                         <div className="flex items-center gap-2 mb-1">
                           <FileText className="w-4 h-4 text-purple-500" />
                           <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
-                            Display Title
+                            Title
                           </FormLabel>
                         </div>
                         <FormControl>
@@ -228,7 +224,7 @@ export function DomainForm() {
                         <div className="flex items-center gap-2 mb-1">
                           <Globe className="w-4 h-4 text-blue-500" />
                           <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
-                            Unique Slug
+                            Slug
                           </FormLabel>
                         </div>
                         <FormControl>
@@ -257,7 +253,7 @@ export function DomainForm() {
                         <div className="flex items-center gap-2 mb-1">
                           <ListOrdered className="w-4 h-4 text-amber-500" />
                           <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
-                            Sort Priority
+                            Order
                           </FormLabel>
                         </div>
                         <FormControl>
@@ -280,7 +276,7 @@ export function DomainForm() {
                         <div className="flex items-center gap-2 mb-1">
                           <ShieldCheck className="w-4 h-4 text-emerald-500" />
                           <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
-                            Protocol Status
+                            Status
                           </FormLabel>
                         </div>
                         <Select
@@ -326,7 +322,7 @@ export function DomainForm() {
                       <div className="flex items-center gap-2 mb-1">
                         <FileText className="w-4 h-4 text-indigo-500" />
                         <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
-                          Comprehensive Description
+                          Description
                         </FormLabel>
                       </div>
                       <FormControl>

@@ -3,15 +3,14 @@
 > eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0
 
 
-C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\hooks\use-bulk-import.test.tsx
-  109:7   error  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
-  111:32  error  Unexpected any. Specify a different type                                                               @typescript-eslint/no-explicit-any
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\rls-bypass.e2e.spec.ts
+  5:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  6:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
 
-C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\hooks\use-toast.test.tsx
-    1:1  error    Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
-  210:9  warning  Forbidden non-null assertion                                                                           @typescript-eslint/no-non-null-assertion
-  210:9  warning  Forbidden non-null assertion                                                                           @typescript-eslint/no-non-null-assertion
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\security-stress.e2e.spec.ts
+   5:21  warning  Forbidden non-null assertion                                                            @typescript-eslint/no-non-null-assertion
+   6:25  warning  Forbidden non-null assertion                                                            @typescript-eslint/no-non-null-assertion
+  66:20  error    'deleteError' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
 
-Γ£û 5 problems (3 errors, 2 warnings)
-  2 errors and 0 warnings potentially fixable with the `--fix` option.
+✖ 5 problems (1 error, 4 warnings)
 

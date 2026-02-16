@@ -265,8 +265,8 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <AdminHeader
-        title={initialData ? 'Refine Question' : 'Architect Question'}
-        description="Configure this question."
+        title={initialData ? 'Edit Question' : 'Add Question'}
+        description="Question details"
         icon={HelpCircle}
       />
 

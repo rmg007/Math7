@@ -110,8 +110,8 @@ export function SkillForm({ initialData }: SkillFormProps) {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <AdminHeader
-        title={isEditing ? 'Refine Skill' : 'Provision Skill'}
-        description={isEditing ? 'Edit skill details.' : 'Create a new skill.'}
+        title={isEditing ? 'Edit Skill' : 'Add Skill'}
+        description={isEditing ? 'Edit skill details.' : 'Add a new skill.'}
         icon={Zap}
       />
 
@@ -131,7 +131,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
                       <div className="flex items-center gap-2 mb-1">
                         <Layers className="w-4 h-4 text-purple-500" />
                         <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
-                          Parent Domain
+                          Domain
                         </FormLabel>
                       </div>
                       <Select
@@ -170,7 +170,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
                         <div className="flex items-center gap-2 mb-1">
                           <FileText className="w-4 h-4 text-blue-500" />
                           <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
-                            Skill Title
+                            Title
                           </FormLabel>
                         </div>
                         <FormControl>
@@ -193,7 +193,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
                         <div className="flex items-center gap-2 mb-1">
                           <Globe className="w-4 h-4 text-indigo-500" />
                           <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
-                            Resource identifier
+                            Slug
                           </FormLabel>
                         </div>
                         <FormControl>
@@ -218,7 +218,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
                         <div className="flex items-center gap-2 mb-1">
                           <Zap className="w-4 h-4 text-amber-500" />
                           <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
-                            Intensity (1-5)
+                            Difficulty (1-5)
                           </FormLabel>
                         </div>
                         <FormControl>
@@ -243,7 +243,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
                         <div className="flex items-center gap-2 mb-1">
                           <ListOrdered className="w-4 h-4 text-slate-500" />
                           <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
-                            Sequence
+                            Order
                           </FormLabel>
                         </div>
                         <FormControl>
@@ -266,7 +266,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
                         <div className="flex items-center gap-2 mb-1">
                           <ShieldCheck className="w-4 h-4 text-emerald-500" />
                           <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
-                            Protocol State
+                            Status
                           </FormLabel>
                         </div>
                         <Select
@@ -312,7 +312,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
                       <div className="flex items-center gap-2 mb-1">
                         <FileText className="w-4 h-4 text-indigo-500" />
                         <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
-                          Instructional Blueprint
+                          Description
                         </FormLabel>
                       </div>
                       <FormControl>

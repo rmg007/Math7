@@ -5,6 +5,12 @@
 
 ---
 
+## 🚫 [HARD RULE] Admin Panel Feature Freeze (2026-02-16)
+
+**DO NOT add any new features to `admin-panel/`.** Bug fixes and maintenance only. No new pages, components, hooks, routes, or UI elements. This rule is non-negotiable.
+
+---
+
 ## [import-path] Duplicate Import Deduplication (2026-02-16)
 
 When adding new imports via multi_replace_file_content, always check that the existing import block doesn't already contain the same modules. Replacing a line that includes `import X from 'y'` with a block that also adds `import X from 'y'` will create duplicates. Solution: view lines 1-25 first.

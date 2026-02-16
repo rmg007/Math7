@@ -265,11 +265,7 @@ export function InvitationCodesPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
-      <AdminHeader
-        title="Admin Invitation Registry"
-        description="Manage invitation codes."
-        icon={Key}
-      />
+      <AdminHeader title="Invitation Codes" description="Manage system access codes." icon={Key} />
 
       {error && (
         <div className="bg-red-500/10 border border-red-500/20 backdrop-blur-xl rounded-2xl p-4 flex items-center gap-3 animate-in shake duration-500">
@@ -292,9 +288,9 @@ export function InvitationCodesPage() {
             <Zap className="h-6 w-6 text-indigo-600" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-gray-900 tracking-tight">Provision Access</h2>
+            <h2 className="text-xl font-black text-gray-900 tracking-tight">Create Code</h2>
             <p className="text-2xs font-black text-gray-400 uppercase tracking-widest italic">
-              Generate new invitation codes for admin onboarding
+              Create a new code for user onboarding
             </p>
           </div>
         </div>
@@ -302,7 +298,7 @@ export function InvitationCodesPage() {
         <div className="flex flex-wrap gap-8 items-end">
           <div className="space-y-2 group">
             <label className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
-              Authority Uses
+              Max Uses
             </label>
             <Input
               type="number"
@@ -332,7 +328,7 @@ export function InvitationCodesPage() {
             className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl px-10 h-12 shadow-lg shadow-indigo-600/20 font-black text-xs uppercase tracking-extra-wide transition-all hover:-translate-y-0.5 gap-2"
           >
             {generating && <Loader2 className="h-4 w-4 animate-spin" />}
-            {generating ? 'GENERATING...' : 'GENERATE CODE'}
+            {generating ? 'GENERATING...' : 'CREATE CODE'}
           </Button>
         </div>
       </div>
@@ -358,6 +354,7 @@ export function InvitationCodesPage() {
                 setCurrentPage(1);
               }}
               className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
+              title="Clear search"
             >
               <X className="h-4 w-4" />
             </button>
@@ -414,9 +411,9 @@ export function InvitationCodesPage() {
       <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 overflow-hidden hover:shadow-xl transition-all duration-500">
         <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-black text-gray-900 tracking-tight">Access Registry</h3>
+            <h3 className="text-xl font-black text-gray-900 tracking-tight">Active Codes</h3>
             <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
-              Invitation Codes
+              System Codes
             </p>
           </div>
           <Activity className="h-5 w-5 text-gray-200" />

@@ -679,7 +679,7 @@ export function QuestionList() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center bg-white/50 backdrop-blur-md rounded-[2.5rem] p-12 border border-white/20 shadow-xl">
           <p className="text-gray-500 font-black italic uppercase tracking-widest">
-            Select an active app to access Question Registry
+            Select an active app to view Questions
           </p>
         </div>
       </div>
@@ -689,11 +689,7 @@ export function QuestionList() {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
-        <AdminHeader
-          title="Question Registry"
-          description="Manage assessment questions."
-          icon={FileText}
-        />
+        <AdminHeader title="Questions" description="Manage your question bank." icon={FileText} />
 
         {/* Skeleton Filter Bar */}
         <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
@@ -742,8 +738,8 @@ export function QuestionList() {
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <AdminHeader
-        title="Question Registry"
-        description="Manage assessment questions."
+        title="Questions"
+        description="Manage your question bank."
         icon={FileText}
         actions={
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -775,7 +771,7 @@ export function QuestionList() {
             <Link to="/questions/new">
               <Button className="h-12 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-extra-wide shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-1 gap-3">
                 <Plus className="h-5 w-5" />
-                <span>Initialize Asset</span>
+                <span>Add Question</span>
               </Button>
             </Link>
           </div>

@@ -1,5 +1,11 @@
 # Questerix — AI Agent Instructions
 
+## 🚫 HARD RULE — Admin Panel Feature Freeze
+
+> **DO NOT add any new features to `admin-panel/`.**
+> Bug fixes and maintenance only. No new pages, components, hooks, routes, or UI elements.
+> This rule is non-negotiable and overrides any other instruction or request.
+
 ## Project Context
 
 Questerix is an educational platform with:

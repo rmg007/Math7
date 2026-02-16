@@ -153,16 +153,16 @@ export function SubjectsPage() {
     try {
       if (editingSubject) {
         await updateSubject.mutateAsync({ id: editingSubject.subject_id, ...formData });
-        toast({ title: 'Success', description: 'Taxonomy node updated' });
+        toast({ title: 'Success', description: 'Subject updated' });
       } else {
         await createSubject.mutateAsync(formData);
-        toast({ title: 'Success', description: 'Taxonomy node created' });
+        toast({ title: 'Success', description: 'Subject created' });
       }
       setIsDialogOpen(false);
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to persist taxonomy data',
+        description: 'Failed to persist subject data',
         variant: 'destructive',
       });
     }
@@ -173,14 +173,14 @@ export function SubjectsPage() {
       try {
         await deleteSubject.mutateAsync(id);
         toast({
-          title: 'Taxonomy Node Purged',
+          title: 'Subject Deleted',
           description:
-            'The subject and all associated metadata have been removed from the registry.',
+            'The subject and all associated metadata have been removed from the platform.',
         });
       } catch (error) {
         toast({
           title: 'Error',
-          description: 'Failed to purge taxonomy node',
+          description: 'Failed to delete subject',
           variant: 'destructive',
         });
       }
@@ -198,15 +198,15 @@ export function SubjectsPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
-        title="Knowledge Taxonomy"
-        description="Manage curriculum subject areas."
+        title="Subjects"
+        description="Manage subjects."
         icon={Boxes}
         actions={
           <Button
             onClick={() => handleOpenDialog()}
             className="h-12 px-8 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-purple-600/20 transition-all hover:-translate-y-0.5 gap-3"
           >
-            <Plus className="w-4 h-4" /> Provision Taxonomy Node
+            <Plus className="w-4 h-4" /> Add Subject
           </Button>
         }
       />
@@ -217,7 +217,7 @@ export function SubjectsPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-purple-500 transition-colors" />
           <input
             type="text"
-            placeholder="Search taxonomy nodes by name or identifier slug..."
+            placeholder="Search subjects..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all outline-none text-sm font-medium"
@@ -236,10 +236,10 @@ export function SubjectsPage() {
         <div className="flex items-center gap-3 shrink-0">
           <div className="px-4 py-2 bg-purple-500/10 border border-purple-500/10 rounded-xl">
             <span className="text-2xs font-black text-purple-500 uppercase tracking-widest mr-2">
-              Nodes:
+              Subjects:
             </span>
             <span className="text-sm font-black text-purple-700 tracking-tight">
-              {filteredSubjects.length} MAPPED
+              {filteredSubjects.length}
             </span>
           </div>
         </div>
@@ -251,19 +251,19 @@ export function SubjectsPage() {
             <TableHeader>
               <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b-2 border-gray-100">
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 px-8 h-14">
-                  Domain Identity
+                  Title
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Semantic Slug
+                  Slug
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14 text-center">
-                  Visual Anchor
+                  Icon
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Display Rank
+                  Order
                 </TableHead>
                 <TableHead className="text-right px-8 h-14 font-black text-2xs uppercase tracking-widest text-gray-400">
-                  Execution
+                  Actions
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -281,14 +281,14 @@ export function SubjectsPage() {
                   <TableCell colSpan={5} className="py-24">
                     <EmptyState
                       icon={Boxes}
-                      title="Taxonomy Vacuum Detected"
-                      description="No subjects defined yet. Create one to get started."
+                      title="No subjects found"
+                      description="Create a subject to get started."
                       action={
                         <Button
                           onClick={() => handleOpenDialog()}
                           className="rounded-full px-8 shadow-md"
                         >
-                          PROVISION NODE
+                          Add Subject
                         </Button>
                       }
                     />
@@ -312,7 +312,7 @@ export function SubjectsPage() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="rounded-[2.5rem] border-none bg-white/90 backdrop-blur-2xl p-0 overflow-hidden shadow-2xl">
           <DialogTitle className="sr-only">
-            {editingSubject ? 'Edit Taxonomy Node' : 'Provision Node'}
+            {editingSubject ? 'Edit Subject' : 'Add Subject'}
           </DialogTitle>
           <form onSubmit={handleSubmit}>
             <div className="p-10 space-y-8">
@@ -326,12 +326,10 @@ export function SubjectsPage() {
                 </div>
                 <div>
                   <h2 className="text-2xl font-black text-gray-900 tracking-tight italic">
-                    {editingSubject ? 'Edit Taxonomy Node' : 'Provision Node'}
+                    {editingSubject ? 'Edit Subject' : 'Add Subject'}
                   </h2>
                   <p className="text-2xs font-black text-gray-400 uppercase tracking-widest mt-1">
-                    {editingSubject
-                      ? `Refining ID: ${editingSubject.subject_id.split('-')[0]}`
-                      : 'Initializing Knowledge category'}
+                    {editingSubject ? `Editing subject` : 'Add a new subject'}
                   </p>
                 </div>
               </div>
@@ -343,7 +341,7 @@ export function SubjectsPage() {
                       htmlFor="name"
                       className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
                     >
-                      Subject Name
+                      Title
                     </Label>
                     <Input
                       id="name"
@@ -359,7 +357,7 @@ export function SubjectsPage() {
                       htmlFor="slug"
                       className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
                     >
-                      Semantic Slug
+                      Slug
                     </Label>
                     <Input
                       id="slug"
@@ -378,7 +376,7 @@ export function SubjectsPage() {
                       htmlFor="color"
                       className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
                     >
-                      Color Palette (Hex)
+                      Color
                     </Label>
                     <div className="flex gap-3">
                       <div
@@ -399,7 +397,7 @@ export function SubjectsPage() {
                       htmlFor="order"
                       className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
                     >
-                      Display Rank
+                      Order
                     </Label>
                     <Input
                       id="order"
@@ -419,7 +417,7 @@ export function SubjectsPage() {
                     htmlFor="description"
                     className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
                   >
-                    Narrative Description
+                    Description
                   </Label>
                   <Input
                     id="description"
@@ -439,14 +437,14 @@ export function SubjectsPage() {
                 onClick={() => setIsDialogOpen(false)}
                 className="h-12 px-8 rounded-2xl font-black text-2xs uppercase tracking-widest text-gray-400 hover:bg-gray-200 italic transition-all"
               >
-                Abort
+                Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={createSubject.isPending || updateSubject.isPending}
                 className="h-12 px-10 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-purple-600/20 transition-all hover:-translate-y-0.5"
               >
-                {editingSubject ? 'COMMIT CHANGES' : 'EXECUTE PROVISIONING'}
+                {editingSubject ? 'Save Changes' : 'Create Subject'}
               </Button>
             </DialogFooter>
           </form>

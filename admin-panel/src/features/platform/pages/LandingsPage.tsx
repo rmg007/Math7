@@ -282,15 +282,15 @@ export function LandingsPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
-        title="Marketing Registry"
-        description="Manage app landing pages."
+        title="Landing Pages"
+        description="Manage marketing pages for your applications."
         icon={Globe}
         actions={
           <Button
             onClick={() => setIsCreateDialogOpen(true)}
             className="h-12 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 gap-3"
           >
-            <Plus className="w-4 h-4" /> Provision Landing Registry
+            <Plus className="w-4 h-4" /> Create Landing Page
           </Button>
         }
       />
@@ -301,7 +301,7 @@ export function LandingsPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
           <input
             type="text"
-            placeholder="Search landing registries by application name or headline..."
+            placeholder="Search landing pages..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -316,6 +316,7 @@ export function LandingsPage() {
                 setCurrentPage(1);
               }}
               className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
+              title="Clear search"
             >
               <X className="h-4 w-4" />
             </button>
@@ -325,10 +326,10 @@ export function LandingsPage() {
         <div className="flex items-center gap-3 shrink-0">
           <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
             <span className="text-2xs font-black text-indigo-500 uppercase tracking-widest">
-              Registries:
+              Pages:
             </span>
             <span className="text-sm font-black text-indigo-700 tracking-tight">
-              {filteredLandings.length} ACTIVE
+              {filteredLandings.length}
             </span>
           </div>
         </div>
@@ -340,19 +341,19 @@ export function LandingsPage() {
             <TableHeader>
               <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b-2 border-gray-100">
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 px-8 h-14">
-                  Target Application
+                  Application
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Deployment URL
+                  URL
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Primary Hook
+                  Headline
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Node Status
+                  Status
                 </TableHead>
                 <TableHead className="text-right px-8 h-14 font-black text-2xs uppercase tracking-widest text-gray-400">
-                  Execution
+                  Actions
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -370,14 +371,14 @@ export function LandingsPage() {
                   <TableCell colSpan={5} className="py-24">
                     <EmptyState
                       icon={LayoutPanelTop}
-                      title="No Marketing Records Identified"
+                      title="No Landing Pages"
                       description="Create your first landing page."
                       action={
                         <Button
                           onClick={() => setIsCreateDialogOpen(true)}
-                          className="rounded-full px-8 shadow-md"
+                          className="rounded-full px-8 shadow-md font-bold uppercase tracking-widest text-xs"
                         >
-                          INITIATE REGISTRY
+                          Create Landing Page
                         </Button>
                       }
                     />
@@ -399,7 +400,7 @@ export function LandingsPage() {
                             {l.apps?.display_name}
                           </p>
                           <p className="text-2xs font-black text-gray-400 uppercase tracking-widest mt-1">
-                            Tenant ID: {l.app_id?.split('-')[0] || 'UNMAPPED'}
+                            App ID: {l.app_id?.split('-')[0] || 'UNMAPPED'}
                           </p>
                         </div>
                       </div>
@@ -411,13 +412,13 @@ export function LandingsPage() {
                     </TableCell>
                     <TableCell className="py-5">
                       <p className="font-black text-xs text-gray-600 tracking-tight italic line-clamp-1 max-w-[200px]">
-                        "{l.hero_headline || 'NULL_HOOK'}"
+                        "{l.hero_headline || 'No Headline'}"
                       </p>
                     </TableCell>
                     <TableCell className="py-5">
                       <StatusBadge
-                        status={l.is_published ? 'live' : 'draft'}
-                        label={l.is_published ? 'OPERATIONAL' : 'DRAFTING'}
+                        status={l.is_published ? 'active' : 'inactive'}
+                        label={l.is_published ? 'Published' : 'Draft'}
                       />
                     </TableCell>
                     <TableCell className="px-8 py-5 text-right">
@@ -428,7 +429,7 @@ export function LandingsPage() {
                         className="h-10 px-4 rounded-xl font-black text-2xs uppercase tracking-widest text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 gap-2 overflow-hidden group/btn"
                       >
                         <Pencil className="w-3.5 h-3.5" />
-                        REWRITE
+                        Edit
                         <ArrowRight className="w-3.5 h-3.5 -translate-x-4 opacity-0 transition-all group-hover/btn:translate-x-0 group-hover/btn:opacity-100" />
                       </Button>
                     </TableCell>
@@ -458,7 +459,7 @@ export function LandingsPage() {
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="rounded-[2.5rem] border-none bg-white/90 backdrop-blur-2xl p-0 overflow-hidden shadow-2xl">
-          <DialogTitle className="sr-only">Initialize Registry</DialogTitle>
+          <DialogTitle className="sr-only">Create Landing Page</DialogTitle>
           <div className="p-10 space-y-8">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-3xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20">
@@ -466,10 +467,10 @@ export function LandingsPage() {
               </div>
               <div>
                 <h2 className="text-2xl font-black text-gray-900 tracking-tight italic">
-                  Initialize Registry
+                  Create Landing Page
                 </h2>
                 <p className="text-2xs font-black text-gray-400 uppercase tracking-widest mt-1">
-                  Select application endpoint
+                  Select an application to create a landing page for.
                 </p>
               </div>
             </div>
@@ -477,11 +478,11 @@ export function LandingsPage() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
-                  Target Tenant
+                  Application
                 </Label>
                 <Select value={selectedAppId} onValueChange={setSelectedAppId}>
                   <SelectTrigger className="h-14 rounded-2xl border-gray-100 bg-white shadow-sm font-bold text-gray-700">
-                    <SelectValue placeholder="Identify Unmapped Application..." />
+                    <SelectValue placeholder="Select Application..." />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl border-gray-100 shadow-xl p-2">
                     {apps
@@ -499,7 +500,7 @@ export function LandingsPage() {
                       .length === 0 && (
                       <div className="p-4 space-y-3">
                         <div className="text-xs font-black text-center text-rose-400 uppercase tracking-widest italic">
-                          Registry saturated. All nodes mapped.
+                          All applications already have landing pages.
                         </div>
                         <div className="text-center">
                           <Button
@@ -525,14 +526,14 @@ export function LandingsPage() {
               onClick={() => setIsCreateDialogOpen(false)}
               className="h-12 px-8 rounded-2xl font-black text-2xs uppercase tracking-widest text-gray-400 hover:bg-gray-200 italic transition-all"
             >
-              Abort
+              Cancel
             </Button>
             <Button
               onClick={handleCreate}
               className="h-12 px-10 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5"
               disabled={createLanding.isPending}
             >
-              {createLanding.isPending ? 'EXECUTING...' : 'INITIATE REGISTRY'}
+              {createLanding.isPending ? 'Creating...' : 'Create Landing Page'}
             </Button>
           </DialogFooter>
         </DialogContent>
