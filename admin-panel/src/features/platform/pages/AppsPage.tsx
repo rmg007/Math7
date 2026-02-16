@@ -32,6 +32,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import {
+  AlertTriangle,
+  ExternalLink,
   Globe,
   GraduationCap,
   Layers,
@@ -89,12 +91,21 @@ const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-2">
-          <Globe className="h-3.5 w-3.5 text-gray-300" />
-          <span className="font-mono text-xs font-black text-indigo-500 tracking-tighter">
+        <a
+          href={`http://${app.subdomain}.questerix.com`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 group/link hover:opacity-80 transition-opacity"
+          title="Launch App"
+        >
+          <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center group-hover/link:bg-indigo-100 transition-colors">
+            <Globe className="h-3.5 w-3.5 text-indigo-500" />
+          </div>
+          <span className="font-mono text-xs font-black text-indigo-500 tracking-tighter decoration-indigo-200 underline-offset-4 group-hover/link:underline">
             {app.subdomain}.questerix.com
           </span>
-        </div>
+          <ExternalLink className="w-3 h-3 text-indigo-300 opacity-0 group-hover/link:opacity-100 transition-all -ml-1" />
+        </a>
       </TableCell>
       <TableCell>
         <div className="px-3 py-1 bg-gray-100 rounded-lg text-xs font-black text-gray-500 uppercase tracking-widest inline-block border border-gray-200/50">
@@ -292,7 +303,7 @@ export function AppsPage() {
                   Cluster Subject
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Subdomain
+                  Subdomain / Link
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Tier/Grade
@@ -394,6 +405,34 @@ export function AppsPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="px-8 py-8 space-y-8">
+            <div className="p-4 bg-orange-50/50 border border-orange-100 rounded-2xl flex gap-4">
+              <div className="p-2 h-fit rounded-xl bg-orange-100 text-orange-600">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-black text-orange-800 uppercase tracking-wide">
+                  DNS Configuration Required
+                </h4>
+                <p className="text-xs text-orange-700 leading-relaxed font-medium">
+                  After creating or changing a subdomain, you MUST update Cloudflare Pages DNS. Map{' '}
+                  <span className="font-mono font-bold bg-orange-100 px-1 rounded">
+                    {formData.subdomain || '...'}.questerix.com
+                  </span>{' '}
+                  to{' '}
+                  <span className="font-mono font-bold bg-orange-100 px-1 rounded">
+                    questerix-student.pages.dev
+                  </span>
+                  .
+                </p>
+                {editingApp && (
+                  <p className="text-xs text-red-600 font-bold mt-2">
+                    ⚠️ Warning: Changing the subdomain will immediately break the app until DNS is
+                    updated.
+                  </p>
+                )}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-3">
                 <Label className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
@@ -435,17 +474,28 @@ export function AppsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-3">
-                <Label
-                  htmlFor="subdomain"
-                  className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
-                >
-                  DNS Subdomain
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label
+                    htmlFor="subdomain"
+                    className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
+                  >
+                    DNS Subdomain
+                  </Label>
+                  <span className="text-2xs font-bold text-gray-400">Low-level identifier</span>
+                </div>
                 <div className="flex items-center gap-0 group">
                   <Input
                     id="subdomain"
                     value={formData.subdomain}
-                    onChange={(e) => setFormData({ ...formData, subdomain: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        subdomain: e.target.value
+                          .toLowerCase()
+                          .replace(/[^a-z0-9-]/g, '')
+                          .slice(0, 63),
+                      })
+                    }
                     placeholder="m7"
                     className="h-12 rounded-l-xl rounded-r-none border-gray-200 border-r-0 focus:ring-0 focus:border-gray-200 font-mono font-black text-indigo-600 focus:ring-indigo-500/10"
                     required
