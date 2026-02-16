@@ -119,9 +119,27 @@ When you encounter an error:
 
 ### Documentation-As-You-Go
 
+During execution:
+
 - **Bug fixed?** → Add entry to `docs/LEARNING_LOG.md` immediately
-- **Phase complete?** → Update relevant docs
 - **Architectural decision?** → Document the "why" inline
+
+### Session Finalization (MANDATORY before stopping)
+
+At the end of every Loki session — whether task completes, budget exhausts, or circuit breaker fires:
+
+1. **LEARNING_LOG.md** — Add a session entry to `docs/LEARNING_LOG.md` with:
+   - Session context (trigger, scope, outcome)
+   - What was done (files created/modified)
+   - What was learned (patterns, gotchas, architecture decisions)
+   - Prevention measures (rules for future agents)
+2. **CHANGELOG.md** — Add entry if user-facing behavior changed
+3. **Workflow discoverability** — If you created a new workflow or skill:
+   - Add it to `.agent/workflows/help.md` (workflow table + details section)
+   - Cross-reference from related workflows (e.g., `autopilot.md`)
+4. **Commit and push** — All documentation changes committed with `docs:` prefix
+
+> **Why this matters**: Multiple agents work on this project. Documentation is the API between agents. If you don't document what you did, the next agent will repeat your mistakes or duplicate your work.
 
 ---
 
