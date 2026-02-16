@@ -1,0 +1,89 @@
+{
+  "skill": "loki-mode",
+  "version": "2.0.26",
+  "permissions": {
+    "mode": "Turbo",
+    "allow": [
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(git *)",
+      "Bash(flutter *)",
+      "Bash(dart *)",
+      "Bash(python *)",
+      "Bash(pip *)",
+      "Bash(supabase *)",
+      "Bash(pwsh *)",
+      "Bash(node *)",
+      "Read(./admin-panel/**)",
+      "Read(./student-app/**)",
+      "Read(./content-engine/**)",
+      "Read(./scripts/**)",
+      "Read(./docs/**)",
+      "Read(./.agent/**)",
+      "Read(./.antigravity/**)",
+      "Write(./admin-panel/src/**)",
+      "Write(./admin-panel/tests/**)",
+      "Write(./student-app/lib/**)",
+      "Write(./student-app/test/**)",
+      "Write(./content-engine/**)",
+      "Write(./scripts/**)",
+      "Write(./docs/**)",
+      "Write(./.agent/**)",
+      "Write(./.antigravity/**)",
+      "WebBrowser(google.com, github.com, stackoverflow.com, pub.dev, supabase.com, docs.flutter.dev, react.dev, vitejs.dev)"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf C:)",
+      "Bash(sudo *)",
+      "Bash(format *)",
+      "Bash(del /s /q C:\\*)",
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.production)",
+      "Read(~/.ssh/*)",
+      "Read(~/.aws/*)",
+      "Write(./.env)",
+      "Write(./.env.local)",
+      "Write(./.env.production)",
+      "Write(./master-config.json)",
+      "Write(./.secrets/*)"
+    ]
+  },
+  "constraints": {
+    "max_budget_usd": 10.00,
+    "max_iterations": 25,
+    "max_retries_per_subtask": 5,
+    "max_consecutive_same_error": 3,
+    "idle_timeout_minutes": 15,
+    "require_vitals_check": true,
+    "vitals_check_commands": [
+      "npx tsc --noEmit",
+      "npm run lint"
+    ]
+  },
+  "notifications": {
+    "on_error": "log_file",
+    "on_circuit_breaker": "log_file",
+    "on_success": "log_file",
+    "on_phase_complete": "log_file",
+    "checkpoint_interval_steps": 5,
+    "log_directory": ".antigravity/skills/loki-mode/logs"
+  },
+  "deployment": {
+    "auto_deploy": false,
+    "require_human_approval": true,
+    "deploy_command": "./orchestrator.ps1",
+    "pre_deploy_checks": [
+      "./scripts/preflight.ps1",
+      "./scripts/run-all-tests.ps1"
+    ]
+  },
+  "process_integration": {
+    "follows_process_phases": true,
+    "autonomous_phases": [1, 2, 3, 4, 5],
+    "human_gated_phases": [6],
+    "state_file": ".antigravity/skills/loki-mode/state.json"
+  }
+}
