@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Type Safety**: Synchronized `QuestionListItem` and `DomainListItem` types with joined application metadata.
 - **Project HADES**: Completed Phase 3 (The Anatomy) Architecture Audit - Architecture Drift & Multi-tenant Visibility.
 - **UI**: Removed redundant decorative icons (Layout, GraduationCap, Globe) from admin panel tables to reduce visual noise.
+- **Admin**: Fixed domain deletion bug where Super Admins could not delete domains if they differed from the current app context.
 - **Admin Panel**: Resolved 403 Forbidden error on Subject creation/deletion for administrators.
 - **Admin Panel**: Hardened error tracking by filtering `ResizeObserver` and `AbortError` noise.
 - **Admin Panel**: Applications now normalized to lowercase on save to prevent DNS mismatch.

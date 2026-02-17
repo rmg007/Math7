@@ -163,21 +163,22 @@ export function useCreateDomain() {
 
 export function useUpdateDomain() {
   const queryClient = useQueryClient();
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async ({ domain_id, ...updates }: { domain_id: string } & Partial<Domain>) => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
 
-      const { data, error } = await supabase
-        .from('domains')
-        .update(updates)
-        .eq('domain_id', domain_id)
-        .eq('app_id', currentApp.app_id)
-        .select()
-        .single();
+      let query = supabase.from('domains').update(updates).eq('domain_id', domain_id);
+
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { data, error } = await query.select().single();
 
       if (error) throw error;
+      if (!data) throw new Error(`Domain with ID ${domain_id} not found for update.`);
       return data as Domain;
     },
     onSuccess: (data) => {
@@ -190,18 +191,24 @@ export function useUpdateDomain() {
 
 export function useDeleteDomain() {
   const queryClient = useQueryClient();
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async (domain_id: string) => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
 
-      const { error } = await supabase
+      // Super Admins can delete any domain (RLS will enforce perms)
+      // Tenant Admins are restricted to their current app via RLS and this extra check
+      let query = supabase
         .from('domains')
         .update({ deleted_at: new Date().toISOString() })
-        .eq('domain_id', domain_id)
-        .eq('app_id', currentApp.app_id);
+        .eq('domain_id', domain_id);
 
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { error } = await query;
       if (error) throw error;
     },
     onSuccess: () => {
@@ -213,18 +220,22 @@ export function useDeleteDomain() {
 
 export function useBulkDeleteDomains() {
   const queryClient = useQueryClient();
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async (domain_ids: string[]) => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
 
-      const { error } = await supabase
+      let query = supabase
         .from('domains')
         .update({ deleted_at: new Date().toISOString() })
-        .in('domain_id', domain_ids)
-        .eq('app_id', currentApp.app_id);
+        .in('domain_id', domain_ids);
 
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { error } = await query;
       if (error) throw error;
     },
     onSuccess: () => {
@@ -237,18 +248,19 @@ export function useBulkDeleteDomains() {
 
 export function useBulkUpdateDomainsStatus() {
   const queryClient = useQueryClient();
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async ({ ids, status }: { ids: string[]; status: CurriculumStatus }) => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
 
-      const { error } = await supabase
-        .from('domains')
-        .update({ status })
-        .in('domain_id', ids)
-        .eq('app_id', currentApp.app_id);
+      let query = supabase.from('domains').update({ status }).in('domain_id', ids);
 
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { error } = await query;
       if (error) throw error;
     },
     onSuccess: () => {
@@ -262,19 +274,21 @@ export function useBulkUpdateDomainsStatus() {
 
 export function useUpdateDomainOrder() {
   const queryClient = useQueryClient();
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async (updates: { domain_id: string; sort_order: number }[]) => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
 
-      const promises = updates.map(({ domain_id, sort_order }) =>
-        supabase
-          .from('domains')
-          .update({ sort_order })
-          .eq('domain_id', domain_id)
-          .eq('app_id', currentApp.app_id)
-      );
+      const promises = updates.map(({ domain_id, sort_order }) => {
+        let query = supabase.from('domains').update({ sort_order }).eq('domain_id', domain_id);
+
+        if (!isSuperAdmin && currentApp?.app_id) {
+          query = query.eq('app_id', currentApp.app_id);
+        }
+
+        return query;
+      });
 
       const results = await Promise.all(promises);
       const errors = results.filter((r) => r.error);

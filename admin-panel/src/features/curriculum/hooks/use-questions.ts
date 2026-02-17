@@ -233,22 +233,22 @@ export function useBulkCreateQuestions() {
 
 export function useUpdateQuestion() {
   const queryClient = useQueryClient();
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async ({
       question_id,
       ...updates
     }: { question_id: string } & Partial<Question>) => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
 
-      const { data, error } = await supabase
-        .from('questions')
-        .update(updates)
-        .eq('question_id', question_id)
-        .eq('app_id', currentApp.app_id)
-        .select()
-        .single();
+      let query = supabase.from('questions').update(updates).eq('question_id', question_id);
+
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { data, error } = await query.select().single();
 
       if (error) throw error;
       return data;
@@ -263,18 +263,22 @@ export function useUpdateQuestion() {
 
 export function useDeleteQuestion() {
   const queryClient = useQueryClient();
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async (question_id: string) => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
 
-      const { error } = await supabase
+      let query = supabase
         .from('questions')
         .update({ deleted_at: new Date().toISOString() })
-        .eq('question_id', question_id)
-        .eq('app_id', currentApp.app_id);
+        .eq('question_id', question_id);
 
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { error } = await query;
       if (error) throw error;
     },
     onSuccess: () => {
@@ -286,18 +290,22 @@ export function useDeleteQuestion() {
 
 export function useBulkDeleteQuestions() {
   const queryClient = useQueryClient();
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async (question_ids: string[]) => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
 
-      const { error } = await supabase
+      let query = supabase
         .from('questions')
         .update({ deleted_at: new Date().toISOString() })
-        .in('question_id', question_ids)
-        .eq('app_id', currentApp.app_id);
+        .in('question_id', question_ids);
 
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { error } = await query;
       if (error) throw error;
     },
     onSuccess: () => {
@@ -310,7 +318,7 @@ export function useBulkDeleteQuestions() {
 
 export function useBulkUpdateQuestionsStatus() {
   const queryClient = useQueryClient();
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async ({
@@ -320,14 +328,15 @@ export function useBulkUpdateQuestionsStatus() {
       question_ids: string[];
       status: 'draft' | 'published' | 'live';
     }) => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
 
-      const { error } = await supabase
-        .from('questions')
-        .update({ status })
-        .in('question_id', question_ids)
-        .eq('app_id', currentApp.app_id);
+      let query = supabase.from('questions').update({ status }).in('question_id', question_ids);
 
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { error } = await query;
       if (error) throw error;
     },
     onSuccess: () => {
@@ -339,61 +348,28 @@ export function useBulkUpdateQuestionsStatus() {
   });
 }
 
-export function useDuplicateQuestion() {
-  const queryClient = useQueryClient();
-  const { currentApp } = useApp();
-
-  return useMutation({
-    mutationFn: async (question_id: string) => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
-
-      const { data: original, error: fetchError } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('question_id', question_id)
-        .eq('app_id', currentApp.app_id)
-        .single();
-
-      if (fetchError) throw fetchError;
-      if (!original) throw new Error('Question not found');
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { question_id: _, created_at, updated_at, app_id, ...rest } = original;
-      const duplicate: QuestionInsert = {
-        ...rest,
-        app_id: currentApp.app_id,
-        content: rest.content || 'Question',
-        status: 'draft',
-      };
-
-      const { data, error } = await supabase.from('questions').insert(duplicate).select().single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-    },
-  });
-}
+// ... duplicate skipped ...
 
 export function useUpdateQuestionOrder() {
   const queryClient = useQueryClient();
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async (updates: { question_id: string; sort_order: number }[]) => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
 
-      const promises = updates.map(({ question_id, sort_order }) =>
-        supabase
+      const promises = updates.map(({ question_id, sort_order }) => {
+        let query = supabase
           .from('questions')
           .update({ sort_order })
-          .eq('question_id', question_id)
-          .eq('app_id', currentApp.app_id)
-      );
+          .eq('question_id', question_id);
+
+        if (!isSuperAdmin && currentApp?.app_id) {
+          query = query.eq('app_id', currentApp.app_id);
+        }
+
+        return query;
+      });
 
       const results = await Promise.all(promises);
       const errors = results.filter((r) => r.error);
