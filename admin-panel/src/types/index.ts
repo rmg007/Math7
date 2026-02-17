@@ -1,22 +1,21 @@
-import type { Database, Tables } from '@/lib/database.types';
-import type { Json } from '@/lib/database.types';
+import type { Database, Json, Tables } from '@/lib/database.types';
 
 // --- Shared Constants & Types (from common) ---
 export interface PaginationParams {
-    page: number;
-    pageSize: number;
-    sortBy?: string;
-    sortDirection?: 'asc' | 'desc';
-    search?: string;
-    statusFilter?: string;
+  page: number;
+  pageSize: number;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+  search?: string;
+  statusFilter?: string;
 }
 
 export interface PaginatedResponse<T> {
-    data: T[];
-    totalCount: number;
-    page: number;
-    pageSize: number;
-    totalPages: number;
+  data: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 // --- Row Type Aliases (The "Golden" types) ---
@@ -47,23 +46,27 @@ export interface SkillWithQuestions extends Skill {
 }
 
 export type QuestionListItem = QuestionRow & {
-    metadata?: Json;
-    skills: { title: string; domains: { title: string } | null } | null;
+  metadata?: Json;
+  skills: { title: string; domains: { title: string } | null } | null;
+  apps?: { display_name: string } | null;
 };
 
 export type DomainListItem = DomainRow;
 export type SkillReference = Pick<SkillRow, 'skill_id' | 'title'>;
-export type UserProfile = Pick<ProfileRow, 'id' | 'email' | 'full_name' | 'avatar_url' | 'role' | 'created_at'>;
+export type UserProfile = Pick<
+  ProfileRow,
+  'id' | 'email' | 'full_name' | 'avatar_url' | 'role' | 'created_at'
+>;
 
 // --- DTOs ---
 export interface QuestionImportData {
-    content: string;
-    type: QuestionType;
-    points: number;
-    status: CurriculumStatus;
-    options: Json;
-    solution: Json;
-    explanation: string;
-    skill_id: string;
-    sort_order: number;
+  content: string;
+  type: QuestionType;
+  points: number;
+  status: CurriculumStatus;
+  options: Json;
+  solution: Json;
+  explanation: string;
+  skill_id: string;
+  sort_order: number;
 }

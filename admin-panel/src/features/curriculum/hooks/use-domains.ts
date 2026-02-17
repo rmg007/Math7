@@ -47,7 +47,9 @@ export function usePaginatedDomains(params: PaginationParams, appId?: string) {
 
   return useQuery({
     queryKey: ['domains-paginated', params, appId || currentApp?.app_id, isSuperAdmin],
-    queryFn: async (): Promise<PaginatedResponse<Domain>> => {
+    queryFn: async (): Promise<
+      PaginatedResponse<Domain & { apps: { display_name: string } | null }>
+    > => {
       const targetAppId = appId || currentApp?.app_id;
 
       if (!isSuperAdmin && !targetAppId) {
@@ -68,7 +70,10 @@ export function usePaginatedDomains(params: PaginationParams, appId?: string) {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      let query = supabase.from('domains').select('*', { count: 'exact' }).is('deleted_at', null);
+      let query = supabase
+        .from('domains')
+        .select('*, apps(display_name)', { count: 'exact' })
+        .is('deleted_at', null);
 
       // Only filter by app_id if not super admin or if a specific app is requested
       if (!isSuperAdmin || appId) {
@@ -96,7 +101,7 @@ export function usePaginatedDomains(params: PaginationParams, appId?: string) {
       if (error) throw error;
 
       return {
-        data: data as Domain[],
+        data: data as (Domain & { apps: { display_name: string } | null })[],
         totalCount: count ?? 0,
         page,
         pageSize,

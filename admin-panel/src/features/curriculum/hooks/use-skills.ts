@@ -53,12 +53,14 @@ export function useSkills(domainId?: string) {
 }
 
 export function usePaginatedSkills(params: PaginationParams, appFilter?: string) {
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useQuery({
     queryKey: ['skills-paginated', params, currentApp?.app_id, appFilter],
     queryFn: async (): Promise<
-      PaginatedResponse<Skill & { domains: { title: string } | null }>
+      PaginatedResponse<
+        Skill & { domains: { title: string } | null; apps: { display_name: string } | null }
+      >
     > => {
       const {
         page,
@@ -79,20 +81,20 @@ export function usePaginatedSkills(params: PaginationParams, appFilter?: string)
           *,
           domains (
             title
+          ),
+          apps (
+            display_name
           )
         `,
           { count: 'exact' }
         )
         .is('deleted_at', null);
 
-      // For super admin, filter by app_id if specified, otherwise show all apps
-      // For regular users, always filter by current app
-      if (appFilter && appFilter !== 'all') {
-        query = query.eq('app_id', appFilter);
-      } else if (!appFilter || appFilter === 'all') {
-        // If no app filter or 'all', show current app for regular users
-        if (currentApp?.app_id) {
-          query = query.eq('app_id', currentApp.app_id);
+      // Only filter by app_id if not super admin or if a specific app is requested
+      if (!isSuperAdmin || (appFilter && appFilter !== 'all')) {
+        const targetAppId = appFilter && appFilter !== 'all' ? appFilter : currentApp?.app_id;
+        if (targetAppId) {
+          query = query.eq('app_id', targetAppId);
         } else {
           throw new Error('No app selected');
         }
@@ -123,7 +125,10 @@ export function usePaginatedSkills(params: PaginationParams, appFilter?: string)
       if (error) throw error;
 
       return {
-        data: data as unknown as (Skill & { domains: { title: string } | null })[],
+        data: data as unknown as (Skill & {
+          domains: { title: string } | null;
+          apps: { display_name: string } | null;
+        })[],
         totalCount: count ?? 0,
         page,
         pageSize,

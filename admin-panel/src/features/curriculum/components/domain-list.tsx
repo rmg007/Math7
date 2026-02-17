@@ -78,6 +78,8 @@ interface Domain {
   sort_order: number | null;
   status: 'draft' | 'published' | 'live' | null;
   updated_at: string;
+  app_id: string;
+  apps?: { display_name: string } | null;
 }
 
 interface SortableRowProps {
@@ -149,7 +151,14 @@ function SortableRow({
         </span>
       </td>
       <td className="px-6 py-3">
-        <span className="font-bold text-gray-900 text-sm tracking-tight">{domain.title}</span>
+        <div className="flex flex-col">
+          <span className="font-bold text-gray-900 text-sm tracking-tight">{domain.title}</span>
+          {domain.apps?.display_name && (
+            <span className="text-[10px] text-indigo-500 font-black uppercase tracking-widest mt-0.5">
+              App: {domain.apps.display_name}
+            </span>
+          )}
+        </div>
       </td>
       <td className="px-6 py-3">
         <span className="text-sm text-gray-900 whitespace-nowrap">
@@ -244,7 +253,14 @@ function SortableCard({
             <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-purple-100 text-purple-700 font-semibold text-xs flex-shrink-0">
               {domain.sort_order ?? 0}
             </span>
-            <h3 className="font-medium text-gray-900 truncate">{domain.title}</h3>
+            <div className="flex flex-col min-w-0">
+              <h3 className="font-medium text-gray-900 truncate">{domain.title}</h3>
+              {domain.apps?.display_name && (
+                <span className="text-[10px] text-indigo-500 font-black uppercase tracking-widest leading-none mt-1">
+                  {domain.apps.display_name}
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <span>Modified: {new Date(domain.updated_at).toLocaleDateString()}</span>
@@ -832,7 +848,22 @@ export function DomainList() {
                 <span className="block mt-2 font-semibold text-red-600 text-sm">
                   This will also delete {deleteImpact.skillCount} skill(s) and{' '}
                   {deleteImpact.questionCount} question(s) linked to{' '}
-                  {deleteConfirmation?.type === 'bulk' ? 'these domains' : 'this domain'}.
+                  {deleteConfirmation?.type === 'bulk' ? 'these domains' : 'this domain'}
+                  {deleteConfirmation?.type === 'single' && deleteConfirmation.id && (
+                    <>
+                      {' '}
+                      in app{' '}
+                      <span className="text-gray-900">
+                        "
+                        {
+                          domains.find((d) => d.domain_id === deleteConfirmation.id)?.apps
+                            ?.display_name
+                        }
+                        "
+                      </span>
+                    </>
+                  )}
+                  .
                 </span>
               ) : null}
             </AlertDialogDescription>

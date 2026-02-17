@@ -71,6 +71,7 @@ const DEFAULT_PAGE_SIZE = 10;
 
 type SkillListItem = Tables<'skills'> & {
   domains?: { title: string } | null;
+  apps?: { display_name: string } | null;
 };
 
 const SKILL_COLUMNS: DataColumn[] = [
@@ -158,9 +159,16 @@ const SortableRow = memo(
           </button>
         </td>
         <td className="px-4 py-4 min-w-[250px]">
-          <span className="font-bold text-gray-900 text-sm tracking-tight leading-none group-hover/row:text-indigo-700 transition-colors">
-            {skill.title}
-          </span>
+          <div className="flex flex-col">
+            <span className="font-bold text-gray-900 text-sm tracking-tight leading-none group-hover/row:text-indigo-700 transition-colors">
+              {skill.title}
+            </span>
+            {skill.apps?.display_name && (
+              <span className="text-[10px] text-indigo-500 font-black uppercase tracking-widest mt-1">
+                App: {skill.apps.display_name}
+              </span>
+            )}
+          </div>
         </td>
         <td className="px-4 py-4">
           <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-2xs font-black uppercase tracking-widest border border-indigo-100/50 shadow-sm">
@@ -296,10 +304,15 @@ const SortableCard = memo(
             <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 shadow-sm transition-transform group-hover/card:scale-110">
               <Layers className="w-6 h-6" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex flex-col">
               <h3 className="font-black text-gray-900 text-lg tracking-tight truncate leading-tight mb-1">
                 {skill.title}
               </h3>
+              {skill.apps?.display_name && (
+                <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest truncate">
+                  {skill.apps.display_name}
+                </p>
+              )}
               <p className="text-2xs font-black text-gray-400 uppercase tracking-widest italic opacity-60 truncate">
                 /{skill.slug}
               </p>

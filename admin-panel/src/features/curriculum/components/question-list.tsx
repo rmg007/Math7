@@ -159,16 +159,23 @@ const SortableRow = memo(
           </button>
         </td>
         <td className="px-6 py-5 max-w-[450px]">
-          <div
-            className="font-bold text-gray-900 text-[15px] tracking-tight line-clamp-1 group-hover/row:text-indigo-700 transition-colors prose-sm min-w-0"
-            dangerouslySetInnerHTML={{
-              __html: sanitizeHtml(
-                typeof question.content === 'string'
-                  ? question.content
-                  : JSON.stringify(question.content)
-              ),
-            }}
-          />
+          <div className="flex flex-col min-w-0">
+            <div
+              className="font-bold text-gray-900 text-[15px] tracking-tight line-clamp-1 group-hover/row:text-indigo-700 transition-colors prose-sm"
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(
+                  typeof question.content === 'string'
+                    ? question.content
+                    : JSON.stringify(question.content)
+                ),
+              }}
+            />
+            {question.apps?.display_name && (
+              <span className="text-[10px] text-indigo-500 font-black uppercase tracking-widest mt-1">
+                App: {question.apps.display_name}
+              </span>
+            )}
+          </div>
         </td>
         <td className="px-4 py-5">
           <span className="px-3 py-1.5 bg-white border border-gray-100 text-gray-600 rounded-xl text-2xs font-black uppercase tracking-widest shadow-sm group-hover/row:border-indigo-100 group-hover/row:text-indigo-600 transition-all">
@@ -306,7 +313,7 @@ const SortableCard = memo(
 
           <div className="min-w-0">
             <div
-              className="font-black text-gray-900 text-lg tracking-tight leading-relaxed mb-4 line-clamp-3 prose-sm"
+              className="font-black text-gray-900 text-lg tracking-tight leading-relaxed line-clamp-3 prose-sm"
               dangerouslySetInnerHTML={{
                 __html: sanitizeHtml(
                   typeof question.content === 'string'
@@ -315,7 +322,12 @@ const SortableCard = memo(
                 ),
               }}
             />
-            <div className="space-y-3">
+            {question.apps?.display_name && (
+              <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mt-1 mb-3">
+                {question.apps.display_name}
+              </p>
+            )}
+            <div className="space-y-3 mt-4">
               {question.skills?.domains?.title && (
                 <div className="flex items-center gap-2">
                   <Badge

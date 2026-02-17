@@ -50,7 +50,7 @@ export function useQuestions(skillId?: string) {
 }
 
 export function usePaginatedQuestions(params: PaginationParams, appFilter?: string) {
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useQuery({
     queryKey: ['questions-paginated', params, currentApp?.app_id, appFilter],
@@ -75,20 +75,18 @@ export function usePaginatedQuestions(params: PaginationParams, appFilter?: stri
           skills (
             title,
             domains ( title )
-          )
+          ),
+          apps ( display_name )
         `,
           { count: 'exact' }
         )
         .is('deleted_at', null);
 
-      // For super admin, filter by app_id if specified, otherwise show all apps
-      // For regular users, always filter by current app
-      if (appFilter && appFilter !== 'all') {
-        query = query.eq('app_id', appFilter);
-      } else if (!appFilter || appFilter === 'all') {
-        // If no app filter or 'all', show current app for regular users
-        if (currentApp?.app_id) {
-          query = query.eq('app_id', currentApp.app_id);
+      // Only filter by app_id if not super admin or if a specific app is requested
+      if (!isSuperAdmin || (appFilter && appFilter !== 'all')) {
+        const targetAppId = appFilter && appFilter !== 'all' ? appFilter : currentApp?.app_id;
+        if (targetAppId) {
+          query = query.eq('app_id', targetAppId);
         } else {
           throw new Error('No app selected');
         }
