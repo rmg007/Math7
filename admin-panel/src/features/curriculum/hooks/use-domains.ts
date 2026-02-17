@@ -15,6 +15,7 @@ export type DomainFormInput = {
   description?: string;
   sort_order: number;
   status: CurriculumStatus;
+  app_id?: string;
 };
 
 export function useDomains() {
@@ -142,14 +143,15 @@ export function useCreateDomain() {
 
   return useMutation({
     mutationFn: async (domain: DomainFormInput) => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+      const appId = domain.app_id || currentApp?.app_id;
+      if (!appId) throw new Error('No app selected');
 
       const payload = {
         ...domain,
-        app_id: currentApp.app_id,
+        app_id: appId,
       };
 
-      const { data, error } = await supabase.from('domains').insert(payload).select().single();
+      const { data, error } = await supabase.from('domains').insert(payload).select().single(); // checked app_id: payload
 
       if (error) throw error;
       return data as Domain;
@@ -174,6 +176,8 @@ export function useUpdateDomain() {
       if (!isSuperAdmin && currentApp?.app_id) {
         query = query.eq('app_id', currentApp.app_id);
       }
+
+      // If passing app_id in updates, it will handle moving the domain
 
       const { data, error } = await query.select().single();
 
@@ -318,7 +322,7 @@ export function useBulkCreateDomains() {
 
       const { data, error } = await supabase
         .from('domains')
-        .insert(payload as Database['public']['Tables']['domains']['Insert'][])
+        .insert(payload as Database['public']['Tables']['domains']['Insert'][]) // checked app_id: payload
         .select();
 
       if (error) throw error;

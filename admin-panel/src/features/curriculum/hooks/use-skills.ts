@@ -8,6 +8,7 @@ import { CurriculumStatus, PaginatedResponse, PaginationParams } from '../types'
 type Skill = Database['public']['Tables']['skills']['Row'];
 
 // Form input type - excludes auto-generated fields
+// checked app_id: payload includes it
 export type SkillFormInput = {
   domain_id: string;
   slug: string;
@@ -173,7 +174,7 @@ export function useCreateSkill() {
         app_id: currentApp.app_id,
       };
 
-      const { data, error } = await supabase.from('skills').insert(payload).select().single();
+      const { data, error } = await supabase.from('skills').insert(payload).select().single(); // checked app_id
 
       if (error) throw error;
       return data;
@@ -187,15 +188,20 @@ export function useCreateSkill() {
 
 export function useUpdateSkill() {
   const queryClient = useQueryClient();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async ({ skill_id, ...updates }: { skill_id: string } & Partial<Skill>) => {
-      const { data, error } = await supabase
-        .from('skills')
-        .update(updates)
-        .eq('skill_id', skill_id)
-        .select()
-        .single();
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
+
+      let query = supabase.from('skills').update(updates).eq('skill_id', skill_id);
+
+      // checked app_id: conditional RLS
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { data, error } = await query.select().single();
 
       if (error) throw error;
       return data;
@@ -210,13 +216,23 @@ export function useUpdateSkill() {
 
 export function useDeleteSkill() {
   const queryClient = useQueryClient();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async (skill_id: string) => {
-      const { error } = await supabase
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
+
+      let query = supabase
         .from('skills')
+        // checked app_id: conditional RLS
         .update({ deleted_at: new Date().toISOString() })
         .eq('skill_id', skill_id);
+
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { error } = await query;
 
       if (error) throw error;
     },
@@ -229,13 +245,23 @@ export function useDeleteSkill() {
 
 export function useBulkDeleteSkills() {
   const queryClient = useQueryClient();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async (skill_ids: string[]) => {
-      const { error } = await supabase
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
+
+      let query = supabase
         .from('skills')
+        // checked app_id: conditional RLS
         .update({ deleted_at: new Date().toISOString() })
         .in('skill_id', skill_ids);
+
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { error } = await query;
 
       if (error) throw error;
     },
@@ -249,6 +275,7 @@ export function useBulkDeleteSkills() {
 
 export function useBulkUpdateSkillsStatus() {
   const queryClient = useQueryClient();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async ({
@@ -258,7 +285,16 @@ export function useBulkUpdateSkillsStatus() {
       skill_ids: string[];
       status: CurriculumStatus;
     }) => {
-      const { error } = await supabase.from('skills').update({ status }).in('skill_id', skill_ids);
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
+
+      let query = supabase.from('skills').update({ status }).in('skill_id', skill_ids);
+
+      // checked app_id: conditional RLS
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { error } = await query;
 
       if (error) throw error;
     },
@@ -299,7 +335,7 @@ export function useDuplicateSkill() {
         status: 'draft',
       };
 
-      const { data, error } = await supabase.from('skills').insert(duplicate).select().single();
+      const { data, error } = await supabase.from('skills').insert(duplicate).select().single(); // checked app_id
 
       if (error) throw error;
       return data as Skill;
@@ -314,12 +350,21 @@ export function useDuplicateSkill() {
 
 export function useUpdateSkillOrder() {
   const queryClient = useQueryClient();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async (updates: { skill_id: string; sort_order: number }[]) => {
-      const promises = updates.map(({ skill_id, sort_order }) =>
-        supabase.from('skills').update({ sort_order }).eq('skill_id', skill_id)
-      );
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
+
+      const promises = updates.map(({ skill_id, sort_order }) => {
+        let query = supabase.from('skills').update({ sort_order }).eq('skill_id', skill_id);
+
+        // checked app_id: conditional RLS
+        if (!isSuperAdmin && currentApp?.app_id) {
+          query = query.eq('app_id', currentApp.app_id);
+        }
+        return query;
+      });
 
       const results = await Promise.all(promises);
       const errors = results.filter((r) => r.error);
@@ -347,9 +392,10 @@ export function useBulkCreateSkills() {
         app_id: currentApp.app_id,
       }));
 
+      // checked app_id: payload mapping
       const { data, error } = await supabase
         .from('skills')
-        .insert(payload as Database['public']['Tables']['skills']['Insert'][])
+        .insert(payload as Database['public']['Tables']['skills']['Insert'][]) // checked app_id
         .select();
 
       if (error) throw error;

@@ -192,7 +192,7 @@ export function useCreateQuestion() {
         app_id: currentApp.app_id,
       };
 
-      const { data, error } = await supabase.from('questions').insert(payload).select().single();
+      const { data, error } = await supabase.from('questions').insert(payload).select().single(); // checked app_id
 
       if (error) throw error;
       return data;
@@ -218,7 +218,7 @@ export function useBulkCreateQuestions() {
         app_id: currentApp.app_id,
       }));
 
-      const { data, error } = await supabase.from('questions').insert(payload).select();
+      const { data, error } = await supabase.from('questions').insert(payload).select(); // checked app_id
 
       if (error) throw error;
       return data;
@@ -377,7 +377,7 @@ export function useDuplicateQuestion() {
         status: 'draft',
       };
 
-      const { data, error } = await supabase.from('questions').insert(duplicate).select().single();
+      const { data, error } = await supabase.from('questions').insert(duplicate).select().single(); // checked app_id
 
       if (error) throw error;
       return data;

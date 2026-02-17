@@ -26,8 +26,7 @@ interface EnvConfig {
   enableOfflineMode: boolean;
   /** Analytics tracking ID (optional) */
   analyticsId: string | null;
-  /** Gemini API key for AI features (optional) */
-  geminiApiKey: string | null;
+
   /** Current environment mode */
   mode: 'development' | 'production';
   /** Whether running in production */
@@ -69,7 +68,7 @@ export const env: EnvConfig = {
   supabaseAnonKey: getEnvVar('VITE_SUPABASE_ANON_KEY'),
   enableOfflineMode: getEnvVar('VITE_ENABLE_OFFLINE_MODE', false) === 'true',
   analyticsId: getEnvVar('VITE_ANALYTICS_ID', false) || null,
-  geminiApiKey: getEnvVar('VITE_GEMINI_API_KEY', false) || null,
+
   mode: import.meta.env.MODE as 'development' | 'production',
   isProduction: import.meta.env.PROD,
   isDevelopment: import.meta.env.DEV,
@@ -106,6 +105,5 @@ if (import.meta.env.DEV) {
     supabaseAnonKey: env.supabaseAnonKey ? '***configured***' : 'NOT SET',
     enableOfflineMode: env.enableOfflineMode,
     analyticsId: env.analyticsId ? '***configured***' : null,
-    geminiApiKey: env.geminiApiKey ? '***configured***' : null,
   });
 }

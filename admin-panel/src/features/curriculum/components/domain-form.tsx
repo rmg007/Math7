@@ -1,22 +1,22 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { FormActions } from '@/components/ui/form-actions';
 import { Input } from '@/components/ui/input';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/hooks/use-app';
@@ -43,6 +43,7 @@ const domainSchema = z.object({
   description: z.string().optional(),
   sort_order: z.coerce.number().int().default(0),
   status: z.enum(['draft', 'live']).default('draft'),
+  app_id: z.string().uuid('App selection is required'),
 });
 
 type DomainFormData = z.infer<typeof domainSchema>;
@@ -50,7 +51,7 @@ type DomainFormData = z.infer<typeof domainSchema>;
 export function DomainForm() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentApp, isLoading: isAppLoading } = useApp();
+  const { currentApp, isLoading: isAppLoading, isSuperAdmin, apps } = useApp();
   const createDomain = useCreateDomain();
   const updateDomain = useUpdateDomain();
   const { data: domains } = useDomains();
@@ -67,6 +68,7 @@ export function DomainForm() {
       description: '',
       sort_order: 0,
       status: 'draft',
+      app_id: currentApp?.app_id || '',
     },
   });
 
@@ -90,17 +92,24 @@ export function DomainForm() {
         description: existingDomain.description || '',
         sort_order: existingDomain.sort_order ?? 0,
         status: (existingDomain.status as 'draft' | 'live') || 'draft',
+        app_id: existingDomain.app_id || currentApp?.app_id || '',
       });
+    } else if (currentApp?.app_id) {
+      // Should default to current app for new domains
+      if (!form.getValues('app_id')) {
+        form.setValue('app_id', currentApp.app_id);
+      }
     }
-  }, [existingDomain, form]);
+  }, [existingDomain, form, currentApp]);
 
   const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async (data: DomainFormData) => {
     setError(null);
-    if (!currentApp?.app_id) {
-      const msg =
-        'Failed to save domain: No app selected (currentApp is ' + JSON.stringify(currentApp) + ')';
+    const appId = data.app_id || currentApp?.app_id;
+
+    if (!appId) {
+      const msg = 'Failed to save domain: No app selected';
       console.error(msg);
       setError(msg);
       return;
@@ -201,6 +210,45 @@ export function DomainForm() {
             <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
               <CardContent className="p-4 sm:p-8 md:p-10 space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <FormField
+                    control={form.control}
+                    name="app_id"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Globe className="w-4 h-4 text-indigo-500" />
+                          <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
+                            Related App
+                          </FormLabel>
+                        </div>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          value={field.value}
+                          disabled={!isSuperAdmin} // Only Super Admins can change app association
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all border">
+                              <SelectValue placeholder="Select Application" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
+                            {apps.map((app) => (
+                              <SelectItem
+                                key={app.app_id}
+                                value={app.app_id}
+                                className="py-3 rounded-xl font-bold"
+                              >
+                                {app.display_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage className="text-xs font-bold text-red-500 italic" />
+                      </FormItem>
+                    )}
+                  />
+
                   <FormField
                     control={form.control}
                     name="title"

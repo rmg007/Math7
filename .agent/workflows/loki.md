@@ -37,7 +37,10 @@ For each sub-task, follow the RARV cycle defined in `SKILL.md`:
 │                                         │
 │  ✅ Pass → next sub-task                │
 │  🛑 5 failures → circuit breaker        │
+│  🛡️ Bug Fixed? → Add Preventative Test  │
 └─────────────────────────────────────────┘
+
+**Learning Flag Protocol**: When documenting a learning, you MUST append one of these flags: `[need test]`, `[test created]`, or `[no test needed]`.
 ```
 
 ### Step 3: Phase Progression
@@ -89,7 +92,7 @@ After every completed sub-task, update `.agent/skills/loki-mode/state.json`:
   "iteration_count": N,
   "completed": N,
   "errors": [...],
-  "learnings": [...]
+  "learnings": ["Found infinite loop in auth [test created]"]
 }
 ```
 

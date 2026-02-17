@@ -31,6 +31,8 @@ Write the code:
 - **One logical change at a time** — don't batch unrelated changes
 - **Follow existing patterns** — check neighboring files for conventions
 - **Use TypeScript strict mode** — no `any`, no `@ts-ignore` without comment
+- **Start with a failing test** — verify the bug exists before fixing it (TDD)
+- **Prevent regression** — if fixing a bug, add a test that would have caught it
 - **Test as you go** — create or update tests alongside implementation
 
 ### 3. REFLECT (Evaluate)

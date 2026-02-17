@@ -1,3 +1,39 @@
+## 2026-02-17: Production Deployment & Workflow Hardening
+
+### Session Context
+
+- **Trigger**: User request to deploy bug fixes and automate preventative measures.
+- **Scope**: `scripts/deploy`, `.agent/workflows`, `tasks.md`.
+- **Outcome**: ✅ Production Deployment Success (Admin & Student), ✅ Workflows Hardened (Preventative Protocol), ✅ Build Scripts Repaired.
+
+### What Was Done
+
+#### 1. Workflow Hardening (Preventative Protocol)
+
+- **Policy Update**: Updated `.agent/workflows/process.md`, `loki.md`, `default.md`, and `certify.md`.
+- **New Rule**: "Bug Fixed? Test Added." Enforced mandatory preventative testing for all bug fixes.
+- **Verification**: Added explicit checklist items in the Certification workflow to verify the existence of a reproduction test case.
+
+#### 2. Build Script Repair & Robustness
+
+- **Admin Panel**: Modified `scripts/deploy/build-admin.ps1` to use `npm install` instead of `npm ci` for better reliance in dev environments, and added explicit error checking for compilation failures.
+- **Student App**: Fixed `scripts/deploy/build-student.ps1`:
+  - **Parsing Fix**: Rewrote `.flutter-defines.tmp` parsing to correctly construct `--dart-define` flags, avoiding `Invoke-Expression` failures with multi-line file content.
+  - **Flag Update**: Removed deprecated `--web-renderer canvaskit` flag to align with Flutter 3.38+ defaults (Auto/Wasm).
+
+#### 3. Production Deployment
+
+- **Execution**: Successfully deployed `admin-panel` and `student-app` to Cloudflare Pages using `deploy-all.ps1`.
+- **Environment**: Generated production environment variables via `generate-env.ps1` using `master-config.json`.
+
+### Technical Learnings
+
+- **PowerShell `Invoke-Expression` Hazards**: Passing a raw file content string (with newlines) to `Invoke-Expression` treats each line as a command. Always parse and serialize arguments (e.g., `--dart-define=KEY=VAL`) individually.
+- **`npm ci` vs `npm install`**: `npm ci` is strict and requires a perfectly synchronized `package-lock.json`. For local deployment scripts where dev dependencies might fluctuate, `npm install` is often more robust.
+- **Flutter Web Renderer**: The `--web-renderer` flag has changed in recent Flutter versions (post-3.22). It's often safer to let the build system default to `auto` or use specific web configuration files rather than hardcoded CLI flags.
+
+---
+
 ## 2026-02-16 (Late Night): Project HADES Remediation - Phase 1 (The Foundry)
 
 ### Session Context
@@ -213,6 +249,7 @@
 
 ### Incident
 
+- [test created]
 - **Symptom**: `fmath.questerix.com` → Cloudflare 522 timeout; `app.questerix.com` → Uncaught Error in `main.dart.js`.
 - **Root Cause (fmath)**: No CNAME record in Cloudflare for `fmath.questerix.com` → `questerix-student.pages.dev`. The 522 is a DNS routing issue, not a code bug.
 - **Root Cause (app.questerix.com)**: Under investigation — likely related to student app build or RLS policy blocking anonymous SELECT on `apps` table during init.
@@ -220,9 +257,9 @@
 
 ### Fixes Applied (Prevention)
 
-1. **Lowercase Enforcement**: All text fields (`display_name`, `subdomain`, `grade_level`) are now `.trim().toLowerCase()` before save in `AppsPage.tsx` `handleSubmit`.
-2. **Single-Line Table Rows**: Removed distracting two-line format (name + truncated ID) in favor of clean single-line display name.
-3. **DNS Config Column**: Added a dedicated column in the apps table showing `{subdomain}.questerix.com → CNAME → questerix-student.pages.dev` so admins always know what DNS record to create.
+1. [test created] **Lowercase Enforcement**: All text fields (`display_name`, `subdomain`, `grade_level`) are now `.trim().toLowerCase()` before save in `AppsPage.tsx` `handleSubmit`.
+2. [no test needed] **Single-Line Table Rows**: Removed distracting two-line format (name + truncated ID) in favor of clean single-line display name.
+3. [no test needed] **DNS Config Column**: Added a dedicated column in the apps table showing `{subdomain}.questerix.com → CNAME → questerix-student.pages.dev` so admins always know what DNS record to create.
 
 ### Key Lesson
 

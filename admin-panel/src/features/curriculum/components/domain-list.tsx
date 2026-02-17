@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
@@ -20,45 +20,45 @@ import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
 import { supabase } from '@/lib/supabase';
 import {
-    Book,
-    CheckSquare,
-    Filter,
-    GripVertical,
-    Loader2,
-    Pencil,
-    Plus,
-    Square,
-    Trash2,
-    X,
+  Book,
+  CheckSquare,
+  Filter,
+  GripVertical,
+  Loader2,
+  Pencil,
+  Plus,
+  Square,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-    useBulkCreateDomains,
-    useBulkDeleteDomains,
-    useBulkUpdateDomainsStatus,
-    useDeleteDomain,
-    usePaginatedDomains,
-    useUpdateDomainOrder,
+  useBulkCreateDomains,
+  useBulkDeleteDomains,
+  useBulkUpdateDomainsStatus,
+  useDeleteDomain,
+  usePaginatedDomains,
+  useUpdateDomainOrder,
 } from '../hooks/use-domains';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 import {
-    closestCenter,
-    DndContext,
-    DragEndEvent,
-    KeyboardSensor,
-    PointerSensor,
-    TouchSensor,
-    useSensor,
-    useSensors,
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
 import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -172,7 +172,7 @@ function SortableRow({
           </span>
         </span>
       </td>
-      <td className="px-6 py-3">{renderStatusBadge(domain.status || 'draft')}</td>
+      <td className="px-6 py-3 whitespace-nowrap">{renderStatusBadge(domain.status || 'draft')}</td>
       <td className="px-4 py-3 text-right">
         <div className="flex items-center justify-end gap-2">
           <Link

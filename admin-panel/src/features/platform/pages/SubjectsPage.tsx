@@ -1,52 +1,52 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { normalizeFormData } from '@/lib/normalization';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Boxes, Layers, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
+import { Boxes, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import { memo, useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
-    useCreateSubject,
-    useDeleteSubject,
-    useSubjects,
-    useUpdateSubject,
-    type Subject,
+  useCreateSubject,
+  useDeleteSubject,
+  useSubjects,
+  useUpdateSubject,
+  type Subject,
 } from '../hooks/use-subjects';
 
 interface SubjectRowProps {
@@ -63,15 +63,6 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
     >
       <TableCell className="px-8 py-5">
         <div className="flex items-center gap-4">
-          <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-110"
-            style={{
-              backgroundColor: `${subject.color_hex}15`,
-              border: `1px solid ${subject.color_hex}30`,
-            }}
-          >
-            <Layers className="w-6 h-6" style={{ color: subject.color_hex || '#8b5cf6' }} />
-          </div>
           <span className="font-black text-gray-900 tracking-tight text-base italic leading-none">
             {subject.title}
           </span>
@@ -145,7 +136,11 @@ const subjectSchema = z.object({
     .min(1, 'Slug is required')
     .regex(/^[a-z0-9_]+$/, 'Slug must contain only lowercase letters, numbers, and underscores'),
   description: z.string().optional(),
-  color_hex: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color code (e.g. #8b5cf6)').optional().or(z.literal('')),
+  color_hex: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color code (e.g. #8b5cf6)')
+    .optional()
+    .or(z.literal('')),
   display_order: z.coerce.number().int().default(0),
   status: z.enum(['draft', 'published', 'live']).default('draft'),
 });
@@ -205,13 +200,10 @@ export function SubjectsPage() {
     }
   }, [isDialogOpen, editingSubject, subjects, form]);
 
-  const handleOpenDialog = useCallback(
-    (subject?: Subject) => {
-      setEditingSubject(subject || null);
-      setIsDialogOpen(true);
-    },
-    []
-  );
+  const handleOpenDialog = useCallback((subject?: Subject) => {
+    setEditingSubject(subject || null);
+    setIsDialogOpen(true);
+  }, []);
 
   const onSubmit = async (data: SubjectFormData) => {
     // Normalize text fields: trim whitespace, lowercase the slug
@@ -270,7 +262,6 @@ export function SubjectsPage() {
     },
     [deleteSubject, toast]
   );
-
 
   const filteredSubjects =
     subjects?.filter(
@@ -504,7 +495,11 @@ export function SubjectsPage() {
                             <Input
                               placeholder="e.g. math"
                               {...field}
-                              onChange={(e) => field.onChange(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')
+                                )
+                              }
                               data-testid="subject-slug"
                               className="h-14 rounded-2xl border-gray-100 bg-white/50 text-purple-600 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-mono text-sm font-bold"
                               required

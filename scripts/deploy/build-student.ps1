@@ -26,7 +26,13 @@ if (-not (Test-Path $DefinesFile)) {
     exit 1
 }
 
-$flutterDefines = Get-Content $DefinesFile -Raw
+$definesContent = Get-Content $DefinesFile
+$dartDefineFlags = ""
+foreach ($line in $definesContent) {
+    if (-not [string]::IsNullOrWhiteSpace($line) -and -not $line.StartsWith("#")) {
+        $dartDefineFlags += " --dart-define=$line"
+    }
+}
 
 Set-Location $StudentAppDir
 
@@ -37,8 +43,8 @@ Write-Host "Getting Flutter packages..." -ForegroundColor Cyan
 flutter pub get
 
 Write-Host "Building Flutter web with dart-define flags..." -ForegroundColor Cyan
-$buildCommand = "flutter build web --release --web-renderer canvaskit $flutterDefines"
-Write-Host "Command: $buildCommand" -ForegroundColor DarkGray
+$buildCommand = "flutter build web --release $dartDefineFlags"
+Write-Host "Command: flutter build web --release [FLAGS_HIDDEN]" -ForegroundColor DarkGray
 Invoke-Expression $buildCommand
 
 if (Test-Path (Join-Path $StudentAppDir 'build\web')) {

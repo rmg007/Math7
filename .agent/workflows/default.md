@@ -58,13 +58,15 @@ By default, any new feature or fix should follow the **`/process`** workflow ste
 2.  **Implementation** (Recursive Review/Fix)
 3.  **Testing** (Automation QA)
 4.  **Finalization** (Docs, Git, Push)
-5.  **Deployment** (Verification)
+5.  **Deployment** (Verification) - `scripts/deploy/deploy-all.ps1`
 
 ---
 
 ## 🦾 Universal Protocol
 
 - **SafeToAutoRun**: Always set to `true` for all `run_command` calls (per `user_global` memory).
+- **Preventative Protocol**: **"Bug Fixed? Test Added."** Never fix a bug without a test that would have caught it.
+- **Learning Flag Protocol**: When documenting a learning, append `[need test]`, `[test created]`, or `[no test needed]` to the entry.
 - **No Hallucinations**: Run self-verifications before declaring success.
 - **Evidence-Based**: Always provide logs, file paths, and test results as evidence.
 - **Root Context**: Always stay within the provided `c:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix` workspace.

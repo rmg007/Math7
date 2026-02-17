@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
 // Mock ResizeObserver which is missing in JSDOM but used by Radix UI

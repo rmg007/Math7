@@ -25,6 +25,7 @@ description: Independent post-implementation audit and certification
 ---
 
 ## ⚡ Phase 0: Automated Evidence Collection
+
 **Estimated Time**: 5-15 minutes (Parallelized)
 **Goal**: Prime the audit with a comprehensive set of automated reports.
 
@@ -37,6 +38,7 @@ description: Independent post-implementation audit and certification
 ---
 
 ## 🗄️ Phase 1: Database Integrity Audit
+
 **Estimated Time**: 5-7 minutes  
 **Applies If**: Database changes were made in `/process`
 
@@ -67,6 +69,7 @@ description: Independent post-implementation audit and certification
 ---
 
 ## 🔍 Phase 2: Code Quality Audit
+
 **Estimated Time**: 8-10 minutes  
 **Applies If**: Code was modified in `/process`
 
@@ -103,6 +106,7 @@ description: Independent post-implementation audit and certification
 ---
 
 ## 🧠 Phase 2.5: IDD Protocol Compliance Audit
+
 **Estimated Time**: 5-7 minutes  
 **Applies If**: New features or bug fixes were implemented
 
@@ -115,6 +119,11 @@ description: Independent post-implementation audit and certification
     - ⏱️ Boundary Path (min/max/empty/edge cases)
     - 🔄 Idempotent Path (repeated calls produce same result)
   - **Proof**: List test file names and count of each path type
+
+- [ ] **Preventative Test Verification**
+  - **Rule**: If a bug was fixed, a new test case MUST exist in the codebase.
+  - **Verify**: Locate the specific test file/case that reproduces the bug.
+  - **Proof**: File path to the preventative test (e.g., `tests/grid-layout.spec.ts`).
 
 - [ ] **Silent Failure Hunt Results**
   - Verify `/process` Phase 4 documented silent failure scan
@@ -136,6 +145,7 @@ description: Independent post-implementation audit and certification
 ---
 
 ## 🧪 Phase 4: Test Coverage Audit
+
 **Estimated Time**: 10-15 minutes  
 **Applies Always**
 
@@ -164,6 +174,7 @@ description: Independent post-implementation audit and certification
 ---
 
 ## ⚡ Phase 5: Performance Audit
+
 **Estimated Time**: 5-7 minutes  
 **Applies If**: UI components or heavy logic were added
 
@@ -193,6 +204,7 @@ description: Independent post-implementation audit and certification
 ---
 
 ## 🎨 Phase 6: Visual & UX Audit
+
 **Estimated Time**: 8-10 minutes  
 **Applies If**: UI was modified
 
@@ -222,6 +234,7 @@ description: Independent post-implementation audit and certification
 ---
 
 ## 📚 Phase 7: Documentation Audit
+
 **Estimated Time**: 5-6 minutes  
 **Applies Always**
 
@@ -252,6 +265,7 @@ description: Independent post-implementation audit and certification
 ---
 
 ## 🔥 Phase 8: Chaos Engineering (Break Everything)
+
 **Estimated Time**: 5-8 minutes  
 **Applies Always**
 
@@ -284,22 +298,24 @@ description: Independent post-implementation audit and certification
 ## ✅ Final Certification
 
 ### Issue Log
-| Issue | Severity | Status | Notes |
-|-------|----------|--------|-------|
+
+| Issue         | Severity          | Status           | Notes                         |
+| ------------- | ----------------- | ---------------- | ----------------------------- |
 | [Description] | Critical/High/Low | Fixed/Documented | [Justification if documented] |
 
 ### Certification Decision
 
-**Status**: [ ] CERTIFIED ✅  |  [ ] CONDITIONAL (with documented issues) ⚠️  |  [ ] FAILED ❌
+**Status**: [ ] CERTIFIED ✅ | [ ] CONDITIONAL (with documented issues) ⚠️ | [ ] FAILED ❌
 
 **Summary**: Provide 2-3 sentence verdict on code quality, security, and readiness.
 
-**Recommendation**: 
+**Recommendation**:
+
 - If CERTIFIED → Proceed to deployment
 - If CONDITIONAL → User decision required
 - If FAILED → Return to `/process` Phase 3 for fixes
 
-> **Documentation Rule**: If ANY issue was found and fixed during this audit, you **MUST** add an entry to `docs/LEARNING_LOG.md` describing the gap and how it was missed in `/process`.
+> **Documentation Rule**: If ANY issue was found and fixed during this audit, you **MUST** add an entry to `docs/LEARNING_LOG.md` describing the gap and how it was missed in `/process`. Flag it with `[need test]`, `[test created]`, or `[no test needed]`.
 
 ---
 
