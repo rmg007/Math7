@@ -1,0 +1,485 @@
+[dotenv@17.2.3] injecting env (6) from .env.test.local -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+{
+  "config": {
+    "configFile": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\playwright.config.ts",
+    "rootDir": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 6
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "mobile",
+        "name": "mobile",
+        "testDir": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "tablet",
+        "name": "tablet",
+        "testDir": "C:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "runAgents": "none",
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.58.1",
+    "workers": 6,
+    "webServer": {
+      "command": "npm run dev -- --mode test",
+      "url": "http://localhost:5000",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "super-admin-cross-app.spec.ts",
+      "file": "super-admin-cross-app.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Super Admin Cross-App Operations",
+          "file": "super-admin-cross-app.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should be able to see domains from other apps when filtering by \"ALL APPS\"",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 11183,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-17T05:15:20.794Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4719619995336c912538-3167d1d3899047623968",
+              "file": "super-admin-cross-app.spec.ts",
+              "line": 31,
+              "column": 3
+            },
+            {
+              "title": "should verify deletion capability persists across app switch",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 7973,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: table, text=\"No domains yet\"\nExpected: visible\nError: Unexpected token \"=\" while parsing css selector \"table, text=\"No domains yet\"\". Did you mean to CSS.escape it?\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for table, text=\"No domains yet\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: table, text=\"No domains yet\"\nExpected: visible\nError: Unexpected token \"=\" while parsing css selector \"table, text=\"No domains yet\"\". Did you mean to CSS.escape it?\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for table, text=\"No domains yet\"\u001b[22m\n\n    at C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts:57:32",
+                        "location": {
+                          "file": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts",
+                          "column": 32,
+                          "line": 57
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 55 |\u001b[39m     \u001b[90m// Ensure table or empty state is loaded\u001b[39m\n \u001b[90m 56 |\u001b[39m     \u001b[36mconst\u001b[39m tableOrEmpty \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'table, text=\"No domains yet\"'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 57 |\u001b[39m     \u001b[36mawait\u001b[39m expect(tableOrEmpty)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 58 |\u001b[39m\n \u001b[90m 59 |\u001b[39m     \u001b[90m// Verify Delete buttons exist if there are domains\u001b[39m\n \u001b[90m 60 |\u001b[39m     \u001b[36mconst\u001b[39m deleteButtons \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'button[title=\"Delete Domain\"]'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts",
+                            "column": 32,
+                            "line": 57
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: table, text=\"No domains yet\"\nExpected: visible\nError: Unexpected token \"=\" while parsing css selector \"table, text=\"No domains yet\"\". Did you mean to CSS.escape it?\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for table, text=\"No domains yet\"\u001b[22m\n\n\n  55 |     // Ensure table or empty state is loaded\n  56 |     const tableOrEmpty = page.locator('table, text=\"No domains yet\"');\n> 57 |     await expect(tableOrEmpty).toBeVisible();\n     |                                ^\n  58 |\n  59 |     // Verify Delete buttons exist if there are domains\n  60 |     const deleteButtons = page.locator('button[title=\"Delete Domain\"]');\n    at C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts:57:32"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-17T05:15:21.684Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\test-results\\super-admin-cross-app-Supe-bd835--persists-across-app-switch-desktop\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\test-results\\super-admin-cross-app-Supe-bd835--persists-across-app-switch-desktop\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\test-results\\super-admin-cross-app-Supe-bd835--persists-across-app-switch-desktop\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts",
+                        "column": 32,
+                        "line": 57
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4719619995336c912538-8b7b6f7fde367ab2c4c5",
+              "file": "super-admin-cross-app.spec.ts",
+              "line": 51,
+              "column": 3
+            },
+            {
+              "title": "should be able to see domains from other apps when filtering by \"ALL APPS\"",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "mobile",
+                  "projectName": "mobile",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "failed",
+                      "duration": 34149,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('table')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('table')\u001b[22m\n\u001b[2m    13 ├ù locator resolved to <table class=\"w-full\">ΓÇª</table>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('table')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('table')\u001b[22m\n\u001b[2m    13 ├ù locator resolved to <table class=\"w-full\">ΓÇª</table>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n\n    at C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts:44:41",
+                        "location": {
+                          "file": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts",
+                          "column": 41,
+                          "line": 44
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 42 |\u001b[39m     \u001b[90m// This part is tricky if the DB is empty or clean, but we assume seeded data or at least one other app.\u001b[39m\n \u001b[90m 43 |\u001b[39m     \u001b[90m// We can just verify the filter works and doesn't crash.\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 44 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'table'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 45 |\u001b[39m     \n \u001b[90m 46 |\u001b[39m     \u001b[90m// If there's data, we should see rows. If not, empty state.\u001b[39m\n \u001b[90m 47 |\u001b[39m     \u001b[90m// Let's create a domain via API if possible? No, sticking to UI.\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts",
+                            "column": 41,
+                            "line": 44
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('table')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('table')\u001b[22m\n\u001b[2m    13 ├ù locator resolved to <table class=\"w-full\">ΓÇª</table>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n\n\n  42 |     // This part is tricky if the DB is empty or clean, but we assume seeded data or at least one other app.\n  43 |     // We can just verify the filter works and doesn't crash.\n> 44 |     await expect(page.locator('table')).toBeVisible();\n     |                                         ^\n  45 |     \n  46 |     // If there's data, we should see rows. If not, empty state.\n  47 |     // Let's create a domain via API if possible? No, sticking to UI.\n    at C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts:44:41"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-17T05:15:21.698Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\test-results\\super-admin-cross-app-Supe-b3f24-when-filtering-by-ALL-APPS--mobile\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\test-results\\super-admin-cross-app-Supe-b3f24-when-filtering-by-ALL-APPS--mobile\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\test-results\\super-admin-cross-app-Supe-b3f24-when-filtering-by-ALL-APPS--mobile\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts",
+                        "column": 41,
+                        "line": 44
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4719619995336c912538-c09b0eeb49d3810f22fa",
+              "file": "super-admin-cross-app.spec.ts",
+              "line": 31,
+              "column": 3
+            },
+            {
+              "title": "should verify deletion capability persists across app switch",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "mobile",
+                  "projectName": "mobile",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "failed",
+                      "duration": 19059,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: table, text=\"No domains yet\"\nExpected: visible\nError: Unexpected token \"=\" while parsing css selector \"table, text=\"No domains yet\"\". Did you mean to CSS.escape it?\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for table, text=\"No domains yet\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: table, text=\"No domains yet\"\nExpected: visible\nError: Unexpected token \"=\" while parsing css selector \"table, text=\"No domains yet\"\". Did you mean to CSS.escape it?\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for table, text=\"No domains yet\"\u001b[22m\n\n    at C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts:57:32",
+                        "location": {
+                          "file": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts",
+                          "column": 32,
+                          "line": 57
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 55 |\u001b[39m     \u001b[90m// Ensure table or empty state is loaded\u001b[39m\n \u001b[90m 56 |\u001b[39m     \u001b[36mconst\u001b[39m tableOrEmpty \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'table, text=\"No domains yet\"'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 57 |\u001b[39m     \u001b[36mawait\u001b[39m expect(tableOrEmpty)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 58 |\u001b[39m\n \u001b[90m 59 |\u001b[39m     \u001b[90m// Verify Delete buttons exist if there are domains\u001b[39m\n \u001b[90m 60 |\u001b[39m     \u001b[36mconst\u001b[39m deleteButtons \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'button[title=\"Delete Domain\"]'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts",
+                            "column": 32,
+                            "line": 57
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: table, text=\"No domains yet\"\nExpected: visible\nError: Unexpected token \"=\" while parsing css selector \"table, text=\"No domains yet\"\". Did you mean to CSS.escape it?\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for table, text=\"No domains yet\"\u001b[22m\n\n\n  55 |     // Ensure table or empty state is loaded\n  56 |     const tableOrEmpty = page.locator('table, text=\"No domains yet\"');\n> 57 |     await expect(tableOrEmpty).toBeVisible();\n     |                                ^\n  58 |\n  59 |     // Verify Delete buttons exist if there are domains\n  60 |     const deleteButtons = page.locator('button[title=\"Delete Domain\"]');\n    at C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts:57:32"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-17T05:15:20.906Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\test-results\\super-admin-cross-app-Supe-bd835--persists-across-app-switch-mobile\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\test-results\\super-admin-cross-app-Supe-bd835--persists-across-app-switch-mobile\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\test-results\\super-admin-cross-app-Supe-bd835--persists-across-app-switch-mobile\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts",
+                        "column": 32,
+                        "line": 57
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4719619995336c912538-d1898202ec87bebe3f7d",
+              "file": "super-admin-cross-app.spec.ts",
+              "line": 51,
+              "column": 3
+            },
+            {
+              "title": "should be able to see domains from other apps when filtering by \"ALL APPS\"",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "tablet",
+                  "projectName": "tablet",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 4,
+                      "status": "passed",
+                      "duration": 24525,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-17T05:15:22.085Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4719619995336c912538-87b529c4340cd937239c",
+              "file": "super-admin-cross-app.spec.ts",
+              "line": 31,
+              "column": 3
+            },
+            {
+              "title": "should verify deletion capability persists across app switch",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "tablet",
+                  "projectName": "tablet",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 5,
+                      "status": "failed",
+                      "duration": 21372,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: table, text=\"No domains yet\"\nExpected: visible\nError: Unexpected token \"=\" while parsing css selector \"table, text=\"No domains yet\"\". Did you mean to CSS.escape it?\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for table, text=\"No domains yet\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: table, text=\"No domains yet\"\nExpected: visible\nError: Unexpected token \"=\" while parsing css selector \"table, text=\"No domains yet\"\". Did you mean to CSS.escape it?\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for table, text=\"No domains yet\"\u001b[22m\n\n    at C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts:57:32",
+                        "location": {
+                          "file": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts",
+                          "column": 32,
+                          "line": 57
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 55 |\u001b[39m     \u001b[90m// Ensure table or empty state is loaded\u001b[39m\n \u001b[90m 56 |\u001b[39m     \u001b[36mconst\u001b[39m tableOrEmpty \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'table, text=\"No domains yet\"'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 57 |\u001b[39m     \u001b[36mawait\u001b[39m expect(tableOrEmpty)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 58 |\u001b[39m\n \u001b[90m 59 |\u001b[39m     \u001b[90m// Verify Delete buttons exist if there are domains\u001b[39m\n \u001b[90m 60 |\u001b[39m     \u001b[36mconst\u001b[39m deleteButtons \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'button[title=\"Delete Domain\"]'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts",
+                            "column": 32,
+                            "line": 57
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: table, text=\"No domains yet\"\nExpected: visible\nError: Unexpected token \"=\" while parsing css selector \"table, text=\"No domains yet\"\". Did you mean to CSS.escape it?\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for table, text=\"No domains yet\"\u001b[22m\n\n\n  55 |     // Ensure table or empty state is loaded\n  56 |     const tableOrEmpty = page.locator('table, text=\"No domains yet\"');\n> 57 |     await expect(tableOrEmpty).toBeVisible();\n     |                                ^\n  58 |\n  59 |     // Verify Delete buttons exist if there are domains\n  60 |     const deleteButtons = page.locator('button[title=\"Delete Domain\"]');\n    at C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts:57:32"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-17T05:15:21.789Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\test-results\\super-admin-cross-app-Supe-bd835--persists-across-app-switch-tablet\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\test-results\\super-admin-cross-app-Supe-bd835--persists-across-app-switch-tablet\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\test-results\\super-admin-cross-app-Supe-bd835--persists-across-app-switch-tablet\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\tests\\super-admin-cross-app.spec.ts",
+                        "column": 32,
+                        "line": 57
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4719619995336c912538-c860cf7effee60068974",
+              "file": "super-admin-cross-app.spec.ts",
+              "line": 51,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-02-17T05:15:13.859Z",
+    "duration": 42429.689999999995,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}

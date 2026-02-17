@@ -8,8 +8,15 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -29,8 +36,11 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { normalizeFormData } from '@/lib/normalization';
 import { cn } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Boxes, Layers, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import {
     useCreateSubject,
     useDeleteSubject,
@@ -128,6 +138,20 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
   );
 });
 
+const subjectSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(100),
+  slug: z
+    .string()
+    .min(1, 'Slug is required')
+    .regex(/^[a-z0-9_]+$/, 'Slug must contain only lowercase letters, numbers, and underscores'),
+  description: z.string().optional(),
+  color_hex: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color code (e.g. #8b5cf6)').optional().or(z.literal('')),
+  display_order: z.coerce.number().int().default(0),
+  status: z.enum(['draft', 'published', 'live']).default('draft'),
+});
+
+type SubjectFormData = z.infer<typeof subjectSchema>;
+
 export function SubjectsPage() {
   const { data: subjects, isLoading } = useSubjects();
   const createSubject = useCreateSubject();
@@ -141,48 +165,57 @@ export function SubjectsPage() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    slug: '',
-    description: '',
-    color_hex: '',
-    display_order: 1,
-    status: 'draft' as 'draft' | 'published' | 'live',
+
+  const form = useForm<SubjectFormData>({
+    resolver: zodResolver(subjectSchema),
+    mode: 'onChange',
+    defaultValues: {
+      title: '',
+      slug: '',
+      description: '',
+      color_hex: '#8b5cf6',
+      display_order: 0,
+      status: 'draft',
+    },
   });
 
-  const handleOpenDialog = useCallback(
-    (subject?: Subject) => {
-      if (subject) {
-        setEditingSubject(subject);
-        setFormData({
-          title: subject.title,
-          slug: subject.slug,
-          description: subject.description || '',
-          color_hex: subject.color_hex || '',
-          display_order: subject.display_order ?? 1,
-          status: (subject.status || 'draft') as 'draft' | 'published' | 'live',
+  // Reset form when dialog opens/closes or editing subject changes
+  useEffect(() => {
+    if (isDialogOpen) {
+      if (editingSubject) {
+        form.reset({
+          title: editingSubject.title,
+          slug: editingSubject.slug,
+          description: editingSubject.description || '',
+          color_hex: editingSubject.color_hex || '',
+          display_order: editingSubject.display_order ?? 1,
+          status: (editingSubject.status as 'draft' | 'published' | 'live') || 'draft',
         });
       } else {
-        setEditingSubject(null);
-        setFormData({
+        const nextOrder = (subjects?.length ?? 0) + 1;
+        form.reset({
           title: '',
           slug: '',
           description: '',
           color_hex: '',
-          display_order: (subjects?.length ?? 0) + 1,
-          status: 'draft' as 'draft' | 'published' | 'live',
+          display_order: nextOrder,
+          status: 'draft',
         });
       }
+    }
+  }, [isDialogOpen, editingSubject, subjects, form]);
+
+  const handleOpenDialog = useCallback(
+    (subject?: Subject) => {
+      setEditingSubject(subject || null);
       setIsDialogOpen(true);
     },
-    [subjects?.length]
+    []
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onSubmit = async (data: SubjectFormData) => {
     // Normalize text fields: trim whitespace, lowercase the slug
-    const normalizedData = normalizeFormData(formData, {
+    const normalizedData = normalizeFormData(data, {
       trim: ['title', 'description'],
       lowercase: ['slug', 'color_hex'],
     });
@@ -237,6 +270,7 @@ export function SubjectsPage() {
     },
     [deleteSubject, toast]
   );
+
 
   const filteredSubjects =
     subjects?.filter(
@@ -413,171 +447,204 @@ export function SubjectsPage() {
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="rounded-[2.5rem] border-none bg-white/90 backdrop-blur-2xl p-0 overflow-hidden shadow-2xl">
-          <form onSubmit={handleSubmit}>
-            <div className="p-10 space-y-8">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-3xl bg-purple-600 flex items-center justify-center shadow-lg shadow-purple-600/20">
-                  {editingSubject ? (
-                    <Pencil className="w-8 h-8 text-white" />
-                  ) : (
-                    <Plus className="w-8 h-8 text-white" />
-                  )}
-                </div>
-                <div>
-                  <h2 className="text-2xl font-black text-gray-900 tracking-tight italic">
-                    <DialogTitle>{editingSubject ? 'Edit Subject' : 'Add Subject'}</DialogTitle>
-                  </h2>
-                  <DialogDescription className="text-2xs font-black text-gray-400 uppercase tracking-widest mt-1">
-                    {editingSubject ? `Editing subject` : 'Add a new subject'}
-                  </DialogDescription>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2 group">
-                    <Label
-                      htmlFor="name"
-                      className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
-                    >
-                      Title
-                    </Label>
-                    <Input
-                      id="name"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      placeholder="e.g. Mathematics"
-                      required
-                      className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-bold italic"
-                    />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
+              <div className="p-10 space-y-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-3xl bg-purple-600 flex items-center justify-center shadow-lg shadow-purple-600/20">
+                    {editingSubject ? (
+                      <Pencil className="w-8 h-8 text-white" />
+                    ) : (
+                      <Plus className="w-8 h-8 text-white" />
+                    )}
                   </div>
-                  <div className="space-y-2 group">
-                    <Label
-                      htmlFor="slug"
-                      className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
-                    >
-                      Slug
-                    </Label>
-                    <Input
-                      id="slug"
-                      value={formData.slug}
-                      onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                      placeholder="e.g. math"
-                      required
-                      pattern="[a-z0-9_]+"
-                      title="Lowercase letters, numbers, and underscores only"
-                      className="h-14 rounded-2xl border-gray-100 bg-white/50 text-purple-600 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-mono text-sm font-bold"
-                    />
+                  <div>
+                    <h2 className="text-2xl font-black text-gray-900 tracking-tight italic">
+                      <DialogTitle>{editingSubject ? 'Edit Subject' : 'Add Subject'}</DialogTitle>
+                    </h2>
+                    <DialogDescription className="text-2xs font-black text-gray-400 uppercase tracking-widest mt-1">
+                      {editingSubject ? `Editing subject` : 'Add a new subject'}
+                    </DialogDescription>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-6">
-                  <div className="space-y-2 group">
-                    <Label
-                      htmlFor="color"
-                      className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
-                    >
-                      Color
-                    </Label>
-                    <div className="flex gap-3">
-                      <div
-                        className="h-14 w-14 rounded-2xl border-2 border-dashed border-gray-200 shrink-0"
-                        style={{ backgroundColor: formData.color_hex }}
-                      />
-                      <Input
-                        id="color"
-                        value={formData.color_hex}
-                        onChange={(e) => setFormData({ ...formData, color_hex: e.target.value })}
-                        placeholder="#8b5cf6"
-                        className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-bold w-full"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2 group">
-                    <Label
-                      htmlFor="order"
-                      className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
-                    >
-                      Order
-                    </Label>
-                    <Input
-                      id="order"
-                      type="number"
-                      value={formData.display_order}
-                      onChange={(e) =>
-                        setFormData({ ...formData, display_order: parseInt(e.target.value) })
-                      }
-                      required
-                      className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-bold"
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2 group">
+                          <FormLabel className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
+                            Title
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g. Mathematics"
+                              {...field}
+                              data-testid="subject-title"
+                              className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-bold italic"
+                              required
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="slug"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2 group">
+                          <FormLabel className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
+                            Slug
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g. math"
+                              {...field}
+                              onChange={(e) => field.onChange(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                              data-testid="subject-slug"
+                              className="h-14 rounded-2xl border-gray-100 bg-white/50 text-purple-600 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-mono text-sm font-bold"
+                              required
+                              pattern="[a-z0-9_]+"
+                              title="Lowercase letters, numbers, and underscores only"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
-                  <div className="space-y-2 group">
-                    <Label
-                      htmlFor="status"
-                      className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
-                    >
-                      Status
-                    </Label>
-                    <Select
-                      value={formData.status}
-                      onValueChange={(v: 'draft' | 'live' | 'published') =>
-                        setFormData({ ...formData, status: v })
-                      }
-                    >
-                      <SelectTrigger className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-bold">
-                        <SelectValue placeholder="Select Status" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
-                        <SelectItem value="draft" className="font-bold">
-                          Draft
-                        </SelectItem>
-                        <SelectItem value="live" className="font-bold text-emerald-600">
-                          Live
-                        </SelectItem>
-                        <SelectItem value="published" className="font-bold text-blue-600">
-                          Published
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
 
-                <div className="space-y-2 group">
-                  <Label
-                    htmlFor="description"
-                    className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
-                  >
-                    Description
-                  </Label>
-                  <Input
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Brief architectural scope of this knowledge domain"
-                    className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all text-sm font-medium"
+                  <div className="grid grid-cols-3 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="color_hex"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2 group">
+                          <FormLabel className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
+                            Color
+                          </FormLabel>
+                          <div className="flex gap-3">
+                            <div
+                              className="h-14 w-14 rounded-2xl border-2 border-dashed border-gray-200 shrink-0"
+                              style={{ backgroundColor: field.value }}
+                            />
+                            <FormControl>
+                              <Input
+                                placeholder="#8b5cf6"
+                                {...field}
+                                data-testid="subject-color"
+                                className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-bold w-full"
+                              />
+                            </FormControl>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="display_order"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2 group">
+                          <FormLabel className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
+                            Order
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              data-testid="subject-order"
+                              className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-bold"
+                              required
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2 group">
+                          <FormLabel className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
+                            Status
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-bold">
+                                <SelectValue placeholder="Select Status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
+                              <SelectItem value="draft" className="font-bold">
+                                Draft
+                              </SelectItem>
+                              <SelectItem value="live" className="font-bold text-emerald-600">
+                                Live
+                              </SelectItem>
+                              <SelectItem value="published" className="font-bold text-blue-600">
+                                Published
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2 group">
+                        <FormLabel className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
+                          Description
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Brief architectural scope of this knowledge domain"
+                            {...field}
+                            className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all text-sm font-medium"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
               </div>
-            </div>
 
-            <DialogFooter className="bg-gray-50/50 p-8 flex gap-3 border-t border-gray-100">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setIsDialogOpen(false)}
-                className="h-12 px-8 rounded-2xl font-black text-2xs uppercase tracking-widest text-gray-400 hover:bg-gray-200 italic transition-all"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={createSubject.isPending || updateSubject.isPending}
-                className="h-12 px-10 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-purple-600/20 transition-all hover:-translate-y-0.5"
-              >
-                {editingSubject ? 'Save Changes' : 'Create Subject'}
-              </Button>
-            </DialogFooter>
-          </form>
+              <DialogFooter className="bg-gray-50/50 p-8 flex gap-3 border-t border-gray-100">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setIsDialogOpen(false)}
+                  className="h-12 px-8 rounded-2xl font-black text-2xs uppercase tracking-widest text-gray-400 hover:bg-gray-200 italic transition-all"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createSubject.isPending || updateSubject.isPending}
+                  className="h-12 px-10 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-purple-600/20 transition-all hover:-translate-y-0.5"
+                >
+                  {editingSubject ? 'Save Changes' : 'Create Subject'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </div>

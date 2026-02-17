@@ -1,3 +1,5 @@
+import { Page, expect } from '@playwright/test';
+
 // Convention: password == email (for all test accounts)
 export const TEST_USERS = {
   SUPER_ADMIN: {
@@ -17,6 +19,20 @@ export const TEST_USERS = {
 // Legacy support for scripts that use TEST_CREDENTIALS
 export const TEST_CREDENTIALS = TEST_USERS.ADMIN;
 
+// Helper to login
+export async function login(page: Page, email: string = TEST_CREDENTIALS.email, password: string = TEST_CREDENTIALS.password) {
+  await page.goto('/login');
+  await page.fill('input[type="email"]', email);
+  await page.fill('input[type="password"]', password);
+  await page.click('button[type="submit"]');
+  
+  // Wait for navigation and dashboard element
+  await expect(page).not.toHaveURL(/\/login/, { timeout: 15000 });
+  
+  // Wait for sidebar or dashboard content to ensure auth success
+  // Using a generic locator that appears on dashboard/logged-in pages
+  await expect(page.getByRole('link', { name: /Dashboard/i }).first()).toBeVisible({ timeout: 15000 });
+}
 export function generateTestUser() {
   const email = `test-${Date.now()}@example.com`;
   return {

@@ -23,7 +23,7 @@
 
 ### P1 — UI/UX & Reliability
 
-- [ ] **Inline Form Validation**: Add HTML5 `required`/`pattern` attrs and inline error messages to content creation forms.
+- [x] **Inline Form Validation**: Add HTML5 `required`/`pattern` attrs and inline error messages to content creation forms. Verified via robust E2E tests for Apps and Subjects.
 - [x] **Responsive Testing**: Verify layouts at 375px, 768px, 1024px+.
 
 ### P2 — Polish
@@ -32,6 +32,7 @@
 - [x] **Automated Row Height Test**: Implement Playwright test to verify all table rows (`tr`) remain single-line (constant height) across the platform.
 - [x] **Table Icon Cleanup**: Removed decorative icons from AppsPage and verified absence across tables with strict Playwright test.
 - [x] **Fix Domain Deletion**: Enable Super Admins to delete domains regardless of current app context. [COMPLETED]
+- [x] **Cross-App Administration Test**: Implemented automated Playwright test suite for Super Admin cross-app capabilities. [COMPLETED]
 
 ---
 
@@ -61,5 +62,5 @@ python ops_runner.py tasks.json # Autonomous execution
 
 ---
 
-**Last Synchronized**: 2026-02-16 20:46 PST
+**Last Synchronized**: 2026-02-17 01:21 PST
 **Project Context**: RMG-007 / Questerix

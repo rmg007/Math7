@@ -8,8 +8,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Pagination } from '@/components/ui/pagination';
 import {
   Select,
@@ -33,6 +41,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { normalizeFormData } from '@/lib/normalization';
 import { cn } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   AlertTriangle,
   ExternalLink,
@@ -45,7 +54,9 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import {
   useApps,
   useCreateApp,
@@ -130,6 +141,21 @@ const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
   );
 });
 
+const appSchema = z.object({
+  subject_id: z.string().uuid('Please select a subject'),
+  display_name: z.string().min(1, 'Display name is required'),
+  subdomain: z
+    .string()
+    .min(1, 'Subdomain is required')
+    .max(63, 'Subdomain must be less than 64 characters')
+    .regex(/^[a-z0-9-]+$/, 'Subdomain must contain only lowercase letters, numbers, and dashes'),
+  grade_level: z.string().min(1, 'Grade level is required'),
+  grade_number: z.coerce.number().int().default(0),
+  is_active: z.boolean().default(true),
+});
+
+type AppFormData = z.infer<typeof appSchema>;
+
 export function AppsPage() {
   const { data: apps, isLoading: appsLoading } = useApps();
   const { data: subjects } = useSubjects();
@@ -145,30 +171,34 @@ export function AppsPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingApp, setEditingApp] = useState<CompiledApp | null>(null);
-  const [formData, setFormData] = useState({
-    subject_id: '',
-    display_name: '',
-    subdomain: '',
-    grade_level: '',
-    grade_number: 0,
-    is_active: true,
+
+  const form = useForm<AppFormData>({
+    resolver: zodResolver(appSchema),
+    mode: 'onChange',
+    defaultValues: {
+      subject_id: '',
+      display_name: '',
+      subdomain: '',
+      grade_level: '',
+      grade_number: 0,
+      is_active: true,
+    },
   });
 
-  const handleOpenDialog = useCallback(
-    (app?: CompiledApp) => {
-      if (app) {
-        setEditingApp(app);
-        setFormData({
-          subject_id: app.subject_id || '',
-          display_name: app.display_name,
-          subdomain: app.subdomain,
-          grade_level: app.grade_level || '',
-          grade_number: app.grade_number || 0,
-          is_active: app.is_active || false,
+  // Reset form when dialog opens/closes or editing app changes
+  useEffect(() => {
+    if (isDialogOpen) {
+      if (editingApp) {
+        form.reset({
+          subject_id: editingApp.subject_id || '',
+          display_name: editingApp.display_name,
+          subdomain: editingApp.subdomain,
+          grade_level: editingApp.grade_level || '',
+          grade_number: editingApp.grade_number || 0,
+          is_active: editingApp.is_active || false,
         });
       } else {
-        setEditingApp(null);
-        setFormData({
+        form.reset({
           subject_id: subjects && subjects.length > 0 ? subjects[0].subject_id : '',
           display_name: '',
           subdomain: '',
@@ -177,20 +207,20 @@ export function AppsPage() {
           is_active: true,
         });
       }
+    }
+  }, [isDialogOpen, editingApp, subjects, form]);
+
+  const handleOpenDialog = useCallback(
+    (app?: CompiledApp) => {
+      setEditingApp(app || null);
       setIsDialogOpen(true);
     },
-    [subjects]
+    []
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.subject_id) {
-      toast({ title: 'Error', description: 'Please select a subject', variant: 'destructive' });
-      return;
-    }
-
+  const onSubmit = async (data: AppFormData) => {
     // Normalize all text fields to lowercase to prevent case-mismatch issues
-    const normalizedData = normalizeFormData(formData, {
+    const normalizedData = normalizeFormData(data, {
       lowercase: ['display_name', 'subdomain', 'grade_level'],
     });
 
@@ -468,170 +498,196 @@ export function AppsPage() {
             <Layout className="w-8 h-8 text-white/20" />
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="flex-1 overflow-y-auto px-8 py-6 space-y-6 min-h-0"
-          >
-            <div className="p-3 bg-orange-50/50 border border-orange-100 rounded-2xl flex gap-3">
-              <div className="p-1.5 h-fit rounded-xl bg-orange-100 text-orange-600">
-                <AlertTriangle className="w-4 h-4" />
-              </div>
-              <div className="space-y-0.5">
-                <h4 className="text-[10px] font-black text-orange-800 uppercase tracking-wide">
-                  DNS Configuration Required
-                </h4>
-                <p className="text-[10px] text-orange-700 leading-tight font-medium">
-                  After creating or changing a subdomain, you MUST update Cloudflare Pages DNS. Map{' '}
-                  <span className="font-mono font-bold bg-orange-100 px-1 rounded">
-                    {formData.subdomain || '...'}.questerix.com
-                  </span>{' '}
-                  to{' '}
-                  <span className="font-mono font-bold bg-orange-100 px-1 rounded">
-                    questerix-student.pages.dev
-                  </span>
-                  .
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
-                  Primary Subject
-                </Label>
-                <Select
-                  value={formData.subject_id ?? ''}
-                  onValueChange={(v) => setFormData({ ...formData, subject_id: v })}
-                >
-                  <SelectTrigger className="h-10 rounded-xl border-gray-200 focus:ring-indigo-500/10 font-bold text-sm">
-                    <SelectValue placeholder="Identify Subject" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-gray-200">
-                    {subjects?.map((s) => (
-                      <SelectItem key={s.subject_id} value={s.subject_id} className="font-bold">
-                        {s.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label
-                  htmlFor="display_name"
-                  className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1"
-                >
-                  Display Alias
-                </Label>
-                <Input
-                  id="display_name"
-                  data-testid="app-display-name"
-                  value={formData.display_name}
-                  onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
-                  placeholder="e.g. Master Mathematics v7"
-                  className="h-10 rounded-xl border-gray-200 focus:ring-indigo-500/10 font-bold text-sm"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label
-                    htmlFor="subdomain"
-                    className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1"
-                  >
-                    DNS Subdomain
-                  </Label>
-                </div>
-                <div className="flex items-center gap-0 group">
-                  <Input
-                    id="subdomain"
-                    data-testid="app-subdomain"
-                    value={formData.subdomain}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        subdomain: e.target.value
-                          .toLowerCase()
-                          .replace(/[^a-z0-9-]/g, '')
-                          .slice(0, 63),
-                      })
-                    }
-                    placeholder="m7"
-                    className="h-10 rounded-l-xl rounded-r-none border-gray-200 border-r-0 focus:ring-0 focus:border-gray-200 font-mono font-black text-indigo-600 focus:ring-indigo-500/10 text-sm"
-                    required
-                    pattern="[a-z0-9-]+"
-                    title="Lowercase letters, numbers, and dashes only"
-                  />
-                  <div className="h-10 px-3 flex items-center bg-gray-50 border border-gray-200 rounded-r-xl text-[10px] font-black text-gray-400 uppercase tracking-tighter">
-                    .questerix.com
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label
-                  htmlFor="grade_level"
-                  className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1"
-                >
-                  Target Grade/Tier
-                </Label>
-                <Input
-                  id="grade_level"
-                  data-testid="app-grade-level"
-                  value={formData.grade_level}
-                  onChange={(e) => setFormData({ ...formData, grade_level: e.target.value })}
-                  placeholder="e.g. Grade 12 Advanced"
-                  className="h-10 rounded-xl border-gray-200 focus:ring-indigo-500/10 font-bold text-sm"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-indigo-50 border border-indigo-100/50 group hover:border-indigo-200 transition-all">
-              <div className="flex items-center gap-4">
-                <div className="p-2 rounded-xl bg-white shadow-sm group-hover:scale-110 transition-transform">
-                  <Power
-                    className={cn(
-                      'w-5 h-5 transition-colors',
-                      formData.is_active ? 'text-indigo-600' : 'text-gray-300'
-                    )}
-                  />
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex-1 overflow-y-auto px-8 py-6 space-y-6 min-h-0"
+              noValidate
+            >
+              <div className="p-3 bg-orange-50/50 border border-orange-100 rounded-2xl flex gap-3">
+                <div className="p-1.5 h-fit rounded-xl bg-orange-100 text-orange-600">
+                  <AlertTriangle className="w-4 h-4" />
                 </div>
                 <div className="space-y-0.5">
-                  <Label className="text-xs font-black text-indigo-900 uppercase tracking-widest">
-                    Active Status
-                  </Label>
-                  <p className="text-2xs text-indigo-400 font-bold uppercase tracking-tight italic">
-                    Public availability toggle
+                  <h4 className="text-[10px] font-black text-orange-800 uppercase tracking-wide">
+                    DNS Configuration Required
+                  </h4>
+                  <p className="text-[10px] text-orange-700 leading-tight font-medium">
+                    After creating or changing a subdomain, you MUST update Cloudflare Pages DNS. Map{' '}
+                    <span className="font-mono font-bold bg-orange-100 px-1 rounded">
+                      {form.watch('subdomain') || '...'}.questerix.com
+                    </span>{' '}
+                    to{' '}
+                    <span className="font-mono font-bold bg-orange-100 px-1 rounded">
+                      questerix-student.pages.dev
+                    </span>
+                    .
                   </p>
                 </div>
               </div>
-              <Switch
-                checked={formData.is_active}
-                onCheckedChange={(v) => setFormData({ ...formData, is_active: v })}
-                className="data-[state=checked]:bg-indigo-600"
-              />
-            </div>
 
-            <DialogFooter className="pt-4 flex flex-col md:flex-row gap-3">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setIsDialogOpen(false)}
-                className="rounded-xl font-black text-2xs uppercase tracking-widest text-gray-400"
-              >
-                Abort Changes
-              </Button>
-              <Button
-                type="submit"
-                disabled={createApp.isPending || updateApp.isPending}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-8 h-12 shadow-lg shadow-indigo-600/20 font-black text-xs uppercase tracking-widest"
-              >
-                {editingApp ? 'UPDATE CLUSTER' : 'AUTHORIZE DEPLOYMENT'}
-              </Button>
-            </DialogFooter>
-          </form>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="subject_id"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+                        Primary Subject
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-10 rounded-xl border-gray-200 focus:ring-indigo-500/10 font-bold text-sm">
+                            <SelectValue placeholder="Identify Subject" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="rounded-xl border-gray-200">
+                          {subjects?.map((s) => (
+                            <SelectItem key={s.subject_id} value={s.subject_id} className="font-bold">
+                              {s.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="display_name"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+                        Display Alias
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. Master Mathematics v7"
+                          {...field}
+                          data-testid="app-display-name"
+                          className="h-10 rounded-xl border-gray-200 focus:ring-indigo-500/10 font-bold text-sm"
+                          required
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="subdomain"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className="flex items-center justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+                        DNS Subdomain
+                      </FormLabel>
+                      <div className="flex items-center gap-0 group">
+                        <FormControl>
+                          <Input
+                            placeholder="m7"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 63))}
+                            data-testid="app-subdomain"
+                            className="h-10 rounded-l-xl rounded-r-none border-gray-200 border-r-0 focus:ring-0 focus:border-gray-200 font-mono font-black text-indigo-600 focus:ring-indigo-500/10 text-sm"
+                            required
+                            pattern="[a-z0-9-]+"
+                            title="Lowercase letters, numbers, and dashes only"
+                          />
+                        </FormControl>
+                        <div className="h-10 px-3 flex items-center bg-gray-50 border border-gray-200 rounded-r-xl text-[10px] font-black text-gray-400 uppercase tracking-tighter">
+                          .questerix.com
+                        </div>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="grade_level"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+                        Target Grade/Tier
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. Grade 12 Advanced"
+                          {...field}
+                          data-testid="app-grade-level"
+                          className="h-10 rounded-xl border-gray-200 focus:ring-indigo-500/10 font-bold text-sm"
+                          required
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="is_active"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between p-4 rounded-2xl bg-indigo-50 border border-indigo-100/50 group hover:border-indigo-200 transition-all space-y-0">
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 rounded-xl bg-white shadow-sm group-hover:scale-110 transition-transform">
+                        <Power
+                          className={cn(
+                            'w-5 h-5 transition-colors',
+                            field.value ? 'text-indigo-600' : 'text-gray-300'
+                          )}
+                        />
+                      </div>
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-xs font-black text-indigo-900 uppercase tracking-widest">
+                          Active Status
+                        </FormLabel>
+                        <FormDescription className="text-2xs text-indigo-400 font-bold uppercase tracking-tight italic mt-0">
+                          Public availability toggle
+                        </FormDescription>
+                      </div>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="data-[state=checked]:bg-indigo-600"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter className="pt-4 flex flex-col md:flex-row gap-3">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setIsDialogOpen(false)}
+                  className="rounded-xl font-black text-2xs uppercase tracking-widest text-gray-400"
+                >
+                  Abort Changes
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createApp.isPending || updateApp.isPending}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-8 h-12 shadow-lg shadow-indigo-600/20 font-black text-xs uppercase tracking-widest"
+                >
+                  {editingApp ? 'UPDATE CLUSTER' : 'AUTHORIZE DEPLOYMENT'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </div>

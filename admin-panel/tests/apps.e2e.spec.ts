@@ -1,14 +1,5 @@
-import { expect, Page, test } from '@playwright/test';
-import { TEST_USERS } from './test-utils';
-
-async function login(page: Page, email: string, password: string) {
-  await page.goto('/login');
-  await page.fill('input[type="email"]', email);
-  await page.fill('input[type="password"]', password);
-  await page.click('button[type="submit"]');
-  // Wait for redirect to dashboard or domains
-  await expect(page).not.toHaveURL(/\/login/);
-}
+import { expect, test } from '@playwright/test';
+import { TEST_USERS, login } from './test-utils';
 
 test.describe('Apps Management CRUD', () => {
   test.beforeEach(async ({ page }) => {
@@ -19,7 +10,7 @@ test.describe('Apps Management CRUD', () => {
     await page.goto('/apps');
 
     // 1. CREATE
-    const newAppBtn = page.getByRole('button', { name: /New Application/i });
+    const newAppBtn = page.getByRole('button', { name: /New Application/i }).first();
     await expect(newAppBtn).toBeVisible({ timeout: 15000 });
     await newAppBtn.click();
 
@@ -94,4 +85,55 @@ test.describe('Apps Management CRUD', () => {
     // Verify deletion
     await expect(page.getByText(updatedName)).toHaveCount(0, { timeout: 15000 });
   });
+
+  test('should validate app form inputs', async ({ page }) => {
+    await page.goto('/apps');
+    
+    const newAppBtn = page.getByRole('button', { name: /New Application/i }).first();
+    await expect(newAppBtn).toBeVisible({ timeout: 15000 });
+    await newAppBtn.click();
+    
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+
+    // 1. Submit empty form
+    const saveBtn = page.getByRole('button', { name: /AUTHORIZE DEPLOYMENT/i });
+    await expect(saveBtn).toBeEnabled();
+    console.log('Clicking save in apps form...');
+    await saveBtn.click();
+    console.log('Clicked save. Checking errors...');
+    
+    // Expect required errors
+    await expect(page.getByText('Display name is required')).toBeVisible();
+    await expect(page.getByText('Subdomain is required')).toBeVisible();
+    // Subject is also required, but might default to first option if not careful? 
+    // The select component might need interaction to trigger validation if it's empty initially.
+    
+    // 2. Invalid Subdomain - Should be auto-normalized
+    const subdomainInput = page.getByTestId('app-subdomain');
+    await subdomainInput.fill('Invalid Subdomain!');
+    
+    // Check normalization: "Invalid Subdomain!" -> "invalidsubdomain"
+    await expect(subdomainInput).toHaveValue('invalidsubdomain');
+
+    // Submitting with valid (normalized) subdomain should NOT show error
+    await saveBtn.click();
+    await expect(page.getByText('Subdomain must contain only lowercase letters, numbers, and dashes')).not.toBeVisible();
+    
+    // 3. Subdomain with uppercase (should be auto-normalized)
+    await subdomainInput.fill('UpperCase');
+    await expect(subdomainInput).toHaveValue('uppercase'); 
+
+    // 4. Invalid length (too long) but max is 63 char.
+    const longSubdomain = 'a'.repeat(64);
+    await subdomainInput.fill(longSubdomain);
+    // The slice(0, 63) in onChange prevents this, so value should be 63 chars.
+    await expect(subdomainInput).toHaveValue('a'.repeat(63));
+
+    // 5. Valid Submission Check (already covered in previous test, so skip full submission here)
+    const closeBtn = page.getByRole('button', { name: /Abort Changes/i });
+    await closeBtn.click();
+    await expect(dialog).not.toBeVisible();
+  });
 });
+
