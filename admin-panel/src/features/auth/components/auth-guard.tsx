@@ -17,18 +17,17 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       // When the tab/browser closes, sessionStorage is destroyed. On the
       // next visit, both flags are absent → the session should be evicted.
       if (session) {
-        // Always mark the current tab as having an active session.
-        // The "Remember Me" eviction only fires on a fresh browser
-        // open (i.e. a *new* tab after the browser was fully closed).
-        // Within the same browser session, navigation must never logout.
+        // Read "Remember Me" preference and previous session state
+        // BEFORE marking the current session active.
+        const rememberMe = localStorage.getItem('questerix_remember_me');
+        const wasSessionActive = sessionStorage.getItem('questerix_session_active');
+
+        // Always mark the current tab as having an active session immediately after checking.
         sessionStorage.setItem('questerix_session_active', '1');
 
-        const rememberMe = localStorage.getItem('questerix_remember_me');
-        const sessionActive = sessionStorage.getItem('questerix_session_active');
-
         // Only evict if the browser was fully closed (sessionStorage
-        // was cleared) AND the user did not check "Remember Me".
-        if (!rememberMe && !sessionActive) {
+        // was CLEARED) AND the user did not check "Remember Me".
+        if (!rememberMe && !wasSessionActive) {
           await supabase.auth.signOut();
           navigate('/login');
           return;
@@ -48,12 +47,15 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           .single();
 
         if (profileError) {
-          console.error('Could not fetch profile, redirecting to login:', profileError);
-          window.location.href = '/login';
-          return;
-        }
-
-        if (profile && profile.deleted_at) {
+          // If we can't fetch the profile (network error, RLS, etc.), we should NOT
+          // aggressively log the user out. The JWT session is still valid.
+          // We log the error but proceed.
+          console.warn(
+            'Could not verify profile status (transient error?), allowing access:',
+            profileError
+          );
+        } else if (profile && profile.deleted_at) {
+          // Only force logout if we CONFIRM the user is deleted.
           await supabase.auth.signOut();
           navigate('/login');
           return;

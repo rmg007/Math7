@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -47,6 +47,11 @@ export function LoginPage() {
   // (new tab or after browser restart), sessionStorage is empty so the
   // auth-guard can detect "no persist" and call signOut. This avoids the
   // unreliable pattern of calling async signOut() in beforeunload.
+  // Manage the "Remember Me" preference via localStorage.
+  // When unchecked, we set a sessionStorage flag. On the *next* page load
+  // (new tab or after browser restart), sessionStorage is empty so the
+  // auth-guard can detect "no persist" and call signOut. This avoids the
+  // unreliable pattern of calling async signOut() in beforeunload.
   useEffect(() => {
     if (rememberMe) {
       // Mark that this session should persist
@@ -58,6 +63,19 @@ export function LoginPage() {
       sessionStorage.setItem('questerix_session_active', '1');
     }
   }, [rememberMe]);
+
+  // If user visits /login but is already authenticated, redirect to dashboard
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/');
+      }
+    };
+    checkSession();
+  }, [navigate]);
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),

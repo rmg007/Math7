@@ -210,13 +210,10 @@ export function AppsPage() {
     }
   }, [isDialogOpen, editingApp, subjects, form]);
 
-  const handleOpenDialog = useCallback(
-    (app?: CompiledApp) => {
-      setEditingApp(app || null);
-      setIsDialogOpen(true);
-    },
-    []
-  );
+  const handleOpenDialog = useCallback((app?: CompiledApp) => {
+    setEditingApp(app || null);
+    setIsDialogOpen(true);
+  }, []);
 
   const onSubmit = async (data: AppFormData) => {
     // Normalize all text fields to lowercase to prevent case-mismatch issues
@@ -382,8 +379,11 @@ export function AppsPage() {
                     className="text-2xs"
                   />
                 </TableHead>
-                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  CNAME
+                <TableHead
+                  className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14 cursor-help"
+                  title="Point your custom domain CNAME record to this target"
+                >
+                  DNS Target
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   <SortableHeader
@@ -513,7 +513,8 @@ export function AppsPage() {
                     DNS Configuration Required
                   </h4>
                   <p className="text-[10px] text-orange-700 leading-tight font-medium">
-                    After creating or changing a subdomain, you MUST update Cloudflare Pages DNS. Map{' '}
+                    After creating or changing a subdomain, you MUST update Cloudflare Pages DNS.
+                    Map{' '}
                     <span className="font-mono font-bold bg-orange-100 px-1 rounded">
                       {form.watch('subdomain') || '...'}.questerix.com
                     </span>{' '}
@@ -547,7 +548,11 @@ export function AppsPage() {
                         </FormControl>
                         <SelectContent className="rounded-xl border-gray-200">
                           {subjects?.map((s) => (
-                            <SelectItem key={s.subject_id} value={s.subject_id} className="font-bold">
+                            <SelectItem
+                              key={s.subject_id}
+                              value={s.subject_id}
+                              className="font-bold"
+                            >
                               {s.title}
                             </SelectItem>
                           ))}
@@ -595,7 +600,14 @@ export function AppsPage() {
                           <Input
                             placeholder="m7"
                             {...field}
-                            onChange={(e) => field.onChange(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 63))}
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value
+                                  .toLowerCase()
+                                  .replace(/[^a-z0-9-]/g, '')
+                                  .slice(0, 63)
+                              )
+                            }
                             data-testid="app-subdomain"
                             className="h-10 rounded-l-xl rounded-r-none border-gray-200 border-r-0 focus:ring-0 focus:border-gray-200 font-mono font-black text-indigo-600 focus:ring-indigo-500/10 text-sm"
                             required
