@@ -513,8 +513,7 @@ export function AppsPage() {
                     DNS Configuration Required
                   </h4>
                   <p className="text-[10px] text-orange-700 leading-tight font-medium">
-                    After creating or changing a subdomain, you MUST update Cloudflare Pages DNS.
-                    Map{' '}
+                    1. Map{' '}
                     <span className="font-mono font-bold bg-orange-100 px-1 rounded">
                       {form.watch('subdomain') || '...'}.questerix.com
                     </span>{' '}
@@ -522,7 +521,11 @@ export function AppsPage() {
                     <span className="font-mono font-bold bg-orange-100 px-1 rounded">
                       questerix-student.pages.dev
                     </span>
-                    .
+                    .<br />
+                    2. <span className="font-bold text-orange-800">CRITICAL:</span> You MUST also
+                    add this subdomain as a Custom Domain in the Cloudflare Pages project settings,
+                    otherwise users will see
+                    <span className="font-mono font-bold text-red-600"> Error 1014</span>.
                   </p>
                 </div>
               </div>
