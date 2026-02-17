@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -170,7 +170,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-900">
+    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 overflow-x-hidden">
       <div className="w-full max-w-md px-4">
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
@@ -180,7 +180,7 @@ export function LoginPage() {
           <p className="text-muted-foreground mt-2">Curriculum Management System</p>
         </div>
 
-        <Card className="border-border/40 shadow-xl">
+        <Card className="border-border/40 shadow-none sm:shadow-xl overflow-hidden">
           <CardHeader>
             <CardTitle>{isRegister ? 'Create Account' : 'Welcome Back'}</CardTitle>
             <CardDescription>

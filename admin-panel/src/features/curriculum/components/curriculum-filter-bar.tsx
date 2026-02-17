@@ -19,7 +19,7 @@ export function CurriculumFilterBar({
   extraFilters,
 }: CurriculumFilterBarProps) {
   return (
-    <div className="p-6 border-b border-gray-100 bg-white/50 backdrop-blur-sm flex flex-col md:flex-row gap-6 items-center">
+    <div className="p-4 sm:p-6 border-b border-gray-100 bg-white/50 backdrop-blur-sm flex flex-col xl:flex-row gap-4 items-center min-w-0 overflow-hidden">
       <div className="relative flex-1 w-full group">
         <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
         <input
@@ -31,7 +31,7 @@ export function CurriculumFilterBar({
         />
       </div>
 
-      <div className="flex items-center gap-3 w-full md:w-auto">
+      <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
         {extraFilters}
         <div className="relative w-full md:w-56">
           <select

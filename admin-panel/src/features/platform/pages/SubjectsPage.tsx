@@ -1,29 +1,30 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
+import { SortableHeader } from '@/components/ui/sortable-header';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { normalizeFormData } from '@/lib/normalization';
@@ -31,11 +32,11 @@ import { cn } from '@/lib/utils';
 import { Boxes, Layers, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import {
-  useCreateSubject,
-  useDeleteSubject,
-  useSubjects,
-  useUpdateSubject,
-  type Subject,
+    useCreateSubject,
+    useDeleteSubject,
+    useSubjects,
+    useUpdateSubject,
+    type Subject,
 } from '../hooks/use-subjects';
 
 interface SubjectRowProps {
@@ -135,6 +136,8 @@ export function SubjectsPage() {
   const { toast } = useToast();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<string>('display_order');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
@@ -242,6 +245,27 @@ export function SubjectsPage() {
         s.slug.toLowerCase().includes(searchQuery.toLowerCase())
     ) || [];
 
+  const sortedSubjects = [...filteredSubjects].sort((a, b) => {
+    const aValue = a[sortBy as keyof Subject];
+    const bValue = b[sortBy as keyof Subject];
+
+    if (aValue === bValue) return 0;
+    if (aValue === null || aValue === undefined) return 1;
+    if (bValue === null || bValue === undefined) return -1;
+
+    const result = aValue < bValue ? -1 : 1;
+    return sortOrder === 'asc' ? result : -result;
+  });
+
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
       <AdminHeader
@@ -298,19 +322,47 @@ export function SubjectsPage() {
             <TableHeader>
               <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b-2 border-gray-100">
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 px-8 h-14">
-                  Title
+                  <SortableHeader
+                    label="Title"
+                    column="title"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Slug
+                  <SortableHeader
+                    label="Slug"
+                    column="slug"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14 text-center">
                   Icon
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Order
+                  <SortableHeader
+                    label="Order"
+                    column="display_order"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Status
+                  <SortableHeader
+                    label="Status"
+                    column="status"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="text-right px-8 h-14 font-black text-2xs uppercase tracking-widest text-gray-400">
                   Actions
@@ -345,7 +397,7 @@ export function SubjectsPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredSubjects.map((s) => (
+                sortedSubjects.map((s) => (
                   <SubjectRow
                     key={s.subject_id}
                     subject={s}
@@ -412,6 +464,8 @@ export function SubjectsPage() {
                       onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                       placeholder="e.g. math"
                       required
+                      pattern="[a-z0-9_]+"
+                      title="Lowercase letters, numbers, and underscores only"
                       className="h-14 rounded-2xl border-gray-100 bg-white/50 text-purple-600 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-mono text-sm font-bold"
                     />
                   </div>

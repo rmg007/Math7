@@ -1,22 +1,22 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { FormActions } from '@/components/ui/form-actions';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/hooks/use-app';
@@ -199,7 +199,7 @@ export function DomainForm() {
             )}
 
             <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
-              <CardContent className="p-8 md:p-10 space-y-8">
+              <CardContent className="p-4 sm:p-8 md:p-10 space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <FormField
                     control={form.control}
@@ -217,6 +217,7 @@ export function DomainForm() {
                             placeholder="e.g. Advanced Mathematics"
                             {...field}
                             className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-purple-500/10 transition-all border"
+                            required
                           />
                         </FormControl>
                         <FormMessage className="text-xs font-bold text-red-500 italic" />
@@ -241,6 +242,9 @@ export function DomainForm() {
                             {...field}
                             disabled={isEditing}
                             className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all border disabled:opacity-50"
+                            required
+                            pattern="[a-z0-9_]+"
+                            title="Lowercase letters, numbers, and underscores only"
                           />
                         </FormControl>
                         <FormDescription className="text-2xs font-medium text-gray-400">
@@ -269,6 +273,7 @@ export function DomainForm() {
                             type="number"
                             {...field}
                             className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-amber-500/10 transition-all border"
+                            required
                           />
                         </FormControl>
                         <FormMessage className="text-xs font-bold text-red-500 italic" />

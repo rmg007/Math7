@@ -3,14 +3,15 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge } from '@/components/ui/status-badge';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from '@/hooks/use-toast';
@@ -18,20 +19,20 @@ import type { Tables } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import {
-  Activity,
-  Fingerprint,
-  History,
-  Key,
-  Search,
-  Shield,
-  ShieldAlert,
-  UserCheck,
-  UserCog,
-  Users,
-  UserX,
-  X,
+    Activity,
+    Fingerprint,
+    History,
+    Key,
+    Search,
+    Shield,
+    ShieldAlert,
+    UserCheck,
+    UserCog,
+    Users,
+    UserX,
+    X,
 } from 'lucide-react';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 type AdminUser = Tables<'profiles'>;
@@ -206,6 +207,8 @@ export function UserManagementPage() {
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [sortBy, setSortBy] = useState<keyof AdminUser>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [error, setError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -379,8 +382,31 @@ export function UserManagementPage() {
     );
   });
 
+  const sortedUsers = useMemo(() => {
+    return [...filteredUsers].sort((a, b) => {
+      const aValue = a[sortBy];
+      const bValue = b[sortBy];
+
+      if (aValue === bValue) return 0;
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+
+      const result = aValue < bValue ? -1 : 1;
+      return sortOrder === 'asc' ? result : -result;
+    });
+  }, [filteredUsers, sortBy, sortOrder]);
+
   const activeUsersCount = users.filter((u) => !u.deleted_at).length;
-  const paginatedUsers = filteredUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const paginatedUsers = sortedUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column as keyof AdminUser);
+      setSortOrder('asc');
+    }
+  };
 
   const handleSelectAll = useCallback(() => {
     // Only select users we can actually edit (not self)
@@ -541,19 +567,47 @@ export function UserManagementPage() {
                     )}
                   </button>
                 </TableHead>
-                <TableHead className="text-left py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
-                  User
+                 <TableHead className="text-left py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
+                  <SortableHeader
+                    label="User"
+                    column="full_name"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="text-left px-6 py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
-                  Role
+                  <SortableHeader
+                    label="Role"
+                    column="role"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 {isSuperAdmin && (
                   <TableHead className="text-left px-6 py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
-                    Application
+                    <SortableHeader
+                      label="Application"
+                      column="app_id"
+                      currentSortBy={sortBy}
+                      currentSortOrder={sortOrder}
+                      onSort={handleSort}
+                      className="text-2xs"
+                    />
                   </TableHead>
                 )}
                 <TableHead className="text-left px-6 py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
-                  Date Added
+                  <SortableHeader
+                    label="Date Added"
+                    column="created_at"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="text-left px-6 py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
                   Status

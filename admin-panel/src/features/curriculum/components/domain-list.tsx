@@ -1,63 +1,64 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
+import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
 import { supabase } from '@/lib/supabase';
 import {
-  Book,
-  CheckSquare,
-  Filter,
-  GripVertical,
-  Loader2,
-  Pencil,
-  Plus,
-  Square,
-  Trash2,
-  X,
+    Book,
+    CheckSquare,
+    Filter,
+    GripVertical,
+    Loader2,
+    Pencil,
+    Plus,
+    Square,
+    Trash2,
+    X,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  useBulkCreateDomains,
-  useBulkDeleteDomains,
-  useBulkUpdateDomainsStatus,
-  useDeleteDomain,
-  usePaginatedDomains,
-  useUpdateDomainOrder,
+    useBulkCreateDomains,
+    useBulkDeleteDomains,
+    useBulkUpdateDomainsStatus,
+    useDeleteDomain,
+    usePaginatedDomains,
+    useUpdateDomainOrder,
 } from '../hooks/use-domains';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -154,7 +155,7 @@ function SortableRow({
         <div className="flex flex-col">
           <span className="font-bold text-gray-900 text-sm tracking-tight">{domain.title}</span>
           {domain.apps?.display_name && (
-            <span className="text-[10px] text-indigo-500 font-black uppercase tracking-widest mt-0.5">
+            <span className="text-[10px] text-indigo-700 font-black uppercase tracking-widest mt-0.5">
               App: {domain.apps.display_name}
             </span>
           )}
@@ -163,7 +164,7 @@ function SortableRow({
       <td className="px-6 py-3">
         <span className="text-sm text-gray-900 whitespace-nowrap">
           {new Date(domain.updated_at).toLocaleDateString()}{' '}
-          <span className="text-gray-400">
+          <span className="text-gray-500">
             {new Date(domain.updated_at).toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',
@@ -295,8 +296,8 @@ export function DomainList() {
   const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const sortBy = 'title';
-  const sortOrder = 'asc' as const;
+  const [sortBy, setSortBy] = useState<string>('sort_order');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
     type: 'single' | 'bulk';
     id?: string;
@@ -399,6 +400,16 @@ export function DomainList() {
         }
       }
     }
+  };
+
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+    setPage(1);
   };
 
   const handleSelectOne = useCallback((id: string) => {
@@ -591,7 +602,7 @@ export function DomainList() {
       />
 
       {selectedIds.size > 0 && (
-        <div className="sticky top-24 z-30 flex items-center justify-between p-3 bg-gray-900/90 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl animate-in slide-in-from-top-8 duration-500 max-w-2xl mx-auto w-full">
+        <div className="sticky top-24 z-30 flex flex-col md:flex-row items-center justify-between p-3 bg-gray-900/90 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl animate-in slide-in-from-top-8 duration-500 max-w-2xl mx-auto w-full gap-4 md:gap-0">
           <div className="flex items-center gap-4 pl-4">
             <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
               <span className="text-white font-black text-xs">{selectedIds.size}</span>
@@ -600,7 +611,7 @@ export function DomainList() {
               Bulk Actions
             </span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center justify-center gap-1.5">
             <Button
               variant="ghost"
               size="sm"
@@ -698,16 +709,37 @@ export function DomainList() {
                         <GripVertical className="h-4 w-4 text-gray-300" />
                       </div>
                     </th>
-                    <th className="px-6 py-4 text-left text-2xs font-black text-gray-400 uppercase tracking-widest">
-                      Domain
+                    <th className="px-6 py-4 text-left text-2xs font-black text-gray-600 uppercase tracking-widest">
+                      <SortableHeader
+                        label="Domain"
+                        column="title"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                        className="text-2xs"
+                      />
                     </th>
-                    <th className="px-6 py-4 text-left text-2xs font-black text-gray-400 uppercase tracking-widest">
-                      Last Updated
+                    <th className="px-6 py-4 text-left text-2xs font-black text-gray-600 uppercase tracking-widest">
+                      <SortableHeader
+                        label="Last Updated"
+                        column="updated_at"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                        className="text-2xs"
+                      />
                     </th>
-                    <th className="px-6 py-4 text-left text-2xs font-black text-gray-400 uppercase tracking-widest">
-                      Status
+                    <th className="px-6 py-4 text-left text-2xs font-black text-gray-600 uppercase tracking-widest">
+                      <SortableHeader
+                        label="Status"
+                        column="status"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                        className="text-2xs"
+                      />
                     </th>
-                    <th className="px-6 py-4 text-right text-2xs font-black text-gray-400 uppercase tracking-widest">
+                    <th className="px-6 py-4 text-right text-2xs font-black text-gray-600 uppercase tracking-widest">
                       Actions
                     </th>
                   </tr>

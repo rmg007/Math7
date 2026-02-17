@@ -1,19 +1,19 @@
-import { Link } from 'react-router-dom';
+import { AdminHeader } from '@/components/ui/admin-header';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import {
-  Book,
-  FlaskConical,
-  HelpCircle,
-  Upload,
-  Plus,
-  Clock,
-  TrendingUp,
-  LayoutDashboard,
+    Book,
+    Clock,
+    FlaskConical,
+    HelpCircle,
+    LayoutDashboard,
+    Plus,
+    TrendingUp,
+    Upload,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useDashboardStats, useRecentActivity } from '../hooks/use-dashboard';
-import { Button } from '@/components/ui/button';
-import { AdminHeader } from '@/components/ui/admin-header';
-import { Skeleton } from '@/components/ui/skeleton';
 
 function formatRelativeTime(timestamp: string): string {
   const now = new Date();
@@ -45,7 +45,7 @@ function StatCard({
   isLoading?: boolean;
 }) {
   return (
-    <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-8 shadow-sm hover:shadow-xl transition-all duration-500 group overflow-hidden relative">
+    <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-6 sm:p-8 shadow-sm hover:shadow-xl transition-all duration-500 group overflow-hidden relative">
       <div className="flex items-center gap-5 relative z-10">
         <div
           className={cn(
@@ -124,7 +124,7 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
+    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <AdminHeader
         title="Curriculum Intelligence"
         description="Domains, skills, and publications."
@@ -176,7 +176,7 @@ export function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 shadow-sm overflow-hidden hover:shadow-xl transition-all duration-500">
-          <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
+          <div className="px-6 sm:px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
             <div>
               <h3 className="text-xl font-black text-gray-900 tracking-tight">Command Center</h3>
               <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
@@ -185,7 +185,7 @@ export function DashboardPage() {
             </div>
             <Plus className="h-5 w-5 text-gray-200" />
           </div>
-          <div className="p-8 grid gap-4">
+          <div className="p-6 sm:p-8 grid gap-4">
             <Link to="/domains/new">
               <Button
                 variant="outline"
@@ -277,7 +277,7 @@ export function DashboardPage() {
         </div>
 
         <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 shadow-sm overflow-hidden hover:shadow-xl transition-all duration-500">
-          <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
+          <div className="px-6 sm:px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
             <div>
               <h3 className="text-xl font-black text-gray-900 tracking-tight">Signal Stream</h3>
               <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
@@ -286,7 +286,7 @@ export function DashboardPage() {
             </div>
             <Clock className="h-5 w-5 text-gray-200" />
           </div>
-          <div className="p-8">
+          <div className="p-6 sm:p-8">
             {activitiesLoading ? (
               <div className="flex flex-col gap-4">
                 <Skeleton className="h-16 w-full rounded-2xl" />
@@ -343,14 +343,14 @@ export function DashboardPage() {
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 rounded-[3rem] p-10 shadow-2xl relative overflow-hidden group">
+      <div className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 rounded-[3rem] p-8 sm:p-10 shadow-2xl relative overflow-hidden group">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[80px] -mr-32 -mt-32 rounded-full"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/20 blur-[60px] -ml-24 -mb-24 rounded-full"></div>
 
         <div className="flex items-center justify-between flex-wrap gap-10 relative z-10">
           <div>
-            <h3 className="text-2xl font-black text-white tracking-tight mb-2 uppercase italic">
+            <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-2 uppercase italic">
               Global Integrity Summary
             </h3>
             <div className="flex flex-col gap-1">

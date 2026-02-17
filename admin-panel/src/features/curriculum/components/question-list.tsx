@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,47 +24,47 @@ import { sanitizeHtml } from '@/lib/sanitize';
 import { cn, formatIdentifier } from '@/lib/utils';
 import type { QuestionListItem } from '@/types';
 import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  CheckSquare,
-  Copy,
-  FileText,
-  Filter,
-  GripVertical,
-  Loader2,
-  Pencil,
-  Plus,
-  Sparkles,
-  Square,
-  Trash2,
+    CheckSquare,
+    Copy,
+    FileText,
+    Filter,
+    GripVertical,
+    Loader2,
+    Pencil,
+    Plus,
+    Sparkles,
+    Square,
+    Trash2,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  QuestionInsert,
-  useBulkCreateQuestions,
-  useBulkDeleteQuestions,
-  useBulkUpdateQuestionsStatus,
-  useDeleteQuestion,
-  useDuplicateQuestion,
-  usePaginatedQuestions,
-  useUpdateQuestionOrder,
+    QuestionInsert,
+    useBulkCreateQuestions,
+    useBulkDeleteQuestions,
+    useBulkUpdateQuestionsStatus,
+    useDeleteQuestion,
+    useDuplicateQuestion,
+    usePaginatedQuestions,
+    useUpdateQuestionOrder,
 } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
@@ -171,7 +171,7 @@ const SortableRow = memo(
               }}
             />
             {question.apps?.display_name && (
-              <span className="text-[10px] text-indigo-500 font-black uppercase tracking-widest mt-1">
+              <span className="text-[10px] text-indigo-700 font-black uppercase tracking-widest mt-1">
                 App: {question.apps.display_name}
               </span>
             )}
@@ -185,7 +185,7 @@ const SortableRow = memo(
         <td className="px-4 py-5 text-center">
           <span className="text-sm font-black text-gray-900">
             {question.points}{' '}
-            <span className="text-[8px] text-gray-400 uppercase tracking-tighter">PTS</span>
+            <span className="text-[8px] text-gray-600 uppercase tracking-tighter">PTS</span>
           </span>
         </td>
         <td className="px-4 py-5">
@@ -323,7 +323,7 @@ const SortableCard = memo(
               }}
             />
             {question.apps?.display_name && (
-              <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mt-1 mb-3">
+              <p className="text-[10px] font-black text-indigo-700 uppercase tracking-widest mt-1 mb-3">
                 {question.apps.display_name}
               </p>
             )}
@@ -831,7 +831,7 @@ export function QuestionList() {
 
       {/* Bulk Actions Bar */}
       {selectedIds.size > 0 && (
-        <div className="sticky top-24 z-30 flex items-center justify-between p-3 bg-gray-900/90 backdrop-blur-xl border border-white/10 rounded-[1.5rem] shadow-2xl shadow-indigo-600/20 animate-in slide-in-from-top-8 duration-500 max-w-2xl mx-auto w-full">
+        <div className="sticky top-24 z-30 flex flex-col md:flex-row items-center justify-between p-3 bg-gray-900/90 backdrop-blur-xl border border-white/10 rounded-[1.5rem] shadow-2xl shadow-indigo-600/20 animate-in slide-in-from-top-8 duration-500 max-w-2xl mx-auto w-full gap-4 md:gap-0">
           <div className="flex items-center gap-4 pl-4">
             <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
               <span className="text-white font-black text-xs">{selectedIds.size}</span>
@@ -840,7 +840,7 @@ export function QuestionList() {
               Clustered Operations
             </span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center justify-center gap-1.5">
             <Button
               variant="ghost"
               size="sm"
@@ -921,10 +921,14 @@ export function QuestionList() {
                     />
                   </th>
                   <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
-                    <div className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors cursor-default">
-                      <Filter className="h-3 w-3" />
-                      Target Skill
-                    </div>
+                    <SortableHeader
+                      label="Target Skill"
+                      column="skills.title"
+                      currentSortBy={sortBy}
+                      currentSortOrder={sortOrder}
+                      onSort={handleSort}
+                      className="text-2xs"
+                    />
                   </th>
                   <th className="h-14 px-4 text-center font-black text-2xs uppercase tracking-widest text-gray-600">
                     <SortableHeader

@@ -9,13 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Project HADES**: Completed Phase 1 (The Foundry) Audit & Remediation.
-- **Admin Panel**: DNS Config column in Applications table showing required CNAME mapping.
-- **Admin Panel**: Fixed full-screen height and overflow issues in deployment modal.
-- **Admin Panel**: Advanced Subject management with hardened RLS security.
+- **Admin Panel**: Improved responsive layout for 375px viewports across all curriculum management pages and forms.
+- **Admin Panel**: Added global `overflow-x-hidden` and adaptive typography to prevent layout breakage on small screens.
+- **Admin Panel**: Standardized padding and shadow behaviors on mobile for `LoginPage`, `DomainList`, `SkillList`, and `QuestionList`.
+- **Admin Panel**: Cross-app transparency for Super Admins in Curriculum management. List views now display the associated Application name when viewing across all apps.
+- **Admin Panel**: Enhanced deletion confirmation with precise application context for impacted items.
+- **Testing**: Added `tests/responsiveness.spec.ts` for automated mobile/tablet/desktop responsiveness validation.
 
 ### Fixed
 
+- **Type Safety**: Fixed `sortBy` type indexing in `UserManagementPage` to eliminate `tsc` errors.
+- **Admin Panel**: Resolved domain deletion discrepancy where associated skills/questions were incorrectly reported due to multi-tenant overlap.
+- **Admin Panel**: Fixed `usePaginatedSkills` and `usePaginatedQuestions` hooks to allow Super Admins to view all apps when the 'All Apps' filter is active.
+- **Type Safety**: Synchronized `QuestionListItem` and `DomainListItem` types with joined application metadata.
+- **Project HADES**: Completed Phase 3 (The Anatomy) Architecture Audit - Architecture Drift & Multi-tenant Visibility.
 - **Admin Panel**: Resolved 403 Forbidden error on Subject creation/deletion for administrators.
 - **Admin Panel**: Hardened error tracking by filtering `ResizeObserver` and `AbortError` noise.
 - **Admin Panel**: Applications now normalized to lowercase on save to prevent DNS mismatch.

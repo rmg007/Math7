@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
@@ -21,46 +21,46 @@ import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
 import { cn } from '@/lib/utils';
 import {
-  CheckSquare,
-  Copy,
-  Filter,
-  GripVertical,
-  Layers,
-  Pencil,
-  Plus,
-  Square,
-  Trash2,
+    CheckSquare,
+    Copy,
+    Filter,
+    GripVertical,
+    Layers,
+    Pencil,
+    Plus,
+    Square,
+    Trash2,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDomains } from '../hooks/use-domains';
 import {
-  useBulkCreateSkills,
-  useBulkDeleteSkills,
-  useBulkUpdateSkillsStatus,
-  useDeleteSkill,
-  useDuplicateSkill,
-  usePaginatedSkills,
-  useUpdateSkillOrder,
+    useBulkCreateSkills,
+    useBulkDeleteSkills,
+    useBulkUpdateSkillsStatus,
+    useDeleteSkill,
+    useDuplicateSkill,
+    usePaginatedSkills,
+    useUpdateSkillOrder,
 } from '../hooks/use-skills';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -164,7 +164,7 @@ const SortableRow = memo(
               {skill.title}
             </span>
             {skill.apps?.display_name && (
-              <span className="text-[10px] text-indigo-500 font-black uppercase tracking-widest mt-1">
+              <span className="text-[10px] text-indigo-700 font-black uppercase tracking-widest mt-1">
                 App: {skill.apps.display_name}
               </span>
             )}
@@ -689,13 +689,13 @@ export function SkillList() {
 
       {/* Bulk Actions Bar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center justify-between p-4 bg-indigo-600 rounded-[2rem] shadow-xl shadow-indigo-600/20 animate-in slide-in-from-top-4 duration-500">
+        <div className="flex flex-col md:flex-row items-center justify-between p-4 bg-indigo-600 rounded-[2rem] shadow-xl shadow-indigo-600/20 animate-in slide-in-from-top-4 duration-500 gap-4 md:gap-0">
           <div className="flex items-center gap-4 pl-4">
             <span className="text-white font-black text-xs uppercase tracking-extra-wide">
               {selectedIds.size} Selected
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             <Button
               variant="ghost"
               size="sm"
@@ -766,7 +766,14 @@ export function SkillList() {
                     />
                   </th>
                   <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
-                    Domain
+                    <SortableHeader
+                      label="Domain"
+                      column="domains.title"
+                      currentSortBy={sortBy}
+                      currentSortOrder={sortOrder}
+                      onSort={handleSort}
+                      className="text-2xs"
+                    />
                   </th>
                   <th className="h-14 px-4 text-center font-black text-2xs uppercase tracking-widest text-gray-600">
                     <SortableHeader
@@ -779,7 +786,14 @@ export function SkillList() {
                     />
                   </th>
                   <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
-                    Status
+                    <SortableHeader
+                      label="Status"
+                      column="status"
+                      currentSortBy={sortBy}
+                      currentSortOrder={sortOrder}
+                      onSort={handleSort}
+                      className="text-2xs"
+                    />
                   </th>
                   <th className="h-14 pl-4 pr-8 text-right font-black text-2xs uppercase tracking-widest text-gray-600">
                     Actions

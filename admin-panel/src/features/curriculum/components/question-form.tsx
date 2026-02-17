@@ -3,21 +3,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useApp } from '@/hooks/use-app';
@@ -26,14 +26,14 @@ import { Database } from '@/lib/database.types';
 import { normalizeFormData } from '@/lib/normalization';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  CheckCircle2,
-  FileText,
-  HelpCircle,
-  Layers,
-  Loader2,
-  Plus,
-  Settings,
-  Trash,
+    CheckCircle2,
+    FileText,
+    HelpCircle,
+    Layers,
+    Loader2,
+    Plus,
+    Settings,
+    Trash,
 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -42,12 +42,12 @@ import { z } from 'zod';
 import { useCreateQuestion, useUpdateQuestion } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 import {
-  BooleanSolution,
-  McqMultiSolution,
-  McqSolution,
-  QuestionOptions,
-  ReorderStepsSolution,
-  TextInputSolution,
+    BooleanSolution,
+    McqMultiSolution,
+    McqSolution,
+    QuestionOptions,
+    ReorderStepsSolution,
+    TextInputSolution,
 } from '../types/question-types';
 
 type Question = Database['public']['Tables']['questions']['Row'];
@@ -286,7 +286,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
               <div className="lg:col-span-2 space-y-8">
                 {/* Content Area */}
                 <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
-                  <CardContent className="p-8 md:p-10 space-y-8">
+                  <CardContent className="p-4 sm:p-8 md:p-10 space-y-8">
                     <div className="flex items-center gap-4 mb-2">
                       <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/10">
                         <FileText className="h-5 w-5 text-indigo-600" />
@@ -323,7 +323,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
 
                 {/* Answer Logic */}
                 <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
-                  <CardContent className="p-8 md:p-10 space-y-8">
+                  <CardContent className="p-4 sm:p-8 md:p-10 space-y-8">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-4">
                         <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/10">
@@ -374,6 +374,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                                       }}
                                       placeholder={`Option ${opt.id.toUpperCase()}`}
                                       className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                                      required
                                     />
                                   </div>
                                   <Button
@@ -496,6 +497,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                             onChange={(e) => form.setValue('solution', e.target.value)}
                             placeholder="Enter the authoritative response..."
                             className="h-14 rounded-2xl bg-white/50 border-gray-100 text-lg font-black tracking-tight focus:ring-8 focus:ring-emerald-500/5 transition-all"
+                            required
                           />
                         </div>
                       </div>
@@ -569,6 +571,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                                 }}
                                 placeholder={`Step ${index + 1} content...`}
                                 className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold"
+                                required
                               />
                               <Button
                                 type="button"
@@ -630,7 +633,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
 
                 {/* Explanation */}
                 <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
-                  <CardContent className="p-8 md:p-10 space-y-8">
+                  <CardContent className="p-4 sm:p-8 md:p-10 space-y-8">
                     <div className="flex items-center gap-4 mb-2">
                       <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/10">
                         <HelpCircle className="h-5 w-5 text-amber-600" />
@@ -668,7 +671,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
               <div className="space-y-8">
                 {/* Protocol Settings */}
                 <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
-                  <CardContent className="p-8 space-y-8">
+                  <CardContent className="p-4 sm:p-8 space-y-8">
                     <div className="flex items-center gap-4">
                       <div className="p-2.5 rounded-xl bg-slate-500/10 border border-slate-500/10">
                         <Settings className="h-5 w-5 text-slate-600" />
@@ -698,6 +701,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                               ))}
                             </SelectContent>
                           </Select>
+                          <FormMessage className="text-2xs font-bold text-red-500 italic" />
                         </FormItem>
                       )}
                     />
@@ -728,6 +732,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                               ))}
                             </SelectContent>
                           </Select>
+                          <FormMessage className="text-2xs font-bold text-red-500 italic" />
                         </FormItem>
                       )}
                     />
@@ -746,8 +751,10 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                               min={1}
                               {...field}
                               className="h-12 rounded-xl bg-white/50 border-gray-100 font-black text-lg focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                              required
                             />
                           </FormControl>
+                          <FormMessage className="text-2xs font-bold text-red-500 italic" />
                         </FormItem>
                       )}
                     />
@@ -756,7 +763,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
 
                 {/* Categorization */}
                 <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
-                  <CardContent className="p-8 space-y-6">
+                  <CardContent className="p-4 sm:p-8 space-y-6">
                     <div className="flex items-center gap-4">
                       <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/10">
                         <Layers className="h-5 w-5 text-purple-600" />

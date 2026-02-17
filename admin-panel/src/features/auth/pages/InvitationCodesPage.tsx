@@ -10,13 +10,14 @@ import { memo, useCallback, useEffect, useState } from 'react';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SortableHeader } from '@/components/ui/sortable-header';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 
 type InvitationCode = Tables<'invitation_codes'>;
@@ -138,6 +139,8 @@ export function InvitationCodesPage() {
   const [pageSize, setPageSize] = useState(10);
   const [expiresDays, setExpiresDays] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<string>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -145,7 +148,28 @@ export function InvitationCodesPage() {
     c.code.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const paginatedCodes = filteredCodes.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const sortedCodes = [...filteredCodes].sort((a, b) => {
+    const aValue = a[sortBy as keyof InvitationCode];
+    const bValue = b[sortBy as keyof InvitationCode];
+
+    if (aValue === bValue) return 0;
+    if (aValue === null || aValue === undefined) return 1;
+    if (bValue === null || bValue === undefined) return -1;
+
+    const result = aValue < bValue ? -1 : 1;
+    return sortOrder === 'asc' ? result : -result;
+  });
+
+  const paginatedCodes = sortedCodes.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+  };
 
   const fetchCodes = useCallback(async () => {
     setLoading(true);
@@ -436,19 +460,54 @@ export function InvitationCodesPage() {
                   </button>
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Invitation Code
+                  <SortableHeader
+                    label="Invitation Code"
+                    column="code"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Status
+                  <SortableHeader
+                    label="Status"
+                    column="is_active"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Utilization
+                  <SortableHeader
+                    label="Utilization"
+                    column="times_used"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Expiration
+                  <SortableHeader
+                    label="Expiration"
+                    column="expires_at"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Created
+                  <SortableHeader
+                    label="Created"
+                    column="created_at"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="text-right px-8 h-14 font-black text-2xs uppercase tracking-widest text-gray-400">
                   Execution

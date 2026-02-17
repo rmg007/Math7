@@ -1,21 +1,21 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { FormActions } from '@/components/ui/form-actions';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Database } from '@/lib/database.types';
@@ -128,7 +128,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
             className="space-y-8 disabled:opacity-60"
           >
             <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
-              <CardContent className="p-8 md:p-10 space-y-8">
+              <CardContent className="p-4 sm:p-8 md:p-10 space-y-8">
                 <FormField
                   control={form.control}
                   name="domain_id"
@@ -184,6 +184,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
                             placeholder="e.g. Single-Digit Addition"
                             {...field}
                             className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all border"
+                            required
                           />
                         </FormControl>
                         <FormMessage className="text-xs font-bold text-red-500 italic" />
@@ -207,6 +208,9 @@ export function SkillForm({ initialData }: SkillFormProps) {
                             placeholder="e.g. addition_basic"
                             {...field}
                             className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all border"
+                            required
+                            pattern="[a-z0-9_]+"
+                            title="Lowercase letters, numbers, and underscores only"
                           />
                         </FormControl>
                         <FormMessage className="text-xs font-bold text-red-500 italic" />
@@ -234,6 +238,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
                             max={5}
                             {...field}
                             className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-amber-500/10 transition-all border text-center"
+                            required
                           />
                         </FormControl>
                         <FormMessage className="text-xs font-bold text-red-500 italic" />
@@ -257,6 +262,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
                             type="number"
                             {...field}
                             className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-slate-500/10 transition-all border text-center"
+                            required
                           />
                         </FormControl>
                         <FormMessage className="text-xs font-bold text-red-500 italic" />

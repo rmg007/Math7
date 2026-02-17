@@ -21,7 +21,7 @@ export function AdminHeader({
   backTo
 }: AdminHeaderProps) {
   return (
-    <div className={cn("space-y-4 mb-8", className)}>
+    <div className={cn("space-y-4 mb-8 w-full overflow-hidden", className)}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           {backTo && (
@@ -39,12 +39,12 @@ export function AdminHeader({
             </div>
           )}
           <div>
-            <h1 data-testid="admin-header-title" className="text-3xl font-bold text-foreground tracking-tight">{title}</h1>
+            <h1 data-testid="admin-header-title" className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">{title}</h1>
             {description && <p className="text-muted-foreground mt-1 max-w-2xl">{description}</p>}
           </div>
         </div>
         {actions && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap overflow-hidden">
             {actions}
           </div>
         )}

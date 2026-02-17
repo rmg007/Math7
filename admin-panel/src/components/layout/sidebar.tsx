@@ -1,37 +1,37 @@
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import {
-  AlertTriangle,
-  BarChart3,
-  Book,
-  Boxes,
-  Bug,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  FileText,
-  FileUp,
-  Globe,
-  History,
-  Key,
-  Layers,
-  Layout,
-  LifeBuoy,
-  LogOut,
-  MessageSquare,
-  Settings,
-  Shield,
-  Upload,
-  UserCog,
-  Users,
+    AlertTriangle,
+    BarChart3,
+    Book,
+    Boxes,
+    Bug,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    FileText,
+    FileUp,
+    Globe,
+    History,
+    Key,
+    Layers,
+    Layout,
+    LifeBuoy,
+    LogOut,
+    MessageSquare,
+    Settings,
+    Shield,
+    Upload,
+    UserCog,
+    Users,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -259,7 +259,9 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
         {!isSidebarCollapsed && (
           <div className="flex items-center gap-0.5">
             <a
-              href="mailto:support@questerix.com?subject=Admin%20Panel%20Feedback"
+              href="https://github.com/rmg007/Questerix/issues"
+              target="_blank"
+              rel="noopener noreferrer"
               className="p-1.5 rounded-lg text-purple-300/40 hover:text-white hover:bg-white/10 transition-colors"
               title="Help & Feedback"
             >

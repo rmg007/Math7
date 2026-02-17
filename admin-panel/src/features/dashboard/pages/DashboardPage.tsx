@@ -6,27 +6,27 @@ import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Activity,
-  AlertCircle,
-  ArrowDownRight,
-  ArrowUpRight,
-  BookOpen,
-  BrainCircuit,
-  Database,
-  Layers,
+    Activity,
+    AlertCircle,
+    ArrowDownRight,
+    ArrowUpRight,
+    BookOpen,
+    BrainCircuit,
+    Database,
+    Layers,
 } from 'lucide-react';
 import React, { useState } from 'react';
 import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
+    Area,
+    AreaChart,
+    CartesianGrid,
+    Cell,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
 } from 'recharts';
 
 const COLORS = ['#6366f1', '#a855f7', '#ec4899', '#f43f5e'];
@@ -258,13 +258,13 @@ export function DashboardPage() {
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }}
+                    tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }}
                     dy={10}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }}
+                    tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }}
                     dx={-10}
                   />
                   <Tooltip

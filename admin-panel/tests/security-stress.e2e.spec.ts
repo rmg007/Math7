@@ -56,7 +56,7 @@ test.describe('Security Stress: Multi-tenant Isolation Force Check', () => {
     const { error: insertError } = await supabaseB.from('domains').insert({
       title: 'MALICIOUS INSERT',
       app_id: alphaAppId,
-      slug: 'malicious-slug',
+      slug: 'malicious-slug-unique-stress-test',
     });
 
     // Likely fails Code 42501 (Insufficient Privilege) because current_app_id() mismatch

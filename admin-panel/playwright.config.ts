@@ -38,28 +38,26 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
-      use: { 
+      name: 'desktop',
+      use: {
         ...devices['Desktop Chrome'],
-        viewport: { width: 1920, height: 1080 },
+        viewport: { width: 1440, height: 900 },
+      },
+    },
+    {
+      name: 'mobile',
+      use: {
+        ...devices['iPhone 12'],
+        viewport: { width: 375, height: 812 },
       },
     },
     {
       name: 'tablet',
-      testMatch: /visual-regression/,
       use: {
-        ...devices['iPad Pro 11'],
+        ...devices['iPad Mini'],
+        viewport: { width: 768, height: 1024 },
       },
     },
-    // Uncomment to test on other browsers
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
   ],
   webServer: {
     command: 'npm run dev -- --mode test',

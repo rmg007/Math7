@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -153,6 +154,8 @@ export function AppsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [sortBy, setSortBy] = useState<string>('display_name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingApp, setEditingApp] = useState<CompiledApp | null>(null);
   const [formData, setFormData] = useState({
@@ -241,7 +244,34 @@ export function AppsPage() {
         app.subjects?.title.toLowerCase().includes(searchQuery.toLowerCase())
     ) || [];
 
-  const paginatedApps = filteredApps.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const sortedApps = [...filteredApps].sort((a, b) => {
+    let aValue: any = a[sortBy as keyof CompiledApp];
+    let bValue: any = b[sortBy as keyof CompiledApp];
+
+    // Special handling for nested fields or computed values if needed
+    if (sortBy === 'subject') {
+      aValue = a.subjects?.title || '';
+      bValue = b.subjects?.title || '';
+    }
+
+    if (aValue === bValue) return 0;
+    if (aValue === null || aValue === undefined) return 1;
+    if (bValue === null || bValue === undefined) return -1;
+
+    const result = aValue < bValue ? -1 : 1;
+    return sortOrder === 'asc' ? result : -result;
+  });
+
+  const paginatedApps = sortedApps.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
@@ -304,22 +334,57 @@ export function AppsPage() {
             <TableHeader>
               <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b-2 border-gray-100">
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 px-8 h-14">
-                  Application Name
+                  <SortableHeader
+                    label="Application Name"
+                    column="display_name"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Cluster Subject
+                  <SortableHeader
+                    label="Cluster Subject"
+                    column="subject"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Subdomain / Link
+                  <SortableHeader
+                    label="Subdomain / Link"
+                    column="subdomain"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   CNAME
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Tier/Grade
+                  <SortableHeader
+                    label="Tier/Grade"
+                    column="grade_level"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
-                  Status
+                  <SortableHeader
+                    label="Status"
+                    column="is_active"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                    className="text-2xs"
+                  />
                 </TableHead>
                 <TableHead className="text-right px-8 h-14 font-black text-2xs uppercase tracking-widest text-gray-400">
                   Actions
@@ -507,6 +572,8 @@ export function AppsPage() {
                     placeholder="m7"
                     className="h-10 rounded-l-xl rounded-r-none border-gray-200 border-r-0 focus:ring-0 focus:border-gray-200 font-mono font-black text-indigo-600 focus:ring-indigo-500/10 text-sm"
                     required
+                    pattern="[a-z0-9-]+"
+                    title="Lowercase letters, numbers, and dashes only"
                   />
                   <div className="h-10 px-3 flex items-center bg-gray-50 border border-gray-200 rounded-r-xl text-[10px] font-black text-gray-400 uppercase tracking-tighter">
                     .questerix.com
