@@ -1,8 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const CLOUDFLARE_ACCOUNT_ID = "1ad655f025b0db1974614aac7ebec10a"
-const CLOUDFLARE_PROJECT_NAME = "questerix-student"
-const BASE_DOMAIN = "questerix.com"
+// --- HADES SECURITY PATCH: Externalize Infra IDs ---
+const CLOUDFLARE_ACCOUNT_ID = Deno.env.get("CLOUDFLARE_ACCOUNT_ID") || "1ad655f025b0db1974614aac7ebec10a";
+const CLOUDFLARE_PROJECT_NAME = Deno.env.get("CLOUDFLARE_PROJECT_NAME") || "questerix-student";
+const BASE_DOMAIN = Deno.env.get("BASE_DOMAIN") || "questerix.com";
 
 interface AppRecord {
   subdomain: string;
@@ -20,10 +21,14 @@ async function handleDomainChange(req: Request) {
     const webhookSecret = Deno.env.get("DOMAIN_WEBHOOK_SECRET");
     const incomingSecret = req.headers.get("x-webhook-secret");
 
-    console.log(`Checking secrets: webhookSecret set? ${!!webhookSecret}, incomingSecret set? ${!!incomingSecret}`);
+    // --- HADES SECURITY PATCH: MANDATORY SECRET ---
+    if (!webhookSecret) {
+      console.error("DOMAIN_WEBHOOK_SECRET missing in environment!");
+      return new Response("Server configuration error", { status: 500 });
+    }
 
-    if (webhookSecret && incomingSecret !== webhookSecret) {
-      console.warn("Secret mismatch!");
+    if (incomingSecret !== webhookSecret) {
+      console.warn(`Unauthorized domain change attempt. Secret mismatch.`);
       return new Response("Unauthorized", { status: 401 });
     }
 

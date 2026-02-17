@@ -15,6 +15,9 @@
 
 ### P0 — Critical Path
 
+- [x] **Project HADES: Phase 1 Audit (The Foundry)** — RLS Ghosting, Multi-tenant Isolation, Edge Function Auth.
+- [x] **Project HADES: Phase 2 Audit (The Pipeline)** — Sync Service Loop fix, RLS Tenant Isolation (admin tables), AI Prompt Injection hardening.
+- [ ] **Project HADES: Phase 3 Audit (The Anatomy)** — Architecture Drift, Type Safety, CORS.
 - [ ] **Beta Feedback Loop**: Ensure the sidebar feedback mechanism correctly pipes to Supabase/Edge Function.
 
 ### P1 — UI/UX & Reliability
@@ -39,9 +42,9 @@
 
 ## 🚀 SYSTEM STATE (SSoT)
 
-- **Infrastructure**: ✅ Production Stable (Admin Panel & Student App)
-- **Security**: ✅ RLS Hardened, Secrets Rotated
-- **CI/CD**: ✅ Self-healing Dispatch Active
+- **Infrastructure**: ✅ Production Live (Cloudflare Pages) — Last Deployed: 2026-02-16 16:21
+- **Security**: ✅ HADES Phase 1 & 2 Remediation Complete
+- **CI/CD**: ✅ Parallel Orchestrator Stabilized
 
 ---
 
@@ -50,10 +53,10 @@
 ```powershell
 ./scripts/run-all-tests.ps1   # Parallelized test suite execution
 ./scripts/preflight.ps1       # Comprehensive code hygiene check
-supabase gen types typescript --project-id bkfhorslctqieetzqdtd > admin-panel/src/lib/database.types.ts
+python ops_runner.py tasks.json # Autonomous execution
 ```
 
 ---
 
-**Last Synchronized**: 2026-02-16 14:47 PST
+**Last Synchronized**: 2026-02-16 16:26 PST
 **Project Context**: RMG-007 / Questerix

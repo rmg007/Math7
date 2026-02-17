@@ -12,14 +12,6 @@ interface DriftRequest {
   scope?: 'schema' | 'code' | 'all'
 }
 
-interface DriftFinding {
-  type: 'missing' | 'extra' | 'mismatch'
-  entity: string
-  expected: string
-  actual: string
-  severity: 'critical' | 'high' | 'medium' | 'low'
-}
-
 export async function analyzeSpecDriftHandler(req: Request, deps?: { supabase?: any; genAI?: any }): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -28,15 +20,32 @@ export async function analyzeSpecDriftHandler(req: Request, deps?: { supabase?: 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const authHeader = req.headers.get('Authorization')!;
+
     const supabaseClient = deps?.supabase || createClient(
       supabaseUrl,
       supabaseAnonKey,
       {
         global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
+          headers: { Authorization: authHeader },
         },
       }
     )
+
+    // --- HADES SECURITY PATCH: ROLE & TENANT CHECK ---
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
+    }
+
+    const userRole = user.app_metadata?.user_role || user.user_metadata?.user_role;
+    const isAdmin = userRole === 'admin' || userRole === 'super_admin';
+
+    if (!isAdmin) {
+      console.warn(`Non-admin user ${user.id} attempted to trigger spec-drift analysis.`);
+      return new Response(JSON.stringify({ error: 'Forbidden: Admin access required' }), { status: 403, headers: corsHeaders });
+    }
+    // --- END PATCH ---
 
     const { specId, targetPath, scope = 'all' }: DriftRequest = await req.json()
 

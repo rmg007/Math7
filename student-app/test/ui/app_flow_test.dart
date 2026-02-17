@@ -1,19 +1,18 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/native.dart';
-import 'package:questerix_domain/questerix_domain.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:questerix_domain/questerix_domain.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
-
 import 'package:student_app/src/app.dart';
-import 'package:student_app/src/core/database/database.dart';
 import 'package:student_app/src/core/core_providers.dart';
+import 'package:student_app/src/core/database/database.dart';
+import 'package:student_app/src/core/sync/sync_service.dart';
 import 'package:student_app/src/features/auth/providers/auth_provider.dart';
 // Connectivity is now in core_providers.dart
 import 'package:student_app/src/features/home/screens/main_shell.dart';
-import 'package:student_app/src/core/sync/sync_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 // Mock Auth Repo (Domain)
 class MockAuthRepository extends Mock implements AuthRepository {}
@@ -31,7 +30,7 @@ class MockGoTrueClient extends Mock implements supabase.GoTrueClient {}
 class MockSyncService extends StateNotifier<SyncState> implements SyncService {
   MockSyncService() : super(SyncState.idle());
   @override
-  Future<void> sync() async {}
+  Future<void> sync({int retryCount = 0}) async {}
   @override
   Future<void> push() async {}
   @override

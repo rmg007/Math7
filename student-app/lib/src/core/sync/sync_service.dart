@@ -1,14 +1,14 @@
 import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:student_app/src/core/database/database.dart';
+import 'package:questerix_domain/questerix_domain.dart' as model;
 import 'package:student_app/src/core/core_providers.dart';
+import 'package:student_app/src/core/database/database.dart';
 import 'package:student_app/src/features/curriculum/repositories/curriculum_repositories.dart';
 import 'package:student_app/src/features/curriculum/repositories/local_curriculum_repository.dart';
-
-import 'package:questerix_domain/questerix_domain.dart' as model;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Sync state
 class SyncState {
@@ -58,19 +58,38 @@ class SyncService extends StateNotifier<SyncState> {
   ) : super(SyncState.idle());
 
   /// Full sync: push local changes, then pull remote changes
-  Future<void> sync() async {
-    if (state.isSyncing) return;
+  /// Implements safety limits on retries to prevent infinite loops
+  Future<void> sync({int retryCount = 0}) async {
+    if (state.isSyncing && retryCount == 0) return;
 
     try {
-      state = SyncState.syncing();
+      if (retryCount == 0) {
+        state = SyncState.syncing();
+      }
+
       await push();
       await pull();
+
       state = SyncState.success(DateTime.now());
     } catch (e) {
+      debugPrint('SYNC: Error during sync (attempt ${retryCount + 1}): $e');
+
+      // Stop retrying after 3 failed attempts
+      if (retryCount >= 3) {
+        state = SyncState.error('Sync failed after multiple attempts: $e');
+        return;
+      }
+
       state = SyncState.error(e.toString());
-      // Retry after delay
-      await Future.delayed(const Duration(seconds: 5));
-      if (!state.isSyncing) sync();
+
+      // Exponential backoff: 5s, 10s, 20s
+      final delay = Duration(seconds: 5 * (1 << retryCount));
+      await Future.delayed(delay);
+
+      // Only retry if the state hasn't been changed to syncing again by a manual trigger
+      if (!state.isSyncing) {
+        await sync(retryCount: retryCount + 1);
+      }
     }
   }
 

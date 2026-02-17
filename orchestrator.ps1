@@ -246,13 +246,17 @@ function Invoke-PhaseBuild {
     # Proper format dart defines
 
     $definesList = Get-Content (Join-Path $ScriptDir '.flutter-defines.tmp')
-    $definesArg = ""
+    $definesArg = @()
     foreach ($line in $definesList) {
-        if ($line.Trim() -and -not $line.StartsWith("#")) {
-            $definesArg += " --dart-define=$line"
+        $trimmed = $line.Trim()
+        if ($trimmed -and -not $trimmed.StartsWith("#")) {
+            $definesArg += "--dart-define=$trimmed"
         }
     }
-    Invoke-Expression "flutter build web --release --no-tree-shake-icons $definesArg"
+    
+    Write-Info "Building Student App with defines..."
+    # Use direct call with array to correctly pass arguments through PowerShell's native argument handling
+    & flutter build web --release --no-tree-shake-icons $definesArg
     Set-Location $ScriptDir
 
     

@@ -1,3 +1,82 @@
+## 2026-02-16 (Late Night): Project HADES Remediation - Phase 1 (The Foundry)
+
+### Session Context
+
+- **Trigger**: Subject visibility issues for admins during app creation and UI/UX inconsistencies.
+- **Scope**: `admin-panel/src/features/platform/pages/SubjectsPage.tsx`, `admin-panel/src/components/ui/select.tsx`, `AppsPage.tsx`.
+- **Outcome**: ✅ Subject status management added to Admin UI, ✅ Table Status column with color-coded badges, ✅ Z-index and layout conflict resolved, ✅ Super Admin JWT claim hardening.
+
+### What Was Done
+
+#### 1. Subject Management & Visibility
+
+- **Incident**: Admins couldn't see newly created subjects in the "New Application" dropdown because they defaulted to `draft`. The UI lacked a way to change status.
+- **Fix**:
+  - Added a **Curriculum Status** dropdown (Draft, Live, Published) to the Subject creation/edit modal.
+  - Added a **Status column** to the Subjects table with premium color-coded badges (Emerald for Live, Gray for Draft, Blue for Published).
+  - Improved the Subject form layout with a 3-column grid for Color, Order, and Status.
+- **Verification**: Confirmed that setting a subject to "Live" immediately makes it visible in the app deployment flow.
+
+#### 2. UI Conflict Resolution (Z-Index & Stacking)
+
+- **Incident**: The "Primary Subject" dropdown in the "New Application" modal was rendering behind the dialog or appearing horizontally displaced.
+- **Fix**:
+  - Modified `admin-panel/src/components/ui/select.tsx` to set `SelectContent`'s z-index to `z-[100]`, ensuring it tops the standard `z-[70]` Dialog.
+  - Removed `overflow-hidden` and `backdrop-blur` from `DialogContent` in `AppsPage.tsx` to prevent unexpected stacking context shifts that caused dropdown misalignment.
+
+#### 3. Super Admin JWT Hardening
+
+- **Incident**: `jwt_is_super_admin()` relied solely on a database profile lookup. If the database was in a partial state or the profile wasn't yet created, super admins were locked out.
+- **Fix**: Updated the SQL function to check both the `public.profiles` table AND the `auth.jwt()` claims (`user_role`). This allows super admins to retain their elevated status even if their profile record is being synchronized.
+
+### Technical Learnings
+
+- **Z-Index Modularity**: Standard Shadcn UI z-indices (`z-50`) are often insufficient when multiple portal-based components (Dialogs, Selects, Tooltips) are nested. Explicitly defining a hierarchy (e.g., Dialog=70, Select=100) is necessary for complex administrative interfaces.
+- **Hybrid Auth checks**: In Supabase RLS, don't rely solely on `auth.uid() -> profiles.role`. For critical super-admin keys, check the JWT claims directly as a failsafe to prevent "chicken-and-egg" lockouts during multi-tenant provisioning.
+- **Stacking Context Side Effects**: `backdrop-blur` and `overflow-hidden` are "expensive" CSS properties that create new stacking contexts. When used on a parent modal, they can break the positioning of absolute/fixed child elements (like dropdown portals) in non-obvious ways.
+
+---
+
+## 2026-02-16 (Evening): Deployment Pipeline Hardening & Test Regression Recovery
+
+### Session Context
+
+- **Trigger**: Script syntax errors in deployment pipeline and test failures in JSDOM environment.
+- **Scope**: `orchestrator.ps1`, `deploy-all.ps1`, `vitest.setup.ts`, `use-toast.test.tsx`.
+- **Outcome**: ✅ Successful build and deploy of Admin & Student apps, ✅ ASCII-sanitized scripts, ✅ 100% Vitest pass rate restored.
+
+### What Was Done
+
+#### 1. Script Sanitization (ASCII Standard)
+
+- **Incident**: Deployment scripts failed with "Unexpected token '}'" despite valid logic.
+- **Root Cause**: Encoding drift. Emojis and box-drawing characters in the scripts were mis-interpreted by terminal host processes, leading to junk bytes that "swallowed" code symbols.
+- **Fix**: Removed all emojis and non-ASCII characters from `orchestrator.ps1`, `deploy-all.ps1`, and `preflight.ps1`. Established a strict ASCII-only standard for infrastructure code.
+
+#### 2. Sequential Deployment Reliability
+
+- **Refactor**: Switched `deploy-all.ps1` from parallel background jobs (`Start-Job`) to sequential execution.
+- **Reason**: Background jobs in certain PowerShell environments do not inherit environment variables (like `CLOUDFLARE_API_TOKEN`) unless explicitly serialized. Sequential execution ensures consistent environment state and reliable CLI authentication.
+
+#### 3. Test Environment Polyfills
+
+- **Fix**: Created `admin-panel/src/vitest.setup.ts` to mock `ResizeObserver` and `window.matchMedia`.
+- **Reason**: These APIs are used by Radix UI but are missing in the `jsdom` environment used by Vitest, causing tests to crash on component render.
+- **Test Alignment**: Updated `useToast` unit tests to expect a `TOAST_LIMIT` of 3, matching the production value (previously hardcoded to 1).
+
+#### 4. Credential Shadowing Protection
+
+- **Hardening**: Updated `orchestrator.ps1` to detect `REPLACE_ME` placeholders in `.secrets`.
+- **Logic**: If a placeholder is detected, the environment variable is explicitly cleared. This prevents an invalid token from shadowing a valid local Wrangler session.
+
+### Technical Learnings
+
+- **Encoding vs. Aesthetics**: Infrastructure scripts should prioritize encoding robustness over visual aesthetics. Emojis are a syntax risk in mixed-terminal environments.
+- **Job Isolation vs. Speed**: Parallelism in PowerShell scripts adds significant complexity to secret management. For deployment tasks where reliability is paramount, sequential execution is the safer default.
+- **JSDOM Polyfilling**: Always check for modern browser APIs when using premium UI libraries. Centralizing mocks in a setup file is more maintainable than mocking per-test.
+
+---
+
 ## 2026-02-16 (Late Night - Session 2): Subject CRUD Remediation & Sync Stabilization
 
 ### Session Context

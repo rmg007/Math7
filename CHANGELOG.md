@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Project HADES**: Completed Phase 1 (The Foundry) Audit & Remediation.
 - **Admin Panel**: DNS Config column in Applications table showing required CNAME mapping.
+- **Admin Panel**: Fixed full-screen height and overflow issues in deployment modal.
 - **Admin Panel**: Advanced Subject management with hardened RLS security.
 
 ### Fixed
@@ -27,6 +29,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Testing**: Refactored illegal `await import` calls in unit tests to standard top-level imports.
 - **Testing**: Stabilized `data-utils` tests by switching to `globalThis` spying for URL APIs and expanded coverage to 100% with pure unit testing strategies.
 - **Backend**: Refactored Supabase Edge Functions to use handlers and guarded server loops for unit test compatibility.
+
+## [2.0.2] - 2026-02-16
+
+### Added
+
+- **Orchestration**: Added `-SkipTesting` and `-SkipBuild` flags to `orchestrator.ps1` for flexible deployment pipelines.
+
+### Fixed
+
+- **Deployment**: Stabilized `deploy-all.ps1` by switching to sequential execution, ensuring environment variable inheritance for Cloudflare credentials.
+- **Deployment**: Sanitized all PowerShell scripts to be ASCII-only, eliminating "Unexpected token" syntax errors caused by encoding drift of emojis/box-drawing characters.
+- **Deployment**: Hardened Cloudflare authentication by detecting and clearing `REPLACE_ME` placeholders in `.secrets`, allowing fallback to local Wrangler sessions.
+- **Testing**: Resolved `ResizeObserver` and `matchMedia` definition errors in `jsdom` by implementing a global `vitest.setup.ts`.
+- **Testing**: Updated `useToast` unit tests to align with the production `TOAST_LIMIT` of 3.
+- **Infrastructure**: Fixed path resolution in `generate-env.ps1` to handle absolute paths for configuration and secrets.
 
 ### Changed
 

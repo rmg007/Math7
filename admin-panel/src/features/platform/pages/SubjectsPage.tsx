@@ -11,6 +11,13 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Table,
   TableBody,
   TableCell,
@@ -20,6 +27,7 @@ import {
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { normalizeFormData } from '@/lib/normalization';
+import { cn } from '@/lib/utils';
 import { Boxes, Layers, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import {
@@ -81,6 +89,20 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
           </span>
         </div>
       </TableCell>
+      <TableCell className="py-5">
+        <div className="flex items-center">
+          <span
+            className={cn(
+              'px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border',
+              subject.status === 'live' && 'bg-emerald-50 text-emerald-600 border-emerald-100',
+              subject.status === 'draft' && 'bg-gray-50 text-gray-500 border-gray-200',
+              subject.status === 'published' && 'bg-blue-50 text-blue-600 border-blue-100'
+            )}
+          >
+            {subject.status}
+          </span>
+        </div>
+      </TableCell>
       <TableCell className="px-8 py-5 text-right">
         <div className="flex justify-end gap-2">
           <Button
@@ -122,6 +144,7 @@ export function SubjectsPage() {
     description: '',
     color_hex: '',
     display_order: 1,
+    status: 'draft' as 'draft' | 'published' | 'live',
   });
 
   const handleOpenDialog = useCallback(
@@ -134,6 +157,7 @@ export function SubjectsPage() {
           description: subject.description || '',
           color_hex: subject.color_hex || '',
           display_order: subject.display_order ?? 1,
+          status: (subject.status || 'draft') as 'draft' | 'published' | 'live',
         });
       } else {
         setEditingSubject(null);
@@ -143,6 +167,7 @@ export function SubjectsPage() {
           description: '',
           color_hex: '',
           display_order: (subjects?.length ?? 0) + 1,
+          status: 'draft' as 'draft' | 'published' | 'live',
         });
       }
       setIsDialogOpen(true);
@@ -284,6 +309,9 @@ export function SubjectsPage() {
                 <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
                   Order
                 </TableHead>
+                <TableHead className="font-black text-2xs uppercase tracking-widest text-gray-400 h-14">
+                  Status
+                </TableHead>
                 <TableHead className="text-right px-8 h-14 font-black text-2xs uppercase tracking-widest text-gray-400">
                   Actions
                 </TableHead>
@@ -389,7 +417,7 @@ export function SubjectsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-3 gap-6">
                   <div className="space-y-2 group">
                     <Label
                       htmlFor="color"
@@ -407,7 +435,7 @@ export function SubjectsPage() {
                         value={formData.color_hex}
                         onChange={(e) => setFormData({ ...formData, color_hex: e.target.value })}
                         placeholder="#8b5cf6"
-                        className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-bold"
+                        className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-bold w-full"
                       />
                     </div>
                   </div>
@@ -428,6 +456,35 @@ export function SubjectsPage() {
                       required
                       className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-bold"
                     />
+                  </div>
+                  <div className="space-y-2 group">
+                    <Label
+                      htmlFor="status"
+                      className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
+                    >
+                      Status
+                    </Label>
+                    <Select
+                      value={formData.status}
+                      onValueChange={(v: 'draft' | 'live' | 'published') =>
+                        setFormData({ ...formData, status: v })
+                      }
+                    >
+                      <SelectTrigger className="h-14 rounded-2xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-bold">
+                        <SelectValue placeholder="Select Status" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
+                        <SelectItem value="draft" className="font-bold">
+                          Draft
+                        </SelectItem>
+                        <SelectItem value="live" className="font-bold text-emerald-600">
+                          Live
+                        </SelectItem>
+                        <SelectItem value="published" className="font-bold text-blue-600">
+                          Published
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 

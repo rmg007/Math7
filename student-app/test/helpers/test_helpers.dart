@@ -1,11 +1,11 @@
+import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:drift/native.dart';
 import 'package:student_app/src/core/core_providers.dart';
+import 'package:student_app/src/core/database/database.dart';
 import 'package:student_app/src/core/sync/sync_service.dart';
 import 'package:student_app/src/features/auth/providers/auth_provider.dart';
-import 'package:student_app/src/core/database/database.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}
 
@@ -15,7 +15,7 @@ class MockSyncService extends StateNotifier<SyncState> implements SyncService {
   MockSyncService() : super(SyncState());
 
   @override
-  Future<void> sync() async {}
+  Future<void> sync({int retryCount = 0}) async {}
 
   @override
   Future<void> pull() async {}

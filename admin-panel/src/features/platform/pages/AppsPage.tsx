@@ -401,32 +401,32 @@ export function AppsPage() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col rounded-3xl p-0 overflow-hidden border-0 shadow-2xl backdrop-blur-3xl bg-white/90">
-          <div className="bg-indigo-600 px-8 py-10 flex items-center justify-between">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col rounded-3xl p-0 border-0 shadow-2xl bg-white">
+          <div className="bg-indigo-600 px-8 py-6 flex items-center justify-between">
             <div>
-              <DialogTitle className="text-2xl font-black text-white tracking-tight">
+              <DialogTitle className="text-xl font-black text-white tracking-tight">
                 {editingApp ? 'RECONFIGURE APP' : 'INITIATE DEPLOYMENT'}
               </DialogTitle>
-              <DialogDescription className="text-indigo-100 text-xs font-bold uppercase tracking-extra-wide mt-1 italic">
+              <DialogDescription className="text-indigo-100 text-[10px] font-bold uppercase tracking-extra-wide mt-0.5 italic">
                 Define cluster parameters
               </DialogDescription>
             </div>
-            <Layout className="w-10 h-10 text-white/20" />
+            <Layout className="w-8 h-8 text-white/20" />
           </div>
 
           <form
             onSubmit={handleSubmit}
-            className="flex-1 overflow-y-auto px-8 py-8 space-y-8 min-h-0"
+            className="flex-1 overflow-y-auto px-8 py-6 space-y-6 min-h-0"
           >
-            <div className="p-4 bg-orange-50/50 border border-orange-100 rounded-2xl flex gap-4">
-              <div className="p-2 h-fit rounded-xl bg-orange-100 text-orange-600">
-                <AlertTriangle className="w-5 h-5" />
+            <div className="p-3 bg-orange-50/50 border border-orange-100 rounded-2xl flex gap-3">
+              <div className="p-1.5 h-fit rounded-xl bg-orange-100 text-orange-600">
+                <AlertTriangle className="w-4 h-4" />
               </div>
-              <div className="space-y-1">
-                <h4 className="text-sm font-black text-orange-800 uppercase tracking-wide">
+              <div className="space-y-0.5">
+                <h4 className="text-[10px] font-black text-orange-800 uppercase tracking-wide">
                   DNS Configuration Required
                 </h4>
-                <p className="text-xs text-orange-700 leading-relaxed font-medium">
+                <p className="text-[10px] text-orange-700 leading-tight font-medium">
                   After creating or changing a subdomain, you MUST update Cloudflare Pages DNS. Map{' '}
                   <span className="font-mono font-bold bg-orange-100 px-1 rounded">
                     {formData.subdomain || '...'}.questerix.com
@@ -437,25 +437,19 @@ export function AppsPage() {
                   </span>
                   .
                 </p>
-                {editingApp && (
-                  <p className="text-xs text-red-600 font-bold mt-2">
-                    ⚠️ Warning: Changing the subdomain will immediately break the app until DNS is
-                    updated.
-                  </p>
-                )}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <Label className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
                   Primary Subject
                 </Label>
                 <Select
                   value={formData.subject_id ?? ''}
                   onValueChange={(v) => setFormData({ ...formData, subject_id: v })}
                 >
-                  <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:ring-indigo-500/10 font-bold">
+                  <SelectTrigger className="h-10 rounded-xl border-gray-200 focus:ring-indigo-500/10 font-bold text-sm">
                     <SelectValue placeholder="Identify Subject" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-gray-200">
@@ -467,10 +461,10 @@ export function AppsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label
                   htmlFor="display_name"
-                  className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
+                  className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1"
                 >
                   Display Alias
                 </Label>
@@ -480,22 +474,21 @@ export function AppsPage() {
                   value={formData.display_name}
                   onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
                   placeholder="e.g. Master Mathematics v7"
-                  className="h-12 rounded-xl border-gray-200 focus:ring-indigo-500/10 font-bold"
+                  className="h-10 rounded-xl border-gray-200 focus:ring-indigo-500/10 font-bold text-sm"
                   required
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label
                     htmlFor="subdomain"
-                    className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
+                    className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1"
                   >
                     DNS Subdomain
                   </Label>
-                  <span className="text-2xs font-bold text-gray-400">Low-level identifier</span>
                 </div>
                 <div className="flex items-center gap-0 group">
                   <Input
@@ -512,18 +505,18 @@ export function AppsPage() {
                       })
                     }
                     placeholder="m7"
-                    className="h-12 rounded-l-xl rounded-r-none border-gray-200 border-r-0 focus:ring-0 focus:border-gray-200 font-mono font-black text-indigo-600 focus:ring-indigo-500/10"
+                    className="h-10 rounded-l-xl rounded-r-none border-gray-200 border-r-0 focus:ring-0 focus:border-gray-200 font-mono font-black text-indigo-600 focus:ring-indigo-500/10 text-sm"
                     required
                   />
-                  <div className="h-12 px-3 flex items-center bg-gray-50 border border-gray-200 rounded-r-xl text-2xs font-black text-gray-400 uppercase tracking-tighter">
+                  <div className="h-10 px-3 flex items-center bg-gray-50 border border-gray-200 rounded-r-xl text-[10px] font-black text-gray-400 uppercase tracking-tighter">
                     .questerix.com
                   </div>
                 </div>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label
                   htmlFor="grade_level"
-                  className="text-2xs font-black text-gray-400 uppercase tracking-widest pl-1"
+                  className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1"
                 >
                   Target Grade/Tier
                 </Label>
@@ -533,7 +526,7 @@ export function AppsPage() {
                   value={formData.grade_level}
                   onChange={(e) => setFormData({ ...formData, grade_level: e.target.value })}
                   placeholder="e.g. Grade 12 Advanced"
-                  className="h-12 rounded-xl border-gray-200 focus:ring-indigo-500/10 font-bold"
+                  className="h-10 rounded-xl border-gray-200 focus:ring-indigo-500/10 font-bold text-sm"
                   required
                 />
               </div>

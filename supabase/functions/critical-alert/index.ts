@@ -1,5 +1,5 @@
 // Follows standard Supabase Edge Function pattern
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 interface ErrorRecord {
   id: string;
@@ -14,6 +14,21 @@ interface ErrorRecord {
 }
 
 export async function criticalAlertHandler(req: Request): Promise<Response> {
+  // --- HADES SECURITY PATCH: START ---
+  const webhookSecret = Deno.env.get("ERROR_WEBHOOK_SECRET");
+  const incomingSecret = req.headers.get("x-webhook-secret");
+
+  if (!webhookSecret) {
+    console.error("ERROR_WEBHOOK_SECRET is not set in environment. Blocking all requests for safety.");
+    return new Response(JSON.stringify({ error: "Configuration error" }), { status: 500 });
+  }
+
+  if (incomingSecret !== webhookSecret) {
+    console.warn("Unauthorized critical-alert attempt detected.");
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+  // --- HADES SECURITY PATCH: END ---
+
   try {
     const payload = await req.json();
     const { record, type } = payload as { record: ErrorRecord, type: string };
