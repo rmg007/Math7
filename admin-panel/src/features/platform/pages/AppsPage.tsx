@@ -36,8 +36,6 @@ import { cn } from '@/lib/utils';
 import {
   AlertTriangle,
   ExternalLink,
-  Globe,
-  GraduationCap,
   Layers,
   Layout,
   Pencil,
@@ -71,21 +69,13 @@ const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
     >
       <TableCell className="px-8 py-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
-            <Layout className="w-5 h-5 text-indigo-600" />
-          </div>
           <span className="font-bold text-gray-900 tracking-tight text-base line-clamp-1">
             {app.display_name}
           </span>
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-            <GraduationCap className="h-3.5 w-3.5 text-emerald-600" />
-          </div>
-          <span className="font-bold text-gray-700">{app.subjects?.title ?? 'Unlinked'}</span>
-        </div>
+        <span className="font-bold text-gray-700">{app.subjects?.title ?? 'Unlinked'}</span>
       </TableCell>
       <TableCell>
         <a
@@ -95,9 +85,6 @@ const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
           className="flex items-center gap-2 group/link hover:opacity-80 transition-opacity"
           title="Launch App"
         >
-          <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center group-hover/link:bg-indigo-100 transition-colors">
-            <Globe className="h-3.5 w-3.5 text-indigo-500" />
-          </div>
           <span className="font-mono text-xs font-black text-indigo-500 tracking-tighter decoration-indigo-200 underline-offset-4 group-hover/link:underline">
             {app.subdomain}.questerix.com
           </span>
@@ -245,7 +232,9 @@ export function AppsPage() {
     ) || [];
 
   const sortedApps = [...filteredApps].sort((a, b) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let aValue: any = a[sortBy as keyof CompiledApp];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let bValue: any = b[sortBy as keyof CompiledApp];
 
     // Special handling for nested fields or computed values if needed

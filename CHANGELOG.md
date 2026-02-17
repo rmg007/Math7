@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Admin Panel**: Cross-app transparency for Super Admins in Curriculum management. List views now display the associated Application name when viewing across all apps.
 - **Admin Panel**: Enhanced deletion confirmation with precise application context for impacted items.
 - **Testing**: Added `tests/responsiveness.spec.ts` for automated mobile/tablet/desktop responsiveness validation.
+- **Testing**: Added `tests/verify-icon-removal.spec.ts` to enforce clean table UI and prevent regression of decorative icons.
 
 ### Fixed
 
@@ -23,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Admin Panel**: Fixed `usePaginatedSkills` and `usePaginatedQuestions` hooks to allow Super Admins to view all apps when the 'All Apps' filter is active.
 - **Type Safety**: Synchronized `QuestionListItem` and `DomainListItem` types with joined application metadata.
 - **Project HADES**: Completed Phase 3 (The Anatomy) Architecture Audit - Architecture Drift & Multi-tenant Visibility.
+- **UI**: Removed redundant decorative icons (Layout, GraduationCap, Globe) from admin panel tables to reduce visual noise.
 - **Admin Panel**: Resolved 403 Forbidden error on Subject creation/deletion for administrators.
 - **Admin Panel**: Hardened error tracking by filtering `ResizeObserver` and `AbortError` noise.
 - **Admin Panel**: Applications now normalized to lowercase on save to prevent DNS mismatch.

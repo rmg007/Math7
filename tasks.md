@@ -30,6 +30,7 @@
 
 - [x] **Sort Direction Indicators**: Clarify active sort column/direction in table headers.
 - [x] **Automated Row Height Test**: Implement Playwright test to verify all table rows (`tr`) remain single-line (constant height) across the platform.
+- [x] **Table Icon Cleanup**: Removed decorative icons from AppsPage and verified absence across tables with strict Playwright test.
 
 ---
 
@@ -59,5 +60,5 @@ python ops_runner.py tasks.json # Autonomous execution
 
 ---
 
-**Last Synchronized**: 2026-02-16 19:58 PST
+**Last Synchronized**: 2026-02-16 20:46 PST
 **Project Context**: RMG-007 / Questerix
