@@ -22,8 +22,8 @@ export function SortableHeader({
   return (
     <button
       onClick={() => onSort(column)}
-      className={`inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded px-0.5 py-0.5 ${
-        isActive ? 'text-teal-600' : 'text-gray-500 hover:text-teal-600'
+      className={`inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded px-0.5 py-0.5 ${
+        isActive ? 'text-teal-600' : 'text-gray-600 hover:text-teal-600'
       } ${className}`}
       aria-sort={isActive ? (currentSortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
     >
