@@ -34,7 +34,7 @@ export function AdminHeader({
             </Link>
           )}
           {Icon && (
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/10 flex-shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-500 to-purple-600 flex items-center justify-center shadow-lg shadow-teal-500/10 flex-shrink-0">
               <Icon className="w-6 h-6 text-white" />
             </div>
           )}
@@ -52,4 +52,3 @@ export function AdminHeader({
     </div>
   );
 }
-
