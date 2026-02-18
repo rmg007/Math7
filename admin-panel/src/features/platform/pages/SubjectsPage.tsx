@@ -321,7 +321,7 @@ export function SubjectsPage() {
             placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-8 py-1.5 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none text-sm"
+            className="w-full pl-9 pr-8 py-1.5 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none focus-visible:outline-none text-sm"
           />
           {searchQuery && (
             <button
@@ -334,11 +334,9 @@ export function SubjectsPage() {
           )}
         </div>
 
-        {searchQuery && (
-          <div className="text-[11px] text-gray-500 whitespace-nowrap">
-            {filteredSubjects.length} match{filteredSubjects.length !== 1 ? 'es' : ''}
-          </div>
-        )}
+        <span className="text-[11px] text-gray-500 whitespace-nowrap">
+          {filteredSubjects.length} {filteredSubjects.length === 1 ? 'subject' : 'subjects'}
+        </span>
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
@@ -393,25 +391,25 @@ export function SubjectsPage() {
               {isLoading ? (
                 Array.from({ length: 8 }).map((_, i) => (
                   <TableRow key={i} className="border-b border-gray-200 even:bg-gray-50/40">
-                    <TableCell className="px-4 py-2">
+                    <TableCell className="px-4 py-1.5">
                       <div className="flex items-center gap-2">
                         <div className="h-2.5 w-2.5 bg-gray-200 rounded-full animate-pulse"></div>
                         <div className="h-3.5 bg-gray-200 rounded w-24 animate-pulse"></div>
                       </div>
                     </TableCell>
-                    <TableCell className="px-3 py-2 hidden md:table-cell">
+                    <TableCell className="px-3 py-1.5 hidden md:table-cell">
                       <div className="h-3.5 bg-gray-200 rounded w-16 animate-pulse"></div>
                     </TableCell>
-                    <TableCell className="px-2 py-2 hidden sm:table-cell">
+                    <TableCell className="px-2 py-1.5 hidden sm:table-cell">
                       <div className="h-6 w-6 bg-gray-200 rounded mx-auto animate-pulse"></div>
                     </TableCell>
-                    <TableCell className="px-3 py-2">
+                    <TableCell className="px-3 py-1.5">
                       <div className="h-4 bg-gray-200 rounded-full w-14 animate-pulse"></div>
                     </TableCell>
-                    <TableCell className="px-3 py-2 hidden lg:table-cell">
+                    <TableCell className="px-3 py-1.5 hidden lg:table-cell">
                       <div className="h-3.5 bg-gray-200 rounded w-6 animate-pulse"></div>
                     </TableCell>
-                    <TableCell className="px-4 py-2">
+                    <TableCell className="px-4 py-1.5">
                       <div className="flex gap-0.5 justify-end">
                         <div className="h-7 w-7 bg-gray-200 rounded animate-pulse"></div>
                         <div className="h-7 w-7 bg-gray-200 rounded animate-pulse"></div>
