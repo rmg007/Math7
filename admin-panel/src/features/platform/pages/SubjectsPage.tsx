@@ -67,9 +67,9 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
   return (
     <TableRow
       key={subject.subject_id}
-      className="border-b border-gray-100 hover:bg-teal-50/60 even:bg-gray-50/50"
+      className="border-b border-gray-200 hover:!bg-teal-50 even:bg-gray-50/40"
     >
-      <TableCell className="px-4 py-2">
+      <TableCell className="px-4 py-1.5">
         <div className="flex items-center gap-2">
           {subject.color_hex && (
             <span
@@ -78,17 +78,17 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
               title={subject.color_hex}
             />
           )}
-          <span className="font-medium text-gray-900 text-sm truncate">
+          <span className="font-normal text-gray-900 text-xs truncate">
             {subject.title}
           </span>
         </div>
       </TableCell>
-      <TableCell className="px-3 py-2 hidden md:table-cell">
-        <code className="text-[11px] text-gray-500 font-mono">
+      <TableCell className="px-3 py-1.5 hidden md:table-cell">
+        <code className="text-xs text-gray-600 font-mono">
           {subject.slug}
         </code>
       </TableCell>
-      <TableCell className="px-2 py-2 text-center hidden sm:table-cell">
+      <TableCell className="px-2 py-1.5 text-center hidden sm:table-cell">
         {subject.icon_url ? (
           <div className="w-6 h-6 rounded bg-white border border-gray-200 flex items-center justify-center mx-auto">
             <img src={subject.icon_url} alt="" className="w-4 h-4 object-contain" />
@@ -97,18 +97,18 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
           <span className="text-gray-300 text-xs">&mdash;</span>
         )}
       </TableCell>
-      <TableCell className="px-3 py-2">
+      <TableCell className="px-3 py-1.5">
         <span className={cn('inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium', status.bgColor, status.textColor)}>
           <span className={cn('w-1.5 h-1.5 rounded-full', status.dotColor)} />
           {status.label}
         </span>
       </TableCell>
-      <TableCell className="px-3 py-2 hidden lg:table-cell">
+      <TableCell className="px-3 py-1.5 hidden lg:table-cell">
         <span className="text-xs text-gray-500 tabular-nums">
           {subject.display_order ?? 0}
         </span>
       </TableCell>
-      <TableCell className="px-4 py-2 text-right">
+      <TableCell className="px-4 py-1.5 text-right">
         <div className="flex justify-end gap-0.5">
           <Button
             variant="ghost"
@@ -342,7 +342,6 @@ export function SubjectsPage() {
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
           <Table className="w-full">
             <TableHeader>
               <TableRow className="bg-gray-50/80 border-b border-gray-200">
@@ -393,7 +392,7 @@ export function SubjectsPage() {
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 8 }).map((_, i) => (
-                  <TableRow key={i} className="border-b border-gray-100 even:bg-gray-50/50">
+                  <TableRow key={i} className="border-b border-gray-200 even:bg-gray-50/40">
                     <TableCell className="px-4 py-2">
                       <div className="flex items-center gap-2">
                         <div className="h-2.5 w-2.5 bg-gray-200 rounded-full animate-pulse"></div>
@@ -450,21 +449,6 @@ export function SubjectsPage() {
               )}
             </TableBody>
           </Table>
-        </div>
-
-        {/* Table footer */}
-        {!isLoading && subjects && subjects.length > 0 && (
-          <div className="border-t border-gray-200 bg-gray-50/80 px-4 py-2 flex items-center justify-between">
-            <span className="text-[11px] text-gray-500">
-              {filteredSubjects.length === subjects.length
-                ? `${subjects.length} subject${subjects.length !== 1 ? 's' : ''}`
-                : `${filteredSubjects.length} of ${subjects.length} subject${subjects.length !== 1 ? 's' : ''}`}
-            </span>
-            <span className="text-[11px] text-gray-400">
-              Sorted by {sortBy.replace('_', ' ')} ({sortOrder})
-            </span>
-          </div>
-        )}
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
