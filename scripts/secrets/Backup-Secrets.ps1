@@ -65,11 +65,11 @@ if ($Encrypt) {
     # For this implementation, we will skip complex encryption to avoid getting locked out without keys
     # But we will mark it as such.
     $backupFile = "$backupFile" 
-    Write-Host "⚠️  Encryption requested but simple JSON backup performed for recoverability." -ForegroundColor Yellow
+    Write-Host "  Encryption requested but simple JSON backup performed for recoverability." -ForegroundColor Yellow
 }
 
 $backup | ConvertTo-Json -Depth 10 | Set-Content $backupFile
-Write-Host "✅ Backup created: $backupFile" -ForegroundColor Green
+Write-Host " Backup created: $backupFile" -ForegroundColor Green
 
 # Cleanup old backups (keep last 30 days)
 $cutoffDate = (Get-Date).AddDays(-30)
@@ -77,4 +77,4 @@ Get-ChildItem $backupDir -Filter "secrets-*.json*" |
     Where-Object { $_.CreationTime -lt $cutoffDate } | 
     Remove-Item -Force
 
-Write-Host "🧹 Cleaned up old backups" -ForegroundColor Yellow
+Write-Host " Cleaned up old backups" -ForegroundColor Yellow

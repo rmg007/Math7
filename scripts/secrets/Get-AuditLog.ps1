@@ -27,7 +27,7 @@ $RootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $AuditLog = Join-Path $RootDir "logs\secrets-audit.json"
 
 if (-not (Test-Path $AuditLog)) {
-    Write-Host "📊 No audit log found at $AuditLog" -ForegroundColor Yellow
+    Write-Host " No audit log found at $AuditLog" -ForegroundColor Yellow
     return
 }
 
@@ -78,13 +78,13 @@ if ($Summary) {
         }
     }
     
-    Write-Host "📊 Secrets Audit Summary" -ForegroundColor Cyan
+    Write-Host " Secrets Audit Summary" -ForegroundColor Cyan
     Write-Host "========================" -ForegroundColor Cyan
     $summary | Format-Table -AutoSize
     
 } else {
     # Detailed report
-    Write-Host "📋 Detailed Audit Log" -ForegroundColor Cyan
+    Write-Host " Detailed Audit Log" -ForegroundColor Cyan
     Write-Host "======================" -ForegroundColor Cyan
     
     foreach ($entry in $filteredEntries | Sort-Object timestamp -Descending) {
@@ -95,7 +95,7 @@ if ($Summary) {
             default { "White" }
         }
         
-        Write-Host "🕐 $($entry.timestamp)" -ForegroundColor Gray
+        Write-Host " $($entry.timestamp)" -ForegroundColor Gray
         Write-Host "  Action: $($entry.action)" -ForegroundColor Cyan
         Write-Host "  Environment: $($entry.environment)" -ForegroundColor Cyan
         Write-Host "  User: $($entry.user)" -ForegroundColor Cyan

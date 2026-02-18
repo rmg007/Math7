@@ -49,7 +49,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             .from('profiles')
             .select('app_id, role')
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
           profileAppId = profile?.app_id ?? undefined;
           setUserRole(profile?.role ?? null);
         }

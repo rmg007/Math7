@@ -23,13 +23,13 @@ if (-not (Test-Path $configPath)) {
 }
 
 if (-not (Test-Path $configPath)) {
-    Write-Host "❌ Config file not found: $configPath" -ForegroundColor Red
+    Write-Host " Config file not found: $configPath" -ForegroundColor Red
     exit 1
 }
 
 $secretsPath = Join-Path $RootDir '.secrets'
 if (-not (Test-Path $secretsPath)) {
-    Write-Host "❌ Secrets file not found: $secretsPath" -ForegroundColor Red
+    Write-Host " Secrets file not found: $secretsPath" -ForegroundColor Red
     exit 1
 }
 
@@ -77,7 +77,7 @@ function Resolve-Value {
 }
 
 # Generate Admin Panel .env.local
-Write-Host "⚙️  Generating admin-panel/.env.local..." -ForegroundColor Cyan
+Write-Host "  Generating admin-panel/.env.local..." -ForegroundColor Cyan
 $adminEnvContent = @()
 $adminEnvContent += "# Generated from $ConfigFile on $(Get-Date)"
 $adminEnvContent += "# DO NOT EDIT MANUALLY"
@@ -93,13 +93,13 @@ foreach ($prop in $configJson.admin.PSObject.Properties) {
 
 $adminEnvPath = Join-Path $RootDir "admin-panel\.env.local"
 Set-Content -Path $adminEnvPath -Value $adminEnvContent
-Write-Host "  ✅ Created: $adminEnvPath" -ForegroundColor Green
+Write-Host "   Created: $adminEnvPath" -ForegroundColor Green
 
 
 <# 
 # [DEPRECATED] DO NOT PUBLISH LANDING PAGES
 # Generate Landing Pages .env
-Write-Host "⚙️  Generating landing-pages/.env..." -ForegroundColor Cyan
+Write-Host "  Generating landing-pages/.env..." -ForegroundColor Cyan
 $landingEnvContent = @()
 $landingEnvContent += "# Generated from $ConfigFile on $(Get-Date)"
 $landingEnvContent += "# DO NOT EDIT MANUALLY"
@@ -115,12 +115,12 @@ foreach ($prop in $configJson.landing.PSObject.Properties) {
 
 $landingEnvPath = Join-Path $RootDir "landing-pages\.env"
 Set-Content -Path $landingEnvPath -Value $landingEnvContent
-Write-Host "  ✅ Created: $landingEnvPath" -ForegroundColor Green
+Write-Host "   Created: $landingEnvPath" -ForegroundColor Green
 #>
 
 
 # Generate Student App .flutter-defines.tmp
-Write-Host "⚙️  Generating .flutter-defines.tmp..." -ForegroundColor Cyan
+Write-Host "  Generating .flutter-defines.tmp..." -ForegroundColor Cyan
 $flutterEnvContent = @()
 $flutterEnvContent += "# Generated from $ConfigFile on $(Get-Date)"
 
@@ -134,6 +134,6 @@ foreach ($prop in $configJson.student.PSObject.Properties) {
 
 $flutterDefinesPath = Join-Path $RootDir ".flutter-defines.tmp"
 Set-Content -Path $flutterDefinesPath -Value $flutterEnvContent
-Write-Host "  ✅ Created: $flutterDefinesPath" -ForegroundColor Green
+Write-Host "   Created: $flutterDefinesPath" -ForegroundColor Green
 
-Write-Host "✅ Environment generation complete." -ForegroundColor Green
+Write-Host " Environment generation complete." -ForegroundColor Green

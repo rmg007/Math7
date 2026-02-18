@@ -1,3 +1,7 @@
+---
+description: Enter Loki Mode (Autonomous Developer)
+---
+
 # 🐺 /loki — Autonomous Developer Mode
 
 // turbo-all
@@ -73,9 +77,9 @@ The agent MUST stop if:
 
 ```bash
 # Verification suite (use during VERIFY phase)
-./scripts/preflight.ps1         # Type check + lint + deps
-./scripts/run-all-tests.ps1     # All test suites
-./scripts/code-hygiene-scan.ps1 # Security scan
+python ops_runner.py tasks.json # executes: ./scripts/preflight.ps1
+python ops_runner.py tasks.json # executes: ./scripts/run-all-tests.ps1
+python ops_runner.py tasks.json # executes: ./scripts/code-hygiene-scan.ps1
 
 # Quick checks (use during REFLECT phase)
 cd admin-panel && npx tsc --noEmit && npm run lint

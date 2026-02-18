@@ -22,17 +22,17 @@ function Write-Check {
     param([string]$Name, [string]$Status, [string]$Detail = "")
     switch ($Status) {
         "PASS" {
-            Write-Host "  ✅ $Name" -ForegroundColor Green
+            Write-Host "   $Name" -ForegroundColor Green
             $script:PassCount++
         }
         "FAIL" {
-            Write-Host "  ❌ $Name" -ForegroundColor Red
-            if ($Detail) { Write-Host "     → $Detail" -ForegroundColor DarkRed }
+            Write-Host "   $Name" -ForegroundColor Red
+            if ($Detail) { Write-Host "      $Detail" -ForegroundColor DarkRed }
             $script:FailCount++
         }
         "WARN" {
-            Write-Host "  ⚠️  $Name" -ForegroundColor Yellow
-            if ($Detail) { Write-Host "     → $Detail" -ForegroundColor DarkYellow }
+            Write-Host "    $Name" -ForegroundColor Yellow
+            if ($Detail) { Write-Host "      $Detail" -ForegroundColor DarkYellow }
             $script:WarnCount++
         }
     }
@@ -42,8 +42,8 @@ function Write-Check {
 # Section 1: Required Files
 # =============================================================================
 Write-Host ""
-Write-Host "📁 Required Files" -ForegroundColor Cyan
-Write-Host "─────────────────────────────────────────"
+Write-Host " Required Files" -ForegroundColor Cyan
+Write-Host ""
 
 $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 # Handle case where script is directly in scripts/ (not scripts/subdir/)
@@ -82,8 +82,8 @@ foreach ($file in $requiredFiles) {
 # Section 2: Knowledge Base Dependencies
 # =============================================================================
 Write-Host ""
-Write-Host "📦 Knowledge Base Dependencies" -ForegroundColor Cyan
-Write-Host "─────────────────────────────────────────"
+Write-Host " Knowledge Base Dependencies" -ForegroundColor Cyan
+Write-Host ""
 
 $kbDir = Join-Path $projectRoot "scripts\knowledge-base"
 if (Test-Path "$kbDir\node_modules") {
@@ -109,15 +109,15 @@ if (Test-Path "$kbDir\.env") {
         Write-Check "knowledge-base/.env" "FAIL" "Missing keys: $($missing -join ', ')"
     }
 } else {
-    Write-Check "knowledge-base/.env" "FAIL" "No .env file — copy from .env.example"
+    Write-Check "knowledge-base/.env" "FAIL" "No .env file  copy from .env.example"
 }
 
 # =============================================================================
 # Section 3: MCP Server Configuration
 # =============================================================================
 Write-Host ""
-Write-Host "🔌 MCP Servers" -ForegroundColor Cyan
-Write-Host "─────────────────────────────────────────"
+Write-Host " MCP Servers" -ForegroundColor Cyan
+Write-Host ""
 
 $mcpConfig = Join-Path $projectRoot ".mcp_config.json"
 if (Test-Path $mcpConfig) {
@@ -134,8 +134,8 @@ if (Test-Path $mcpConfig) {
 # Section 4: Agent Workflows
 # =============================================================================
 Write-Host ""
-Write-Host "⚙️ Agent Workflows" -ForegroundColor Cyan
-Write-Host "─────────────────────────────────────────"
+Write-Host " Agent Workflows" -ForegroundColor Cyan
+Write-Host ""
 
 $workflowDir = Join-Path $projectRoot ".agent\workflows"
 if (Test-Path $workflowDir) {
@@ -158,8 +158,8 @@ if (Test-Path $workflowDir) {
 # Section 5: Documentation Coverage
 # =============================================================================
 Write-Host ""
-Write-Host "📚 Documentation Coverage" -ForegroundColor Cyan
-Write-Host "─────────────────────────────────────────"
+Write-Host " Documentation Coverage" -ForegroundColor Cyan
+Write-Host ""
 
 $docsDir = Join-Path $projectRoot "docs"
 if (Test-Path $docsDir) {
@@ -187,20 +187,20 @@ if (Test-Path $docsDir) {
 # Summary
 # =============================================================================
 Write-Host ""
-Write-Host "═══════════════════════════════════════════" -ForegroundColor White
-Write-Host "📊 Knowledge Health Summary" -ForegroundColor Cyan
-Write-Host "═══════════════════════════════════════════" -ForegroundColor White
+Write-Host "" -ForegroundColor White
+Write-Host " Knowledge Health Summary" -ForegroundColor Cyan
+Write-Host "" -ForegroundColor White
 Write-Host "  Passed:   $script:PassCount" -ForegroundColor Green
 Write-Host "  Warnings: $script:WarnCount" -ForegroundColor Yellow
 Write-Host "  Failed:   $script:FailCount" -ForegroundColor Red
-Write-Host "═══════════════════════════════════════════" -ForegroundColor White
+Write-Host "" -ForegroundColor White
 
 if ($script:FailCount -eq 0) {
     Write-Host ""
-    Write-Host "✨ All knowledge systems operational!" -ForegroundColor Green
+    Write-Host " All knowledge systems operational!" -ForegroundColor Green
     exit 0
 } else {
     Write-Host ""
-    Write-Host "🔧 Fix the failed checks above before relying on knowledge infrastructure." -ForegroundColor Red
+    Write-Host " Fix the failed checks above before relying on knowledge infrastructure." -ForegroundColor Red
     exit 1
 }

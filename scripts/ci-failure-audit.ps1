@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Forensic CI Failure Audit — Bulk sweep of all failed GitHub Actions runs.
+    Forensic CI Failure Audit  Bulk sweep of all failed GitHub Actions runs.
     Implements the "ChatGPT Playbook" Steps 1-4 locally.
 
 .DESCRIPTION
@@ -27,13 +27,13 @@ param(
 
 $ErrorActionPreference = "Continue"
 
-# ── Step 0: Ensure gh CLI is available ──
+#  Step 0: Ensure gh CLI is available 
 if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
     Write-Error "GitHub CLI (gh) is not installed. Install from https://cli.github.com/"
     exit 1
 }
 
-# ── Step 1: Create output directories ──
+#  Step 1: Create output directories 
 $logsDir = Join-Path $OutputDir "logs"
 $sigsDir = Join-Path $OutputDir "signatures"
 $groupsDir = Join-Path $OutputDir "groups"
@@ -42,23 +42,23 @@ New-Item -ItemType Directory -Path $logsDir -Force | Out-Null
 New-Item -ItemType Directory -Path $sigsDir -Force | Out-Null
 New-Item -ItemType Directory -Path $groupsDir -Force | Out-Null
 
-Write-Host "`n🔍 CI Failure Forensic Audit" -ForegroundColor Cyan
+Write-Host "`n CI Failure Forensic Audit" -ForegroundColor Cyan
 Write-Host "   Fetching up to $Limit failed runs...`n" -ForegroundColor Gray
 
-# ── Step 2: Get the master list of failed runs ──
+#  Step 2: Get the master list of failed runs 
 $masterList = gh run list --status failure --limit $Limit --json databaseId,workflowName,displayTitle,headBranch,headSha,createdAt,url | ConvertFrom-Json
 
 if (-not $masterList -or $masterList.Count -eq 0) {
-    Write-Host "✅ No failed runs found! Repository is healthy." -ForegroundColor Green
+    Write-Host " No failed runs found! Repository is healthy." -ForegroundColor Green
     exit 0
 }
 
-Write-Host "📋 Found $($masterList.Count) failed runs across all workflows.`n" -ForegroundColor Yellow
+Write-Host " Found $($masterList.Count) failed runs across all workflows.`n" -ForegroundColor Yellow
 
 # Save master list
 $masterList | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $OutputDir "master_list.json")
 
-# ── Step 3: Download failed logs and extract signatures ──
+#  Step 3: Download failed logs and extract signatures 
 $progress = 0
 foreach ($run in $masterList) {
     $progress++
@@ -100,8 +100,8 @@ foreach ($run in $masterList) {
 
 Write-Progress -Activity "Downloading failure logs" -Completed
 
-# ── Step 4: Group by signature hash into buckets ──
-Write-Host "`n🪣  Grouping failures into buckets by signature hash...`n" -ForegroundColor Cyan
+#  Step 4: Group by signature hash into buckets 
+Write-Host "`n  Grouping failures into buckets by signature hash...`n" -ForegroundColor Cyan
 
 $buckets = @{}
 
@@ -134,11 +134,11 @@ foreach ($sigFile in Get-ChildItem $sigsDir -Filter "*.sig") {
     }
 }
 
-# ── Step 5: Generate the summary report ──
+#  Step 5: Generate the summary report 
 $reportPath = Join-Path $OutputDir "AUDIT_REPORT.md"
 
 $report = @"
-# 🔍 CI Failure Forensic Audit Report
+#  CI Failure Forensic Audit Report
 
 **Generated**: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 **Total Failed Runs Analyzed**: $($masterList.Count)
@@ -153,11 +153,11 @@ $sortedBuckets = $buckets.GetEnumerator() | Sort-Object { $_.Value.RunIds.Count 
 foreach ($entry in $sortedBuckets) {
     $bucket = $entry.Value
     $runCount = $bucket.RunIds.Count
-    $severity = if ($runCount -ge 10) { "🔴 CRITICAL" } elseif ($runCount -ge 5) { "🟠 HIGH" } elseif ($runCount -ge 2) { "🟡 MEDIUM" } else { "🟢 LOW" }
+    $severity = if ($runCount -ge 10) { " CRITICAL" } elseif ($runCount -ge 5) { " HIGH" } elseif ($runCount -ge 2) { " MEDIUM" } else { " LOW" }
 
     $report += @"
 
-## $severity Bucket ``$($bucket.Hash)`` — $runCount run(s)
+## $severity Bucket ``$($bucket.Hash)``  $runCount run(s)
 
 **Workflows**: $($bucket.Workflows -join ', ')
 **Affected Runs**: $($bucket.RunIds | Select-Object -First 5 | ForEach-Object { "[$_](https://github.com/$($env:GH_REPO ?? 'rmg007/Questerix')/actions/runs/$_)" } | Join-String -Separator ', ')$(if ($runCount -gt 5) { " ... and $($runCount - 5) more" })
@@ -178,10 +178,10 @@ $($bucket.SampleSignature)
 
 $report | Set-Content $reportPath -Encoding utf8
 
-# ── Console Summary ──
-Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor White
-Write-Host "📊 FORENSIC AUDIT COMPLETE" -ForegroundColor Green
-Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor White
+#  Console Summary 
+Write-Host "" -ForegroundColor White
+Write-Host " FORENSIC AUDIT COMPLETE" -ForegroundColor Green
+Write-Host "" -ForegroundColor White
 Write-Host ""
 Write-Host "  Total Failed Runs:     $($masterList.Count)" -ForegroundColor White
 Write-Host "  Unique Root Causes:    $($buckets.Count)" -ForegroundColor White
@@ -190,13 +190,13 @@ Write-Host ""
 foreach ($entry in $sortedBuckets) {
     $bucket = $entry.Value
     $runCount = $bucket.RunIds.Count
-    $icon = if ($runCount -ge 10) { "🔴" } elseif ($runCount -ge 5) { "🟠" } elseif ($runCount -ge 2) { "🟡" } else { "🟢" }
-    Write-Host "  $icon [$($bucket.Hash)] $runCount run(s) — $($bucket.Workflows -join ', ')" -ForegroundColor $(if ($runCount -ge 5) { "Red" } elseif ($runCount -ge 2) { "Yellow" } else { "Gray" })
+    $icon = if ($runCount -ge 10) { "" } elseif ($runCount -ge 5) { "" } elseif ($runCount -ge 2) { "" } else { "" }
+    Write-Host "  $icon [$($bucket.Hash)] $runCount run(s)  $($bucket.Workflows -join ', ')" -ForegroundColor $(if ($runCount -ge 5) { "Red" } elseif ($runCount -ge 2) { "Yellow" } else { "Gray" })
 }
 
 Write-Host ""
-Write-Host "  📄 Full report: $reportPath" -ForegroundColor Cyan
-Write-Host "  📁 Logs dir:    $logsDir" -ForegroundColor Cyan
-Write-Host "  📁 Signatures:  $sigsDir" -ForegroundColor Cyan
+Write-Host "   Full report: $reportPath" -ForegroundColor Cyan
+Write-Host "   Logs dir:    $logsDir" -ForegroundColor Cyan
+Write-Host "   Signatures:  $sigsDir" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor White
+Write-Host "" -ForegroundColor White

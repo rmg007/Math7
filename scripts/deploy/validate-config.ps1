@@ -39,13 +39,13 @@ foreach ($tool in $requiredTools) {
 }
 
 if ($missingTools.Count -gt 0) {
-    Write-Host "❌ Missing required tools:" -ForegroundColor Red
+    Write-Host " Missing required tools:" -ForegroundColor Red
     foreach ($tool in $missingTools) {
         Write-Host "   - $tool" -ForegroundColor Red
     }
     exit 1
 }
-Write-Host "✅ All required tools available" -ForegroundColor Green
+Write-Host " All required tools available" -ForegroundColor Green
 
 # =============================================================================
 # CHECK SECRETS FILE
@@ -54,7 +54,7 @@ $secretsPath = Join-Path $RootDir '.secrets'
 $secretsTemplate = Join-Path $RootDir '.secrets.template'
 
 if (-not (Test-Path $secretsPath)) {
-    Write-Host "❌ .secrets file not found" -ForegroundColor Red
+    Write-Host " .secrets file not found" -ForegroundColor Red
     Write-Host ""
     Write-Host "To fix this:" -ForegroundColor Yellow
     Write-Host "1. Copy .secrets.template to .secrets" -ForegroundColor Yellow
@@ -63,7 +63,7 @@ if (-not (Test-Path $secretsPath)) {
     Write-Host "Run: Copy-Item '$secretsTemplate' '$secretsPath'" -ForegroundColor Cyan
     exit 1
 }
-Write-Host "✅ .secrets file found" -ForegroundColor Green
+Write-Host " .secrets file found" -ForegroundColor Green
 
 # =============================================================================
 # VERIFY .secrets IS IN .gitignore
@@ -72,12 +72,12 @@ $gitignorePath = Join-Path $RootDir '.gitignore'
 if (Test-Path $gitignorePath) {
     $gitignoreContent = Get-Content $gitignorePath -Raw
     if ($gitignoreContent -notmatch '\.secrets') {
-        Write-Host "❌ SECURITY RISK: .secrets is NOT in .gitignore!" -ForegroundColor Red
+        Write-Host " SECURITY RISK: .secrets is NOT in .gitignore!" -ForegroundColor Red
         Write-Host "   Add '.secrets' to .gitignore before proceeding." -ForegroundColor Red
         exit 1
     }
 }
-Write-Host "✅ .secrets is in .gitignore" -ForegroundColor Green
+Write-Host " .secrets is in .gitignore" -ForegroundColor Green
 
 # =============================================================================
 # VALIDATE SECRETS CONTENT
@@ -103,13 +103,13 @@ foreach ($secret in $requiredSecrets) {
 }
 
 if ($missingSecrets.Count -gt 0) {
-    Write-Host "❌ Missing required secrets in .secrets:" -ForegroundColor Red
+    Write-Host " Missing required secrets in .secrets:" -ForegroundColor Red
     foreach ($secret in $missingSecrets) {
         Write-Host "   - $secret" -ForegroundColor Red
     }
     exit 1
 }
-Write-Host "✅ All required secrets configured" -ForegroundColor Green
+Write-Host " All required secrets configured" -ForegroundColor Green
 
 # =============================================================================
 # VALIDATE CONFIGURATION JSON
@@ -117,7 +117,7 @@ Write-Host "✅ All required secrets configured" -ForegroundColor Green
 if ($ConfigFile -and (Test-Path $ConfigFile)) {
     try {
         $config = Get-Content $ConfigFile -Raw | ConvertFrom-Json
-        Write-Host "✅ Configuration JSON is valid: $ConfigFile" -ForegroundColor Green
+        Write-Host " Configuration JSON is valid: $ConfigFile" -ForegroundColor Green
         
         # Check for placeholder values
         $placeholders = @()
@@ -132,13 +132,13 @@ if ($ConfigFile -and (Test-Path $ConfigFile)) {
         }
         
         if ($placeholders.Count -gt 0) {
-            Write-Host "⚠️  Warning: Placeholder values found in config:" -ForegroundColor Yellow
+            Write-Host "  Warning: Placeholder values found in config:" -ForegroundColor Yellow
             foreach ($p in $placeholders) {
                 Write-Host "   - $p" -ForegroundColor Yellow
             }
         }
     } catch {
-        Write-Host "❌ Invalid JSON in $ConfigFile" -ForegroundColor Red
+        Write-Host " Invalid JSON in $ConfigFile" -ForegroundColor Red
         Write-Host "   Error: $_" -ForegroundColor Red
         exit 1
     }
@@ -152,20 +152,20 @@ $adminDir = Join-Path $RootDir 'admin-panel'
 $studentDir = Join-Path $RootDir 'student-app'
 
 if (-not (Test-Path $landingDir)) {
-    Write-Host "❌ Landing pages directory not found: $landingDir" -ForegroundColor Red
+    Write-Host " Landing pages directory not found: $landingDir" -ForegroundColor Red
     exit 1
 }
 if (-not (Test-Path $adminDir)) {
-    Write-Host "❌ Admin panel directory not found: $adminDir" -ForegroundColor Red
+    Write-Host " Admin panel directory not found: $adminDir" -ForegroundColor Red
     exit 1
 }
 if (-not (Test-Path $studentDir)) {
-    Write-Host "❌ Student app directory not found: $studentDir" -ForegroundColor Red
+    Write-Host " Student app directory not found: $studentDir" -ForegroundColor Red
     exit 1
 }
-Write-Host "✅ All application directories found" -ForegroundColor Green
+Write-Host " All application directories found" -ForegroundColor Green
 
 Write-Host ""
-Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Green
+Write-Host "" -ForegroundColor Green
 Write-Host "  ALL PRE-FLIGHT CHECKS PASSED" -ForegroundColor Green
-Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Green
+Write-Host "" -ForegroundColor Green

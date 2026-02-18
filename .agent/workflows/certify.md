@@ -29,7 +29,7 @@ description: Independent post-implementation audit and certification
 **Estimated Time**: 5-15 minutes (Parallelized)
 **Goal**: Prime the audit with a comprehensive set of automated reports.
 
-1. **Execute**: `powershell .\scripts\certify-evidence.ps1`
+1. **Execute**: Use `python ops_runner.py` to run `powershell .\scripts\certify-evidence.ps1`
 2. **Review**: Check `.agent/artifacts/certify_[TIMESTAMP]/manifest.json` for an overview.
 3. **Analyze**: Open the log files in that directory (`preflight.log`, `tests.log`, `hygiene.log`, `admin-build.log`) to spot failures early.
 
@@ -136,7 +136,7 @@ description: Independent post-implementation audit and certification
   - **Proof**: Screenshot or excerpt from plan showing 5 threats
 
 - [ ] **Forbidden Pattern Scan**
-  - Action: Run `powershell .\scripts\code-hygiene-scan.ps1`
+  - Action: Use `python ops_runner.py` to run `powershell .\scripts\code-hygiene-scan.ps1`
   - **Proof**: Summary output showing "0 found" or justification for exceptions.
   - Check logs: `.agent/logs/hygiene/`
 
@@ -152,7 +152,7 @@ description: Independent post-implementation audit and certification
 ### Checklist
 
 - [ ] **Re-Run All Tests** (Fresh proof required)
-  - Action: Run `powershell .\scripts\run-all-tests.ps1`
+  - Action: Use `python ops_runner.py` to run `powershell .\scripts\run-all-tests.ps1`
   - **Proof**: Terminal output summary with pass/fail counts.
   - Link: Check detailed logs in `.agent/logs/tests/`.
 

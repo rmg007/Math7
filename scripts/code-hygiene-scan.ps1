@@ -6,7 +6,7 @@ $ErrorActionPreference = "Continue"
 $logDir = "$PSScriptRoot/../.agent/logs/hygiene"
 if (!(Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
 
-Write-Host "🧹 Starting Code Hygiene Scan..." -ForegroundColor Cyan
+Write-Host " Starting Code Hygiene Scan..." -ForegroundColor Cyan
 
 $rootPath = Resolve-Path "$PSScriptRoot/.."
 $jobs = @()
@@ -52,16 +52,16 @@ $jobs += Start-Job -Name "service-role-leak" -ScriptBlock {
     exit $foundMatches.Count
 } -ArgumentList $rootPath
 
-Write-Host "⏳ Running scans..." -ForegroundColor Yellow
+Write-Host " Running scans..." -ForegroundColor Yellow
 $jobs | Wait-Job | Out-Null
 
-Write-Host "`n📋 Hygiene Scan Results:" -ForegroundColor Cyan
+Write-Host "`n Hygiene Scan Results:" -ForegroundColor Cyan
 Write-Host "---------------------------------------------------"
 
 $issueCount = 0
 foreach ($job in $jobs) {
     if ($job.ChildJobs[0].ExitCode -eq 0) { 
-        Write-Host "[✓] PASS: $($job.Name)" -ForegroundColor Green
+        Write-Host "[] PASS: $($job.Name)" -ForegroundColor Green
     } else { 
         Write-Host "[!] ISSUE: $($job.Name) - See $logDir/$($job.Name).log" -ForegroundColor Yellow
         $issueCount++
@@ -69,5 +69,5 @@ foreach ($job in $jobs) {
 }
 
 Remove-Job $jobs
-Write-Host "`n✨ Scan complete." -ForegroundColor Cyan
+Write-Host "`n Scan complete." -ForegroundColor Cyan
 exit 0

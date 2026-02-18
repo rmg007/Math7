@@ -35,7 +35,7 @@ $registryItems = @(
     @{ name = "questerix-domain"; type = "library"; platform = "dart-package"; path = "questerix_domain"; stack = @{ framework = "dart"; codegen = "freezed" } }
 )
 
-Write-Host "🧠 Syncing Knowledge Registry to Supabase..." -ForegroundColor Cyan
+Write-Host " Syncing Knowledge Registry to Supabase..." -ForegroundColor Cyan
 
 # 3. Generate SQL for Upsert
 $sql = "BEGIN;`n"
@@ -56,7 +56,7 @@ foreach ($item in $registryItems) {
 }
 
 # 4. Process Metrics (LOC)
-Write-Host "📊 Calculating Code Metrics..." -ForegroundColor Cyan
+Write-Host " Calculating Code Metrics..." -ForegroundColor Cyan
 $extensions = @{
     'dart' = '*.dart'
     'typescript' = '*.ts','*.tsx'
@@ -100,5 +100,5 @@ $sql += "COMMIT;"
 $sqlFile = Join-Path $RootDir "registry-sync.sql"
 $sql | Out-File $sqlFile -Encoding utf8
 
-Write-Host "✅ SQL Batch generated: $sqlFile" -ForegroundColor Green
-Write-Host "🚀 Run with: supabase db execute --file $sqlFile (or use agent tool)" -ForegroundColor Yellow
+Write-Host " SQL Batch generated: $sqlFile" -ForegroundColor Green
+Write-Host " Run with: supabase db execute --file $sqlFile (or use agent tool)" -ForegroundColor Yellow

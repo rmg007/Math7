@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useCreateSkill, usePaginatedSkills, useSkills } from '../use-skills';
+import { useCreateSkill, usePaginatedSkills, useSkill, useSkills } from '../use-skills';
 
 // Mock dependencies
 vi.mock('@/hooks/use-app');
@@ -19,6 +19,7 @@ vi.mock('@/lib/supabase', () => {
       or: vi.fn(() => chain),
       range: vi.fn(() => chain),
       single: vi.fn(() => chain),
+      maybeSingle: vi.fn(() => chain),
       insert: vi.fn(() => chain),
       update: vi.fn(() => chain),
       in: vi.fn(() => chain),
@@ -108,6 +109,40 @@ describe('useSkills', () => {
       renderHook(() => useSkills('domain-1'), { wrapper });
 
       expect(mockChain.eq).toHaveBeenCalledWith('domain_id', 'domain-1');
+    });
+  });
+
+  describe('useSkill (single)', () => {
+    it('should fetch a single skill by id', async () => {
+      const mockChain = supabase.from('skills') as any;
+      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+        Promise.resolve({ data: mockSkills[0], error: null }).then(onFulfilled)
+      );
+
+      const { result } = renderHook(() => useSkill('1'), { wrapper });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(mockChain.eq).toHaveBeenCalledWith('skill_id', '1');
+      expect(mockChain.maybeSingle).toHaveBeenCalled();
+      expect(result.current.data).toEqual(mockSkills[0]);
+    });
+
+    it('should handle missing skill gracefully (returns null)', async () => {
+      const mockChain = supabase.from('skills') as any;
+      // Simulate "no rows found" from .maybeSingle() -> returns null data, null error
+      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+        Promise.resolve({ data: null, error: null }).then(onFulfilled)
+      );
+
+      const { result } = renderHook(() => useSkill('999'), { wrapper });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(mockChain.eq).toHaveBeenCalledWith('skill_id', '999');
+      expect(mockChain.maybeSingle).toHaveBeenCalled();
+      expect(result.current.data).toBeNull();
+      expect(result.current.error).toBeNull();
     });
   });
 

@@ -42,14 +42,14 @@ $rotationConfig = @{
 }
 
 $config = $rotationConfig[$SecretType]
-Write-Host "🔄 Starting rotation for $SecretType in $Environment" -ForegroundColor Cyan
+Write-Host " Starting rotation for $SecretType in $Environment" -ForegroundColor Cyan
 
 if ($DryRun) {
-    Write-Host "🔍 DRY RUN MODE - No actual changes will be made" -ForegroundColor Yellow
+    Write-Host " DRY RUN MODE - No actual changes will be made" -ForegroundColor Yellow
 }
 
 # Phase 1: Backup current secrets
-Write-Host "📋 Phase 1: Creating backup..." -ForegroundColor Yellow
+Write-Host " Phase 1: Creating backup..." -ForegroundColor Yellow
 $backupName = ".secrets.rotation.backup.$(Get-Date -Format 'yyyyMMdd-HHmmss')"
 $backupPath = Join-Path $RootDir $backupName
 if (Test-Path (Join-Path $RootDir '.secrets')) {
@@ -57,7 +57,7 @@ if (Test-Path (Join-Path $RootDir '.secrets')) {
 }
 
 # Phase 2: Generate new secret
-Write-Host "🔑 Phase 2: Generating new secret..." -ForegroundColor Yellow
+Write-Host " Phase 2: Generating new secret..." -ForegroundColor Yellow
 
 switch ($SecretType) {
     "SUPABASE_SERVICE_KEY" {
@@ -78,20 +78,20 @@ switch ($SecretType) {
 }
 
 # Phase 3: Validate new secret
-Write-Host "✅ Phase 3: Validating new secret..." -ForegroundColor Yellow
+Write-Host " Phase 3: Validating new secret..." -ForegroundColor Yellow
 
 if (-not $DryRun) {
     # Validation logic here (API calls to test the new secret)
     # Placeholder for actual API validation
     if ($newSecret.Length -lt 10) {
-        Write-Host "  ❌ Validation failed: Secret too short" -ForegroundColor Red
+        Write-Host "   Validation failed: Secret too short" -ForegroundColor Red
         exit 1
     }
-    Write-Host "  ✅ New secret validated successfully" -ForegroundColor Green
+    Write-Host "   New secret validated successfully" -ForegroundColor Green
 }
 
 # Phase 4: Update local secrets
-Write-Host "📝 Phase 4: Updating local secrets..." -ForegroundColor Yellow
+Write-Host " Phase 4: Updating local secrets..." -ForegroundColor Yellow
 
 if (-not $DryRun) {
     $secretsContent = Get-Content (Join-Path $RootDir '.secrets')
@@ -106,7 +106,7 @@ if (-not $DryRun) {
 }
 
 # Phase 5: Upload to cloud
-Write-Host "☁️ Phase 5: Uploading to Cloudflare..." -ForegroundColor Yellow
+Write-Host " Phase 5: Uploading to Cloudflare..." -ForegroundColor Yellow
 
 if (-not $DryRun) {
     & (Join-Path $ScriptDir 'Upload-Secrets.ps1') -Environment $Environment -Force
@@ -114,7 +114,7 @@ if (-not $DryRun) {
 
 # Phase 6: Redeploy if required
 if ($config.requires_redeploy) {
-    Write-Host "🚀 Phase 6: Redeploying applications..." -ForegroundColor Yellow
+    Write-Host " Phase 6: Redeploying applications..." -ForegroundColor Yellow
     Write-Host "   (Run orchestrator.ps1 manually for now or uncomment automation)" -ForegroundColor Gray
     
     # if (-not $DryRun) {
@@ -122,5 +122,5 @@ if ($config.requires_redeploy) {
     # }
 }
 
-Write-Host "✅ Rotation completed successfully!" -ForegroundColor Green
-Write-Host "📋 Backup available at: $backupPath" -ForegroundColor Yellow
+Write-Host " Rotation completed successfully!" -ForegroundColor Green
+Write-Host " Backup available at: $backupPath" -ForegroundColor Yellow

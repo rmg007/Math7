@@ -8,6 +8,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   useCreateQuestion,
   useDeleteQuestion,
+  useDuplicateQuestion,
   usePaginatedQuestions,
   useQuestion,
   useQuestions,
@@ -26,6 +27,7 @@ vi.mock('@/lib/supabase', () => {
       ilike: vi.fn(() => chain),
       range: vi.fn(() => chain),
       single: vi.fn(() => chain),
+      maybeSingle: vi.fn(() => chain),
       insert: vi.fn(() => chain),
       update: vi.fn(() => chain),
       in: vi.fn(() => chain),
@@ -131,7 +133,7 @@ describe('useQuestions', () => {
   });
 
   describe('useQuestion', () => {
-    it('should fetch a single question by id', async () => {
+    it('should fetch a single question by id without invalid subjects relation', async () => {
       const mockChain = supabase.from('questions') as any;
       mockChain.then.mockImplementationOnce((onFulfilled: any) =>
         Promise.resolve({ data: mockQuestions[0], error: null }).then(onFulfilled)
@@ -141,8 +143,38 @@ describe('useQuestions', () => {
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
+      // Verify query structure
       expect(mockChain.eq).toHaveBeenCalledWith('question_id', '1');
+
+      // Get the select argument
+      const selectCall = mockChain.select.mock.calls.find((call: any[]) =>
+        call[0].includes('skills')
+      );
+      expect(selectCall).toBeDefined();
+      const selectQuery = selectCall[0];
+
+      // Assert it does NOT contain 'subjects'
+      expect(selectQuery).not.toContain('subjects');
+      expect(selectQuery).toContain('domains');
+
+      expect(mockChain.maybeSingle).toHaveBeenCalled();
       expect(result.current.data).toEqual(mockQuestions[0]);
+    });
+
+    it('should handle missing question gracefully (returns null)', async () => {
+      const mockChain = supabase.from('questions') as any;
+      // Simulate "no rows found"
+      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+        Promise.resolve({ data: null, error: null }).then(onFulfilled)
+      );
+
+      const { result } = renderHook(() => useQuestion('999'), { wrapper });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(mockChain.eq).toHaveBeenCalledWith('question_id', '999');
+      expect(mockChain.maybeSingle).toHaveBeenCalled();
+      expect(result.current.data).toBeNull();
     });
   });
 
@@ -192,6 +224,45 @@ describe('useQuestions', () => {
         })
       );
       expect(mockChain.eq).toHaveBeenCalledWith('question_id', '1');
+    });
+  });
+  describe('useDuplicateQuestion', () => {
+    it('should duplicate a question', async () => {
+      const mockChain = supabase.from('questions') as any;
+      const originalQuestion = {
+        ...mockQuestions[0],
+        content: 'Question 1',
+        skill_id: 'skill-1',
+        app_id: mockAppId,
+      };
+
+      // Mock fetching original, then inserting duplicate
+      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+        Promise.resolve({ data: originalQuestion, error: null }).then(onFulfilled)
+      );
+
+      mockChain.then.mockImplementation((onFulfilled: any) =>
+        Promise.resolve({
+          data: { ...originalQuestion, content: 'Question 1', status: 'draft' },
+          error: null,
+        }).then(onFulfilled)
+      );
+
+      const { result } = renderHook(() => useDuplicateQuestion(), { wrapper });
+
+      await result.current.mutateAsync('1');
+
+      // Verify fetch happened
+      expect(mockChain.eq).toHaveBeenCalledWith('question_id', '1');
+
+      // Verify insert happened
+      expect(mockChain.insert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          app_id: mockAppId,
+          status: 'draft',
+          skill_id: 'skill-1',
+        })
+      );
     });
   });
 });

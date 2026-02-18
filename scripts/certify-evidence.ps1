@@ -9,7 +9,7 @@ $artifactDir = "$rootPath/.agent/artifacts/certify_$timestamp"
 
 if (!(Test-Path $artifactDir)) { New-Item -ItemType Directory -Path $artifactDir -Force | Out-Null }
 
-Write-Host "🏆 Starting Certification Evidence Collection ($timestamp)..." -ForegroundColor Cyan
+Write-Host " Starting Certification Evidence Collection ($timestamp)..." -ForegroundColor Cyan
 
 $jobs = @()
 
@@ -31,18 +31,18 @@ $jobs += Start-Job -Name "hygiene" -ScriptBlock {
     & "$root/scripts/code-hygiene-scan.ps1" > "$artDir/hygiene.log" 2>&1
 } -ArgumentList $rootPath, $artifactDir
 
-Write-Host "⏳ Collecting evidence in parallel..." -ForegroundColor Yellow
+Write-Host " Collecting evidence in parallel..." -ForegroundColor Yellow
 $jobs | Wait-Job | Out-Null
 
 $duration = (Get-Date) - $startTime
-Write-Host "`n📋 Certification Summary (Duration: $($duration.TotalMinutes.ToString("F1"))m):" -ForegroundColor Cyan
+Write-Host "`n Certification Summary (Duration: $($duration.TotalMinutes.ToString("F1"))m):" -ForegroundColor Cyan
 Write-Host "Evidence Location: $artifactDir" -ForegroundColor Gray
 
 foreach ($job in $jobs) {
     if ($job.ChildJobs[0].ExitCode -eq 0) { 
-        Write-Host "[✓] PASSED: $($job.Name)" -ForegroundColor Green
+        Write-Host "[] PASSED: $($job.Name)" -ForegroundColor Green
     } else { 
-        Write-Host "[✗] FAILED: $($job.Name)" -ForegroundColor Red
+        Write-Host "[] FAILED: $($job.Name)" -ForegroundColor Red
     }
 }
 
@@ -55,5 +55,5 @@ $manifest = @{
 }
 $manifest | ConvertTo-Json | Out-File "$artifactDir/manifest.json"
 
-Write-Host "`n✨ Evidence collection complete." -ForegroundColor Cyan
+Write-Host "`n Evidence collection complete." -ForegroundColor Cyan
 exit 0

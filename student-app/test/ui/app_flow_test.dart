@@ -6,6 +6,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:questerix_domain/questerix_domain.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:student_app/src/app.dart';
+import 'package:student_app/src/core/config/app_config_service.dart';
 import 'package:student_app/src/core/core_providers.dart';
 import 'package:student_app/src/core/database/database.dart';
 import 'package:student_app/src/core/sync/sync_service.dart';
@@ -35,6 +36,16 @@ class MockSyncService extends StateNotifier<SyncState> implements SyncService {
   Future<void> push() async {}
   @override
   Future<void> pull() async {}
+}
+
+class FakeAppConfigService extends AppConfigService {
+  FakeAppConfigService() : super(MockSupabaseClient()) {
+    state = const AppContext(
+      appId: 'test-app-id',
+      appName: 'Test App',
+      primaryColor: 0xFF0000FF,
+    );
+  }
 }
 
 void main() {
@@ -90,6 +101,7 @@ void main() {
             connectivityServiceProvider
                 .overrideWith((ref) => Stream.value(ConnectivityStatus.online)),
             syncServiceProvider.overrideWith((ref) => MockSyncService()),
+            appConfigProvider.overrideWith((ref) => FakeAppConfigService()),
           ],
           child: const QuesterixApp(),
         ),

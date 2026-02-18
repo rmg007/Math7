@@ -21,7 +21,7 @@ try {
     Write-Host "  [2/2] Running production build..." -ForegroundColor Gray
     npm run build
     
-    Write-Host "✅ Landing Pages build complete!" -ForegroundColor Green
+    Write-Host " Landing Pages build complete!" -ForegroundColor Green
 }
 finally {
     Pop-Location

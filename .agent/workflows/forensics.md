@@ -8,6 +8,7 @@ description: All-Seeing Auditor Protocol - Deep-Dive Forensic Audit
 > **Policy:** Guilty Until Proven Innocent — every artifact must prove its worth.
 
 ## 🧠 Mission
+
 **ACT AS:** Senior Systems Auditor & Red Team Forensics Lead.
 **GOAL:** Identify Structural Rot and Silent Failures. Prove the repository is lying by exposing hollow artifacts, hanging processes, and historical security vulnerabilities.
 
@@ -15,7 +16,7 @@ description: All-Seeing Auditor Protocol - Deep-Dive Forensic Audit
 
 ## 🚀 THE SUPREME MANDATE: EFFICIENCY FIRST
 
-> **🚫 BANNED PATHS (NEVER SCAN)**: 
+> **🚫 BANNED PATHS (NEVER SCAN)**:
 > `node_modules`, `dist`, `build`, `.git`, `.next`, `coverage`, `.dart_tool`, `ios/Pods`.
 >
 > **CRITICAL RULE**: Searching the entire repository without explicit exclusions is a **TERMINAL OFFENSE**. Always use surgical filters (`-t`, `-g`) or the centralized audit script.
@@ -25,21 +26,24 @@ description: All-Seeing Auditor Protocol - Deep-Dive Forensic Audit
 Instead of running multiple disconnected scripts, use the centralized Forensic Engine. This script performs a **single-pass autopsy** of the codebase, respecting all exclusion rules and focusing only on source artifacts.
 
 #### 1. EXECUTION
+
 - **Action**: Run the centralized forensic engine.
 - **Command**:
   ```powershell
-  pwsh scripts/maintenance/forensic_audit.ps1
+  python ops_runner.py tasks.json # executes: pwsh scripts/maintenance/forensic_audit.ps1
   ```
 - **Scope**:
-    - **Taxonomy Scans**: Confirmed security anti-patterns.
-    - **Hollow Infrastructure**: Logic-stripped weight checks.
-    - **Evidence Autopsy**: Zombie test (hang) detection.
-    - **Archaeology**: Migration "confessions."
-    - **Config Drift**: Environment vs. `.env.example`.
-    - **Pattern Hunt**: Silent killers (empty catch, as any).
+  - **Taxonomy Scans**: Confirmed security anti-patterns.
+  - **Hollow Infrastructure**: Logic-stripped weight checks.
+  - **Evidence Autopsy**: Zombie test (hang) detection.
+  - **Archaeology**: Migration "confessions."
+  - **Config Drift**: Environment vs. `.env.example`.
+  - **Pattern Hunt**: Silent killers (empty catch, as any).
 
 #### 2. CLOUD DELEGATION (Optional)
+
 If the audit is run by an external "Cloud Auditor" agent:
+
 - Record the **Date**, **Agent ID**, and **Architect's Verdict**.
 - Merge findings into the local `tasks.md` Hardening Backlog.
 
@@ -73,7 +77,7 @@ Once the report is generated, follow this strict loop:
 
 1.  **Task Creation**: Convert findings into `tasks.md` under `## 🛡️ HARDENING BACKLOG`.
 2.  **Implementation**: Fix every identified issue. **NO NEW FEATURES** until the backlog is zero.
-3.  **Cross-Domain Documentation**: 
+3.  **Cross-Domain Documentation**:
     - Document the fix in the current task context.
     - **MANDATORY**: Update `docs/reports/LEARNING_LOG.md` using "Root Cause → Lesson → Prevention".
 4.  **Surgical Verification**: Re-run the specific Forensic step using optimized filters (never scan all folders).
@@ -83,7 +87,9 @@ Once the report is generated, follow this strict loop:
 ---
 
 ## 🛑 EFFICIENCY ENFORCEMENT
+
 Any command that scans for code MUST:
+
 1.  **Exclude Heavy Folders**: `-g '!node_modules' -g '!dist' -g '!.next'`.
 2.  **Filter by Type**: Use `-t ts -t js -t dart`.
 3.  **Limit Output**: Use `--max-depth` if possible.

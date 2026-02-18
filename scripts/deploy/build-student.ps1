@@ -48,8 +48,8 @@ Write-Host "Command: flutter build web --release [FLAGS_HIDDEN]" -ForegroundColo
 Invoke-Expression $buildCommand
 
 if (Test-Path (Join-Path $StudentAppDir 'build\web')) {
-    Write-Host "✅ Flutter web build complete: build/web/" -ForegroundColor Green
+    Write-Host " Flutter web build complete: build/web/" -ForegroundColor Green
 } else {
-    Write-Host "❌ Flutter web build failed!" -ForegroundColor Red
+    Write-Host " Flutter web build failed!" -ForegroundColor Red
     exit 1
 }

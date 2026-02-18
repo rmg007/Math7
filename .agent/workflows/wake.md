@@ -86,7 +86,7 @@ git pull --ff-only 2>&1
 
 ```powershell
 // turbo
-cd admin-panel ; npx tsc --noEmit 2>&1 | Select-Object -First 10
+python ops_runner.py tasks.json # executes: cd admin-panel ; npx tsc --noEmit
 ```
 
 **If errors found**: Report them but don't block. Note: "Build has [N] errors. You may want to fix these before proceeding."

@@ -20,12 +20,12 @@ param(
 
 $ErrorActionPreference = "SilentlyContinue"
 
-# ── Paths ──────────────────────────────────────────────────────────────
+#  Paths 
 $BrainPath   = "$env:USERPROFILE\.gemini\antigravity\brain"
 $ProjectRoot = "$env:USERPROFILE\OneDrive\Desktop\Important Projects\Questerix"
 $LogFile     = "$ProjectRoot\scripts\maintenance\cleanup-log.txt"
 
-# ── Helpers ────────────────────────────────────────────────────────────
+#  Helpers 
 function Write-Log {
     param([string]$Message)
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -42,7 +42,7 @@ function Format-Size {
     return "$Bytes B"
 }
 
-# ── Pre-flight ─────────────────────────────────────────────────────────
+#  Pre-flight 
 if (-not (Test-Path $BrainPath)) {
     Write-Log "ERROR: Brain path not found: $BrainPath"
     exit 1
@@ -52,19 +52,19 @@ $sizeBefore = (Get-ChildItem -Path $BrainPath -Recurse -File | Measure-Object -P
 $countBefore = (Get-ChildItem -Path $BrainPath -Recurse -File | Measure-Object).Count
 $sessionsBefore = (Get-ChildItem -Path $BrainPath -Directory | Measure-Object).Count
 
-Write-Log "═══════════════════════════════════════════════════════════"
+Write-Log ""
 Write-Log "AGENT MEMORY CLEANUP STARTED"
 Write-Log "Mode: $(if ($DryRun) { 'DRY RUN' } else { 'LIVE' })"
 Write-Log "Retain: $RetainDays days / $RetainSessions sessions"
 Write-Log "Before: $(Format-Size $sizeBefore) | $countBefore files | $sessionsBefore sessions"
-Write-Log "═══════════════════════════════════════════════════════════"
+Write-Log ""
 
 $cutoffDate = (Get-Date).AddDays(-$RetainDays)
 $removedFiles = 0
 $removedSessions = 0
 $recoveredBytes = 0
 
-# ── Phase 1: Strip Media from ALL sessions ─────────────────────────────
+#  Phase 1: Strip Media from ALL sessions 
 Write-Log "Phase 1: Stripping media artifacts..."
 
 $mediaPatterns = @("*.png", "*.webp", "*.jpg", "*.jpeg", "*.gif", "*.mp4")
@@ -97,7 +97,7 @@ Get-ChildItem -Path $BrainPath -Directory | ForEach-Object {
     }
 }
 
-# ── Phase 2: Prune resolved state snapshots ────────────────────────────
+#  Phase 2: Prune resolved state snapshots 
 Write-Log "Phase 2: Pruning resolved state snapshots..."
 
 Get-ChildItem -Path $BrainPath -Directory | ForEach-Object {
@@ -113,7 +113,7 @@ Get-ChildItem -Path $BrainPath -Directory | ForEach-Object {
     }
 }
 
-# ── Phase 3: Delete stale sessions ────────────────────────────────────
+#  Phase 3: Delete stale sessions 
 Write-Log "Phase 3: Pruning stale sessions (older than $RetainDays days)..."
 
 $allSessions = Get-ChildItem -Path $BrainPath -Directory |
@@ -135,7 +135,7 @@ foreach ($session in $sessionsToDelete) {
     }
 }
 
-# ── Phase 4: Clean root workspace temp files ───────────────────────────
+#  Phase 4: Clean root workspace temp files 
 Write-Log "Phase 4: Cleaning project root temp files..."
 
 $rootCleanup = @(
@@ -155,7 +155,7 @@ foreach ($file in $rootCleanup) {
     }
 }
 
-# ── Phase 5: Prune old artifacts (indexed in Oracle) ───────────────────
+#  Phase 5: Prune old artifacts (indexed in Oracle) 
 Write-Log "Phase 5: Pruning indexed artifacts..."
 
 $artifactPath = Join-Path $ProjectRoot ".agent\artifacts"
@@ -174,7 +174,7 @@ if (Test-Path $artifactPath) {
     }
 }
 
-# ── Summary ────────────────────────────────────────────────────────────
+#  Summary 
 $sizeAfter = if (-not $DryRun) {
     (Get-ChildItem -Path $BrainPath -Recurse -File | Measure-Object -Property Length -Sum).Sum
 } else { $sizeBefore - $recoveredBytes }
@@ -183,13 +183,13 @@ $sessionsAfter = if (-not $DryRun) {
     (Get-ChildItem -Path $BrainPath -Directory | Measure-Object).Count
 } else { $sessionsBefore - $removedSessions }
 
-Write-Log "═══════════════════════════════════════════════════════════"
+Write-Log ""
 Write-Log "CLEANUP COMPLETE"
 Write-Log "Sessions: $sessionsBefore -> $sessionsAfter (-$removedSessions)"
 Write-Log "Files removed: $removedFiles"
 Write-Log "Space recovered: $(Format-Size $recoveredBytes)"
 Write-Log "Final size: $(Format-Size $sizeAfter)"
-Write-Log "═══════════════════════════════════════════════════════════"
+Write-Log ""
 
 # Return summary object for pipeline use
 [PSCustomObject]@{

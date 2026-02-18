@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_theme.dart';
 
 typedef AnswerCallback = void Function(Map<String, dynamic> answer);
@@ -19,9 +20,14 @@ class MultipleChoiceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final optionsList = (options is Map && options['options'] != null)
-        ? options['options'] as List<dynamic>
-        : options as List<dynamic>;
+    List<dynamic> optionsList;
+    if (options is Map && options.containsKey('options')) {
+      optionsList = options['options'] as List<dynamic>;
+    } else if (options is List) {
+      optionsList = options;
+    } else {
+      optionsList = [];
+    }
 
     return Column(
       children: optionsList.map<Widget>((option) {
@@ -142,9 +148,14 @@ class McqMultiWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final optionsList = (options is Map && options['options'] != null)
-        ? options['options'] as List<dynamic>
-        : options as List<dynamic>;
+    List<dynamic> optionsList;
+    if (options is Map && options.containsKey('options')) {
+      optionsList = options['options'] as List<dynamic>;
+    } else if (options is List) {
+      optionsList = options;
+    } else {
+      optionsList = [];
+    }
 
     return Column(
       children: optionsList.map<Widget>((option) {
@@ -517,10 +528,15 @@ class _ReorderStepsWidgetState extends State<ReorderStepsWidget> {
     if (existingOrder != null && existingOrder is List) {
       _orderedSteps = List<String>.from(existingOrder);
     } else {
-      final stepsList =
-          (widget.options is Map && widget.options['steps'] != null)
-              ? widget.options['steps'] as List<dynamic>
-              : widget.options as List<dynamic>;
+      List<dynamic> stepsList;
+      if (widget.options is Map &&
+          (widget.options as Map).containsKey('steps')) {
+        stepsList = widget.options['steps'] as List<dynamic>;
+      } else if (widget.options is List) {
+        stepsList = widget.options as List<dynamic>;
+      } else {
+        stepsList = [];
+      }
       _orderedSteps = stepsList.map<String>((step) {
         if (step is Map) {
           return step['text'] as String? ??

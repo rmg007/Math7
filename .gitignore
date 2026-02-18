@@ -110,6 +110,10 @@ deps-output.txt
 .gemini/antigravity/knowledge/
 !.gemini/antigravity/knowledge/.keep
 
+# Agent & IDE Configurations
+.agent/
+.windsurf/
+
 
 # Tool binaries (install via package manager, never commit)
 tools/bin/

@@ -152,10 +152,10 @@ export function useSkill(skill_id: string) {
         .select('*')
         .eq('skill_id', skill_id)
         .eq('app_id', currentApp.app_id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      return data as Skill;
+      return data as Skill | null;
     },
     enabled: Boolean(skill_id) && Boolean(currentApp?.app_id),
   });

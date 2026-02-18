@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Questerix Forensic Strike Engine — Surgical Strike Mode
+    Questerix Forensic Strike Engine  Surgical Strike Mode
 #>
 
 $ErrorActionPreference = "SilentlyContinue"
@@ -20,7 +20,7 @@ $report = @{
 }
 $rootDir = $PWD.Path
 
-# 🎯 SURGICAL TARGETS (Non-recursive discovery where possible)
+#  SURGICAL TARGETS (Non-recursive discovery where possible)
 $targetPaths = @(
     "admin-panel/src",
     "student-app/lib",
@@ -30,7 +30,7 @@ $targetPaths = @(
 )
 
 Write-Section "STEP 0: READINESS"
-Write-Host "✅ Tools Ready (Surgical Mode)" -ForegroundColor Green
+Write-Host " Tools Ready (Surgical Mode)" -ForegroundColor Green
 
 Write-Section "STEP 1-7: UNIFIED STRIKE"
 
@@ -81,7 +81,7 @@ foreach ($file in $files) {
 
             # Observability alignment
             if ($h.Line -match "prune_old_error_logs|cleanup_security_logs" -and $relPath -match "migrations") {
-                Write-Host "✅ Found Maintenance Function: $loc" -ForegroundColor Gray
+                Write-Host " Found Maintenance Function: $loc" -ForegroundColor Gray
             }
         }
 
@@ -111,14 +111,14 @@ foreach ($log in $logs) {
 # --- STEP 8: REINDEX ORACLE ---
 Write-Section "STEP 8: REINDEX ORACLE"
 try {
-    Write-Host "🔄 Updating Project Oracle Search Index..." -ForegroundColor Cyan
+    Write-Host " Updating Project Oracle Search Index..." -ForegroundColor Cyan
     $kbDir = Join-Path $PWD.Path "scripts/knowledge-base"
     if (Test-Path $kbDir) {
         Push-Location $kbDir
         # Use tsx directly to avoid npm noise if possible, but npm run index is safer
         & npm run index 2>&1 | Out-Null
         Pop-Location
-        Write-Host "✅ Oracle Index Updated" -ForegroundColor Green
+        Write-Host " Oracle Index Updated" -ForegroundColor Green
     } else {
         Write-Warn "Knowledge base directory not found at $kbDir"
     }
@@ -128,7 +128,7 @@ try {
 
 # --- GENERATE REPORTS (JSON & Markdown) ---
 $date = Get-Date -Format "yyyy-MM-dd HH:mm"
-$verdict = "🟢 STABLE"
+$verdict = " STABLE"
 $stats = @{ critical = 0; warning = 0; info = 0 }
 $findings = @()
 
@@ -164,8 +164,8 @@ foreach ($sr in $report.stability_risks) {
     }
 }
 
-if ($stats.critical -gt 0) { $verdict = "🔴 STOP SHIP" }
-elseif ($stats.warning -gt 0) { $verdict = "🟡 DEBT WARN" }
+if ($stats.critical -gt 0) { $verdict = " STOP SHIP" }
+elseif ($stats.warning -gt 0) { $verdict = " DEBT WARN" }
 
 # 1. Output JSON Backlog
 $backlog = @{
@@ -180,7 +180,7 @@ $backlog | ConvertTo-Json -Depth 10 | Out-File "$rootDir/.agent/HARDENING_BACKLO
 # 2. Output Markdown (Visual)
 $reportMarkdown = @"
 ============================================================
-  QUESTERIX HARDENING BACKLOG — $date
+  QUESTERIX HARDENING BACKLOG  $date
 ============================================================
 Verdict: $verdict | Critical: $($stats.critical) | Warning: $($stats.warning)
 ------------------------------------------------------------

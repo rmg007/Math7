@@ -28,7 +28,7 @@ $content = $content -replace "const parseField = \(field: any\)", "const parseFi
 
 Set-Content $file $content -NoNewline
 
-Write-Host "✓ Fixed question-list.tsx" -ForegroundColor Green
+Write-Host " Fixed question-list.tsx" -ForegroundColor Green
 
 # Fix question-form.tsx
 $file = "admin-panel/src/features/curriculum/components/question-form.tsx"
@@ -72,7 +72,7 @@ $content = $content -replace "\(s: any\) =>", "(s: ReorderStep) =>"
 
 Set-Content $file $content -NoNewline
 
-Write-Host "✓ Fixed question-form.tsx" -ForegroundColor Green
+Write-Host " Fixed question-form.tsx" -ForegroundColor Green
 
 # Fix GovernancePage.tsx
 $file = "admin-panel/src/features/ai-assistant/pages/GovernancePage.tsx"
@@ -80,7 +80,7 @@ $content = Get-Content $file -Raw
 $content = $content -replace "\(q: any\)", "(q: Record<string, unknown>)"
 Set-Content $file $content -NoNewline
 
-Write-Host "✓ Fixed GovernancePage.tsx" -ForegroundColor Green
+Write-Host " Fixed GovernancePage.tsx" -ForegroundColor Green
 
 # Fix GenerationPage.tsx
 $file = "admin-panel/src/features/ai-assistant/pages/GenerationPage.tsx"
@@ -88,7 +88,7 @@ $content = Get-Content $file -Raw
 $content = $content -replace "\(skill: any\)", "(skill: { id: string; title: string })"
 Set-Content $file $content -NoNewline
 
-Write-Host "✓ Fixed GenerationPage.tsx" -ForegroundColor Green
+Write-Host " Fixed GenerationPage.tsx" -ForegroundColor Green
 
 # Fix DocumentUploader.tsx
 $file = "admin-panel/src/features/ai-assistant/components/DocumentUploader.tsx"
@@ -96,7 +96,7 @@ $content = Get-Content $file -Raw
 $content = $content -replace "\.map\(\(item: any\) =>", ".map((item: { str: string }) =>"
 Set-Content $file $content -NoNewline
 
-Write-Host "✓ Fixed DocumentUploader.tsx" -ForegroundColor Green
+Write-Host " Fixed DocumentUploader.tsx" -ForegroundColor Green
 
 Write-Host "`nAll files fixed! Running TypeScript check..." -ForegroundColor Cyan
 cd admin-panel

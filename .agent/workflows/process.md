@@ -187,15 +187,15 @@ Before Phase 1, create `.agent/artifacts/TASK_STATE.json`:
     - Verify: Feature isolation maintained (no cross-feature imports)
     - **Proof**: Command output showing "no dependency violations found"
 7.  **Quality Verification Suite**:
-    - **Action**: Run `powershell .\scripts\preflight.ps1`
+    - **Action**: Use `python ops_runner.py` to run `powershell .\scripts\preflight.ps1`
     - **Goal**: Verify type safety, linting, and project-wide dependency hygiene in parallel.
     - **Proof**: Attach the summary report from `.agent/logs/preflight/`.
 8.  **Full Test Suite**:
-    - **Action**: Run `powershell .\scripts\run-all-tests.ps1`
+    - **Action**: Use `python ops_runner.py` to run `powershell .\scripts\run-all-tests.ps1`
     - **Goal**: Execute every test suite in the project (Admin, Student, Python, Supabase) simultaneously.
     - **Proof**: Summary results showing pass/fail counts.
 9.  **Security & Hygiene Scan**:
-    - **Action**: Run `powershell .\scripts\code-hygiene-scan.ps1`
+    - **Action**: Use `python ops_runner.py` to run `powershell .\scripts\code-hygiene-scan.ps1`
     - **Goal**: Detect empty catch blocks, leaked secrets, and other anti-patterns.
     - **Proof**: Findings from `.agent/logs/hygiene/`.
 10. **QA Loop**: If any step fails, fix the code and re-run the specific script.

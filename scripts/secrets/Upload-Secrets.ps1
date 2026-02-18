@@ -28,9 +28,9 @@ if (-not (Test-Path $auditDir)) { New-Item -ItemType Directory -Path $auditDir -
 
 # Security: Validate environment
 if ($Environment -eq "production" -and -not $Force) {
-    $confirmation = Read-Host "🚨 PRODUCTION ENVIRONMENT - Type 'CONFIRM' to proceed"
+    $confirmation = Read-Host " PRODUCTION ENVIRONMENT - Type 'CONFIRM' to proceed"
     if ($confirmation -ne "CONFIRM") {
-        Write-Host "❌ Production upload cancelled" -ForegroundColor Red
+        Write-Host " Production upload cancelled" -ForegroundColor Red
         exit 1
     }
 }
@@ -38,7 +38,7 @@ if ($Environment -eq "production" -and -not $Force) {
 # Load and validate secrets
 $secretsPath = Join-Path $RootDir '.secrets'
 if (-not (Test-Path $secretsPath)) {
-    Write-Host "❌ .secrets file not found" -ForegroundColor Red
+    Write-Host " .secrets file not found" -ForegroundColor Red
     exit 1
 }
 
@@ -46,7 +46,7 @@ if (-not (Test-Path $secretsPath)) {
 $timestamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $autoBackup = Join-Path $RootDir ".secrets.backup.$timestamp"
 Copy-Item $secretsPath $autoBackup
-Write-Host "📋 Backup created: $autoBackup" -ForegroundColor Yellow
+Write-Host " Backup created: $autoBackup" -ForegroundColor Yellow
 
 # Load secrets with validation
 $secrets = @{}
@@ -78,15 +78,15 @@ Get-Content $secretsPath | ForEach-Object {
 $missingSecrets = $allRequiredSecrets | Where-Object { -not $secrets.ContainsKey($_) -or -not $secrets[$_] }
 
 if ($missingSecrets) {
-    Write-Host "⚠️  WARNING: The following secrets are missing or empty:" -ForegroundColor Yellow
+    Write-Host "  WARNING: The following secrets are missing or empty:" -ForegroundColor Yellow
     $missingSecrets | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
     
     $proceed = Read-Host "Do you want to proceed with uploading ONLY the available secrets? (Y/N)"
     if ($proceed -ne "Y" -and $proceed -ne "y") {
-        Write-Host "❌ Upload cancelled." -ForegroundColor Red
+        Write-Host " Upload cancelled." -ForegroundColor Red
         exit 1
     }
-    Write-Host "⚠️  Proceeding with partial upload..." -ForegroundColor Yellow
+    Write-Host "  Proceeding with partial upload..." -ForegroundColor Yellow
 }
 
 # Upload with audit logging
@@ -99,7 +99,7 @@ $auditEntry = @{
     status = "in_progress"
 }
 
-Write-Host "🔒 Uploading secrets to $Environment..." -ForegroundColor Yellow
+Write-Host " Uploading secrets to $Environment..." -ForegroundColor Yellow
 
 # Prepare the secrets file content for piping
 $envContent = ""
@@ -122,7 +122,7 @@ $secretsJson = $secrets | ConvertTo-Json
 Set-Content -Path $tempJsonPath -Value $secretsJson
 
 try {
-    Write-Host "  📤 Executing wrangler secret bulk..." -ForegroundColor Cyan
+    Write-Host "   Executing wrangler secret bulk..." -ForegroundColor Cyan
     # Use npx wrangler here to ensure it uses local or cached version if global is missing
     # We pipe the JSON file content to standard input if possible, or use the file
     
@@ -130,10 +130,10 @@ try {
     $cmd = "npx wrangler secret bulk $tempJsonPath --env $Environment"
     Invoke-Expression $cmd
     
-    Write-Host "  ✅ Upload completed" -ForegroundColor Green
+    Write-Host "   Upload completed" -ForegroundColor Green
     
 } catch {
-    Write-Host "  ❌ Failed: $_" -ForegroundColor Red
+    Write-Host "   Failed: $_" -ForegroundColor Red
     $auditEntry.status = "failed"
     $auditEntry.error = $_.Exception.Message
     
@@ -150,5 +150,5 @@ finally {
 $auditEntry.status = "completed"
 $auditEntry | ConvertTo-Json -Depth 10 | Add-Content $AuditLog
 
-Write-Host "✅ Secrets uploaded successfully to $Environment" -ForegroundColor Green
-Write-Host "📊 Audit log updated: $AuditLog" -ForegroundColor Yellow
+Write-Host " Secrets uploaded successfully to $Environment" -ForegroundColor Green
+Write-Host " Audit log updated: $AuditLog" -ForegroundColor Yellow

@@ -11,6 +11,7 @@ description: Reindex all project documentation into Supabase Project Oracle
 ## Prerequisites
 
 1. **Environment Variables** (set these first):
+
 ```powershell
 $env:OPENAI_API_KEY = "sk-proj-..."
 $env:SUPABASE_URL = "https://qvslbiceoonrgjxzkotb.supabase.co"
@@ -18,6 +19,7 @@ $env:SUPABASE_SERVICE_ROLE_KEY = "eyJ..."
 ```
 
 2. **Python Dependencies**:
+
 ```bash
 pip install openai supabase
 ```
@@ -27,17 +29,21 @@ pip install openai supabase
 ## Workflow Steps
 
 ### Step 1: Navigate to Project Oracle
+
 // turbo
+
 ```powershell
 cd scripts/knowledge-base
 ```
 
 ### Step 2: Install Dependencies (First Time Only)
+
 ```powershell
 npm install
 ```
 
 ### Step 3: Configure Environment (First Time Only)
+
 ```powershell
 # Copy example and edit with your keys
 cp .env.example .env
@@ -49,12 +55,15 @@ cp .env.example .env
 ```
 
 ### Step 4: Run Indexer
+
 // turbo
+
 ```powershell
-npm run index
+python ops_runner.py tasks.json # executes: cd scripts/knowledge-base && npm run index
 ```
 
 **What this does**:
+
 - Discovers all `.md` files in configured paths
 - Splits documents into semantic chunks (500-800 tokens)
 - Generates embeddings via OpenAI API
@@ -62,6 +71,7 @@ npm run index
 - Deletes orphaned chunks from deleted files
 
 **Expected output**:
+
 ```
 🔍 Discovering documentation files...
 ✅ Found 45 files to process
@@ -83,6 +93,7 @@ Estimated Cost:      $0.0002
 ```
 
 ### Step 5: Test Search (Optional)
+
 ```powershell
 npm run query "How to validate UUIDs?"
 ```
@@ -101,6 +112,7 @@ npm run query "How to validate UUIDs?"
 ## Troubleshooting
 
 ### **Error: Missing environment variables**
+
 ```powershell
 # Set them in PowerShell
 $env:OPENAI_API_KEY = "your-key"
@@ -109,15 +121,18 @@ $env:SUPABASE_SERVICE_ROLE_KEY = "your-key"
 ```
 
 ### **Error: Module not found**
+
 ```bash
 pip install openai supabase
 ```
 
 ### **Error: Rate limit exceeded**
+
 The uploader has built-in rate limiting (2 second pause every 10 chunks).
 If you still hit limits, edit `oracle_upload.py` and increase the pause.
 
 ### **Error: Duplicate key violation**
+
 This is normal - it means the chunk already exists. The uploader will skip it.
 
 ---
@@ -125,11 +140,13 @@ This is normal - it means the chunk already exists. The uploader will skip it.
 ## Performance Impact
 
 **Before Project Oracle**:
+
 - AI loads 13 KIs at startup (~20,000 tokens)
 - Slow session start
 - 40% relevance (lots of irrelevant context)
 
 **After Project Oracle**:
+
 - AI loads 0 KIs at startup (0 tokens)
 - Instant session start
 - 100% relevance (only retrieves what's needed)

@@ -24,13 +24,13 @@ Write-Host "Building Admin Panel with Vite..." -ForegroundColor Cyan
 npm run build
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ npm run build failed with exit code $LASTEXITCODE" -ForegroundColor Red
+    Write-Host " npm run build failed with exit code $LASTEXITCODE" -ForegroundColor Red
     exit 1
 }
 
 if (Test-Path (Join-Path $AdminDir 'dist')) {
-    Write-Host "✅ Admin Panel build complete: dist/" -ForegroundColor Green
+    Write-Host " Admin Panel build complete: dist/" -ForegroundColor Green
 } else {
-    Write-Host "❌ Admin Panel build failed! dist/ directory not found." -ForegroundColor Red
+    Write-Host " Admin Panel build failed! dist/ directory not found." -ForegroundColor Red
     exit 1
 }
