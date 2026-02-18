@@ -621,12 +621,12 @@ export function DomainList() {
 
       {/* Bulk Actions Bar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center justify-between p-3 bg-gray-900 rounded-lg shadow-md">
+        <div className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md">
           <div className="flex items-center gap-3 pl-2">
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-xs font-semibold">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold">
               {selectedIds.size}
             </span>
-            <span className="text-xs text-gray-300 font-medium">
+            <span className="text-xs text-teal-200 font-medium">
               selected
             </span>
           </div>
@@ -636,7 +636,7 @@ export function DomainList() {
               size="sm"
               disabled={bulkUpdateStatus.isPending}
               onClick={handleMarkPublished}
-              className="h-7 px-3 rounded text-xs text-gray-300 hover:text-white hover:bg-white/10 gap-1"
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
               {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
               Publish
@@ -646,7 +646,7 @@ export function DomainList() {
               size="sm"
               disabled={bulkUpdateStatus.isPending}
               onClick={handleMarkLive}
-              className="h-7 px-3 rounded text-xs text-gray-300 hover:text-white hover:bg-white/10 gap-1"
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
               {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
               Go Live
@@ -656,12 +656,12 @@ export function DomainList() {
               size="sm"
               disabled={bulkUpdateStatus.isPending}
               onClick={handleMarkDraft}
-              className="h-7 px-3 rounded text-xs text-gray-300 hover:text-white hover:bg-white/10 gap-1"
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
               {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
               Draft
             </Button>
-            <div className="w-px h-5 bg-white/10 mx-1" />
+            <div className="w-px h-5 bg-teal-700 mx-1" />
             <Button
               variant="ghost"
               size="sm"
@@ -683,7 +683,7 @@ export function DomainList() {
               variant="ghost"
               size="sm"
               onClick={() => setSelectedIds(new Set())}
-              className="h-7 px-2 rounded text-xs text-gray-400 hover:text-white hover:bg-white/10"
+              className="h-7 px-2 rounded text-xs text-teal-300 hover:text-white hover:bg-white/10"
             >
               <X className="h-3 w-3" />
             </Button>
