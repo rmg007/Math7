@@ -130,38 +130,29 @@ export function usePaginatedQuestions(params: PaginationParams, appFilter?: stri
 }
 
 export function useQuestion(question_id: string) {
-  const { currentApp, isSuperAdmin } = useApp();
-
   return useQuery({
-    queryKey: ['question', question_id, currentApp?.app_id, isSuperAdmin],
+    queryKey: ['question', question_id],
     queryFn: async () => {
-      // Validate the resource ID itself before sending to Supabase
       if (!isValidUUID(question_id)) throw new Error(`Invalid question ID format: ${question_id}`);
-      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
 
-      let query = supabase
+      // RLS enforces tenant isolation — no client-side app_id filter needed
+      const { data, error } = await supabase
         .from('questions')
         .select(
           `
-                    *,
-                    skills (
-                        title,
-                        skill_id,
-                        domains (
-                            title,
-                            domain_id
-                        )
-                    )
-                `
+          *,
+          skills (
+            title,
+            skill_id,
+            domains (
+              title,
+              domain_id
+            )
+          )
+        `
         )
-        .eq('question_id', question_id);
-
-      // Only enforce app_id check for non-super admins
-      if (!isSuperAdmin && currentApp?.app_id) {
-        query = query.eq('app_id', currentApp.app_id);
-      }
-
-      const { data, error } = await query.maybeSingle();
+        .eq('question_id', question_id)
+        .maybeSingle();
 
       if (error) throw error;
       return data as unknown as
@@ -177,10 +168,7 @@ export function useQuestion(question_id: string) {
           })
         | null;
     },
-    enabled:
-      Boolean(question_id) &&
-      isValidUUID(question_id) &&
-      (isSuperAdmin || Boolean(currentApp?.app_id)),
+    enabled: Boolean(question_id) && isValidUUID(question_id),
   });
 }
 

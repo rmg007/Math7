@@ -114,38 +114,22 @@ export function usePaginatedDomains(params: PaginationParams, appId?: string) {
 }
 
 export function useDomain(domainId: string) {
-  const { currentApp, isSuperAdmin } = useApp();
-
   return useQuery({
-    queryKey: ['domain', domainId, currentApp?.app_id, isSuperAdmin],
+    queryKey: ['domain', domainId],
     queryFn: async () => {
-      // Validate the resource ID itself before sending to Supabase
       if (!isValidUUID(domainId)) throw new Error(`Invalid domain ID format: ${domainId}`);
 
-      // For Super Admins, we allow fetching by ID without app context constraint
-      // This enables deep linking to domains in other apps
-      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
-
-      if (!isSuperAdmin && currentApp?.app_id && !isValidUUID(currentApp.app_id)) {
-        throw new Error(`Invalid app ID format: ${currentApp.app_id}`);
-      }
-
-      let query = supabase.from('domains').select('*').eq('domain_id', domainId);
-
-      // Only enforce app_id check for non-super admins or when specifically scoped
-      if (!isSuperAdmin && currentApp?.app_id) {
-        query = query.eq('app_id', currentApp.app_id);
-      }
-
-      const { data, error } = await query.single();
+      // RLS enforces tenant isolation — no client-side app_id filter needed
+      const { data, error } = await supabase
+        .from('domains')
+        .select('*')
+        .eq('domain_id', domainId)
+        .single();
 
       if (error) throw error;
       return data as Domain;
     },
-    // Enable if domainId is a valid UUID.
-    // For non-super admins, also require currentApp.
-    // For super admins, we can try fetching with just domainId.
-    enabled: Boolean(domainId) && isValidUUID(domainId) && (isSuperAdmin || (Boolean(currentApp?.app_id) && isValidUUID(currentApp?.app_id))),
+    enabled: Boolean(domainId) && isValidUUID(domainId),
   });
 }
 

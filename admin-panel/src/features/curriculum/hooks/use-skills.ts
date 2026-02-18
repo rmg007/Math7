@@ -141,29 +141,22 @@ export function usePaginatedSkills(params: PaginationParams, appFilter?: string)
 }
 
 export function useSkill(skill_id: string) {
-  const { currentApp, isSuperAdmin } = useApp();
-
   return useQuery({
-    queryKey: ['skill', skill_id, currentApp?.app_id, isSuperAdmin],
+    queryKey: ['skill', skill_id],
     queryFn: async () => {
-      // Validate the resource ID itself before sending to Supabase
       if (!isValidUUID(skill_id)) throw new Error(`Invalid skill ID format: ${skill_id}`);
-      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
 
-      let query = supabase.from('skills').select('*').eq('skill_id', skill_id);
-
-      // Only enforce app_id check for non-super admins
-      if (!isSuperAdmin && currentApp?.app_id) {
-        query = query.eq('app_id', currentApp.app_id);
-      }
-
-      const { data, error } = await query.maybeSingle();
+      // RLS enforces tenant isolation — no client-side app_id filter needed
+      const { data, error } = await supabase
+        .from('skills')
+        .select('*')
+        .eq('skill_id', skill_id)
+        .maybeSingle();
 
       if (error) throw error;
       return data as Skill | null;
     },
-    enabled:
-      Boolean(skill_id) && isValidUUID(skill_id) && (isSuperAdmin || Boolean(currentApp?.app_id)),
+    enabled: Boolean(skill_id) && isValidUUID(skill_id),
   });
 }
 

@@ -1,5 +1,75 @@
 ---
 
+## 2026-02-18: Fix Edit Page Loading & "Not Found" Bugs [test created]
+
+### Session Context
+
+- **Trigger**: Domains show infinite "Switching App Context..." spinner; Skills/Questions show false "Not Found" on edit pages
+- **Scope**: 3 single-entity hooks + 3 edit pages
+- **Outcome**: Root cause identified and fixed — 6 files simplified, 27 existing tests pass, 0 type errors
+
+### Root Cause
+
+Single-entity hooks (`useDomain`, `useSkill`, `useQuestion`) included redundant client-side `app_id` filtering that duplicated RLS. This caused:
+
+1. **Query key instability** — `currentApp?.app_id` in queryKey caused cache thrashing on app context changes
+2. **Disabled query race** — `enabled` gate required `currentApp` to be loaded, causing TanStack Query v5 to report "not found" before the query could run
+3. **Context-switching loops** — Edit pages had `useEffect` hooks that called `setCurrentApp` when `entity.app_id !== currentApp.app_id`, creating infinite re-render cycles
+
+### Fix Pattern
+
+```typescript
+// BEFORE (BUGGY) — 3 dependencies, race-prone
+export function useDomain(domainId: string) {
+  const { currentApp, isSuperAdmin } = useApp();
+  return useQuery({
+    queryKey: ['domain', domainId, currentApp?.app_id, isSuperAdmin],
+    enabled: Boolean(domainId) && (isSuperAdmin || Boolean(currentApp?.app_id)),
+    queryFn: async () => {
+      let query = supabase.from('domains').select('*').eq('domain_id', domainId);
+      if (!isSuperAdmin && currentApp?.app_id) query = query.eq('app_id', currentApp.app_id);
+      // ...
+    },
+  });
+}
+
+// AFTER (FIXED) — PK only, RLS handles isolation
+export function useDomain(domainId: string) {
+  return useQuery({
+    queryKey: ['domain', domainId],
+    enabled: Boolean(domainId) && isValidUUID(domainId),
+    queryFn: async () => {
+      const { data, error } = await supabase.from('domains').select('*')
+        .eq('domain_id', domainId).single();
+      // ...
+    },
+  });
+}
+```
+
+### Prevention Rules
+
+1. **Single-entity fetch = PK only** — When fetching by primary key, never add `app_id` filter. RLS enforces tenant isolation server-side.
+2. **No context-switching in edit pages** — Edit pages should render or error based on the hook's result, never try to mutate app context.
+3. **Minimal queryKey** — Only include values that actually affect the query. Extra dependencies cause cache thrashing.
+4. **Minimal `enabled` gate** — Only gate on values the query itself needs. Don't gate on unrelated context.
+
+### Files Modified
+
+1. `use-domains.ts` — Simplified `useDomain`
+2. `use-skills.ts` — Simplified `useSkill`
+3. `use-questions.ts` — Simplified `useQuestion`
+4. `skill-edit-page.tsx` — Removed context-switching
+5. `question-edit-page.tsx` — Removed context-switching
+6. `domain-form.tsx` — Removed context-switching
+
+### Verification
+
+- `npx tsc --noEmit` — 0 errors
+- `npx vitest run` — 27/27 tests passed (4 test files)
+
+---
+
 ## 2026-02-18: IRONCLAD ARCHITECT V2 — Admin Panel Forensic Audit
 
 ### Session Context
