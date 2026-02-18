@@ -94,7 +94,7 @@ const MemberRow = memo(
     return (
       <div className="flex items-center justify-between p-4 hover:bg-gray-50/50 transition-all group">
         <div className="flex items-center gap-4 flex-1">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-sm shadow-indigo-500/20 shadow-lg">
+          <div className="h-10 w-10 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-700 font-semibold text-sm">
             {displayName.charAt(0).toUpperCase()}
           </div>
 
@@ -105,7 +105,7 @@ const MemberRow = memo(
                   type="text"
                   value={editNickname}
                   onChange={(e) => onNicknameChange(e.target.value)}
-                  className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 w-full max-w-[200px]"
+                  className="px-3 py-1.5 bg-white border border-gray-200 rounded text-gray-900 text-sm font-medium focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 w-full max-w-[200px]"
                   placeholder="Enter nickname"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && member.user_id) onSave(member.user_id);
@@ -127,7 +127,7 @@ const MemberRow = memo(
                 <div className="flex items-center gap-2">
                   <h3 className="font-bold text-gray-900 text-sm leading-tight">{displayName}</h3>
                   {isAnonymous && (
-                    <span className="text-2xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-black uppercase tracking-widest">
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-semibold uppercase">
                       Anon
                     </span>
                   )}
@@ -152,7 +152,7 @@ const MemberRow = memo(
               size="icon"
               variant="ghost"
               onClick={() => member.user_id && onEdit(member.user_id, member.nickname || '')}
-              className="h-8 w-8 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
+              className="h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
             >
               <Edit3 className="h-3.5 w-3.5" />
             </Button>
@@ -160,7 +160,7 @@ const MemberRow = memo(
               size="icon"
               variant="ghost"
               onClick={() => member.user_id && onRemove(member.user_id)}
-              className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+              className="h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
@@ -494,7 +494,7 @@ export function GroupDetailPage() {
   const memberCount = members?.length || 0;
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
         title={group.name}
         description="Group overview."
@@ -515,108 +515,90 @@ export function GroupDetailPage() {
         }
       />
 
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="bg-white/50 backdrop-blur-xl p-1.5 rounded-[1.5rem] border border-white/20 shadow-sm inline-flex">
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList className="bg-white p-1 rounded-lg border border-gray-200 shadow-sm inline-flex">
           <TabsTrigger
             value="overview"
-            className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-indigo-600 font-bold text-xs uppercase tracking-widest transition-all"
+            className="rounded px-4 py-1.5 data-[state=active]:bg-teal-600 data-[state=active]:text-white data-[state=active]:shadow-sm font-semibold text-xs"
           >
-            <LayoutDashboard className="w-4 h-4 mr-2" /> Overview
+            <LayoutDashboard className="w-3.5 h-3.5 mr-1.5" /> Overview
           </TabsTrigger>
           <TabsTrigger
             value="progress"
-            className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-indigo-600 font-bold text-xs uppercase tracking-widest transition-all"
+            className="rounded px-4 py-1.5 data-[state=active]:bg-teal-600 data-[state=active]:text-white data-[state=active]:shadow-sm font-semibold text-xs"
           >
-            <ClipboardList className="w-4 h-4 mr-2" /> Progress Matrix
+            <ClipboardList className="w-3.5 h-3.5 mr-1.5" /> Progress
           </TabsTrigger>
           <TabsTrigger
             value="settings"
-            className="rounded-xl px-6 py-2.5 data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 font-black text-2xs uppercase tracking-extra-wide transition-all"
+            className="rounded px-4 py-1.5 data-[state=active]:bg-teal-600 data-[state=active]:text-white data-[state=active]:shadow-sm font-semibold text-xs"
           >
-            <Settings className="w-3.5 h-3.5 mr-2" /> Parameters
+            <Settings className="w-3.5 h-3.5 mr-1.5" /> Settings
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-8 outline-none">
-          <div className="grid gap-6 md:grid-cols-3">
-            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-8 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/10">
-                  <Users className="h-5 w-5 text-purple-600" />
-                </div>
-                <span className="text-2xs text-gray-400 uppercase tracking-extra-wide font-black">
-                  Members
-                </span>
+        <TabsContent value="overview" className="space-y-4 outline-none">
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Members</span>
+                <Users className="w-3.5 h-3.5 text-teal-500" />
               </div>
-              <div className="text-4xl font-black text-gray-900 tracking-tight">{memberCount}</div>
+              <p className="text-2xl font-bold text-gray-900 tabular-nums">{memberCount}</p>
             </div>
 
-            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-8 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/10">
-                    <Copy className="h-5 w-5 text-indigo-600" />
-                  </div>
-                  <span className="text-2xs text-gray-400 uppercase tracking-extra-wide font-black">
-                    Join Code
-                  </span>
-                </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Join Code</span>
+                <Copy className="w-3.5 h-3.5 text-teal-500" />
               </div>
-              <div className="flex items-center gap-2 p-1 bg-gray-50 rounded-2xl border border-gray-100">
-                <div className="bg-white px-4 py-2.5 rounded-xl border border-gray-100 shadow-sm flex-1">
-                  <code className="text-indigo-600 font-mono text-xl font-black tracking-widest block text-center">
-                    {group.join_code}
-                  </code>
-                </div>
+              <div className="flex items-center gap-2">
+                <code className="text-teal-700 font-mono text-lg font-bold tracking-wider">
+                  {group.join_code}
+                </code>
                 <Button
                   onClick={() => copyJoinCode()}
                   variant="ghost"
                   size="icon"
-                  className="h-12 w-12 rounded-xl text-indigo-600 hover:bg-white hover:shadow-sm"
+                  className="h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
                 >
                   {copiedCode ? (
-                    <Check className="h-5 w-5 text-green-600" />
+                    <Check className="h-3.5 w-3.5 text-emerald-600" />
                   ) : (
-                    <Copy className="h-5 w-5" />
+                    <Copy className="h-3.5 w-3.5" />
                   )}
                 </Button>
               </div>
             </div>
 
-            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-8 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/10">
-                  <UserPlus className="h-5 w-5 text-emerald-600" />
-                </div>
-                <span className="text-2xs text-gray-400 uppercase tracking-extra-wide font-black">
-                  Public Join
-                </span>
+            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Public Join</span>
+                <UserPlus className="w-3.5 h-3.5 text-teal-500" />
               </div>
-              <div
+              <p
                 className={cn(
-                  'text-2xl font-black tracking-tight',
-                  group.allow_anonymous_join ? 'text-emerald-600' : 'text-gray-300'
+                  'text-sm font-semibold',
+                  group.allow_anonymous_join ? 'text-emerald-600' : 'text-gray-400'
                 )}
               >
-                {group.allow_anonymous_join ? 'ENABLED' : 'DISABLED'}
-              </div>
+                {group.allow_anonymous_join ? 'Enabled' : 'Disabled'}
+              </p>
             </div>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-2">
-            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 shadow-sm overflow-hidden flex flex-col">
-              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden flex flex-col">
+              <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-gray-900 tracking-tight text-lg">Members</h3>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-widest">
-                    Enrollment roster
-                  </p>
+                  <h3 className="text-sm font-semibold text-gray-900">Members</h3>
+                  <p className="text-[11px] text-gray-500">Enrolled students</p>
                 </div>
                 <Button
                   size="sm"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest h-9"
+                  className="h-8 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1"
                 >
-                  <Plus className="mr-2 h-4 w-4" /> Add
+                  <Plus className="h-3.5 w-3.5" /> Add
                 </Button>
               </div>
 
@@ -653,20 +635,18 @@ export function GroupDetailPage() {
               )}
             </div>
 
-            <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-gray-900 tracking-tight text-lg">Curriculum</h3>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-widest">
-                    Active assignments
-                  </p>
+                  <h3 className="text-sm font-semibold text-gray-900">Assignments</h3>
+                  <p className="text-[11px] text-gray-500">Active tasks</p>
                 </div>
                 <Link to={`/groups/${id}/assignments/new`}>
                   <Button
                     size="sm"
-                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest h-9"
+                    className="h-8 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1"
                   >
-                    <Plus className="mr-2 h-4 w-4" /> Create
+                    <Plus className="h-3.5 w-3.5" /> New
                   </Button>
                 </Link>
               </div>
@@ -692,7 +672,7 @@ export function GroupDetailPage() {
                   action={
                     <Button
                       onClick={() => navigate(`/groups/${id}/assignments/new`)}
-                      className="rounded-full px-8 shadow-md"
+                      className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
                     >
                       Initialize Task
                     </Button>
@@ -704,12 +684,10 @@ export function GroupDetailPage() {
         </TabsContent>
 
         <TabsContent value="progress" className="outline-none">
-          <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-              <h2 className="font-bold text-gray-900 text-lg tracking-tight">Assignment Matrix</h2>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
-                Mastery tracking engine
-              </p>
+          <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-200">
+              <h2 className="text-sm font-semibold text-gray-900">Progress Matrix</h2>
+              <p className="text-[11px] text-gray-500">Mastery tracking per student</p>
             </div>
 
             {!members || members.length === 0 ? (
@@ -778,28 +756,27 @@ export function GroupDetailPage() {
         </TabsContent>
 
         <TabsContent value="settings" className="outline-none">
-          <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-16 shadow-sm text-center">
-            <div className="w-16 h-16 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-center mx-auto mb-6">
-              <Settings className="w-8 h-8 text-gray-200" />
+          <div className="bg-white rounded-lg border border-gray-200 shadow-md p-12 text-center">
+            <div className="w-12 h-12 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center mx-auto mb-4">
+              <Settings className="w-6 h-6 text-gray-300" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 tracking-tight mb-2">
-              Advanced Engine Tuning
+            <h3 className="text-base font-semibold text-gray-900 mb-1">
+              Group Settings
             </h3>
-            <p className="text-gray-500 font-medium mb-8 max-w-sm mx-auto leading-relaxed">
-              Modify group parameters, synchronization protocols, and archival state. This interface
-              is currently under development.
+            <p className="text-xs text-gray-500 mb-6 max-w-sm mx-auto">
+              Group configuration is currently under development.
             </p>
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-3">
               <Button
                 variant="outline"
-                className="rounded-xl px-8 border-gray-200 text-gray-400 grayscale"
+                className="h-9 px-4 rounded text-sm text-gray-400"
                 disabled
               >
-                Manage Meta
+                Edit Details
               </Button>
               <Button
                 variant="outline"
-                className="rounded-xl px-8 border-red-100 text-red-300 hover:text-red-600 hover:bg-red-50 hover:border-red-200"
+                className="h-9 px-4 rounded text-sm border-red-200 text-red-400"
                 disabled
               >
                 Archive Group
