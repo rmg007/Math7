@@ -3,7 +3,7 @@ import { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { CurriculumStatus, PaginatedResponse, PaginationParams } from '../types';
+import { CurriculumStatus, isValidUUID, PaginatedResponse, PaginationParams } from '../types';
 
 type Skill = Database['public']['Tables']['skills']['Row'];
 
@@ -141,23 +141,29 @@ export function usePaginatedSkills(params: PaginationParams, appFilter?: string)
 }
 
 export function useSkill(skill_id: string) {
-  const { currentApp } = useApp();
-  return useQuery({
-    queryKey: ['skill', skill_id, currentApp?.app_id],
-    queryFn: async () => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+  const { currentApp, isSuperAdmin } = useApp();
 
-      const { data, error } = await supabase
-        .from('skills')
-        .select('*')
-        .eq('skill_id', skill_id)
-        .eq('app_id', currentApp.app_id)
-        .maybeSingle();
+  return useQuery({
+    queryKey: ['skill', skill_id, currentApp?.app_id, isSuperAdmin],
+    queryFn: async () => {
+      // Validate the resource ID itself before sending to Supabase
+      if (!isValidUUID(skill_id)) throw new Error(`Invalid skill ID format: ${skill_id}`);
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
+
+      let query = supabase.from('skills').select('*').eq('skill_id', skill_id);
+
+      // Only enforce app_id check for non-super admins
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { data, error } = await query.maybeSingle();
 
       if (error) throw error;
       return data as Skill | null;
     },
-    enabled: Boolean(skill_id) && Boolean(currentApp?.app_id),
+    enabled:
+      Boolean(skill_id) && isValidUUID(skill_id) && (isSuperAdmin || Boolean(currentApp?.app_id)),
   });
 }
 
@@ -193,11 +199,14 @@ export function useUpdateSkill() {
   return useMutation({
     mutationFn: async ({ skill_id, ...updates }: { skill_id: string } & Partial<Skill>) => {
       if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
+      if (!isValidUUID(skill_id)) throw new Error(`Invalid skill ID format: ${skill_id}`);
 
       let query = supabase.from('skills').update(updates).eq('skill_id', skill_id);
 
-      // checked app_id: conditional RLS
-      if (!isSuperAdmin && currentApp?.app_id) {
+      // Always scope writes to the resource's own app_id when available (defense-in-depth)
+      if (updates.app_id) {
+        query = query.eq('app_id', updates.app_id);
+      } else if (!isSuperAdmin && currentApp?.app_id) {
         query = query.eq('app_id', currentApp.app_id);
       }
 
@@ -309,18 +318,20 @@ export function useBulkUpdateSkillsStatus() {
 
 export function useDuplicateSkill() {
   const queryClient = useQueryClient();
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async (skill_id: string) => {
       if (!currentApp?.app_id) throw new Error('No app selected');
 
-      const { data: original, error: fetchError } = await supabase
-        .from('skills')
-        .select('*')
-        .eq('skill_id', skill_id)
-        .eq('app_id', currentApp.app_id)
-        .single();
+      let query = supabase.from('skills').select('*').eq('skill_id', skill_id);
+
+      // Only enforce source app_id for non-super admins
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { data: original, error: fetchError } = await query.single();
 
       if (fetchError) throw fetchError;
       if (!original) throw new Error('Skill not found');

@@ -4,7 +4,7 @@ import { escapePostgrestSearch } from '@/lib/postgrest-utils';
 import { supabase } from '@/lib/supabase';
 import type { QuestionListItem } from '@/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { PaginatedResponse, PaginationParams } from '../types';
+import { isValidUUID, PaginatedResponse, PaginationParams } from '../types';
 
 type Question = Database['public']['Tables']['questions']['Row'];
 export type QuestionInsert = Database['public']['Tables']['questions']['Insert'];
@@ -130,13 +130,16 @@ export function usePaginatedQuestions(params: PaginationParams, appFilter?: stri
 }
 
 export function useQuestion(question_id: string) {
-  const { currentApp } = useApp();
-  return useQuery({
-    queryKey: ['question', question_id, currentApp?.app_id],
-    queryFn: async () => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+  const { currentApp, isSuperAdmin } = useApp();
 
-      const { data, error } = await supabase
+  return useQuery({
+    queryKey: ['question', question_id, currentApp?.app_id, isSuperAdmin],
+    queryFn: async () => {
+      // Validate the resource ID itself before sending to Supabase
+      if (!isValidUUID(question_id)) throw new Error(`Invalid question ID format: ${question_id}`);
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
+
+      let query = supabase
         .from('questions')
         .select(
           `
@@ -151,9 +154,14 @@ export function useQuestion(question_id: string) {
                     )
                 `
         )
-        .eq('question_id', question_id)
-        .eq('app_id', currentApp.app_id)
-        .maybeSingle();
+        .eq('question_id', question_id);
+
+      // Only enforce app_id check for non-super admins
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { data, error } = await query.maybeSingle();
 
       if (error) throw error;
       return data as unknown as
@@ -169,7 +177,10 @@ export function useQuestion(question_id: string) {
           })
         | null;
     },
-    enabled: Boolean(question_id) && Boolean(currentApp?.app_id),
+    enabled:
+      Boolean(question_id) &&
+      isValidUUID(question_id) &&
+      (isSuperAdmin || Boolean(currentApp?.app_id)),
   });
 }
 
@@ -235,10 +246,14 @@ export function useUpdateQuestion() {
       ...updates
     }: { question_id: string } & Partial<Question>) => {
       if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
+      if (!isValidUUID(question_id)) throw new Error(`Invalid question ID format: ${question_id}`);
 
       let query = supabase.from('questions').update(updates).eq('question_id', question_id);
 
-      if (!isSuperAdmin && currentApp?.app_id) {
+      // Always scope writes to the resource's own app_id when available (defense-in-depth)
+      if (updates.app_id) {
+        query = query.eq('app_id', updates.app_id);
+      } else if (!isSuperAdmin && currentApp?.app_id) {
         query = query.eq('app_id', currentApp.app_id);
       }
 
@@ -346,18 +361,20 @@ export function useBulkUpdateQuestionsStatus() {
 
 export function useDuplicateQuestion() {
   const queryClient = useQueryClient();
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
     mutationFn: async (question_id: string) => {
       if (!currentApp?.app_id) throw new Error('No app selected');
 
-      const { data: original, error: fetchError } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('question_id', question_id)
-        .eq('app_id', currentApp.app_id)
-        .single();
+      let query = supabase.from('questions').select('*').eq('question_id', question_id);
+
+      // Only enforce source app_id for non-super admins
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { data: original, error: fetchError } = await query.single();
 
       if (fetchError) throw fetchError;
       if (!original) throw new Error('Question not found');

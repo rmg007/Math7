@@ -139,12 +139,17 @@ describe('useQuestions', () => {
         Promise.resolve({ data: mockQuestions[0], error: null }).then(onFulfilled)
       );
 
-      const { result } = renderHook(() => useQuestion('1'), { wrapper });
+      const { result } = renderHook(() => useQuestion('550e8400-e29b-41d4-a716-446655440001'), {
+        wrapper,
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
       // Verify query structure
-      expect(mockChain.eq).toHaveBeenCalledWith('question_id', '1');
+      expect(mockChain.eq).toHaveBeenCalledWith(
+        'question_id',
+        '550e8400-e29b-41d4-a716-446655440001'
+      );
 
       // Get the select argument
       const selectCall = mockChain.select.mock.calls.find((call: any[]) =>
@@ -168,11 +173,16 @@ describe('useQuestions', () => {
         Promise.resolve({ data: null, error: null }).then(onFulfilled)
       );
 
-      const { result } = renderHook(() => useQuestion('999'), { wrapper });
+      const { result } = renderHook(() => useQuestion('550e8400-e29b-41d4-a716-000000000000'), {
+        wrapper,
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-      expect(mockChain.eq).toHaveBeenCalledWith('question_id', '999');
+      expect(mockChain.eq).toHaveBeenCalledWith(
+        'question_id',
+        '550e8400-e29b-41d4-a716-000000000000'
+      );
       expect(mockChain.maybeSingle).toHaveBeenCalled();
       expect(result.current.data).toBeNull();
     });
@@ -263,6 +273,103 @@ describe('useQuestions', () => {
           skill_id: 'skill-1',
         })
       );
+    });
+
+    it('should allow super admin to duplicate cross-app question', async () => {
+      const mockChain = supabase.from('questions') as any;
+      const sourceAppId = '550e8400-e29b-41d4-a716-446655440001';
+      const originalQuestion = {
+        ...mockQuestions[0],
+        content: 'Cross-App Question',
+        skill_id: 'skill-1',
+        app_id: sourceAppId, // Different from currentApp
+      };
+
+      // Mock super admin context
+      vi.mocked(useApp).mockReturnValue({
+        currentApp: {
+          app_id: mockAppId,
+          created_at: new Date().toISOString(),
+          display_name: 'Current App',
+          grade_level: 'K-12',
+          grade_number: 1,
+          is_active: true,
+          subdomain: 'current',
+          subject_id: 'subject-1',
+          updated_at: new Date().toISOString(),
+          ai_token_limit: 0,
+          branding: {},
+          description: '',
+        },
+        apps: [],
+        isLoading: false,
+        setCurrentApp: vi.fn(),
+        refreshApps: vi.fn(),
+        isSidebarCollapsed: false,
+        toggleSidebar: vi.fn(),
+        userRole: null,
+        isSuperAdmin: true, // Super Admin
+      });
+
+      // Mock fetching original (should NOT filter by app_id)
+      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+        Promise.resolve({ data: originalQuestion, error: null }).then(onFulfilled)
+      );
+
+      // Mock inserting duplicate (should use currentApp.app_id)
+      mockChain.then.mockImplementation((onFulfilled: any) =>
+        Promise.resolve({
+          data: { ...originalQuestion, app_id: mockAppId, status: 'draft' },
+          error: null,
+        }).then(onFulfilled)
+      );
+
+      const { result } = renderHook(() => useDuplicateQuestion(), { wrapper });
+
+      await result.current.mutateAsync('1');
+
+      // Verify fetch did NOT filter by app_id (super admin cross-app access)
+      expect(mockChain.eq).toHaveBeenCalledWith('question_id', '1');
+      expect(mockChain.eq).not.toHaveBeenCalledWith('app_id', mockAppId);
+
+      // Verify insert used currentApp.app_id
+      expect(mockChain.insert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          app_id: mockAppId, // Destination is current app
+          status: 'draft',
+          skill_id: 'skill-1',
+        })
+      );
+    });
+
+    it('should enforce app_id for non-super admin', async () => {
+      const mockChain = supabase.from('questions') as any;
+      const originalQuestion = {
+        ...mockQuestions[0],
+        content: 'Same-App Question',
+        skill_id: 'skill-1',
+        app_id: mockAppId,
+      };
+
+      // Mock fetching original (should filter by app_id for non-super admin)
+      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+        Promise.resolve({ data: originalQuestion, error: null }).then(onFulfilled)
+      );
+
+      mockChain.then.mockImplementation((onFulfilled: any) =>
+        Promise.resolve({
+          data: { ...originalQuestion, status: 'draft' },
+          error: null,
+        }).then(onFulfilled)
+      );
+
+      const { result } = renderHook(() => useDuplicateQuestion(), { wrapper });
+
+      await result.current.mutateAsync('1');
+
+      // Verify fetch filtered by app_id (non-super admin)
+      expect(mockChain.eq).toHaveBeenCalledWith('question_id', '1');
+      expect(mockChain.eq).toHaveBeenCalledWith('app_id', mockAppId);
     });
   });
 });
