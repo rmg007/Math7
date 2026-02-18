@@ -302,6 +302,7 @@ export function SubjectsPage() {
         title="Subjects"
         description="Manage subjects."
         icon={Boxes}
+        className="mb-2"
         actions={
           <Button
             onClick={() => handleOpenDialog()}
@@ -321,7 +322,7 @@ export function SubjectsPage() {
             placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-8 py-1.5 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none focus-visible:outline-none text-sm"
+            className="w-full pl-9 pr-8 py-1.5 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none focus-visible:outline-none text-sm"
           />
           {searchQuery && (
             <button
@@ -450,26 +451,17 @@ export function SubjectsPage() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="rounded border border-gray-200 bg-white p-0 overflow-hidden shadow-md max-w-sm">
+        <DialogContent className="rounded-lg border border-gray-200 bg-white p-0 overflow-hidden shadow-lg max-w-md">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
-              <div className="p-6 space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded bg-teal-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    {editingSubject ? (
-                      <Pencil className="w-5 h-5 text-white" />
-                    ) : (
-                      <Plus className="w-5 h-5 text-white" />
-                    )}
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-gray-900">
-                      <DialogTitle>{editingSubject ? 'Edit' : 'Create'} Subject</DialogTitle>
-                    </h2>
-                    <DialogDescription className="text-xs text-gray-600 mt-0">
-                      {editingSubject ? 'Update details' : 'Add new subject'}
-                    </DialogDescription>
-                  </div>
+              <div className="px-6 pt-6 pb-4 space-y-4">
+                <div>
+                  <h2 className="text-base font-semibold text-gray-900">
+                    <DialogTitle>{editingSubject ? 'Edit' : 'Create'} Subject</DialogTitle>
+                  </h2>
+                  <DialogDescription className="text-xs text-gray-500 mt-0.5">
+                    {editingSubject ? 'Update the subject details below.' : 'Fill in the details to create a new subject.'}
+                  </DialogDescription>
                 </div>
 
                 <div className="space-y-3">
@@ -478,16 +470,16 @@ export function SubjectsPage() {
                       control={form.control}
                       name="title"
                       render={({ field }) => (
-                        <FormItem className="space-y-1.5">
-                          <FormLabel className="text-xs font-semibold text-gray-700">
+                        <FormItem className="space-y-1">
+                          <FormLabel className="text-xs font-medium text-gray-700">
                             Title
                           </FormLabel>
                           <FormControl>
-                                                          <Input
+                            <Input
                               placeholder="e.g. Mathematics"
                               {...field}
                               data-testid="subject-title"
-                              className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 font-normal text-sm"
+                              className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
                               required
                             />
                           </FormControl>
@@ -500,8 +492,8 @@ export function SubjectsPage() {
                       control={form.control}
                       name="slug"
                       render={({ field }) => (
-                        <FormItem className="space-y-1.5">
-                          <FormLabel className="text-xs font-semibold text-gray-700">
+                        <FormItem className="space-y-1">
+                          <FormLabel className="text-xs font-medium text-gray-700">
                             Slug
                           </FormLabel>
                           <FormControl>
@@ -514,7 +506,7 @@ export function SubjectsPage() {
                                 )
                               }
                               data-testid="subject-slug"
-                              className="h-9 rounded border border-gray-300 bg-white text-teal-700 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 font-mono text-xs font-normal"
+                              className="h-9 rounded border border-gray-300 bg-white text-gray-700 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none font-mono text-xs"
                               required
                               pattern="[a-z0-9_]+"
                               title="Lowercase letters, numbers, and underscores only"
@@ -531,8 +523,8 @@ export function SubjectsPage() {
                       control={form.control}
                       name="color_hex"
                       render={({ field }) => (
-                        <FormItem className="space-y-1.5">
-                          <FormLabel className="text-xs font-semibold text-gray-700">
+                        <FormItem className="space-y-1">
+                          <FormLabel className="text-xs font-medium text-gray-700">
                             Color
                           </FormLabel>
                           <div className="flex gap-2">
@@ -542,11 +534,11 @@ export function SubjectsPage() {
                             />
                             <FormControl>
                               <Input
-                              placeholder="#0D9488"
-                              {...field}
-                              data-testid="subject-color"
-                              className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 font-normal w-full text-sm"
-                            />
+                                placeholder="#0D9488"
+                                {...field}
+                                data-testid="subject-color"
+                                className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none w-full text-sm"
+                              />
                             </FormControl>
                           </div>
                           <FormMessage />
@@ -558,8 +550,8 @@ export function SubjectsPage() {
                       control={form.control}
                       name="display_order"
                       render={({ field }) => (
-                        <FormItem className="space-y-1.5">
-                          <FormLabel className="text-xs font-semibold text-gray-700">
+                        <FormItem className="space-y-1">
+                          <FormLabel className="text-xs font-medium text-gray-700">
                             Order
                           </FormLabel>
                           <FormControl>
@@ -567,7 +559,7 @@ export function SubjectsPage() {
                               type="number"
                               {...field}
                               data-testid="subject-order"
-                              className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 font-normal text-sm"
+                              className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
                               required
                             />
                           </FormControl>
@@ -580,8 +572,8 @@ export function SubjectsPage() {
                       control={form.control}
                       name="status"
                       render={({ field }) => (
-                        <FormItem className="space-y-1.5">
-                          <FormLabel className="text-xs font-semibold text-gray-700">
+                        <FormItem className="space-y-1">
+                          <FormLabel className="text-xs font-medium text-gray-700">
                             Status
                           </FormLabel>
                           <Select
@@ -590,11 +582,11 @@ export function SubjectsPage() {
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 font-normal text-sm">
+                              <SelectTrigger className="h-9 rounded border border-gray-300 bg-white text-gray-900 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm">
                                 <SelectValue placeholder="Select" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="rounded border border-gray-200 shadow-sm">
+                            <SelectContent className="rounded-lg border border-gray-200 shadow-md">
                               <SelectItem value="draft" className="text-sm">Draft</SelectItem>
                               <SelectItem value="live" className="text-sm">Live</SelectItem>
                               <SelectItem value="published" className="text-sm">Published</SelectItem>
@@ -610,15 +602,15 @@ export function SubjectsPage() {
                     control={form.control}
                     name="description"
                     render={({ field }) => (
-                      <FormItem className="space-y-1.5">
-                        <FormLabel className="text-xs font-semibold text-gray-700">
-                          Description (optional)
+                      <FormItem className="space-y-1">
+                        <FormLabel className="text-xs font-medium text-gray-700">
+                          Description <span className="text-gray-400 font-normal">(optional)</span>
                         </FormLabel>
                         <FormControl>
                           <Input
                             placeholder="Brief description..."
                             {...field}
-                            className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 font-normal text-sm"
+                            className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
                           />
                         </FormControl>
                         <FormMessage />
@@ -628,21 +620,21 @@ export function SubjectsPage() {
                 </div>
               </div>
 
-              <DialogFooter className="bg-gray-50 p-4 flex gap-2 border-t border-gray-200">
+              <DialogFooter className="bg-gray-50 px-6 py-4 flex gap-2 border-t border-gray-200">
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => setIsDialogOpen(false)}
-                  className="h-9 px-4 rounded text-sm text-gray-700 hover:bg-gray-100"
+                  className="h-9 px-4 rounded text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={createSubject.isPending || updateSubject.isPending}
-                  className="h-9 px-4 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-9 px-5 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {editingSubject ? 'Save' : 'Create'}
+                  {editingSubject ? 'Save Changes' : 'Create Subject'}
                 </Button>
               </DialogFooter>
             </form>
