@@ -3,36 +3,37 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { isValidUUID } from '@/features/curriculum/types';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowLeft,
-  Check,
-  CheckCircle,
-  Circle,
-  ClipboardList,
-  Clock,
-  Copy,
-  Edit3,
-  Home,
-  Layers,
-  LayoutDashboard,
-  Plus,
-  School,
-  Settings,
-  Trash2,
-  UserPlus,
-  Users,
+    ArrowLeft,
+    Check,
+    CheckCircle,
+    Circle,
+    ClipboardList,
+    Clock,
+    Copy,
+    Edit3,
+    Home,
+    Layers,
+    LayoutDashboard,
+    Plus,
+    School,
+    Settings,
+    Trash2,
+    UserPlus,
+    Users,
 } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -259,12 +260,13 @@ export function GroupDetailPage() {
     queryKey: ['group', id],
     queryFn: async () => {
       if (!id) throw new Error('Group ID is required');
+      if (!isValidUUID(id)) throw new Error(`Invalid group ID format: ${id}`);
       const { data, error } = await supabase.from('groups').select('*').eq('id', id).single();
 
       if (error) throw error;
       return data;
     },
-    enabled: Boolean(id),
+    enabled: Boolean(id) && isValidUUID(id ?? ''),
   });
 
   // Fetch group members
@@ -272,6 +274,7 @@ export function GroupDetailPage() {
     queryKey: ['group-members', id],
     queryFn: async () => {
       if (!id) throw new Error('Group ID is required');
+      if (!isValidUUID(id)) throw new Error(`Invalid group ID format: ${id}`);
       const { data, error } = await supabase
         .from('group_members')
         .select(
@@ -297,6 +300,7 @@ export function GroupDetailPage() {
   const updateNicknameMutation = useMutation({
     mutationFn: async ({ memberId, nickname }: { memberId: string; nickname: string }) => {
       if (!id) throw new Error('Group ID is required');
+      if (!isValidUUID(id)) throw new Error(`Invalid group ID format: ${id}`);
       const { error } = await supabase
         .from('group_members')
         .update({ nickname } as { nickname: string })
@@ -328,6 +332,7 @@ export function GroupDetailPage() {
     queryKey: ['assignments', id],
     queryFn: async () => {
       if (!id) throw new Error('Group ID is required');
+      if (!isValidUUID(id)) throw new Error(`Invalid group ID format: ${id}`);
       const { data, error } = await supabase
         .from('assignments')
         .select('*')
@@ -381,6 +386,7 @@ export function GroupDetailPage() {
   const removeMemberMutation = useMutation({
     mutationFn: async (memberId: string) => {
       if (!id) throw new Error('Group ID is required');
+      if (!isValidUUID(id)) throw new Error(`Invalid group ID format: ${id}`);
       const { error } = await supabase
         .from('group_members')
         .delete()

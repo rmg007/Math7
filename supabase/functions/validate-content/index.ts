@@ -1,11 +1,24 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { GoogleGenerativeAI } from 'npm:@google/generative-ai@0.1.3';
+import { createSanitizedErrorResponse } from '../_shared/error-sanitizer.ts';
+import { createRateLimitMiddleware, rateLimitConfigs } from '../_shared/rate-limiter.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || 'http://localhost:3000,http://localhost:5173').split(',');
+
+function getCorsHeaders(req?: Request): Record<string, string> {
+  const origin = req?.headers.get('Origin') || '';
+  const allowedOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Max-Age': '86400',
+  };
+}
+
+// Rate limiter must be created OUTSIDE the handler to persist state across requests
+const rateLimit = createRateLimitMiddleware(rateLimitConfigs.validateContent);
 
 interface ValidationRequest {
   questions: any[];
@@ -18,8 +31,16 @@ interface ValidationRequest {
 }
 
 export async function validateContentHandler(req: Request, deps?: { supabase?: Record<string, unknown>; genAI?: Record<string, unknown> }): Promise<Response> {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
+  }
+
+  // Rate limiting check
+  const rateLimitResult = rateLimit.middleware(req);
+  
+  if (!rateLimitResult.allowed) {
+    return rateLimitResult.response!;
   }
 
   try {
@@ -28,10 +49,7 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: R
     // ========================================
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Missing authorization header' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      );
+      return createSanitizedErrorResponse('UNAUTHORIZED', 'Missing authorization header');
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -43,10 +61,7 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: R
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid or expired token' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      );
+      return createSanitizedErrorResponse('UNAUTHORIZED', 'Invalid or expired token');
     }
 
     // Get user's app_id for tenant isolation
@@ -57,18 +72,12 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: R
       .single();
 
     if (profileError || !profile?.app_id) {
-      return new Response(
-        JSON.stringify({ error: 'User profile not found or missing tenant' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
-      );
+      return createSanitizedErrorResponse('FORBIDDEN', 'Access denied');
     }
 
     // Only admins can validate content
     if (profile.role !== 'admin' && profile.role !== 'super_admin') {
-      return new Response(
-        JSON.stringify({ error: 'Only administrators can validate content' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
-      );
+      return createSanitizedErrorResponse('FORBIDDEN', 'Access denied');
     }
 
     const { questions, source_text, rules = [] }: ValidationRequest = await req.json();
@@ -79,7 +88,7 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: R
 
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey && !deps?.genAI) {
-      throw new Error('GEMINI_API_KEY not configured');
+      return createSanitizedErrorResponse('INTERNAL_ERROR');
     }
 
     const genAI = (deps?.genAI as any) || new GoogleGenerativeAI(apiKey!);
@@ -94,7 +103,24 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: R
     const prompt = buildValidationPrompt(questions, source_text, rules);
 
     const startTime = Date.now();
-    const result = await geminiModel.generateContent(prompt); // enforced-temp
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    
+    let result: any;
+    try {
+      result = await geminiModel.generateContent(prompt, {
+        signal: controller.signal
+      });
+    } catch (err: unknown) {
+      clearTimeout(timeoutId);
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return createSanitizedErrorResponse('SERVICE_UNAVAILABLE', 'AI request timed out');
+      }
+      throw err;
+    }
+    clearTimeout(timeoutId);
+    
     const response = await result.response;
     const validationText = response.text();
     const duration = Date.now() - startTime;
@@ -120,7 +146,7 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: R
     // Parse JSON response
     const jsonMatch = validationText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error('AI did not return valid JSON validation report');
+      return createSanitizedErrorResponse('INTERNAL_ERROR', 'Failed to process AI response');
     }
 
     const validationReport = JSON.parse(jsonMatch[0]);
@@ -143,15 +169,7 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: R
     );
   } catch (error) {
     console.error('Validation error:', error);
-    return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : 'Failed to validate content',
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      }
-    );
+    return createSanitizedErrorResponse('INTERNAL_ERROR');
   }
 }
 

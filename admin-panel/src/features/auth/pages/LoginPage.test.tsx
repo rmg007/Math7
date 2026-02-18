@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LoginPage } from './LoginPage';
 
 // Mock dependencies
@@ -12,6 +12,7 @@ vi.mock('@/lib/supabase', () => ({
     auth: {
       signInWithPassword: vi.fn(),
       signUp: vi.fn(),
+      getSession: vi.fn(() => Promise.resolve({ data: { session: null } })),
     },
     rpc: vi.fn(),
   },

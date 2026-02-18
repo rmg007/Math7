@@ -114,26 +114,38 @@ export function usePaginatedDomains(params: PaginationParams, appId?: string) {
 }
 
 export function useDomain(domainId: string) {
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin } = useApp();
+
   return useQuery({
-    queryKey: ['domain', domainId, currentApp?.app_id],
+    queryKey: ['domain', domainId, currentApp?.app_id, isSuperAdmin],
     queryFn: async () => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
-      if (!isValidUUID(currentApp.app_id)) {
+      // Validate the resource ID itself before sending to Supabase
+      if (!isValidUUID(domainId)) throw new Error(`Invalid domain ID format: ${domainId}`);
+
+      // For Super Admins, we allow fetching by ID without app context constraint
+      // This enables deep linking to domains in other apps
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
+
+      if (!isSuperAdmin && currentApp?.app_id && !isValidUUID(currentApp.app_id)) {
         throw new Error(`Invalid app ID format: ${currentApp.app_id}`);
       }
 
-      const { data, error } = await supabase
-        .from('domains')
-        .select('*')
-        .eq('domain_id', domainId)
-        .eq('app_id', currentApp.app_id)
-        .single();
+      let query = supabase.from('domains').select('*').eq('domain_id', domainId);
+
+      // Only enforce app_id check for non-super admins or when specifically scoped
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+
+      const { data, error } = await query.single();
 
       if (error) throw error;
       return data as Domain;
     },
-    enabled: Boolean(domainId) && Boolean(currentApp?.app_id) && isValidUUID(currentApp?.app_id),
+    // Enable if domainId is a valid UUID.
+    // For non-super admins, also require currentApp.
+    // For super admins, we can try fetching with just domainId.
+    enabled: Boolean(domainId) && isValidUUID(domainId) && (isSuperAdmin || (Boolean(currentApp?.app_id) && isValidUUID(currentApp?.app_id))),
   });
 }
 
@@ -170,14 +182,16 @@ export function useUpdateDomain() {
   return useMutation({
     mutationFn: async ({ domain_id, ...updates }: { domain_id: string } & Partial<Domain>) => {
       if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
+      if (!isValidUUID(domain_id)) throw new Error(`Invalid domain ID format: ${domain_id}`);
 
       let query = supabase.from('domains').update(updates).eq('domain_id', domain_id);
 
-      if (!isSuperAdmin && currentApp?.app_id) {
+      // Always scope writes to the resource's own app_id when available (defense-in-depth)
+      if (updates.app_id) {
+        query = query.eq('app_id', updates.app_id);
+      } else if (!isSuperAdmin && currentApp?.app_id) {
         query = query.eq('app_id', currentApp.app_id);
       }
-
-      // If passing app_id in updates, it will handle moving the domain
 
       const { data, error } = await query.select().single();
 

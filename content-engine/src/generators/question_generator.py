@@ -233,17 +233,26 @@ Remember: Output ONLY the JSON array. No markdown, no explanations.
         retry=retry_if_exception_type((Exception,))
     )
     def _call_gemini(self, prompt: str) -> str:
-        """Call Gemini API with retry logic."""
-        try:
-            response = self.client.generate_content(
+        """Call Gemini API with retry logic and timeout protection."""
+        import concurrent.futures
+        
+        def _do_call():
+            return self.client.generate_content(
                 prompt,
                 generation_config=genai.GenerationConfig(
                     temperature=self.temperature,
                     max_output_tokens=4096,
-                )
+                ),
             )
-            return response.text
         
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_do_call)
+                response = future.result(timeout=30)  # 30s, cross-platform
+            return response.text
+        except concurrent.futures.TimeoutError:
+            logger.error("Gemini API call timed out after 30 seconds")
+            raise TimeoutError("Gemini API call timed out after 30 seconds")
         except Exception as e:
             logger.error(f"Gemini API error: {e}")
             raise
@@ -254,19 +263,28 @@ Remember: Output ONLY the JSON array. No markdown, no explanations.
         retry=retry_if_exception_type((Exception,))
     )
     def _call_openai(self, prompt: str) -> str:
-        """Call OpenAI API with retry logic."""
-        try:
-            response = self.client.chat.completions.create(
+        """Call OpenAI API with retry logic and timeout protection."""
+        import concurrent.futures
+        
+        def _do_call():
+            return self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": self.DEFAULT_SYSTEM_PROMPT},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=self.temperature,
-                max_tokens=4096
+                max_tokens=4096,
             )
-            return response.choices[0].message.content
         
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_do_call)
+                response = future.result(timeout=30)  # 30s, cross-platform
+            return response.choices[0].message.content
+        except concurrent.futures.TimeoutError:
+            logger.error("OpenAI API call timed out after 30 seconds")
+            raise TimeoutError("OpenAI API call timed out after 30 seconds")
         except Exception as e:
             logger.error(f"OpenAI API error: {e}")
             raise

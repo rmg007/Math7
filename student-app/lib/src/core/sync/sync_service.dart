@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart'; // For debugPrint
@@ -6,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:questerix_domain/questerix_domain.dart' as model;
 import 'package:student_app/src/core/core_providers.dart';
 import 'package:student_app/src/core/database/database.dart';
+import 'package:student_app/src/core/errors/retry_with_backoff.dart';
 import 'package:student_app/src/features/curriculum/repositories/curriculum_repositories.dart';
 import 'package:student_app/src/features/curriculum/repositories/local_curriculum_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -36,6 +38,17 @@ class SyncState {
   }
 }
 
+// Global circuit breakers for different sync operations
+final _pushCircuitBreaker = CircuitBreaker(
+  failureThreshold: 3,
+  resetTimeout: const Duration(minutes: 5),
+);
+
+final _pullCircuitBreaker = CircuitBreaker(
+  failureThreshold: 3,
+  resetTimeout: const Duration(minutes: 2),
+);
+
 /// Sync service provider
 final syncServiceProvider =
     StateNotifierProvider<SyncService, SyncState>((ref) {
@@ -59,6 +72,7 @@ class SyncService extends StateNotifier<SyncState> {
 
   /// Full sync: push local changes, then pull remote changes
   /// Implements safety limits on retries to prevent infinite loops
+  /// Uses circuit breakers to prevent cascade failures
   Future<void> sync({int retryCount = 0}) async {
     if (state.isSyncing && retryCount == 0) return;
 
@@ -67,29 +81,77 @@ class SyncService extends StateNotifier<SyncState> {
         state = SyncState.syncing();
       }
 
-      await push();
-      await pull();
+      // Use enhanced retry with circuit breaker and jitter
+      // Uses module-level _pushCircuitBreaker so failures accumulate across calls
+      await retryWithBackoff(
+        () async {
+          await _performPush();
+          await _performPull();
+        },
+        maxRetries: 2, // Reduced from 3 to prevent excessive retries
+        initialDelay: const Duration(seconds: 2),
+        maxDelay: const Duration(seconds: 15),
+        addJitter: true,
+        circuitBreaker: _pushCircuitBreaker,
+      );
 
       state = SyncState.success(DateTime.now());
     } catch (e) {
       debugPrint('SYNC: Error during sync (attempt ${retryCount + 1}): $e');
 
-      // Stop retrying after 3 failed attempts
-      if (retryCount >= 3) {
+      // Stop retrying after 2 failed attempts (reduced from 3)
+      if (retryCount >= 2) {
         state = SyncState.error('Sync failed after multiple attempts: $e');
         return;
       }
 
       state = SyncState.error(e.toString());
 
-      // Exponential backoff: 5s, 10s, 20s
-      final delay = Duration(seconds: 5 * (1 << retryCount));
+      // Enhanced exponential backoff with jitter: 2s, 4s
+      final baseDelay = Duration(seconds: 2 * (1 << retryCount));
+      final jitter = Duration(
+        milliseconds:
+            (baseDelay.inMilliseconds * 0.3 * (math.Random().nextDouble()))
+                .round(),
+      );
+      final delay = baseDelay + jitter;
+
       await Future.delayed(delay);
 
       // Only retry if the state hasn't been changed to syncing again by a manual trigger
       if (!state.isSyncing) {
         await sync(retryCount: retryCount + 1);
       }
+    }
+  }
+
+  /// Separate push operation with circuit breaker
+  Future<void> _performPush() async {
+    if (_pushCircuitBreaker.isOpen) {
+      throw Exception('Push circuit breaker is open - skipping push operation');
+    }
+
+    try {
+      await push();
+      _pushCircuitBreaker.recordSuccess();
+    } catch (e) {
+      _pushCircuitBreaker.recordFailure();
+      rethrow;
+    }
+  }
+
+  /// Separate pull operation with circuit breaker
+  Future<void> _performPull() async {
+    if (_pullCircuitBreaker.isOpen) {
+      throw Exception('Pull circuit breaker is open - skipping pull operation');
+    }
+
+    try {
+      await pull();
+      _pullCircuitBreaker.recordSuccess();
+    } catch (e) {
+      _pullCircuitBreaker.recordFailure();
+      rethrow;
     }
   }
 

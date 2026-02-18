@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
+import { isValidUUID } from '@/features/curriculum/types';
 import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
 import { normalizeString } from '@/lib/normalization';
@@ -46,6 +47,7 @@ export function GroupCreatePage() {
       const joinCode = generateJoinCode();
 
       if (!currentApp) throw new Error('No application context');
+      if (!isValidUUID(currentApp.app_id)) throw new Error('Invalid app context ID');
 
       const { error } = await supabase.from('groups').insert({
         name: normalizeString(name),

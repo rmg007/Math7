@@ -47,8 +47,8 @@ describe('useApps', () => {
   );
 
   const mockApps = [
-    { app_id: '1', display_name: 'App 1', subdomain: 'app1' },
-    { app_id: '2', display_name: 'App 2', subdomain: 'app2' },
+    { app_id: '550e8400-e29b-41d4-a716-446655440001', display_name: 'App 1', subdomain: 'app1' },
+    { app_id: '550e8400-e29b-41d4-a716-446655440002', display_name: 'App 2', subdomain: 'app2' },
   ];
 
   beforeEach(() => {
@@ -118,10 +118,10 @@ describe('useApps', () => {
 
       const { result } = renderHook(() => useUpdateApp(), { wrapper });
 
-      await result.current.mutateAsync({ id: '1', display_name: 'Updated Name' });
+      await result.current.mutateAsync({ id: '550e8400-e29b-41d4-a716-446655440001', display_name: 'Updated Name' });
 
       expect(mockChain.update).toHaveBeenCalledWith({ display_name: 'Updated Name' });
-      expect(mockChain.eq).toHaveBeenCalledWith('app_id', '1');
+      expect(mockChain.eq).toHaveBeenCalledWith('app_id', '550e8400-e29b-41d4-a716-446655440001');
     });
   });
 });

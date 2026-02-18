@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
 import { AdminHeader } from '@/components/ui/admin-header';
-import { Target, Clock, CheckCircle, Activity, ShieldCheck, Loader2, Calendar } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { useApp } from '@/hooks/use-app';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Activity, Calendar, CheckCircle, Clock, Loader2, ShieldCheck, Target } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 // Types
 type AssignmentType = 'skill_mastery' | 'time_goal' | 'custom';
@@ -28,7 +28,7 @@ export function AssignmentCreatePage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { currentApp } = useApp();
+  const { currentApp, isSuperAdmin, setCurrentApp, apps, isLoading: isAppLoading } = useApp();
 
   // Form State
   const [type, setType] = useState<AssignmentType>('skill_mastery');
@@ -39,21 +39,37 @@ export function AssignmentCreatePage() {
 
   // Fetch Group Details
   const { data: group } = useQuery({
-    queryKey: ['group', groupId, currentApp?.app_id],
+    queryKey: ['group', groupId, currentApp?.app_id, isSuperAdmin],
     queryFn: async () => {
-      if (!currentApp?.app_id || !groupId) throw new Error('Missing app or group context');
+      if (!groupId) throw new Error('Missing group ID');
+      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('Missing app context');
 
-      const { data, error } = await supabase
-        .from('groups')
-        .select('*')
-        .eq('id', groupId)
-        .eq('app_id', currentApp.app_id)
-        .single();
+      let query = supabase.from('groups').select('*').eq('id', groupId);
+
+      if (!isSuperAdmin && currentApp?.app_id) {
+        query = query.eq('app_id', currentApp.app_id);
+      }
+      
+      const { data, error } = await query.single();
       if (error) throw error;
       return data;
     },
-    enabled: Boolean(groupId) && Boolean(currentApp?.app_id),
+    enabled: Boolean(groupId) && (isSuperAdmin || Boolean(currentApp?.app_id)),
   });
+
+  // Context Switching
+  const isContextSwitching = group && currentApp && group.app_id !== currentApp.app_id;
+
+  useEffect(() => {
+    if (isContextSwitching) {
+      const targetApp = apps.find(a => a.app_id === group.app_id);
+      if (targetApp) {
+        console.log(`[AssignmentCreatePage] Switching context from ${currentApp?.display_name} to ${targetApp.display_name}`);
+        setCurrentApp(targetApp);
+      }
+    }
+  }, [group, currentApp, apps, setCurrentApp, isContextSwitching]);
+
 
   // Fetch Skills for Selection
   const { data: skills } = useQuery<Skill[]>({
@@ -121,12 +137,12 @@ export function AssignmentCreatePage() {
     },
   });
 
-  if (!group)
+  if (!group || isAppLoading || isContextSwitching)
     return (
       <div className="max-w-3xl mx-auto p-12 flex flex-col items-center justify-center animate-pulse">
         <Loader2 className="h-12 w-12 text-indigo-500 animate-spin mb-4" />
         <p className="text-2xs font-black text-gray-400 uppercase tracking-widest text-center">
-          Awaiting Group Synchronization...
+          {isContextSwitching ? 'Switching App Context...' : 'Awaiting Group Synchronization...'}
         </p>
       </div>
     );

@@ -1,11 +1,25 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { GoogleGenerativeAI } from 'npm:@google/generative-ai@0.1.3';
+import { createSanitizedErrorResponse, withErrorSanitization } from '../_shared/error-sanitizer.ts';
+import { validateGenerationRequest } from '../_shared/input-sanitizer.ts';
+import { addRateLimitHeaders, createRateLimitMiddleware, rateLimitConfigs } from '../_shared/rate-limiter.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || 'http://localhost:3000,http://localhost:5173').split(',');
+
+function getCorsHeaders(req?: Request): Record<string, string> {
+  const origin = req?.headers.get('Origin') || '';
+  const allowedOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Max-Age': '86400',
+  };
+}
+
+// Rate limiter must be created OUTSIDE the handler to persist state across requests
+const rateLimit = createRateLimitMiddleware(rateLimitConfigs.generateQuestions);
 
 interface GenerationRequest {
   text: string;
@@ -18,22 +32,27 @@ interface GenerationRequest {
   model?: 'gemini-1.5-flash' | 'gpt-4o-mini';
 }
 
-export async function generateQuestionsHandler(req: Request, deps?: { supabase?: Record<string, unknown>; genAI?: Record<string, unknown> }): Promise<Response> {
-  // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
+export const generateQuestionsHandler = withErrorSanitization(
+  async (req: Request, deps?: { supabase?: Record<string, unknown>; genAI?: Record<string, unknown> }) => {
+    // Handle CORS preflight
+    const corsHeaders = getCorsHeaders(req);
+    if (req.method === 'OPTIONS') {
+      return new Response('ok', { headers: corsHeaders });
+    }
 
-  try {
+    // Rate limiting check
+    const rateLimitResult = rateLimit.middleware(req);
+    
+    if (!rateLimitResult.allowed) {
+      return rateLimitResult.response!;
+    }
+
     // ========================================
     // FIX S1: AUTHENTICATION CHECK
     // ========================================
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Missing authorization header' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      );
+      return createSanitizedErrorResponse('UNAUTHORIZED', 'Missing authorization header');
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -45,10 +64,7 @@ export async function generateQuestionsHandler(req: Request, deps?: { supabase?:
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid or expired token' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      );
+      return createSanitizedErrorResponse('UNAUTHORIZED', 'Invalid or expired token');
     }
 
     // Get user's app_id for tenant isolation
@@ -59,60 +75,82 @@ export async function generateQuestionsHandler(req: Request, deps?: { supabase?:
       .single();
 
     if (profileError || !profile?.app_id) {
-      return new Response(
-        JSON.stringify({ error: 'User profile not found or missing tenant' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
-      );
+      return createSanitizedErrorResponse('FORBIDDEN', 'Access denied');
     }
 
     // Only admins can generate questions
     if (profile.role !== 'admin' && profile.role !== 'super_admin') {
-      return new Response(
-        JSON.stringify({ error: 'Only administrators can generate questions' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
-      );
+      return createSanitizedErrorResponse('FORBIDDEN', 'Access denied');
     }
 
     const { text, difficulty_distribution, custom_instructions, model = 'gemini-1.5-flash' }: GenerationRequest =
       await req.json();
 
-    // Validate input
-    if (!text || text.trim().length === 0) {
-      throw new Error('Text content is required');
+    // ========================================
+    // FIX SEC-003: INPUT VALIDATION AND SANITIZATION
+    // ========================================
+    const validation = validateGenerationRequest({
+      text,
+      difficulty_distribution,
+      custom_instructions,
+      model,
+    });
+
+    if (!validation.isValid) {
+      return createSanitizedErrorResponse('BAD_REQUEST', `Invalid input: ${validation.errors.join(', ')}`);
     }
 
-    const totalQuestions = difficulty_distribution.easy + difficulty_distribution.medium + difficulty_distribution.hard;
-    if (totalQuestions === 0 || totalQuestions > 100) {
-      throw new Error('Total questions must be between 1 and 100');
-    }
+    // Use sanitized request
+    const sanitizedRequest = validation.sanitizedRequest!;
 
     // Initialize AI client
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey && !deps?.genAI) {
-      throw new Error('GEMINI_API_KEY not configured');
+      return createSanitizedErrorResponse('INTERNAL_ERROR');
     }
 
     const genAI = (deps?.genAI as any) || new GoogleGenerativeAI(apiKey!);
     const geminiModel = genAI.getGenerativeModel({ 
-      model: model, // ✅ FIX P1: Use variable, not hardcoded literal
+      model: sanitizedRequest.model, // ✅ FIX P1: Use sanitized model variable
       generationConfig: {
         responseMimeType: "application/json", // ✅ FIX R1: Force JSON output
         temperature: 0.1,
       },
     });
 
-    // Build prompt
-    const prompt = buildPrompt(text, difficulty_distribution, custom_instructions);
+    // Build prompt with sanitized inputs
+    const prompt = buildPrompt(
+      sanitizedRequest.text, 
+      sanitizedRequest.difficulty_distribution, 
+      sanitizedRequest.custom_instructions
+    );
 
-    // Call AI
+    // Call AI with timeout protection
     const startTime = Date.now();
-    const result = await geminiModel.generateContent(prompt); // enforced-temp
-    const response = await result.response;
-    const generatedText = response.text();
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+    
+    let result: any;
+    try {
+      result = await geminiModel.generateContent(prompt, {
+        signal: controller.signal
+      });
+    } catch (err: unknown) {
+      clearTimeout(timeoutId);
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return createSanitizedErrorResponse('SERVICE_UNAVAILABLE', 'AI request timed out');
+      }
+      throw err;
+    }
+    clearTimeout(timeoutId);
+    
+    const aiResponse = await result.response;
+    const generatedText = aiResponse.text();
     const generationTime = Date.now() - startTime;
 
     // FIX T5: Use actual usage metadata from Gemini API instead of heuristic
-    const usageMetadata = (response as any).usageMetadata;
+    const usageMetadata = (aiResponse as any).usageMetadata;
     const actualTokenCount = usageMetadata?.totalTokenCount ?? 
       Math.ceil((prompt.length + generatedText.length) / 4); // Fallback to estimate
 
@@ -133,17 +171,17 @@ export async function generateQuestionsHandler(req: Request, deps?: { supabase?:
     // Parse JSON response
     const jsonMatch = generatedText.match(/\[[\s\S]*\]/);
     if (!jsonMatch) {
-      throw new Error('AI did not return valid JSON array');
+      return createSanitizedErrorResponse('INTERNAL_ERROR', 'Failed to process AI response');
     }
 
     const questions = JSON.parse(jsonMatch[0]);
 
-    // Return response
-    return new Response(
+    // Return response with rate limit headers
+    const httpResponse = new Response(
       JSON.stringify({
         questions,
         metadata: {
-          model: model, // ✅ FIX P1: Return actual model used
+          model: sanitizedRequest.model, // ✅ FIX P1: Return actual model used
           generation_time_ms: generationTime,
           token_count: actualTokenCount, // FIX T5: Use actual count
           prompt_tokens: usageMetadata?.promptTokenCount,
@@ -152,23 +190,16 @@ export async function generateQuestionsHandler(req: Request, deps?: { supabase?:
         },
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
         status: 200,
       }
     );
-  } catch (error) {
-    console.error('Generation error:', error);
-    return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : 'Failed to generate questions',
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      }
-    );
-  }
-}
+    
+    // Add rate limit headers (use result from initial middleware() call to avoid double-counting)
+    return addRateLimitHeaders(httpResponse, rateLimitResult.rateLimitResult);
+  },
+  { statusCode: 500, includeRequestId: true }
+);
 
 // Start the server only if run as main
 // deno-lint-ignore no-explicit-any

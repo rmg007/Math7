@@ -1,3 +1,4 @@
+import { isValidUUID } from '@/features/curriculum/types';
 import type { Tables } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -58,6 +59,7 @@ export function useUpdateErrorStatus() {
 
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      if (!isValidUUID(id)) throw new Error(`Invalid error log ID format: ${id}`);
       const { error } = await supabase.from('error_logs').update({ status }).eq('id', id);
 
       if (error) throw error;
@@ -74,6 +76,7 @@ export function useDeleteErrorLog() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      if (!isValidUUID(id)) throw new Error(`Invalid error log ID format: ${id}`);
       const { error } = await supabase.from('error_logs').delete().eq('id', id);
 
       if (error) throw error;

@@ -6,11 +6,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  useCreateDomain,
-  useDeleteDomain,
-  useDomain,
-  useDomains,
-  usePaginatedDomains,
+    useCreateDomain,
+    useDeleteDomain,
+    useDomain,
+    useDomains,
+    usePaginatedDomains,
 } from '../use-domains';
 
 // Mock dependencies
@@ -61,8 +61,8 @@ describe('useDomains', () => {
 
   const mockAppId = '550e8400-e29b-41d4-a716-446655440000';
   const mockDomains = [
-    { domain_id: '1', title: 'Domain 1', slug: 'domain-1', sort_order: 1 },
-    { domain_id: '2', title: 'Domain 2', slug: 'domain-2', sort_order: 2 },
+    { domain_id: '550e8400-e29b-41d4-a716-446655440001', title: 'Domain 1', slug: 'domain-1', sort_order: 1 },
+    { domain_id: '550e8400-e29b-41d4-a716-446655440002', title: 'Domain 2', slug: 'domain-2', sort_order: 2 },
   ];
 
   beforeEach(() => {
@@ -149,7 +149,7 @@ describe('useDomains', () => {
         Promise.resolve({ data: mockDomains[0], error: null }).then(onFulfilled)
       );
 
-      const { result } = renderHook(() => useDomain('1'), { wrapper });
+      const { result } = renderHook(() => useDomain(mockDomains[0].domain_id), { wrapper });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
@@ -200,14 +200,14 @@ describe('useDomains', () => {
 
       const { result } = renderHook(() => useDeleteDomain(), { wrapper });
 
-      await result.current.mutateAsync('1');
+      await result.current.mutateAsync(mockDomains[0].domain_id);
 
       expect(mockChain.update).toHaveBeenCalledWith(
         expect.objectContaining({
           deleted_at: expect.any(String),
         })
       );
-      expect(updateChain.eq).toHaveBeenCalledWith('domain_id', '1');
+      expect(updateChain.eq).toHaveBeenCalledWith('domain_id', mockDomains[0].domain_id);
       expect(updateChain.eq).toHaveBeenCalledWith('app_id', mockAppId);
     });
   });

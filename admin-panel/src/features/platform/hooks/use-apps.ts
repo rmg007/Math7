@@ -1,3 +1,4 @@
+import { isValidUUID } from '@/features/curriculum/types';
 import { Tables, TablesInsert, TablesUpdate } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -66,6 +67,7 @@ export function useUpdateApp() {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: { id: string } & AppUpdate) => {
+      if (!isValidUUID(id)) throw new Error(`Invalid app ID format: ${id}`);
       const { data, error } = await supabase
         .from('apps')
         .update(updates)
@@ -89,6 +91,7 @@ export function useDeleteApp() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      if (!isValidUUID(id)) throw new Error(`Invalid app ID format: ${id}`);
       const { error } = await supabase.from('apps').delete().eq('app_id', id);
 
       if (error) throw error;

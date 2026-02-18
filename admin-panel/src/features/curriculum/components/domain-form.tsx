@@ -1,22 +1,22 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { FormActions } from '@/components/ui/form-actions';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/hooks/use-app';
@@ -26,7 +26,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
-import { useCreateDomain, useDomains, useUpdateDomain } from '../hooks/use-domains';
+import { useCreateDomain, useDomain, useDomains, useUpdateDomain } from '../hooks/use-domains';
 
 const STATUS_OPTIONS: { value: 'draft' | 'live'; label: string; description?: string }[] = [
   { value: 'draft', label: 'Draft', description: 'Not visible to students' },
@@ -51,13 +51,19 @@ type DomainFormData = z.infer<typeof domainSchema>;
 export function DomainForm() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentApp, isLoading: isAppLoading, isSuperAdmin, apps } = useApp();
+  const { currentApp, isLoading: isAppLoading, isSuperAdmin, apps, setCurrentApp } = useApp();
   const createDomain = useCreateDomain();
   const updateDomain = useUpdateDomain();
+  
+  // Use useDomain specific hook for fetching the target domain
+  // This allows finding domains across apps for Super Admins
+  const { data: fetchedDomain, isLoading: isDomainLoading, error: domainError } = useDomain(id || '');
+  
+  // Keep useDomains for NEW domains sort order logic
   const { data: domains } = useDomains();
 
   const isEditing = Boolean(id);
-  const existingDomain = domains?.find((d) => d.domain_id === id);
+  const existingDomain = fetchedDomain;
 
   const form = useForm<DomainFormData>({
     mode: 'onBlur',
@@ -71,6 +77,7 @@ export function DomainForm() {
       app_id: currentApp?.app_id || '',
     },
   });
+
 
   // Auto-set sort order for new domains
   useEffect(() => {
@@ -103,8 +110,10 @@ export function DomainForm() {
   }, [existingDomain, form, currentApp]);
 
   const [error, setError] = useState<string | null>(null);
+  const [contextError, setContextError] = useState<string | null>(null);
 
   const onSubmit = async (data: DomainFormData) => {
+    // ... (onSubmit implementation is fine, just need to make sure I don't delete it)
     setError(null);
     const appId = data.app_id || currentApp?.app_id;
 
@@ -154,12 +163,54 @@ export function DomainForm() {
 
   const isSubmitting = createDomain.isPending || updateDomain.isPending;
 
-  if (isAppLoading || (isEditing && !existingDomain && domains)) {
+  // Determining loading state w.r.t context switching
+  // If we are editing, have an ID, but no domain yet -> Loading
+  // If we have domain, but app mismatch -> Switching
+  const isContextSwitching = existingDomain && currentApp && existingDomain.app_id !== currentApp.app_id && !contextError;
+  const isInitialLoading = isAppLoading || (isEditing && isDomainLoading);
+
+  // Context Switching Effect:
+  // If we found the domain, but it belongs to a different app, switch to that app.
+  useEffect(() => {
+    if (existingDomain && currentApp && existingDomain.app_id !== currentApp.app_id && !contextError) {
+       const targetApp = apps.find(a => a.app_id === existingDomain.app_id);
+       
+       if (targetApp) {
+         console.log(`[DomainForm] Switching context from ${currentApp.display_name} to ${targetApp.display_name}`);
+         setContextError(null);
+         setCurrentApp(targetApp);
+       } else if (!isAppLoading) {
+         // If app is not found and we finished loading available apps, it's a hard error
+         console.error(`[DomainForm] Target app ${existingDomain.app_id} not found in available apps.`);
+         setContextError('The application associated with this domain was not found or access is restricted.');
+       }
+    }
+  }, [existingDomain, currentApp, apps, setCurrentApp, isAppLoading, contextError]);
+
+  if (domainError || contextError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <ShieldCheck className="w-12 h-12 text-red-500" />
+        <h3 className="text-xl font-bold text-red-900">
+          {contextError ? 'Context Access Denied' : 'Error Loading Domain'}
+        </h3>
+        <p className="text-red-700 max-w-md text-center">{contextError || (domainError as Error).message}</p>
+        <button 
+          onClick={() => navigate('/domains')}
+          className="px-4 py-2 bg-white border border-red-200 rounded-lg text-red-700 font-bold hover:bg-red-50 transition-colors"
+        >
+          Return to Domains
+        </button>
+      </div>
+    );
+  }
+
+  if (isInitialLoading || isContextSwitching) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <Loader2 className="w-12 h-12 text-purple-500 animate-spin" />
         <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">
-          Synchronizing Context...
+          {isContextSwitching ? 'Switching App Context...' : 'Loading Domain...'}
         </p>
       </div>
     );
