@@ -110,7 +110,7 @@ export function DataToolbar<T extends Record<string, unknown>>({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-20 w-44 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+        <div className="absolute right-0 z-50 w-44 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
           {/* Import / Upload */}
           <button
             onClick={handleUploadClick}
