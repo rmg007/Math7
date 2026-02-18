@@ -123,7 +123,7 @@ const subjectSchema = z.object({
   description: z.string().optional(),
   color_hex: z
     .string()
-    .regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color code (e.g. #8b5cf6)')
+    .regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color code (e.g. #0D9488)')
     .optional()
     .or(z.literal('')),
   display_order: z.coerce.number().int().default(0),
@@ -153,7 +153,7 @@ export function SubjectsPage() {
       title: '',
       slug: '',
       description: '',
-      color_hex: '#6366f1',
+      color_hex: '#0D9488',
       display_order: 0,
       status: 'draft',
     },
@@ -285,28 +285,28 @@ export function SubjectsPage() {
         actions={
           <Button
             onClick={() => handleOpenDialog()}
-            className="h-10 px-6 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-2xs uppercase tracking-widest shadow-sm shadow-indigo-600/20 transition-all gap-2"
+            className="h-10 px-4 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-sm transition-colors gap-2"
           >
-            <Plus className="w-4 h-4" /> Add Subject
+            <Plus className="w-4 h-4" /> Add
           </Button>
         }
       />
 
-      {/* Search & Intelligence Bar */}
-      <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-200/50 p-6 flex flex-col md:flex-row gap-6 items-center">
-        <div className="relative flex-1 w-full group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-purple-500 transition-colors" />
+      {/* Search Bar */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col md:flex-row gap-4 items-center">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search subjects..."
+            placeholder="Search by title or slug..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-12 py-3 rounded-xl border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none text-sm font-medium"
+            className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-600/10 transition-colors outline-none text-sm"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-lg transition-all"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded transition-colors"
               title="Clear search"
             >
               <X className="h-4 w-4" />
@@ -314,20 +314,15 @@ export function SubjectsPage() {
           )}
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-lg">
-            <span className="text-2xs font-semibold text-indigo-500 uppercase tracking-widest mr-2">
-              Subjects:
-            </span>
-            <span className="text-sm font-semibold text-indigo-700 tracking-tight">
-              {filteredSubjects.length}
-            </span>
-          </div>
+        <div className="px-3 py-2 bg-teal-50 border border-teal-200 rounded-lg whitespace-nowrap">
+          <span className="text-xs font-medium text-teal-700">
+            {filteredSubjects.length} subject{filteredSubjects.length !== 1 ? 's' : ''}
+          </span>
         </div>
       </div>
 
-      <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-200/50 overflow-hidden hover:shadow-md transition-all duration-500">
-        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
           <Table className="w-full">
             <TableHeader>
               <TableRow className="bg-white border-b border-gray-200">
@@ -375,25 +370,40 @@ export function SubjectsPage() {
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i} className="animate-pulse">
-                    <TableCell colSpan={5} className="px-8 py-6">
-                      <div className="h-10 bg-gray-100/50 rounded-2xl w-full"></div>
+                  <TableRow key={i} className="border-b border-gray-200">
+                    <TableCell className="px-6 py-3">
+                      <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                    </TableCell>
+                    <TableCell className="px-4 py-3">
+                      <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+                    </TableCell>
+                    <TableCell className="px-4 py-3">
+                      <div className="h-6 bg-gray-200 rounded-md w-16 animate-pulse"></div>
+                    </TableCell>
+                    <TableCell className="px-4 py-3">
+                      <div className="h-4 bg-gray-200 rounded w-8 animate-pulse"></div>
+                    </TableCell>
+                    <TableCell className="px-6 py-3">
+                      <div className="flex gap-2 justify-end">
+                        <div className="h-9 w-9 bg-gray-200 rounded-lg animate-pulse"></div>
+                        <div className="h-9 w-9 bg-gray-200 rounded-lg animate-pulse"></div>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
               ) : subjects?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-24">
+                  <TableCell colSpan={5} className="py-20">
                     <EmptyState
                       icon={Boxes}
-                      title="No subjects found"
-                      description="Create a subject to get started."
+                      title="No subjects yet"
+                      description="Create your first subject to get started."
                       action={
                         <Button
                           onClick={() => handleOpenDialog()}
-                          className="rounded-full px-8 shadow-md"
+                          className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
                         >
-                          Add Subject
+                          Create Subject
                         </Button>
                       }
                     />
@@ -415,27 +425,27 @@ export function SubjectsPage() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="rounded-2xl border border-gray-200/50 bg-white/95 backdrop-blur-sm p-0 overflow-hidden shadow-lg">
+        <DialogContent className="rounded-lg border border-gray-200 bg-white p-0 overflow-hidden shadow-lg max-w-md">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
               <div className="p-8 space-y-6">
                 <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-600/15">
-            {editingSubject ? (
-              <Pencil className="w-8 h-8 text-white" />
-            ) : (
-              <Plus className="w-8 h-8 text-white" />
-            )}
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
-              <DialogTitle>{editingSubject ? 'Edit Subject' : 'Add Subject'}</DialogTitle>
-            </h2>
-            <DialogDescription className="text-2xs font-semibold text-gray-400 uppercase tracking-widest mt-1">
-              {editingSubject ? `Editing subject` : 'Add a new subject'}
-            </DialogDescription>
-          </div>
-        </div>
+                  <div className="w-14 h-14 rounded-xl bg-teal-600 flex items-center justify-center shadow-sm">
+                    {editingSubject ? (
+                      <Pencil className="w-6 h-6 text-white" />
+                    ) : (
+                      <Plus className="w-6 h-6 text-white" />
+                    )}
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      <DialogTitle>{editingSubject ? 'Edit Subject' : 'Create Subject'}</DialogTitle>
+                    </h2>
+                    <DialogDescription className="text-sm text-gray-600 mt-0.5">
+                      {editingSubject ? 'Update subject details and settings' : 'Add a new subject to your curriculum'}
+                    </DialogDescription>
+                  </div>
+                </div>
 
                 <div className="space-y-5">
                   <div className="grid grid-cols-2 gap-5">
@@ -443,8 +453,8 @@ export function SubjectsPage() {
                       control={form.control}
                       name="title"
                       render={({ field }) => (
-                        <FormItem className="space-y-2 group">
-                          <FormLabel className="text-2xs font-semibold text-gray-400 uppercase tracking-widest pl-1">
+                        <FormItem className="space-y-2">
+                          <FormLabel className="text-sm font-semibold text-gray-700">
                             Title
                           </FormLabel>
                           <FormControl>
@@ -452,7 +462,7 @@ export function SubjectsPage() {
                               placeholder="e.g. Mathematics"
                               {...field}
                               data-testid="subject-title"
-                              className="h-12 rounded-xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-normal"
+                              className="h-11 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-600/10 transition-colors font-normal text-base"
                               required
                             />
                           </FormControl>
@@ -465,8 +475,8 @@ export function SubjectsPage() {
                       control={form.control}
                       name="slug"
                       render={({ field }) => (
-                        <FormItem className="space-y-2 group">
-                          <FormLabel className="text-2xs font-semibold text-gray-400 uppercase tracking-widest pl-1">
+                        <FormItem className="space-y-2">
+                          <FormLabel className="text-sm font-semibold text-gray-700">
                             Slug
                           </FormLabel>
                           <FormControl>
@@ -479,7 +489,7 @@ export function SubjectsPage() {
                                 )
                               }
                               data-testid="subject-slug"
-                              className="h-12 rounded-xl border-gray-100 bg-white/50 text-indigo-600 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-mono text-sm font-normal"
+                              className="h-11 rounded-lg border border-gray-300 bg-white text-teal-700 placeholder:text-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-600/10 transition-colors font-mono text-sm font-normal"
                               required
                               pattern="[a-z0-9_]+"
                               title="Lowercase letters, numbers, and underscores only"
@@ -496,21 +506,21 @@ export function SubjectsPage() {
                       control={form.control}
                       name="color_hex"
                       render={({ field }) => (
-                        <FormItem className="space-y-2 group">
-                          <FormLabel className="text-2xs font-semibold text-gray-400 uppercase tracking-widest pl-1">
+                        <FormItem className="space-y-2">
+                          <FormLabel className="text-sm font-semibold text-gray-700">
                             Color
                           </FormLabel>
                           <div className="flex gap-3">
                             <div
-                              className="h-14 w-14 rounded-2xl border-2 border-dashed border-gray-200 shrink-0"
-                              style={{ backgroundColor: field.value }}
+                              className="h-11 w-11 rounded-lg border-2 border-gray-300 shrink-0 flex-shrink-0"
+                              style={{ backgroundColor: field.value || '#0D9488' }}
                             />
                             <FormControl>
                               <Input
-                              placeholder="#6366f1"
+                              placeholder="#0D9488"
                               {...field}
                               data-testid="subject-color"
-                              className="h-12 rounded-xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-normal w-full"
+                              className="h-11 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-600/10 transition-colors font-normal w-full text-sm"
                             />
                             </FormControl>
                           </div>
@@ -523,8 +533,8 @@ export function SubjectsPage() {
                       control={form.control}
                       name="display_order"
                       render={({ field }) => (
-                        <FormItem className="space-y-2 group">
-                          <FormLabel className="text-2xs font-semibold text-gray-400 uppercase tracking-widest pl-1">
+                        <FormItem className="space-y-2">
+                          <FormLabel className="text-sm font-semibold text-gray-700">
                             Order
                           </FormLabel>
                           <FormControl>
@@ -532,7 +542,7 @@ export function SubjectsPage() {
                               type="number"
                               {...field}
                               data-testid="subject-order"
-                              className="h-12 rounded-xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-normal"
+                              className="h-11 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-600/10 transition-colors font-normal text-base"
                               required
                             />
                           </FormControl>
@@ -545,8 +555,8 @@ export function SubjectsPage() {
                       control={form.control}
                       name="status"
                       render={({ field }) => (
-                        <FormItem className="space-y-2 group">
-                          <FormLabel className="text-2xs font-semibold text-gray-400 uppercase tracking-widest pl-1">
+                        <FormItem className="space-y-2">
+                          <FormLabel className="text-sm font-semibold text-gray-700">
                             Status
                           </FormLabel>
                           <Select
@@ -555,20 +565,14 @@ export function SubjectsPage() {
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger className="h-12 rounded-xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-normal">
-                                <SelectValue placeholder="Select Status" />
+                              <SelectTrigger className="h-11 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-600/10 transition-colors font-normal text-base">
+                                <SelectValue placeholder="Select status" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
-                              <SelectItem value="draft" className="font-normal">
-                                Draft
-                              </SelectItem>
-                              <SelectItem value="live" className="font-normal text-emerald-600">
-                                Live
-                              </SelectItem>
-                              <SelectItem value="published" className="font-normal text-blue-600">
-                                Published
-                              </SelectItem>
+                            <SelectContent className="rounded-lg border border-gray-200 shadow-md">
+                              <SelectItem value="draft" className="font-normal">Draft</SelectItem>
+                              <SelectItem value="live" className="font-normal">Live</SelectItem>
+                              <SelectItem value="published" className="font-normal">Published</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -581,15 +585,15 @@ export function SubjectsPage() {
                     control={form.control}
                     name="description"
                     render={({ field }) => (
-                      <FormItem className="space-y-2 group">
-                        <FormLabel className="text-2xs font-semibold text-gray-400 uppercase tracking-widest pl-1">
+                      <FormItem className="space-y-2">
+                        <FormLabel className="text-sm font-semibold text-gray-700">
                           Description
                         </FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Brief architectural scope of this knowledge domain"
+                            placeholder="Brief description of this subject area"
                             {...field}
-                            className="h-12 rounded-xl border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all text-sm font-normal"
+                            className="h-11 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-600/10 transition-colors font-normal text-sm"
                           />
                         </FormControl>
                         <FormMessage />
@@ -599,19 +603,19 @@ export function SubjectsPage() {
                 </div>
               </div>
 
-              <DialogFooter className="bg-gray-50/50 p-6 flex gap-3 border-t border-gray-200/50">
+              <DialogFooter className="bg-gray-50 p-6 flex gap-3 border-t border-gray-200">
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => setIsDialogOpen(false)}
-                  className="h-10 px-6 rounded-lg font-semibold text-2xs uppercase tracking-widest text-gray-400 hover:bg-gray-200 transition-all"
+                  className="h-10 px-6 rounded-lg font-semibold text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={createSubject.isPending || updateSubject.isPending}
-                  className="h-10 px-6 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-2xs uppercase tracking-widest shadow-sm shadow-indigo-600/20 transition-all"
+                  className="h-10 px-6 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {editingSubject ? 'Save Changes' : 'Create Subject'}
                 </Button>
