@@ -14,9 +14,16 @@ import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
-import { Skeleton } from '@/components/ui/skeleton';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
@@ -53,6 +60,7 @@ import {
     Sparkles,
     Square,
     Trash2,
+    X,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -110,58 +118,49 @@ const SortableRow = memo(
       transform: CSS.Transform.toString(transform),
       transition,
       opacity: isDragging ? 0.5 : 1,
-      boxShadow: isDragging ? '0 8px 32px rgba(99, 102, 241, 0.15)' : undefined,
-      zIndex: isDragging ? 50 : undefined,
+      position: 'relative' as const,
+      zIndex: isDragging ? 10 : undefined,
     };
 
     return (
-      <tr
+      <TableRow
         ref={setNodeRef}
         style={style}
-        className={cn(
-          'hover:bg-indigo-50/20 transition-all group/row border-b border-gray-100/50 last:border-0 relative',
-          isSelected && 'bg-indigo-50/30'
-        )}
+        className={`even:bg-gray-50/40 ${isDragging ? 'bg-gray-50 shadow-md' : ''}`}
       >
-        <td className="pl-8 pr-2 py-5 w-12 relative overflow-hidden">
-          <div
-            className={cn(
-              'absolute inset-y-0 left-0 w-1 bg-indigo-600 transition-all duration-300',
-              isSelected ? 'opacity-100' : 'opacity-0 group-hover/row:opacity-100'
-            )}
-          />
+        <TableCell className="w-8 px-2">
           {!isDragDisabled ? (
             <button
               {...attributes}
               {...listeners}
-              className="p-2 text-indigo-300 hover:text-indigo-600 cursor-grab active:cursor-grabbing touch-none transition-colors"
+              className="p-1 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing touch-none"
               aria-label="Drag to reorder"
             >
-              <GripVertical className="h-5 w-5" />
+              <GripVertical className="h-4 w-4" />
             </button>
           ) : (
-            <div className="p-2 text-gray-200">
-              <GripVertical className="h-5 w-5" />
+            <div className="p-1 text-gray-200">
+              <GripVertical className="h-4 w-4" />
             </div>
           )}
-        </td>
-        <td className="px-4 py-3">
+        </TableCell>
+        <TableCell className="w-8 px-2">
           <button
             onClick={() => onSelect(question.question_id)}
-            aria-label={isSelected ? 'Deselect question' : 'Select question'}
-            className="text-gray-300 hover:text-indigo-600 transition-all duration-300 transform hover:scale-110"
+            className="text-gray-300 hover:text-gray-500"
+            title={isSelected ? 'Deselect' : 'Select'}
           >
             {isSelected ? (
-              <CheckSquare className="h-5 w-5 text-indigo-600" />
+              <CheckSquare className="h-4 w-4 text-teal-600" />
             ) : (
-              <Square className="h-5 w-5" />
+              <Square className="h-4 w-4" />
             )}
           </button>
-        </td>
-        <td className="px-6 py-5 max-w-[450px]">
+        </TableCell>
+        <TableCell className="px-4 max-w-[350px]">
           <div className="flex flex-col min-w-0">
             <div
-              className="font-bold text-gray-900 text-[15px] tracking-tight line-clamp-1 group-hover/row:text-indigo-700 transition-colors prose-sm"
+              className="font-medium text-gray-900 text-xs line-clamp-1 prose-sm"
               dangerouslySetInnerHTML={{
                 __html: sanitizeHtml(
                   typeof question.content === 'string'
@@ -171,56 +170,57 @@ const SortableRow = memo(
               }}
             />
             {question.apps?.display_name && (
-              <span className="text-[10px] text-indigo-700 font-black uppercase tracking-widest mt-1">
-                App: {question.apps.display_name}
+              <span className="text-[10px] text-gray-400 mt-0.5">
+                {question.apps.display_name}
               </span>
             )}
           </div>
-        </td>
-        <td className="px-4 py-5">
-          <span className="px-3 py-1.5 bg-white border border-gray-100 text-gray-600 rounded-xl text-2xs font-black uppercase tracking-widest shadow-sm group-hover/row:border-indigo-100 group-hover/row:text-indigo-600 transition-all">
+        </TableCell>
+        <TableCell>
+          <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium border border-gray-200/50">
             {formatIdentifier(question.type)}
           </span>
-        </td>
-        <td className="px-4 py-5 text-center">
-          <span className="text-sm font-black text-gray-900">
-            {question.points}{' '}
-            <span className="text-[8px] text-gray-600 uppercase tracking-tighter">PTS</span>
+        </TableCell>
+        <TableCell>
+          <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium border border-gray-200/50">
+            {question.skills?.title || 'No Skill'}
           </span>
-        </td>
-        <td className="px-4 py-5">
-          <StatusBadge
-            status={(question.status?.toLowerCase() as StatusType) || 'draft'}
-            label={question.status?.toUpperCase()}
-          />
-        </td>
-        <td className="pl-4 pr-10 py-5 text-right">
-          <div className="flex items-center justify-end gap-1.5">
+        </TableCell>
+        <TableCell className="text-center">
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-gray-600 font-semibold text-xs tabular-nums">
+            {question.points}
+          </span>
+        </TableCell>
+        <TableCell>
+          <StatusBadge status={(question.status?.toLowerCase() as StatusType) || 'draft'} />
+        </TableCell>
+        <TableCell className="px-4 text-right border-l border-gray-100">
+          <div className="flex items-center justify-end gap-0.5">
             <Link
               to={`/questions/${question.question_id}/edit`}
-              className="p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-white border border-transparent hover:border-indigo-100 rounded-2xl transition-all shadow-none hover:shadow-lg hover:shadow-indigo-500/5"
-              title="Edit Question"
+              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+              title="Edit"
             >
-              <Pencil className="h-4 w-4" />
+              <Pencil className="h-3.5 w-3.5" />
             </Link>
             <button
               onClick={() => onDuplicate(question.question_id)}
               disabled={isDuplicating}
-              className="p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-white border border-transparent hover:border-indigo-100 rounded-2xl transition-all shadow-none hover:shadow-lg hover:shadow-indigo-500/5 disabled:opacity-50"
-              title="Duplicate Question"
+              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+              title="Duplicate"
             >
-              <Copy className="h-4 w-4" />
+              <Copy className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => onDelete(question.question_id)}
-              className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-white border border-transparent hover:border-red-100 rounded-2xl transition-all shadow-none hover:shadow-lg hover:shadow-red-500/5"
-              title="Delete Question"
+              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
+              title="Delete"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
-        </td>
-      </tr>
+        </TableCell>
+      </TableRow>
     );
   }
 );
@@ -244,7 +244,8 @@ const SortableCard = memo(
       transform: CSS.Transform.toString(transform),
       transition,
       opacity: isDragging ? 0.5 : 1,
-      zIndex: isDragging ? 50 : undefined,
+      position: 'relative' as const,
+      zIndex: isDragging ? 10 : undefined,
     };
 
     return (
@@ -252,68 +253,39 @@ const SortableCard = memo(
         ref={setNodeRef}
         style={style}
         className={cn(
-          'bg-white/80 backdrop-blur-xl rounded-[2.5rem] border transition-all duration-500 group/card relative overflow-hidden',
-          isSelected
-            ? 'border-indigo-400 bg-indigo-50/50 shadow-xl shadow-indigo-500/10'
-            : 'border-white/40 hover:border-indigo-200 hover:shadow-2xl hover:shadow-indigo-500/5 hover:-translate-y-1'
+          'bg-white rounded-lg border p-3 space-y-2',
+          isSelected ? 'border-teal-300 bg-teal-50/30' : 'border-gray-200'
         )}
       >
-        <div className="p-8 space-y-6">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-2">
-              {!isDragDisabled ? (
-                <button
-                  {...attributes}
-                  {...listeners}
-                  className="p-2.5 text-indigo-300 hover:text-indigo-600 cursor-grab active:cursor-grabbing touch-none transition-all rounded-xl hover:bg-indigo-50"
-                  aria-label="Drag to reorder"
-                >
-                  <GripVertical className="h-5 w-5" />
-                </button>
-              ) : (
-                <div className="p-2.5 text-gray-200">
-                  <GripVertical className="h-5 w-5" />
-                </div>
-              )}
-              <button
-                onClick={() => onSelect(question.question_id)}
-                className="p-2.5 text-gray-300 hover:text-indigo-600 transition-all rounded-xl hover:bg-indigo-50 transform hover:scale-110"
-              >
-                {isSelected ? (
-                  <CheckSquare className="h-6 w-6 text-indigo-600" />
-                ) : (
-                  <Square className="h-6 w-6" />
-                )}
-              </button>
+        <div className="flex items-start gap-2">
+          {!isDragDisabled ? (
+            <button
+              {...attributes}
+              {...listeners}
+              className="p-1 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing touch-none shrink-0"
+              aria-label="Drag to reorder"
+            >
+              <GripVertical className="h-4 w-4" />
+            </button>
+          ) : (
+            <div className="p-1 text-gray-200 shrink-0">
+              <GripVertical className="h-4 w-4" />
             </div>
-            <div className="flex gap-1.5">
-              <Link
-                to={`/questions/${question.question_id}/edit`}
-                className="p-3 rounded-2xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm hover:shadow-lg"
-              >
-                <Pencil className="h-4 w-4" />
-              </Link>
-              <button
-                onClick={() => onDuplicate(question.question_id)}
-                disabled={isDuplicating}
-                aria-label="Duplicate question"
-                className="p-3 rounded-2xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm hover:shadow-lg disabled:opacity-50"
-              >
-                <Copy className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => onDelete(question.question_id)}
-                aria-label="Delete question"
-                className="p-3 rounded-2xl bg-white border border-gray-100 text-red-500 hover:bg-red-50 transition-all shadow-sm hover:shadow-lg"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          <div className="min-w-0">
+          )}
+          <button
+            onClick={() => onSelect(question.question_id)}
+            className="p-1 text-gray-300 hover:text-gray-500 shrink-0"
+            title={isSelected ? 'Deselect' : 'Select'}
+          >
+            {isSelected ? (
+              <CheckSquare className="h-4 w-4 text-teal-600" />
+            ) : (
+              <Square className="h-4 w-4" />
+            )}
+          </button>
+          <div className="flex-1 min-w-0">
             <div
-              className="font-black text-gray-900 text-lg tracking-tight leading-relaxed line-clamp-3 prose-sm"
+              className="font-medium text-gray-900 text-xs line-clamp-2 prose-sm mb-1"
               dangerouslySetInnerHTML={{
                 __html: sanitizeHtml(
                   typeof question.content === 'string'
@@ -323,59 +295,50 @@ const SortableCard = memo(
               }}
             />
             {question.apps?.display_name && (
-              <p className="text-[10px] font-black text-indigo-700 uppercase tracking-widest mt-1 mb-3">
+              <span className="text-[10px] text-gray-400 leading-none">
                 {question.apps.display_name}
-              </p>
+              </span>
             )}
-            <div className="space-y-3 mt-4">
-              {question.skills?.domains?.title && (
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className="bg-purple-50 text-purple-700 border-purple-100 rounded-lg font-black text-[9px] uppercase tracking-widest px-2 py-0.5"
-                  >
-                    {question.skills.domains.title}
-                  </Badge>
-                  <span className="text-gray-300 text-xs italic">/</span>
-                  <Badge
-                    variant="outline"
-                    className="bg-indigo-50 text-indigo-700 border-indigo-100 rounded-lg font-black text-[9px] uppercase tracking-widest px-2 py-0.5"
-                  >
-                    {question.skills.title}
-                  </Badge>
-                </div>
-              )}
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="px-3 py-1.5 bg-white border border-gray-100 text-gray-600 rounded-xl text-2xs font-black uppercase tracking-widest shadow-sm">
-                  {formatIdentifier(question.type)}
+            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+              <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium">
+                {formatIdentifier(question.type)}
+              </span>
+              {question.skills?.title && (
+                <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium">
+                  {question.skills.title}
                 </span>
-              </div>
+              )}
+              <span className="text-[10px] text-gray-400">{question.points} pts</span>
             </div>
           </div>
-
-          <div className="flex items-center justify-between pt-6 border-t border-gray-100/50">
-            <StatusBadge
-              status={(question.status?.toLowerCase() as StatusType) || 'draft'}
-              label={question.status?.toUpperCase()}
-            />
-            <div className="flex items-center gap-3">
-              <div className="flex flex-col items-end">
-                <span className="text-xl font-black text-gray-900 leading-none">
-                  {question.points}
-                </span>
-                <span className="text-[8px] font-black text-gray-400 uppercase tracking-tighter">
-                  WEIGHT
-                </span>
-              </div>
-              <div className="w-10 h-10 rounded-2xl bg-orange-100 border border-orange-200 flex items-center justify-center shadow-sm">
-                <Sparkles className="h-5 w-5 text-orange-600" />
-              </div>
-            </div>
+          <div className="shrink-0">
+            <StatusBadge status={(question.status?.toLowerCase() as StatusType) || 'draft'} />
           </div>
         </div>
-
-        {/* Subtle card glow */}
-        <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/5 blur-[80px] rounded-full pointer-events-none" />
+        <div className="flex items-center justify-end gap-0.5 pt-2 border-t border-gray-100">
+          <Link
+            to={`/questions/${question.question_id}/edit`}
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+            title="Edit"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Link>
+          <button
+            onClick={() => onDuplicate(question.question_id)}
+            disabled={isDuplicating}
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+            title="Duplicate"
+          >
+            <Copy className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={() => onDelete(question.question_id)}
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
+            title="Delete"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
     );
   }
@@ -581,19 +544,19 @@ export function QuestionList() {
     setDeleteConfirmation({ type: 'single', id });
   }, []);
 
-  const confirmExecution = async () => {
+  const confirmDelete = async () => {
     if (!deleteConfirmation) return;
     try {
       if (deleteConfirmation.type === 'bulk') {
         await bulkDelete.mutateAsync(Array.from(selectedIds));
-        showToast(`${selectedIds.size} question(s) purged`, 'success');
+        showToast(`${selectedIds.size} question(s) deleted`, 'success');
         setSelectedIds(new Set());
       } else if (deleteConfirmation.type === 'single' && deleteConfirmation.id) {
         await deleteQuestion.mutateAsync(deleteConfirmation.id);
-        showToast('Question purged successfully', 'success');
+        showToast('Question deleted', 'success');
       }
     } catch {
-      showToast('Failed to execute purge operation', 'error');
+      showToast('Failed to delete question(s)', 'error');
     } finally {
       setDeleteConfirmation(null);
     }
@@ -681,11 +644,9 @@ export function QuestionList() {
 
   if (!currentApp) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center bg-white/50 backdrop-blur-md rounded-[2.5rem] p-12 border border-white/20 shadow-xl">
-          <p className="text-gray-500 font-black italic uppercase tracking-widest">
-            Select an active app to view Questions
-          </p>
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-md p-12 text-center">
+          <p className="text-sm text-gray-500">Select an active app to view Questions.</p>
         </div>
       </div>
     );
@@ -693,37 +654,18 @@ export function QuestionList() {
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
-        <AdminHeader title="Questions" description="Manage your question bank." icon={FileText} />
-
-        {/* Skeleton Filter Bar */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
-          <Skeleton className="h-14 flex-1 rounded-2xl" />
-          <div className="flex gap-3">
-            <Skeleton className="h-10 w-32 rounded-xl" />
-            <Skeleton className="h-10 w-32 rounded-xl" />
-            <Skeleton className="h-10 w-40 rounded-xl" />
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-200">
+            <div className="h-8 bg-gray-200 rounded w-48 animate-pulse" />
           </div>
-        </div>
-
-        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 overflow-hidden">
-          <div className="p-8 space-y-6">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div
-                key={i}
-                className="flex items-center gap-6 pb-6 border-b border-gray-50 last:border-0 last:pb-0"
-              >
-                <Skeleton className="h-5 w-5 rounded" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-5 w-3/4 rounded-lg" />
-                  <Skeleton className="h-3 w-1/2 rounded-md" />
-                </div>
-                <Skeleton className="h-8 w-24 rounded-xl" />
-                <Skeleton className="h-8 w-16 rounded-xl" />
-                <Skeleton className="h-10 w-10 rounded-xl" />
-              </div>
-            ))}
-          </div>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="px-4 py-3 border-b border-gray-100 flex items-center gap-4">
+              <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+              <div className="h-3.5 bg-gray-200 rounded w-48 animate-pulse" />
+              <div className="h-3.5 bg-gray-200 rounded w-20 animate-pulse ml-auto" />
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -731,39 +673,41 @@ export function QuestionList() {
 
   if (isError) {
     return (
-      <div className="bg-red-500/10 border border-red-500/20 backdrop-blur-xl rounded-2xl p-8 text-center">
-        <p className="text-red-700 font-bold">
-          Error loading questions:{' '}
-          {error instanceof Error ? error.message : 'Unknown connectivity issue'}
-        </p>
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+          <p className="text-sm text-red-600">
+            Error loading questions: {error instanceof Error ? error.message : 'Please try again.'}
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
         title="Questions"
         description="Manage your question bank."
         icon={FileText}
+        className="mb-2"
         actions={
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-2">
             <Link to="/ai-questions">
               <Button
                 variant="outline"
-                className="h-12 px-8 rounded-2xl bg-white/50 backdrop-blur-md border border-indigo-100 text-indigo-600 font-black text-2xs uppercase tracking-extra-wide shadow-lg shadow-indigo-500/5 transition-all hover:-translate-y-1 hover:bg-white gap-3 group"
+                className="h-9 px-3 rounded border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 font-medium text-xs gap-1"
               >
-                <Sparkles className="h-4 w-4 text-indigo-500 group-hover:rotate-12 transition-transform" />
-                <span>AI Accelerator</span>
+                <Sparkles className="h-3.5 w-3.5" />
+                AI Generate
               </Button>
             </Link>
             <Link to="/ai-import">
               <Button
                 variant="outline"
-                className="h-12 px-8 rounded-2xl bg-white/50 backdrop-blur-md border border-indigo-100 text-indigo-600 font-black text-2xs uppercase tracking-extra-wide shadow-lg shadow-indigo-500/5 transition-all hover:-translate-y-1 hover:bg-white gap-3 group"
+                className="h-9 px-3 rounded border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 font-medium text-xs gap-1"
               >
-                <FileText className="h-4 w-4 text-indigo-500 group-hover:scale-110 transition-transform" />
-                <span>Bulk Import</span>
+                <FileText className="h-3.5 w-3.5" />
+                Bulk Import
               </Button>
             </Link>
             <DataToolbar
@@ -774,220 +718,234 @@ export function QuestionList() {
               importDisabled={false}
             />
             <Link to="/questions/new">
-              <Button className="h-12 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-extra-wide shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-1 gap-3">
-                <Plus className="h-5 w-5" />
-                <span>Add Question</span>
+              <Button className="h-9 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1">
+                <Plus className="w-3.5 h-3.5" /> New Question
               </Button>
             </Link>
           </div>
         }
       />
 
-      <CurriculumFilterBar
-        searchPlaceholder="Query curriculum assets..."
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        extraFilters={
-          <>
-            <div className="relative w-full md:w-56">
-              <select
-                aria-label="Filter by skill"
-                value={selectedSkillId}
-                onChange={(e) => setSelectedSkillId(e.target.value)}
-                className="w-full h-14 appearance-none pl-6 pr-12 text-sm font-black uppercase tracking-widest rounded-[1.25rem] border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer"
-              >
-                <option value="all">ALL CLUSTERS</option>
-                {skills?.map((skill: { skill_id: string; title: string }) => (
-                  <option key={skill.skill_id} value={skill.skill_id}>
-                    {skill.title.toUpperCase()}
-                  </option>
-                ))}
-              </select>
-              <Filter className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-indigo-500 pointer-events-none" />
-            </div>
-            {isSuperAdmin ? (
-              <div className="relative w-full md:w-56">
-                <select
-                  aria-label="Filter by app"
-                  value={appFilter}
-                  onChange={(e) => setAppFilter(e.target.value)}
-                  className="w-full h-14 appearance-none pl-6 pr-12 text-sm font-black uppercase tracking-widest rounded-[1.25rem] border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer"
-                >
-                  <option value="all">ALL APPS</option>
-                  {apps.map((app) => (
-                    <option key={app.app_id} value={app.app_id}>
-                      {app.display_name}
-                    </option>
-                  ))}
-                </select>
-                <Filter className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-indigo-500 pointer-events-none" />
-              </div>
-            ) : undefined}
-          </>
-        }
-      />
-
       {/* Bulk Actions Bar */}
       {selectedIds.size > 0 && (
-        <div className="sticky top-24 z-30 flex flex-col md:flex-row items-center justify-between p-3 bg-gray-900/90 backdrop-blur-xl border border-white/10 rounded-[1.5rem] shadow-2xl shadow-indigo-600/20 animate-in slide-in-from-top-8 duration-500 max-w-2xl mx-auto w-full gap-4 md:gap-0">
-          <div className="flex items-center gap-4 pl-4">
-            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
-              <span className="text-white font-black text-xs">{selectedIds.size}</span>
-            </div>
-            <span className="text-white/70 font-black text-2xs uppercase tracking-widest group-hover:text-white transition-colors">
-              Clustered Operations
+        <div className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md">
+          <div className="flex items-center gap-3 pl-2">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold">
+              {selectedIds.size}
             </span>
+            <span className="text-xs text-teal-200 font-medium">selected</span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-1.5">
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
+              disabled={bulkUpdateStatus.isPending}
               onClick={handleMarkPublished}
-              className="h-10 px-4 rounded-xl text-white font-black text-[9px] uppercase tracking-[0.15em] hover:bg-white/10 transition-all"
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
+              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
               Publish
             </Button>
             <Button
               variant="ghost"
               size="sm"
+              disabled={bulkUpdateStatus.isPending}
               onClick={handleMarkLive}
-              className="h-10 px-4 rounded-xl text-white font-black text-[9px] uppercase tracking-[0.15em] hover:bg-white/10 transition-all"
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
+              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
               Go Live
             </Button>
             <Button
               variant="ghost"
               size="sm"
+              disabled={bulkUpdateStatus.isPending}
               onClick={handleMarkDraft}
-              className="h-10 px-4 rounded-xl text-white font-black text-[9px] uppercase tracking-[0.15em] hover:bg-white/10 transition-all"
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
+              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
               Draft
             </Button>
-            <div className="w-px h-6 bg-white/10 mx-2" />
+            <div className="w-px h-5 bg-teal-700 mx-1" />
             <Button
               variant="ghost"
               size="sm"
+              disabled={bulkDelete.isPending}
               onClick={() => setDeleteConfirmation({ type: 'bulk' })}
-              className="h-10 px-4 rounded-xl text-red-400 font-black text-[9px] uppercase tracking-[0.15em] hover:bg-red-500 hover:text-white transition-all gap-2"
+              className="h-7 px-3 rounded text-xs text-red-400 hover:text-white hover:bg-red-600 gap-1"
             >
-              <Trash2 className="h-4 w-4" />
-              Purge
+              {bulkDelete.isPending ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Trash2 className="h-3 w-3" />
+              )}
+              Delete
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedIds(new Set())}
+              className="h-7 px-2 rounded text-xs text-teal-300 hover:text-white hover:bg-white/10"
+            >
+              <X className="h-3 w-3" />
             </Button>
           </div>
         </div>
       )}
 
-      <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-xl border border-white/20 overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
+        <CurriculumFilterBar
+          searchPlaceholder="Search questions..."
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          count={totalCount}
+          countLabel={totalCount === 1 ? 'question' : 'questions'}
+          extraFilters={
+            <>
+              <div className="relative">
+                <select
+                  aria-label="Filter by skill"
+                  value={selectedSkillId}
+                  onChange={(e) => setSelectedSkillId(e.target.value)}
+                  className="h-8 appearance-none pl-3 pr-8 text-xs font-medium rounded border border-gray-200 bg-white text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none cursor-pointer"
+                >
+                  <option value="all">All Skills</option>
+                  {skills?.map((skill: { skill_id: string; title: string }) => (
+                    <option key={skill.skill_id} value={skill.skill_id}>
+                      {skill.title}
+                    </option>
+                  ))}
+                </select>
+                <Filter className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
+              </div>
+              {isSuperAdmin ? (
+                <div className="relative">
+                  <select
+                    aria-label="Filter by app"
+                    value={appFilter}
+                    onChange={(e) => setAppFilter(e.target.value)}
+                    className="h-8 appearance-none pl-3 pr-8 text-xs font-medium rounded border border-gray-200 bg-white text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none cursor-pointer"
+                  >
+                    <option value="all">All Apps</option>
+                    {apps.map((app) => (
+                      <option key={app.app_id} value={app.app_id}>
+                        {app.display_name}
+                      </option>
+                    ))}
+                  </select>
+                  <Filter className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
+                </div>
+              ) : undefined}
+            </>
+          }
+        />
+
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           {/* Desktop Table View */}
-          <div className="hidden md:block overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50/50 border-b-2 border-gray-100">
-                <tr>
-                  <th className="w-12 h-14 pl-6 pr-2 font-black text-2xs uppercase tracking-widest text-gray-600"></th>
-                  <th className="w-12 h-14 px-4">
+          <div className="hidden md:block">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow className="bg-gray-50">
+                  <TableHead className="w-8 px-2">
+                    <GripVertical className="h-3.5 w-3.5 text-gray-300" />
+                  </TableHead>
+                  <TableHead className="w-8 px-2">
                     <button
                       onClick={handleSelectAll}
-                      aria-label={isAllSelected ? 'Deselect all questions' : 'Select all questions'}
-                      className="text-gray-300 hover:text-indigo-600 transition-colors"
+                      aria-label={isAllSelected ? 'Deselect all' : 'Select all'}
+                      className="text-gray-300 hover:text-gray-500"
                     >
                       {isAllSelected && questions.length > 0 ? (
-                        <CheckSquare className="h-5 w-5 text-indigo-600" />
+                        <CheckSquare className="h-4 w-4 text-teal-600" />
                       ) : (
-                        <Square className="h-5 w-5" />
+                        <Square className="h-4 w-4" />
                       )}
                     </button>
-                  </th>
-                  <th className="h-14 px-6 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
+                  </TableHead>
+                  <TableHead className="px-4">
                     <SortableHeader
-                      label="Question Content"
+                      label="Question"
                       column="content"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-2xs"
                     />
-                  </th>
-                  <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
+                  </TableHead>
+                  <TableHead>
                     <SortableHeader
-                      label="Asset Type"
+                      label="Type"
                       column="type"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-2xs"
                     />
-                  </th>
-                  <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
+                  </TableHead>
+                  <TableHead>
                     <SortableHeader
-                      label="Target Skill"
+                      label="Skill"
                       column="skills.title"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-2xs"
                     />
-                  </th>
-                  <th className="h-14 px-4 text-center font-black text-2xs uppercase tracking-widest text-gray-600">
+                  </TableHead>
+                  <TableHead className="text-center">
                     <SortableHeader
-                      label="Weight"
+                      label="Points"
                       column="points"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-2xs justify-center"
                     />
-                  </th>
-                  <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
+                  </TableHead>
+                  <TableHead>
                     <SortableHeader
                       label="Status"
                       column="status"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-2xs"
                     />
-                  </th>
-                  <th className="h-14 pl-4 pr-10 text-right font-black text-2xs uppercase tracking-widest text-gray-600">
-                    Execution
-                  </th>
-                </tr>
-              </thead>
+                  </TableHead>
+                  <TableHead className="text-right px-4 border-l border-gray-100">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
               <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>
-                <tbody className="divide-y divide-gray-50">
+                <TableBody>
                   {!questions.length ? (
-                    <tr>
-                      <td colSpan={8} className="px-6 py-24 text-center">
+                    <TableRow>
+                      <TableCell colSpan={8} className="py-20">
                         <EmptyState
                           icon={FileText}
-                          title={hasActiveFilters ? 'No matches found' : 'Registry empty'}
+                          title={hasActiveFilters ? 'No matches found' : 'No questions yet'}
                           description={
                             hasActiveFilters
-                              ? 'Adjust your search parameters or skill focus.'
-                              : 'The question cluster is empty. Use AI generation or manual creation to populate it.'
+                              ? 'Try adjusting your search or filters.'
+                              : 'Create your first question or use AI to generate them.'
                           }
                           action={
                             hasActiveFilters ? (
                               <Button
                                 onClick={clearFilters}
-                                className="rounded-full px-8 shadow-md"
+                                className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
                               >
-                                Clear filters
+                                Clear Filters
                               </Button>
                             ) : (
-                              <Button
-                                onClick={() => (window.location.href = '/questions/new')}
-                                className="rounded-full px-8 shadow-md"
-                              >
-                                New Question
-                              </Button>
+                              <Link to="/questions/new">
+                                <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
+                                  New Question
+                                </Button>
+                              </Link>
                             )
                           }
                         />
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ) : (
                     questions.map((question: QuestionListItem) => (
                       <SortableRow
@@ -1002,35 +960,44 @@ export function QuestionList() {
                       />
                     ))
                   )}
-                </tbody>
+                </TableBody>
               </SortableContext>
-            </table>
+            </Table>
           </div>
 
           {/* Mobile Card View */}
-          <div className="md:hidden p-4">
+          <div className="md:hidden p-3">
             <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>
               {!questions.length ? (
-                <div className="rounded-[2.5rem] border border-dashed border-gray-200 p-12 bg-white/30 backdrop-blur-md">
+                <div className="py-12">
                   <EmptyState
                     icon={FileText}
-                    title={hasActiveFilters ? 'No matches found' : 'Registry empty'}
+                    title={hasActiveFilters ? 'No matches found' : 'No questions yet'}
                     description={
                       hasActiveFilters
-                        ? 'Try adjusting your focus.'
-                        : 'Start adding assets to your library.'
+                        ? 'Try adjusting your search or filters.'
+                        : 'Create your first question to get started.'
                     }
                     action={
                       hasActiveFilters ? (
-                        <Button onClick={clearFilters} className="rounded-full px-8 shadow-md">
-                          Clear filters
+                        <Button
+                          onClick={clearFilters}
+                          className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                        >
+                          Clear Filters
                         </Button>
-                      ) : undefined
+                      ) : (
+                        <Link to="/questions/new">
+                          <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
+                            New Question
+                          </Button>
+                        </Link>
+                      )
                     }
                   />
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {questions.map((question: QuestionListItem) => (
                     <SortableCard
                       key={question.question_id}
@@ -1049,46 +1016,48 @@ export function QuestionList() {
           </div>
         </DndContext>
 
-        <div className="px-8 py-6 bg-gray-50/50 border-t border-gray-100">
-          <Pagination
-            currentPage={page}
-            totalPages={totalPages}
-            totalCount={totalCount}
-            pageSize={pageSize}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-          />
-        </div>
+        {totalCount > 0 && (
+          <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          </div>
+        )}
       </div>
 
       <AlertDialog
         open={Boolean(deleteConfirmation)}
         onOpenChange={(open) => !open && setDeleteConfirmation(null)}
       >
-        <AlertDialogContent className="rounded-[2.5rem] border-none bg-white/90 backdrop-blur-2xl p-10 shadow-2xl">
+        <AlertDialogContent className="rounded-lg border border-gray-200 bg-white shadow-lg max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl font-black text-gray-900 tracking-tight italic">
-              Confirm Purge
+            <AlertDialogTitle className="text-base font-semibold text-gray-900">
+              Delete {deleteConfirmation?.type === 'bulk' ? `${selectedIds.size} questions` : 'question'}?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-500 font-medium">
+            <AlertDialogDescription className="text-sm text-gray-500">
               {deleteConfirmation?.type === 'bulk'
-                ? `You are about to permanently purge ${selectedIds.size} questions from the registry. This operation cannot be reversed.`
-                : 'This asset will be permanently removed from the curriculum engine. Are you sure you want to proceed?'}
+                ? `This will permanently delete ${selectedIds.size} selected question(s). This action cannot be undone.`
+                : 'This action cannot be undone. This will permanently delete the question.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-8 gap-3">
-            <AlertDialogCancel className="h-12 px-8 rounded-2xl font-black text-2xs uppercase tracking-widest text-gray-400 hover:bg-gray-100 italic transition-all border-none">
-              Abort
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="h-9 px-4 rounded text-sm font-medium">
+              Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmExecution}
+              onClick={confirmDelete}
               disabled={bulkDelete.isPending || deleteQuestion.isPending}
-              className="h-12 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-red-600/20 transition-all hover:-translate-y-0.5"
+              className="h-9 px-5 rounded bg-red-600 hover:bg-red-700 text-white font-semibold text-sm shadow-sm"
             >
               {(bulkDelete.isPending || deleteQuestion.isPending) && (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
               )}
-              Confirm Purge
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
