@@ -13,9 +13,16 @@ import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
-import { Skeleton } from '@/components/ui/skeleton';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
@@ -26,10 +33,12 @@ import {
     Filter,
     GripVertical,
     Layers,
+    Loader2,
     Pencil,
     Plus,
     Square,
     Trash2,
+    X,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -118,96 +127,93 @@ const SortableRow = memo(
       transform: CSS.Transform.toString(transform),
       transition,
       opacity: isDragging ? 0.5 : 1,
-      boxShadow: isDragging ? '0 4px 12px rgba(0, 0, 0, 0.15)' : undefined,
-      zIndex: isDragging ? 50 : undefined,
+      position: 'relative' as const,
+      zIndex: isDragging ? 10 : undefined,
     };
 
     return (
-      <tr
+      <TableRow
         ref={setNodeRef}
         style={style}
-        className="hover:bg-indigo-50/30 transition-all group/row border-b border-gray-50 last:border-0 relative"
+        className={`even:bg-gray-50/40 ${isDragging ? 'bg-gray-50 shadow-md' : ''}`}
       >
-        <td className="pl-6 pr-2 py-4 w-12 relative overflow-hidden">
-          <div className="absolute inset-y-0 left-0 w-1 bg-indigo-600 opacity-0 group-hover/row:opacity-100 transition-opacity" />
+        <TableCell className="w-8 px-2">
           {!isDragDisabled ? (
             <button
               {...attributes}
               {...listeners}
-              className="p-2 text-indigo-400/50 hover:text-indigo-600 cursor-grab active:cursor-grabbing touch-none transition-colors"
+              className="p-1 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing touch-none"
               aria-label="Drag to reorder"
             >
-              <GripVertical className="h-5 w-5" />
+              <GripVertical className="h-4 w-4" />
             </button>
           ) : (
-            <div className="p-2 text-gray-200">
-              <GripVertical className="h-5 w-5" />
+            <div className="p-1 text-gray-200">
+              <GripVertical className="h-4 w-4" />
             </div>
           )}
-        </td>
-        <td className="px-4 py-3">
+        </TableCell>
+        <TableCell className="w-8 px-2">
           <button
             onClick={() => onSelect(skill.skill_id)}
-            aria-label={isSelected ? 'Deselect skill' : 'Select skill'}
-            className="text-gray-300 hover:text-indigo-600 transition-colors"
+            className="text-gray-300 hover:text-gray-500"
+            title={isSelected ? 'Deselect' : 'Select'}
           >
             {isSelected ? (
-              <CheckSquare className="h-5 w-5 text-indigo-600" />
+              <CheckSquare className="h-4 w-4 text-teal-600" />
             ) : (
-              <Square className="h-5 w-5" />
+              <Square className="h-4 w-4" />
             )}
           </button>
-        </td>
-        <td className="px-4 py-4 min-w-[250px]">
+        </TableCell>
+        <TableCell className="px-4">
           <div className="flex flex-col">
-            <span className="font-bold text-gray-900 text-sm tracking-tight leading-none group-hover/row:text-indigo-700 transition-colors">
-              {skill.title}
-            </span>
+            <span className="font-medium text-gray-900 text-xs">{skill.title}</span>
             {skill.apps?.display_name && (
-              <span className="text-[10px] text-indigo-700 font-black uppercase tracking-widest mt-1">
-                App: {skill.apps.display_name}
+              <span className="text-[10px] text-gray-400 mt-0.5">
+                {skill.apps.display_name}
               </span>
             )}
           </div>
-        </td>
-        <td className="px-4 py-4">
-          <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-2xs font-black uppercase tracking-widest border border-indigo-100/50 shadow-sm">
+        </TableCell>
+        <TableCell>
+          <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium border border-gray-200/50">
             {skill.domains?.title || 'No Domain'}
           </span>
-        </td>
-        <td className="px-4 py-4 text-center">
-          <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg bg-gray-100 text-gray-600 font-bold text-xs border border-gray-200 shadow-sm">
+        </TableCell>
+        <TableCell className="text-center">
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-gray-600 font-semibold text-xs tabular-nums">
             {skill.difficulty_level}
           </span>
-        </td>
-        <td className="px-4 py-4">{renderStatusBadge(skill.status || 'draft')}</td>
-        <td className="pl-4 pr-8 py-3 text-right">
-          <div className="flex items-center justify-end gap-1">
+        </TableCell>
+        <TableCell>{renderStatusBadge(skill.status || 'draft')}</TableCell>
+        <TableCell className="px-4 text-right border-l border-gray-100">
+          <div className="flex items-center justify-end gap-0.5">
             <Link
               to={`/skills/${skill.skill_id}/edit`}
-              className="p-2 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
-              title="Edit Skill"
+              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+              title="Edit"
             >
-              <Pencil className="h-4 w-4" />
+              <Pencil className="h-3.5 w-3.5" />
             </Link>
             <button
               onClick={() => onDuplicate(skill.skill_id)}
               disabled={isDuplicating}
-              className="p-2 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all disabled:opacity-50"
-              title="Duplicate Skill"
+              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+              title="Duplicate"
             >
-              <Copy className="h-4 w-4" />
+              <Copy className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => onDelete(skill.skill_id)}
-              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-              title="Delete Skill"
+              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
+              title="Delete"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
-        </td>
-      </tr>
+        </TableCell>
+      </TableRow>
     );
   }
 );
@@ -232,7 +238,8 @@ const SortableCard = memo(
       transform: CSS.Transform.toString(transform),
       transition,
       opacity: isDragging ? 0.5 : 1,
-      zIndex: isDragging ? 50 : undefined,
+      position: 'relative' as const,
+      zIndex: isDragging ? 10 : undefined,
     };
 
     return (
@@ -240,96 +247,79 @@ const SortableCard = memo(
         ref={setNodeRef}
         style={style}
         className={cn(
-          'bg-white/80 backdrop-blur-xl rounded-3xl border transition-all duration-300 group/card',
+          'bg-white rounded-lg border p-3 space-y-2',
           isSelected
-            ? 'border-indigo-400 bg-indigo-50/50 shadow-md shadow-indigo-500/10'
-            : 'border-white/40 hover:border-indigo-200 hover:shadow-lg'
+            ? 'border-teal-300 bg-teal-50/30'
+            : 'border-gray-200'
         )}
       >
-        <div className="p-6 space-y-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-3">
-              {!isDragDisabled ? (
-                <button
-                  {...attributes}
-                  {...listeners}
-                  className="p-2 text-indigo-300 hover:text-indigo-600 cursor-grab active:cursor-grabbing touch-none transition-colors"
-                  aria-label="Drag to reorder"
-                >
-                  <GripVertical className="h-5 w-5" />
-                </button>
-              ) : (
-                <div className="p-2 text-gray-200">
-                  <GripVertical className="h-5 w-5" />
-                </div>
-              )}
-              <button
-                onClick={() => onSelect(skill.skill_id)}
-                aria-label={isSelected ? 'Deselect skill' : 'Select skill'}
-                className="p-2 text-gray-300 hover:text-indigo-600 transition-colors"
-              >
-                {isSelected ? (
-                  <CheckSquare className="h-5 w-5 text-indigo-600" />
-                ) : (
-                  <Square className="h-5 w-5" />
-                )}
-              </button>
+        <div className="flex items-start gap-2">
+          {!isDragDisabled ? (
+            <button
+              {...attributes}
+              {...listeners}
+              className="p-1 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing touch-none shrink-0"
+              aria-label="Drag to reorder"
+            >
+              <GripVertical className="h-4 w-4" />
+            </button>
+          ) : (
+            <div className="p-1 text-gray-200 shrink-0">
+              <GripVertical className="h-4 w-4" />
             </div>
-            <div className="flex gap-1.5">
-              <Link
-                to={`/skills/${skill.skill_id}/edit`}
-                className="p-2.5 rounded-xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm"
-              >
-                <Pencil className="h-4 w-4" />
-              </Link>
-              <button
-                onClick={() => onDuplicate(skill.skill_id)}
-                disabled={isDuplicating}
-                className="p-2.5 rounded-xl bg-white border border-gray-100 text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm disabled:opacity-50"
-                aria-label="Duplicate skill"
-              >
-                <Copy className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => onDelete(skill.skill_id)}
-                className="p-2.5 rounded-xl bg-white border border-gray-100 text-red-500 hover:bg-red-50 transition-all shadow-sm"
-                aria-label="Delete skill"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 shadow-sm transition-transform group-hover/card:scale-110">
-              <Layers className="w-6 h-6" />
-            </div>
-            <div className="min-w-0 flex flex-col">
-              <h3 className="font-black text-gray-900 text-lg tracking-tight truncate leading-tight mb-1">
-                {skill.title}
-              </h3>
+          )}
+          <button
+            onClick={() => onSelect(skill.skill_id)}
+            className="p-1 text-gray-300 hover:text-gray-500 shrink-0"
+            title={isSelected ? 'Deselect' : 'Select'}
+          >
+            {isSelected ? (
+              <CheckSquare className="h-4 w-4 text-teal-600" />
+            ) : (
+              <Square className="h-4 w-4" />
+            )}
+          </button>
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col min-w-0 mb-1">
+              <h3 className="font-medium text-gray-900 text-xs truncate">{skill.title}</h3>
               {skill.apps?.display_name && (
-                <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest truncate">
+                <span className="text-[10px] text-gray-400 leading-none mt-0.5">
                   {skill.apps.display_name}
-                </p>
+                </span>
               )}
-              <p className="text-2xs font-black text-gray-400 uppercase tracking-widest italic opacity-60 truncate">
-                /{skill.slug}
-              </p>
             </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-2 border-t border-gray-50">
-            <div className="flex items-center gap-3">
-              <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-2xs font-black uppercase tracking-widest border border-indigo-100/50">
-                {skill.domains?.title?.substring(0, 12)}...
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium">
+                {skill.domains?.title || 'No Domain'}
               </span>
-              {renderStatusBadge(skill.status || 'draft')}
+              <span className="text-[10px] text-gray-400">Lvl {skill.difficulty_level}</span>
             </div>
-            <span className="text-2xs font-black text-gray-600 uppercase tracking-widest bg-gray-100 px-2 py-1 rounded">
-              LVL {skill.difficulty_level}
-            </span>
           </div>
+          <div className="shrink-0">{renderStatusBadge(skill.status || 'draft')}</div>
+        </div>
+        <div className="flex items-center justify-end gap-0.5 pt-2 border-t border-gray-100">
+          <Link
+            to={`/skills/${skill.skill_id}/edit`}
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+            title="Edit"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Link>
+          <button
+            onClick={() => onDuplicate(skill.skill_id)}
+            disabled={isDuplicating}
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+            title="Duplicate"
+          >
+            <Copy className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={() => onDelete(skill.skill_id)}
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
+            title="Delete"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
     );
@@ -525,19 +515,19 @@ export function SkillList() {
     setDeleteConfirmation({ type: 'single', id });
   }, []);
 
-  const confirmExecution = async () => {
+  const confirmDelete = async () => {
     if (!deleteConfirmation) return;
     try {
       if (deleteConfirmation.type === 'bulk') {
         await bulkDelete.mutateAsync(Array.from(selectedIds));
-        showToast(`${selectedIds.size} skill(s) purged`, 'success');
+        showToast(`${selectedIds.size} skill(s) deleted`, 'success');
         setSelectedIds(new Set());
       } else if (deleteConfirmation.type === 'single' && deleteConfirmation.id) {
         await deleteSkill.mutateAsync(deleteConfirmation.id);
-        showToast('Skill purged successfully', 'success');
+        showToast('Skill deleted', 'success');
       }
     } catch {
-      showToast('Failed to execute purge operation', 'error');
+      showToast('Failed to delete skill(s)', 'error');
     } finally {
       setDeleteConfirmation(null);
     }
@@ -586,23 +576,23 @@ export function SkillList() {
   };
 
   const renderStatusBadge = useCallback((status: string) => {
-    return <StatusBadge status={status.toLowerCase() as StatusType} label={status.toUpperCase()} />;
+    return <StatusBadge status={status.toLowerCase() as StatusType} />;
   }, []);
 
   if (isLoading) {
     return (
-      <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <AdminHeader
-          title="Curriculum Skills"
-          description="Manage learning skills."
-          icon={Layers}
-        />
-        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 p-8 space-y-4">
-          <Skeleton className="h-12 w-full rounded-2xl" />
-          <Skeleton className="h-12 w-full rounded-2xl" />
-          <Skeleton className="h-12 w-full rounded-2xl" />
-          <Skeleton className="h-12 w-full rounded-2xl" />
-          <Skeleton className="h-12 w-full rounded-2xl" />
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-200">
+            <div className="h-8 bg-gray-200 rounded w-48 animate-pulse" />
+          </div>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="px-4 py-3 border-b border-gray-100 flex items-center gap-4">
+              <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+              <div className="h-3.5 bg-gray-200 rounded w-32 animate-pulse" />
+              <div className="h-3.5 bg-gray-200 rounded w-20 animate-pulse ml-auto" />
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -610,20 +600,23 @@ export function SkillList() {
 
   if (error) {
     return (
-      <div className="bg-red-500/10 border border-red-500/20 backdrop-blur-xl rounded-2xl p-8 text-center">
-        <p className="text-red-700 font-bold">Error loading skills. Please try again.</p>
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+          <p className="text-sm text-red-600">Error loading skills. Please try again.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
         title="Skills"
-        description="Manage skills."
+        description="Manage learning skills."
         icon={Layers}
+        className="mb-2"
         actions={
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-2">
             <DataToolbar
               data={skills as Record<string, unknown>[]}
               columns={SKILL_COLUMNS}
@@ -632,207 +625,225 @@ export function SkillList() {
               importDisabled={false}
             />
             <Link to="/skills/new">
-              <Button className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 gap-2">
-                <Plus className="h-4 w-4" />
-                <span>Add Skill</span>
+              <Button className="h-9 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1">
+                <Plus className="w-3.5 h-3.5" /> New Skill
               </Button>
             </Link>
           </div>
         }
       />
 
-      <CurriculumFilterBar
-        searchPlaceholder="Search skills..."
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        extraFilters={
-          <>
-            <div className="relative w-full md:w-56">
-              <select
-                aria-label="Filter by domain"
-                value={selectedDomainId}
-                onChange={(e) => setSelectedDomainId(e.target.value)}
-                className="w-full h-14 appearance-none pl-6 pr-12 text-sm font-black uppercase tracking-widest rounded-[1.25rem] border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer"
-              >
-                <option value="all">ALL DOMAINS</option>
-                {domains?.map((domain) => (
-                  <option key={domain.domain_id} value={domain.domain_id}>
-                    {domain.title.toUpperCase()}
-                  </option>
-                ))}
-              </select>
-              <Filter className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-indigo-500 pointer-events-none" />
-            </div>
-            {isSuperAdmin ? (
-              <div className="relative w-full md:w-56">
-                <select
-                  aria-label="Filter by app"
-                  value={appFilter}
-                  onChange={(e) => setAppFilter(e.target.value)}
-                  className="w-full h-14 appearance-none pl-6 pr-12 text-sm font-black uppercase tracking-widest rounded-[1.25rem] border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer"
-                >
-                  <option value="all">ALL APPS</option>
-                  {apps.map((app: App) => (
-                    <option key={app.app_id} value={app.app_id}>
-                      {app.display_name}
-                    </option>
-                  ))}
-                </select>
-                <Filter className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-indigo-500 pointer-events-none" />
-              </div>
-            ) : undefined}
-          </>
-        }
-      />
-
       {/* Bulk Actions Bar */}
       {selectedIds.size > 0 && (
-        <div className="flex flex-col md:flex-row items-center justify-between p-4 bg-indigo-600 rounded-[2rem] shadow-xl shadow-indigo-600/20 animate-in slide-in-from-top-4 duration-500 gap-4 md:gap-0">
-          <div className="flex items-center gap-4 pl-4">
-            <span className="text-white font-black text-xs uppercase tracking-extra-wide">
-              {selectedIds.size} Selected
+        <div className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md">
+          <div className="flex items-center gap-3 pl-2">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold">
+              {selectedIds.size}
             </span>
+            <span className="text-xs text-teal-200 font-medium">selected</span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
+              disabled={bulkUpdateStatus.isPending}
               onClick={handleMarkPublished}
-              className="h-10 px-4 rounded-xl text-white font-black text-2xs uppercase tracking-widest hover:bg-white/10"
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
+              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
               Publish
             </Button>
             <Button
               variant="ghost"
               size="sm"
+              disabled={bulkUpdateStatus.isPending}
               onClick={handleMarkLive}
-              className="h-10 px-4 rounded-xl text-white font-black text-2xs uppercase tracking-widest hover:bg-white/10"
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
+              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
               Go Live
             </Button>
             <Button
               variant="ghost"
               size="sm"
+              disabled={bulkUpdateStatus.isPending}
               onClick={handleMarkDraft}
-              className="h-10 px-4 rounded-xl text-white font-black text-2xs uppercase tracking-widest hover:bg-white/10"
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
+              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
               Draft
             </Button>
-            <div className="w-px h-6 bg-white/20 mx-2" />
+            <div className="w-px h-5 bg-teal-700 mx-1" />
             <Button
               variant="ghost"
               size="sm"
+              disabled={bulkDelete.isPending}
               onClick={() => setDeleteConfirmation({ type: 'bulk' })}
-              className="h-10 px-4 rounded-xl text-red-200 font-black text-2xs uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all gap-2"
+              className="h-7 px-3 rounded text-xs text-red-400 hover:text-white hover:bg-red-600 gap-1"
             >
-              <Trash2 className="h-4 w-4" />
-              Purge
+              {bulkDelete.isPending ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Trash2 className="h-3 w-3" />
+              )}
+              Delete
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedIds(new Set())}
+              className="h-7 px-2 rounded text-xs text-teal-300 hover:text-white hover:bg-white/10"
+            >
+              <X className="h-3 w-3" />
             </Button>
           </div>
         </div>
       )}
 
-      <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-xl border border-white/20 overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
+        <CurriculumFilterBar
+          searchPlaceholder="Search skills..."
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          count={totalCount}
+          countLabel={totalCount === 1 ? 'skill' : 'skills'}
+          extraFilters={
+            <>
+              <div className="relative">
+                <select
+                  aria-label="Filter by domain"
+                  value={selectedDomainId}
+                  onChange={(e) => setSelectedDomainId(e.target.value)}
+                  className="h-8 appearance-none pl-3 pr-8 text-xs font-medium rounded border border-gray-200 bg-white text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none cursor-pointer"
+                >
+                  <option value="all">All Domains</option>
+                  {domains?.map((domain) => (
+                    <option key={domain.domain_id} value={domain.domain_id}>
+                      {domain.title}
+                    </option>
+                  ))}
+                </select>
+                <Filter className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
+              </div>
+              {isSuperAdmin ? (
+                <div className="relative">
+                  <select
+                    aria-label="Filter by app"
+                    value={appFilter}
+                    onChange={(e) => setAppFilter(e.target.value)}
+                    className="h-8 appearance-none pl-3 pr-8 text-xs font-medium rounded border border-gray-200 bg-white text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none cursor-pointer"
+                  >
+                    <option value="all">All Apps</option>
+                    {apps.map((app: App) => (
+                      <option key={app.app_id} value={app.app_id}>
+                        {app.display_name}
+                      </option>
+                    ))}
+                  </select>
+                  <Filter className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
+                </div>
+              ) : undefined}
+            </>
+          }
+        />
+
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           {/* Desktop Table View */}
-          <div className="hidden md:block overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50/50 border-b-2 border-gray-100">
-                <tr>
-                  <th className="w-12 h-14 pl-6 pr-2 font-black text-2xs uppercase tracking-widest text-gray-600"></th>
-                  <th className="w-12 h-14 px-4">
+          <div className="hidden md:block">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow className="bg-gray-50">
+                  <TableHead className="w-8 px-2">
+                    <GripVertical className="h-3.5 w-3.5 text-gray-300" />
+                  </TableHead>
+                  <TableHead className="w-8 px-2">
                     <button
                       onClick={handleSelectAll}
-                      aria-label={isAllSelected ? 'Deselect all skills' : 'Select all skills'}
-                      className="text-gray-300 hover:text-indigo-600 transition-colors"
+                      aria-label={isAllSelected ? 'Deselect all' : 'Select all'}
+                      className="text-gray-300 hover:text-gray-500"
                     >
                       {isAllSelected && skills.length > 0 ? (
-                        <CheckSquare className="h-5 w-5 text-indigo-600" />
+                        <CheckSquare className="h-4 w-4 text-teal-600" />
                       ) : (
-                        <Square className="h-5 w-5" />
+                        <Square className="h-4 w-4" />
                       )}
                     </button>
-                  </th>
-                  <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
+                  </TableHead>
+                  <TableHead className="px-4">
                     <SortableHeader
-                      label="Title"
+                      label="Skill"
                       column="title"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-2xs"
                     />
-                  </th>
-                  <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
+                  </TableHead>
+                  <TableHead>
                     <SortableHeader
                       label="Domain"
                       column="domains.title"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-2xs"
                     />
-                  </th>
-                  <th className="h-14 px-4 text-center font-black text-2xs uppercase tracking-widest text-gray-600">
+                  </TableHead>
+                  <TableHead className="text-center">
                     <SortableHeader
                       label="Level"
                       column="difficulty_level"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-2xs justify-center"
                     />
-                  </th>
-                  <th className="h-14 px-4 text-left font-black text-2xs uppercase tracking-widest text-gray-600">
+                  </TableHead>
+                  <TableHead>
                     <SortableHeader
                       label="Status"
                       column="status"
                       currentSortBy={sortBy}
                       currentSortOrder={sortOrder}
                       onSort={handleSort}
-                      className="text-2xs"
                     />
-                  </th>
-                  <th className="h-14 pl-4 pr-8 text-right font-black text-2xs uppercase tracking-widest text-gray-600">
+                  </TableHead>
+                  <TableHead className="text-right px-4 border-l border-gray-100">
                     Actions
-                  </th>
-                </tr>
-              </thead>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
               <SortableContext items={skillIds} strategy={verticalListSortingStrategy}>
-                <tbody className="divide-y divide-gray-50">
+                <TableBody>
                   {!skills.length ? (
-                    <tr>
-                      <td colSpan={7} className="px-6 py-24 text-center">
+                    <TableRow>
+                      <TableCell colSpan={7} className="py-20">
                         <EmptyState
                           icon={Layers}
                           title={hasActiveFilters ? 'No matches found' : 'No skills yet'}
                           description={
                             hasActiveFilters
-                              ? 'Try adjusting your search or domain filter.'
-                              : 'Start building your curriculum by adding some learning objectives.'
+                              ? 'Try adjusting your search or filters.'
+                              : 'Create your first skill to build your curriculum.'
                           }
                           action={
                             hasActiveFilters ? (
                               <Button
                                 onClick={clearFilters}
-                                className="rounded-full px-8 shadow-md"
+                                className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
                               >
-                                Clear filters
+                                Clear Filters
                               </Button>
                             ) : (
-                              <Button
-                                onClick={() => (window.location.href = '/skills/new')}
-                                className="rounded-full px-8 shadow-md"
-                              >
-                                Create Skill
-                              </Button>
+                              <Link to="/skills/new">
+                                <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
+                                  New Skill
+                                </Button>
+                              </Link>
                             )
                           }
                         />
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ) : (
                     skills.map((skill: SkillListItem) => (
                       <SortableRow
@@ -848,46 +859,44 @@ export function SkillList() {
                       />
                     ))
                   )}
-                </tbody>
+                </TableBody>
               </SortableContext>
-            </table>
+            </Table>
           </div>
 
           {/* Mobile Card View */}
-          <div className="md:hidden p-4">
+          <div className="md:hidden p-3">
             <SortableContext items={skillIds} strategy={verticalListSortingStrategy}>
               {!skills.length ? (
-                <div className="rounded-[2rem] border border-dashed border-gray-200 p-12 bg-white/30 backdrop-blur-md">
+                <div className="py-12">
                   <EmptyState
                     icon={Layers}
                     title={hasActiveFilters ? 'No matches found' : 'No skills yet'}
                     description={
                       hasActiveFilters
                         ? 'Try adjusting your search or filters.'
-                        : 'Get started by creating your first skill.'
+                        : 'Create your first skill to get started.'
                     }
                     action={
                       hasActiveFilters ? (
                         <Button
                           onClick={clearFilters}
-                          className="rounded-full px-8 shadow-md"
-                          variant="outline"
+                          className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
                         >
-                          Clear filters
+                          Clear Filters
                         </Button>
                       ) : (
-                        <Button
-                          onClick={() => (window.location.href = '/skills/new')}
-                          className="rounded-full px-8 shadow-md"
-                        >
-                          Create Skill
-                        </Button>
+                        <Link to="/skills/new">
+                          <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
+                            New Skill
+                          </Button>
+                        </Link>
                       )
                     }
                   />
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {skills.map((skill: SkillListItem) => (
                     <SortableCard
                       key={skill.skill_id}
@@ -907,42 +916,48 @@ export function SkillList() {
           </div>
         </DndContext>
 
-        <div className="px-8 py-6 bg-gray-50/50 border-t border-gray-100">
-          <Pagination
-            currentPage={page}
-            totalPages={totalPages}
-            totalCount={totalCount}
-            pageSize={pageSize}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-          />
-        </div>
+        {totalCount > 0 && (
+          <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          </div>
+        )}
       </div>
 
       <AlertDialog
         open={Boolean(deleteConfirmation)}
         onOpenChange={(open: boolean) => !open && setDeleteConfirmation(null)}
       >
-        <AlertDialogContent className="rounded-[2.5rem] border-none bg-white/90 backdrop-blur-2xl p-10 shadow-2xl">
+        <AlertDialogContent className="rounded-lg border border-gray-200 bg-white shadow-lg max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl font-black text-gray-900 tracking-tight italic">
-              Are you absolutely sure?
+            <AlertDialogTitle className="text-base font-semibold text-gray-900">
+              Delete {deleteConfirmation?.type === 'bulk' ? `${selectedIds.size} skills` : 'skill'}?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-500 font-medium">
+            <AlertDialogDescription className="text-sm text-gray-500">
               {deleteConfirmation?.type === 'bulk'
-                ? `This will permanently purge ${selectedIds.size} selected skill(s). This action is irreversible.`
-                : 'This action cannot be undone. This will permanently delete the skill and all associated questions from our high-availability clusters.'}
+                ? `This will permanently delete ${selectedIds.size} selected skill(s) and their associated questions.`
+                : 'This action cannot be undone. This will permanently delete the skill and all associated questions.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-8 gap-3">
-            <AlertDialogCancel className="h-12 px-8 rounded-2xl font-black text-2xs uppercase tracking-widest text-gray-400 hover:bg-gray-100 italic transition-all border-none">
-              Abort
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="h-9 px-4 rounded text-sm font-medium">
+              Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmExecution}
-              className="h-12 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-red-600/20 transition-all hover:-translate-y-0.5"
+              onClick={confirmDelete}
+              disabled={bulkDelete.isPending || deleteSkill.isPending}
+              className="h-9 px-5 rounded bg-red-600 hover:bg-red-700 text-white font-semibold text-sm shadow-sm"
             >
-              Confirm Execution
+              {(bulkDelete.isPending || deleteSkill.isPending) && (
+                <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+              )}
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
