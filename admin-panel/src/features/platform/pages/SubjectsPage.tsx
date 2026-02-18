@@ -71,6 +71,17 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
           {subject.slug}
         </code>
       </TableCell>
+      <TableCell className="px-2 py-2 text-center hidden sm:table-cell">
+        {subject.icon_url ? (
+          <div className="w-6 h-6 rounded bg-white border border-gray-300 flex items-center justify-center mx-auto">
+            <img src={subject.icon_url} alt="" className="w-4 h-4 object-contain" />
+          </div>
+        ) : (
+          <div className="w-6 h-6 rounded bg-gray-100 border border-gray-300 flex items-center justify-center mx-auto text-xs text-gray-400">
+            -
+          </div>
+        )}
+      </TableCell>
       <TableCell className="px-3 py-2">
         <span
           className={cn(
@@ -342,6 +353,9 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
+                <TableHead className="font-semibold text-xs text-gray-600 px-2 py-2 h-auto text-center hidden sm:table-cell">
+                  Icon
+                </TableHead>
                 <TableHead className="font-semibold text-xs text-gray-600 px-3 py-2 h-auto">
                   <SortableHeader
                     label="Status"
@@ -375,6 +389,9 @@ export function SubjectsPage() {
                     <TableCell className="px-3 py-2 hidden md:table-cell">
                       <div className="h-3.5 bg-gray-200 rounded w-16 animate-pulse"></div>
                     </TableCell>
+                    <TableCell className="px-2 py-2 hidden sm:table-cell">
+                      <div className="h-6 w-6 bg-gray-200 rounded mx-auto animate-pulse"></div>
+                    </TableCell>
                     <TableCell className="px-3 py-2">
                       <div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
                     </TableCell>
@@ -391,7 +408,7 @@ export function SubjectsPage() {
                 ))
               ) : subjects?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-20">
+                  <TableCell colSpan={6} className="py-20">
                     <EmptyState
                       icon={Boxes}
                       title="No subjects yet"
