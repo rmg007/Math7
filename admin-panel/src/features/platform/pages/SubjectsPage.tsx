@@ -55,58 +55,67 @@ interface SubjectRowProps {
   onDelete: (id: string) => void;
 }
 
+const statusConfig = {
+  live: { label: 'Live', dotColor: 'bg-emerald-500', textColor: 'text-emerald-700', bgColor: 'bg-emerald-50' },
+  published: { label: 'Published', dotColor: 'bg-blue-500', textColor: 'text-blue-700', bgColor: 'bg-blue-50' },
+  draft: { label: 'Draft', dotColor: 'bg-gray-400', textColor: 'text-gray-600', bgColor: 'bg-gray-100' },
+} as const;
+
 const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
+  const status = statusConfig[subject.status as keyof typeof statusConfig] ?? statusConfig.draft;
+
   return (
     <TableRow
       key={subject.subject_id}
-      className="border-b border-gray-200 hover:bg-teal-50 last:border-0"
+      className="border-b border-gray-100 hover:bg-teal-50/60 even:bg-gray-50/50"
     >
       <TableCell className="px-4 py-2">
-        <span className="font-medium text-gray-900 text-sm">
-          {subject.title}
-        </span>
+        <div className="flex items-center gap-2">
+          {subject.color_hex && (
+            <span
+              className="w-2.5 h-2.5 rounded-full shrink-0 ring-1 ring-black/10"
+              style={{ backgroundColor: subject.color_hex }}
+              title={subject.color_hex}
+            />
+          )}
+          <span className="font-medium text-gray-900 text-sm truncate">
+            {subject.title}
+          </span>
+        </div>
       </TableCell>
       <TableCell className="px-3 py-2 hidden md:table-cell">
-        <code className="px-1.5 py-0.5 rounded-sm bg-gray-100 text-teal-600 font-mono text-xs font-medium border border-gray-300">
+        <code className="text-[11px] text-gray-500 font-mono">
           {subject.slug}
         </code>
       </TableCell>
       <TableCell className="px-2 py-2 text-center hidden sm:table-cell">
         {subject.icon_url ? (
-          <div className="w-6 h-6 rounded bg-white border border-gray-300 flex items-center justify-center mx-auto">
+          <div className="w-6 h-6 rounded bg-white border border-gray-200 flex items-center justify-center mx-auto">
             <img src={subject.icon_url} alt="" className="w-4 h-4 object-contain" />
           </div>
         ) : (
-          <div className="w-6 h-6 rounded bg-gray-100 border border-gray-300 flex items-center justify-center mx-auto text-xs text-gray-400">
-            -
-          </div>
+          <span className="text-gray-300 text-xs">&mdash;</span>
         )}
       </TableCell>
       <TableCell className="px-3 py-2">
-        <span
-          className={cn(
-            'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
-            subject.status === 'live' && 'bg-emerald-100 text-emerald-700',
-            subject.status === 'draft' && 'bg-amber-100 text-amber-700',
-            subject.status === 'published' && 'bg-blue-100 text-blue-700'
-          )}
-        >
-          {subject.status === 'live' ? 'Live' : subject.status === 'published' ? 'Published' : 'Draft'}
+        <span className={cn('inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium', status.bgColor, status.textColor)}>
+          <span className={cn('w-1.5 h-1.5 rounded-full', status.dotColor)} />
+          {status.label}
         </span>
       </TableCell>
       <TableCell className="px-3 py-2 hidden lg:table-cell">
-        <span className="text-xs text-gray-600 font-medium">
+        <span className="text-xs text-gray-500 tabular-nums">
           {subject.display_order ?? 0}
         </span>
       </TableCell>
       <TableCell className="px-4 py-2 text-right">
-        <div className="flex justify-end gap-1">
+        <div className="flex justify-end gap-0.5">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => onEdit(subject)}
             title="Edit subject"
-            className="h-8 w-8 rounded text-teal-600 hover:bg-teal-100 focus:ring-2 focus:ring-teal-600 focus:ring-offset-1"
+            className="h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50 focus:ring-2 focus:ring-teal-600 focus:ring-offset-1"
           >
             <Pencil className="w-3.5 h-3.5" />
           </Button>
@@ -115,7 +124,7 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
             size="icon"
             onClick={() => onDelete(subject.subject_id)}
             title="Delete subject"
-            className="h-8 w-8 rounded text-red-600 hover:bg-red-100 focus:ring-2 focus:ring-red-600 focus:ring-offset-1"
+            className="h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 focus:ring-2 focus:ring-red-600 focus:ring-offset-1"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </Button>
@@ -325,17 +334,19 @@ export function SubjectsPage() {
           )}
         </div>
 
-        <div className="text-xs font-medium text-gray-600 whitespace-nowrap">
-          {filteredSubjects.length} results
-        </div>
+        {searchQuery && (
+          <div className="text-[11px] text-gray-500 whitespace-nowrap">
+            {filteredSubjects.length} match{filteredSubjects.length !== 1 ? 'es' : ''}
+          </div>
+        )}
       </div>
 
-      <div className="bg-white rounded border border-gray-200 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
           <Table className="w-full">
             <TableHeader>
-              <TableRow className="bg-gray-50 border-b border-gray-200">
-                <TableHead className="font-semibold text-xs text-gray-600 px-4 py-2 h-auto">
+              <TableRow className="bg-gray-50/80 border-b border-gray-200">
+                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-gray-500 px-4 py-2.5 h-auto">
                   <SortableHeader
                     label="Title"
                     column="title"
@@ -344,7 +355,7 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="font-semibold text-xs text-gray-600 px-3 py-2 h-auto hidden md:table-cell">
+                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-gray-500 px-3 py-2.5 h-auto hidden md:table-cell">
                   <SortableHeader
                     label="Slug"
                     column="slug"
@@ -353,10 +364,10 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="font-semibold text-xs text-gray-600 px-2 py-2 h-auto text-center hidden sm:table-cell">
+                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-gray-500 px-2 py-2.5 h-auto text-center hidden sm:table-cell">
                   Icon
                 </TableHead>
-                <TableHead className="font-semibold text-xs text-gray-600 px-3 py-2 h-auto">
+                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-gray-500 px-3 py-2.5 h-auto">
                   <SortableHeader
                     label="Status"
                     column="status"
@@ -365,7 +376,7 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="font-semibold text-xs text-gray-600 px-3 py-2 h-auto hidden lg:table-cell">
+                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-gray-500 px-3 py-2.5 h-auto hidden lg:table-cell">
                   <SortableHeader
                     label="Order"
                     column="display_order"
@@ -374,7 +385,7 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="text-right px-4 py-2 h-auto font-semibold text-xs text-gray-600">
+                <TableHead className="text-right px-4 py-2.5 h-auto font-medium text-[11px] uppercase tracking-wider text-gray-500">
                   Actions
                 </TableHead>
               </TableRow>
@@ -382,9 +393,12 @@ export function SubjectsPage() {
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 8 }).map((_, i) => (
-                  <TableRow key={i} className="border-b border-gray-200 hover:bg-teal-50">
+                  <TableRow key={i} className="border-b border-gray-100 even:bg-gray-50/50">
                     <TableCell className="px-4 py-2">
-                      <div className="h-3.5 bg-gray-200 rounded w-24 animate-pulse"></div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2.5 w-2.5 bg-gray-200 rounded-full animate-pulse"></div>
+                        <div className="h-3.5 bg-gray-200 rounded w-24 animate-pulse"></div>
+                      </div>
                     </TableCell>
                     <TableCell className="px-3 py-2 hidden md:table-cell">
                       <div className="h-3.5 bg-gray-200 rounded w-16 animate-pulse"></div>
@@ -393,15 +407,15 @@ export function SubjectsPage() {
                       <div className="h-6 w-6 bg-gray-200 rounded mx-auto animate-pulse"></div>
                     </TableCell>
                     <TableCell className="px-3 py-2">
-                      <div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 rounded-full w-14 animate-pulse"></div>
                     </TableCell>
                     <TableCell className="px-3 py-2 hidden lg:table-cell">
                       <div className="h-3.5 bg-gray-200 rounded w-6 animate-pulse"></div>
                     </TableCell>
                     <TableCell className="px-4 py-2">
-                      <div className="flex gap-1 justify-end">
-                        <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                        <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="flex gap-0.5 justify-end">
+                        <div className="h-7 w-7 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-7 w-7 bg-gray-200 rounded animate-pulse"></div>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -437,6 +451,20 @@ export function SubjectsPage() {
             </TableBody>
           </Table>
         </div>
+
+        {/* Table footer */}
+        {!isLoading && subjects && subjects.length > 0 && (
+          <div className="border-t border-gray-200 bg-gray-50/80 px-4 py-2 flex items-center justify-between">
+            <span className="text-[11px] text-gray-500">
+              {filteredSubjects.length === subjects.length
+                ? `${subjects.length} subject${subjects.length !== 1 ? 's' : ''}`
+                : `${filteredSubjects.length} of ${subjects.length} subject${subjects.length !== 1 ? 's' : ''}`}
+            </span>
+            <span className="text-[11px] text-gray-400">
+              Sorted by {sortBy.replace('_', ' ')} ({sortOrder})
+            </span>
+          </div>
+        )}
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
