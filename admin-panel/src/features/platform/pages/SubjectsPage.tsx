@@ -109,7 +109,7 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
         </span>
       </TableCell>
       <TableCell className="px-4 py-1.5 text-right border-l border-gray-100">
-        <div className="flex justify-end gap-0.5 opacity-0 group-hover/row:opacity-100">
+        <div className="flex justify-end gap-0.5">
           <Button
             variant="ghost"
             size="icon"
