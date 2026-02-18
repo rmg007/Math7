@@ -59,59 +59,43 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
   return (
     <TableRow
       key={subject.subject_id}
-      className="group hover:bg-indigo-50/20 transition-colors border-b border-gray-100/50 last:border-0"
+      className="border-b border-gray-200 hover:bg-neutral-100 transition-colors last:border-0"
     >
-      <TableCell className="px-6 py-4">
-        <div className="flex items-center gap-4">
-          <span className="font-bold text-gray-900 tracking-tight text-base leading-none">
-            {subject.title}
-          </span>
-        </div>
+      <TableCell className="px-6 py-3">
+        <span className="font-semibold text-gray-900 text-base">
+          {subject.title}
+        </span>
       </TableCell>
-      <TableCell className="py-4">
-        <code className="px-3 py-1.5 rounded-lg bg-gray-100/30 text-indigo-600 font-mono text-2xs font-semibold tracking-tight border border-gray-200/50">
+      <TableCell className="px-4 py-3">
+        <code className="px-2 py-1 rounded-md bg-gray-100 text-teal-600 font-mono text-xs font-medium border border-gray-300">
           {subject.slug}
         </code>
       </TableCell>
-      <TableCell className="py-4 text-center">
-        {subject.icon_url ? (
-          <div className="w-10 h-10 rounded-lg bg-white border border-gray-200/50 flex items-center justify-center mx-auto shadow-sm">
-            <img src={subject.icon_url} alt="" className="w-6 h-6 object-contain" />
-          </div>
-        ) : (
-          <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-200/50 flex items-center justify-center mx-auto shadow-sm text-2xs font-semibold text-gray-400">
-            NONE
-          </div>
-        )}
+      <TableCell className="px-4 py-3">
+        <span
+          className={cn(
+            'inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium',
+            subject.status === 'live' && 'bg-emerald-100 text-emerald-700',
+            subject.status === 'draft' && 'bg-amber-100 text-amber-700',
+            subject.status === 'published' && 'bg-blue-100 text-blue-700'
+          )}
+        >
+          {subject.status === 'live' ? 'Live' : subject.status === 'published' ? 'Published' : 'Draft'}
+        </span>
       </TableCell>
-      <TableCell className="py-4">
-        <div className="flex items-center gap-2">
-          <span className="w-8 h-8 rounded-md bg-gray-50 border border-gray-200/50 flex items-center justify-center text-xs font-semibold text-gray-600">
-            {subject.display_order ?? 0}
-          </span>
-        </div>
+      <TableCell className="px-4 py-3">
+        <span className="text-sm text-gray-600">
+          {subject.display_order ?? 0}
+        </span>
       </TableCell>
-      <TableCell className="py-4">
-        <div className="flex items-center">
-          <span
-            className={cn(
-              'px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest border',
-              subject.status === 'live' && 'bg-emerald-50 text-emerald-600 border-emerald-100',
-              subject.status === 'draft' && 'bg-gray-50 text-gray-500 border-gray-200',
-              subject.status === 'published' && 'bg-blue-50 text-blue-600 border-blue-100'
-            )}
-          >
-            {subject.status}
-          </span>
-        </div>
-      </TableCell>
-      <TableCell className="px-6 py-4 text-right">
+      <TableCell className="px-6 py-3 text-right">
         <div className="flex justify-end gap-2">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => onEdit(subject)}
-            className="h-9 w-9 rounded-lg text-indigo-500 hover:bg-indigo-50 hover:text-indigo-600"
+            title="Edit subject"
+            className="h-10 w-10 rounded-lg text-teal-600 hover:bg-teal-50 hover:text-teal-700 focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
           >
             <Pencil className="w-4 h-4" />
           </Button>
@@ -119,7 +103,8 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
             variant="ghost"
             size="icon"
             onClick={() => onDelete(subject.subject_id)}
-            className="h-9 w-9 rounded-lg text-rose-500 hover:bg-rose-50 hover:text-rose-600"
+            title="Delete subject"
+            className="h-10 w-10 rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700 focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
           >
             <Trash2 className="w-4 h-4" />
           </Button>
@@ -345,51 +330,44 @@ export function SubjectsPage() {
         <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
           <Table className="w-full">
             <TableHeader>
-              <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b border-gray-200/50">
-                <TableHead className="font-semibold text-2xs uppercase tracking-widest text-gray-400 px-6 h-12">
+              <TableRow className="bg-white border-b border-gray-200">
+                <TableHead className="font-semibold text-sm text-gray-700 px-6 py-3 h-auto">
                   <SortableHeader
                     label="Title"
                     column="title"
                     currentSortBy={sortBy}
                     currentSortOrder={sortOrder}
                     onSort={handleSort}
-                    className="text-2xs"
                   />
                 </TableHead>
-                <TableHead className="font-semibold text-2xs uppercase tracking-widest text-gray-400 h-12">
+                <TableHead className="font-semibold text-sm text-gray-700 px-4 py-3 h-auto">
                   <SortableHeader
                     label="Slug"
                     column="slug"
                     currentSortBy={sortBy}
                     currentSortOrder={sortOrder}
                     onSort={handleSort}
-                    className="text-2xs"
                   />
                 </TableHead>
-                <TableHead className="font-semibold text-2xs uppercase tracking-widest text-gray-400 h-12 text-center">
-                  Icon
-                </TableHead>
-                <TableHead className="font-semibold text-2xs uppercase tracking-widest text-gray-400 h-12">
-                  <SortableHeader
-                    label="Order"
-                    column="display_order"
-                    currentSortBy={sortBy}
-                    currentSortOrder={sortOrder}
-                    onSort={handleSort}
-                    className="text-2xs"
-                  />
-                </TableHead>
-                <TableHead className="font-semibold text-2xs uppercase tracking-widest text-gray-400 h-12">
+                <TableHead className="font-semibold text-sm text-gray-700 px-4 py-3 h-auto">
                   <SortableHeader
                     label="Status"
                     column="status"
                     currentSortBy={sortBy}
                     currentSortOrder={sortOrder}
                     onSort={handleSort}
-                    className="text-2xs"
                   />
                 </TableHead>
-                <TableHead className="text-right px-6 h-12 font-semibold text-2xs uppercase tracking-widest text-gray-400">
+                <TableHead className="font-semibold text-sm text-gray-700 px-4 py-3 h-auto">
+                  <SortableHeader
+                    label="Order"
+                    column="display_order"
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                  />
+                </TableHead>
+                <TableHead className="text-right px-6 py-3 h-auto font-semibold text-sm text-gray-700">
                   Actions
                 </TableHead>
               </TableRow>
