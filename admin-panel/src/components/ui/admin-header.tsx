@@ -21,7 +21,7 @@ export function AdminHeader({
   backTo
 }: AdminHeaderProps) {
   return (
-    <div className={cn("space-y-4 mb-8 w-full overflow-hidden", className)}>
+    <div className={cn("space-y-4 mb-8 w-full", className)}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           {backTo && (
@@ -44,7 +44,7 @@ export function AdminHeader({
           </div>
         </div>
         {actions && (
-          <div className="flex items-center gap-2 flex-wrap overflow-hidden">
+          <div className="flex items-center gap-2 flex-wrap">
             {actions}
           </div>
         )}
