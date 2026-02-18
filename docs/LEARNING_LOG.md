@@ -170,6 +170,39 @@ export function useDomain(domainId: string) {
 - **Scope**: Audit and fix cross-app duplication patterns across curriculum hooks
 - **Outcome**: Fixed 2 bugs, added 6 regression tests, documented prevention rule
 
+## 2026-02-18: Regression Prevention for Single-Entity Hooks
+
+### Problem
+
+Infinite loading spinners or "Not Found" errors occurred when navigating to edit pages (Domains, Skills, Questions). The root cause was that single-entity hooks (`useDomain`, `useSkill`, `useQuestion`) depended on the global application context (`useApp`). Specifically:
+
+1. The `queryKey` included `currentApp?.app_id`.
+2. The `enabled` gate required `currentApp?.app_id` to be present.
+3. When switching from one application context to another (e.g., editing a domain belonging to App B while App A was active), a race condition occurred where the hook was disabled or the query key changed prematurely, leading to incorrect state.
+
+### Solution
+
+Decoupled single-entity hooks from the global application context.
+
+1. **RLS is Authoritative**: Since Row Level Security (RLS) is correctly implemented on the Supabase side, client-side filtering by `app_id` is redundant for fetching specific IDs.
+2. **Entity-ID as Only Key**: The hooks now only depend on the entity ID (e.g., `domain_id`) for their query key and enabled gate.
+3. **Context Switching Removed**: The redundant context-switching logic in edit pages (which tried to force-switch the app context to match the domain) was removed, as the hooks are now independent.
+
+### Regression Prevention
+
+A new regression test suite was added in `admin-panel/src/features/curriculum/hooks/__tests__/regression.test.tsx`. These tests mock the application context as `null` and verify that:
+
+- `useDomain(id)` still fetches successfully.
+- `useSkill(id)` still fetches successfully.
+- `useQuestion(id)` still fetches successfully.
+
+**Rule for Future Hooks**: Single-entity fetch hooks (GET by primary key) must NEVER depend on `useApp()`. Multiple-entity list hooks (GET several items) SHOULD continue to depend on `useApp()` for tenant scoping in the UI.
+
+### Deployment & Git Notes
+
+- **False Positive deletions**: The "deleted files" reported during deployment were likely non-essential artifacts (e.g., `admin-panel/coverage` or build outputs) that are cleaned up during the deployment orchestration. No source files were deleted.
+- **Environment Gating**: The `orchestrator.ps1` script may fail in nested PowerShell environments due to profile alias conflicts (`npm.exe` vs `npm`). Running build commands directly is recommended if the orchestrator hangs at the build phase.
+
 ### Bug Pattern: Missing `isSuperAdmin` Conditional on Source Fetch
 
 **Root Cause**: Duplicate hooks hardcode `app_id` filter on source fetch, blocking Super Admin cross-app access.
