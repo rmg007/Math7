@@ -56,9 +56,9 @@ interface SubjectRowProps {
 }
 
 const statusConfig = {
-  live: { label: 'Live', dotColor: 'bg-emerald-500', textColor: 'text-emerald-700', bgColor: 'bg-emerald-50' },
-  published: { label: 'Published', dotColor: 'bg-blue-500', textColor: 'text-blue-700', bgColor: 'bg-blue-50' },
-  draft: { label: 'Draft', dotColor: 'bg-gray-400', textColor: 'text-gray-600', bgColor: 'bg-gray-100' },
+  live: { label: 'Live', dotColor: 'bg-emerald-500', textColor: 'text-emerald-800', bgColor: 'bg-emerald-100' },
+  published: { label: 'Published', dotColor: 'bg-indigo-500', textColor: 'text-indigo-700', bgColor: 'bg-indigo-100' },
+  draft: { label: 'Draft', dotColor: 'bg-gray-400', textColor: 'text-gray-700', bgColor: 'bg-gray-100' },
 } as const;
 
 const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
