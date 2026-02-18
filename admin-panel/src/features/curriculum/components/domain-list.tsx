@@ -15,6 +15,14 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
@@ -109,89 +117,91 @@ function SortableRow({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    boxShadow: isDragging ? '0 4px 12px rgba(0, 0, 0, 0.15)' : undefined,
-    backgroundColor: isDragging ? '#f9fafb' : undefined,
     position: 'relative' as const,
     zIndex: isDragging ? 10 : undefined,
   };
 
   return (
-    <tr ref={setNodeRef} style={style} className="hover:bg-gray-50 transition-colors">
-      <td className="px-2 py-4 w-10">
+    <TableRow
+      ref={setNodeRef}
+      style={style}
+      className={`even:bg-gray-50/40 ${isDragging ? 'bg-gray-50 shadow-md' : ''}`}
+    >
+      <TableCell className="w-8 px-2">
         {!isDragDisabled ? (
           <button
             {...attributes}
             {...listeners}
-            className="p-2 text-gray-500 hover:text-gray-700 cursor-grab active:cursor-grabbing touch-none"
+            className="p-1 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing touch-none"
             aria-label="Drag to reorder"
           >
-            <GripVertical className="h-5 w-5" />
+            <GripVertical className="h-4 w-4" />
           </button>
         ) : (
-          <div className="p-2 text-gray-200">
-            <GripVertical className="h-5 w-5" />
+          <div className="p-1 text-gray-200">
+            <GripVertical className="h-4 w-4" />
           </div>
         )}
-      </td>
-      <td className="px-4 py-3">
+      </TableCell>
+      <TableCell className="w-8 px-2">
         <button
           onClick={() => onSelect(domain.domain_id)}
-          className="text-gray-400 hover:text-gray-600"
-          title={isSelected ? 'Deselect domain' : 'Select domain'}
+          className="text-gray-300 hover:text-gray-500"
+          title={isSelected ? 'Deselect' : 'Select'}
         >
           {isSelected ? (
-            <CheckSquare className="h-5 w-5 text-purple-600" />
+            <CheckSquare className="h-4 w-4 text-teal-600" />
           ) : (
-            <Square className="h-5 w-5" />
+            <Square className="h-4 w-4" />
           )}
         </button>
-      </td>
-      <td className="px-6 py-3">
-        <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-blue-50 text-blue-700 font-bold text-sm">
+      </TableCell>
+      <TableCell className="text-center w-12">
+        <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-gray-600 font-semibold text-xs tabular-nums">
           {domain.sort_order ?? 0}
         </span>
-      </td>
-      <td className="px-6 py-3">
+      </TableCell>
+      <TableCell className="px-4">
         <div className="flex flex-col">
-          <span className="font-bold text-gray-900 text-sm tracking-tight">{domain.title}</span>
+          <span className="font-medium text-gray-900 text-xs">{domain.title}</span>
           {domain.apps?.display_name && (
-            <span className="text-[10px] text-indigo-700 font-black uppercase tracking-widest mt-0.5">
-              App: {domain.apps.display_name}
+            <span className="text-[10px] text-gray-400 mt-0.5">
+              {domain.apps.display_name}
             </span>
           )}
         </div>
-      </td>
-      <td className="px-6 py-3">
-        <span className="text-sm text-gray-900 whitespace-nowrap">
+      </TableCell>
+      <TableCell className="hidden lg:table-cell">
+        <span className="text-xs text-gray-500">
           {new Date(domain.updated_at).toLocaleDateString()}{' '}
-          <span className="text-gray-500">
+          <span className="text-gray-400">
             {new Date(domain.updated_at).toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',
             })}
           </span>
         </span>
-      </td>
-      <td className="px-6 py-3 whitespace-nowrap">{renderStatusBadge(domain.status || 'draft')}</td>
-      <td className="px-4 py-3 text-right">
-        <div className="flex items-center justify-end gap-2">
+      </TableCell>
+      <TableCell>{renderStatusBadge(domain.status || 'draft')}</TableCell>
+      <TableCell className="px-4 text-right border-l border-gray-100">
+        <div className="flex items-center justify-end gap-0.5">
           <Link
             to={`/domains/${domain.domain_id}/edit`}
-            className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-            title="Edit Domain"
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+            title="Edit"
           >
-            <Pencil className="h-4 w-4" />
+            <Pencil className="h-3.5 w-3.5" />
           </Link>
           <button
             onClick={() => onDelete(domain.domain_id)}
-            className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
-            title="Delete Domain"
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
+            title="Delete"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -212,7 +222,6 @@ function SortableCard({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    boxShadow: isDragging ? '0 8px 16px rgba(0, 0, 0, 0.15)' : undefined,
     position: 'relative' as const,
     zIndex: isDragging ? 10 : undefined,
   };
@@ -221,67 +230,68 @@ function SortableCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-white rounded-xl border ${isSelected ? 'border-purple-300 bg-purple-50' : 'border-gray-200'} p-4 space-y-3 transition-colors`}
+      className={`bg-white rounded-lg border ${isSelected ? 'border-teal-300 bg-teal-50/30' : 'border-gray-200'} p-3 space-y-2`}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2">
         {!isDragDisabled ? (
           <button
             {...attributes}
             {...listeners}
-            className="p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
+            className="p-1 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing touch-none shrink-0"
             aria-label="Drag to reorder"
           >
-            <GripVertical className="h-5 w-5" />
+            <GripVertical className="h-4 w-4" />
           </button>
         ) : (
-          <div className="p-2 text-gray-200 flex-shrink-0">
-            <GripVertical className="h-5 w-5" />
+          <div className="p-1 text-gray-200 shrink-0">
+            <GripVertical className="h-4 w-4" />
           </div>
         )}
         <button
           onClick={() => onSelect(domain.domain_id)}
-          className="p-2 text-gray-400 hover:text-gray-600 flex-shrink-0"
-          title={isSelected ? 'Deselect domain' : 'Select domain'}
+          className="p-1 text-gray-300 hover:text-gray-500 shrink-0"
+          title={isSelected ? 'Deselect' : 'Select'}
         >
           {isSelected ? (
-            <CheckSquare className="h-5 w-5 text-purple-600" />
+            <CheckSquare className="h-4 w-4 text-teal-600" />
           ) : (
-            <Square className="h-5 w-5" />
+            <Square className="h-4 w-4" />
           )}
         </button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-purple-100 text-purple-700 font-semibold text-xs flex-shrink-0">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-gray-600 font-semibold text-xs shrink-0">
               {domain.sort_order ?? 0}
             </span>
             <div className="flex flex-col min-w-0">
-              <h3 className="font-medium text-gray-900 truncate">{domain.title}</h3>
+              <h3 className="font-medium text-gray-900 text-xs truncate">{domain.title}</h3>
               {domain.apps?.display_name && (
-                <span className="text-[10px] text-indigo-500 font-black uppercase tracking-widest leading-none mt-1">
+                <span className="text-[10px] text-gray-400 leading-none mt-0.5">
                   {domain.apps.display_name}
                 </span>
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <span>Modified: {new Date(domain.updated_at).toLocaleDateString()}</span>
+          <div className="text-[10px] text-gray-400">
+            Modified: {new Date(domain.updated_at).toLocaleDateString()}
           </div>
         </div>
-        <div className="flex-shrink-0">{renderStatusBadge(domain.status || 'draft')}</div>
+        <div className="shrink-0">{renderStatusBadge(domain.status || 'draft')}</div>
       </div>
-      <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+      <div className="flex items-center justify-end gap-0.5 pt-2 border-t border-gray-100">
         <Link
           to={`/domains/${domain.domain_id}/edit`}
-          className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+          className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+          title="Edit"
         >
-          <Pencil className="h-4 w-4" />
+          <Pencil className="h-3.5 w-3.5" />
         </Link>
         <button
           onClick={() => onDelete(domain.domain_id)}
-          className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
-          aria-label="Delete domain"
+          className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
+          title="Delete"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>
     </div>
@@ -547,10 +557,18 @@ export function DomainList() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-r-transparent"></div>
-          <p className="mt-4 text-gray-500">Loading domains...</p>
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-200">
+            <div className="h-8 bg-gray-200 rounded w-48 animate-pulse" />
+          </div>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="px-4 py-3 border-b border-gray-100 flex items-center gap-4">
+              <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+              <div className="h-3.5 bg-gray-200 rounded w-32 animate-pulse" />
+              <div className="h-3.5 bg-gray-200 rounded w-20 animate-pulse ml-auto" />
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -558,32 +576,33 @@ export function DomainList() {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
-        <p className="text-red-600">Error loading domains. Please try again.</p>
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+          <p className="text-sm text-red-600">Error loading domains. Please try again.</p>
+        </div>
       </div>
     );
   }
 
   if (!currentApp) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center bg-white/50 backdrop-blur-md rounded-3xl p-12 border border-white/20 shadow-xl">
-          <p className="text-gray-500 font-bold uppercase tracking-widest italic">
-            Select an active app to access Domains
-          </p>
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-md p-12 text-center">
+          <p className="text-sm text-gray-500">Select an active app to access Domains.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
         title="Domains"
         description="Organize domain categories."
         icon={Book}
+        className="mb-2"
         actions={
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-2">
             <DataToolbar
               data={domains as unknown as Record<string, unknown>[]}
               columns={DOMAIN_COLUMNS}
@@ -592,34 +611,34 @@ export function DomainList() {
               importDisabled={false}
             />
             <Link to="/domains/new">
-              <Button className="h-12 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-widest shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-0.5 gap-3">
-                <Plus className="h-5 w-5" />
-                <span>Add Domain</span>
+              <Button className="h-9 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1">
+                <Plus className="w-3.5 h-3.5" /> New Domain
               </Button>
             </Link>
           </div>
         }
       />
 
+      {/* Bulk Actions Bar */}
       {selectedIds.size > 0 && (
-        <div className="sticky top-24 z-30 flex flex-col md:flex-row items-center justify-between p-3 bg-gray-900/90 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl animate-in slide-in-from-top-8 duration-500 max-w-2xl mx-auto w-full gap-4 md:gap-0">
-          <div className="flex items-center gap-4 pl-4">
-            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
-              <span className="text-white font-black text-xs">{selectedIds.size}</span>
-            </div>
-            <span className="text-white/70 font-black text-2xs uppercase tracking-widest">
-              Bulk Actions
+        <div className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md">
+          <div className="flex items-center gap-3 pl-2">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold">
+              {selectedIds.size}
+            </span>
+            <span className="text-xs text-teal-200 font-medium">
+              selected
             </span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-1.5">
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
               disabled={bulkUpdateStatus.isPending}
               onClick={handleMarkPublished}
-              className="h-10 px-4 rounded-xl text-white font-black text-[9px] uppercase tracking-widest hover:bg-white/10 gap-2"
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
-              {bulkUpdateStatus.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
               Publish
             </Button>
             <Button
@@ -627,9 +646,9 @@ export function DomainList() {
               size="sm"
               disabled={bulkUpdateStatus.isPending}
               onClick={handleMarkLive}
-              className="h-10 px-4 rounded-xl text-white font-black text-[9px] uppercase tracking-widest hover:bg-white/10 gap-2"
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
-              {bulkUpdateStatus.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
               Go Live
             </Button>
             <Button
@@ -637,12 +656,12 @@ export function DomainList() {
               size="sm"
               disabled={bulkUpdateStatus.isPending}
               onClick={handleMarkDraft}
-              className="h-10 px-4 rounded-xl text-white font-black text-[9px] uppercase tracking-widest hover:bg-white/10 gap-2"
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
-              {bulkUpdateStatus.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
               Draft
             </Button>
-            <div className="w-px h-6 bg-white/10 mx-2" />
+            <div className="w-px h-5 bg-teal-700 mx-1" />
             <Button
               variant="ghost"
               size="sm"
@@ -651,190 +670,148 @@ export function DomainList() {
                 setDeleteConfirmation({ type: 'bulk' });
                 fetchDeleteImpact(Array.from(selectedIds));
               }}
-              className="h-10 px-4 rounded-xl text-red-400 font-black text-[9px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all gap-2"
+              className="h-7 px-3 rounded text-xs text-red-400 hover:text-white hover:bg-red-600 gap-1"
             >
               {bulkDelete.isPending ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3 w-3" />
               )}
-              Purge
+              Delete
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedIds(new Set())}
+              className="h-7 px-2 rounded text-xs text-teal-300 hover:text-white hover:bg-white/10"
+            >
+              <X className="h-3 w-3" />
             </Button>
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded-[2.5rem] shadow-xl border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
         <CurriculumFilterBar
           searchPlaceholder="Search domains..."
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
+          count={totalCount}
+          countLabel={totalCount === 1 ? 'domain' : 'domains'}
           extraFilters={
             isSuperAdmin ? (
-              <div className="relative w-full md:w-56">
+              <div className="relative">
                 <select
                   aria-label="Filter by app"
                   value={appFilter}
                   onChange={(e) => setAppFilter(e.target.value)}
-                  className="w-full h-14 appearance-none pl-6 pr-12 text-sm font-black uppercase tracking-widest rounded-[1.25rem] border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer"
+                  className="h-8 appearance-none pl-3 pr-8 text-xs font-medium rounded border border-gray-200 bg-white text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none cursor-pointer"
                 >
-                  <option value="all">ALL APPS</option>
+                  <option value="all">All Apps</option>
                   {apps.map((app) => (
                     <option key={app.app_id} value={app.app_id}>
                       {app.display_name}
                     </option>
                   ))}
                 </select>
-                <Filter className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-indigo-500 pointer-events-none" />
+                <Filter className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
               </div>
             ) : undefined
           }
         />
 
-        <div className="p-0">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            {/* Desktop Table View */}
-            <div className="hidden md:block overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-100/50">
-                    <th className="w-12 px-6 py-4">
-                      <div className="flex items-center justify-center">
-                        <GripVertical className="h-4 w-4 text-gray-300" />
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-left text-2xs font-black text-gray-600 uppercase tracking-widest">
-                      <SortableHeader
-                        label="Domain"
-                        column="title"
-                        currentSortBy={sortBy}
-                        currentSortOrder={sortOrder}
-                        onSort={handleSort}
-                        className="text-2xs"
-                      />
-                    </th>
-                    <th className="px-6 py-4 text-left text-2xs font-black text-gray-600 uppercase tracking-widest">
-                      <SortableHeader
-                        label="Last Updated"
-                        column="updated_at"
-                        currentSortBy={sortBy}
-                        currentSortOrder={sortOrder}
-                        onSort={handleSort}
-                        className="text-2xs"
-                      />
-                    </th>
-                    <th className="px-6 py-4 text-left text-2xs font-black text-gray-600 uppercase tracking-widest">
-                      <SortableHeader
-                        label="Status"
-                        column="status"
-                        currentSortBy={sortBy}
-                        currentSortOrder={sortOrder}
-                        onSort={handleSort}
-                        className="text-2xs"
-                      />
-                    </th>
-                    <th className="px-6 py-4 text-right text-2xs font-black text-gray-600 uppercase tracking-widest">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <SortableContext items={domainIds} strategy={verticalListSortingStrategy}>
-                  <tbody className="divide-y divide-gray-50">
-                    {!domains.length ? (
-                      <tr>
-                        <td colSpan={7} className="px-6 py-12">
-                          <EmptyState
-                            icon={Book}
-                            title={hasActiveFilters ? 'No matches found' : 'No domains yet'}
-                            description={
-                              hasActiveFilters
-                                ? 'Try adjusting your search or filters to find what you are looking for.'
-                                : 'Get started by creating your first domain to organize your curriculum.'
-                            }
-                            action={
-                              hasActiveFilters ? (
-                                <button
-                                  onClick={clearFilters}
-                                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-                                >
-                                  <X className="h-4 w-4" />
-                                  Clear filters
-                                </button>
-                              ) : (
-                                <Link
-                                  to="/domains/new"
-                                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
-                                >
-                                  <Plus className="h-4 w-4" />
-                                  Create Domain
-                                </Link>
-                              )
-                            }
-                          />
-                        </td>
-                      </tr>
-                    ) : (
-                      domains.map((domain) => (
-                        <SortableRow
-                          key={domain.domain_id}
-                          domain={domain}
-                          isSelected={selectedIds.has(domain.domain_id)}
-                          onSelect={handleSelectOne}
-                          onDelete={handleDelete}
-                          renderStatusBadge={renderStatusBadge}
-                          isDragDisabled={isDragDisabled}
-                        />
-                      ))
-                    )}
-                  </tbody>
-                </SortableContext>
-              </table>
-            </div>
-
-            {/* Mobile Card View */}
-            <div className="md:hidden">
-              <SortableContext items={domainIds} strategy={verticalListSortingStrategy}>
-                {!domains.length ? (
-                  <div className="rounded-xl border border-gray-100 p-8">
-                    <EmptyState
-                      icon={Book}
-                      title={hasActiveFilters ? 'No matches found' : 'No domains yet'}
-                      description={
-                        hasActiveFilters
-                          ? 'Try adjusting your search or filters.'
-                          : 'Get started by creating your first domain.'
-                      }
-                      action={
-                        hasActiveFilters ? (
-                          <button
-                            onClick={clearFilters}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-                          >
-                            <X className="h-4 w-4" />
-                            Clear filters
-                          </button>
-                        ) : (
-                          <Link
-                            to="/domains/new"
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
-                          >
-                            <Plus className="h-4 w-4" />
-                            Create Domain
-                          </Link>
-                        )
-                      }
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow className="bg-gray-50">
+                  <TableHead className="w-8 px-2">
+                    <GripVertical className="h-3.5 w-3.5 text-gray-300" />
+                  </TableHead>
+                  <TableHead className="w-8 px-2" />
+                  <TableHead className="text-center w-12">
+                    <SortableHeader
+                      label="#"
+                      column="sort_order"
+                      currentSortBy={sortBy}
+                      currentSortOrder={sortOrder}
+                      onSort={handleSort}
                     />
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {domains.map((domain) => (
-                      <SortableCard
+                  </TableHead>
+                  <TableHead className="px-4">
+                    <SortableHeader
+                      label="Domain"
+                      column="title"
+                      currentSortBy={sortBy}
+                      currentSortOrder={sortOrder}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead className="hidden lg:table-cell">
+                    <SortableHeader
+                      label="Last Updated"
+                      column="updated_at"
+                      currentSortBy={sortBy}
+                      currentSortOrder={sortOrder}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <SortableHeader
+                      label="Status"
+                      column="status"
+                      currentSortBy={sortBy}
+                      currentSortOrder={sortOrder}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead className="text-right px-4 border-l border-gray-100">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <SortableContext items={domainIds} strategy={verticalListSortingStrategy}>
+                <TableBody>
+                  {!domains.length ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="py-20">
+                        <EmptyState
+                          icon={Book}
+                          title={hasActiveFilters ? 'No matches found' : 'No domains yet'}
+                          description={
+                            hasActiveFilters
+                              ? 'Try adjusting your search or filters.'
+                              : 'Create your first domain to organize your curriculum.'
+                          }
+                          action={
+                            hasActiveFilters ? (
+                              <Button
+                                onClick={clearFilters}
+                                className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                              >
+                                Clear Filters
+                              </Button>
+                            ) : (
+                              <Link to="/domains/new">
+                                <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
+                                  New Domain
+                                </Button>
+                              </Link>
+                            )
+                          }
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    domains.map((domain) => (
+                      <SortableRow
                         key={domain.domain_id}
                         domain={domain}
                         isSelected={selectedIds.has(domain.domain_id)}
@@ -843,72 +820,113 @@ export function DomainList() {
                         renderStatusBadge={renderStatusBadge}
                         isDragDisabled={isDragDisabled}
                       />
-                    ))}
-                  </div>
-                )}
+                    ))
+                  )}
+                </TableBody>
               </SortableContext>
-            </div>
-          </DndContext>
-        </div>
+            </Table>
+          </div>
 
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          totalCount={totalCount}
-          pageSize={pageSize}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
-        />
+          {/* Mobile Card View */}
+          <div className="md:hidden p-3">
+            <SortableContext items={domainIds} strategy={verticalListSortingStrategy}>
+              {!domains.length ? (
+                <div className="py-12">
+                  <EmptyState
+                    icon={Book}
+                    title={hasActiveFilters ? 'No matches found' : 'No domains yet'}
+                    description={
+                      hasActiveFilters
+                        ? 'Try adjusting your search or filters.'
+                        : 'Create your first domain to get started.'
+                    }
+                    action={
+                      hasActiveFilters ? (
+                        <Button
+                          onClick={clearFilters}
+                          className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                        >
+                          Clear Filters
+                        </Button>
+                      ) : (
+                        <Link to="/domains/new">
+                          <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
+                            New Domain
+                          </Button>
+                        </Link>
+                      )
+                    }
+                  />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {domains.map((domain) => (
+                    <SortableCard
+                      key={domain.domain_id}
+                      domain={domain}
+                      isSelected={selectedIds.has(domain.domain_id)}
+                      onSelect={handleSelectOne}
+                      onDelete={handleDelete}
+                      renderStatusBadge={renderStatusBadge}
+                      isDragDisabled={isDragDisabled}
+                    />
+                  ))}
+                </div>
+              )}
+            </SortableContext>
+          </div>
+        </DndContext>
+
+        {totalCount > 0 && (
+          <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          </div>
+        )}
       </div>
 
       <AlertDialog
         open={Boolean(deleteConfirmation)}
         onOpenChange={(open) => !open && setDeleteConfirmation(null)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-lg border border-gray-200 bg-white shadow-lg max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-base font-semibold text-gray-900">
+              Delete {deleteConfirmation?.type === 'bulk' ? `${selectedIds.size} domains` : 'domain'}?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-gray-500">
               {deleteConfirmation?.type === 'bulk'
                 ? `This will permanently delete ${selectedIds.size} selected domain(s).`
-                : 'This action cannot be undone. This will permanently delete the domain.'}
+                : 'This action cannot be undone.'}
               {deleteImpact.loading ? (
-                <span className="block mt-2 text-gray-500 text-sm">
+                <span className="block mt-2 text-gray-400 text-xs">
                   Checking for dependent items...
                 </span>
               ) : deleteImpact.skillCount > 0 || deleteImpact.questionCount > 0 ? (
-                <span className="block mt-2 font-semibold text-red-600 text-sm">
+                <span className="block mt-2 font-medium text-red-600 text-xs">
                   This will also delete {deleteImpact.skillCount} skill(s) and{' '}
-                  {deleteImpact.questionCount} question(s) linked to{' '}
-                  {deleteConfirmation?.type === 'bulk' ? 'these domains' : 'this domain'}
-                  {deleteConfirmation?.type === 'single' && deleteConfirmation.id && (
-                    <>
-                      {' '}
-                      in app{' '}
-                      <span className="text-gray-900">
-                        "
-                        {
-                          domains.find((d) => d.domain_id === deleteConfirmation.id)?.apps
-                            ?.display_name
-                        }
-                        "
-                      </span>
-                    </>
-                  )}
-                  .
+                  {deleteImpact.questionCount} question(s).
                 </span>
               ) : null}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="h-9 px-4 rounded text-sm font-medium">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               disabled={bulkDelete.isPending || deleteDomain.isPending}
-              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              className="h-9 px-5 rounded bg-red-600 hover:bg-red-700 text-white font-semibold text-sm shadow-sm"
             >
               {(bulkDelete.isPending || deleteDomain.isPending) && (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
               )}
               Delete
             </AlertDialogAction>

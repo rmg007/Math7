@@ -2,7 +2,6 @@ import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
-import { Skeleton } from '@/components/ui/skeleton';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge } from '@/components/ui/status-badge';
 import {
@@ -19,13 +18,12 @@ import type { Tables } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import {
-    Activity,
-    Fingerprint,
-    History,
+    CheckSquare,
     Key,
     Search,
     Shield,
     ShieldAlert,
+    Square,
     UserCheck,
     UserCog,
     Users,
@@ -38,7 +36,7 @@ import { Link } from 'react-router-dom';
 type AdminUser = Tables<'profiles'>;
 
 function formatDate(dateString: string): string {
-  if (!dateString) return 'UNKNOWN';
+  if (!dateString) return '—';
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -71,125 +69,109 @@ const UserRow = memo(
   }: UserRowProps) => {
     return (
       <TableRow
-        key={user.id}
         className={cn(
-          'group hover:bg-indigo-50/30 transition-colors border-b border-gray-50/50 last:border-0',
-          user.deleted_at && 'opacity-40 grayscale-[0.5]'
+          'even:bg-gray-50/40',
+          user.deleted_at && 'opacity-40'
         )}
       >
-        <TableCell className="pl-8 pr-2 py-5">
+        <TableCell className="px-3 w-8">
           <button
             onClick={() => onSelect(user.id)}
             disabled={user.id === currentUserId}
             className={cn(
-              'transition-colors',
               user.id === currentUserId
-                ? 'text-gray-100 cursor-not-allowed'
-                : 'text-gray-300 hover:text-indigo-600'
+                ? 'text-gray-200 cursor-not-allowed'
+                : 'text-gray-300 hover:text-gray-500'
             )}
           >
             {isSelected ? (
-              <UserCheck className="h-5 w-5 text-indigo-600" />
+              <CheckSquare className="h-4 w-4 text-teal-600" />
             ) : (
-              <Activity className="h-5 w-5 opacity-20" />
+              <Square className="h-4 w-4" />
             )}
           </button>
         </TableCell>
-        <TableCell className="py-5">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/10 relative overflow-hidden group-hover:scale-110 transition-transform">
-              <span className="text-indigo-700 font-black text-lg relative z-10">
+        <TableCell className="px-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-teal-50 border border-teal-100 shrink-0">
+              <span className="text-teal-700 font-semibold text-sm">
                 {(user.full_name || user.email)?.charAt(0).toUpperCase()}
               </span>
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent"></div>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="font-black text-gray-900 tracking-tight text-base italic">
-                  {user.full_name || 'ANONYMOUS UNIT'}
-                </p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="font-medium text-gray-900 text-xs truncate">
+                  {user.full_name || 'No name'}
+                </span>
                 {user.id === currentUserId && (
-                  <div className="px-1.5 py-0.5 rounded-md bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest">
-                    SELF
-                  </div>
+                  <span className="px-1.5 py-0.5 rounded bg-teal-600 text-white text-[9px] font-semibold uppercase">
+                    You
+                  </span>
                 )}
               </div>
-              <div className="flex items-center gap-1.5 text-gray-400 mt-0.5">
-                <Fingerprint className="w-3 h-3" />
-                <p className="text-xs font-bold font-mono tracking-tighter">{user.email}</p>
-              </div>
+              <p className="text-[11px] text-gray-400 font-mono truncate">{user.email}</p>
             </div>
           </div>
         </TableCell>
-        <TableCell className="px-6 py-5">
-          <div className="flex items-center gap-2">
-            {user.role === 'super_admin' ? (
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-purple-500/10 border border-purple-500/20 rounded-lg group/badge transition-all hover:bg-purple-500/20">
-                <ShieldAlert className="w-3.5 h-3.5 text-purple-600" />
-                <span className="text-2xs font-black text-purple-700 uppercase tracking-widest">
-                  Level 10 Super
-                </span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg group/badge transition-all hover:bg-emerald-500/20">
-                <Shield className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="text-2xs font-black text-emerald-700 uppercase tracking-widest">
-                  Level 1 Admin
-                </span>
-              </div>
-            )}
-          </div>
+        <TableCell>
+          {user.role === 'super_admin' ? (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 rounded-full text-[11px] font-medium text-purple-700">
+              <ShieldAlert className="w-3 h-3" />
+              Super Admin
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 rounded-full text-[11px] font-medium text-emerald-700">
+              <Shield className="w-3 h-3" />
+              Admin
+            </span>
+          )}
         </TableCell>
         {isSuperAdmin && (
-          <TableCell className="px-6 py-5">
-            <div className="flex items-center gap-2">
-              {user.app_id ? (
-                <span className="text-xs font-bold text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
-                  {apps.find((app) => app.app_id === user.app_id)?.display_name || user.app_id}
-                </span>
-              ) : (
-                <span className="text-xs font-bold text-gray-400 italic">No App</span>
-              )}
-            </div>
+          <TableCell className="hidden lg:table-cell">
+            {user.app_id ? (
+              <span className="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
+                {apps.find((app) => app.app_id === user.app_id)?.display_name || user.app_id}
+              </span>
+            ) : (
+              <span className="text-xs text-gray-400">—</span>
+            )}
           </TableCell>
         )}
-        <TableCell className="px-6 py-5">
-          <div className="flex items-center gap-2 text-gray-400">
-            <History className="w-3 h-3" />
-            <span className="text-xs font-black uppercase tracking-wider">
-              {formatDate(user.created_at)}
-            </span>
-          </div>
+        <TableCell className="hidden md:table-cell">
+          <span className="text-xs text-gray-500">
+            {formatDate(user.created_at)}
+          </span>
         </TableCell>
-        <TableCell className="px-6 py-5">
+        <TableCell>
           <StatusBadge
             status={user.deleted_at ? 'inactive' : 'active'}
-            label={user.deleted_at ? 'VOIDED' : 'OPERATIONAL'}
           />
         </TableCell>
-        <TableCell className="px-8 py-5 text-right">
+        <TableCell className="px-4 text-right border-l border-gray-100">
           {user.id !== currentUserId && (
-            <div>
+            <>
               {user.deleted_at ? (
                 <Button
                   variant="ghost"
+                  size="sm"
                   onClick={() => onReactivate(user.id)}
-                  className="h-10 px-4 rounded-xl font-black text-2xs uppercase tracking-widest text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 gap-2"
+                  className="h-7 px-2 rounded text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 gap-1"
                 >
-                  <UserCheck className="h-4 w-4" />
-                  REINSTATE
+                  <UserCheck className="h-3 w-3" />
+                  Reactivate
                 </Button>
               ) : (
                 <Button
                   variant="ghost"
+                  size="sm"
                   onClick={() => onDeactivate(user.id)}
-                  className="h-10 px-4 rounded-xl font-black text-2xs uppercase tracking-widest text-red-500 hover:bg-red-50 hover:text-red-700 gap-2"
+                  className="h-7 px-2 rounded text-xs text-red-500 hover:text-red-700 hover:bg-red-50 gap-1"
                 >
-                  <UserX className="h-4 w-4" />
-                  DEACTIVATE
+                  <UserX className="h-3 w-3" />
+                  Deactivate
                 </Button>
               )}
-            </div>
+            </>
           )}
         </TableCell>
       </TableRow>
@@ -234,7 +216,6 @@ export function UserManagementPage() {
     setError(null);
 
     try {
-      // Get current profile for role check
       const {
         data: { user: authUser },
       } = await supabase.auth.getUser();
@@ -254,7 +235,6 @@ export function UserManagementPage() {
         .from('profiles')
         .select('id, email, full_name, role, created_at, deleted_at, app_id');
 
-      // Super admins can see all users across all tenants
       if (userRole !== 'super_admin') {
         query = query.in('role', ['admin']);
       }
@@ -289,14 +269,12 @@ export function UserManagementPage() {
 
         if (error) throw error;
 
-        // Revoke all active sessions for the user
         const { error: revokeError } = await supabase.functions.invoke('revoke-user-sessions', {
           body: { userId },
         });
 
         if (revokeError) {
           console.error('Failed to revoke user sessions:', revokeError);
-          // Continue anyway - profile is deactivated
         }
 
         toast({
@@ -358,14 +336,14 @@ export function UserManagementPage() {
         if (errors.length > 0) throw new Error('One or more updates failed');
 
         toast({
-          title: `Batch Process Complete`,
-          description: `${ids.length} users ${status === 'deactivate' ? 'deactivated' : 'reactivated'}.`,
+          title: 'Batch Complete',
+          description: `${ids.length} user(s) ${status === 'deactivate' ? 'deactivated' : 'reactivated'}.`,
         });
         setSelectedIds(new Set());
         fetchUsers();
       } catch (err) {
         toast({
-          title: 'Batch Error',
+          title: 'Error',
           description: 'Operation failed for one or more users.',
           variant: 'destructive',
         });
@@ -409,7 +387,6 @@ export function UserManagementPage() {
   };
 
   const handleSelectAll = useCallback(() => {
-    // Only select users we can actually edit (not self)
     const selectable = paginatedUsers.filter((u) => u.id !== currentUserId);
     if (selectedIds.size === selectable.length && selectable.length > 0) {
       setSelectedIds(new Set());
@@ -431,246 +408,258 @@ export function UserManagementPage() {
     [currentUserId]
   );
 
+  const colSpan = isSuperAdmin ? 7 : 6;
+
   return (
-    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
+    <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
         title="Users"
         description="Manage system access."
         icon={UserCog}
+        className="mb-2"
         actions={
-          <div className="flex items-center gap-3 px-6 py-3 bg-indigo-500/10 border border-indigo-500/10 rounded-2xl">
-            <Users className="w-5 h-5 text-indigo-600" />
-            <div className="flex flex-col">
-              <span className="text-sm font-black text-indigo-700 tracking-tight">
-                {activeUsersCount} ACTIVE
-              </span>
-              <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">
-                Users
-              </span>
-            </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-teal-50 border border-teal-200 rounded-lg">
+            <Users className="w-3.5 h-3.5 text-teal-600" />
+            <span className="text-xs font-semibold text-teal-700">
+              {activeUsersCount} active
+            </span>
           </div>
         }
       />
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 backdrop-blur-xl rounded-2xl p-4 flex items-center gap-3 animate-in shake duration-500">
-          <ShieldAlert className="h-5 w-5 text-red-600" />
-          <p className="text-sm text-red-700 font-bold tracking-tight">{error}</p>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
+          <ShieldAlert className="h-4 w-4 text-red-500 shrink-0" />
+          <p className="text-xs text-red-700">{error}</p>
         </div>
       )}
 
-      {/* Search & Intelligence Bar */}
-      <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
-        <div className="relative flex-1 w-full group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none text-sm font-medium"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setCurrentPage(1);
-              }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
-              title="Clear search"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
-            <span className="text-2xs font-black text-indigo-500 uppercase tracking-widest">
-              Telemetry:
-            </span>
-            <span className="text-sm font-black text-indigo-700 tracking-tight">
-              {filteredUsers.length} RESULTS
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Bulk Actions Bar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center justify-between p-4 bg-indigo-600 rounded-[2rem] shadow-xl shadow-indigo-600/20 animate-in slide-in-from-top-4 duration-500">
-          <div className="flex items-center gap-4 pl-4">
-            <span className="text-white font-black text-xs uppercase tracking-extra-wide">
-              {selectedIds.size} SELECTED FOR BATCH MODIFICATION
+        <div className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md">
+          <div className="flex items-center gap-3 pl-2">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold">
+              {selectedIds.size}
             </span>
+            <span className="text-xs text-teal-200 font-medium">selected</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => handleBulkToggleStatus('reactivate')}
-              className="h-10 px-6 rounded-xl text-white font-black text-2xs uppercase tracking-widest hover:bg-white/10 transition-all gap-2"
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
-              <UserCheck className="h-4 w-4" />
-              Reinstate
+              <UserCheck className="h-3 w-3" />
+              Reactivate
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => handleBulkToggleStatus('deactivate')}
-              className="h-10 px-6 rounded-xl text-red-100 font-black text-2xs uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all gap-2"
+              className="h-7 px-3 rounded text-xs text-red-400 hover:text-white hover:bg-red-600 gap-1"
             >
-              <UserX className="h-4 w-4" />
+              <UserX className="h-3 w-3" />
               Deactivate
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSelectedIds(new Set())}
-              className="h-10 px-4 rounded-xl text-indigo-200 font-black text-2xs uppercase tracking-widest hover:bg-white/10"
+              className="h-7 px-2 rounded text-xs text-teal-300 hover:text-white hover:bg-white/10"
             >
-              Cancel
+              <X className="h-3 w-3" />
             </Button>
           </div>
         </div>
       )}
 
-      <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-sm border border-white/20 overflow-hidden hover:shadow-xl transition-all duration-500">
-        <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-black text-gray-900 tracking-tight">All Users</h3>
-            <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
-              System Users
-            </p>
+      <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
+        {/* Card Header: Search + Count */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full pl-9 pr-8 py-1.5 rounded border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none focus-visible:outline-none text-sm"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setCurrentPage(1);
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-200 text-gray-400 hover:text-gray-600 rounded"
+                title="Clear"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
           </div>
-          <Activity className="h-5 w-5 text-gray-200" />
+          <span className="text-[11px] text-gray-500 whitespace-nowrap">
+            {filteredUsers.length} {filteredUsers.length === 1 ? 'user' : 'users'}
+          </span>
         </div>
 
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b-2 border-gray-100/50">
-                <TableHead className="w-12 h-14 pl-8 pr-2">
-                  <button
-                    onClick={handleSelectAll}
-                    className="text-gray-300 hover:text-indigo-600 transition-colors"
-                  >
-                    {selectedIds.size > 0 &&
-                    selectedIds.size ===
-                      paginatedUsers.filter((u) => u.id !== currentUserId).length ? (
-                      <History className="h-5 w-5 text-indigo-600" />
-                    ) : (
-                      <Activity className="h-5 w-5" />
-                    )}
-                  </button>
-                </TableHead>
-                 <TableHead className="text-left py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
+        <Table className="w-full">
+          <TableHeader>
+            <TableRow className="bg-gray-50">
+              <TableHead className="px-3 w-8">
+                <button
+                  onClick={handleSelectAll}
+                  className="text-gray-300 hover:text-gray-500"
+                  title="Select all"
+                >
+                  {selectedIds.size > 0 &&
+                  selectedIds.size ===
+                    paginatedUsers.filter((u) => u.id !== currentUserId).length ? (
+                    <CheckSquare className="h-4 w-4 text-teal-600" />
+                  ) : (
+                    <Square className="h-4 w-4" />
+                  )}
+                </button>
+              </TableHead>
+              <TableHead className="px-4">
+                <SortableHeader
+                  label="User"
+                  column="full_name"
+                  currentSortBy={sortBy}
+                  currentSortOrder={sortOrder}
+                  onSort={handleSort}
+                />
+              </TableHead>
+              <TableHead>
+                <SortableHeader
+                  label="Role"
+                  column="role"
+                  currentSortBy={sortBy}
+                  currentSortOrder={sortOrder}
+                  onSort={handleSort}
+                />
+              </TableHead>
+              {isSuperAdmin && (
+                <TableHead className="hidden lg:table-cell">
                   <SortableHeader
-                    label="User"
-                    column="full_name"
+                    label="Application"
+                    column="app_id"
                     currentSortBy={sortBy}
                     currentSortOrder={sortOrder}
                     onSort={handleSort}
-                    className="text-2xs"
                   />
                 </TableHead>
-                <TableHead className="text-left px-6 py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
-                  <SortableHeader
-                    label="Role"
-                    column="role"
-                    currentSortBy={sortBy}
-                    currentSortOrder={sortOrder}
-                    onSort={handleSort}
-                    className="text-2xs"
-                  />
-                </TableHead>
-                {isSuperAdmin && (
-                  <TableHead className="text-left px-6 py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
-                    <SortableHeader
-                      label="Application"
-                      column="app_id"
-                      currentSortBy={sortBy}
-                      currentSortOrder={sortOrder}
-                      onSort={handleSort}
-                      className="text-2xs"
-                    />
-                  </TableHead>
-                )}
-                <TableHead className="text-left px-6 py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
-                  <SortableHeader
-                    label="Date Added"
-                    column="created_at"
-                    currentSortBy={sortBy}
-                    currentSortOrder={sortOrder}
-                    onSort={handleSort}
-                    className="text-2xs"
-                  />
-                </TableHead>
-                <TableHead className="text-left px-6 py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
-                  Status
-                </TableHead>
-                <TableHead className="text-right px-8 py-5 text-2xs font-black text-gray-400 uppercase tracking-widest h-14">
-                  Commands
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell colSpan={isSuperAdmin ? 7 : 6} className="px-8 py-6">
-                      <Skeleton className="h-10 w-full rounded-2xl" />
+              )}
+              <TableHead className="hidden md:table-cell">
+                <SortableHeader
+                  label="Date Added"
+                  column="created_at"
+                  currentSortBy={sortBy}
+                  currentSortOrder={sortOrder}
+                  onSort={handleSort}
+                />
+              </TableHead>
+              <TableHead>
+                Status
+              </TableHead>
+              <TableHead className="text-right px-4 border-l border-gray-100">
+                Actions
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i} className="even:bg-gray-50/40">
+                  <TableCell className="px-3">
+                    <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+                  </TableCell>
+                  <TableCell className="px-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse" />
+                      <div className="space-y-1">
+                        <div className="h-3.5 bg-gray-200 rounded w-24 animate-pulse" />
+                        <div className="h-3 bg-gray-200 rounded w-32 animate-pulse" />
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="h-4 bg-gray-200 rounded-full w-16 animate-pulse" />
+                  </TableCell>
+                  {isSuperAdmin && (
+                    <TableCell className="hidden lg:table-cell">
+                      <div className="h-3.5 bg-gray-200 rounded w-20 animate-pulse" />
                     </TableCell>
-                  </TableRow>
-                ))
-              ) : filteredUsers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={isSuperAdmin ? 7 : 6} className="py-20 p-0">
-                    <EmptyState
-                      icon={UserX}
-                      title="No Users Found"
-                      description={
-                        searchQuery
-                          ? `No users match your search for "${searchQuery}".`
-                          : 'No users found. Create an invitation code to onboard new users.'
-                      }
-                      action={
-                        !searchQuery ? (
-                          <Link to="/invitation-codes">
-                            <Button className="gap-2 rounded-2xl px-6 h-10 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-2xs uppercase tracking-widest shadow-lg shadow-indigo-600/20">
-                              <Key className="h-4 w-4" />
-                              Generate Invitation Code
-                            </Button>
-                          </Link>
-                        ) : undefined
-                      }
-                    />
+                  )}
+                  <TableCell className="hidden md:table-cell">
+                    <div className="h-3.5 bg-gray-200 rounded w-20 animate-pulse" />
+                  </TableCell>
+                  <TableCell>
+                    <div className="h-4 bg-gray-200 rounded-full w-14 animate-pulse" />
+                  </TableCell>
+                  <TableCell className="px-4">
+                    <div className="h-7 w-20 bg-gray-200 rounded animate-pulse ml-auto" />
                   </TableCell>
                 </TableRow>
-              ) : (
-                paginatedUsers.map((user) => (
-                  <UserRow
-                    key={user.id}
-                    user={user}
-                    currentUserId={currentUserId}
-                    onSelect={handleSelectOne}
-                    onDeactivate={handleDeactivate}
-                    onReactivate={handleReactivate}
-                    isSelected={selectedIds.has(user.id)}
-                    isSuperAdmin={isSuperAdmin}
-                    apps={apps}
+              ))
+            ) : filteredUsers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={colSpan} className="py-20">
+                  <EmptyState
+                    icon={UserX}
+                    title={searchQuery ? 'No matches found' : 'No users found'}
+                    description={
+                      searchQuery
+                        ? `No users match "${searchQuery}".`
+                        : 'Create an invitation code to onboard new users.'
+                    }
+                    action={
+                      !searchQuery ? (
+                        <Link to="/invitation-codes">
+                          <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm gap-1.5">
+                            <Key className="h-3.5 w-3.5" />
+                            Generate Invitation Code
+                          </Button>
+                        </Link>
+                      ) : (
+                        <Button
+                          onClick={() => {
+                            setSearchQuery('');
+                            setCurrentPage(1);
+                          }}
+                          className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                        >
+                          Clear Search
+                        </Button>
+                      )
+                    }
                   />
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedUsers.map((user) => (
+                <UserRow
+                  key={user.id}
+                  user={user}
+                  currentUserId={currentUserId}
+                  onSelect={handleSelectOne}
+                  onDeactivate={handleDeactivate}
+                  onReactivate={handleReactivate}
+                  isSelected={selectedIds.has(user.id)}
+                  isSuperAdmin={isSuperAdmin}
+                  apps={apps}
+                />
+              ))
+            )}
+          </TableBody>
+        </Table>
 
         {filteredUsers.length > 0 && (
-          <div className="px-8 py-6 bg-gray-50/30 border-t border-gray-100/50">
+          <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
             <Pagination
               currentPage={currentPage}
               totalPages={Math.ceil(filteredUsers.length / pageSize)}
@@ -687,10 +676,10 @@ export function UserManagementPage() {
       </div>
 
       {users.some((u) => u.deleted_at) && (
-        <div className="flex items-center gap-2 px-6 py-3 bg-gray-50/50 rounded-2xl border border-gray-100 w-fit">
-          <Activity className="w-4 h-4 text-gray-300" />
-          <p className="text-2xs font-black text-gray-400 uppercase tracking-widest">
-            Archive Status: {users.filter((u) => u.deleted_at).length} DEACTIVATED USERS SHOWN
+        <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 w-fit">
+          <UserX className="w-3.5 h-3.5 text-gray-400" />
+          <p className="text-[11px] text-gray-500">
+            {users.filter((u) => u.deleted_at).length} deactivated user(s) shown
           </p>
         </div>
       )}

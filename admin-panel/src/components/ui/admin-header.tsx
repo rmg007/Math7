@@ -21,7 +21,7 @@ export function AdminHeader({
   backTo
 }: AdminHeaderProps) {
   return (
-    <div className={cn("space-y-4 mb-8 w-full overflow-hidden", className)}>
+    <div className={cn("space-y-4 mb-8 w-full", className)}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           {backTo && (
@@ -34,7 +34,7 @@ export function AdminHeader({
             </Link>
           )}
           {Icon && (
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/10 flex-shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-500 to-purple-600 flex items-center justify-center shadow-lg shadow-teal-500/10 flex-shrink-0">
               <Icon className="w-6 h-6 text-white" />
             </div>
           )}
@@ -44,7 +44,7 @@ export function AdminHeader({
           </div>
         </div>
         {actions && (
-          <div className="flex items-center gap-2 flex-wrap overflow-hidden">
+          <div className="flex items-center gap-2 flex-wrap">
             {actions}
           </div>
         )}
@@ -52,4 +52,3 @@ export function AdminHeader({
     </div>
   );
 }
-

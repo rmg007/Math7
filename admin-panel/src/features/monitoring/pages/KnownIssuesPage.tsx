@@ -1,14 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -37,6 +36,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
+  Filter,
   LifeBuoy,
   Pencil,
   Plus,
@@ -138,10 +138,10 @@ export function KnownIssuesPage() {
           id: editingIssue.id,
           updates,
         });
-        toast({ title: 'Success', description: 'Issue updated successfully' });
+        toast({ title: 'Success', description: 'Issue updated' });
       } else {
         await createIssue.mutateAsync(formData);
-        toast({ title: 'Success', description: 'Issue created successfully' });
+        toast({ title: 'Success', description: 'Issue created' });
       }
       setIsDialogOpen(false);
     } catch (error) {
@@ -160,8 +160,8 @@ export function KnownIssuesPage() {
     } catch (err) {
       console.error(err);
       toast({
-        title: 'Oracle Offline',
-        description: 'Failed to query Project Oracle base.',
+        title: 'Search Failed',
+        description: 'Failed to query knowledge base.',
         variant: 'destructive',
       });
     } finally {
@@ -173,7 +173,7 @@ export function KnownIssuesPage() {
     e.stopPropagation();
     try {
       await deleteIssue.mutateAsync(id);
-      toast({ title: 'Issue Purged', description: 'Stability has been restored.' });
+      toast({ title: 'Deleted', description: 'Issue has been removed.' });
     } catch (error) {
       toast({ title: 'Error', description: 'Failed to delete issue', variant: 'destructive' });
     }
@@ -199,7 +199,7 @@ export function KnownIssuesPage() {
 
   const getSeverityBadge = (severity: string | null) => {
     if (!severity) return null;
-    return <StatusBadge status={severity as StatusType} className="font-semibold" />;
+    return <StatusBadge status={severity as StatusType} />;
   };
 
   const sanitizeHtml = (html: string | null | undefined): string => {
@@ -211,352 +211,447 @@ export function KnownIssuesPage() {
     });
   };
 
+  const openCount = issues?.filter((i) => i.status === 'open' || i.status === 'recurring').length ?? 0;
+  const resolvedCount = issues?.filter((i) => i.status === 'closed').length ?? 0;
+
   return (
-    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8 pb-20">
+    <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
-        title="Stability Matrix"
+        title="Known Issues"
         description="Tracked issues and fixes."
         icon={Shield}
+        className="mb-2"
         actions={
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <Button
               onClick={() => setIsOracleDialogOpen(true)}
               variant="outline"
-              className="h-12 px-6 rounded-2xl border-indigo-200 text-indigo-600 hover:bg-indigo-50 font-bold uppercase tracking-widest text-2xs gap-2 hidden md:flex"
+              className="h-9 px-3 rounded border-gray-200 text-gray-500 hover:text-teal-600 hover:border-teal-500 hover:bg-teal-50 text-xs font-semibold gap-1.5 hidden md:flex"
             >
-              <LifeBuoy className="w-4 h-4" /> Consult Oracle
+              <LifeBuoy className="w-3.5 h-3.5" /> Oracle
             </Button>
             <Button
               onClick={() => handleOpenDialog()}
-              className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white transition-all font-bold uppercase tracking-widest text-2xs gap-2 shadow-lg shadow-indigo-200"
+              className="h-9 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1"
             >
-              <Plus className="w-4 h-4" /> Record Issue
+              <Plus className="w-3.5 h-3.5" /> New Issue
             </Button>
           </div>
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/10 group-hover:scale-110 transition-transform">
-              <Shield className="h-6 w-6 text-indigo-600" />
-            </div>
-            <div>
-              <p className="text-2xs font-black text-gray-400 uppercase tracking-widest leading-none">
-                Total Tracked
-              </p>
-              <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
-                {issues?.length ?? 0}
-              </h3>
-            </div>
+      {/* Summary Stats */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Total</span>
+            <Shield className="w-3.5 h-3.5 text-gray-400" />
           </div>
-          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full bg-indigo-500 w-[100%]" />
-          </div>
+          <p className="text-2xl font-bold text-gray-900 tabular-nums">{issues?.length ?? 0}</p>
         </div>
-
-        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/10 group-hover:scale-110 transition-transform">
-              <AlertCircle className="h-6 w-6 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-2xs font-black text-gray-400 uppercase tracking-widest leading-none">
-                Active Bugs
-              </p>
-              <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
-                {issues?.filter((i) => i.status === 'open' || i.status === 'recurring').length ?? 0}
-              </h3>
-            </div>
+        <div className="rounded-lg border border-amber-100 bg-amber-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Open</span>
+            <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
           </div>
-          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-amber-500"
-              style={{
-                width: `${((issues?.filter((i) => i.status === 'open' || i.status === 'recurring').length ?? 0) / (issues?.length || 1)) * 100}%`,
-              }}
-            />
-          </div>
+          <p className="text-2xl font-bold text-amber-600 tabular-nums">{openCount}</p>
         </div>
-
-        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/10 group-hover:scale-110 transition-transform">
-              <CheckCircle2 className="h-6 w-6 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-2xs font-black text-gray-400 uppercase tracking-widest leading-none">
-                Resolved
-              </p>
-              <h3 className="text-2xl font-black text-gray-900 tracking-tight mt-1">
-                {issues?.filter((i) => i.status === 'closed').length ?? 0}
-              </h3>
-            </div>
+        <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Resolved</span>
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
           </div>
-          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-emerald-500"
-              style={{
-                width: `${((issues?.filter((i) => i.status === 'closed').length ?? 0) / (issues?.length || 1)) * 100}%`,
-              }}
-            />
-          </div>
+          <p className="text-2xl font-bold text-emerald-600 tabular-nums">{resolvedCount}</p>
         </div>
       </div>
 
-      <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
-        <div className="relative flex-1 w-full group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
-          <input
-            type="text"
-            placeholder="Search vulnerabilities..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white/50 text-gray-800 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none text-sm font-medium"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
+      {/* Table Card */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
+        {/* Card Header: Search + Filter + Count */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 flex-wrap">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search issues..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-8 py-1.5 rounded border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none focus-visible:outline-none text-sm"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-200 text-gray-400 hover:text-gray-600 rounded"
+                title="Clear"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+
+          <div className="relative">
+            <select
+              aria-label="Filter by status"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-8 appearance-none pl-3 pr-8 text-xs font-medium rounded border border-gray-200 bg-white text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none cursor-pointer"
             >
-              <X className="h-4 w-4" />
-            </button>
-          )}
+              <option value="all">All Statuses</option>
+              <option value="open">Open</option>
+              <option value="recurring">Recurring</option>
+              <option value="closed">Resolved</option>
+            </select>
+            <Filter className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
+          </div>
+
+          <span className="text-[11px] text-gray-500 whitespace-nowrap">
+            {filteredIssues?.length || 0} {(filteredIssues?.length || 0) === 1 ? 'issue' : 'issues'}
+          </span>
         </div>
 
-        <div className="flex items-center shrink-0">
-          <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl">
-            <span className="text-2xs font-black text-gray-400 uppercase tracking-widest">
-              Filter:
-            </span>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-auto min-w-[120px] h-6 border-none bg-transparent p-0 focus:ring-0 shadow-none text-xs font-black text-gray-700 hover:text-indigo-600 transition-colors uppercase italic tracking-tight">
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent className="rounded-2xl border-gray-100 shadow-xl p-2">
-                <SelectItem value="all" className="rounded-xl py-2 font-bold text-xs italic">
-                  ALL VULNERABILITIES
-                </SelectItem>
-                <SelectItem value="open" className="rounded-xl py-2 font-bold text-xs italic">
-                  ACTIVE BUGS
-                </SelectItem>
-                <SelectItem value="recurring" className="rounded-xl py-2 font-bold text-xs italic">
-                  RECURRING EVENTS
-                </SelectItem>
-                <SelectItem value="closed" className="rounded-xl py-2 font-bold text-xs italic">
-                  RESOLVED ISSUES
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <Table className="w-full">
+          <TableHeader>
+            <TableRow className="bg-gray-50">
+              <TableHead className="px-4">
+                Issue
+              </TableHead>
+              <TableHead>
+                Status
+              </TableHead>
+              <TableHead className="hidden md:table-cell">
+                Severity
+              </TableHead>
+              <TableHead className="hidden lg:table-cell">
+                Date
+              </TableHead>
+              <TableHead className="text-right px-4 border-l border-gray-100">
+                Actions
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i} className="even:bg-gray-50/40">
+                  <TableCell className="px-4">
+                    <div className="space-y-1">
+                      <div className="h-3.5 bg-gray-200 rounded w-40 animate-pulse" />
+                      <div className="h-3 bg-gray-200 rounded w-56 animate-pulse" />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="h-4 bg-gray-200 rounded-full w-16 animate-pulse" />
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <div className="h-4 bg-gray-200 rounded-full w-14 animate-pulse" />
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    <div className="h-3.5 bg-gray-200 rounded w-20 animate-pulse" />
+                  </TableCell>
+                  <TableCell className="px-4">
+                    <div className="flex gap-0.5 justify-end">
+                      <div className="h-7 w-7 bg-gray-200 rounded animate-pulse" />
+                      <div className="h-7 w-7 bg-gray-200 rounded animate-pulse" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : filteredIssues?.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="py-20">
+                  <EmptyState
+                    icon={Shield}
+                    title={searchTerm || statusFilter !== 'all' ? 'No matches found' : 'No known issues'}
+                    description={
+                      searchTerm || statusFilter !== 'all'
+                        ? 'Try adjusting your search or filters.'
+                        : 'No issues have been recorded yet.'
+                    }
+                    action={
+                      searchTerm || statusFilter !== 'all' ? (
+                        <Button
+                          onClick={() => {
+                            setSearchTerm('');
+                            setStatusFilter('all');
+                          }}
+                          className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                        >
+                          Clear Filters
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => handleOpenDialog()}
+                          className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                        >
+                          New Issue
+                        </Button>
+                      )
+                    }
+                  />
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredIssues?.map((issue) => (
+                <TableRow
+                  key={issue.id}
+                  className="even:bg-gray-50/40 cursor-pointer"
+                  onClick={() => handleOpenDialog(issue)}
+                >
+                  <TableCell className="px-4">
+                    <div>
+                      <span className="font-medium text-gray-900 text-xs">
+                        {issue.title}
+                      </span>
+                      <p className="text-[11px] text-gray-400 line-clamp-1 mt-0.5">
+                        {sanitizeHtml(issue.description) || 'No description'}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell>{getStatusBadge(issue.status)}</TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    {getSeverityBadge(issue.severity)}
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    <span className="text-xs text-gray-500">
+                      {issue.created_at ? new Date(issue.created_at).toLocaleDateString() : '—'}
+                    </span>
+                  </TableCell>
+                  <TableCell className="px-4 text-right border-l border-gray-100">
+                    <div
+                      className="flex items-center justify-end gap-0.5"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Edit"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenDialog(issue);
+                        }}
+                        className="h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Delete"
+                        onClick={(e) => handleDelete(issue.id, e)}
+                        className="h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
 
-      <Card className="shadow-sm overflow-hidden border-indigo-100/50">
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader className="bg-gray-50/30">
-              <TableRow>
-                <TableHead className="w-[40%]">Issue Details</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Severity</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
-                    Loading issues...
-                  </TableCell>
-                </TableRow>
-              ) : filteredIssues?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                    <LifeBuoy className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                    No issues found matching your filters.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredIssues?.map((issue) => (
-                  <TableRow
-                    key={issue.id}
-                    className="group cursor-pointer hover:bg-indigo-50/20"
-                    onClick={() => handleOpenDialog(issue)}
-                  >
-                    <TableCell>
-                      <div className="font-medium group-hover:text-indigo-600 transition-colors">
-                        {issue.title}
-                      </div>
-                      <div className="text-xs text-muted-foreground line-clamp-1">
-                        {sanitizeHtml(issue.description) || 'No description provided'}
-                      </div>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(issue.status)}</TableCell>
-                    <TableCell>{getSeverityBadge(issue.severity)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {issue.created_at ? new Date(issue.created_at).toLocaleDateString() : 'N/A'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div
-                        className="flex items-center justify-end gap-2"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-indigo-600"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenDialog(issue);
-                          }}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-red-600"
-                          onClick={(e) => handleDelete(issue.id, e)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
+      {/* Oracle Dialog */}
       <Dialog open={isOracleDialogOpen} onOpenChange={setIsOracleDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto rounded-[2rem] border-0 shadow-2xl p-0 overflow-hidden text-left">
-          <div className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 p-8 text-white relative">
-            <div className="absolute top-0 right-0 p-8 opacity-10">
-              <LifeBuoy className="w-32 h-32" />
-            </div>
-            <DialogHeader className="relative text-left">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
-                  <Sparkles className="w-5 h-5 text-indigo-200" />
-                </div>
-                <span className="text-2xs font-black uppercase tracking-[0.3em] text-white/60">
-                  Project Oracle Plus
-                </span>
+        <DialogContent className="rounded-lg border border-gray-200 bg-white p-0 overflow-hidden shadow-lg max-w-2xl max-h-[85vh] overflow-y-auto">
+          <div className="px-6 pt-6 pb-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-teal-50 border border-teal-100">
+                <Sparkles className="w-4 h-4 text-teal-600" />
               </div>
-              <DialogTitle className="text-3xl font-black tracking-tight text-white mb-2">
-                Knowledge Sync
-              </DialogTitle>
-              <DialogDescription className="text-indigo-100 opacity-80 text-sm max-w-md">
-                Query the semantic knowledge base for architectural patterns and recovery protocols.
-              </DialogDescription>
-            </DialogHeader>
+              <div>
+                <DialogTitle className="text-base font-semibold text-gray-900">Knowledge Search</DialogTitle>
+                <DialogDescription className="text-xs text-gray-500 mt-0.5">
+                  Query the knowledge base for patterns and fixes.
+                </DialogDescription>
+              </div>
+            </div>
 
-            <div className="mt-8 relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40 group-focus-within:text-white transition-colors" />
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
               <input
-                placeholder="Enter technical query or error signature..."
-                className="w-full bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 pl-12 pr-32 text-white placeholder:text-white/30 focus:outline-none focus:ring-4 focus:ring-white/10 transition-all text-sm font-medium"
+                placeholder="Enter query..."
+                className="w-full pl-9 pr-24 py-2 rounded border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none focus-visible:outline-none text-sm"
                 value={oracleQuery}
                 onChange={(e) => setOracleQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleOracleSearch()}
               />
               <Button
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-indigo-900 hover:bg-indigo-50 rounded-xl px-4 py-2 font-black text-2xs uppercase tracking-widest gap-2 h-10 shadow-lg"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold gap-1"
                 onClick={handleOracleSearch}
                 disabled={isOracleSearching}
               >
                 {isOracleSearching ? (
-                  <div className="w-3 h-3 border-2 border-indigo-900/30 border-t-indigo-900 rounded-full animate-spin" />
+                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3 h-3" />
                 )}
-                Execute
+                Search
               </Button>
             </div>
           </div>
 
-          <div className="p-8 bg-white min-h-[300px]">
+          <div className="px-6 pb-6 min-h-[200px]">
             {isOracleSearching ? (
-              <div className="flex flex-col items-center justify-center py-20 gap-4">
-                <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
-                <p className="text-xs font-black text-gray-400 uppercase tracking-widest animate-pulse">
-                  Scanning Semantic Space...
-                </p>
+              <div className="flex flex-col items-center justify-center py-12 gap-3">
+                <div className="w-8 h-8 border-3 border-gray-200 border-t-teal-600 rounded-full animate-spin" />
+                <p className="text-xs text-gray-400">Searching...</p>
               </div>
             ) : oracleResults.length > 0 ? (
-              <div className="space-y-6">
-                <h4 className="text-2xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
-                  <div className="w-2 h-2 bg-indigo-500 rounded-full" />
-                  Intelligence matches FOUND ({oracleResults.length})
-                </h4>
-                <div className="grid grid-cols-1 gap-4">
-                  {oracleResults.map((res, i) => (
-                    <div
-                      key={i}
-                      className="p-6 bg-gray-50 rounded-2xl border border-gray-100 hover:border-indigo-200 transition-all"
-                    >
-                      <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center justify-between">
-                        <span>FILE: {res.file_path.split('\\').pop()}</span>
-                        <span className="text-indigo-500">
-                          MATCH: {Math.round(res.similarity * 100)}%
-                        </span>
-                      </div>
-                      <div className="text-xs leading-relaxed text-gray-700 font-medium italic line-clamp-4">
-                        \"{res.content}\"
-                      </div>
+              <div className="space-y-3">
+                <span className="text-[11px] text-gray-500">
+                  {oracleResults.length} result(s) found
+                </span>
+                {oracleResults.map((res, i) => (
+                  <div
+                    key={i}
+                    className="p-3 bg-gray-50 rounded-lg border border-gray-100"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] text-gray-400 font-mono">
+                        {res.file_path.split('\\').pop()}
+                      </span>
+                      <span className="text-[10px] text-teal-600 font-medium">
+                        {Math.round(res.similarity * 100)}% match
+                      </span>
                     </div>
-                  ))}
-                </div>
+                    <p className="text-xs text-gray-600 line-clamp-4">
+                      {res.content}
+                    </p>
+                  </div>
+                ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-center opacity-40">
-                <LifeBuoy className="w-16 h-16 text-gray-300 mb-4" />
-                <p className="text-sm font-bold text-gray-400">
-                  Enter a query to begin synchronization.
-                </p>
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <LifeBuoy className="w-10 h-10 text-gray-200 mb-3" />
+                <p className="text-xs text-gray-400">Enter a query to search.</p>
               </div>
             )}
           </div>
         </DialogContent>
       </Dialog>
 
+      {/* Create/Edit Issue Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="text-left">
-            <DialogTitle>{editingIssue ? 'Edit Known Issue' : 'Record New Issue'}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-            <div className="space-y-2">
-              <Label htmlFor="title" className="text-left block">
-                Issue Title
-              </Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-                required
-              />
+        <DialogContent className="rounded-lg border border-gray-200 bg-white p-0 overflow-hidden shadow-lg max-w-lg max-h-[90vh] overflow-y-auto">
+          <form onSubmit={handleSubmit}>
+            <div className="px-6 pt-6 pb-4 space-y-4">
+              <div>
+                <DialogTitle className="text-base font-semibold text-gray-900">
+                  {editingIssue ? 'Edit Issue' : 'New Issue'}
+                </DialogTitle>
+                <DialogDescription className="text-xs text-gray-500 mt-0.5">
+                  {editingIssue ? 'Update the issue details below.' : 'Fill in the details to record a new issue.'}
+                </DialogDescription>
+              </div>
+
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label className="text-xs font-medium text-gray-700">Title</Label>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                    className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-medium text-gray-700">Description <span className="text-gray-400 font-normal">(optional)</span></Label>
+                  <Textarea
+                    value={formData.description ?? ''}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                    className="rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm p-3"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium text-gray-700">Status</Label>
+                    <Select
+                      value={formData.status ?? 'open'}
+                      onValueChange={(v) => setFormData((prev) => ({ ...prev, status: v }))}
+                    >
+                      <SelectTrigger className="h-9 rounded border border-gray-300 bg-white text-gray-900 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-lg border border-gray-200 shadow-md">
+                        <SelectItem value="open" className="text-sm">Open</SelectItem>
+                        <SelectItem value="recurring" className="text-sm">Recurring</SelectItem>
+                        <SelectItem value="closed" className="text-sm">Resolved</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium text-gray-700">Severity</Label>
+                    <Select
+                      value={formData.severity ?? 'medium'}
+                      onValueChange={(v) => setFormData((prev) => ({ ...prev, severity: v }))}
+                    >
+                      <SelectTrigger className="h-9 rounded border border-gray-300 bg-white text-gray-900 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-lg border border-gray-200 shadow-md">
+                        <SelectItem value="low" className="text-sm">Low</SelectItem>
+                        <SelectItem value="medium" className="text-sm">Medium</SelectItem>
+                        <SelectItem value="high" className="text-sm">High</SelectItem>
+                        <SelectItem value="critical" className="text-sm">Critical</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-medium text-gray-700">Root Cause <span className="text-gray-400 font-normal">(optional)</span></Label>
+                  <Textarea
+                    value={formData.root_cause ?? ''}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, root_cause: e.target.value }))}
+                    placeholder="Why did this happen?"
+                    className="rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm p-3"
+                    rows={2}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-medium text-gray-700">Resolution <span className="text-gray-400 font-normal">(optional)</span></Label>
+                  <Textarea
+                    value={formData.resolution ?? ''}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, resolution: e.target.value }))}
+                    placeholder="How was it fixed?"
+                    className="rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm p-3"
+                    rows={2}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-medium text-gray-700">Reference Link <span className="text-gray-400 font-normal">(optional)</span></Label>
+                  <Input
+                    value={formData.sentry_link ?? ''}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, sentry_link: e.target.value }))}
+                    placeholder="https://..."
+                    className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
+                  />
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-left block">
-                Description
-              </Label>
-              <Textarea
-                id="description"
-                value={formData.description ?? ''}
-                onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-              />
-            </div>
-            <DialogFooter className="pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+
+            <DialogFooter className="bg-gray-50 px-6 py-4 flex gap-2 border-t border-gray-200">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsDialogOpen(false)}
+                className="h-9 px-4 rounded text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              >
                 Cancel
               </Button>
-              <Button type="submit">Save Issue</Button>
+              <Button
+                type="submit"
+                disabled={createIssue.isPending || updateIssue.isPending}
+                className="h-9 px-5 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-sm disabled:opacity-50"
+              >
+                {editingIssue ? 'Save Changes' : 'Create Issue'}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
