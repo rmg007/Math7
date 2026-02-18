@@ -67,9 +67,9 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
   return (
     <TableRow
       key={subject.subject_id}
-      className="group/row border-b border-gray-200 hover:!bg-teal-50 even:bg-gray-50/40"
+      className="group/row even:bg-gray-50/40"
     >
-      <TableCell className="px-4 py-1.5">
+      <TableCell className="px-4">
         <div className="flex items-center gap-2">
           {subject.color_hex && (
             <span
@@ -83,12 +83,12 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
           </span>
         </div>
       </TableCell>
-      <TableCell className="px-3 py-1.5 hidden md:table-cell">
+      <TableCell className="hidden md:table-cell">
         <code className="text-xs text-gray-500 font-mono">
           {subject.slug}
         </code>
       </TableCell>
-      <TableCell className="px-2 py-1.5 text-center hidden sm:table-cell w-12">
+      <TableCell className="px-2 text-center hidden sm:table-cell w-12">
         {subject.icon_url ? (
           <div className="w-6 h-6 rounded bg-white border border-gray-200 flex items-center justify-center mx-auto">
             <img src={subject.icon_url} alt="" className="w-4 h-4 object-contain" />
@@ -97,18 +97,18 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
           <span className="text-gray-300 text-xs">&mdash;</span>
         )}
       </TableCell>
-      <TableCell className="px-3 py-1.5">
+      <TableCell>
         <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium', status.bgColor, status.textColor)}>
           <span className={cn('w-1.5 h-1.5 rounded-full', status.dotColor)} />
           {status.label}
         </span>
       </TableCell>
-      <TableCell className="px-3 py-1.5 hidden lg:table-cell text-center">
+      <TableCell className="hidden lg:table-cell text-center">
         <span className="text-xs text-gray-500 tabular-nums">
           {subject.display_order ?? 0}
         </span>
       </TableCell>
-      <TableCell className="px-4 py-1.5 text-right border-l border-gray-100">
+      <TableCell className="px-4 text-right border-l border-gray-100">
         <div className="flex justify-end gap-0.5">
           <Button
             variant="ghost"
@@ -341,8 +341,8 @@ export function SubjectsPage() {
         </div>
           <Table className="w-full">
             <TableHeader>
-              <TableRow className="bg-gray-50 border-b border-gray-200">
-                <TableHead className="font-semibold text-[11px] uppercase tracking-wider text-gray-600 px-4 py-2 h-auto">
+              <TableRow className="bg-gray-50">
+                <TableHead className="px-4">
                   <SortableHeader
                     label="Title"
                     column="title"
@@ -351,7 +351,7 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="font-semibold text-[11px] uppercase tracking-wider text-gray-600 px-3 py-2 h-auto hidden md:table-cell">
+                <TableHead className="hidden md:table-cell">
                   <SortableHeader
                     label="Slug"
                     column="slug"
@@ -360,10 +360,10 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="font-semibold text-[11px] uppercase tracking-wider text-gray-600 px-2 py-2 h-auto text-center hidden sm:table-cell w-12">
+                <TableHead className="px-2 text-center hidden sm:table-cell w-12">
                   Icon
                 </TableHead>
-                <TableHead className="font-semibold text-[11px] uppercase tracking-wider text-gray-600 px-3 py-2 h-auto">
+                <TableHead>
                   <SortableHeader
                     label="Status"
                     column="status"
@@ -372,7 +372,7 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="font-semibold text-[11px] uppercase tracking-wider text-gray-600 px-3 py-2 h-auto hidden lg:table-cell text-center">
+                <TableHead className="hidden lg:table-cell text-center">
                   <SortableHeader
                     label="Order"
                     column="display_order"
@@ -381,7 +381,7 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="text-right px-4 py-2 h-auto font-semibold text-[11px] uppercase tracking-wider text-gray-600 border-l border-gray-100">
+                <TableHead className="text-right px-4 border-l border-gray-100">
                   Actions
                 </TableHead>
               </TableRow>
@@ -389,26 +389,26 @@ export function SubjectsPage() {
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 8 }).map((_, i) => (
-                  <TableRow key={i} className="border-b border-gray-200 even:bg-gray-50/40">
-                    <TableCell className="px-4 py-1.5">
+                  <TableRow key={i} className="even:bg-gray-50/40">
+                    <TableCell className="px-4">
                       <div className="flex items-center gap-2">
                         <div className="h-2.5 w-2.5 bg-gray-200 rounded-full animate-pulse"></div>
                         <div className="h-3.5 bg-gray-200 rounded w-24 animate-pulse"></div>
                       </div>
                     </TableCell>
-                    <TableCell className="px-3 py-1.5 hidden md:table-cell">
+                    <TableCell className="hidden md:table-cell">
                       <div className="h-3.5 bg-gray-200 rounded w-16 animate-pulse"></div>
                     </TableCell>
-                    <TableCell className="px-2 py-1.5 hidden sm:table-cell">
+                    <TableCell className="px-2 hidden sm:table-cell">
                       <div className="h-6 w-6 bg-gray-200 rounded mx-auto animate-pulse"></div>
                     </TableCell>
-                    <TableCell className="px-3 py-1.5">
+                    <TableCell>
                       <div className="h-4 bg-gray-200 rounded-full w-14 animate-pulse"></div>
                     </TableCell>
-                    <TableCell className="px-3 py-1.5 hidden lg:table-cell">
+                    <TableCell className="hidden lg:table-cell">
                       <div className="h-3.5 bg-gray-200 rounded w-6 animate-pulse"></div>
                     </TableCell>
-                    <TableCell className="px-4 py-1.5">
+                    <TableCell className="px-4">
                       <div className="flex gap-0.5 justify-end">
                         <div className="h-7 w-7 bg-gray-200 rounded animate-pulse"></div>
                         <div className="h-7 w-7 bg-gray-200 rounded animate-pulse"></div>
