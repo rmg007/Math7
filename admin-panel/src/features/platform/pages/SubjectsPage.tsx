@@ -342,7 +342,7 @@ export function SubjectsPage() {
       <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
           <Table className="w-full">
             <TableHeader>
-              <TableRow className="bg-gray-50/80 border-b border-gray-200">
+              <TableRow className="bg-gray-50 border-b border-gray-200">
                 <TableHead className="font-semibold text-[11px] uppercase tracking-wider text-gray-600 px-4 py-2.5 h-auto">
                   <SortableHeader
                     label="Title"
