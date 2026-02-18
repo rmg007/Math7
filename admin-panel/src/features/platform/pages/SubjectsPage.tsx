@@ -67,7 +67,7 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
   return (
     <TableRow
       key={subject.subject_id}
-      className="border-b border-gray-200 hover:!bg-teal-50 even:bg-gray-50/40"
+      className="group/row border-b border-gray-200 hover:!bg-teal-50 even:bg-gray-50/40"
     >
       <TableCell className="px-4 py-1.5">
         <div className="flex items-center gap-2">
@@ -109,7 +109,7 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
         </span>
       </TableCell>
       <TableCell className="px-4 py-1.5 text-right border-l border-gray-100">
-        <div className="flex justify-end gap-0.5">
+        <div className="flex justify-end gap-0.5 opacity-0 group-hover/row:opacity-100">
           <Button
             variant="ghost"
             size="icon"
@@ -339,7 +339,7 @@ export function SubjectsPage() {
         </span>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
           <Table className="w-full">
             <TableHeader>
               <TableRow className="bg-gray-50/80 border-b border-gray-200">
