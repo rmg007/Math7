@@ -103,7 +103,7 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
           {status.label}
         </span>
       </TableCell>
-      <TableCell className="px-3 py-1.5 hidden lg:table-cell">
+      <TableCell className="px-3 py-1.5 hidden lg:table-cell text-center">
         <span className="text-xs text-gray-500 tabular-nums">
           {subject.display_order ?? 0}
         </span>
@@ -372,7 +372,7 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="font-semibold text-[11px] uppercase tracking-wider text-gray-600 px-3 py-2 h-auto hidden lg:table-cell">
+                <TableHead className="font-semibold text-[11px] uppercase tracking-wider text-gray-600 px-3 py-2 h-auto hidden lg:table-cell text-center">
                   <SortableHeader
                     label="Order"
                     column="display_order"
