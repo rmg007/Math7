@@ -35,21 +35,42 @@ export function useErrorLogStats() {
   return useQuery({
     queryKey: ['error-log-stats'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('error_logs').select('status');
+      // Use server-side counting with head:true to avoid fetching all rows
+      const [totalResult, newResult, seenResult, ignoredResult, resolvedResult, promotedResult] =
+        await Promise.all([
+          supabase.from('error_logs').select('id', { count: 'exact', head: true }),
+          supabase
+            .from('error_logs')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'new'),
+          supabase
+            .from('error_logs')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'seen'),
+          supabase
+            .from('error_logs')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'ignored'),
+          supabase
+            .from('error_logs')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'resolved'),
+          supabase
+            .from('error_logs')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'promoted'),
+        ]);
 
-      if (error) throw error;
+      if (totalResult.error) throw totalResult.error;
 
-      const logs = data ?? [];
-      const stats = {
-        total: logs.length,
-        new: logs.filter((e) => e.status === 'new').length,
-        seen: logs.filter((e) => e.status === 'seen').length,
-        ignored: logs.filter((e) => e.status === 'ignored').length,
-        resolved: logs.filter((e) => e.status === 'resolved').length,
-        promoted: logs.filter((e) => e.status === 'promoted').length,
+      return {
+        total: totalResult.count ?? 0,
+        new: newResult.count ?? 0,
+        seen: seenResult.count ?? 0,
+        ignored: ignoredResult.count ?? 0,
+        resolved: resolvedResult.count ?? 0,
+        promoted: promotedResult.count ?? 0,
       };
-
-      return stats;
     },
   });
 }

@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import type { Tables } from '@/lib/database.types';
+import { supabase } from '@/lib/supabase';
+import { useQuery } from '@tanstack/react-query';
 
 export type KnownIssue = Tables<'known_issues'>;
 
@@ -16,26 +16,6 @@ export function useKnownIssues() {
       if (error) throw error;
 
       return data ?? [];
-    },
-  });
-}
-
-export function useDeleteKnownIssue() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('known_issues')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['known-issues'] });
-      queryClient.invalidateQueries({ queryKey: ['error-logs'] });
-      queryClient.invalidateQueries({ queryKey: ['error-log-stats'] });
     },
   });
 }

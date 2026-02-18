@@ -45,13 +45,18 @@ export function useCreateApp() {
       if (!data) throw new Error('Failed to create app');
 
       // Automatically create a landing page entry for the new app
-      await supabase.from('app_landing_pages').insert({
+      const { error: landingPageError } = await supabase.from('app_landing_pages').insert({
         app_id: data.app_id,
         meta_title: `${data.display_name} | Questerix`,
         meta_description: `Learn ${data.display_name} with Questerix.`,
         hero_headline: `Ace ${data.display_name}`,
         hero_subheadline: `Master your subjects with adaptive practice.`,
       });
+
+      if (landingPageError) {
+        console.error('Failed to create landing page for new app:', landingPageError);
+        // Don't throw — the app was created successfully. The landing page can be created manually.
+      }
 
       return data;
     },

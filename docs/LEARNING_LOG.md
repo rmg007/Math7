@@ -1,5 +1,52 @@
 ---
 
+## 2026-02-18: IRONCLAD ARCHITECT V2 — Admin Panel Forensic Audit
+
+### Session Context
+
+- **Trigger**: Proactive forensic audit of all `admin-panel/src/` code
+- **Scope**: 42 source files across 8 feature modules — auth guards, data hooks, services, AI APIs
+- **Outcome**: Found 12 issues (6 actionable bugs, 4 design notes, 2 informational). Fixed 5, deferred 1.
+
+### Bugs Found & Fixed
+
+#### BUG-A1/A2 MEDIUM: Admin Guards Infinite Loading on Unauthorized [test created]
+
+- **Issue**: `standard-admin-guard.tsx` and `super-admin-guard.tsx` only called `setLoading(false)` on the **success** path. Unauthorized users saw an infinite spinner.
+- **Fix**: Wrapped auth check in `try/finally` to always clear loading state.
+- **Lesson**: State cleanup must live in `finally` blocks, not conditional success paths.
+
+#### BUG-A3 MEDIUM: Silent Landing Page Creation Failure [no test needed]
+
+- **Issue**: `useCreateApp()` in `use-apps.ts` silently swallowed errors from the automatic landing page insert.
+- **Fix**: Captured the error and logged it. App creation still succeeds — landing page can be created manually.
+- **Lesson**: Fire-and-forget side effects must still log failures.
+
+#### BUG-A5 LOW: Client-Side Error Log Counting [no test needed]
+
+- **Issue**: `useErrorLogStats()` fetched ALL error logs and counted client-side. Degrades as table grows.
+- **Fix**: Replaced with 6 parallel `{ count: 'exact', head: true }` queries — zero rows transferred.
+- **Lesson**: Use `head: true` for counts. Never fetch full rows just to `.length` them.
+
+#### BUG-A6 LOW: Duplicate `useDeleteKnownIssue` Hook [no test needed]
+
+- **Issue**: `useDeleteKnownIssue` existed in both `use-known-issues.ts` and `use-known-issues-mutations.ts` with different cache invalidation.
+- **Fix**: Removed from `use-known-issues.ts`, added cross-query invalidation to the canonical version.
+- **Lesson**: When splitting hooks across files, grep for duplicates.
+
+### Prevention Rules
+
+1. **`finally` for state cleanup** — Any `setLoading(false)` or state reset must be in a `finally` block, never only on success paths.
+2. **Never swallow side-effect errors** — Even optional operations (landing pages, telemetry) must log failures.
+3. **Server-side counting** — Use `select('id', { count: 'exact', head: true })` instead of fetching rows to count.
+4. **Grep before splitting** — When reorganizing hooks across files, search for duplicates.
+
+### Verification
+
+- `npx tsc --noEmit` — exit code 0
+
+---
+
 ## 2026-02-17 (Self-Review #3): 3 More Bugs Found in Reliability Code
 
 ### Session Context

@@ -9,29 +9,32 @@ export function StandardAdminGuard({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     const checkRole = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-      if (!user) {
-        navigate('/login');
-        return;
+        if (!user) {
+          navigate('/login');
+          return;
+        }
+
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        // Allow both standard admins and super admins
+        if (error || !profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
+          navigate('/');
+          return;
+        }
+
+        setAuthorized(true);
+      } finally {
+        setLoading(false);
       }
-
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-      // Allow both standard admins and super admins
-      if (error || !profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
-        navigate('/');
-        return;
-      }
-
-      setAuthorized(true);
-      setLoading(false);
     };
 
     checkRole();
