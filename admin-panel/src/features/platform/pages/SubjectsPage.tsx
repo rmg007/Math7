@@ -78,17 +78,17 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
               title={subject.color_hex}
             />
           )}
-          <span className="font-normal text-gray-900 text-xs truncate">
+          <span className="font-medium text-gray-900 text-xs truncate">
             {subject.title}
           </span>
         </div>
       </TableCell>
       <TableCell className="px-3 py-1.5 hidden md:table-cell">
-        <code className="text-xs text-gray-600 font-mono">
+        <code className="text-xs text-gray-500 font-mono">
           {subject.slug}
         </code>
       </TableCell>
-      <TableCell className="px-2 py-1.5 text-center hidden sm:table-cell">
+      <TableCell className="px-2 py-1.5 text-center hidden sm:table-cell w-12">
         {subject.icon_url ? (
           <div className="w-6 h-6 rounded bg-white border border-gray-200 flex items-center justify-center mx-auto">
             <img src={subject.icon_url} alt="" className="w-4 h-4 object-contain" />
@@ -98,7 +98,7 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
         )}
       </TableCell>
       <TableCell className="px-3 py-1.5">
-        <span className={cn('inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium', status.bgColor, status.textColor)}>
+        <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium', status.bgColor, status.textColor)}>
           <span className={cn('w-1.5 h-1.5 rounded-full', status.dotColor)} />
           {status.label}
         </span>
@@ -108,7 +108,7 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
           {subject.display_order ?? 0}
         </span>
       </TableCell>
-      <TableCell className="px-4 py-1.5 text-right">
+      <TableCell className="px-4 py-1.5 text-right border-l border-gray-100">
         <div className="flex justify-end gap-0.5">
           <Button
             variant="ghost"
@@ -343,7 +343,7 @@ export function SubjectsPage() {
           <Table className="w-full">
             <TableHeader>
               <TableRow className="bg-gray-50/80 border-b border-gray-200">
-                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-gray-500 px-4 py-2.5 h-auto">
+                <TableHead className="font-semibold text-[11px] uppercase tracking-wider text-gray-600 px-4 py-2.5 h-auto">
                   <SortableHeader
                     label="Title"
                     column="title"
@@ -352,7 +352,7 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-gray-500 px-3 py-2.5 h-auto hidden md:table-cell">
+                <TableHead className="font-semibold text-[11px] uppercase tracking-wider text-gray-600 px-3 py-2.5 h-auto hidden md:table-cell">
                   <SortableHeader
                     label="Slug"
                     column="slug"
@@ -361,10 +361,10 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-gray-500 px-2 py-2.5 h-auto text-center hidden sm:table-cell">
+                <TableHead className="font-semibold text-[11px] uppercase tracking-wider text-gray-600 px-2 py-2.5 h-auto text-center hidden sm:table-cell w-12">
                   Icon
                 </TableHead>
-                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-gray-500 px-3 py-2.5 h-auto">
+                <TableHead className="font-semibold text-[11px] uppercase tracking-wider text-gray-600 px-3 py-2.5 h-auto">
                   <SortableHeader
                     label="Status"
                     column="status"
@@ -373,7 +373,7 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="font-medium text-[11px] uppercase tracking-wider text-gray-500 px-3 py-2.5 h-auto hidden lg:table-cell">
+                <TableHead className="font-semibold text-[11px] uppercase tracking-wider text-gray-600 px-3 py-2.5 h-auto hidden lg:table-cell">
                   <SortableHeader
                     label="Order"
                     column="display_order"
@@ -382,7 +382,7 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="text-right px-4 py-2.5 h-auto font-medium text-[11px] uppercase tracking-wider text-gray-500">
+                <TableHead className="text-right px-4 py-2.5 h-auto font-semibold text-[11px] uppercase tracking-wider text-gray-600 border-l border-gray-100">
                   Actions
                 </TableHead>
               </TableRow>
