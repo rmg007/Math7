@@ -59,22 +59,22 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
   return (
     <TableRow
       key={subject.subject_id}
-      className="border-b border-gray-200 hover:bg-neutral-100 transition-colors last:border-0"
+      className="border-b border-gray-200 hover:bg-teal-50 last:border-0"
     >
-      <TableCell className="px-6 py-3">
-        <span className="font-semibold text-gray-900 text-base">
+      <TableCell className="px-4 py-2">
+        <span className="font-medium text-gray-900 text-sm">
           {subject.title}
         </span>
       </TableCell>
-      <TableCell className="px-4 py-3">
-        <code className="px-2 py-1 rounded-md bg-gray-100 text-teal-600 font-mono text-xs font-medium border border-gray-300">
+      <TableCell className="px-3 py-2 hidden md:table-cell">
+        <code className="px-1.5 py-0.5 rounded-sm bg-gray-100 text-teal-600 font-mono text-xs font-medium border border-gray-300">
           {subject.slug}
         </code>
       </TableCell>
-      <TableCell className="px-4 py-3">
+      <TableCell className="px-3 py-2">
         <span
           className={cn(
-            'inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium',
+            'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
             subject.status === 'live' && 'bg-emerald-100 text-emerald-700',
             subject.status === 'draft' && 'bg-amber-100 text-amber-700',
             subject.status === 'published' && 'bg-blue-100 text-blue-700'
@@ -83,30 +83,30 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
           {subject.status === 'live' ? 'Live' : subject.status === 'published' ? 'Published' : 'Draft'}
         </span>
       </TableCell>
-      <TableCell className="px-4 py-3">
-        <span className="text-sm text-gray-600">
+      <TableCell className="px-3 py-2 hidden lg:table-cell">
+        <span className="text-xs text-gray-600 font-medium">
           {subject.display_order ?? 0}
         </span>
       </TableCell>
-      <TableCell className="px-6 py-3 text-right">
-        <div className="flex justify-end gap-2">
+      <TableCell className="px-4 py-2 text-right">
+        <div className="flex justify-end gap-1">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => onEdit(subject)}
             title="Edit subject"
-            className="h-10 w-10 rounded-lg text-teal-600 hover:bg-teal-50 hover:text-teal-700 focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
+            className="h-8 w-8 rounded text-teal-600 hover:bg-teal-100 focus:ring-2 focus:ring-teal-600 focus:ring-offset-1"
           >
-            <Pencil className="w-4 h-4" />
+            <Pencil className="w-3.5 h-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => onDelete(subject.subject_id)}
             title="Delete subject"
-            className="h-10 w-10 rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700 focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
+            className="h-8 w-8 rounded text-red-600 hover:bg-red-100 focus:ring-2 focus:ring-red-600 focus:ring-offset-1"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
           </Button>
         </div>
       </TableCell>
@@ -277,7 +277,7 @@ export function SubjectsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-6">
+    <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
         title="Subjects"
         description="Manage subjects."
@@ -285,48 +285,46 @@ export function SubjectsPage() {
         actions={
           <Button
             onClick={() => handleOpenDialog()}
-            className="h-10 px-4 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-sm transition-colors gap-2"
+            className="h-9 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1"
           >
-            <Plus className="w-4 h-4" /> Add
+            <Plus className="w-3.5 h-3.5" /> New
           </Button>
         }
       />
 
       {/* Search Bar */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col md:flex-row gap-4 items-center">
+      <div className="flex flex-col md:flex-row gap-2 items-start md:items-center">
         <div className="relative flex-1 w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
           <input
             type="text"
-            placeholder="Search by title or slug..."
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-600/10 transition-colors outline-none text-sm"
+            className="w-full pl-9 pr-8 py-1.5 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none text-sm"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded transition-colors"
-              title="Clear search"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded"
+              title="Clear"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3 w-3" />
             </button>
           )}
         </div>
 
-        <div className="px-3 py-2 bg-teal-50 border border-teal-200 rounded-lg whitespace-nowrap">
-          <span className="text-xs font-medium text-teal-700">
-            {filteredSubjects.length} subject{filteredSubjects.length !== 1 ? 's' : ''}
-          </span>
+        <div className="text-xs font-medium text-gray-600 whitespace-nowrap">
+          {filteredSubjects.length} results
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded border border-gray-200 shadow-xs overflow-hidden">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
           <Table className="w-full">
             <TableHeader>
-              <TableRow className="bg-white border-b border-gray-200">
-                <TableHead className="font-semibold text-sm text-gray-700 px-6 py-3 h-auto">
+              <TableRow className="bg-gray-50 border-b border-gray-200">
+                <TableHead className="font-semibold text-xs text-gray-600 px-4 py-2 h-auto">
                   <SortableHeader
                     label="Title"
                     column="title"
@@ -335,7 +333,7 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="font-semibold text-sm text-gray-700 px-4 py-3 h-auto">
+                <TableHead className="font-semibold text-xs text-gray-600 px-3 py-2 h-auto hidden md:table-cell">
                   <SortableHeader
                     label="Slug"
                     column="slug"
@@ -344,7 +342,7 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="font-semibold text-sm text-gray-700 px-4 py-3 h-auto">
+                <TableHead className="font-semibold text-xs text-gray-600 px-3 py-2 h-auto">
                   <SortableHeader
                     label="Status"
                     column="status"
@@ -353,7 +351,7 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="font-semibold text-sm text-gray-700 px-4 py-3 h-auto">
+                <TableHead className="font-semibold text-xs text-gray-600 px-3 py-2 h-auto hidden lg:table-cell">
                   <SortableHeader
                     label="Order"
                     column="display_order"
@@ -362,31 +360,31 @@ export function SubjectsPage() {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="text-right px-6 py-3 h-auto font-semibold text-sm text-gray-700">
+                <TableHead className="text-right px-4 py-2 h-auto font-semibold text-xs text-gray-600">
                   Actions
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i} className="border-b border-gray-200">
-                    <TableCell className="px-6 py-3">
-                      <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                Array.from({ length: 8 }).map((_, i) => (
+                  <TableRow key={i} className="border-b border-gray-200 hover:bg-teal-50">
+                    <TableCell className="px-4 py-2">
+                      <div className="h-3.5 bg-gray-200 rounded w-24 animate-pulse"></div>
                     </TableCell>
-                    <TableCell className="px-4 py-3">
-                      <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+                    <TableCell className="px-3 py-2 hidden md:table-cell">
+                      <div className="h-3.5 bg-gray-200 rounded w-16 animate-pulse"></div>
                     </TableCell>
-                    <TableCell className="px-4 py-3">
-                      <div className="h-6 bg-gray-200 rounded-md w-16 animate-pulse"></div>
+                    <TableCell className="px-3 py-2">
+                      <div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
                     </TableCell>
-                    <TableCell className="px-4 py-3">
-                      <div className="h-4 bg-gray-200 rounded w-8 animate-pulse"></div>
+                    <TableCell className="px-3 py-2 hidden lg:table-cell">
+                      <div className="h-3.5 bg-gray-200 rounded w-6 animate-pulse"></div>
                     </TableCell>
-                    <TableCell className="px-6 py-3">
-                      <div className="flex gap-2 justify-end">
-                        <div className="h-9 w-9 bg-gray-200 rounded-lg animate-pulse"></div>
-                        <div className="h-9 w-9 bg-gray-200 rounded-lg animate-pulse"></div>
+                    <TableCell className="px-4 py-2">
+                      <div className="flex gap-1 justify-end">
+                        <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -425,36 +423,36 @@ export function SubjectsPage() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="rounded-lg border border-gray-200 bg-white p-0 overflow-hidden shadow-lg max-w-md">
+        <DialogContent className="rounded border border-gray-200 bg-white p-0 overflow-hidden shadow-md max-w-sm">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
-              <div className="p-8 space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-teal-600 flex items-center justify-center shadow-sm">
+              <div className="p-6 space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded bg-teal-600 flex items-center justify-center flex-shrink-0 mt-0.5">
                     {editingSubject ? (
-                      <Pencil className="w-6 h-6 text-white" />
+                      <Pencil className="w-5 h-5 text-white" />
                     ) : (
-                      <Plus className="w-6 h-6 text-white" />
+                      <Plus className="w-5 h-5 text-white" />
                     )}
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">
-                      <DialogTitle>{editingSubject ? 'Edit Subject' : 'Create Subject'}</DialogTitle>
+                    <h2 className="text-lg font-bold text-gray-900">
+                      <DialogTitle>{editingSubject ? 'Edit' : 'Create'} Subject</DialogTitle>
                     </h2>
-                    <DialogDescription className="text-sm text-gray-600 mt-0.5">
-                      {editingSubject ? 'Update subject details and settings' : 'Add a new subject to your curriculum'}
+                    <DialogDescription className="text-xs text-gray-600 mt-0">
+                      {editingSubject ? 'Update details' : 'Add new subject'}
                     </DialogDescription>
                   </div>
                 </div>
 
-                <div className="space-y-5">
-                  <div className="grid grid-cols-2 gap-5">
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
                     <FormField
                       control={form.control}
                       name="title"
                       render={({ field }) => (
-                        <FormItem className="space-y-2">
-                          <FormLabel className="text-sm font-semibold text-gray-700">
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="text-xs font-semibold text-gray-700">
                             Title
                           </FormLabel>
                           <FormControl>
@@ -462,7 +460,7 @@ export function SubjectsPage() {
                               placeholder="e.g. Mathematics"
                               {...field}
                               data-testid="subject-title"
-                              className="h-11 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-600/10 transition-colors font-normal text-base"
+                              className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 font-normal text-sm"
                               required
                             />
                           </FormControl>
@@ -475,8 +473,8 @@ export function SubjectsPage() {
                       control={form.control}
                       name="slug"
                       render={({ field }) => (
-                        <FormItem className="space-y-2">
-                          <FormLabel className="text-sm font-semibold text-gray-700">
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="text-xs font-semibold text-gray-700">
                             Slug
                           </FormLabel>
                           <FormControl>
@@ -489,7 +487,7 @@ export function SubjectsPage() {
                                 )
                               }
                               data-testid="subject-slug"
-                              className="h-11 rounded-lg border border-gray-300 bg-white text-teal-700 placeholder:text-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-600/10 transition-colors font-mono text-sm font-normal"
+                              className="h-9 rounded border border-gray-300 bg-white text-teal-700 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 font-mono text-xs font-normal"
                               required
                               pattern="[a-z0-9_]+"
                               title="Lowercase letters, numbers, and underscores only"
@@ -501,18 +499,18 @@ export function SubjectsPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-5">
+                  <div className="grid grid-cols-3 gap-3">
                     <FormField
                       control={form.control}
                       name="color_hex"
                       render={({ field }) => (
-                        <FormItem className="space-y-2">
-                          <FormLabel className="text-sm font-semibold text-gray-700">
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="text-xs font-semibold text-gray-700">
                             Color
                           </FormLabel>
-                          <div className="flex gap-3">
+                          <div className="flex gap-2">
                             <div
-                              className="h-11 w-11 rounded-lg border-2 border-gray-300 shrink-0 flex-shrink-0"
+                              className="h-9 w-9 rounded border border-gray-300 shrink-0"
                               style={{ backgroundColor: field.value || '#0D9488' }}
                             />
                             <FormControl>
@@ -520,7 +518,7 @@ export function SubjectsPage() {
                               placeholder="#0D9488"
                               {...field}
                               data-testid="subject-color"
-                              className="h-11 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-600/10 transition-colors font-normal w-full text-sm"
+                              className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 font-normal w-full text-sm"
                             />
                             </FormControl>
                           </div>
@@ -533,8 +531,8 @@ export function SubjectsPage() {
                       control={form.control}
                       name="display_order"
                       render={({ field }) => (
-                        <FormItem className="space-y-2">
-                          <FormLabel className="text-sm font-semibold text-gray-700">
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="text-xs font-semibold text-gray-700">
                             Order
                           </FormLabel>
                           <FormControl>
@@ -542,7 +540,7 @@ export function SubjectsPage() {
                               type="number"
                               {...field}
                               data-testid="subject-order"
-                              className="h-11 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-600/10 transition-colors font-normal text-base"
+                              className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 font-normal text-sm"
                               required
                             />
                           </FormControl>
@@ -555,8 +553,8 @@ export function SubjectsPage() {
                       control={form.control}
                       name="status"
                       render={({ field }) => (
-                        <FormItem className="space-y-2">
-                          <FormLabel className="text-sm font-semibold text-gray-700">
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="text-xs font-semibold text-gray-700">
                             Status
                           </FormLabel>
                           <Select
@@ -565,14 +563,14 @@ export function SubjectsPage() {
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger className="h-11 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-600/10 transition-colors font-normal text-base">
-                                <SelectValue placeholder="Select status" />
+                              <SelectTrigger className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 font-normal text-sm">
+                                <SelectValue placeholder="Select" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="rounded-lg border border-gray-200 shadow-md">
-                              <SelectItem value="draft" className="font-normal">Draft</SelectItem>
-                              <SelectItem value="live" className="font-normal">Live</SelectItem>
-                              <SelectItem value="published" className="font-normal">Published</SelectItem>
+                            <SelectContent className="rounded border border-gray-200 shadow-sm">
+                              <SelectItem value="draft" className="text-sm">Draft</SelectItem>
+                              <SelectItem value="live" className="text-sm">Live</SelectItem>
+                              <SelectItem value="published" className="text-sm">Published</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -585,15 +583,15 @@ export function SubjectsPage() {
                     control={form.control}
                     name="description"
                     render={({ field }) => (
-                      <FormItem className="space-y-2">
-                        <FormLabel className="text-sm font-semibold text-gray-700">
-                          Description
+                      <FormItem className="space-y-1.5">
+                        <FormLabel className="text-xs font-semibold text-gray-700">
+                          Description (optional)
                         </FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Brief description of this subject area"
+                            placeholder="Brief description..."
                             {...field}
-                            className="h-11 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-600/10 transition-colors font-normal text-sm"
+                            className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 font-normal text-sm"
                           />
                         </FormControl>
                         <FormMessage />
@@ -603,21 +601,21 @@ export function SubjectsPage() {
                 </div>
               </div>
 
-              <DialogFooter className="bg-gray-50 p-6 flex gap-3 border-t border-gray-200">
+              <DialogFooter className="bg-gray-50 p-4 flex gap-2 border-t border-gray-200">
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => setIsDialogOpen(false)}
-                  className="h-10 px-6 rounded-lg font-semibold text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="h-9 px-4 rounded text-sm text-gray-700 hover:bg-gray-100"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={createSubject.isPending || updateSubject.isPending}
-                  className="h-10 px-6 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-9 px-4 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {editingSubject ? 'Save Changes' : 'Create Subject'}
+                  {editingSubject ? 'Save' : 'Create'}
                 </Button>
               </DialogFooter>
             </form>
