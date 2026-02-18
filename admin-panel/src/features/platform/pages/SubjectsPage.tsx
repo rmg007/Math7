@@ -71,11 +71,13 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
     >
       <TableCell className="px-4 py-1.5">
         <div className="flex items-center gap-2">
-          <span
-            className="w-2.5 h-2.5 rounded-full shrink-0 ring-1 ring-black/10"
-            style={{ backgroundColor: subject.color_hex || '#E2E8F0' }}
-            title={subject.color_hex || 'No color'}
-          />
+          {subject.color_hex && (
+            <span
+              className="w-2.5 h-2.5 rounded-full shrink-0 ring-1 ring-black/10"
+              style={{ backgroundColor: subject.color_hex }}
+              title={subject.color_hex}
+            />
+          )}
           <span className="font-medium text-gray-900 text-xs truncate">
             {subject.title}
           </span>
