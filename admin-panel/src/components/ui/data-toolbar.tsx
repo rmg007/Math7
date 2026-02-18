@@ -1,6 +1,5 @@
-import { useRef, useState } from 'react';
-import { Download, Upload, FileText, ChevronDown } from 'lucide-react';
-import { Button } from './button';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronDown, Download, FileText, Upload } from 'lucide-react';
 import {
   exportToCSV,
   exportToJSON,
@@ -29,21 +28,35 @@ export function DataToolbar<T extends Record<string, unknown>>({
   importDisabledMessage = 'Import is not available',
 }: DataToolbarProps<T>) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [importing, setImporting] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
 
   const handleExportCSV = () => {
     exportToCSV(data, columns, entityName.toLowerCase().replace(/\s+/g, '_'));
-    setShowExportMenu(false);
+    setIsOpen(false);
   };
 
   const handleExportJSON = () => {
     exportToJSON(data, entityName.toLowerCase().replace(/\s+/g, '_'));
-    setShowExportMenu(false);
+    setIsOpen(false);
   };
 
   const handleDownloadTemplate = () => {
     downloadTemplate(columns, entityName.toLowerCase().replace(/\s+/g, '_'));
+    setIsOpen(false);
   };
 
   const handleUploadClick = () => {
@@ -51,6 +64,7 @@ export function DataToolbar<T extends Record<string, unknown>>({
       alert(importDisabledMessage);
       return;
     }
+    setIsOpen(false);
     fileInputRef.current?.click();
   };
 
@@ -82,65 +96,49 @@ export function DataToolbar<T extends Record<string, unknown>>({
     }
   };
 
+  const itemClass =
+    'w-full px-3 py-1.5 text-left text-xs text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center gap-2';
+
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <div className="relative">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowExportMenu(!showExportMenu)}
-          className="flex items-center gap-2"
-        >
-          <Download className="h-4 w-4" />
-          <span className="hidden sm:inline">Export</span>
-          <ChevronDown className="h-3 w-3" />
-        </Button>
-        {showExportMenu && (
-          <>
-            <div
-              className="fixed inset-0 z-10"
-              onClick={() => setShowExportMenu(false)}
-            />
-            <div className="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
-              <button
-                onClick={handleExportCSV}
-                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-              >
-                <FileText className="h-4 w-4" />
-                Export as CSV
-              </button>
-              <button
-                onClick={handleExportJSON}
-                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-              >
-                <FileText className="h-4 w-4" />
-                Export as JSON
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleUploadClick}
-        disabled={importing || importDisabled}
-        className="flex items-center gap-2"
+    <div className="relative" ref={menuRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="inline-flex items-center h-9 px-3 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded shadow-sm hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 gap-1.5"
       >
-        <Upload className="h-4 w-4" />
-        <span className="hidden sm:inline">{importing ? 'Importing...' : 'Upload'}</span>
-      </Button>
+        Actions
+        <ChevronDown className="w-3 h-3 text-gray-400" />
+      </button>
 
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleDownloadTemplate}
-        className="flex items-center gap-2"
-      >
-        <FileText className="h-4 w-4" />
-        <span className="hidden sm:inline">Template</span>
-      </Button>
+      {isOpen && (
+        <div className="absolute right-0 z-20 w-44 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+          {/* Import / Upload */}
+          <button
+            onClick={handleUploadClick}
+            disabled={importing || importDisabled}
+            className={itemClass + (importDisabled ? ' opacity-40 cursor-not-allowed' : '')}
+          >
+            <Upload className="h-3.5 w-3.5 text-gray-400" />
+            {importing ? 'Importing...' : 'Upload Data'}
+          </button>
+          <button onClick={handleDownloadTemplate} className={itemClass}>
+            <FileText className="h-3.5 w-3.5 text-gray-400" />
+            Download Template
+          </button>
+
+          {/* Divider */}
+          <div className="border-t border-gray-100 my-1" />
+
+          {/* Exports */}
+          <button onClick={handleExportCSV} className={itemClass}>
+            <Download className="h-3.5 w-3.5 text-gray-400" />
+            Export as CSV
+          </button>
+          <button onClick={handleExportJSON} className={itemClass}>
+            <Download className="h-3.5 w-3.5 text-gray-400" />
+            Export as JSON
+          </button>
+        </div>
+      )}
 
       <input
         ref={fileInputRef}
