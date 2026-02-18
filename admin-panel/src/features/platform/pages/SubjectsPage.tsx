@@ -313,34 +313,32 @@ export function SubjectsPage() {
         }
       />
 
-      {/* Search Bar */}
-      <div className="flex flex-col md:flex-row gap-2 items-start md:items-center">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-8 py-1.5 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none focus-visible:outline-none text-sm"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded"
-              title="Clear"
-            >
-              <X className="h-3 w-3" />
-            </button>
-          )}
-        </div>
-
-        <span className="text-[11px] text-gray-500 whitespace-nowrap">
-          {filteredSubjects.length} {filteredSubjects.length === 1 ? 'subject' : 'subjects'}
-        </span>
-      </div>
-
       <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
+        {/* Card Header: Search + Count */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search subjects..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-8 py-1.5 rounded border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none focus-visible:outline-none text-sm"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-200 text-gray-400 hover:text-gray-600 rounded"
+                title="Clear"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+          <span className="text-[11px] text-gray-500 whitespace-nowrap">
+            {filteredSubjects.length} {filteredSubjects.length === 1 ? 'subject' : 'subjects'}
+          </span>
+        </div>
           <Table className="w-full">
             <TableHeader>
               <TableRow className="bg-gray-50 border-b border-gray-200">
