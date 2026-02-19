@@ -1,36 +1,47 @@
 {
-  "session_id": "2026-02-17T22:45:00",
-  "mission": "Fix LoginPage Unit Tests and Deploy",
+  "session_id": "2026-02-18T19:40:00",
+  "mission": "Fix Antigravity Telegram Bridge 404 error",
   "subtasks": [
     {
       "id": 1,
-      "description": "Fix 'supabase.auth.getSession' mock in LoginPage.test.tsx",
+      "description": "Diagnose 404 error — probe IDE internal server for valid endpoints",
       "status": "completed",
-      "iterations": 1,
-      "notes": "Added getSession mock. Passed single test run."
+      "iterations": 2,
+      "notes": "All paths returned 404. IDE server is LSP/dev server, not a REST API."
     },
     {
       "id": 2,
-      "description": "Run Admin Panel Unit Tests (Full Suite)",
+      "description": "Rewrite bridge to use tasks.json queue pattern instead of HTTP API",
       "status": "completed",
       "iterations": 1,
-      "notes": "Full suite passed!"
+      "files_changed": ["antigravity_bridge.py"],
+      "notes": "Removed requests dependency, added /status and /queue commands."
     },
     {
       "id": 3,
-      "description": "Deploy to Production",
-      "status": "pending",
-      "iterations": 0
+      "description": "Update LEARNING_LOG.md and tasks.md",
+      "status": "completed",
+      "iterations": 1,
+      "files_changed": ["docs/LEARNING_LOG.md", "tasks.md"]
     }
   ],
   "current_subtask": 3,
-  "total_iterations": 2,
-  "errors_encountered": [],
+  "total_iterations": 4,
+  "errors_encountered": [
+    "404 on all probed paths: /api/agent/prompt, /api/prompt, /prompt, /v1/agent/prompt, /v1/chat/completions, etc."
+  ],
   "research_queries": [],
   "circuit_breaker_triggered": false,
-  "learnings": [],
+  "learnings": [
+    {
+      "category": "config-drift",
+      "lesson": "Antigravity IDE internal HTTP server is not a REST API. It uses proprietary protocols for IDE communication. Use tasks.json + ops_runner.py for external integrations.",
+      "subtask_id": 1,
+      "date": "2026-02-18"
+    }
+  ],
   "pre_task_sweep": {
-    "status": "success",
-    "notes": "All tests green."
+    "status": "skipped",
+    "reason": "Python script fix — no build/lint dependencies"
   }
 }

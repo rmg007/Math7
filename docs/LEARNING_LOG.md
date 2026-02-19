@@ -1,5 +1,90 @@
 ---
 
+## 2026-02-18: Telegram Bridge — Architecture Fix [no test needed]
+
+### Session Context
+
+- **Trigger**: 404 errors when bridge tried to POST to Antigravity IDE's internal HTTP server
+- **Scope**: Complete rewrite of `antigravity_bridge.py` from HTTP API to `tasks.json` queue pattern
+- **Outcome**: Bridge running cleanly with task queuing, `/status`, and `/queue` commands
+
+### Root Cause
+
+The Antigravity IDE's internal HTTP server (dynamic port, e.g. 51282) is an **LSP/development server**, NOT a REST API. It does not accept external HTTP POST requests for prompt injection. Every path (`/api/agent/prompt`, `/api/prompt`, `/prompt`, `/v1/chat/completions`, etc.) returned 404 because the server simply doesn't expose that functionality.
+
+### Architecture Change
+
+- **Before**: `requests.post(localhost:{port}/api/agent/prompt)` → 404 every time
+- **After**: Write tasks to `tasks.json` → `ops_runner.py` picks them up automatically
+- Removed `requests` dependency entirely; now uses only `json` + `pathlib`
+
+### Features
+
+1. **Task Queuing**: Messages from Telegram → appended to `tasks.json` as structured task objects
+2. **`/status` Command**: Reads `tasks.status.json` to report last task result
+3. **`/queue` Command**: Shows pending tasks in queue
+4. **User Authorization**: `AUTHORIZED_USER_ID` check (unchanged, still secure)
+
+### Prevention Rules & Lessons
+
+1. **IDE internal servers are NOT public APIs** — Don't assume an IDE's local HTTP server accepts external REST calls. They use proprietary protocols (LSP, gRPC, etc.).
+2. **Use existing architecture** — The `tasks.json` + `ops_runner.py` pattern was already built and proven. Always check for prior art before inventing new integration points.
+3. **Endpoint scanning reveals architecture** — When all paths return 404, the server doesn't serve what you think it does. Stop probing, rethink approach.
+4. **Port 8080 conflicts** — EnterpriseDB/Apache occupies 8080 on Windows. Always use dynamic port detection.
+
+### Verification
+
+- Script starts cleanly with no network errors
+- No dependency on Antigravity IDE's internal server
+- Tasks written to `tasks.json` in correct format for `ops_runner.py`
+
+---
+
+## 2026-02-18: Proactive Import & Type Fixes [test created]
+
+### Session Context
+
+- **Trigger**: `ReferenceError: Badge is not defined` catch in `DashboardPage.tsx`
+- **Scope**: Proactive scan of 100+ files for missing imports and type errors
+- **Outcome**: 4 critical reference errors fixed, type safety hardened for bulk imports, 100% tsc pass
+
+### Bugs Found & Fixed
+
+#### BUG-F1 CRITICAL: Missing `Badge` in Dashboard [no test needed]
+
+- **Issue**: `DashboardPage.tsx` used `<Badge>` component without an import, causing immediate crash on load.
+- **Fix**: Added `import { Badge } from '@/components/ui/badge'`.
+- **Lesson**: Even if an IDE autocompletes a component, double-check the import line.
+
+#### BUG-F2 CRITICAL: Missing `Loader2` in Subjects [no test needed]
+
+- **Issue**: `SubjectsPage.tsx` used `<Loader2>` in bulk action buttons without importing it from `lucide-react`.
+- **Fix**: Added `Loader2` to `lucide-react` imports.
+
+#### BUG-F3 MEDIUM: Type Safety in CSV Imports [test created]
+
+- **Issue**: `handleImport` in `AppsPage.tsx` and `SubjectsPage.tsx` passed `Record<string, unknown>[]` directly to `mutateAsync`, causing type errors.
+- **Fix**: Implemented explicit mapping to `AppInsert[]` and `SubjectInsert[]` with safe defaults for numbers and booleans.
+- **Lesson**: Bulk imports must always normalize incoming CSV data before passing to mutation hooks.
+
+#### BUG-F4 LOW: Linting Violation in Skill List [no test needed]
+
+- **Issue**: `src/features/curriculum/components/skill-list.tsx` used `catch (error: any)`, violating `no-explicit-any`.
+- **Fix**: Replaced with `catch (error)` and safe type inspection for `error.code`.
+
+### Prevention Rules
+
+1. **Verify imports after every component addition** — Run `npx tsc --noEmit` locally before committing UI changes.
+2. **Strict data normalization for bulk imports** — Never trust CSV/Excel input types. Always map to a strict `Insert` type with defaults.
+3. **Safe Error Handling** — Use `catch (error)` or `catch (error: unknown)` and inspect types instead of casting to `any`.
+
+### Verification
+
+- `npx tsc --noEmit` — 0 errors
+- `npm run lint` — 0 errors (warnings acceptable)
+
+---
+
 ## 2026-02-18: Fix Edit Page Loading & "Not Found" Bugs [test created]
 
 ### Session Context
@@ -23,11 +108,15 @@ Single-entity hooks (`useDomain`, `useSkill`, `useQuestion`) included redundant 
 export function useDomain(domainId: string) {
   const { currentApp, isSuperAdmin } = useApp();
   return useQuery({
-    queryKey: ['domain', domainId, currentApp?.app_id, isSuperAdmin],
+    queryKey: ["domain", domainId, currentApp?.app_id, isSuperAdmin],
     enabled: Boolean(domainId) && (isSuperAdmin || Boolean(currentApp?.app_id)),
     queryFn: async () => {
-      let query = supabase.from('domains').select('*').eq('domain_id', domainId);
-      if (!isSuperAdmin && currentApp?.app_id) query = query.eq('app_id', currentApp.app_id);
+      let query = supabase
+        .from("domains")
+        .select("*")
+        .eq("domain_id", domainId);
+      if (!isSuperAdmin && currentApp?.app_id)
+        query = query.eq("app_id", currentApp.app_id);
       // ...
     },
   });
@@ -36,11 +125,14 @@ export function useDomain(domainId: string) {
 // AFTER (FIXED) — PK only, RLS handles isolation
 export function useDomain(domainId: string) {
   return useQuery({
-    queryKey: ['domain', domainId],
+    queryKey: ["domain", domainId],
     enabled: Boolean(domainId) && isValidUUID(domainId),
     queryFn: async () => {
-      const { data, error } = await supabase.from('domains').select('*')
-        .eq('domain_id', domainId).single();
+      const { data, error } = await supabase
+        .from("domains")
+        .select("*")
+        .eq("domain_id", domainId)
+        .single();
       // ...
     },
   });
@@ -3942,18 +4034,21 @@ Regenerating database types exposed that the recent Supabase project recreation 
 ### What Was Done
 
 **Phase 1: Color Palette Overhaul**
+
 - Replaced all purple references with indigo as primary color (matching enterprise SaaS aesthetic)
 - Maintained semantic colors (emerald for live/success, blue for published, gray for draft, rose for delete)
 - Updated all focus states, backgrounds, shadows, and text colors to indigo
 - Changed default color hex from #8b5cf6 (purple) to #6366f1 (indigo)
 
 **Phase 2: Typography Refinement**
+
 - Removed italic styling from titles and form content (less modern appearance)
 - Reduced font-black usage: converted to font-bold for titles and font-semibold for labels/headers
 - Updated form input font weights from font-bold to font-normal for cleaner appearance
 - Maintained visual hierarchy while reducing visual weight
 
 **Phase 3: Layout & Spacing**
+
 - Reduced main container vertical spacing from space-y-10 to space-y-8
 - Optimized padding: main container p-4 md:p-8 → p-4 md:p-6
 - Reduced table row padding from py-5 to py-4 and px-8 to px-6 for compact efficiency
@@ -3962,6 +4057,7 @@ Regenerating database types exposed that the recent Supabase project recreation 
 - Tightened form grid gaps from gap-6 to gap-5 and section spacing from space-y-6 to space-y-5
 
 **Phase 4: Data Display & Interactions**
+
 - Reduced form input heights from h-14 to h-12 for more compact dialogs
 - Updated form input border-radius from rounded-2xl to rounded-xl for refined appearance
 - Optimized button sizes: h-12 → h-10, px-8 → px-6
@@ -3970,6 +4066,7 @@ Regenerating database types exposed that the recent Supabase project recreation 
 - Updated badge styling with consistent border radius (rounded-lg/rounded-md)
 
 **Phase 5: Visual Polish**
+
 - Reduced excessive border-radius: rounded-[2.5rem] → rounded-2xl, rounded-3xl → rounded-2xl
 - Simplified dialog styling: removed border-none, added border border-gray-200/50
 - Reduced shadow depths: shadow-xl → shadow-md, shadow-lg → shadow-md/sm, shadow-2xl → shadow-lg
@@ -4013,12 +4110,14 @@ Regenerating database types exposed that the recent Supabase project recreation 
 ### What Was Done
 
 #### 1. Column Structure Optimization
+
 - **Removed** Icon column (moved to detail view)
 - **Reordered** columns: Title → Slug → Status → Order → Actions (5 columns)
 - **Rationale**: Better data density for admin use case, critical state (Status) more visible
 - **Impact**: Cleaner interface, easier to scan
 
 #### 2. Complete Color System Overhaul (Indigo → Teal)
+
 - Changed ALL color references from indigo/purple to brand teal (#0D9488)
   - Table headers: gray-400 → gray-700
   - Sortable indicators: purple-600 → teal-600
@@ -4031,6 +4130,7 @@ Regenerating database types exposed that the recent Supabase project recreation 
 - **Impact**: 100% brand alignment, consistent color system
 
 #### 3. Typography Refinement (Per Design System)
+
 - **Headers**: text-2xs (10px) uppercase → text-sm (14px) title case
   - Color: gray-400 → gray-700 (4.5:1 → 13:1 contrast ratio)
   - Removed tracking-widest, improved readability
@@ -4040,6 +4140,7 @@ Regenerating database types exposed that the recent Supabase project recreation 
 - **Impact**: Design system compliance, 40% readability improvement
 
 #### 4. Spacing Standardization (4px Base Unit)
+
 - **Row height**: py-4 → py-3 (12px padding = 44px total, matches design system)
 - **Cell padding**: Standardized px-6/px-4 with py-3
 - **Form inputs**: h-12 → h-11 (48px → 44px, more compact)
@@ -4048,6 +4149,7 @@ Regenerating database types exposed that the recent Supabase project recreation 
 - **Impact**: Consistent spacing throughout, professional appearance
 
 #### 5. Interactive States Enhancement
+
 - **Hover State**: indigo-50/20 (barely visible) → neutral-100 (clearly visible ~12px change)
 - **Sort Indicators**: Color changes + aria-sort attributes for a11y
 - **Form Focus**: ring-teal-600/10 with border-teal-500
@@ -4056,6 +4158,7 @@ Regenerating database types exposed that the recent Supabase project recreation 
 - **Impact**: Clear user feedback, professional interactions
 
 #### 6. Accessibility Improvements (WCAG AA)
+
 - **Color Contrast**:
   - Headers: gray-700 on white (13:1 > 4.5:1 minimum) ✅
   - Body: gray-900 on white (21:1) ✅
@@ -4068,6 +4171,7 @@ Regenerating database types exposed that the recent Supabase project recreation 
 - **Impact**: WCAG AA compliant interface, 40% contrast improvement
 
 #### 7. Visual Polish
+
 - **Borders**: Consistent gray-200, removed semi-transparent variants
 - **Shadows**: Appropriate to elevation (shadow-sm for cards, shadow-lg for modal)
 - **Border-radius**: Standardized to rounded-lg (modern look)
@@ -4078,6 +4182,7 @@ Regenerating database types exposed that the recent Supabase project recreation 
 #### 8. Component Updates
 
 **SortableHeader.tsx:**
+
 - Icon color: purple-600 → teal-600
 - Inactive icon: gray-400 → gray-300 (better contrast)
 - Focus ring: 2px teal-600 with offset
@@ -4086,6 +4191,7 @@ Regenerating database types exposed that the recent Supabase project recreation 
 - Gap: gap-1 → gap-1.5
 
 **SubjectRow:**
+
 - Removed icon column entirely
 - Updated all cell padding and alignment
 - Improved status badge styling (removed uppercase)
@@ -4094,12 +4200,14 @@ Regenerating database types exposed that the recent Supabase project recreation 
 - Hover row: indigo-50/20 → neutral-100
 
 **Table Headers:**
+
 - Font size: text-2xs → text-sm (14px)
 - Case: UPPERCASE → Title Case
 - Weight: Consistent font-semibold
 - Color: gray-400 → gray-700
 
 **Form Fields:**
+
 - Border: gray-100 → gray-300 (more visible)
 - Background: bg-white/50 → bg-white (cleaner)
 - Height: h-12 → h-11 (compact but accessible)
@@ -4107,6 +4215,7 @@ Regenerating database types exposed that the recent Supabase project recreation 
 - Placeholder: Improved text guidance
 
 **Dialog & Search:**
+
 - Removed backdrop-blur (better performance)
 - Simplified borders (gray-200 solid)
 - Dialog max-width: Tighter for better usability
@@ -4126,6 +4235,7 @@ Regenerating database types exposed that the recent Supabase project recreation 
 ### Accessibility Validation
 
 **WCAG AA Compliance:**
+
 - ✅ Color contrast: All text meets 4.5:1 minimum
 - ✅ Focus indicators: 3px teal-600 ring, clearly visible
 - ✅ ARIA labels: Proper semantic HTML, aria-sort on headers
@@ -4134,6 +4244,7 @@ Regenerating database types exposed that the recent Supabase project recreation 
 - ✅ Screen readers: Proper text alternatives, labels
 
 **Testing:**
+
 - ✅ Manual keyboard navigation tested
 - ✅ Focus state visibility verified
 - ✅ Color contrast ratios calculated (all > 4.5:1)
@@ -4202,6 +4313,7 @@ Regenerating database types exposed that the recent Supabase project recreation 
 ## 2026-02-18 (Evening): Aggressive Data-Density Optimization
 
 ### Session Context
+
 - **Feedback**: Table still too roomy, not responsive enough, animations unnecessary
 - **Scope**: Full table, dialog, and search bar optimization
 - **Outcome**: ✅ Professional data-dense admin table with responsive design
@@ -4209,19 +4321,23 @@ Regenerating database types exposed that the recent Supabase project recreation 
 ### Bold Design Changes
 
 #### 1. Data Density Overhaul
+
 **Table Rows:**
+
 - Height: py-3 (44px) → py-2 (32px) - 27% more compact
 - Cell padding: px-6/px-4 → px-4/px-3 (tighter horizontal space)
 - No gaps between rows (flush design)
 - More subjects visible at once (critical for admin workflows)
 
 **Table Headers:**
+
 - Height: py-3 → py-2
 - Font size: text-sm → text-xs (12px)
 - Background: white → gray-50 (subtle distinction)
 - More compact visual weight
 
 **Form Inputs:**
+
 - Height: h-11 (44px) → h-9 (36px) - more compact dialogs
 - Border-radius: rounded-lg → rounded (sharper, more data-focused)
 - Focus ring: ring-2 → ring-1 (less aggressive)
@@ -4229,12 +4345,14 @@ Regenerating database types exposed that the recent Supabase project recreation 
 - Label spacing: space-y-2 → space-y-1.5
 
 **Buttons:**
+
 - Icon buttons: 40px → 32px (h-10 → h-8)
 - Primary buttons: px-8 → px-4 (tighter)
 - Text: "Add Subject" → "New", "Create Subject" → "Create" (shorter labels)
 - No shadows or minimal shadow
 
 #### 2. Animation Removal
+
 - ✅ Removed transition-colors from table rows (instant color change on hover)
 - ✅ Removed transition-all from form inputs
 - ✅ Removed transition-colors from buttons
@@ -4242,28 +4360,34 @@ Regenerating database types exposed that the recent Supabase project recreation 
 - **Impact**: Faster perceived performance, data-focused interface
 
 #### 3. Responsive Design Implementation
+
 **Mobile-First Column Hiding:**
+
 - **Mobile (< 768px)**: Title | Status | Actions (3 columns)
 - **Tablet (≥ 768px)**: Title | Slug | Status | Actions (4 columns)
 - **Desktop (≥ 1024px)**: Title | Slug | Status | Order | Actions (5 columns)
 
 **Implementation:**
+
 ```
 Slug column: hidden md:table-cell
 Order column: hidden lg:table-cell
 ```
 
 **Responsive Search:**
+
 - Flex layout changes: row on desktop → column on mobile
 - Input becomes full-width on small screens
 - Count text becomes inline
 
 **Responsive Table:**
+
 - Horizontal scroll preserved for mobile
 - Smaller text and icons on mobile
 - Touch targets maintain 32px+ (with padding)
 
 #### 4. Visual Simplification
+
 - ✅ Removed backdrop-blur (glassmorphism) - cleaner, better performance
 - ✅ Simplified borders: rounded-lg → rounded (modern, sharp)
 - ✅ Search bar: No background badge, just inline count text
@@ -4272,6 +4396,7 @@ Order column: hidden lg:table-cell
 - ✅ SortableHeader: Smaller icons, tighter gap (gap-1.5 → gap-1)
 
 #### 5. Spacing Reductions Throughout
+
 - Page spacing: space-y-8 → space-y-4 (50% less vertical space between sections)
 - Form sections: space-y-5 → space-y-3 (40% tighter)
 - Grid gaps: gap-5 → gap-3 (40% tighter)
@@ -4280,6 +4405,7 @@ Order column: hidden lg:table-cell
 - Button gaps: gap-2 → gap-1 (50% tighter)
 
 #### 6. Color Optimization for Density
+
 - Hover: Changed from transition to instant color (no animation)
 - Hover background: neutral-100 is solid and visible
 - No visual "breathing room" - compact, focused design
@@ -4288,6 +4414,7 @@ Order column: hidden lg:table-cell
 ### File Changes Summary
 
 **admin-panel/src/components/ui/sortable-header.tsx:**
+
 - Removed transition-colors
 - Reduced icon sizes: h-4 w-4 → h-3.5 w-3.5
 - Reduced gap: gap-1.5 → gap-1
@@ -4295,6 +4422,7 @@ Order column: hidden lg:table-cell
 - Focus ring: ring-2 ring-offset-2 → ring-1 ring-offset-1
 
 **admin-panel/src/features/platform/pages/SubjectsPage.tsx:**
+
 - **SubjectRow**: py-3 → py-2, hidden columns on small screens, h-8 buttons
 - **Headers**: py-3 → py-2, text-sm → text-xs, bg-white → bg-gray-50
 - **Search bar**: Minimal styling, count as text only, reduced padding
@@ -4314,6 +4442,7 @@ Order column: hidden lg:table-cell
 6. **Instant Feedback**: No transitions = immediate visual response
 
 ### Accessibility Considerations
+
 - ✅ Touch targets still 32px+ (meets accessibility minimum with padding)
 - ✅ Focus rings reduced but still visible (ring-1, teal-600)
 - ✅ Color contrast maintained (gray-700 on white = 13:1)
@@ -4322,6 +4451,7 @@ Order column: hidden lg:table-cell
 - ✅ Responsive design maintains usability on all screens
 
 ### Performance Impact
+
 - ✅ Reduced DOM complexity (fewer elements to render)
 - ✅ No transition CSS (lighter style calculations)
 - ✅ No animations (smoother 60fps, no GPU overhead)
@@ -4331,26 +4461,31 @@ Order column: hidden lg:table-cell
 ### Before/After Comparison
 
 **Table Row Height:**
+
 - Before: 44px (py-3)
 - After: 32px (py-2)
 - **Change**: -27% (more efficient use of vertical space)
 
 **Form Input Height:**
+
 - Before: 44px (h-11)
 - After: 36px (h-9)
 - **Change**: -18% (tighter dialogs)
 
 **Page Spacing:**
+
 - Before: 32px gaps (space-y-8)
 - After: 16px gaps (space-y-4)
 - **Change**: -50% (compact sections)
 
 **Visible Subjects on 1080p Screen:**
+
 - Before: ~8-10 subjects
 - After: ~12-15 subjects
 - **Change**: +40% more data visible
 
 **Form Completion Time:**
+
 - Before: Small inputs with larger spacing
 - After: Compact, focused form
 - **Impact**: Faster data entry
@@ -4358,22 +4493,26 @@ Order column: hidden lg:table-cell
 ### Responsive Breakpoints
 
 **Mobile (< 768px)**
+
 - 3 columns visible (Title, Status, Actions)
 - Full-width table with horizontal scroll
 - Stack layout for search
 - Smaller text and buttons
 
 **Tablet (≥ 768px)**
+
 - 4 columns visible (+ Slug)
 - Row layout for search bar
 - Medium-sized text and buttons
 
 **Desktop (≥ 1024px)**
+
 - 5 columns visible (+ Order)
 - Full row layout
 - Normal-sized text and buttons
 
 ### Testing Verification
+
 - ✅ No TypeScript errors
 - ✅ Dev server hot-reload working
 - ✅ All states rendered correctly
@@ -4405,7 +4544,23 @@ Order column: hidden lg:table-cell
 ### Next Steps
 
 The Subjects page is now a **production-ready admin interface**. Next phases:
+
 1. Apply same optimization patterns to other admin pages
 2. Add bulk actions (if needed)
 3. Advanced filtering/views (future enhancement)
 4. Consider column customization (future enhancement)
+
+## 2026-02-18 (Midday): Fixing Dashboard ReferenceError
+
+### Session Context
+
+- **Trigger**: DashboardPage failed to render with `ReferenceError: Badge is not defined`.
+- **Scope**: `admin-panel/src/features/dashboard/pages/DashboardPage.tsx`
+- **Outcome**: [no test needed] Fixed by adding the missing import for the `Badge` component.
+
+### Technical Learnings
+
+- **Import Verification**: When refactoring or adding UI components (like `Badge`), always verify that the import statement is present. Runtime `ReferenceError`s in React components are often due to missing imports that weren't caught by the IDE's auto-import or were accidentally removed.
+- **Component Discovery**: Components in the `admin-panel` are typically located in `@/components/ui/` or within the feature's own `components` directory.
+
+- **Port Conflict Awareness**: Port 8080 on Windows is often used by EnterpriseDB (Apache), which can conflict with local agent APIs. The Antigravity IDE uses dynamic ports and auth tokens found in GEMINI_CLI_IDE_SERVER_PORT and GEMINI_CLI_IDE_AUTH_TOKEN.
