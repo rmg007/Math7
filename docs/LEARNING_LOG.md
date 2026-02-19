@@ -6,9 +6,18 @@
 
 ### Session Context
 
-- **Trigger**: Final release requirement for Phase 5
+- **Trigger**: Final release requirement for Phase 5 & User login issues in Student App
 - **Scope**: Forensic audit, security hardening, E2E auth flow, and production deployment
-- **Outcome**: Verified codebase stability, cleared false-positive security findings, and deployed all apps to production
+- **Outcome**: Resolved "Login Trap" bug in Student App, verified codebase stability, and prepared for final deployment
+
+### Bugs Found & Fixed
+
+#### BUG-AUTH-TRAP: Student App Login Stays on Login Screen [test created]
+
+- **Issue**: `LoginScreen` in `student-app` successfully authenticated users but failed to `pop` itself, leaving users stuck on the login screen.
+- **Fix**: Added `Navigator.pop(context)` and a success `SnackBar` in the `_handleLogin` method.
+- **Root Cause**: Manual navigation stack transitions were missing in the authentication success path.
+- **Prevention**: Created `login_screen_repro_test.dart` to verify that the screen is dismissed upon successful login. Added a new "Rule of Navigation" to prevention guidelines.
 
 ### Audit Findings & Resolutions
 
