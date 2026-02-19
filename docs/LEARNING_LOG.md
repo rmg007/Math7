@@ -1,5 +1,37 @@
 ---
 
+## 2026-02-18: CSP & Tenant Initialization Fixes [test created]
+
+### Session Context
+
+- **Trigger**: Script block for Cloudflare Insights and "Tenant not found" error on student app production
+- **Scope**: Security headers, RLS policies, and initialization flow
+- **Outcome**: Resolved CSP violations and enabled unauthenticated tenant discovery
+
+### Bugs Found & Fixed
+
+#### BUG-CSP: Cloudflare Insights Blocked
+- **Issue**: `admin-panel/public/_headers` missing `static.cloudflareinsights.com` in `script-src`, causing beacon failures.
+- **Fix**: Synchronized `_headers` with `index.html` meta tag, adding Cloudflare and Supabase hostnames.
+- **Lesson**: Production headers in `_headers` take precedence or combine with meta tags. Always keep them in sync.
+
+#### BUG-TENANT: Anonymous Tenant Discovery Blocked
+- **Issue**: Visitors to `app.questerix.com` saw "Tenant not found" because the `apps` table lacked an RLS policy for the `anon` role. The app couldn't retrieve the `app_id` needed to initialize.
+- **Fix**: Added `apps_anon_read` policy: `CREATE POLICY apps_anon_read ON public.apps FOR SELECT TO anon USING (is_active = true);`.
+- **Lesson**: Tables used for app bootstrapping (like `apps` for tenant discovery) must have `anon` read access if the app starts before authentication.
+
+### Prevention Rules
+
+1. **Keep `_headers` and `meta CSP` in sync** — Always verify that production headers match environment-specific meta tags.
+2. **Review RLS for bootstrapping tables** — Any table queried during app startup (Pre-Auth) must have an explicit `anon` policy.
+3. **Verify with Browser Subagent** — Network errors like 401 on initialization requests are often RLS related, not just "Unauthorized" in the auth sense.
+
+### Verification
+
+- Browser Subagent confirmed "Welcome" screen loading correctly.
+- Console logs show 0 CSP errors for `beacon.min.js`.
+
+
 ## 2026-02-18: Proactive Import & Type Fixes [test created]
 
 ### Session Context

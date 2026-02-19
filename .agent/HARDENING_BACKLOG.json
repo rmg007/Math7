@@ -1,51 +1,715 @@
-{
-  "stats": {
-    "info": 0,
-    "critical": 0,
-    "warning": 5
-  },
-  "findings": [
-    {
-      "id": "-947852293",
-      "type": "dead_file",
-      "status": "OPEN",
-      "severity": "WARNING",
-      "file": "admin-panel\\src\\lib\\monitoring.ts",
-      "message": "Hollow Placeholder (1138 bytes)"
-    },
-    {
-      "id": "1492629625",
-      "type": "dead_file",
-      "status": "OPEN",
-      "severity": "WARNING",
-      "file": "admin-panel\\src\\vite-env.d.ts",
-      "message": "Hollow Placeholder (1309 bytes)"
-    },
-    {
-      "id": "1169597322",
-      "type": "dead_file",
-      "status": "OPEN",
-      "severity": "WARNING",
-      "file": "student-app\\lib\\src\\core\\theme\\generated\\app_borders.g.dart",
-      "message": "Hollow Placeholder (1180 bytes)"
-    },
-    {
-      "id": "1326538073",
-      "type": "dead_file",
-      "status": "OPEN",
-      "severity": "WARNING",
-      "file": "student-app\\lib\\src\\core\\theme\\generated\\generated.dart",
-      "message": "Hollow Placeholder (265 bytes)"
-    },
-    {
-      "id": "-714481475",
-      "type": "dead_file",
-      "status": "OPEN",
-      "severity": "WARNING",
-      "file": "student-app\\lib\\src\\core\\core_providers.dart",
-      "message": "Hollow Placeholder (1498 bytes)"
-    }
-  ],
-  "verdict": "🟡 DEBT WARN",
-  "last_run": "2026-02-10 17:33"
+﻿{
+    "verdict":  " STOP SHIP",
+    "findings":  [
+                     {
+                         "id":  "851019599",
+                         "message":  "VUL-003 (Service Role Leak)",
+                         "line":  40,
+                         "type":  "security",
+                         "severity":  "CRITICAL",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\security\\bundle-safety.test.ts"
+                     },
+                     {
+                         "id":  "-1474579229",
+                         "message":  "VUL-003 (Service Role Leak)",
+                         "line":  44,
+                         "type":  "security",
+                         "severity":  "CRITICAL",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\security\\bundle-safety.test.ts"
+                     },
+                     {
+                         "id":  "851019598",
+                         "message":  "VUL-003 (Service Role Leak)",
+                         "line":  50,
+                         "type":  "security",
+                         "severity":  "CRITICAL",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\security\\bundle-safety.test.ts"
+                     },
+                     {
+                         "id":  "-1776562171",
+                         "message":  "VUL-003 (Service Role Leak)",
+                         "line":  59,
+                         "type":  "security",
+                         "severity":  "CRITICAL",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\generate-questions\\index.ts"
+                     },
+                     {
+                         "id":  "-65399660",
+                         "message":  "VUL-003 (Service Role Leak)",
+                         "line":  9,
+                         "type":  "security",
+                         "severity":  "CRITICAL",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\generate-questions\\security.test.ts"
+                     },
+                     {
+                         "id":  "-1740471952",
+                         "message":  "VUL-003 (Service Role Leak)",
+                         "line":  14,
+                         "type":  "security",
+                         "severity":  "CRITICAL",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\generate-questions\\test.ts"
+                     },
+                     {
+                         "id":  "268834847",
+                         "message":  "VUL-003 (Service Role Leak)",
+                         "line":  244,
+                         "type":  "security",
+                         "severity":  "CRITICAL",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\health-check\\index.ts"
+                     },
+                     {
+                         "id":  "1647867240",
+                         "message":  "VUL-003 (Service Role Leak)",
+                         "line":  31,
+                         "type":  "security",
+                         "severity":  "CRITICAL",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\parse-import-prompt\\index.ts"
+                     },
+                     {
+                         "id":  "1711760018",
+                         "message":  "VUL-003 (Service Role Leak)",
+                         "line":  26,
+                         "type":  "security",
+                         "severity":  "CRITICAL",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\revoke-user-sessions\\index.ts"
+                     },
+                     {
+                         "id":  "677637179",
+                         "message":  "VUL-003 (Service Role Leak)",
+                         "line":  56,
+                         "type":  "security",
+                         "severity":  "CRITICAL",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\validate-content\\index.ts"
+                     },
+                     {
+                         "id":  "-1048698727",
+                         "message":  "VUL-003 (Service Role Leak)",
+                         "line":  14,
+                         "type":  "security",
+                         "severity":  "CRITICAL",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\validate-content\\test.ts"
+                     },
+                     {
+                         "id":  "228821448",
+                         "message":  "VUL-003 (Service Role Leak)",
+                         "line":  38,
+                         "type":  "security",
+                         "severity":  "CRITICAL",
+                         "status":  "OPEN",
+                         "file":  "supabase\\migrations\\20260214210000_super_admin_jwt_claims.sql"
+                     },
+                     {
+                         "id":  "231553473",
+                         "message":  "VUL-003 (Service Role Leak)",
+                         "line":  162,
+                         "type":  "security",
+                         "severity":  "CRITICAL",
+                         "status":  "OPEN",
+                         "file":  "supabase\\migrations\\20260216161700_hades_rpc_hardening.sql"
+                     },
+                     {
+                         "id":  "-219460816",
+                         "message":  "Missing Temp",
+                         "line":  136,
+                         "type":  "ai_governance",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\generate-questions\\index.ts"
+                     },
+                     {
+                         "id":  "-1716739928",
+                         "message":  "Missing Temp",
+                         "line":  93,
+                         "type":  "ai_governance",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\generate-questions\\test.ts"
+                     },
+                     {
+                         "id":  "-480106113",
+                         "message":  "Missing Temp",
+                         "line":  91,
+                         "type":  "ai_governance",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\parse-import-prompt\\index.ts"
+                     },
+                     {
+                         "id":  "860703615",
+                         "message":  "Missing Temp",
+                         "line":  112,
+                         "type":  "ai_governance",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\validate-content\\index.ts"
+                     },
+                     {
+                         "id":  "-838348021",
+                         "message":  "Missing Temp",
+                         "line":  93,
+                         "type":  "ai_governance",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\validate-content\\test.ts"
+                     },
+                     {
+                         "id":  "509919161",
+                         "message":  "Hollow Placeholder (1277 bytes)",
+                         "type":  "dead_file",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\lib\\schema-sync.test.ts"
+                     },
+                     {
+                         "id":  "-1309473970",
+                         "message":  "Hollow Placeholder (1135 bytes)",
+                         "type":  "dead_file",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\lib\\utils.test.ts"
+                     },
+                     {
+                         "id":  "-411070097",
+                         "message":  "Hollow Placeholder (1126 bytes)",
+                         "type":  "dead_file",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\vite-env.d.ts"
+                     },
+                     {
+                         "id":  "1390766810",
+                         "message":  "Hollow Placeholder (647 bytes)",
+                         "type":  "dead_file",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\vitest.setup.ts"
+                     },
+                     {
+                         "id":  "257161412",
+                         "message":  "Hollow Placeholder (1180 bytes)",
+                         "type":  "dead_file",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "student-app\\lib\\src\\core\\theme\\generated\\app_borders.g.dart"
+                     },
+                     {
+                         "id":  "1798414140",
+                         "message":  "Hollow Placeholder (265 bytes)",
+                         "type":  "dead_file",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "student-app\\lib\\src\\core\\theme\\generated\\generated.dart"
+                     },
+                     {
+                         "id":  "-1257092078",
+                         "message":  "Hollow Placeholder (1498 bytes)",
+                         "type":  "dead_file",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "student-app\\lib\\src\\core\\core_providers.dart"
+                     },
+                     {
+                         "id":  "711334166",
+                         "message":  "Type Hole",
+                         "line":  99,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx"
+                     },
+                     {
+                         "id":  "-2027921723",
+                         "message":  "Type Hole",
+                         "line":  115,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx"
+                     },
+                     {
+                         "id":  "-1604434220",
+                         "message":  "Type Hole",
+                         "line":  125,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx"
+                     },
+                     {
+                         "id":  "-1322109216",
+                         "message":  "Type Hole",
+                         "line":  147,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx"
+                     },
+                     {
+                         "id":  "-1039784219",
+                         "message":  "Type Hole",
+                         "line":  162,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx"
+                     },
+                     {
+                         "id":  "-44998506",
+                         "message":  "Type Hole",
+                         "line":  189,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx"
+                     },
+                     {
+                         "id":  "-1754687601",
+                         "message":  "Type Hole",
+                         "line":  67,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx"
+                     },
+                     {
+                         "id":  "-591888154",
+                         "message":  "Type Hole",
+                         "line":  75,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx"
+                     },
+                     {
+                         "id":  "2136995350",
+                         "message":  "Type Hole",
+                         "line":  84,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx"
+                     },
+                     {
+                         "id":  "1049959139",
+                         "message":  "Type Hole",
+                         "line":  119,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx"
+                     },
+                     {
+                         "id":  "1332284140",
+                         "message":  "Type Hole",
+                         "line":  138,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx"
+                     },
+                     {
+                         "id":  "577388555",
+                         "message":  "Type Hole",
+                         "line":  98,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
+                     },
+                     {
+                         "id":  "1055250751",
+                         "message":  "Type Hole",
+                         "line":  115,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
+                     },
+                     {
+                         "id":  "772925751",
+                         "message":  "Type Hole",
+                         "line":  137,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
+                     },
+                     {
+                         "id":  "208275742",
+                         "message":  "Type Hole",
+                         "line":  170,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
+                     },
+                     {
+                         "id":  "-786509979",
+                         "message":  "Type Hole",
+                         "line":  193,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
+                     },
+                     {
+                         "id":  "-490630255",
+                         "message":  "Type Hole",
+                         "line":  209,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
+                     },
+                     {
+                         "id":  "-772955252",
+                         "message":  "Type Hole",
+                         "line":  222,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
+                     },
+                     {
+                         "id":  "-1055280251",
+                         "message":  "Type Hole",
+                         "line":  241,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
+                     },
+                     {
+                         "id":  "208275704",
+                         "message":  "Type Hole",
+                         "line":  279,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
+                     },
+                     {
+                         "id":  "-1055280153",
+                         "message":  "Type Hole",
+                         "line":  346,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
+                     },
+                     {
+                         "id":  "862721484",
+                         "message":  "Type Hole",
+                         "line":  106,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
+                     },
+                     {
+                         "id":  "1669290472",
+                         "message":  "Type Hole",
+                         "line":  120,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
+                     },
+                     {
+                         "id":  "1266005912",
+                         "message":  "Type Hole",
+                         "line":  133,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
+                     },
+                     {
+                         "id":  "1669290373",
+                         "message":  "Type Hole",
+                         "line":  150,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
+                     },
+                     {
+                         "id":  "103206366",
+                         "message":  "Type Hole",
+                         "line":  171,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
+                     },
+                     {
+                         "id":  "103206316",
+                         "message":  "Type Hole",
+                         "line":  191,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
+                     },
+                     {
+                         "id":  "-394186297",
+                         "message":  "Type Hole",
+                         "line":  219,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
+                     },
+                     {
+                         "id":  "721558785",
+                         "message":  "Type Hole",
+                         "line":  264,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
+                     },
+                     {
+                         "id":  "1030735077",
+                         "message":  "Type Hole",
+                         "line":  338,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
+                     },
+                     {
+                         "id":  "-1333600597",
+                         "message":  "Type Hole",
+                         "line":  62,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\platform\\hooks\\__tests__\\use-apps.test.tsx"
+                     },
+                     {
+                         "id":  "1966580976",
+                         "message":  "Type Hole",
+                         "line":  81,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\platform\\hooks\\__tests__\\use-apps.test.tsx"
+                     },
+                     {
+                         "id":  "-709464520",
+                         "message":  "Type Hole",
+                         "line":  113,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\features\\platform\\hooks\\__tests__\\use-apps.test.tsx"
+                     },
+                     {
+                         "id":  "43420652",
+                         "message":  "Type Hole",
+                         "line":  67,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
+                     },
+                     {
+                         "id":  "-489891959",
+                         "message":  "Type Hole",
+                         "line":  103,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
+                     },
+                     {
+                         "id":  "1029137749",
+                         "message":  "Type Hole",
+                         "line":  129,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
+                     },
+                     {
+                         "id":  "-893176387",
+                         "message":  "Type Hole",
+                         "line":  156,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
+                     },
+                     {
+                         "id":  "1855909812",
+                         "message":  "Type Hole",
+                         "line":  214,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
+                     },
+                     {
+                         "id":  "-469688917",
+                         "message":  "Type Hole",
+                         "line":  260,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
+                     },
+                     {
+                         "id":  "-872973477",
+                         "message":  "Type Hole",
+                         "line":  275,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
+                     },
+                     {
+                         "id":  "-1276258318",
+                         "message":  "Type Hole",
+                         "line":  296,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
+                     },
+                     {
+                         "id":  "1714747311",
+                         "message":  "Type Hole",
+                         "line":  316,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
+                     },
+                     {
+                         "id":  "-1804685276",
+                         "message":  "Type Hole",
+                         "line":  48,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "admin-panel\\src\\__tests__\\ui\\react-resilience.test.tsx"
+                     },
+                     {
+                         "id":  "-602181754",
+                         "message":  "Type Hole",
+                         "line":  60,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\generate-questions\\index.ts"
+                     },
+                     {
+                         "id":  "-530233294",
+                         "message":  "Type Hole",
+                         "line":  112,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\generate-questions\\index.ts"
+                     },
+                     {
+                         "id":  "-1094883299",
+                         "message":  "Type Hole",
+                         "line":  153,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\generate-questions\\index.ts"
+                     },
+                     {
+                         "id":  "-671395822",
+                         "message":  "Type Hole",
+                         "line":  206,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\generate-questions\\index.ts"
+                     },
+                     {
+                         "id":  "410197410",
+                         "message":  "Type Hole",
+                         "line":  196,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\health-check\\index.ts"
+                     },
+                     {
+                         "id":  "-1196034181",
+                         "message":  "Type Hole",
+                         "line":  278,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\health-check\\index.ts"
+                     },
+                     {
+                         "id":  "1614922654",
+                         "message":  "Type Hole",
+                         "line":  96,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\parse-import-prompt\\index.ts"
+                     },
+                     {
+                         "id":  "674931009",
+                         "message":  "Type Hole",
+                         "line":  57,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\validate-content\\index.ts"
+                     },
+                     {
+                         "id":  "-891153312",
+                         "message":  "Type Hole",
+                         "line":  94,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\validate-content\\index.ts"
+                     },
+                     {
+                         "id":  "-146728343",
+                         "message":  "Type Hole",
+                         "line":  129,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\validate-content\\index.ts"
+                     },
+                     {
+                         "id":  "834502617",
+                         "message":  "Type Hole",
+                         "line":  178,
+                         "type":  "stability",
+                         "severity":  "WARNING",
+                         "status":  "OPEN",
+                         "file":  "supabase\\functions\\validate-content\\index.ts"
+                     }
+                 ],
+    "stats":  {
+                  "critical":  13,
+                  "warning":  66,
+                  "info":  0
+              },
+    "last_run":  "2026-02-18 20:35"
 }

@@ -1,13 +1,12 @@
 # Questerix — Tasks
 
-- [x] **Proactive Import Fixes**: Resolved missing `Loader2` and `Badge` imports across multiple pages.
-- [x] **Type Safety Hardening**: Fixed type errors in `handleImport` logic for Apps and Subjects management.
-- [x] **Linting Cleanup**: Resolved `no-explicit-any` errors in Curriculum components.
-- [ ] **Phase 6: Deploy**: Review work and deploy to production.
+## 🛡️ Phase 5: Certification & Release Sprint
 
----
-
-_No active tasks._
+- [ ] **Logic Audit**: Run `/codescene` and `/forensics` to verify bootstrapping stability.
+- [ ] **Security Validation**: Run `/security-hardening-audit` to verify the new `apps_anon_read` RLS policy.
+- [ ] **Functional Verification**: Run `npm run test:e2e` (Auth Flow) to ensure CSP doesn't block redirects.
+- [ ] **Source Sync**: Push all fixes to GitHub (`git push`).
+- [ ] **Production Release**: Execute `powershell .\scripts\deploy-all.ps1`.
 
 ---
 

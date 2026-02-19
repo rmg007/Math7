@@ -39,6 +39,7 @@ These scripts run multiple checks in parallel to save 60-70% wall-clock time.
 | Workflow     | When to Use                                                           |
 | ------------ | --------------------------------------------------------------------- |
 | `/process`   | Start new feature/task (99% of work)                                  |
+| `/fix`       | **Targeted bug remediation** — Evidence → Repro → Fix → Verify        |
 | `/loki`      | **Full autonomous dev** — RARV cycles, self-healing, circuit breakers |
 | `/certify`   | Verify completed work                                                 |
 | `/resume`    | Continue after break (same agent)                                     |
