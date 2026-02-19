@@ -1,4 +1,43 @@
+# Questerix Learning Log
+
 ---
+
+## 2026-02-19: Certification Sprint & Production Release [test created]
+
+### Session Context
+
+- **Trigger**: Final release requirement for Phase 5
+- **Scope**: Forensic audit, security hardening, E2E auth flow, and production deployment
+- **Outcome**: Verified codebase stability, cleared false-positive security findings, and deployed all apps to production
+
+### Audit Findings & Resolutions
+
+#### AUDIT-FORENSIC: False Positive VUL-003
+
+- **Issue**: Forensic audit flagged 13 criticals for "Service Role Leak".
+- **Investigation**: Manual inspection of high-risk files (`generate-questions/index.ts`, `hades_rpc_hardening.sql`) confirmed these were standard environment variable retrievals or role checks (`jwt() ->> 'role' == 'service_role'`), not actual leaks.
+- **Action**: Verified as false positives. Documentation and tests were also flagged due to containing the specific strings.
+- **Lesson**: Forensic scripts using simple string matching require manual expert verification.
+
+#### AUDIT-SECURITY: RLS Discovery Hardening
+
+- **Issue**: New `apps_anon_read` policy allows unauthenticated access to the `apps` table.
+- **Verification**: Confirmed policy is restricted to `is_active = true` and only exposes public branding/discovery data. Internal app metrics or user data remain protected by strict authenticated RLS.
+- **Action**: Confirmed graduation criteria met for anonymous bootstrapping.
+
+### Deployment Fixes
+
+#### DEPLOY-PROFILE: PowerShell Profile Clash
+
+- **Issue**: `orchestrator.ps1` failed due to a read-only alias conflict (`rm`) in the user's PowerShell profile during execution.
+- **Fix**: Wrapped deployment execution with `-NoProfile` flag in the `ops_runner` tasks.
+- **Prevention**: Always use `powershell -NoProfile` for automation scripts to ensure environment independence.
+
+### Verification
+
+- **Forensic Audit**: Status 🟢 STABLE (after manual triage of false positives).
+- **E2E Tests**: 0 failures in `auth-flow.e2e.spec.ts`.
+- **Production URLS**: `admin.questerix.com` and `app.questerix.com` successfully deployed via unified orchestrator.
 
 ## 2026-02-18: CSP & Tenant Initialization Fixes [test created]
 
@@ -11,11 +50,13 @@
 ### Bugs Found & Fixed
 
 #### BUG-CSP: Cloudflare Insights Blocked
+
 - **Issue**: `admin-panel/public/_headers` missing `static.cloudflareinsights.com` in `script-src`, causing beacon failures.
 - **Fix**: Synchronized `_headers` with `index.html` meta tag, adding Cloudflare and Supabase hostnames.
 - **Lesson**: Production headers in `_headers` take precedence or combine with meta tags. Always keep them in sync.
 
 #### BUG-TENANT: Anonymous Tenant Discovery Blocked
+
 - **Issue**: Visitors to `app.questerix.com` saw "Tenant not found" because the `apps` table lacked an RLS policy for the `anon` role. The app couldn't retrieve the `app_id` needed to initialize.
 - **Fix**: Added `apps_anon_read` policy: `CREATE POLICY apps_anon_read ON public.apps FOR SELECT TO anon USING (is_active = true);`.
 - **Lesson**: Tables used for app bootstrapping (like `apps` for tenant discovery) must have `anon` read access if the app starts before authentication.
@@ -31,7 +72,6 @@
 - Browser Subagent confirmed "Welcome" screen loading correctly.
 - Console logs show 0 CSP errors for `beacon.min.js`.
 
-
 ## 2026-02-18: Proactive Import & Type Fixes [test created]
 
 ### Session Context
@@ -43,20 +83,24 @@
 ### Bugs Found & Fixed
 
 #### BUG-F1 CRITICAL: Missing `Badge` in Dashboard [no test needed]
+
 - **Issue**: `DashboardPage.tsx` used `<Badge>` component without an import, causing immediate crash on load.
 - **Fix**: Added `import { Badge } from '@/components/ui/badge'`.
 - **Lesson**: Even if an IDE autocompletes a component, double-check the import line.
 
 #### BUG-F2 CRITICAL: Missing `Loader2` in Subjects [no test needed]
+
 - **Issue**: `SubjectsPage.tsx` used `<Loader2>` in bulk action buttons without importing it from `lucide-react`.
 - **Fix**: Added `Loader2` to `lucide-react` imports.
 
 #### BUG-F3 MEDIUM: Type Safety in CSV Imports [test created]
+
 - **Issue**: `handleImport` in `AppsPage.tsx` and `SubjectsPage.tsx` passed `Record<string, unknown>[]` directly to `mutateAsync`, causing type errors.
 - **Fix**: Implemented explicit mapping to `AppInsert[]` and `SubjectInsert[]` with safe defaults for numbers and booleans.
 - **Lesson**: Bulk imports must always normalize incoming CSV data before passing to mutation hooks.
 
 #### BUG-F4 LOW: Linting Violation in Skill List [no test needed]
+
 - **Issue**: `src/features/curriculum/components/skill-list.tsx` used `catch (error: any)`, violating `no-explicit-any`.
 - **Fix**: Replaced with `catch (error)` and safe type inspection for `error.code`.
 
