@@ -113,7 +113,7 @@ export default function BulkImportPage() {
             </CardHeader>
             <CardContent className="p-8 space-y-8">
               <div className="space-y-4">
-                <Label className="text-2xs font-black uppercase tracking-widest text-gray-600">
+                <Label className="text-2xs font-black uppercase tracking-widest text-gray-700">
                   Target Skill (Optional)
                 </Label>
                 <Select value={selectedSkillId} onValueChange={setSelectedSkillId}>
@@ -153,17 +153,21 @@ export default function BulkImportPage() {
                   <div className="relative group">
                     <input
                       type="file"
+                      id="bulk-csv-upload"
                       accept=".csv"
                       onChange={handleFileUpload}
                       aria-label="Upload CSV file"
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                     />
-                    <div className="p-10 border-2 border-dashed border-gray-100 rounded-[2rem] bg-gray-50/50 group-hover:border-indigo-400 group-hover:bg-indigo-50/30 transition-all flex flex-col items-center justify-center text-center">
+                    <label
+                      htmlFor="bulk-csv-upload"
+                      className="flex flex-col items-center justify-center text-center cursor-pointer"
+                    >
                       <FileUp className="w-12 h-12 text-gray-300 group-hover:text-indigo-500 mb-4 transition-transform group-hover:scale-110" />
-                      <p className="text-xs font-bold text-gray-500 group-hover:text-indigo-600 uppercase tracking-widest">
+                      <p className="text-xs font-bold text-gray-600 group-hover:text-indigo-600 uppercase tracking-widest">
                         Drop CSV Matrix
                       </p>
-                    </div>
+                    </label>
                   </div>
                 </TabsContent>
 
@@ -194,7 +198,7 @@ export default function BulkImportPage() {
               <div className="pt-8 border-t border-gray-100 space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-2xs font-black uppercase tracking-widest text-gray-600">
+                    <Label className="text-2xs font-black uppercase tracking-widest text-gray-700">
                       Execution Mode
                     </Label>
                     <p className="text-xs font-bold text-gray-700">
@@ -242,7 +246,7 @@ export default function BulkImportPage() {
                 <CardTitle className="text-xl font-black tracking-tight text-gray-900">
                   Synchronizer Buffer
                 </CardTitle>
-                <CardDescription className="text-xs font-bold uppercase tracking-widest text-gray-600 mt-1">
+                <CardDescription className="text-xs font-bold uppercase tracking-widest text-gray-700 mt-1">
                   {importQueue.length} Candidates
                 </CardDescription>
               </div>

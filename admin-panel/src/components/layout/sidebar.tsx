@@ -1,37 +1,37 @@
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import {
-    AlertTriangle,
-    BarChart3,
-    Book,
-    Boxes,
-    Bug,
-    ChevronDown,
-    ChevronLeft,
-    ChevronRight,
-    FileText,
-    FileUp,
-    Globe,
-    History,
-    Key,
-    Layers,
-    Layout,
-    LifeBuoy,
-    LogOut,
-    MessageSquare,
-    Settings,
-    Shield,
-    Upload,
-    UserCog,
-    Users,
+  AlertTriangle,
+  BarChart3,
+  Book,
+  Boxes,
+  Bug,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  FileUp,
+  Globe,
+  History,
+  Key,
+  Layers,
+  Layout,
+  LifeBuoy,
+  LogOut,
+  MessageSquare,
+  Settings,
+  Shield,
+  Upload,
+  UserCog,
+  Users,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -296,6 +296,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
           >
             <SelectTrigger
               aria-label="Select application"
+              title="Select application"
               className="w-full bg-transparent border-white/10 text-white hover:bg-white/5 transition-colors rounded-lg focus:ring-0"
             >
               <SelectValue placeholder={appsLoading ? 'Loading apps...' : 'Select app'} />

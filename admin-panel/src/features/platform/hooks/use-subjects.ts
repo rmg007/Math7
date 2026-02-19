@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { Tables, TablesInsert, TablesUpdate } from '@/lib/database.types';
+import { supabase } from '@/lib/supabase';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export type Subject = Tables<'subjects'>;
 export type SubjectInsert = TablesInsert<'subjects'>;
@@ -10,10 +10,7 @@ export function useSubjects() {
   return useQuery({
     queryKey: ['subjects'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('subjects')
-        .select('*')
-        .order('display_order');
+      const { data, error } = await supabase.from('subjects').select('*').order('display_order');
       if (error) throw error;
       return data || [];
     },
@@ -22,15 +19,11 @@ export function useSubjects() {
 
 export function useCreateSubject() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (subject: SubjectInsert) => {
-      const { data, error } = await supabase
-        .from('subjects')
-        .insert(subject)
-        .select()
-        .single();
-      
+      const { data, error } = await supabase.from('subjects').insert(subject).select().single();
+
       if (error) throw error;
       return data;
     },
@@ -69,12 +62,55 @@ export function useDeleteSubject() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('subjects')
-        .delete()
-        .eq('subject_id', id);
-      
+      const { error } = await supabase.from('subjects').delete().eq('subject_id', id);
+
       if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+    },
+  });
+}
+
+export function useBulkUpdateSubjectsStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      ids,
+      status,
+    }: {
+      ids: string[];
+      status: 'draft' | 'published' | 'live';
+    }) => {
+      const { error } = await supabase.from('subjects').update({ status }).in('subject_id', ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+    },
+  });
+}
+
+export function useBulkDeleteSubjects() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from('subjects').delete().in('subject_id', ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+    },
+  });
+}
+
+export function useBulkCreateSubjects() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (subjects: SubjectInsert[]) => {
+      const { data, error } = await supabase.from('subjects').insert(subjects).select();
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] });

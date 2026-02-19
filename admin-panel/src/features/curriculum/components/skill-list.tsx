@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
@@ -16,65 +16,66 @@ import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
 import { cn } from '@/lib/utils';
 import {
-    CheckSquare,
-    Copy,
-    Filter,
-    GripVertical,
-    Layers,
-    Loader2,
-    Pencil,
-    Plus,
-    Square,
-    Trash2,
-    X,
+  CheckSquare,
+  Copy,
+  Filter,
+  GripVertical,
+  Layers,
+  Loader2,
+  Pencil,
+  Plus,
+  Square,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDomains } from '../hooks/use-domains';
 import {
-    useBulkCreateSkills,
-    useBulkDeleteSkills,
-    useBulkUpdateSkillsStatus,
-    useDeleteSkill,
-    useDuplicateSkill,
-    usePaginatedSkills,
-    useUpdateSkillOrder,
+  useBulkCreateSkills,
+  useBulkDeleteSkills,
+  useBulkUpdateSkillsStatus,
+  useDeleteSkill,
+  useDuplicateSkill,
+  usePaginatedSkills,
+  useUpdateSkillOrder,
 } from '../hooks/use-skills';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 import {
-    closestCenter,
-    DndContext,
-    DragEndEvent,
-    KeyboardSensor,
-    PointerSensor,
-    TouchSensor,
-    useSensor,
-    useSensors,
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
 import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 import type { App } from '@/features/platform/hooks/use-apps';
 import type { Tables } from '@/lib/database.types';
+import type { CurriculumStatus } from '../types';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -94,6 +95,7 @@ const SKILL_COLUMNS: DataColumn[] = [
   { key: 'difficulty_level', header: 'difficulty_level' },
   { key: 'sort_order', header: 'sort_order' },
   { key: 'status', header: 'status' },
+  { key: 'description', header: 'description' },
 ];
 
 interface SortableRowProps {
@@ -170,9 +172,7 @@ const SortableRow = memo(
           <div className="flex flex-col">
             <span className="font-medium text-gray-900 text-xs">{skill.title}</span>
             {skill.apps?.display_name && (
-              <span className="text-[10px] text-gray-400 mt-0.5">
-                {skill.apps.display_name}
-              </span>
+              <span className="text-[10px] text-gray-400 mt-0.5">{skill.apps.display_name}</span>
             )}
           </div>
         </TableCell>
@@ -248,9 +248,7 @@ const SortableCard = memo(
         style={style}
         className={cn(
           'bg-white rounded-lg border p-3 space-y-2',
-          isSelected
-            ? 'border-teal-300 bg-teal-50/30'
-            : 'border-gray-200'
+          isSelected ? 'border-teal-300 bg-teal-50/30' : 'border-gray-200'
         )}
       >
         <div className="flex items-start gap-2">
@@ -568,10 +566,86 @@ export function SkillList() {
 
   const handleImport = async (data: Record<string, unknown>[]) => {
     try {
-      await bulkCreate.mutateAsync(data);
+      if (!domains) {
+        throw new Error('Domains not loaded. Please wait or refresh the page.');
+      }
+
+      const skillsToCreate = data.map((item, index) => {
+        const title = (item.title || item.Title || item.name || item.Name) as string;
+        const slug = (item.slug || item.Slug) as string;
+        const domainTitleFromCsv = (item.domain_title ||
+          item.domain_name ||
+          item.domain ||
+          item.Domain) as string;
+
+        // Find domain_id from title among existing domains for this app
+        let domain_id = (item.domain_id || item.Domain_id || item.domain_id) as string;
+        if (!domain_id && domainTitleFromCsv) {
+          const matchedDomain = domains.find(
+            (d) => d.title.toLowerCase() === domainTitleFromCsv.trim().toLowerCase()
+          );
+          if (matchedDomain) {
+            domain_id = matchedDomain.domain_id;
+          }
+        }
+
+        // If still no domain_id and we have a selected domain filter (and it's not 'all'), use it as fallback
+        if (!domain_id && selectedDomainId && selectedDomainId !== 'all') {
+          domain_id = selectedDomainId;
+        }
+
+        if (!domain_id) {
+          const availableDomainTitles = domains.map((d) => `"${d.title}"`).join(', ');
+          throw new Error(
+            domainTitleFromCsv
+              ? `Row ${index + 1}: Domain "${domainTitleFromCsv}" not found in the current app. Available domains are: ${availableDomainTitles || 'None'}.`
+              : `Row ${index + 1}: Domain title is missing in CSV. Please include a "domain_title" column or select a domain filter.`
+          );
+        }
+
+        // Normalize status to lowercase to match Postgres enum
+        let statusValue = ((item.status as string) || 'draft').toLowerCase().trim();
+        if (statusValue === 'active') statusValue = 'live';
+
+        // Validate status value against enum
+        const validStatuses: CurriculumStatus[] = ['draft', 'published', 'live'];
+        const finalStatus = validStatuses.includes(statusValue as CurriculumStatus)
+          ? (statusValue as CurriculumStatus)
+          : 'draft';
+
+        return {
+          title: title || 'Untitled Skill',
+          slug:
+            slug ||
+            (title
+              ? title
+                  .toLowerCase()
+                  .trim()
+                  .replace(/[^a-z0-9]/g, '_')
+              : `skill_${Date.now()}_${index}`),
+          domain_id,
+          difficulty_level:
+            Number(item.difficulty_level || item.difficulty || item.level || 1) || 1,
+          sort_order: Number(item.sort_order || item.order || 0) || 0,
+          status: finalStatus,
+          description: (item.description || item.Description || '') as string,
+        };
+      });
+
+      await bulkCreate.mutateAsync(skillsToCreate);
       showToast(`${data.length} skills imported successfully`, 'success');
-    } catch {
-      showToast('Failed to import skills. Check for duplicate slugs.', 'error');
+    } catch (error) {
+      console.error('Import error:', error);
+      let message = error instanceof Error ? error.message : 'Failed to import skills';
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        (error as { code: string }).code === '23505'
+      ) {
+        message = 'Import failed: One or more skills have slugs that already exist in this app.';
+      }
+      showToast(message, 'error');
     }
   };
 
@@ -932,7 +1006,7 @@ export function SkillList() {
 
       <AlertDialog
         open={Boolean(deleteConfirmation)}
-        onOpenChange={(open: boolean) => !open && setDeleteConfirmation(null)}
+        onOpenChange={(open) => !open && setDeleteConfirmation(null)}
       >
         <AlertDialogContent className="rounded-lg border border-gray-200 bg-white shadow-lg max-w-md">
           <AlertDialogHeader>

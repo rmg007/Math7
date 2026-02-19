@@ -1,15 +1,14 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -17,12 +16,12 @@ import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
@@ -31,48 +30,48 @@ import { sanitizeHtml } from '@/lib/sanitize';
 import { cn, formatIdentifier } from '@/lib/utils';
 import type { QuestionListItem } from '@/types';
 import {
-    closestCenter,
-    DndContext,
-    DragEndEvent,
-    KeyboardSensor,
-    PointerSensor,
-    TouchSensor,
-    useSensor,
-    useSensors,
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
 import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-    CheckSquare,
-    Copy,
-    FileText,
-    Filter,
-    GripVertical,
-    Loader2,
-    Pencil,
-    Plus,
-    Sparkles,
-    Square,
-    Trash2,
-    X,
+  CheckSquare,
+  Copy,
+  FileText,
+  Filter,
+  GripVertical,
+  Loader2,
+  Pencil,
+  Plus,
+  Sparkles,
+  Square,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-    QuestionInsert,
-    useBulkCreateQuestions,
-    useBulkDeleteQuestions,
-    useBulkUpdateQuestionsStatus,
-    useDeleteQuestion,
-    useDuplicateQuestion,
-    usePaginatedQuestions,
-    useUpdateQuestionOrder,
+  QuestionInsert,
+  useBulkCreateQuestions,
+  useBulkDeleteQuestions,
+  useBulkUpdateQuestionsStatus,
+  useDeleteQuestion,
+  useDuplicateQuestion,
+  usePaginatedQuestions,
+  useUpdateQuestionOrder,
 } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
@@ -148,6 +147,7 @@ const SortableRow = memo(
           <button
             onClick={() => onSelect(question.question_id)}
             className="text-gray-300 hover:text-gray-500"
+            aria-label={isSelected ? 'Deselect question' : 'Select question'}
             title={isSelected ? 'Deselect' : 'Select'}
           >
             {isSelected ? (
@@ -170,9 +170,7 @@ const SortableRow = memo(
               }}
             />
             {question.apps?.display_name && (
-              <span className="text-[10px] text-gray-400 mt-0.5">
-                {question.apps.display_name}
-              </span>
+              <span className="text-[10px] text-gray-400 mt-0.5">{question.apps.display_name}</span>
             )}
           </div>
         </TableCell>
@@ -200,6 +198,7 @@ const SortableRow = memo(
               to={`/questions/${question.question_id}/edit`}
               className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
               title="Edit"
+              aria-label="Edit question"
             >
               <Pencil className="h-3.5 w-3.5" />
             </Link>
@@ -208,6 +207,7 @@ const SortableRow = memo(
               disabled={isDuplicating}
               className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
               title="Duplicate"
+              aria-label="Duplicate question"
             >
               <Copy className="h-3.5 w-3.5" />
             </button>
@@ -215,6 +215,7 @@ const SortableRow = memo(
               onClick={() => onDelete(question.question_id)}
               className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
               title="Delete"
+              aria-label="Delete question"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
@@ -576,39 +577,65 @@ export function QuestionList() {
 
   const handleImport = async (data: Record<string, unknown>[]) => {
     if (!currentApp) return;
-    if (selectedSkillId === 'all') {
-      toast({
-        title: 'Skill selection required',
-        description:
-          'Please select a specific skill filter before importing to assign questions to that skill.',
-        variant: 'destructive',
-      });
-      return;
-    }
 
     try {
       const questionsToImport = data.map((item, index) => {
         const parseField = (field: unknown) => {
           if (typeof field === 'string') {
             try {
+              // Handle potentially double-escaped or stringified JSON
               return JSON.parse(field);
             } catch {
-              return {};
+              // Fallback for non-JSON strings that might be simple values
+              return field;
             }
           }
           return field || {};
         };
 
+        const skillTitleFromCsv = (item.skill_title ||
+          item.skill_name ||
+          item.skill ||
+          item.Skill) as string;
+        let skill_id = (item.skill_id || item.Skill_id) as string;
+
+        // Try to resolve skill_id from title if not provided
+        if (!skill_id && skillTitleFromCsv && skills) {
+          const matchedSkill = skills.find(
+            (s) => s.title.toLowerCase() === skillTitleFromCsv.trim().toLowerCase()
+          );
+          if (matchedSkill) {
+            skill_id = matchedSkill.skill_id;
+          }
+        }
+
+        // Fallback to selected skill filter if still missing
+        if (!skill_id && selectedSkillId && selectedSkillId !== 'all') {
+          skill_id = selectedSkillId;
+        }
+
+        if (!skill_id) {
+          throw new Error(
+            skillTitleFromCsv
+              ? `Row ${index + 1}: Skill "${skillTitleFromCsv}" not found in this app.`
+              : `Row ${index + 1}: Skill ID or Title is missing. Please select a skill or include skill_title in CSV.`
+          );
+        }
+
+        // Normalize status
+        let statusValue = ((item.status as string) || 'draft').toLowerCase().trim();
+        if (statusValue === 'active') statusValue = 'live';
+
         return {
-          app_id: currentApp?.app_id || '',
+          app_id: currentApp.app_id,
           content: typeof item.content === 'object' ? item.content : String(item.content || ''),
-          type: (item.type || 'multiple_choice') as QuestionInsert['type'],
-          points: parseInt(item.points as string) || 1,
-          status: (item.status || 'draft') as QuestionInsert['status'],
-          options: parseField(item.options),
-          solution: parseField(item.solution),
-          explanation: String(item.explanation || ''),
-          skill_id: selectedSkillId,
+          type: (item.type || item.Type || 'multiple_choice') as QuestionInsert['type'],
+          points: parseInt((item.points as string) || (item.Points as string)) || 1,
+          status: (statusValue || 'draft') as QuestionInsert['status'],
+          options: parseField(item.options || item.Options),
+          solution: parseField(item.solution || item.Solution),
+          explanation: String(item.explanation || item.Explanation || ''),
+          skill_id,
           sort_order: (paginatedData?.totalCount ?? 0) + index + 1,
         };
       });
@@ -617,7 +644,8 @@ export function QuestionList() {
       showToast(`Successfully imported ${questionsToImport.length} questions`, 'success');
     } catch (error) {
       console.error('Import error:', error);
-      showToast('Failed to import questions. Check console for details.', 'error');
+      const message = error instanceof Error ? error.message : 'Failed to import questions';
+      showToast(message, 'error');
     }
   };
 
@@ -1037,7 +1065,8 @@ export function QuestionList() {
         <AlertDialogContent className="rounded-lg border border-gray-200 bg-white shadow-lg max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-base font-semibold text-gray-900">
-              Delete {deleteConfirmation?.type === 'bulk' ? `${selectedIds.size} questions` : 'question'}?
+              Delete{' '}
+              {deleteConfirmation?.type === 'bulk' ? `${selectedIds.size} questions` : 'question'}?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-gray-500">
               {deleteConfirmation?.type === 'bulk'

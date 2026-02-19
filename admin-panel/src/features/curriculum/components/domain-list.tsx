@@ -147,6 +147,7 @@ function SortableRow({
         <button
           onClick={() => onSelect(domain.domain_id)}
           className="text-gray-300 hover:text-gray-500"
+          aria-label={isSelected ? 'Deselect domain' : 'Select domain'}
           title={isSelected ? 'Deselect' : 'Select'}
         >
           {isSelected ? (
@@ -165,9 +166,7 @@ function SortableRow({
         <div className="flex flex-col">
           <span className="font-medium text-gray-900 text-xs">{domain.title}</span>
           {domain.apps?.display_name && (
-            <span className="text-[10px] text-gray-400 mt-0.5">
-              {domain.apps.display_name}
-            </span>
+            <span className="text-[10px] text-gray-400 mt-0.5">{domain.apps.display_name}</span>
           )}
         </div>
       </TableCell>
@@ -189,6 +188,7 @@ function SortableRow({
             to={`/domains/${domain.domain_id}/edit`}
             className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
             title="Edit"
+            aria-label="Edit domain"
           >
             <Pencil className="h-3.5 w-3.5" />
           </Link>
@@ -196,6 +196,7 @@ function SortableRow({
             onClick={() => onDelete(domain.domain_id)}
             className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
             title="Delete"
+            aria-label="Delete domain"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -525,10 +526,46 @@ export function DomainList() {
 
   const handleImport = async (data: Record<string, unknown>[]) => {
     try {
-      await bulkCreate.mutateAsync(data);
+      const domainsToCreate = data.map((item, index) => {
+        const title = (item.title || item.Title || item.name || item.Name) as string;
+        const slug = (item.slug || item.Slug) as string;
+
+        // Normalize status
+        let statusValue = ((item.status as string) || 'draft').toLowerCase().trim();
+        if (statusValue === 'active') statusValue = 'live';
+        const validStatuses = ['draft', 'published', 'live'];
+        const finalStatus = validStatuses.includes(statusValue) ? statusValue : 'draft';
+
+        return {
+          title: title || 'Untitled Domain',
+          slug:
+            slug ||
+            (title
+              ? title
+                  .toLowerCase()
+                  .trim()
+                  .replace(/[^a-z0-9]/g, '_')
+              : `domain_${Date.now()}_${index}`),
+          description: (item.description || item.Description || '') as string,
+          sort_order: Number(item.sort_order || item.order || 0) || 0,
+          status: finalStatus,
+        };
+      });
+
+      await bulkCreate.mutateAsync(domainsToCreate);
       showToast(`Successfully imported ${data.length} domains`, 'success');
-    } catch {
-      showToast('Failed to import domains. Check for duplicate slugs.', 'error');
+    } catch (error) {
+      console.error('Import error:', error);
+      let message = 'Failed to import domains. Check for duplicate slugs.';
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        (error as { code: string }).code === '23505'
+      ) {
+        message = 'Import failed: One or more domains have slugs that already exist in this app.';
+      }
+      showToast(message, 'error');
     }
   };
 
@@ -626,9 +663,7 @@ export function DomainList() {
             <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold">
               {selectedIds.size}
             </span>
-            <span className="text-xs text-teal-200 font-medium">
-              selected
-            </span>
+            <span className="text-xs text-teal-200 font-medium">selected</span>
           </div>
           <div className="flex items-center gap-1">
             <Button
@@ -722,11 +757,7 @@ export function DomainList() {
           }
         />
 
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           {/* Desktop Table View */}
           <div className="hidden md:block">
             <Table className="w-full">
@@ -898,7 +929,8 @@ export function DomainList() {
         <AlertDialogContent className="rounded-lg border border-gray-200 bg-white shadow-lg max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-base font-semibold text-gray-900">
-              Delete {deleteConfirmation?.type === 'bulk' ? `${selectedIds.size} domains` : 'domain'}?
+              Delete{' '}
+              {deleteConfirmation?.type === 'bulk' ? `${selectedIds.size} domains` : 'domain'}?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-gray-500">
               {deleteConfirmation?.type === 'bulk'

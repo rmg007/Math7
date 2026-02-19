@@ -1,6 +1,6 @@
-import { isValidUUID } from '@/features/curriculum/types';
 import type { Tables } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
+import { isValidUUID } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export type ErrorLog = Tables<'error_logs'>;
@@ -138,6 +138,36 @@ export function usePromoteToIssue() {
       queryClient.invalidateQueries({ queryKey: ['error-logs'] });
       queryClient.invalidateQueries({ queryKey: ['error-log-stats'] });
       queryClient.invalidateQueries({ queryKey: ['known-issues'] });
+    },
+  });
+}
+
+export function useBulkUpdateErrorStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: string }) => {
+      const { error } = await supabase.from('error_logs').update({ status }).in('id', ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['error-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['error-log-stats'] });
+    },
+  });
+}
+
+export function useBulkDeleteErrorLogs() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from('error_logs').delete().in('id', ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['error-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['error-log-stats'] });
     },
   });
 }

@@ -1,34 +1,36 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
+import { DataToolbar } from '@/components/ui/data-toolbar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge } from '@/components/ui/status-badge';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from '@/hooks/use-toast';
+import { DataColumn } from '@/lib/data-utils';
 import type { Tables } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import {
-    CheckSquare,
-    Key,
-    Search,
-    Shield,
-    ShieldAlert,
-    Square,
-    UserCheck,
-    UserCog,
-    Users,
-    UserX,
-    X,
+  CheckSquare,
+  Key,
+  Search,
+  Shield,
+  ShieldAlert,
+  Square,
+  UserCheck,
+  UserCog,
+  Users,
+  UserX,
+  X,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -68,12 +70,7 @@ const UserRow = memo(
     apps,
   }: UserRowProps) => {
     return (
-      <TableRow
-        className={cn(
-          'even:bg-gray-50/40',
-          user.deleted_at && 'opacity-40'
-        )}
-      >
+      <TableRow className={cn('even:bg-gray-50/40', user.deleted_at && 'opacity-40')}>
         <TableCell className="px-3 w-8">
           <button
             onClick={() => onSelect(user.id)}
@@ -138,14 +135,10 @@ const UserRow = memo(
           </TableCell>
         )}
         <TableCell className="hidden md:table-cell">
-          <span className="text-xs text-gray-500">
-            {formatDate(user.created_at)}
-          </span>
+          <span className="text-xs text-gray-500">{formatDate(user.created_at)}</span>
         </TableCell>
         <TableCell>
-          <StatusBadge
-            status={user.deleted_at ? 'inactive' : 'active'}
-          />
+          <StatusBadge status={user.deleted_at ? 'inactive' : 'active'} />
         </TableCell>
         <TableCell className="px-4 text-right border-l border-gray-100">
           {user.id !== currentUserId && (
@@ -410,6 +403,15 @@ export function UserManagementPage() {
 
   const colSpan = isSuperAdmin ? 7 : 6;
 
+  const columns: DataColumn[] = [
+    { key: 'id', header: 'ID' },
+    { key: 'email', header: 'Email' },
+    { key: 'full_name', header: 'Full Name' },
+    { key: 'role', header: 'Role' },
+    { key: 'app_id', header: 'App ID' },
+    { key: 'created_at', header: 'Joined' },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
@@ -418,11 +420,12 @@ export function UserManagementPage() {
         icon={UserCog}
         className="mb-2"
         actions={
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-teal-50 border border-teal-200 rounded-lg">
-            <Users className="w-3.5 h-3.5 text-teal-600" />
-            <span className="text-xs font-semibold text-teal-700">
-              {activeUsersCount} active
-            </span>
+          <div className="flex items-center gap-2">
+            <DataToolbar data={users} columns={columns} entityName="Users" importDisabled />
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-teal-50 border border-teal-200 rounded-lg h-9">
+              <Users className="w-3.5 h-3.5 text-teal-600" />
+              <span className="text-xs font-semibold text-teal-700">{activeUsersCount} active</span>
+            </div>
           </div>
         }
       />
@@ -563,12 +566,8 @@ export function UserManagementPage() {
                   onSort={handleSort}
                 />
               </TableHead>
-              <TableHead>
-                Status
-              </TableHead>
-              <TableHead className="text-right px-4 border-l border-gray-100">
-                Actions
-              </TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right px-4 border-l border-gray-100">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

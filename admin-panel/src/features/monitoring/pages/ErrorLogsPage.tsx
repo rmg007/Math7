@@ -1,5 +1,6 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
+import { DataToolbar } from '@/components/ui/data-toolbar';
 import {
   Dialog,
   DialogContent,
@@ -23,12 +24,14 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from '@/hooks/use-toast';
+import { DataColumn } from '@/lib/data-utils';
 import { cn } from '@/lib/utils';
 import {
   AlertTriangle,
   ArrowUpRight,
   Bug,
   CheckCircle2,
+  CheckSquare,
   Clock,
   Copy,
   Eye,
@@ -40,12 +43,15 @@ import {
   RefreshCw,
   Search,
   Smartphone,
+  Square,
   Trash2,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
   ErrorLog,
+  useBulkDeleteErrorLogs,
+  useBulkUpdateErrorStatus,
   useDeleteErrorLog,
   useErrorLogs,
   useErrorLogStats,
@@ -61,6 +67,7 @@ export function ErrorLogsPage() {
   const [selectedError, setSelectedError] = useState<ErrorLog | null>(null);
   const [promoteDialogOpen, setPromoteDialogOpen] = useState(false);
   const [promoteData, setPromoteData] = useState({ title: '', rootCause: '', resolution: '' });
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const {
     data: errors,
@@ -72,6 +79,8 @@ export function ErrorLogsPage() {
   const updateStatus = useUpdateErrorStatus();
   const deleteError = useDeleteErrorLog();
   const promoteToIssue = usePromoteToIssue();
+  const bulkUpdateStatus = useBulkUpdateErrorStatus();
+  const bulkDeleteErrors = useBulkDeleteErrorLogs();
 
   const filteredErrors = errors?.filter(
     (error) =>
@@ -134,12 +143,98 @@ export function ErrorLogsPage() {
   };
 
   const statItems = [
-    { label: 'New', value: stats?.new ?? 0, icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100' },
-    { label: 'Seen', value: stats?.seen ?? 0, icon: Eye, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-    { label: 'Ignored', value: stats?.ignored ?? 0, icon: EyeOff, color: 'text-gray-500', bg: 'bg-gray-50', border: 'border-gray-200' },
-    { label: 'Resolved', value: stats?.resolved ?? 0, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
-    { label: 'Issues', value: stats?.promoted ?? 0, icon: ArrowUpRight, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
+    {
+      label: 'New',
+      value: stats?.new ?? 0,
+      icon: AlertTriangle,
+      color: 'text-red-600',
+      bg: 'bg-red-50',
+      border: 'border-red-100',
+    },
+    {
+      label: 'Seen',
+      value: stats?.seen ?? 0,
+      icon: Eye,
+      color: 'text-blue-600',
+      bg: 'bg-blue-50',
+      border: 'border-blue-100',
+    },
+    {
+      label: 'Ignored',
+      value: stats?.ignored ?? 0,
+      icon: EyeOff,
+      color: 'text-gray-500',
+      bg: 'bg-gray-50',
+      border: 'border-gray-200',
+    },
+    {
+      label: 'Resolved',
+      value: stats?.resolved ?? 0,
+      icon: CheckCircle2,
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50',
+      border: 'border-emerald-100',
+    },
+    {
+      label: 'Issues',
+      value: stats?.promoted ?? 0,
+      icon: ArrowUpRight,
+      color: 'text-purple-600',
+      bg: 'bg-purple-50',
+      border: 'border-purple-100',
+    },
   ];
+
+  const columns: DataColumn[] = [
+    { key: 'id', header: 'ID' },
+    { key: 'error_message', header: 'Message' },
+    { key: 'error_type', header: 'Type' },
+    { key: 'status', header: 'Status' },
+    { key: 'platform', header: 'Platform' },
+    { key: 'created_at', header: 'Date' },
+  ];
+
+  const handleSelectAll = () => {
+    if (!filteredErrors) return;
+    if (selectedIds.size === filteredErrors.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredErrors.map((e) => e.id)));
+    }
+  };
+
+  const handleSelectOne = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkStatusUpdate = async (status: string) => {
+    try {
+      await bulkUpdateStatus.mutateAsync({ ids: Array.from(selectedIds), status });
+      setSelectedIds(new Set());
+      toast({
+        title: 'Batch Updated',
+        description: `Updated ${selectedIds.size} logs to ${status}.`,
+      });
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to update logs', variant: 'destructive' });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Are you sure you want to delete ${selectedIds.size} logs?`)) return;
+    try {
+      await bulkDeleteErrors.mutateAsync(Array.from(selectedIds));
+      setSelectedIds(new Set());
+      toast({ title: 'Batch Deleted', description: `Deleted ${selectedIds.size} logs.` });
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to delete logs', variant: 'destructive' });
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
@@ -149,15 +244,23 @@ export function ErrorLogsPage() {
         icon={Bug}
         className="mb-2"
         actions={
-          <Button
-            variant="outline"
-            onClick={() => refetch()}
-            disabled={isFetching}
-            className="h-9 px-3 rounded border-gray-200 text-gray-500 hover:text-teal-600 hover:border-teal-500 hover:bg-teal-50 text-xs font-semibold gap-1.5"
-          >
-            <RefreshCw className={cn('w-3.5 h-3.5', isFetching && 'animate-spin')} />
-            {isFetching ? 'Refreshing...' : 'Refresh'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <DataToolbar
+              data={filteredErrors || []}
+              columns={columns}
+              entityName="Error Logs"
+              importDisabled
+            />
+            <Button
+              variant="outline"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="h-9 px-3 rounded border-gray-200 text-gray-500 hover:text-teal-600 hover:border-teal-500 hover:bg-teal-50 text-xs font-semibold gap-1.5"
+            >
+              <RefreshCw className={cn('w-3.5 h-3.5', isFetching && 'animate-spin')} />
+              {isFetching ? 'Refreshing...' : 'Refresh'}
+            </Button>
+          </div>
         }
       />
 
@@ -169,13 +272,74 @@ export function ErrorLogsPage() {
             className={cn('rounded-lg border p-4 shadow-sm', item.bg, item.border)}
           >
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">{item.label}</span>
+              <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">
+                {item.label}
+              </span>
               <item.icon className={cn('w-3.5 h-3.5', item.color)} />
             </div>
             <p className={cn('text-2xl font-bold tabular-nums', item.color)}>{item.value}</p>
           </div>
         ))}
       </div>
+
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md animate-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-3 pl-2">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold">
+              {selectedIds.size}
+            </span>
+            <span className="text-xs text-teal-200 font-medium">selected</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleBulkStatusUpdate('seen')}
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
+            >
+              <Eye className="h-3 w-3" />
+              Mark Seen
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleBulkStatusUpdate('ignored')}
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
+            >
+              <EyeOff className="h-3 w-3" />
+              Ignore
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleBulkStatusUpdate('resolved')}
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-emerald-600 gap-1"
+            >
+              <CheckCircle2 className="h-3 w-3" />
+              Resolve
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBulkDelete}
+              className="h-7 px-3 rounded text-xs text-red-300 hover:text-white hover:bg-red-600 gap-1"
+            >
+              <Trash2 className="h-3 w-3" />
+              Delete
+            </Button>
+            <div className="w-px h-4 bg-teal-800 mx-1" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedIds(new Set())}
+              className="h-7 px-2 rounded text-xs text-teal-300 hover:text-white hover:bg-white/10"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Table Card */}
       <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
@@ -226,27 +390,38 @@ export function ErrorLogsPage() {
         <Table className="w-full">
           <TableHeader>
             <TableRow className="bg-gray-50">
-              <TableHead className="w-10 text-center">
-                Platform
+              <TableHead className="px-3 w-8">
+                <button
+                  onClick={handleSelectAll}
+                  className="text-gray-300 hover:text-gray-500"
+                  title="Select all"
+                  aria-label={
+                    selectedIds.size > 0 && selectedIds.size === filteredErrors?.length
+                      ? 'Deselect all'
+                      : 'Select all'
+                  }
+                >
+                  {selectedIds.size > 0 && selectedIds.size === filteredErrors?.length ? (
+                    <CheckSquare className="h-4 w-4 text-teal-600" />
+                  ) : (
+                    <Square className="h-4 w-4" />
+                  )}
+                </button>
               </TableHead>
-              <TableHead className="px-4">
-                Error
-              </TableHead>
-              <TableHead>
-                Status
-              </TableHead>
-              <TableHead className="hidden md:table-cell">
-                Time
-              </TableHead>
-              <TableHead className="text-right px-4 border-l border-gray-100">
-                Actions
-              </TableHead>
+              <TableHead className="w-10 text-center">Platform</TableHead>
+              <TableHead className="px-4">Error</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="hidden md:table-cell">Time</TableHead>
+              <TableHead className="text-right px-4 border-l border-gray-100">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i} className="even:bg-gray-50/40">
+                  <TableCell className="px-3">
+                    <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+                  </TableCell>
                   <TableCell className="text-center">
                     <div className="w-7 h-7 bg-gray-200 rounded mx-auto animate-pulse" />
                   </TableCell>
@@ -298,9 +473,30 @@ export function ErrorLogsPage() {
               filteredErrors?.map((error) => (
                 <TableRow
                   key={error.id}
-                  className="even:bg-gray-50/40 cursor-pointer"
                   onClick={() => setSelectedError(error)}
+                  className={cn(
+                    'even:bg-gray-50/40 cursor-pointer transition-colors',
+                    selectedIds.has(error.id) && 'bg-teal-50'
+                  )}
                 >
+                  <TableCell
+                    className="px-3 w-8"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectOne(error.id);
+                    }}
+                  >
+                    <button
+                      className="text-gray-300 hover:text-gray-500"
+                      aria-label={selectedIds.has(error.id) ? 'Deselect error' : 'Select error'}
+                    >
+                      {selectedIds.has(error.id) ? (
+                        <CheckSquare className="h-4 w-4 text-teal-600" />
+                      ) : (
+                        <Square className="h-4 w-4" />
+                      )}
+                    </button>
+                  </TableCell>
                   <TableCell className="text-center">
                     <div className="flex items-center justify-center w-7 h-7 rounded bg-gray-100 text-gray-500 mx-auto">
                       {getPlatformIcon(error.platform)}
@@ -311,9 +507,7 @@ export function ErrorLogsPage() {
                       <p className="font-mono text-xs font-medium text-red-600 truncate">
                         {error.error_type}
                       </p>
-                      <p className="text-[11px] text-gray-400 truncate">
-                        {error.error_message}
-                      </p>
+                      <p className="text-[11px] text-gray-400 truncate">{error.error_message}</p>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -398,17 +592,23 @@ export function ErrorLogsPage() {
                   <span className="text-[11px] text-gray-400">Platform</span>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     {getPlatformIcon(selectedError.platform)}
-                    <span className="font-medium text-gray-700 capitalize">{selectedError.platform}</span>
+                    <span className="font-medium text-gray-700 capitalize">
+                      {selectedError.platform}
+                    </span>
                   </div>
                 </div>
                 <div>
                   <span className="text-[11px] text-gray-400">App Version</span>
-                  <p className="font-medium text-gray-700 mt-0.5">{selectedError.app_version || '—'}</p>
+                  <p className="font-medium text-gray-700 mt-0.5">
+                    {selectedError.app_version || '—'}
+                  </p>
                 </div>
                 <div>
                   <span className="text-[11px] text-gray-400">User ID</span>
                   <div className="flex items-center gap-1 mt-0.5">
-                    <p className="font-mono text-[11px] text-gray-600">{selectedError.user_id || 'Anonymous'}</p>
+                    <p className="font-mono text-[11px] text-gray-600">
+                      {selectedError.user_id || 'Anonymous'}
+                    </p>
                     {selectedError.user_id && (
                       <button
                         className="text-gray-400 hover:text-teal-600"
@@ -565,7 +765,9 @@ export function ErrorLogsPage() {
         <DialogContent className="rounded-lg border border-gray-200 bg-white p-0 overflow-hidden shadow-lg max-w-md">
           <div className="px-6 pt-6 pb-4 space-y-4">
             <div>
-              <DialogTitle className="text-base font-semibold text-gray-900">Create Known Issue</DialogTitle>
+              <DialogTitle className="text-base font-semibold text-gray-900">
+                Create Known Issue
+              </DialogTitle>
               <DialogDescription className="text-xs text-gray-500 mt-0.5">
                 Document this error as a known issue for tracking.
               </DialogDescription>
@@ -581,7 +783,9 @@ export function ErrorLogsPage() {
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs font-medium text-gray-700">Root Cause <span className="text-gray-400 font-normal">(optional)</span></Label>
+                <Label className="text-xs font-medium text-gray-700">
+                  Root Cause <span className="text-gray-400 font-normal">(optional)</span>
+                </Label>
                 <Textarea
                   placeholder="Why did this happen?"
                   value={promoteData.rootCause}
@@ -591,7 +795,9 @@ export function ErrorLogsPage() {
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs font-medium text-gray-700">Resolution <span className="text-gray-400 font-normal">(optional)</span></Label>
+                <Label className="text-xs font-medium text-gray-700">
+                  Resolution <span className="text-gray-400 font-normal">(optional)</span>
+                </Label>
                 <Textarea
                   placeholder="How was it fixed?"
                   value={promoteData.resolution}

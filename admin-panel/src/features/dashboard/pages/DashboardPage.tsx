@@ -6,27 +6,27 @@ import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 import {
-    Activity,
-    AlertCircle,
-    ArrowDownRight,
-    ArrowUpRight,
-    BookOpen,
-    BrainCircuit,
-    Database,
-    Layers,
+  Activity,
+  AlertCircle,
+  ArrowDownRight,
+  ArrowUpRight,
+  BookOpen,
+  BrainCircuit,
+  Database,
+  Layers,
 } from 'lucide-react';
 import React, { useState } from 'react';
 import {
-    Area,
-    AreaChart,
-    CartesianGrid,
-    Cell,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts';
 
 const COLORS = ['#6366f1', '#a855f7', '#ec4899', '#f43f5e'];
@@ -341,7 +341,7 @@ export function DashboardPage() {
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: COLORS[i % COLORS.length] }}
                   />
-                  <span className="text-2xs font-black uppercase text-slate-500 truncate">
+                  <span className="text-2xs font-black uppercase text-gray-700 truncate">
                     {d.name}
                   </span>
                 </div>
@@ -452,7 +452,7 @@ function StatCard({
           <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tighter mb-1">
             {isLoading ? '...' : typeof value === 'number' ? value.toLocaleString() : value}
           </h3>
-          <p className="text-2xs font-black text-slate-600 uppercase tracking-extra-wide italic">
+          <p className="text-2xs font-black text-gray-600 uppercase tracking-extra-wide mt-1">
             {title}
           </p>
         </div>

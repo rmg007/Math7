@@ -81,3 +81,12 @@ export function sanitizeHtml(html: string): string {
  * Generic sleep function for UI testing and demos.
  */
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * UUID validation helper
+ */
+export function isValidUUID(uuid: string | undefined | null): uuid is string {
+  if (!uuid) return false;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+}

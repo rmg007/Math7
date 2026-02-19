@@ -20,9 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Type Safety**: Fixed `sortBy` type indexing in `UserManagementPage` to eliminate `tsc` errors.
+- **Type Safety**: Resolved `ReferenceError: Badge is not defined` in `DashboardPage.tsx` and `Loader2` in `SubjectsPage.tsx`.
+- **Type Safety**: Hardened `handleImport` logic in `AppsPage.tsx` and `SubjectsPage.tsx` with explicit type casting and normalization.
 - **Admin Panel**: Resolved domain deletion discrepancy where associated skills/questions were incorrectly reported due to multi-tenant overlap.
 - **Admin Panel**: Fixed `usePaginatedSkills` and `usePaginatedQuestions` hooks to allow Super Admins to view all apps when the 'All Apps' filter is active.
-- **Type Safety**: Synchronized `QuestionListItem` and `DomainListItem` types with joined application metadata.
+- **Type Safety**: Fixed `no-explicit-any` violation in `skill-list.tsx` by replacing `any` with safe `unknown` error handling.
 - **Project HADES**: Completed Phase 3 (The Anatomy) Architecture Audit - Architecture Drift & Multi-tenant Visibility.
 - **UI**: Removed redundant decorative icons (Layout, GraduationCap, Globe) from admin panel tables to reduce visual noise.
 - **Admin**: Fixed domain deletion bug where Super Admins could not delete domains if they differed from the current app context.

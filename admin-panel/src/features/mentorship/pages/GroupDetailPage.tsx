@@ -3,37 +3,36 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { isValidUUID } from '@/features/curriculum/types';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import { cn } from '@/lib/utils';
+import { cn, isValidUUID } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-    ArrowLeft,
-    Check,
-    CheckCircle,
-    Circle,
-    ClipboardList,
-    Clock,
-    Copy,
-    Edit3,
-    Home,
-    Layers,
-    LayoutDashboard,
-    Plus,
-    School,
-    Settings,
-    Trash2,
-    UserPlus,
-    Users,
+  ArrowLeft,
+  Check,
+  CheckCircle,
+  Circle,
+  ClipboardList,
+  Clock,
+  Copy,
+  Edit3,
+  Home,
+  Layers,
+  LayoutDashboard,
+  Plus,
+  School,
+  Settings,
+  Trash2,
+  UserPlus,
+  Users,
 } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -541,7 +540,9 @@ export function GroupDetailPage() {
           <div className="grid gap-3 md:grid-cols-3">
             <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Members</span>
+                <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">
+                  Members
+                </span>
                 <Users className="w-3.5 h-3.5 text-teal-500" />
               </div>
               <p className="text-2xl font-bold text-gray-900 tabular-nums">{memberCount}</p>
@@ -549,7 +550,9 @@ export function GroupDetailPage() {
 
             <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Join Code</span>
+                <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">
+                  Join Code
+                </span>
                 <Copy className="w-3.5 h-3.5 text-teal-500" />
               </div>
               <div className="flex items-center gap-2">
@@ -573,7 +576,9 @@ export function GroupDetailPage() {
 
             <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Public Join</span>
+                <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">
+                  Public Join
+                </span>
                 <UserPlus className="w-3.5 h-3.5 text-teal-500" />
               </div>
               <p
@@ -760,18 +765,12 @@ export function GroupDetailPage() {
             <div className="w-12 h-12 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center mx-auto mb-4">
               <Settings className="w-6 h-6 text-gray-300" />
             </div>
-            <h3 className="text-base font-semibold text-gray-900 mb-1">
-              Group Settings
-            </h3>
+            <h3 className="text-base font-semibold text-gray-900 mb-1">Group Settings</h3>
             <p className="text-xs text-gray-500 mb-6 max-w-sm mx-auto">
               Group configuration is currently under development.
             </p>
             <div className="flex items-center justify-center gap-3">
-              <Button
-                variant="outline"
-                className="h-9 px-4 rounded text-sm text-gray-400"
-                disabled
-              >
+              <Button variant="outline" className="h-9 px-4 rounded text-sm text-gray-400" disabled>
                 Edit Details
               </Button>
               <Button

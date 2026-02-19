@@ -1,5 +1,16 @@
 import { AdminHeader } from '@/components/ui/admin-header';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { DataToolbar } from '@/components/ui/data-toolbar';
 import {
   Dialog,
   DialogContent,
@@ -37,49 +48,72 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
+import type { DataColumn } from '@/lib/data-utils';
 import { normalizeFormData } from '@/lib/normalization';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   AlertTriangle,
+  CheckSquare,
   ExternalLink,
-  Layout,
   Layers,
+  Layout,
+  Loader2,
   Pencil,
   Plus,
   Power,
   Search,
+  Square,
   Trash2,
   X,
 } from 'lucide-react';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
   useApps,
+  useBulkCreateApps,
+  useBulkDeleteApps,
+  useBulkUpdateAppsStatus,
   useCreateApp,
   useDeleteApp,
   useUpdateApp,
+  type AppInsert,
   type CompiledApp,
 } from '../hooks/use-apps';
+
 import { useSubjects } from '../hooks/use-subjects';
 
 interface AppRowProps {
   app: CompiledApp;
+  isSelected: boolean;
+  onSelect: (id: string) => void;
   onEdit: (app: CompiledApp) => void;
   onDelete: (id: string) => void;
 }
 
-const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
+const AppRow = memo(({ app, isSelected, onSelect, onEdit, onDelete }: AppRowProps) => {
   return (
     <TableRow
       key={app.app_id}
-      className="group/row even:bg-gray-50/40"
+      className={cn('group/row even:bg-gray-50/40', isSelected && 'bg-teal-50/50')}
     >
+      <TableCell className="w-8 px-2">
+        <button
+          onClick={() => onSelect(app.app_id)}
+          className="text-gray-300 hover:text-gray-500"
+          aria-label={isSelected ? 'Deselect application' : 'Select application'}
+          title={isSelected ? 'Deselect' : 'Select'}
+        >
+          {isSelected ? (
+            <CheckSquare className="h-4 w-4 text-teal-600" />
+          ) : (
+            <Square className="h-4 w-4" />
+          )}
+        </button>
+      </TableCell>
       <TableCell className="px-4">
-        <span className="font-medium text-gray-900 text-xs truncate">
-          {app.display_name}
-        </span>
+        <span className="font-medium text-gray-900 text-xs truncate">{app.display_name}</span>
       </TableCell>
       <TableCell>
         <span className="text-xs text-gray-500">{app.subjects?.title ?? 'Unlinked'}</span>
@@ -92,21 +126,15 @@ const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
           className="inline-flex items-center gap-1 group/link"
           title="Launch App"
         >
-          <code className="text-xs text-teal-600 font-mono">
-            {app.subdomain}.questerix.com
-          </code>
+          <code className="text-xs text-teal-600 font-mono">{app.subdomain}.questerix.com</code>
           <ExternalLink className="w-3 h-3 text-gray-300 group-hover/link:text-teal-500" />
         </a>
       </TableCell>
       <TableCell className="hidden lg:table-cell">
-        <code className="text-xs text-gray-400 font-mono">
-          questerix-student.pages.dev
-        </code>
+        <code className="text-xs text-gray-400 font-mono">questerix-student.pages.dev</code>
       </TableCell>
       <TableCell className="hidden md:table-cell">
-        <span className="text-xs text-gray-500">
-          {app.grade_level || 'N/A'}
-        </span>
+        <span className="text-xs text-gray-500">{app.grade_level || 'N/A'}</span>
       </TableCell>
       <TableCell>
         <StatusBadge status={app.is_active ? 'active' : 'inactive'} />
@@ -137,6 +165,13 @@ const AppRow = memo(({ app, onEdit, onDelete }: AppRowProps) => {
   );
 });
 
+const APP_COLUMNS: DataColumn[] = [
+  { key: 'display_name', header: 'Name' },
+  { key: 'subdomain', header: 'Subdomain' },
+  { key: 'is_active', header: 'Status' },
+  { key: 'grade_level', header: 'Grade' },
+];
+
 const appSchema = z.object({
   subject_id: z.string().uuid('Please select a subject'),
   display_name: z.string().min(1, 'Display name is required'),
@@ -158,8 +193,12 @@ export function AppsPage() {
   const createApp = useCreateApp();
   const updateApp = useUpdateApp();
   const deleteApp = useDeleteApp();
+  const bulkDelete = useBulkDeleteApps();
+  const bulkUpdateStatus = useBulkUpdateAppsStatus();
+  const bulkCreate = useBulkCreateApps();
   const { toast } = useToast();
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -167,6 +206,10 @@ export function AppsPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingApp, setEditingApp] = useState<CompiledApp | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    type: 'single' | 'bulk';
+    id?: string;
+  } | null>(null);
 
   const form = useForm<AppFormData>({
     resolver: zodResolver(appSchema),
@@ -210,6 +253,191 @@ export function AppsPage() {
     setIsDialogOpen(true);
   }, []);
 
+  const filteredApps = useMemo(
+    () =>
+      apps?.filter(
+        (app) =>
+          app.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          app.subdomain.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (app.subjects?.title || '').toLowerCase().includes(searchQuery.toLowerCase())
+      ) || [],
+    [apps, searchQuery]
+  );
+
+  const sortedApps = useMemo(
+    () =>
+      [...filteredApps].sort((a, b) => {
+        let aValue: string | number | boolean | null | undefined;
+        let bValue: string | number | boolean | null | undefined;
+
+        if (sortBy === 'subject') {
+          aValue = a.subjects?.title || '';
+          bValue = b.subjects?.title || '';
+        } else {
+          const valA = a[sortBy as keyof CompiledApp];
+          const valB = b[sortBy as keyof CompiledApp];
+          aValue =
+            typeof valA !== 'object' || valA === null
+              ? (valA as string | number | boolean | null | undefined)
+              : '';
+          bValue =
+            typeof valB !== 'object' || valB === null
+              ? (valB as string | number | boolean | null | undefined)
+              : '';
+        }
+
+        if (aValue === bValue) return 0;
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+
+        const result = aValue < bValue ? -1 : 1;
+        return sortOrder === 'asc' ? result : -result;
+      }),
+    [filteredApps, sortBy, sortOrder]
+  );
+
+  const paginatedApps = useMemo(
+    () => sortedApps.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [sortedApps, currentPage, pageSize]
+  );
+
+  const handleSelectOne = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    if (selectedIds.size === filteredApps.length && filteredApps.length > 0) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredApps.map((a) => a.app_id)));
+    }
+  }, [filteredApps, selectedIds.size]);
+
+  const handleBulkStatusUpdate = async (is_active: boolean) => {
+    if (selectedIds.size === 0) return;
+    try {
+      await bulkUpdateStatus.mutateAsync({
+        ids: Array.from(selectedIds),
+        is_active,
+      });
+      toast({ title: 'Success', description: `${selectedIds.size} applications updated` });
+      setSelectedIds(new Set());
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update applications',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.size === 0) return;
+    setDeleteConfirmation({ type: 'bulk' });
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      await bulkDelete.mutateAsync(Array.from(selectedIds));
+      toast({ title: 'Success', description: `${selectedIds.size} applications deleted` });
+      setSelectedIds(new Set());
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete applications',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleteConfirmation(null);
+    }
+  };
+
+  const handleImport = async (data: Record<string, unknown>[]) => {
+    try {
+      const appsToCreate = data.map((item, index) => {
+        const display_name = (item.display_name ||
+          item.Display_Name ||
+          item.name ||
+          item.Name) as string;
+        const subdomain = (item.subdomain || item.Subdomain) as string;
+        const subjectTitleFromCsv = (item.subject_title ||
+          item.subject_name ||
+          item.subject ||
+          item.Subject) as string;
+
+        // Resolve subject_id from title if not provided
+        let subject_id = (item.subject_id || item.Subject_id) as string;
+        if (!subject_id && subjectTitleFromCsv && subjects) {
+          const matchedSubject = subjects.find(
+            (s) => s.title.toLowerCase() === subjectTitleFromCsv.trim().toLowerCase()
+          );
+          if (matchedSubject) {
+            subject_id = matchedSubject.subject_id;
+          }
+        }
+
+        if (!subject_id) {
+          throw new Error(
+            subjectTitleFromCsv
+              ? `Row ${index + 1}: Subject "${subjectTitleFromCsv}" not found. Please create it first.`
+              : `Row ${index + 1}: Subject ID or Title is missing. Please include subject_title in CSV.`
+          );
+        }
+
+        // Normalize status
+        const statusValue = item.is_active as string | boolean;
+        let is_active = true;
+        if (typeof statusValue === 'string') {
+          const val = statusValue.toLowerCase().trim();
+          is_active = val === 'true' || val === 'active' || val === '1' || val === 'yes';
+        } else if (typeof statusValue === 'boolean') {
+          is_active = statusValue;
+        }
+
+        return {
+          subject_id,
+          display_name: display_name || 'Untitled Application',
+          subdomain:
+            subdomain ||
+            (display_name
+              ? display_name
+                  .toLowerCase()
+                  .trim()
+                  .replace(/[^a-z0-9]/g, '-')
+              : `app-${Date.now()}-${index}`),
+          grade_level: (item.grade_level ||
+            item.Grade_Level ||
+            item.grade ||
+            item.Grade ||
+            '') as string,
+          grade_number: Number(item.grade_number || item.Grade_Number || 0) || 0,
+          is_active,
+        };
+      }) as AppInsert[];
+
+      await bulkCreate.mutateAsync(appsToCreate);
+      toast({
+        title: 'Success',
+        description: `Successfully imported ${appsToCreate.length} applications`,
+      });
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: 'Import Failed',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const onSubmit = async (data: AppFormData) => {
     const normalizedData = normalizeFormData(data, {
       lowercase: ['display_name', 'subdomain', 'grade_level'],
@@ -229,46 +457,27 @@ export function AppsPage() {
     }
   };
 
-  const handleDelete = useCallback(
-    async (id: string) => {
-      try {
-        await deleteApp.mutateAsync(id);
-        toast({ title: 'Deleted', description: 'Application has been removed.' });
-      } catch (error) {
-        toast({ title: 'Error', description: 'Failed to delete application', variant: 'destructive' });
-      }
-    },
-    [deleteApp, toast]
-  );
+  const handleDelete = (id: string) => {
+    setDeleteConfirmation({ type: 'single', id });
+  };
 
-  const filteredApps =
-    apps?.filter(
-      (app) =>
-        app.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.subdomain.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.subjects?.title.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [];
+  const confirmSingleDelete = async () => {
+    if (!deleteConfirmation?.id) return;
+    const id = deleteConfirmation.id;
 
-  const sortedApps = [...filteredApps].sort((a, b) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let aValue: any = a[sortBy as keyof CompiledApp];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let bValue: any = b[sortBy as keyof CompiledApp];
-
-    if (sortBy === 'subject') {
-      aValue = a.subjects?.title || '';
-      bValue = b.subjects?.title || '';
+    try {
+      await deleteApp.mutateAsync(id);
+      toast({ title: 'Deleted', description: 'Application has been removed.' });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete application',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleteConfirmation(null);
     }
-
-    if (aValue === bValue) return 0;
-    if (aValue === null || aValue === undefined) return 1;
-    if (bValue === null || bValue === undefined) return -1;
-
-    const result = aValue < bValue ? -1 : 1;
-    return sortOrder === 'asc' ? result : -result;
-  });
-
-  const paginatedApps = sortedApps.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  };
 
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -279,6 +488,8 @@ export function AppsPage() {
     }
   };
 
+  const isAllSelected = filteredApps.length > 0 && selectedIds.size === filteredApps.length;
+
   return (
     <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
@@ -287,14 +498,70 @@ export function AppsPage() {
         icon={Layout}
         className="mb-2"
         actions={
-          <Button
-            onClick={() => handleOpenDialog()}
-            className="h-9 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1"
-          >
-            <Plus className="w-3.5 h-3.5" /> New Application
-          </Button>
+          <div className="flex items-center gap-2">
+            <DataToolbar
+              data={apps as unknown as Record<string, unknown>[]}
+              columns={APP_COLUMNS}
+              entityName="Applications"
+              onImport={handleImport}
+            />
+            <Button
+              onClick={() => handleOpenDialog()}
+              className="h-9 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1"
+            >
+              <Plus className="w-3.5 h-3.5" /> New Application
+            </Button>
+          </div>
         }
       />
+
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md">
+          <div className="flex items-center gap-3 pl-2">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold">
+              {selectedIds.size}
+            </span>
+            <span className="text-xs text-teal-200 font-medium">selected</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleBulkStatusUpdate(true)}
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10"
+            >
+              Activate
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleBulkStatusUpdate(false)}
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10"
+            >
+              Deactivate
+            </Button>
+            <div className="w-px h-5 bg-teal-700 mx-1" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBulkDelete}
+              className="h-7 px-3 rounded text-xs text-red-400 hover:text-white hover:bg-red-600 gap-1"
+            >
+              <Trash2 className="h-3 w-3" />
+              Delete
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedIds(new Set())}
+              className="h-7 px-2 rounded text-xs text-teal-300 hover:text-white hover:bg-white/10"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
         {/* Card Header: Search + Count */}
@@ -332,6 +599,22 @@ export function AppsPage() {
         <Table className="w-full">
           <TableHeader>
             <TableRow className="bg-gray-50">
+              <TableHead className="w-8 px-2">
+                <button
+                  onClick={handleSelectAll}
+                  className="text-gray-300 hover:text-gray-500"
+                  aria-label={
+                    isAllSelected ? 'Deselect all applications' : 'Select all applications'
+                  }
+                  title={isAllSelected ? 'Deselect all' : 'Select all'}
+                >
+                  {isAllSelected ? (
+                    <CheckSquare className="h-4 w-4 text-teal-600" />
+                  ) : (
+                    <Square className="h-4 w-4" />
+                  )}
+                </button>
+              </TableHead>
               <TableHead className="px-4">
                 <SortableHeader
                   label="Name"
@@ -359,7 +642,8 @@ export function AppsPage() {
                   onSort={handleSort}
                 />
               </TableHead>
-              <TableHead className="hidden lg:table-cell"
+              <TableHead
+                className="hidden lg:table-cell"
                 title="Point your custom domain CNAME record to this target"
               >
                 DNS Target
@@ -382,15 +666,16 @@ export function AppsPage() {
                   onSort={handleSort}
                 />
               </TableHead>
-              <TableHead className="text-right px-4 border-l border-gray-100">
-                Actions
-              </TableHead>
+              <TableHead className="text-right px-4 border-l border-gray-100">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {appsLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i} className="even:bg-gray-50/40">
+                  <TableCell className="w-8 px-2">
+                    <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+                  </TableCell>
                   <TableCell className="px-4">
                     <div className="h-3.5 bg-gray-200 rounded w-28 animate-pulse"></div>
                   </TableCell>
@@ -419,7 +704,7 @@ export function AppsPage() {
               ))
             ) : paginatedApps.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-20">
+                <TableCell colSpan={8} className="py-20">
                   <EmptyState
                     icon={Layers}
                     title={searchQuery ? 'No matches found' : 'No applications yet'}
@@ -456,6 +741,8 @@ export function AppsPage() {
                 <AppRow
                   key={app.app_id}
                   app={app}
+                  isSelected={selectedIds.has(app.app_id)}
+                  onSelect={handleSelectOne}
                   onEdit={handleOpenDialog}
                   onDelete={handleDelete}
                 />
@@ -491,7 +778,9 @@ export function AppsPage() {
                     <DialogTitle>{editingApp ? 'Edit' : 'Create'} Application</DialogTitle>
                   </h2>
                   <DialogDescription className="text-xs text-gray-500 mt-0.5">
-                    {editingApp ? 'Update the application details below.' : 'Fill in the details to create a new application.'}
+                    {editingApp
+                      ? 'Update the application details below.'
+                      : 'Fill in the details to create a new application.'}
                   </DialogDescription>
                 </div>
 
@@ -515,37 +804,6 @@ export function AppsPage() {
                   <div className="grid grid-cols-2 gap-3">
                     <FormField
                       control={form.control}
-                      name="subject_id"
-                      render={({ field }) => (
-                        <FormItem className="space-y-1">
-                          <FormLabel className="text-xs font-medium text-gray-700">
-                            Subject
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="h-9 rounded border border-gray-300 bg-white text-gray-900 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm">
-                                <SelectValue placeholder="Select subject" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="rounded-lg border border-gray-200 shadow-md">
-                              {subjects?.map((s) => (
-                                <SelectItem key={s.subject_id} value={s.subject_id} className="text-sm">
-                                  {s.title}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
                       name="display_name"
                       render={({ field }) => (
                         <FormItem className="space-y-1">
@@ -565,9 +823,7 @@ export function AppsPage() {
                         </FormItem>
                       )}
                     />
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-3">
                     <FormField
                       control={form.control}
                       name="subdomain"
@@ -604,7 +860,42 @@ export function AppsPage() {
                         </FormItem>
                       )}
                     />
+                  </div>
 
+                  <FormField
+                    control={form.control}
+                    name="subject_id"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1">
+                        <FormLabel className="text-xs font-medium text-gray-700">Subject</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-9 rounded border border-gray-300 bg-white text-gray-900 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm">
+                              <SelectValue placeholder="Select subject" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="rounded-lg border border-gray-200 shadow-md">
+                            {subjects?.map((s) => (
+                              <SelectItem
+                                key={s.subject_id}
+                                value={s.subject_id}
+                                className="text-sm"
+                              >
+                                {s.title}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-2 gap-3">
                     <FormField
                       control={form.control}
                       name="grade_level"
@@ -620,6 +911,26 @@ export function AppsPage() {
                               data-testid="app-grade-level"
                               className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
                               required
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="grade_number"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1">
+                          <FormLabel className="text-xs font-medium text-gray-700">
+                            Grade Number
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
+                              {...field}
                             />
                           </FormControl>
                           <FormMessage />
@@ -662,27 +973,57 @@ export function AppsPage() {
                 </div>
               </div>
 
-              <DialogFooter className="bg-gray-50 px-6 py-4 flex gap-2 border-t border-gray-200">
+              <DialogFooter className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => setIsDialogOpen(false)}
-                  className="h-9 px-4 rounded text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  className="h-9 px-4 rounded text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={createApp.isPending || updateApp.isPending}
-                  className="h-9 px-5 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-9 px-4 rounded bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 gap-1.5"
                 >
-                  {editingApp ? 'Save Changes' : 'Create Application'}
+                  {(createApp.isPending || updateApp.isPending) && (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  )}
+                  {editingApp ? 'Update Application' : 'Create Application'}
                 </Button>
               </DialogFooter>
             </form>
           </Form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={Boolean(deleteConfirmation)}
+        onOpenChange={(open) => !open && setDeleteConfirmation(null)}
+      >
+        <AlertDialogContent className="max-w-[400px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
+              {deleteConfirmation?.type === 'bulk'
+                ? `This will permanently delete ${selectedIds.size} applications. This will also delete their associated landing pages. This action cannot be undone.`
+                : 'This will permanently delete this application and its associated landing page. This action cannot be undone.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-9 text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={
+                deleteConfirmation?.type === 'bulk' ? confirmBulkDelete : confirmSingleDelete
+              }
+              className="h-9 text-xs bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

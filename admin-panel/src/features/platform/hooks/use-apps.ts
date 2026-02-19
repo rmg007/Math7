@@ -1,6 +1,6 @@
-import { isValidUUID } from '@/features/curriculum/types';
 import { Tables, TablesInsert, TablesUpdate } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
+import { isValidUUID } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export type App = Tables<'apps'>;
@@ -100,6 +100,62 @@ export function useDeleteApp() {
       const { error } = await supabase.from('apps').delete().eq('app_id', id);
 
       if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['apps-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['apps'] });
+    },
+  });
+}
+
+export function useBulkUpdateAppsStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ ids, is_active }: { ids: string[]; is_active: boolean }) => {
+      const { error } = await supabase.from('apps').update({ is_active }).in('app_id', ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['apps-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['apps'] });
+    },
+  });
+}
+
+export function useBulkDeleteApps() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from('apps').delete().in('app_id', ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['apps-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['apps'] });
+    },
+  });
+}
+export function useBulkCreateApps() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (apps: AppInsert[]) => {
+      const { data, error } = await supabase.from('apps').insert(apps).select();
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const landingPages = data.map((app) => ({
+          app_id: app.app_id,
+          meta_title: `${app.display_name} | Questerix`,
+          meta_description: `Learn ${app.display_name} with Questerix.`,
+          hero_headline: `Ace ${app.display_name}`,
+          hero_subheadline: `Master your subjects with adaptive practice.`,
+        }));
+
+        const { error: lpError } = await supabase.from('app_landing_pages').insert(landingPages);
+        if (lpError) console.error('Failed to create bulk landing pages:', lpError);
+      }
+
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['apps-admin'] });

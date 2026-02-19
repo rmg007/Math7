@@ -1,45 +1,5 @@
 ---
 
-## 2026-02-18: Telegram Bridge — Architecture Fix [no test needed]
-
-### Session Context
-
-- **Trigger**: 404 errors when bridge tried to POST to Antigravity IDE's internal HTTP server
-- **Scope**: Complete rewrite of `antigravity_bridge.py` from HTTP API to `tasks.json` queue pattern
-- **Outcome**: Bridge running cleanly with task queuing, `/status`, and `/queue` commands
-
-### Root Cause
-
-The Antigravity IDE's internal HTTP server (dynamic port, e.g. 51282) is an **LSP/development server**, NOT a REST API. It does not accept external HTTP POST requests for prompt injection. Every path (`/api/agent/prompt`, `/api/prompt`, `/prompt`, `/v1/chat/completions`, etc.) returned 404 because the server simply doesn't expose that functionality.
-
-### Architecture Change
-
-- **Before**: `requests.post(localhost:{port}/api/agent/prompt)` → 404 every time
-- **After**: Write tasks to `tasks.json` → `ops_runner.py` picks them up automatically
-- Removed `requests` dependency entirely; now uses only `json` + `pathlib`
-
-### Features
-
-1. **Task Queuing**: Messages from Telegram → appended to `tasks.json` as structured task objects
-2. **`/status` Command**: Reads `tasks.status.json` to report last task result
-3. **`/queue` Command**: Shows pending tasks in queue
-4. **User Authorization**: `AUTHORIZED_USER_ID` check (unchanged, still secure)
-
-### Prevention Rules & Lessons
-
-1. **IDE internal servers are NOT public APIs** — Don't assume an IDE's local HTTP server accepts external REST calls. They use proprietary protocols (LSP, gRPC, etc.).
-2. **Use existing architecture** — The `tasks.json` + `ops_runner.py` pattern was already built and proven. Always check for prior art before inventing new integration points.
-3. **Endpoint scanning reveals architecture** — When all paths return 404, the server doesn't serve what you think it does. Stop probing, rethink approach.
-4. **Port 8080 conflicts** — EnterpriseDB/Apache occupies 8080 on Windows. Always use dynamic port detection.
-
-### Verification
-
-- Script starts cleanly with no network errors
-- No dependency on Antigravity IDE's internal server
-- Tasks written to `tasks.json` in correct format for `ops_runner.py`
-
----
-
 ## 2026-02-18: Proactive Import & Type Fixes [test created]
 
 ### Session Context
@@ -51,24 +11,20 @@ The Antigravity IDE's internal HTTP server (dynamic port, e.g. 51282) is an **LS
 ### Bugs Found & Fixed
 
 #### BUG-F1 CRITICAL: Missing `Badge` in Dashboard [no test needed]
-
 - **Issue**: `DashboardPage.tsx` used `<Badge>` component without an import, causing immediate crash on load.
 - **Fix**: Added `import { Badge } from '@/components/ui/badge'`.
 - **Lesson**: Even if an IDE autocompletes a component, double-check the import line.
 
 #### BUG-F2 CRITICAL: Missing `Loader2` in Subjects [no test needed]
-
 - **Issue**: `SubjectsPage.tsx` used `<Loader2>` in bulk action buttons without importing it from `lucide-react`.
 - **Fix**: Added `Loader2` to `lucide-react` imports.
 
 #### BUG-F3 MEDIUM: Type Safety in CSV Imports [test created]
-
 - **Issue**: `handleImport` in `AppsPage.tsx` and `SubjectsPage.tsx` passed `Record<string, unknown>[]` directly to `mutateAsync`, causing type errors.
 - **Fix**: Implemented explicit mapping to `AppInsert[]` and `SubjectInsert[]` with safe defaults for numbers and booleans.
 - **Lesson**: Bulk imports must always normalize incoming CSV data before passing to mutation hooks.
 
 #### BUG-F4 LOW: Linting Violation in Skill List [no test needed]
-
 - **Issue**: `src/features/curriculum/components/skill-list.tsx` used `catch (error: any)`, violating `no-explicit-any`.
 - **Fix**: Replaced with `catch (error)` and safe type inspection for `error.code`.
 
@@ -4562,5 +4518,3 @@ The Subjects page is now a **production-ready admin interface**. Next phases:
 
 - **Import Verification**: When refactoring or adding UI components (like `Badge`), always verify that the import statement is present. Runtime `ReferenceError`s in React components are often due to missing imports that weren't caught by the IDE's auto-import or were accidentally removed.
 - **Component Discovery**: Components in the `admin-panel` are typically located in `@/components/ui/` or within the feature's own `components` directory.
-
-- **Port Conflict Awareness**: Port 8080 on Windows is often used by EnterpriseDB (Apache), which can conflict with local agent APIs. The Antigravity IDE uses dynamic ports and auth tokens found in GEMINI_CLI_IDE_SERVER_PORT and GEMINI_CLI_IDE_AUTH_TOKEN.

@@ -89,6 +89,7 @@ export function Pagination({
           disabled={currentPage === 1}
           className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
           title="First page"
+          aria-label="First page"
         >
           <ChevronsLeft className="h-3.5 w-3.5" />
         </button>
@@ -97,6 +98,7 @@ export function Pagination({
           disabled={currentPage === 1}
           className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
           title="Previous page"
+          aria-label="Previous page"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
         </button>
@@ -107,6 +109,8 @@ export function Pagination({
               <button
                 key={idx}
                 onClick={() => onPageChange(page)}
+                aria-label={`Page ${page}`}
+                aria-current={page === currentPage ? 'page' : undefined}
                 className={`min-w-[24px] h-6 px-1.5 rounded text-xs font-medium ${
                   page === currentPage
                     ? 'bg-teal-600 text-white'
@@ -128,6 +132,7 @@ export function Pagination({
           disabled={currentPage === totalPages}
           className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
           title="Next page"
+          aria-label="Next page"
         >
           <ChevronRight className="h-3.5 w-3.5" />
         </button>
@@ -136,6 +141,7 @@ export function Pagination({
           disabled={currentPage === totalPages}
           className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
           title="Last page"
+          aria-label="Last page"
         >
           <ChevronsRight className="h-3.5 w-3.5" />
         </button>

@@ -1,5 +1,5 @@
 ---
-description: Enter Loki Mode (Autonomous Developer)
+description: Autonomous Developer Mode
 ---
 
 # 🐺 /loki — Autonomous Developer Mode

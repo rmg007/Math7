@@ -2,9 +2,10 @@ import { useApp } from '@/hooks/use-app';
 import { Database } from '@/lib/database.types';
 import { escapePostgrestSearch } from '@/lib/postgrest-utils';
 import { supabase } from '@/lib/supabase';
+import { isValidUUID } from '@/lib/utils';
 import type { QuestionListItem } from '@/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { isValidUUID, PaginatedResponse, PaginationParams } from '../types';
+import { PaginatedResponse, PaginationParams } from '../types';
 
 type Question = Database['public']['Tables']['questions']['Row'];
 export type QuestionInsert = Database['public']['Tables']['questions']['Insert'];

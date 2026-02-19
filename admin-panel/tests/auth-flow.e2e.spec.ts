@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 import { TEST_USERS } from './test-utils';
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL!;
+const supabaseUrl = process.env.VITE_SUPABASE_URL ?? '';
 
 // Load environment variables if not already present
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -58,7 +58,7 @@ test.describe('Auth Flow & Guardrails', () => {
     await page.waitForURL('/');
 
     // 2. API: Authenticate as Super Admin to perform the "soft delete"
-    const supabaseControl = createClient(supabaseUrl, process.env.VITE_SUPABASE_ANON_KEY!, {
+    const supabaseControl = createClient(supabaseUrl, process.env.VITE_SUPABASE_ANON_KEY ?? '', {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
@@ -89,7 +89,7 @@ test.describe('Auth Flow & Guardrails', () => {
       const { error: updateError } = await supabaseControl
         .from('profiles')
         .update({ deleted_at: new Date().toISOString() })
-        .eq('id', profile!.id);
+        .eq('id', profile?.id);
 
       expect(updateError).toBeNull();
 
@@ -103,7 +103,7 @@ test.describe('Auth Flow & Guardrails', () => {
       const { error: restoreError } = await supabaseControl
         .from('profiles')
         .update({ deleted_at: null })
-        .eq('id', profile!.id);
+        .eq('id', profile?.id);
 
       if (restoreError) {
         console.error('CRITICAL: Failed to restore admin user!', restoreError);

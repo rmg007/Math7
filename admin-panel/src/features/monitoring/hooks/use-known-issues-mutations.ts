@@ -65,3 +65,33 @@ export function useDeleteKnownIssue() {
     },
   });
 }
+
+export function useBulkUpdateKnownIssueStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: string }) => {
+      const { error } = await supabase.from('known_issues').update({ status }).in('id', ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['known-issues'] });
+    },
+  });
+}
+
+export function useBulkDeleteKnownIssues() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from('known_issues').delete().in('id', ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['known-issues'] });
+      queryClient.invalidateQueries({ queryKey: ['error-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['error-log-stats'] });
+    },
+  });
+}

@@ -1,5 +1,16 @@
 import { AdminHeader } from '@/components/ui/admin-header';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { DataToolbar } from '@/components/ui/data-toolbar';
 import {
   Dialog,
   DialogContent,
@@ -17,6 +28,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Pagination } from '@/components/ui/pagination';
 import {
   Select,
   SelectContent,
@@ -34,41 +46,79 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
+import type { DataColumn } from '@/lib/data-utils';
 import { normalizeFormData } from '@/lib/normalization';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Boxes, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { Boxes, CheckSquare, Loader2, Pencil, Plus, Search, Square, Trash2, X } from 'lucide-react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
+  useBulkCreateSubjects,
+  useBulkDeleteSubjects,
+  useBulkUpdateSubjectsStatus,
   useCreateSubject,
   useDeleteSubject,
   useSubjects,
   useUpdateSubject,
   type Subject,
+  type SubjectInsert,
 } from '../hooks/use-subjects';
 
 interface SubjectRowProps {
   subject: Subject;
+  isSelected: boolean;
+  onSelect: (id: string) => void;
   onEdit: (subject: Subject) => void;
   onDelete: (id: string) => void;
 }
 
 const statusConfig = {
-  live: { label: 'Live', dotColor: 'bg-emerald-500', textColor: 'text-emerald-800', bgColor: 'bg-emerald-100' },
-  published: { label: 'Published', dotColor: 'bg-indigo-500', textColor: 'text-indigo-700', bgColor: 'bg-indigo-100' },
-  draft: { label: 'Draft', dotColor: 'bg-gray-400', textColor: 'text-gray-700', bgColor: 'bg-gray-100' },
+  live: {
+    label: 'Live',
+    dotColor: 'bg-emerald-500',
+    textColor: 'text-emerald-800',
+    bgColor: 'bg-emerald-100',
+  },
+  published: {
+    label: 'Published',
+    dotColor: 'bg-indigo-500',
+    textColor: 'text-indigo-700',
+    bgColor: 'bg-indigo-100',
+  },
+  draft: {
+    label: 'Draft',
+    dotColor: 'bg-gray-400',
+    textColor: 'text-gray-700',
+    bgColor: 'bg-gray-100',
+  },
 } as const;
 
-const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
+const SubjectRow = memo(({ subject, isSelected, onSelect, onEdit, onDelete }: SubjectRowProps) => {
   const status = statusConfig[subject.status as keyof typeof statusConfig] ?? statusConfig.draft;
 
   return (
     <TableRow
       key={subject.subject_id}
-      className="group/row even:bg-gray-50/40"
+      className={cn('group/row even:bg-gray-50/40', isSelected && 'bg-teal-50/50')}
     >
+      <TableCell className="w-8 px-2">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect(subject.subject_id);
+          }}
+          className="p-1 hover:bg-white rounded transition-colors group"
+          aria-label={isSelected ? 'Deselect subject' : 'Select subject'}
+        >
+          {isSelected ? (
+            <CheckSquare className="h-4 w-4 text-teal-600" />
+          ) : (
+            <Square className="h-4 w-4" />
+          )}
+        </button>
+      </TableCell>
       <TableCell className="px-4">
         <div className="flex items-center gap-2">
           {subject.color_hex && (
@@ -78,15 +128,11 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
               title={subject.color_hex}
             />
           )}
-          <span className="font-medium text-gray-900 text-xs truncate">
-            {subject.title}
-          </span>
+          <span className="font-medium text-gray-900 text-xs truncate">{subject.title}</span>
         </div>
       </TableCell>
       <TableCell className="hidden md:table-cell">
-        <code className="text-xs text-gray-500 font-mono">
-          {subject.slug}
-        </code>
+        <code className="text-xs text-gray-500 font-mono">{subject.slug}</code>
       </TableCell>
       <TableCell className="px-2 text-center hidden sm:table-cell w-12">
         {subject.icon_url ? (
@@ -98,15 +144,19 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
         )}
       </TableCell>
       <TableCell>
-        <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium', status.bgColor, status.textColor)}>
+        <span
+          className={cn(
+            'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium',
+            status.bgColor,
+            status.textColor
+          )}
+        >
           <span className={cn('w-1.5 h-1.5 rounded-full', status.dotColor)} />
           {status.label}
         </span>
       </TableCell>
       <TableCell className="hidden lg:table-cell text-center">
-        <span className="text-xs text-gray-500 tabular-nums">
-          {subject.display_order ?? 0}
-        </span>
+        <span className="text-xs text-gray-500 tabular-nums">{subject.display_order ?? 0}</span>
       </TableCell>
       <TableCell className="px-4 text-right border-l border-gray-100">
         <div className="flex justify-end gap-0.5">
@@ -134,6 +184,13 @@ const SubjectRow = memo(({ subject, onEdit, onDelete }: SubjectRowProps) => {
   );
 });
 
+const SUBJECT_COLUMNS: DataColumn[] = [
+  { key: 'title', header: 'Title' },
+  { key: 'slug', header: 'Slug' },
+  { key: 'status', header: 'Status' },
+  { key: 'display_order', header: 'Order' },
+];
+
 const subjectSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100),
   slug: z
@@ -154,17 +211,61 @@ type SubjectFormData = z.infer<typeof subjectSchema>;
 
 export function SubjectsPage() {
   const { data: subjects, isLoading } = useSubjects();
+  const { toast } = useToast();
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [sortBy, setSortBy] = useState<string>('display_order');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    type: 'single' | 'bulk';
+    id?: string;
+  } | null>(null);
+
   const createSubject = useCreateSubject();
   const updateSubject = useUpdateSubject();
   const deleteSubject = useDeleteSubject();
-  const { toast } = useToast();
+  const bulkCreate = useBulkCreateSubjects();
+  const bulkDelete = useBulkDeleteSubjects();
+  const bulkUpdateStatus = useBulkUpdateSubjectsStatus();
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<string>('display_order');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const filteredSubjects = useMemo(
+    () =>
+      subjects?.filter(
+        (s) =>
+          s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.slug.toLowerCase().includes(searchQuery.toLowerCase())
+      ) || [],
+    [subjects, searchQuery]
+  );
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, sortBy, sortOrder]);
+
+  const sortedSubjects = useMemo(
+    () =>
+      [...filteredSubjects].sort((a, b) => {
+        const aValue = a[sortBy as keyof Subject];
+        const bValue = b[sortBy as keyof Subject];
+
+        if (aValue === bValue) return 0;
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+
+        const result = aValue < bValue ? -1 : 1;
+        return sortOrder === 'asc' ? result : -result;
+      }),
+    [filteredSubjects, sortBy, sortOrder]
+  );
+
+  const paginatedSubjects = useMemo(
+    () => sortedSubjects.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [sortedSubjects, currentPage, pageSize]
+  );
 
   const form = useForm<SubjectFormData>({
     resolver: zodResolver(subjectSchema),
@@ -235,57 +336,135 @@ export function SubjectsPage() {
     }
   };
 
-  const handleDelete = useCallback(
-    async (id: string) => {
-      try {
-        await deleteSubject.mutateAsync(id);
-        toast({
-          title: 'Subject Deleted',
-          description:
-            'The subject and all associated metadata have been removed from the platform.',
-        });
-      } catch (error: unknown) {
-        let description = 'Failed to delete subject';
-
-        // Handle constraint violation (Postgres error code 23503)
-        if (
-          typeof error === 'object' &&
-          error !== null &&
-          'code' in error &&
-          (error as { code: string }).code === '23503'
-        ) {
-          description =
-            'Cannot delete this subject because it is assigned to one or more Applications. Please reassign or delete the applications first.';
-        }
-
-        toast({
-          title: 'Error',
-          description,
-          variant: 'destructive',
-        });
+  const handleSelectOne = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
       }
-    },
-    [deleteSubject, toast]
-  );
+      return next;
+    });
+  }, []);
 
-  const filteredSubjects =
-    subjects?.filter(
-      (s) =>
-        s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.slug.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [];
+  const handleSelectAll = useCallback(() => {
+    if (selectedIds.size === filteredSubjects.length && filteredSubjects.length > 0) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredSubjects.map((s) => s.subject_id)));
+    }
+  }, [filteredSubjects, selectedIds.size]);
 
-  const sortedSubjects = [...filteredSubjects].sort((a, b) => {
-    const aValue = a[sortBy as keyof Subject];
-    const bValue = b[sortBy as keyof Subject];
+  const handleBulkStatusUpdate = async (status: 'draft' | 'published' | 'live') => {
+    if (selectedIds.size === 0) return;
+    try {
+      await bulkUpdateStatus.mutateAsync({
+        ids: Array.from(selectedIds),
+        status,
+      });
+      toast({ title: 'Success', description: `${selectedIds.size} subjects updated` });
+      setSelectedIds(new Set());
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to update subjects', variant: 'destructive' });
+    }
+  };
 
-    if (aValue === bValue) return 0;
-    if (aValue === null || aValue === undefined) return 1;
-    if (bValue === null || bValue === undefined) return -1;
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setDeleteConfirmation({ type: 'bulk' });
+  };
 
-    const result = aValue < bValue ? -1 : 1;
-    return sortOrder === 'asc' ? result : -result;
-  });
+  const confirmBulkDelete = async () => {
+    try {
+      await bulkDelete.mutateAsync(Array.from(selectedIds));
+      toast({ title: 'Success', description: `${selectedIds.size} subjects deleted` });
+      setSelectedIds(new Set());
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to delete subjects', variant: 'destructive' });
+    } finally {
+      setDeleteConfirmation(null);
+    }
+  };
+
+  const handleImport = async (data: Record<string, unknown>[]) => {
+    try {
+      const subjectsToCreate = data.map((item, index) => {
+        const title = (item.title || item.Title || item.name || item.Name) as string;
+        const slug = (item.slug || item.Slug) as string;
+
+        // Normalize status
+        let statusValue = ((item.status as string) || 'draft').toLowerCase().trim();
+        if (statusValue === 'active') statusValue = 'live';
+        const validStatuses: string[] = ['draft', 'published', 'live'];
+        const finalStatus = (validStatuses.includes(statusValue) ? statusValue : 'draft') as
+          | 'draft'
+          | 'published'
+          | 'live';
+
+        return {
+          title: title || 'Untitled Subject',
+          slug:
+            slug ||
+            (title
+              ? title
+                  .toLowerCase()
+                  .trim()
+                  .replace(/[^a-z0-9]/g, '_')
+              : `subject_${Date.now()}_${index}`),
+          description: (item.description || item.Description || '') as string,
+          color_hex: (item.color_hex || item.Color || item.color || '#0D9488') as string,
+          display_order: Number(item.display_order || item.order || item.Order || 0) || 0,
+          status: finalStatus,
+        };
+      }) as SubjectInsert[];
+      await bulkCreate.mutateAsync(subjectsToCreate);
+      toast({ title: 'Success', description: `${data.length} subjects imported successfully` });
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to import subjects',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDelete = useCallback((id: string) => {
+    setDeleteConfirmation({ type: 'single', id });
+  }, []);
+
+  const confirmSingleDelete = async () => {
+    if (!deleteConfirmation?.id) return;
+    const id = deleteConfirmation.id;
+
+    try {
+      await deleteSubject.mutateAsync(id);
+      toast({
+        title: 'Subject Deleted',
+        description: 'The subject and all associated metadata have been removed.',
+      });
+    } catch (error: unknown) {
+      let description = 'Failed to delete subject';
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        (error as { code: string }).code === '23503'
+      ) {
+        description =
+          'Cannot delete this subject because it is assigned to one or more Applications.';
+      }
+
+      toast({
+        title: 'Error',
+        description,
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleteConfirmation(null);
+    }
+  };
 
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -296,6 +475,8 @@ export function SubjectsPage() {
     }
   };
 
+  const isAllSelected = filteredSubjects.length > 0 && selectedIds.size === filteredSubjects.length;
+
   return (
     <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
@@ -304,14 +485,78 @@ export function SubjectsPage() {
         icon={Boxes}
         className="mb-2"
         actions={
-          <Button
-            onClick={() => handleOpenDialog()}
-            className="h-9 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1"
-          >
-            <Plus className="w-3.5 h-3.5" /> New Subject
-          </Button>
+          <div className="flex items-center gap-2">
+            <DataToolbar
+              data={subjects as unknown as Record<string, unknown>[]}
+              columns={SUBJECT_COLUMNS}
+              entityName="Subjects"
+              onImport={handleImport}
+            />
+            <Button
+              onClick={() => handleOpenDialog()}
+              className="h-9 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1"
+            >
+              <Plus className="w-3.5 h-3.5" /> New Subject
+            </Button>
+          </div>
         }
       />
+
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md">
+          <div className="flex items-center gap-3 pl-2">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold">
+              {selectedIds.size}
+            </span>
+            <span className="text-xs text-teal-200 font-medium">selected</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleBulkStatusUpdate('published')}
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10"
+            >
+              Publish
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleBulkStatusUpdate('live')}
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10"
+            >
+              Go Live
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleBulkStatusUpdate('draft')}
+              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10"
+            >
+              Draft
+            </Button>
+            <div className="w-px h-5 bg-teal-700 mx-1" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBulkDelete}
+              className="h-7 px-3 rounded text-xs text-red-400 hover:text-white hover:bg-red-600 gap-1"
+            >
+              <Trash2 className="h-3 w-3" />
+              Delete
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedIds(new Set())}
+              className="h-7 px-2 rounded text-xs text-teal-300 hover:text-white hover:bg-white/10"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
         {/* Card Header: Search + Count */}
@@ -339,113 +584,137 @@ export function SubjectsPage() {
             {filteredSubjects.length} {filteredSubjects.length === 1 ? 'subject' : 'subjects'}
           </span>
         </div>
-          <Table className="w-full">
-            <TableHeader>
-              <TableRow className="bg-gray-50">
-                <TableHead className="px-4">
-                  <SortableHeader
-                    label="Title"
-                    column="title"
-                    currentSortBy={sortBy}
-                    currentSortOrder={sortOrder}
-                    onSort={handleSort}
-                  />
-                </TableHead>
-                <TableHead className="hidden md:table-cell">
-                  <SortableHeader
-                    label="Slug"
-                    column="slug"
-                    currentSortBy={sortBy}
-                    currentSortOrder={sortOrder}
-                    onSort={handleSort}
-                  />
-                </TableHead>
-                <TableHead className="px-2 text-center hidden sm:table-cell w-12">
-                  Icon
-                </TableHead>
-                <TableHead>
-                  <SortableHeader
-                    label="Status"
-                    column="status"
-                    currentSortBy={sortBy}
-                    currentSortOrder={sortOrder}
-                    onSort={handleSort}
-                  />
-                </TableHead>
-                <TableHead className="hidden lg:table-cell text-center">
-                  <SortableHeader
-                    label="Order"
-                    column="display_order"
-                    currentSortBy={sortBy}
-                    currentSortOrder={sortOrder}
-                    onSort={handleSort}
-                  />
-                </TableHead>
-                <TableHead className="text-right px-4 border-l border-gray-100">
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: 8 }).map((_, i) => (
-                  <TableRow key={i} className="even:bg-gray-50/40">
-                    <TableCell className="px-4">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2.5 w-2.5 bg-gray-200 rounded-full animate-pulse"></div>
-                        <div className="h-3.5 bg-gray-200 rounded w-24 animate-pulse"></div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <div className="h-3.5 bg-gray-200 rounded w-16 animate-pulse"></div>
-                    </TableCell>
-                    <TableCell className="px-2 hidden sm:table-cell">
-                      <div className="h-6 w-6 bg-gray-200 rounded mx-auto animate-pulse"></div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="h-4 bg-gray-200 rounded-full w-14 animate-pulse"></div>
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      <div className="h-3.5 bg-gray-200 rounded w-6 animate-pulse"></div>
-                    </TableCell>
-                    <TableCell className="px-4">
-                      <div className="flex gap-0.5 justify-end">
-                        <div className="h-7 w-7 bg-gray-200 rounded animate-pulse"></div>
-                        <div className="h-7 w-7 bg-gray-200 rounded animate-pulse"></div>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : subjects?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-20">
-                    <EmptyState
-                      icon={Boxes}
-                      title="No subjects yet"
-                      description="Create your first subject to get started."
-                      action={
-                        <Button
-                          onClick={() => handleOpenDialog()}
-                          className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
-                        >
-                          New Subject
-                        </Button>
-                      }
-                    />
+        <Table className="w-full">
+          <TableHeader>
+            <TableRow className="bg-gray-50">
+              <TableHead className="w-8 px-2">
+                <button onClick={handleSelectAll} className="text-gray-300 hover:text-gray-500">
+                  {isAllSelected ? (
+                    <CheckSquare className="h-4 w-4 text-teal-600" />
+                  ) : (
+                    <Square className="h-4 w-4" />
+                  )}
+                </button>
+              </TableHead>
+              <TableHead className="px-4">
+                <SortableHeader
+                  label="Title"
+                  column="title"
+                  currentSortBy={sortBy}
+                  currentSortOrder={sortOrder}
+                  onSort={handleSort}
+                />
+              </TableHead>
+
+              <TableHead className="hidden md:table-cell">
+                <SortableHeader
+                  label="Slug"
+                  column="slug"
+                  currentSortBy={sortBy}
+                  currentSortOrder={sortOrder}
+                  onSort={handleSort}
+                />
+              </TableHead>
+              <TableHead className="px-2 text-center hidden sm:table-cell w-12">Icon</TableHead>
+              <TableHead>
+                <SortableHeader
+                  label="Status"
+                  column="status"
+                  currentSortBy={sortBy}
+                  currentSortOrder={sortOrder}
+                  onSort={handleSort}
+                />
+              </TableHead>
+              <TableHead className="hidden lg:table-cell text-center">
+                <SortableHeader
+                  label="Order"
+                  column="display_order"
+                  currentSortBy={sortBy}
+                  currentSortOrder={sortOrder}
+                  onSort={handleSort}
+                />
+              </TableHead>
+              <TableHead className="text-right px-4 border-l border-gray-100">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <TableRow key={i} className="even:bg-gray-50/40">
+                  <TableCell className="px-4">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2.5 w-2.5 bg-gray-200 rounded-full animate-pulse"></div>
+                      <div className="h-3.5 bg-gray-200 rounded w-24 animate-pulse"></div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <div className="h-3.5 bg-gray-200 rounded w-16 animate-pulse"></div>
+                  </TableCell>
+                  <TableCell className="px-2 hidden sm:table-cell">
+                    <div className="h-6 w-6 bg-gray-200 rounded mx-auto animate-pulse"></div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="h-4 bg-gray-200 rounded-full w-14 animate-pulse"></div>
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    <div className="h-3.5 bg-gray-200 rounded w-6 animate-pulse"></div>
+                  </TableCell>
+                  <TableCell className="px-4">
+                    <div className="flex gap-0.5 justify-end">
+                      <div className="h-7 w-7 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-7 w-7 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
                   </TableCell>
                 </TableRow>
-              ) : (
-                sortedSubjects.map((s) => (
-                  <SubjectRow
-                    key={s.subject_id}
-                    subject={s}
-                    onEdit={handleOpenDialog}
-                    onDelete={handleDelete}
+              ))
+            ) : subjects?.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="py-20">
+                  <EmptyState
+                    icon={Boxes}
+                    title="No subjects yet"
+                    description="Create your first subject to get started."
+                    action={
+                      <Button
+                        onClick={() => handleOpenDialog()}
+                        className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                      >
+                        New Subject
+                      </Button>
+                    }
                   />
-                ))
-              )}
-            </TableBody>
-          </Table>
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedSubjects.map((s) => (
+                <SubjectRow
+                  key={s.subject_id}
+                  subject={s}
+                  isSelected={selectedIds.has(s.subject_id)}
+                  onSelect={handleSelectOne}
+                  onEdit={handleOpenDialog}
+                  onDelete={handleDelete}
+                />
+              ))
+            )}
+          </TableBody>
+        </Table>
+
+        {filteredSubjects.length > 0 && (
+          <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(filteredSubjects.length / pageSize)}
+              totalCount={filteredSubjects.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -458,7 +727,9 @@ export function SubjectsPage() {
                     <DialogTitle>{editingSubject ? 'Edit' : 'Create'} Subject</DialogTitle>
                   </h2>
                   <DialogDescription className="text-xs text-gray-500 mt-0.5">
-                    {editingSubject ? 'Update the subject details below.' : 'Fill in the details to create a new subject.'}
+                    {editingSubject
+                      ? 'Update the subject details below.'
+                      : 'Fill in the details to create a new subject.'}
                   </DialogDescription>
                 </div>
 
@@ -469,9 +740,7 @@ export function SubjectsPage() {
                       name="title"
                       render={({ field }) => (
                         <FormItem className="space-y-1">
-                          <FormLabel className="text-xs font-medium text-gray-700">
-                            Title
-                          </FormLabel>
+                          <FormLabel className="text-xs font-medium text-gray-700">Title</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="e.g. Mathematics"
@@ -491,9 +760,7 @@ export function SubjectsPage() {
                       name="slug"
                       render={({ field }) => (
                         <FormItem className="space-y-1">
-                          <FormLabel className="text-xs font-medium text-gray-700">
-                            Slug
-                          </FormLabel>
+                          <FormLabel className="text-xs font-medium text-gray-700">Slug</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="e.g. math"
@@ -522,9 +789,7 @@ export function SubjectsPage() {
                       name="color_hex"
                       render={({ field }) => (
                         <FormItem className="space-y-1">
-                          <FormLabel className="text-xs font-medium text-gray-700">
-                            Color
-                          </FormLabel>
+                          <FormLabel className="text-xs font-medium text-gray-700">Color</FormLabel>
                           <div className="flex gap-2">
                             <div
                               className="h-9 w-9 rounded border border-gray-300 shrink-0"
@@ -549,9 +814,7 @@ export function SubjectsPage() {
                       name="display_order"
                       render={({ field }) => (
                         <FormItem className="space-y-1">
-                          <FormLabel className="text-xs font-medium text-gray-700">
-                            Order
-                          </FormLabel>
+                          <FormLabel className="text-xs font-medium text-gray-700">Order</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
@@ -585,9 +848,15 @@ export function SubjectsPage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="rounded-lg border border-gray-200 shadow-md">
-                              <SelectItem value="draft" className="text-sm">Draft</SelectItem>
-                              <SelectItem value="live" className="text-sm">Live</SelectItem>
-                              <SelectItem value="published" className="text-sm">Published</SelectItem>
+                              <SelectItem value="draft" className="text-sm">
+                                Draft
+                              </SelectItem>
+                              <SelectItem value="live" className="text-sm">
+                                Live
+                              </SelectItem>
+                              <SelectItem value="published" className="text-sm">
+                                Published
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -618,27 +887,57 @@ export function SubjectsPage() {
                 </div>
               </div>
 
-              <DialogFooter className="bg-gray-50 px-6 py-4 flex gap-2 border-t border-gray-200">
+              <DialogFooter className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => setIsDialogOpen(false)}
-                  className="h-9 px-4 rounded text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  className="h-9 px-4 rounded text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={createSubject.isPending || updateSubject.isPending}
-                  className="h-9 px-5 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-9 px-4 rounded bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 gap-1.5"
                 >
-                  {editingSubject ? 'Save Changes' : 'Create Subject'}
+                  {(createSubject.isPending || updateSubject.isPending) && (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  )}
+                  {editingSubject ? 'Update Subject' : 'Create Subject'}
                 </Button>
               </DialogFooter>
             </form>
           </Form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={Boolean(deleteConfirmation)}
+        onOpenChange={(open) => !open && setDeleteConfirmation(null)}
+      >
+        <AlertDialogContent className="max-w-[400px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
+              {deleteConfirmation?.type === 'bulk'
+                ? `This will permanently delete ${selectedIds.size} subjects. This action cannot be undone.`
+                : 'This will permanently delete this subject. This action cannot be undone.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-9 text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={
+                deleteConfirmation?.type === 'bulk' ? confirmBulkDelete : confirmSingleDelete
+              }
+              className="h-9 text-xs bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

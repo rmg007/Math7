@@ -2,15 +2,3 @@
 > admin-panel@0.0.0 lint
 > eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0
 
-
-C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\rls-bypass.e2e.spec.ts
-  5:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
-  6:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
-
-C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\security-stress.e2e.spec.ts
-   5:21  warning  Forbidden non-null assertion                                                            @typescript-eslint/no-non-null-assertion
-   6:25  warning  Forbidden non-null assertion                                                            @typescript-eslint/no-non-null-assertion
-  66:20  error    'deleteError' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-✖ 5 problems (1 error, 4 warnings)
-
