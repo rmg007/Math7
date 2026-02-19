@@ -27,7 +27,8 @@
     "ENABLE_OFFLINE_FIRST": "true",
     "DRIFT_DB_VERSION": "1",
     "SENTRY_ENABLED": "true",
-    "SENTRY_DSN": "${global.SENTRY_DSN}"
+    "SENTRY_DSN": "${global.SENTRY_DSN}",
+    "DEV_SUBDOMAIN": "app"
   },
   "cloudflare": {
     "account_id": "1ad655f025b0db1974614aac7ebec10a",

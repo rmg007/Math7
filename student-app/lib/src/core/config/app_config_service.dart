@@ -32,7 +32,7 @@ class AppInitializationException implements Exception {
 
 /// Provides access to the current [AppContext] and manages its loading.
 final appConfigProvider =
-    StateNotifierProvider<AppConfigService, AppContext?>((ref) {
+    StateNotifierProvider<AppConfigService, AsyncValue<AppContext>>((ref) {
   final supabase = ref.watch(supabaseClientProvider);
   return AppConfigService(supabase);
 });
@@ -42,42 +42,44 @@ final appConfigServiceProvider = Provider<AppConfigService>((ref) {
   return ref.watch(appConfigProvider.notifier);
 });
 
-class AppConfigService extends StateNotifier<AppContext?> {
+class AppConfigService extends StateNotifier<AsyncValue<AppContext>> {
   final SupabaseClient _supabase;
 
-  AppConfigService(this._supabase) : super(null);
+  AppConfigService(this._supabase) : super(const AsyncLoading());
 
-  Future<AppContext> load() async {
-    // 1. Detect Subdomain (Web)
-    String? subdomain;
+  Future<void> load({String? manualSubdomain}) async {
+    state = const AsyncLoading();
 
-    if (kIsWeb) {
-      final uri = Uri.base;
-      final host = uri.host;
-      // Logic: sub.domain.com -> sub
-      if (host != 'localhost' && host != '127.0.0.1') {
-        final parts = host.split('.');
-        if (parts.isNotEmpty) {
-          subdomain = parts[0];
-        }
-      } else {
-        // Dev fallback for localhost - explicit only
-        // subdomain = 'app'; // VIOLATION: Commented out for Ironclad Compliance
-      }
-    }
-
-    if (subdomain == null) {
-      throw AppInitializationException(
-          'Security Violation: No tenant subdomain detected. Hardcoded fallbacks are disabled.',
-          subdomain: 'null');
-    }
-
-    // 2. Fetch Config from Database (apps table)
     try {
+      // 1. Detect Subdomain (Web)
+      String? subdomain = manualSubdomain;
+
+      if (subdomain == null && kIsWeb) {
+        final uri = Uri.base;
+        final host = uri.host;
+
+        if (host != 'localhost' && host != '127.0.0.1') {
+          final parts = host.split('.');
+          if (parts.isNotEmpty) {
+            subdomain = parts[0];
+          }
+        } else if (Env.devSubdomain.isNotEmpty) {
+          subdomain = Env.devSubdomain;
+        }
+      }
+
+      if (subdomain == null) {
+        throw AppInitializationException(
+          'No tenant context detected.',
+          subdomain: 'null',
+        );
+      }
+
+      // 2. Fetch Config from Database
       final response = await _supabase
           .from('apps')
           .select('app_id, display_name, subdomain')
-          .ilike('subdomain', subdomain) // FIXED: Case-insensitive lookup
+          .ilike('subdomain', subdomain)
           .eq('is_active', true)
           .maybeSingle();
 
@@ -85,21 +87,19 @@ class AppConfigService extends StateNotifier<AppContext?> {
         final context = AppContext(
           appId: response['app_id'] as String,
           appName: (response['display_name'] as String?) ?? Env.appName,
-          primaryColor: Env.themePrimaryColor, // Use env config for theme
+          primaryColor: Env.themePrimaryColor,
         );
 
-        state = context;
-        return context;
+        state = AsyncData(context);
       } else {
-        // Handle "App Not Found" explicitly
         throw AppInitializationException(
           'Tenant not found for subdomain: $subdomain',
           subdomain: subdomain,
         );
       }
-    } catch (e) {
-      debugPrint('Error loading app config for subdomain $subdomain: $e');
-      rethrow; // Rethrow so main.dart knows it failed
+    } catch (e, st) {
+      debugPrint('Error loading app config: $e');
+      state = AsyncError(e, st);
     }
   }
 }

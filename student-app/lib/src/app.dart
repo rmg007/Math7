@@ -23,65 +23,95 @@ class _QuesterixAppState extends ConsumerState<QuesterixApp> {
   @override
   Widget build(BuildContext context) {
     // Watch app config to ensure we have a valid tenant context
-    final appConfig = ref.watch(appConfigProvider);
+    final appConfigAsync = ref.watch(appConfigProvider);
 
-    // If config failed to load (and we are here), show error screen
-    // Note: main.dart catches the exception, so we might end up here with null config
-    if (appConfig == null) {
-      return const MaterialApp(
+    return appConfigAsync.when(
+      loading: () => const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, size: 48, color: Colors.red),
-                SizedBox(height: 16),
-                Text('Failed to load application configuration.',
-                    style: TextStyle(fontSize: 18)),
-                SizedBox(height: 8),
-                Text('Please check your connection and reload.'),
-              ],
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      ),
+      error: (error, _) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(),
+        home: Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.cloud_off_rounded,
+                      size: 64, color: AppColors.error),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Initialization Error',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    error.toString().replaceFirst('Exception: ', ''),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: 200,
+                    child: ElevatedButton(
+                      onPressed: () =>
+                          ref.read(appConfigProvider.notifier).load(),
+                      child: const Text('Try Again'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      );
-    }
+      ),
+      data: (appConfig) {
+        final session = ref.watch(currentSessionProvider);
+        final settings = ref.watch(settingsProvider);
 
-    final session = ref.watch(currentSessionProvider);
-    final settings = ref.watch(settingsProvider);
-    ref.listen(authStateProvider, (previous, next) {});
+        ref.listen<AsyncValue<ConnectivityStatus>>(connectivityServiceProvider,
+            (previous, next) {
+          final oldStatus = previous?.valueOrNull;
+          final newStatus = next.valueOrNull;
 
-    ref.listen<AsyncValue<ConnectivityStatus>>(connectivityServiceProvider,
-        (previous, next) {
-      final oldStatus = previous?.valueOrNull;
-      final newStatus = next.valueOrNull;
+          if (newStatus != null &&
+              oldStatus != null &&
+              oldStatus != newStatus) {
+            _showConnectivitySnackbar(context, newStatus);
+          }
+        });
 
-      if (newStatus != null && oldStatus != null && oldStatus != newStatus) {
-        _showConnectivitySnackbar(context, newStatus);
-      }
-    });
-
-    return MaterialApp(
-      title: appConfig.appName, // Use dynamic app name
-      debugShowCheckedModeBanner: false,
-      theme: _getTheme(context, settings, false),
-      darkTheme: _getTheme(context, settings, true),
-      highContrastTheme:
-          _getTheme(context, settings, false, highContrast: true),
-      highContrastDarkTheme:
-          _getTheme(context, settings, true, highContrast: true),
-      themeMode: settings.darkMode ? ThemeMode.dark : ThemeMode.light,
-      home: session != null
-          ? _AuthenticatedHome(
-              onFirstBuild: () {
-                if (!_hasCheckedResume) {
-                  _hasCheckedResume = true;
-                  _checkForResumeSession(context, ref);
-                }
-              },
-            )
-          : const WelcomeScreen(),
+        return MaterialApp(
+          title: appConfig.appName,
+          debugShowCheckedModeBanner: false,
+          theme: _getTheme(context, settings, false),
+          darkTheme: _getTheme(context, settings, true),
+          highContrastTheme:
+              _getTheme(context, settings, false, highContrast: true),
+          highContrastDarkTheme:
+              _getTheme(context, settings, true, highContrast: true),
+          themeMode: settings.darkMode ? ThemeMode.dark : ThemeMode.light,
+          home: session != null
+              ? _AuthenticatedHome(
+                  onFirstBuild: () {
+                    if (!_hasCheckedResume) {
+                      _hasCheckedResume = true;
+                      _checkForResumeSession(context, ref);
+                    }
+                  },
+                )
+              : const WelcomeScreen(),
+        );
+      },
     );
   }
 

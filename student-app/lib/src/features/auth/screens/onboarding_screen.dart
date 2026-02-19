@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:student_app/src/core/config/app_config_service.dart';
 import 'package:student_app/src/core/theme/app_theme.dart';
+
 import '../providers/auth_provider.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -304,7 +305,7 @@ class _ParentApprovalStepState extends ConsumerState<_ParentApprovalStep> {
       // In a real parent flow, we might want to flag this user as "parent pending" in metadata
       // or simply treat this as the parent creating an account for clarity.
       // FIX M2: Get appId from app context for multi-tenant isolation
-      final appContext = ref.read(appConfigProvider);
+      final appContext = ref.read(appConfigProvider).valueOrNull;
       final appId = appContext?.appId ?? '';
 
       await ref
@@ -462,7 +463,7 @@ class _StudentSignupStepState extends ConsumerState<_StudentSignupStep> {
     try {
       final email = _emailController.text;
       // FIX M2: Get appId from app context for multi-tenant isolation
-      final appContext = ref.read(appConfigProvider);
+      final appContext = ref.read(appConfigProvider).valueOrNull;
       final appId = appContext?.appId ?? '';
 
       await ref

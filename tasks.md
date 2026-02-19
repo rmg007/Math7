@@ -8,6 +8,9 @@
 - [x] **Functional Verification**: Run `npm run test:e2e` (Auth Flow) to ensure CSP doesn't block redirects. (Passed)
 - [x] **Source Sync**: Push all fixes to GitHub (`git push`). (Done)
 - [x] **Production Release**: Execute `powershell .\scripts\deploy-all.ps1`. (Done via orchestrator.ps1)
+- [x] **Auth Refactor**: Implement `AuthController` and `AsyncValue` pattern. (Done)
+- [x] **State Management Migration**: Migrate `AppConfigService` to `AsyncValue`. (Done)
+- [x] **Initialization UX**: Improve splash screen and error handling for multi-tenant boot. (Done)
 
 ---
 

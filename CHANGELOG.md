@@ -41,6 +41,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Testing**: Refactored illegal `await import` calls in unit tests to standard top-level imports.
 - **Testing**: Stabilized `data-utils` tests by switching to `globalThis` spying for URL APIs and expanded coverage to 100% with pure unit testing strategies.
 - **Backend**: Refactored Supabase Edge Functions to use handlers and guarded server loops for unit test compatibility.
+- **Student App**: Refactored `LoginScreen` and `RegisterScreen` to use a centralized `AuthController` and `AsyncValue` pattern for robust state management.
+- **Student App**: Migrated `AppConfigService` to `AsyncValue`, providing consistent loading, success, and error states for multi-tenant bootstrapping.
+- **Student App**: Improved initialization UI in `app.dart` with a themed splash experience and "Try Again" error handling for tenant configuration failures.
+- **Student App**: Resolved the "Login Trap" where users were sometimes unable to navigate away from the login screen despite successful authentication.
+- **Student App**: Fixed multiple unit and widget tests affected by the `AsyncValue` refactor.
+- **Scripts**: Fixed a path resolution bug in `run-student-web.ps1` that prevented the app from launching correctly from the root directory.
 
 ## [2.0.2] - 2026-02-16
 

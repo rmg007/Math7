@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:student_app/src/core/theme/app_theme.dart';
-import 'package:student_app/src/features/auth/providers/auth_provider.dart';
+import 'package:student_app/src/features/auth/controllers/auth_controller.dart';
 import 'package:student_app/src/features/auth/screens/onboarding_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -15,8 +15,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
   bool _obscurePassword = true;
 
   @override
@@ -29,46 +27,39 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await ref.read(authServiceProvider).signInWithPassword(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-          );
-
-      if (mounted) {
-        // Pop the login screen to reveal the authenticated home
-        Navigator.pop(context);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Login successful!'),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-          ),
+    await ref.read(authControllerProvider.notifier).login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
         );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = e.toString().replaceFirst('Exception: ', '');
-        });
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
+
+    // Listen to changes in the auth state to handle side effects (navigation, snackbars)
+    ref.listen<AsyncValue<void>>(authControllerProvider, (previous, next) {
+      next.when(
+        data: (_) {
+          // If we transitioned from loading to data success, pop the screen
+          if (previous?.isLoading ?? false) {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Login successful!'),
+                backgroundColor: AppColors.success,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
+        error: (error, _) {
+          // Errors are handled visually via the error container below
+        },
+        loading: () {},
+      );
+    });
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -207,7 +198,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             },
                           ),
                           const SizedBox(height: 24),
-                          if (_errorMessage != null)
+                          if (authState.hasError)
                             Container(
                               padding: const EdgeInsets.all(12),
                               margin: const EdgeInsets.only(bottom: 16),
@@ -225,7 +216,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      _errorMessage!,
+                                      authState.error
+                                          .toString()
+                                          .replaceFirst('Exception: ', ''),
                                       style: const TextStyle(
                                           color: AppColors.error),
                                     ),
@@ -237,7 +230,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             width: double.infinity,
                             height: 52,
                             child: ElevatedButton(
-                              onPressed: _isLoading ? null : _handleLogin,
+                              onPressed:
+                                  authState.isLoading ? null : _handleLogin,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
@@ -246,7 +240,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                                 elevation: 2,
                               ),
-                              child: _isLoading
+                              child: authState.isLoading
                                   ? const SizedBox(
                                       width: 24,
                                       height: 24,

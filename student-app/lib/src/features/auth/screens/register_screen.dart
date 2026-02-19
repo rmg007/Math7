@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:student_app/src/core/theme/app_theme.dart';
-import 'package:student_app/src/features/auth/providers/auth_provider.dart';
+import 'package:student_app/src/features/auth/controllers/auth_controller.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -16,8 +16,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -33,47 +31,42 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await ref.read(authServiceProvider).signUp(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-            fullName: _nameController.text.trim(),
-          );
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white),
-                SizedBox(width: 12),
-                Text('Account created successfully!'),
-              ],
-            ),
-            backgroundColor: AppColors.success,
-          ),
+    await ref.read(authControllerProvider.notifier).register(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          fullName: _nameController.text.trim(),
         );
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
+
+    // Listen for side effects
+    ref.listen<AsyncValue<void>>(authControllerProvider, (previous, next) {
+      next.when(
+        data: (_) {
+          if (previous?.isLoading ?? false) {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.white),
+                    SizedBox(width: 12),
+                    Text('Account created successfully!'),
+                  ],
+                ),
+                backgroundColor: AppColors.success,
+              ),
+            );
+          }
+        },
+        error: (_, __) {},
+        loading: () {},
+      );
+    });
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -268,7 +261,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             },
                           ),
                           const SizedBox(height: 24),
-                          if (_errorMessage != null)
+                          if (authState.hasError)
                             Container(
                               padding: const EdgeInsets.all(12),
                               margin: const EdgeInsets.only(bottom: 16),
@@ -286,7 +279,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      _errorMessage!,
+                                      authState.error
+                                          .toString()
+                                          .replaceFirst('Exception: ', ''),
                                       style: const TextStyle(
                                           color: AppColors.error),
                                     ),
@@ -298,7 +293,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             width: double.infinity,
                             height: 52,
                             child: ElevatedButton(
-                              onPressed: _isLoading ? null : _handleRegister,
+                              onPressed:
+                                  authState.isLoading ? null : _handleRegister,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
@@ -307,7 +303,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 ),
                                 elevation: 2,
                               ),
-                              child: _isLoading
+                              child: authState.isLoading
                                   ? const SizedBox(
                                       width: 24,
                                       height: 24,

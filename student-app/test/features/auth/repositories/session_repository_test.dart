@@ -53,7 +53,8 @@ void main() {
         () async {
       final mockAppContext = MockAppContext();
       when(() => mockAppContext.appId).thenReturn('test-app-id');
-      when(() => mockRef.read(appConfigProvider)).thenReturn(mockAppContext);
+      when(() => mockRef.read(appConfigProvider))
+          .thenReturn(AsyncData(mockAppContext));
 
       when(() => mockAuth.signInAnonymously(data: any(named: 'data')))
           .thenAnswer((_) async => AuthResponse());

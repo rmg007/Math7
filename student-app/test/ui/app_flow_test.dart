@@ -40,11 +40,11 @@ class MockSyncService extends StateNotifier<SyncState> implements SyncService {
 
 class FakeAppConfigService extends AppConfigService {
   FakeAppConfigService() : super(MockSupabaseClient()) {
-    state = const AppContext(
+    state = const AsyncData(AppContext(
       appId: 'test-app-id',
       appName: 'Test App',
       primaryColor: 0xFF0000FF,
-    );
+    ));
   }
 }
 

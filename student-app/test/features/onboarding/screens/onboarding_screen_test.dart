@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:student_app/src/core/config/app_config_service.dart';
-import 'package:student_app/src/features/auth/screens/onboarding_screen.dart';
-import 'package:student_app/src/features/auth/providers/auth_provider.dart';
 import 'package:questerix_domain/questerix_domain.dart';
+import 'package:student_app/src/core/config/app_config_service.dart';
+import 'package:student_app/src/features/auth/providers/auth_provider.dart';
+import 'package:student_app/src/features/auth/screens/onboarding_screen.dart';
 
 // Mocks
-class MockAppConfigService extends StateNotifier<AppContext?>
+class MockAppConfigService extends StateNotifier<AsyncValue<AppContext>>
     implements AppConfigService {
   MockAppConfigService()
-      : super(const AppContext(
-            appId: 'test-app', appName: 'Test App', primaryColor: 0xFF0000FF));
+      : super(const AsyncData(AppContext(
+            appId: 'test-app', appName: 'Test App', primaryColor: 0xFF0000FF)));
 
   @override
-  Future<AppContext> load() async => state!;
+  Future<void> load({String? manualSubdomain}) async {}
 }
 
 class MockAuthRepository extends Mock implements AuthRepository {}
@@ -179,6 +179,14 @@ void main() {
 
       // Verify success message
       expect(find.textContaining('Email sent'), findsOneWidget);
+    });
+    group('Accessibility', () {
+      testWidgets('Check semantics', (WidgetTester tester) async {
+        setScreenSize(tester);
+        await tester.pumpWidget(createSubject());
+        // Verify semantics of select date button
+        expect(find.text('Select Date'), findsOneWidget);
+      });
     });
   });
 }

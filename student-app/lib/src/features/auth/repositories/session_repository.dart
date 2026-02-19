@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:student_app/src/core/core_providers.dart';
 import 'package:student_app/src/core/config/app_config_service.dart';
+import 'package:student_app/src/core/core_providers.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SessionRepository {
   final SupabaseClient _client;
@@ -16,7 +16,7 @@ class SessionRepository {
   Session? get currentSession => _client.auth.currentSession;
 
   Future<void> signInAnonymously() async {
-    final appConfig = _ref.read(appConfigProvider);
+    final appConfig = _ref.read(appConfigProvider).valueOrNull;
     final data = <String, dynamic>{};
 
     if (appConfig != null) {

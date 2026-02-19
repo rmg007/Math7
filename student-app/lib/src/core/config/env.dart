@@ -79,6 +79,12 @@ class Env {
     defaultValue: 'development',
   );
 
+  /// Subdomain to use in development mode on localhost
+  static const String devSubdomain = String.fromEnvironment(
+    'DEV_SUBDOMAIN',
+    defaultValue: '',
+  );
+
   /// Check if running in production
   static bool get isProduction => environment == 'production';
 
