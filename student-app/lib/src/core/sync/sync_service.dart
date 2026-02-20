@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math' as math;
 
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart'; // For debugPrint
@@ -102,25 +101,22 @@ class SyncService extends StateNotifier<SyncState> {
             'Supabase call timed out after ${_timeout.inSeconds}s'),
       );
 
-  /// Full sync: push local changes, then pull remote changes
-  /// Implements safety limits on retries to prevent infinite loops
-  /// Uses circuit breakers to prevent cascade failures
-  Future<void> sync({int retryCount = 0}) async {
-    if (state.isSyncing && retryCount == 0) return;
+  /// Full sync: push local changes, then pull remote changes.
+  /// Retry logic is handled exclusively by [retryWithBackoff] with the
+  /// [_pushCircuitBreaker] — the old recursive outer-retry loop has been
+  /// removed to prevent phantom compounding (2 × 2 = 4 attempts).
+  Future<void> sync() async {
+    if (state.isSyncing) return;
+
+    state = SyncState.syncing();
 
     try {
-      if (retryCount == 0) {
-        state = SyncState.syncing();
-      }
-
-      // Use enhanced retry with circuit breaker and jitter
-      // Uses module-level _pushCircuitBreaker so failures accumulate across calls
       await retryWithBackoff(
         () async {
           await _performPush();
           await _performPull();
         },
-        maxRetries: 2, // Reduced from 3 to prevent excessive retries
+        maxRetries: 2,
         initialDelay: const Duration(seconds: 2),
         maxDelay: const Duration(seconds: 15),
         addJitter: true,
@@ -129,31 +125,8 @@ class SyncService extends StateNotifier<SyncState> {
 
       state = SyncState.success(DateTime.now());
     } catch (e) {
-      debugPrint('SYNC: Error during sync (attempt ${retryCount + 1}): $e');
-
-      // Stop retrying after 2 failed attempts (reduced from 3)
-      if (retryCount >= 2) {
-        state = SyncState.error('Sync failed after multiple attempts: $e');
-        return;
-      }
-
-      state = SyncState.error(e.toString());
-
-      // Enhanced exponential backoff with jitter: 2s, 4s
-      final baseDelay = Duration(seconds: 2 * (1 << retryCount));
-      final jitter = Duration(
-        milliseconds:
-            (baseDelay.inMilliseconds * 0.3 * (math.Random().nextDouble()))
-                .round(),
-      );
-      final delay = baseDelay + jitter;
-
-      await Future.delayed(delay);
-
-      // Only retry if the state hasn't been changed to syncing again by a manual trigger
-      if (!state.isSyncing) {
-        await sync(retryCount: retryCount + 1);
-      }
+      debugPrint('SYNC: Failed after retries: $e');
+      state = SyncState.error('Sync failed: $e');
     }
   }
 
