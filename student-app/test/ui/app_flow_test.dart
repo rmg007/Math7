@@ -31,6 +31,8 @@ class MockGoTrueClient extends Mock implements supabase.GoTrueClient {}
 class MockSyncService extends StateNotifier<SyncState> implements SyncService {
   MockSyncService() : super(SyncState.idle());
   @override
+  bool get isSyncing => state.isSyncing;
+  @override
   Future<void> sync({int retryCount = 0}) async {}
   @override
   Future<void> push() async {}

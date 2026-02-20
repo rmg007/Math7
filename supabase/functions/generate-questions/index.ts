@@ -165,7 +165,7 @@ export const generateQuestionsHandler = withErrorSanitization(
 
     if (quotaError) {
       console.error('Quota enforcement error:', quotaError);
-      // Log but don't fail - quota exceeded should be checked before generation
+      return createSanitizedErrorResponse('RATE_LIMITED', 'AI token quota exceeded');
     }
 
     // Parse JSON response

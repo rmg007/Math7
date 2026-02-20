@@ -3,8 +3,6 @@ import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
 
 // We need to set up the worker for PDF.js
-// Ideally this should be handled by a vite plugin, or copy the worker to public
-// For this implementation we will use a CDN for the worker to avoid complex build config changes
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.mjs';
 
 export interface ParsedFile {
@@ -14,8 +12,15 @@ export interface ParsedFile {
 }
 
 export async function parseFile(file: File): Promise<ParsedFile> {
-  const fileType = file.name.split('.').pop()?.toLowerCase();
+  // --- HADES: FILE SIZE LIMIT (F-17) ---
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB limit
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error(
+      `File size too large (max 10MB). Received ${Math.round(file.size / 1024 / 1024)}MB`
+    );
+  }
 
+  const fileType = file.name.split('.').pop()?.toLowerCase();
   let content = '';
 
   try {

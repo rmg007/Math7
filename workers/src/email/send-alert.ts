@@ -24,7 +24,7 @@ export async function handleSendAlert(
     console.error('ALERT_WEBHOOK_SECRET is not set in environment.');
     return errorResponse('Configuration error', 500, request);
   }
-  if (incomingSecret !== env.ALERT_WEBHOOK_SECRET) {
+  if (!timingSafeEqual(incomingSecret || '', env.ALERT_WEBHOOK_SECRET)) {
     console.warn('Unauthorized alert attempt detected.');
     return errorResponse('Unauthorized', 401, request);
   }
@@ -99,4 +99,16 @@ export async function handleSendAlert(
       request,
     );
   }
+}
+
+/**
+ * Constant-time comparison for strings to prevent timing attacks.
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
 }

@@ -15,7 +15,7 @@ $jobs = @()
 $jobs += Start-Job -Name "empty-catch" -ScriptBlock {
     param($root)
     $patterns = @('catch\s*\(\w+\)\s*\{\s*\}', 'catch\s*\{\s*\}')
-    $foundFiles = Get-ChildItem -Path $root -Include *.ts,*.tsx,*.dart,*.py -Recurse -Exclude node_modules,build,.dart_tool
+    $foundFiles = Get-ChildItem -Path $root -Include *.ts,*.tsx,*.dart,*.py -Recurse | Where-Object { $_.FullName -notmatch 'node_modules|build|\.dart_tool|\.venv|\.vercel|dist' }
     $foundMatches = @()
     foreach ($file in $foundFiles) {
         $m = Select-String -Path $file.FullName -Pattern $patterns
@@ -29,7 +29,7 @@ $jobs += Start-Job -Name "empty-catch" -ScriptBlock {
 $jobs += Start-Job -Name "hardcoded-secrets" -ScriptBlock {
     param($root)
     $patterns = @('api[_-]?key\s*:', 'api[_-]?key\s*=', 'secret\s*:', 'token\s*:', 'sb_publishable_')
-    $foundFiles = Get-ChildItem -Path $root -Include *.ts,*.tsx,*.dart,*.py,*.env -Recurse -Exclude node_modules,build,.dart_tool,*.example,.env.example
+    $foundFiles = Get-ChildItem -Path $root -Include *.ts,*.tsx,*.dart,*.py,*.env -Recurse | Where-Object { $_.FullName -notmatch 'node_modules|build|\.dart_tool|\.venv|\.vercel|dist' }
     $foundMatches = @()
     foreach ($file in $foundFiles) {
         $m = Select-String -Path $file.FullName -Pattern $patterns | Where-Object { $_.Line -match '["''][a-zA-Z0-9]{10,}["'']' }
@@ -42,7 +42,7 @@ $jobs += Start-Job -Name "hardcoded-secrets" -ScriptBlock {
 # 3. Service Role Leakage
 $jobs += Start-Job -Name "service-role-leak" -ScriptBlock {
     param($root)
-    $foundFiles = Get-ChildItem -Path $root -Include *.ts,*.tsx,*.dart -Recurse -Exclude node_modules,build,.dart_tool
+    $foundFiles = Get-ChildItem -Path $root -Include *.ts,*.tsx,*.dart -Recurse | Where-Object { $_.FullName -notmatch 'node_modules|build|\.dart_tool|\.venv|\.vercel|dist' }
     $foundMatches = @()
     foreach ($file in $foundFiles) {
         $m = Select-String -Path $file.FullName -Pattern 'service_role' | Where-Object { $_.Line -notmatch 'import|type|interface|//|/\*' }

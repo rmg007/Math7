@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:questerix_domain/questerix_domain.dart' as model;
 import 'package:student_app/src/core/core_providers.dart';
 import 'package:student_app/src/core/database/database.dart';
+import 'package:student_app/src/core/errors/app_error.dart';
 import 'package:student_app/src/core/errors/retry_with_backoff.dart';
 import 'package:student_app/src/features/curriculum/repositories/curriculum_repositories.dart';
 import 'package:student_app/src/features/curriculum/repositories/local_curriculum_repository.dart';
@@ -28,6 +29,10 @@ class SyncState {
   SyncState.syncing() : this(isSyncing: true);
   SyncState.success(DateTime time) : this(lastSyncAt: time);
   SyncState.error(String message) : this(error: message);
+
+  bool get isIdle => !isSyncing && error == null && lastSyncAt == null;
+  bool get isSuccess => !isSyncing && error == null && lastSyncAt != null;
+  bool get isError => error != null;
 
   SyncState copyWith({bool? isSyncing, String? error, DateTime? lastSyncAt}) {
     return SyncState(
@@ -55,7 +60,21 @@ final syncServiceProvider =
   final database = ref.watch(databaseProvider);
   final supabase = ref.watch(supabaseClientProvider);
   final curriculumRepo = ref.watch(localCurriculumRepositoryProvider);
-  return SyncService(database, supabase, curriculumRepo);
+  final notifier = SyncService(database, supabase, curriculumRepo);
+
+  // Auto-sync on connectivity restore [P1]
+  ref.listen(connectivityServiceProvider, (previous, next) {
+    final wasOffline = previous?.asData?.value == ConnectivityStatus.offline;
+    final isOnline = next.asData?.value == ConnectivityStatus.online;
+
+    // Check if we are already syncing by looking at notifier's getter
+    if (wasOffline && isOnline && !notifier.isSyncing) {
+      debugPrint('SYNC: Connectivity restored, triggering auto-sync in 2s');
+      Future.delayed(const Duration(seconds: 2), notifier.sync);
+    }
+  });
+
+  return notifier;
 });
 
 /// Sync service - handles push/pull synchronization (manual only)
@@ -63,12 +82,25 @@ class SyncService extends StateNotifier<SyncState> {
   final AppDatabase _database;
   final SupabaseClient _supabase;
   final LocalCurriculumRepository _curriculumRepo;
+  final Duration _timeout;
 
   SyncService(
     this._database,
     this._supabase,
-    this._curriculumRepo,
-  ) : super(SyncState.idle());
+    this._curriculumRepo, {
+    Duration timeout = const Duration(seconds: 30),
+  })  : _timeout = timeout,
+        super(SyncState.idle());
+
+  /// Public getter to check sync status without accessing protected state
+  bool get isSyncing => state.isSyncing;
+
+  // Helper for Supabase calls with timeout
+  Future<T> _supabaseCall<T>(Future<T> call) => call.timeout(
+        _timeout,
+        onTimeout: () => throw NetworkError(
+            'Supabase call timed out after ${_timeout.inSeconds}s'),
+      );
 
   /// Full sync: push local changes, then pull remote changes
   /// Implements safety limits on retries to prevent infinite loops
@@ -160,12 +192,6 @@ class SyncService extends StateNotifier<SyncState> {
   /// Push: Upload pending changes from outbox to Supabase
   /// Uses batched operations to reduce network overhead
   Future<void> push() async {
-    // Prevent concurrent push
-    if (state.isSyncing) {
-      debugPrint('SYNC: Push skipped - already syncing');
-      return;
-    }
-
     final outboxItems = await (_database.select(_database.outbox)
           ..where((o) => o.status.equals('pending'))
           ..orderBy([(o) => OrderingTerm.asc(o.createdAt)]))
@@ -200,12 +226,12 @@ class SyncService extends StateNotifier<SyncState> {
 
             if (tableName == 'attempts') {
               // RPC handles progress updates automatically
-              final List<dynamic> response = await _supabase.rpc(
+              final List<dynamic> response = await _supabaseCall(_supabase.rpc(
                 'submit_attempt_and_update_progress',
                 params: {
                   'attempts_json': payloads,
                 },
-              );
+              ));
 
               // Update local skill progress if returned
               if (response.isNotEmpty) {
@@ -241,12 +267,13 @@ class SyncService extends StateNotifier<SyncState> {
                 });
               }
             } else {
-              await _supabase.from(tableName).upsert(payloads);
+              await _supabaseCall(_supabase.from(tableName).upsert(payloads));
             }
           } else if (action == 'DELETE') {
             final ids =
                 batch.map((item) => item.recordId).whereType<String>().toList();
-            await _supabase.from(tableName).delete().inFilter('id', ids);
+            await _supabaseCall(
+                _supabase.from(tableName).delete().inFilter('id', ids));
           }
 
           // Remove batch from outbox on success
@@ -287,10 +314,10 @@ class SyncService extends StateNotifier<SyncState> {
     final lastSync = await _getLastSync('domains');
 
     // Use pull_changes RPC for tombstone support
-    final response = await _supabase.rpc('pull_changes', params: {
+    final response = await _supabaseCall(_supabase.rpc('pull_changes', params: {
       'table_name': 'domains',
       'last_sync_time': lastSync.toIso8601String(),
-    }) as Map<String, dynamic>;
+    })) as Map<String, dynamic>;
 
     final active = response['active'] as List;
     final deleted = response['deleted'] as List;
@@ -315,10 +342,10 @@ class SyncService extends StateNotifier<SyncState> {
     final lastSync = await _getLastSync('skills');
 
     // Use pull_changes RPC for tombstone support
-    final response = await _supabase.rpc('pull_changes', params: {
+    final response = await _supabaseCall(_supabase.rpc('pull_changes', params: {
       'table_name': 'skills',
       'last_sync_time': lastSync.toIso8601String(),
-    }) as Map<String, dynamic>;
+    })) as Map<String, dynamic>;
 
     final active = response['active'] as List;
     final deleted = response['deleted'] as List;
@@ -342,10 +369,10 @@ class SyncService extends StateNotifier<SyncState> {
     final lastSync = await _getLastSync('questions');
 
     // Use pull_changes RPC for tombstone support
-    final response = await _supabase.rpc('pull_changes', params: {
+    final response = await _supabaseCall(_supabase.rpc('pull_changes', params: {
       'table_name': 'questions',
       'last_sync_time': lastSync.toIso8601String(),
-    }) as Map<String, dynamic>;
+    })) as Map<String, dynamic>;
 
     final active = response['active'] as List;
     final deleted = response['deleted'] as List;
@@ -369,10 +396,10 @@ class SyncService extends StateNotifier<SyncState> {
   Future<void> _pullSkillProgress() async {
     final lastSync = await _getLastSync('skill_progress');
 
-    final response = await _supabase.rpc('pull_changes', params: {
+    final response = await _supabaseCall(_supabase.rpc('pull_changes', params: {
       'table_name': 'skill_progress',
       'last_sync_time': lastSync.toIso8601String(),
-    }) as Map<String, dynamic>;
+    })) as Map<String, dynamic>;
 
     final active = response['active'] as List;
     final deleted = response['deleted'] as List;
@@ -387,7 +414,7 @@ class SyncService extends StateNotifier<SyncState> {
           totalAttempts: Value(json['total_attempts'] as int),
           correctAttempts: Value(json['correct_attempts'] as int),
           totalPoints: Value(json['total_points'] as int),
-          masteryLevel: Value((json['master_level'] as num).round()),
+          masteryLevel: Value((json['mastery_level'] as num).round()),
           currentStreak: Value(json['current_streak'] as int),
           longestStreak: Value(json['longest_streak'] as int),
           lastAttemptAt: Value(json['last_attempt_at'] != null

@@ -18,6 +18,34 @@ const breadcrumbs: Array<{
 }> = [];
 
 /**
+ * Recursively sanitizes objects to remove potential PII (F-18).
+ */
+function sanitizeData(obj: Record<string, unknown>): Record<string, unknown> {
+  const PII_KEYS = [
+    'email',
+    'password',
+    'token',
+    'secret',
+    'phone',
+    'address',
+    'name',
+    'credit_card',
+  ];
+  const sanitized: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (PII_KEYS.some((pii) => key.toLowerCase().includes(pii))) {
+      sanitized[key] = '[REDACTED]';
+    } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+      sanitized[key] = sanitizeData(value as Record<string, unknown>);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+}
+
+/**
  * Adds a breadcrumb to the current session context.
  * Useful for tracking user actions leading up to an error.
  */
@@ -26,11 +54,14 @@ export function addBreadcrumb(
   category?: string,
   data?: Record<string, unknown>
 ): void {
+  // Sanitize data before storing to prevent PII leakage in logs
+  const sanitizedData = data ? sanitizeData(data) : undefined;
+
   breadcrumbs.push({
     timestamp: new Date().toISOString(),
     message,
     category,
-    data,
+    data: sanitizedData,
   });
 
   if (breadcrumbs.length > MAX_BREADCRUMBS) {
@@ -111,12 +142,9 @@ export async function captureMessage(
 
 /**
  * Sets user context for future error reports.
- * This is a no-op in our system since we use auth.uid() server-side.
  */
-
 export function setUser(_userId: string, _email?: string): void {
   // User context is automatically captured via Supabase auth
-  // This function exists for API compatibility
 }
 
 /**

@@ -1,25 +1,49 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createSanitizedErrorResponse, withErrorSanitization } from '../_shared/error-sanitizer.ts';
+import { addRateLimitHeaders, createRateLimitMiddleware, rateLimitConfigs } from '../_shared/rate-limiter.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const ALLOWED_ORIGINS = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://admin.questerix.com',
+  'https://app.questerix.com',
+];
 
-export async function revokeUserSessionsHandler(req: Request, deps?: { supabase?: any }): Promise<Response> {
-  // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('Origin');
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    return {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    };
   }
+  return {
+    'Access-Control-Allow-Origin': ALLOWED_ORIGINS[ALLOWED_ORIGINS.length - 1],
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+}
 
-  try {
-    // Authentication check
+const rateLimit = createRateLimitMiddleware(rateLimitConfigs.validateContent);
+
+export const revokeUserSessionsHandler = withErrorSanitization(
+  async (req: Request, deps?: { supabase?: any }) => {
+    // Handle CORS preflight
+    if (req.method === 'OPTIONS') {
+      return new Response('ok', { headers: getCorsHeaders(req) });
+    }
+
+    // Rate limiting
+    const rateLimitResult = rateLimit.middleware(req);
+    if (!rateLimitResult.allowed) {
+      return rateLimitResult.response!;
+    }
+
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Missing authorization header' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      );
+      return createSanitizedErrorResponse('UNAUTHORIZED', 'Missing authorization header');
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -28,44 +52,34 @@ export async function revokeUserSessionsHandler(req: Request, deps?: { supabase?
 
     // Verify the requesting user's JWT
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const authErrorCheck = await supabase.auth.getUser(token);
+    const user = authErrorCheck.data.user;
+    const authError = authErrorCheck.error;
     
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid or expired token' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      );
+      return createSanitizedErrorResponse('UNAUTHORIZED', 'Invalid or expired token');
     }
 
     // Get user's app_id and admin status
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('app_id, is_admin')
+      .select('app_id, role')
       .eq('id', user.id)
       .single();
 
     if (profileError || !profile?.app_id) {
-      return new Response(
-        JSON.stringify({ error: 'User profile not found or missing tenant' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
-      );
+      return createSanitizedErrorResponse('FORBIDDEN', 'User profile not found or missing tenant');
     }
 
     // Only admins can revoke sessions
-    if (!profile.is_admin) {
-      return new Response(
-        JSON.stringify({ error: 'Only administrators can revoke user sessions' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
-      );
+    if (profile.role !== 'admin' && profile.role !== 'super_admin') {
+      return createSanitizedErrorResponse('FORBIDDEN', 'Only administrators can revoke user sessions');
     }
 
     const { userId } = await req.json();
 
     if (!userId) {
-      return new Response(
-        JSON.stringify({ error: 'userId is required' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      );
+      return createSanitizedErrorResponse('BAD_REQUEST', 'userId is required');
     }
 
     // Verify the target user belongs to the same tenant
@@ -76,10 +90,7 @@ export async function revokeUserSessionsHandler(req: Request, deps?: { supabase?
       .single();
 
     if (targetError || !targetProfile || targetProfile.app_id !== profile.app_id) {
-      return new Response(
-        JSON.stringify({ error: 'Target user not found or access denied' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
-      );
+      return createSanitizedErrorResponse('NOT_FOUND', 'Target user not found or access denied');
     }
 
     // Revoke all sessions for the target user
@@ -87,32 +98,21 @@ export async function revokeUserSessionsHandler(req: Request, deps?: { supabase?
 
     if (revokeError) {
       console.error('Failed to revoke sessions:', revokeError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to revoke user sessions' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-      );
+      return createSanitizedErrorResponse('INTERNAL_ERROR', 'Failed to revoke user sessions');
     }
 
-    return new Response(
+    const httpResponse = new Response(
       JSON.stringify({ success: true, message: 'User sessions revoked successfully' }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
         status: 200,
       }
     );
-  } catch (error) {
-    console.error('Session revocation error:', error);
-    return new Response(
-      JSON.stringify({
-        error: error.message || 'Failed to revoke user sessions',
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      }
-    );
-  }
-}
+
+    return addRateLimitHeaders(httpResponse, rateLimitResult.rateLimitResult);
+  },
+  { statusCode: 500, includeRequestId: true }
+);
 
 // Start the server only if run as main
 if (import.meta.main) {

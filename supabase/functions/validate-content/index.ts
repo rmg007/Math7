@@ -1,8 +1,9 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { GoogleGenerativeAI } from 'npm:@google/generative-ai@0.1.3';
-import { createSanitizedErrorResponse } from '../_shared/error-sanitizer.ts';
-import { createRateLimitMiddleware, rateLimitConfigs } from '../_shared/rate-limiter.ts';
+import { createSanitizedErrorResponse, withErrorSanitization } from '../_shared/error-sanitizer.ts';
+import { sanitizeSourceText } from '../_shared/input-sanitizer.ts';
+import { addRateLimitHeaders, createRateLimitMiddleware, rateLimitConfigs } from '../_shared/rate-limiter.ts';
 
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || 'http://localhost:3000,http://localhost:5173').split(',');
 
@@ -30,23 +31,21 @@ interface ValidationRequest {
   }[];
 }
 
-export async function validateContentHandler(req: Request, deps?: { supabase?: Record<string, unknown>; genAI?: Record<string, unknown> }): Promise<Response> {
-  const corsHeaders = getCorsHeaders(req);
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
+export const validateContentHandler = withErrorSanitization(
+  async (req: Request, deps?: { supabase?: Record<string, unknown>; genAI?: Record<string, unknown> }) => {
+    const corsHeaders = getCorsHeaders(req);
+    if (req.method === 'OPTIONS') {
+      return new Response('ok', { headers: corsHeaders });
+    }
 
-  // Rate limiting check
-  const rateLimitResult = rateLimit.middleware(req);
-  
-  if (!rateLimitResult.allowed) {
-    return rateLimitResult.response!;
-  }
+    // Rate limiting check
+    const rateLimitResult = rateLimit.middleware(req);
+    
+    if (!rateLimitResult.allowed) {
+      return rateLimitResult.response!;
+    }
 
-  try {
-    // ========================================
-    // FIX S2: AUTHENTICATION CHECK
-    // ========================================
+    // Authentication check
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return createSanitizedErrorResponse('UNAUTHORIZED', 'Missing authorization header');
@@ -58,7 +57,9 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: R
 
     // Verify the user's JWT
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const authErrorCheck = await supabase.auth.getUser(token);
+    const user = authErrorCheck.data.user;
+    const authError = authErrorCheck.error;
     
     if (authError || !user) {
       return createSanitizedErrorResponse('UNAUTHORIZED', 'Invalid or expired token');
@@ -83,16 +84,23 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: R
     const { questions, source_text, rules = [] }: ValidationRequest = await req.json();
 
     if (!questions || !Array.isArray(questions)) {
-      throw new Error('Questions array is required');
+      return createSanitizedErrorResponse('BAD_REQUEST', 'Questions array is required');
     }
+
+    if (!source_text || source_text.trim().length === 0) {
+      return createSanitizedErrorResponse('BAD_REQUEST', 'Source text is required');
+    }
+
+    // --- HADES: INPUT SANITIZATION ---
+    const sanitizedSourceText = sanitizeSourceText(source_text).sanitized;
 
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey && !deps?.genAI) {
-      return createSanitizedErrorResponse('INTERNAL_ERROR');
+      return createSanitizedErrorResponse('INTERNAL_ERROR', 'GEMINI_API_KEY not configured');
     }
 
     const genAI = (deps?.genAI as any) || new GoogleGenerativeAI(apiKey!);
-    // Use Gemini Pro for validation (Stronger reasoning than Flash)
+    // Use Gemini Pro for validation
     const geminiModel = genAI.getGenerativeModel({ 
       model: 'gemini-1.5-pro',
       generationConfig: {
@@ -100,7 +108,7 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: R
       },
     });
 
-    const prompt = buildValidationPrompt(questions, source_text, rules);
+    const prompt = buildValidationPrompt(questions, sanitizedSourceText, rules);
 
     const startTime = Date.now();
     
@@ -125,14 +133,11 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: R
     const validationText = response.text();
     const duration = Date.now() - startTime;
 
-    // FIX T5: Use actual usage metadata from Gemini API
     const usageMetadata = (response as any).usageMetadata;
     const actualTokenCount = usageMetadata?.totalTokenCount ?? 
       Math.ceil((prompt.length + validationText.length) / 4);
 
-    // ========================================
-    // FIX S3: CONSUME TENANT TOKENS
-    // ========================================
+    // Consume tenant tokens
     const { error: quotaError } = await supabase.rpc('consume_tenant_tokens', {
       p_app_id: profile.app_id,
       p_tokens_used: actualTokenCount,
@@ -141,6 +146,7 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: R
 
     if (quotaError) {
       console.error('Quota enforcement error:', quotaError);
+      return createSanitizedErrorResponse('RATE_LIMITED', 'AI token quota exceeded');
     }
 
     // Parse JSON response
@@ -151,15 +157,13 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: R
 
     const validationReport = JSON.parse(jsonMatch[0]);
 
-    return new Response(
+    const httpResponse = new Response(
       JSON.stringify({
         ...validationReport,
         metadata: {
           model: 'gemini-1.5-pro',
           validation_time_ms: duration,
           token_count: actualTokenCount,
-          prompt_tokens: usageMetadata?.promptTokenCount,
-          completion_tokens: usageMetadata?.candidatesTokenCount,
         },
       }),
       {
@@ -167,15 +171,13 @@ export async function validateContentHandler(req: Request, deps?: { supabase?: R
         status: 200,
       }
     );
-  } catch (error) {
-    console.error('Validation error:', error);
-    return createSanitizedErrorResponse('INTERNAL_ERROR');
-  }
-}
 
-// Start the server only if run as main
-// deno-lint-ignore no-explicit-any
-if ((import.meta as any).main) {
+    return addRateLimitHeaders(httpResponse, rateLimitResult.rateLimitResult);
+  },
+  { statusCode: 500, includeRequestId: true }
+);
+
+if (import.meta.main) {
   serve(validateContentHandler);
 }
 

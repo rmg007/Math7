@@ -10,7 +10,7 @@ BEGIN
       url := 'https://bkfhorslctqieetzqdtd.supabase.co/functions/v1/manage-app-domains',
       headers := jsonb_build_object(
         'Content-Type', 'application/json',
-        'x-webhook-secret', 'qtx_domain_sync_sec_2026'
+        'x-webhook-secret', current_setting('app.settings.domain_sync_secret')
       ),
       body := jsonb_build_object(
         'type', TG_OP,

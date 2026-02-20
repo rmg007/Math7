@@ -1,5 +1,6 @@
-// Follows standard Supabase Edge Function pattern
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createSanitizedErrorResponse, withErrorSanitization } from "../_shared/error-sanitizer.ts";
+import { addRateLimitHeaders, createRateLimitMiddleware, rateLimitConfigs } from "../_shared/rate-limiter.ts";
 
 interface ErrorRecord {
   id: string;
@@ -13,23 +14,41 @@ interface ErrorRecord {
   };
 }
 
-export async function criticalAlertHandler(req: Request): Promise<Response> {
-  // --- HADES SECURITY PATCH: START ---
-  const webhookSecret = Deno.env.get("ERROR_WEBHOOK_SECRET");
-  const incomingSecret = req.headers.get("x-webhook-secret");
+const rateLimit = createRateLimitMiddleware(rateLimitConfigs.anonymous);
 
-  if (!webhookSecret) {
-    console.error("ERROR_WEBHOOK_SECRET is not set in environment. Blocking all requests for safety.");
-    return new Response(JSON.stringify({ error: "Configuration error" }), { status: 500 });
+/**
+ * Constant-time comparison for strings to prevent timing attacks.
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
+  return result === 0;
+}
 
-  if (incomingSecret !== webhookSecret) {
-    console.warn("Unauthorized critical-alert attempt detected.");
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
-  }
-  // --- HADES SECURITY PATCH: END ---
+export const criticalAlertHandler = withErrorSanitization(
+  async (req: Request) => {
+    // Rate limiting
+    const rateLimitResult = rateLimit.middleware(req);
+    if (!rateLimitResult.allowed) {
+      return rateLimitResult.response!;
+    }
 
-  try {
+    const webhookSecret = Deno.env.get("ERROR_WEBHOOK_SECRET");
+    const incomingSecret = req.headers.get("x-webhook-secret");
+
+    if (!webhookSecret) {
+      console.error("ERROR_WEBHOOK_SECRET is not set in environment.");
+      return createSanitizedErrorResponse('INTERNAL_ERROR', 'Server configuration error');
+    }
+
+    if (!timingSafeEqual(incomingSecret || "", webhookSecret)) {
+      console.warn("Unauthorized critical-alert attempt detected.");
+      return createSanitizedErrorResponse('UNAUTHORIZED', 'Unauthorized');
+    }
+
     const payload = await req.json();
     const { record, type } = payload as { record: ErrorRecord, type: string };
 
@@ -41,33 +60,19 @@ export async function criticalAlertHandler(req: Request): Promise<Response> {
 
     if (type === "INSERT" && isCritical) {
       console.log(`🚨 CRITICAL ERROR DETECTED: [${record.platform}] ${record.error_type}`);
-      console.log(`Message: ${record.error_message}`);
-      console.log(`Context: ${JSON.stringify(record.extra_context)}`);
-      
-      // TODO: Integrate with Discord/Slack/Resend here
-      // For now, we log it in the Edge Function logs which are monitored
-      
-      return new Response(JSON.stringify({ message: "Alert processed", id: record.id }), {
-        headers: { "Content-Type": "application/json" },
-        status: 200,
-      });
+      // In production, this would trigger an external notification
     }
 
-    return new Response(JSON.stringify({ message: "No alert needed" }), {
+    const httpResponse = new Response(JSON.stringify({ message: isCritical ? "Alert processed" : "No alert needed", id: record.id }), {
       headers: { "Content-Type": "application/json" },
       status: 200,
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`Error processing alert: ${message}`);
-    return new Response(JSON.stringify({ error: message }), {
-      headers: { "Content-Type": "application/json" },
-      status: 400,
-    });
-  }
-}
 
-// Start the server only if run as main
+    return addRateLimitHeaders(httpResponse, rateLimitResult.rateLimitResult);
+  },
+  { statusCode: 500, includeRequestId: true }
+);
+
 if (import.meta.main) {
-  serve(criticalAlertHandler)
+  serve(criticalAlertHandler);
 }

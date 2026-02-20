@@ -1,4 +1,5 @@
 import 'package:questerix_domain/questerix_domain.dart';
+import 'package:student_app/src/core/errors/app_error.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 class SupabaseAuthRepository implements AuthRepository {
@@ -28,6 +29,10 @@ class SupabaseAuthRepository implements AuthRepository {
     // CRITICAL: Pass app_id to stamp user with correct tenant
     await _client.auth.signInAnonymously(
       data: {'app_id': appId},
+    ).timeout(
+      const Duration(seconds: 15),
+      onTimeout: () =>
+          throw const NetworkError('Auth timed out — check your connection'),
     );
   }
 
@@ -39,24 +44,38 @@ class SupabaseAuthRepository implements AuthRepository {
     await _client.auth.signInWithOtp(
       email: email,
       data: {'app_id': appId},
+    ).timeout(
+      const Duration(seconds: 15),
+      onTimeout: () =>
+          throw const NetworkError('Auth timed out — check your connection'),
     );
   }
 
   @override
   Future<void> signOut() async {
-    await _client.auth.signOut();
+    await _client.auth.signOut().timeout(
+          const Duration(seconds: 15),
+          onTimeout: () => throw const NetworkError(
+              'Auth timed out — check your connection'),
+        );
   }
 
   @override
   Future<void> updateProfile({required User user}) async {
     // Update metadata in Supabase
-    await _client.auth.updateUser(
-      supabase.UserAttributes(data: {
-        'is_parent_managed': user.isParentManaged,
-        'age_group': user.ageGroup.index, // Store as int
-        'accepted_terms_date': user.acceptedTermsDate?.toIso8601String(),
-      }),
-    );
+    await _client.auth
+        .updateUser(
+          supabase.UserAttributes(data: {
+            'is_parent_managed': user.isParentManaged,
+            'age_group': user.ageGroup.index, // Store as int
+            'accepted_terms_date': user.acceptedTermsDate?.toIso8601String(),
+          }),
+        )
+        .timeout(
+          const Duration(seconds: 15),
+          onTimeout: () => throw const NetworkError(
+              'Auth timed out — check your connection'),
+        );
   }
 
   User _mapSupabaseUserToDomainUser(supabase.User sUser) {

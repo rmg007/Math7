@@ -1,18 +1,24 @@
 # Questerix — Tasks
 
-## Current Sprint
+## Reliability Audit (2026-02-21)
 
-- [x] add forget password and reset password links to login page and sign up page and anywhere it should be. and test it and create test cases to cover it.
-- [ ] for every issue/bug/error you fix, create test cases to avoid falling in same mistakes again. document it. document what you learned from it
-- [x] Deploy to production
-- [x] Quick visual test that everything is working as expected
-- [x] Push to GitHub (~250 changes) and make sure we have only one branch (main)
+- [x] REL-01: Implement network timeouts in Sync/Auth/AI
+- [x] REL-02: Implement auto-sync on connectivity restore
+- [x] REL-03: Implement route-level Error Boundaries in Admin Panel
+- [x] REL-04: Enable CI destructive migration gate
 
-- [ ] I see so many files need to be added to github. it is dimmed in the explorer. please check all files and add them to github.
+## Completed (Hades Phase)
 
-- [ ] so many files should be deleted.
-
----
+- [x] HADES-01: Fix RLS cross-tenant leaks (F-06, F-13)
+- [x] HADES-02: Implement Rate Limiting middleware (F-05)
+- [x] HADES-03: Implement Error Sanitization (F-09)
+- [x] HADES-04: Fix naming drift in Student App (F-02)
+- [x] HADES-05: Remove wildcard CORS (F-04)
+- [x] HADES-06: Timing-safe webhook verification (F-14)
+- [x] HADES-07: Tighten CSP headers (F-10)
+- [x] HADES-08: Add file size validation (F-17)
+- [x] HADES-09: Sanitize error breadcrumbs (F-18)
+- [x] HADES-10: Enforce AI Quotas (F-08)
 
 ## Postponed
 

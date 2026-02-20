@@ -58,6 +58,7 @@ async function generateViaWorkers(
       Authorization: `Bearer ${session.access_token}`,
     },
     body: JSON.stringify(request),
+    signal: AbortSignal.timeout(45_000),
   });
 
   if (!response.ok) {
@@ -75,6 +76,9 @@ async function generateViaSupabase(
 ): Promise<GenerateQuestionsResponse> {
   const { data, error } = await supabase.functions.invoke('generate-questions', {
     body: request,
+    headers: {
+      'x-timeout': '45000', // Hint for some gateways
+    },
   });
 
   if (error) throw error;

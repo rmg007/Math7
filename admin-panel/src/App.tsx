@@ -231,11 +231,30 @@ const router = createBrowserRouter([
       {
         path: '/dashboard',
         element: (
-          <SuperAdminGuard>
-            <Suspense fallback={<LoadingPage />}>
-              <DashboardPage />
-            </Suspense>
-          </SuperAdminGuard>
+          <ErrorBoundary
+            fallback={
+              <div className="min-h-screen flex items-center justify-center p-4">
+                <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-xl border border-indigo-100 text-center">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">Dashboard Error</h2>
+                  <p className="text-gray-600 mb-6 font-medium">
+                    Failed to load standard reporting metrics. Check your network or permissions.
+                  </p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all font-bold text-sm"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            }
+          >
+            <SuperAdminGuard>
+              <Suspense fallback={<LoadingPage />}>
+                <DashboardPage />
+              </Suspense>
+            </SuperAdminGuard>
+          </ErrorBoundary>
         ),
       },
       {
@@ -403,11 +422,30 @@ const router = createBrowserRouter([
       {
         path: '/users',
         element: (
-          <SuperAdminGuard>
-            <Suspense fallback={<LoadingPage />}>
-              <UserManagementPage />
-            </Suspense>
-          </SuperAdminGuard>
+          <ErrorBoundary
+            fallback={
+              <div className="min-h-screen flex items-center justify-center p-4">
+                <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-xl border border-red-100 text-center">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">User Management Error</h2>
+                  <p className="text-gray-600 mb-6 font-medium">
+                    An error occurred while loading users. Ensure you have the required roles.
+                  </p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all font-bold text-sm"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            }
+          >
+            <SuperAdminGuard>
+              <Suspense fallback={<LoadingPage />}>
+                <UserManagementPage />
+              </Suspense>
+            </SuperAdminGuard>
+          </ErrorBoundary>
         ),
       },
       {
@@ -433,11 +471,30 @@ const router = createBrowserRouter([
       {
         path: '/apps',
         element: (
-          <SuperAdminGuard>
-            <Suspense fallback={<LoadingPage />}>
-              <AppsPage />
-            </Suspense>
-          </SuperAdminGuard>
+          <ErrorBoundary
+            fallback={
+              <div className="min-h-screen flex items-center justify-center p-4">
+                <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-xl border border-purple-100 text-center">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">Applications Error</h2>
+                  <p className="text-gray-600 mb-6 font-medium">
+                    Critical failure in application registry. Contact infrastructure team.
+                  </p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all font-bold text-sm"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            }
+          >
+            <SuperAdminGuard>
+              <Suspense fallback={<LoadingPage />}>
+                <AppsPage />
+              </Suspense>
+            </SuperAdminGuard>
+          </ErrorBoundary>
         ),
       },
       {

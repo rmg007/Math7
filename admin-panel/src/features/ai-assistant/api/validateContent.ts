@@ -62,6 +62,7 @@ async function validateViaWorkers(request: ValidationRequest): Promise<Validatio
       Authorization: `Bearer ${session.access_token}`,
     },
     body: JSON.stringify(request),
+    signal: AbortSignal.timeout(45_000),
   });
 
   if (!response.ok) {
@@ -77,6 +78,9 @@ async function validateViaWorkers(request: ValidationRequest): Promise<Validatio
 async function validateViaSupabase(request: ValidationRequest): Promise<ValidationResponse> {
   const { data, error } = await supabase.functions.invoke<ValidationResponse>('validate-content', {
     body: request,
+    headers: {
+      'x-timeout': '45000',
+    },
   });
 
   if (error) throw error;

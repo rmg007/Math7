@@ -5,7 +5,26 @@ All notable changes to the Questerix project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.2.0] - 2026-02-21
+
+### Security (Project HADES Hardening)
+
+- **Rate Limiting**: Implemented production-grade `RateLimiter` with circuit breaker support and persisted state for all sensitive Edge Functions (F-05).
+- **RLS isolation**: Fixed `jwt_is_tenant_admin` and hardened `approval_workflows` to prevent cross-tenant leaks (F-01, F-06).
+- **CORS Hardening**: Replaced wildcard origins with strict whitelist validation across all AI and session endpoints (F-04).
+- **Error Sanitization**: Implemented `withErrorSanitization` HOC to mask internal stack traces and disclose only safe error messages (F-09).
+- **PII Redaction**: Added recursive object scrubbing to error breadcrumbs (Email, Password, Token redaction) (F-18).
+- **Timing Protection**: Migrated webhook secret verification to constant-time `timingSafeEqual` to prevent side-channel leaks (F-14).
+- **Input Sanitization**: Implemented prompt-level sanitizers for custom instructions and source text in AI generation pipelines (F-11, F-12).
+- **Resource Limits**: Enforced client-side document size limits (10MB) to prevent browser memory exhaustion (F-17).
+- **Auth Standardization**: Standardized role checks to use the `role` enum instead of the legacy `is_admin` boolean (F-13).
+
+### Fixed
+
+- **Sync Drift**: Resolved `mastery_level` naming discrepancy between Supabase RPCs and Flutter data models (F-02).
+- **Cost Control**: Forced explicit failure on AI quota exhaustion instead of partial/silent failures (F-08).
+- **CSP**: Tightened Content Security Policy by removing `unsafe-eval` from production headers (F-10).
+- **Infra Fallbacks**: Removed hardcoded fallbacks to ensure deployment fails explicitly on missing environment variables (F-07).
 
 ## [2.1.0] - 2026-02-20
 

@@ -61,10 +61,10 @@ CREATE OR REPLACE FUNCTION public.jwt_is_tenant_admin()
 RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER SET search_path = 'public', 'auth' AS $$
   SELECT COALESCE(
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
-      AND role IN ('super_admin', 'admin')
-      AND app_id = public.current_app_id()
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid()
+      AND p.role IN ('super_admin', 'admin')
+      AND p.app_id = public.current_app_id()
     ),
     false
   );
@@ -148,7 +148,7 @@ DROP POLICY IF EXISTS "Admins can manage approval workflows" ON public.approval_
 CREATE POLICY "approval_workflows_tenant_isolation" ON public.approval_workflows
   FOR ALL TO authenticated
   USING (
-    public.jwt_is_tenant_admin()
+    (public.jwt_is_tenant_admin() AND app_id = public.current_app_id())
     OR public.jwt_is_super_admin()
   );
 

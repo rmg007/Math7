@@ -34,8 +34,8 @@ jobs:
             echo "1. Data migration/backup is in place"
             echo "2. This change has been reviewed by a senior engineer"
             echo "3. Rollback plan is documented"
-            # Uncomment the line below to block destructive changes automatically:
-            # exit 1
+            # Block destructive changes automatically:
+            exit 1
           else
             echo "✅ No destructive SQL patterns detected."
           fi

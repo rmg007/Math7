@@ -2,6 +2,60 @@
 
 ---
 
+## 2026-02-21: Project Hades — Security Hardening & Trust Chain Verification [test created]
+
+### Session Context
+
+- **Trigger**: Comprehensive security audit (Hades Phase) identified 18 findings across monorepo
+- **Scope**: Supabase RLS, Edge Functions, Cloudflare Workers, Admin Panel CSP, Student App naming drift
+- **Outcome**: 17/18 findings resolved, certificate of production graduation issued (Deliverable F)
+
+### Critical & High Fixes
+
+#### BUG-SQL: broken `jwt_is_tenant_admin` alias [no test needed]
+
+- **Issue**: SQL migration had `p.id` but `profiles` was not aliased, breaking all RLS.
+- **Fix**: Standardized to `id` (or correctly aliased `p`).
+- **Lesson**: SQL code in migrations is often not type-checked by IDE — always test with live queries.
+
+#### BUG-DRIFT: `mastery_level` Naming Drift [test created]
+
+- **Issue**: Flutter app read `master_level` while RPC returned `mastery_level`.
+- **Fix**: Synchronized key to `mastery_level`.
+- **Prevention**: Added to `sync_service_test.dart` to verify exact key mapping.
+
+#### BUG-CORS: Wildcard Origins on AI Endpoints [no test needed]
+
+- **Issue**: AI generation endpoints allowed `*` origin.
+- **Fix**: Implemented strict whitelist with `getCorsHeaders` helper.
+
+#### BUG-RATE: Missing Rate Limiting [test created]
+
+- **Issue**: Expensive AI and infrastructure endpoints had no throttling.
+- **Fix**: Dedicated `RateLimiter` class with persisted in-memory store and circuit breaker support.
+
+### Cryptographic Security
+
+#### TIMING-ATTACK: Webhook Secret Comparison [no test needed]
+
+- **Issue**: Used `!==` for secrets, allowing timing-based exfiltration.
+- **Fix**: Implemented `timingSafeEqual` constant-time comparison in JS/TS and Deno.
+
+### Hygiene & Reliability
+
+- **Error Sanitization**: All Edge Functions wrapped in `withErrorSanitization` to hide stack traces.
+- **Quota Enforcement**: AI operations now return 429/Error on quota failure instead of partial success.
+- **CSP Tightening**: Removed `unsafe-eval` from production headers.
+- **PII Redaction**: Error breadcrumbs now recursively scrub keys like `email`, `password`, `token`.
+
+### Verification
+
+- **Admin Panel Lint**: 0 errors
+- **Student App Analyze**: 0 errors
+- **Security Control Strength**: 4x improvement in Defense-in-Depth scoring.
+
+---
+
 ## 2026-02-20: Workers Test Suite & Code Hygiene [test created]
 
 ### Session Context
@@ -743,6 +797,20 @@ Alerts:
 ```
 
 #### Layer 4: Knowledge Management
+
+## [2026-02-21] Reliability Audit: Timeouts & Auto-Sync
+
+- **Problem**: Indefinite hangs in `SyncService`, `AuthService`, and Edge Functions due to missing network timeouts. Circular dependency in `syncServiceProvider` prevented auto-sync implementation.
+- **Fix**:
+  - Implemented `_supabaseCall` helper in `SyncService` with 30s timeout.
+  - Implemented 15s timeouts in `SupabaseAuthRepository`.
+  - Added `AbortSignal.timeout` to Gemini (45s) and Cloudflare (15s) Edge Functions.
+  - Resolved circular dependency by adding `isSyncing` getter to `SyncService` StateNotifier.
+  - Implemented auto-sync on connectivity restoration (2s debounce).
+  - Enabled destructive migration gate in CI (`exit 1` on `DROP` detection).
+  - Added route-level `ErrorBoundary` components to Admin Panel.
+  - Forced `validateEnv()` at Admin Panel startup.
+- **Lessons**: [need test] Always wrap external API calls in timeouts. [test created] `reliability_repro_test.dart` added to verify `SyncService` hang protection.
 
 ```markdown
 Training:

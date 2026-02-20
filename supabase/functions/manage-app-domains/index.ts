@@ -1,9 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createSanitizedErrorResponse, withErrorSanitization } from "../_shared/error-sanitizer.ts";
+import { addRateLimitHeaders, createRateLimitMiddleware, rateLimitConfigs } from "../_shared/rate-limiter.ts";
 
 // --- HADES SECURITY PATCH: Externalize Infra IDs ---
-const CLOUDFLARE_ACCOUNT_ID = Deno.env.get("CLOUDFLARE_ACCOUNT_ID") || "1ad655f025b0db1974614aac7ebec10a";
+const CLOUDFLARE_ACCOUNT_ID = Deno.env.get("CLOUDFLARE_ACCOUNT_ID");
 const CLOUDFLARE_PROJECT_NAME = Deno.env.get("CLOUDFLARE_PROJECT_NAME") || "questerix-student";
 const BASE_DOMAIN = Deno.env.get("BASE_DOMAIN") || "questerix.com";
+
+const rateLimit = createRateLimitMiddleware(rateLimitConfigs.anonymous);
 
 interface AppRecord {
   subdomain: string;
@@ -16,25 +20,48 @@ interface WebhookPayload {
   old_record?: AppRecord;
 }
 
-async function handleDomainChange(req: Request) {
-  try {
+/**
+ * Constant-time comparison for strings to prevent timing attacks.
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+export const manageAppDomainsHandler = withErrorSanitization(
+  async (req: Request) => {
+    // Rate limiting
+    const rateLimitResult = rateLimit.middleware(req);
+    if (!rateLimitResult.allowed) {
+      return rateLimitResult.response!;
+    }
+
     const webhookSecret = Deno.env.get("DOMAIN_WEBHOOK_SECRET");
     const incomingSecret = req.headers.get("x-webhook-secret");
 
     // --- HADES SECURITY PATCH: MANDATORY SECRET ---
     if (!webhookSecret) {
       console.error("DOMAIN_WEBHOOK_SECRET missing in environment!");
-      return new Response("Server configuration error", { status: 500 });
+      return createSanitizedErrorResponse('INTERNAL_ERROR', 'Server configuration error');
     }
 
-    if (incomingSecret !== webhookSecret) {
+    if (!CLOUDFLARE_ACCOUNT_ID) {
+      console.error("CLOUDFLARE_ACCOUNT_ID missing in environment!");
+      return createSanitizedErrorResponse('INTERNAL_ERROR', 'Server configuration error');
+    }
+
+    if (!timingSafeEqual(incomingSecret || "", webhookSecret)) {
       console.warn(`Unauthorized domain change attempt. Secret mismatch.`);
-      return new Response("Unauthorized", { status: 401 });
+      return createSanitizedErrorResponse('UNAUTHORIZED', 'Unauthorized');
     }
 
     const apiToken = Deno.env.get("CLOUDFLARE_API_TOKEN");
     if (!apiToken) {
-      throw new Error("CLOUDFLARE_API_TOKEN is not set");
+      return createSanitizedErrorResponse('INTERNAL_ERROR', 'CLOUDFLARE_API_TOKEN is not set');
     }
 
     const payload: WebhookPayload = await req.json();
@@ -64,26 +91,21 @@ async function handleDomainChange(req: Request) {
       }
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    const httpResponse = new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json" },
       status: 200,
     });
 
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("Error managing Cloudflare domain:", message);
-    return new Response(JSON.stringify({ error: message }), {
-      headers: { "Content-Type": "application/json" },
-      status: 500,
-    });
-  }
-}
+    return addRateLimitHeaders(httpResponse, rateLimitResult.rateLimitResult);
+  },
+  { statusCode: 500, includeRequestId: true }
+);
 
 async function addDomain(subdomain: string, token: string) {
   const fullDomain = `${subdomain}.${BASE_DOMAIN}`;
   console.log(`Adding domain: ${fullDomain}`);
 
-  const url = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${CLOUDFLARE_PROJECT_NAME}/domains`;
+  const url = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/projects/${CLOUDFLARE_PROJECT_NAME}/domains`;
   
   const response = await fetch(url, {
     method: "POST",
@@ -92,11 +114,11 @@ async function addDomain(subdomain: string, token: string) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ name: fullDomain }),
+    signal: AbortSignal.timeout(15_000),
   });
 
   if (!response.ok) {
     const error = await response.json();
-    // 10045 is "domain already exists", we can ignore that
     if (error.errors?.[0]?.code === 10045) {
       console.log(`Domain ${fullDomain} already exists in project.`);
       return;
@@ -110,7 +132,7 @@ async function deleteDomain(subdomain: string, token: string) {
   const fullDomain = `${subdomain}.${BASE_DOMAIN}`;
   console.log(`Deleting domain: ${fullDomain}`);
 
-  const url = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${CLOUDFLARE_PROJECT_NAME}/domains/${fullDomain}`;
+  const url = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/projects/${CLOUDFLARE_PROJECT_NAME}/domains/${fullDomain}`;
   
   const response = await fetch(url, {
     method: "DELETE",
@@ -118,11 +140,11 @@ async function deleteDomain(subdomain: string, token: string) {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json",
     },
+    signal: AbortSignal.timeout(15_000),
   });
 
   if (!response.ok) {
     const error = await response.json();
-    // 10046 is "domain does not exist", we can ignore that
     if (error.errors?.[0]?.code === 10046) {
       console.log(`Domain ${fullDomain} not found in project, skipping delete.`);
       return;
@@ -132,4 +154,6 @@ async function deleteDomain(subdomain: string, token: string) {
   console.log(`Successfully deleted ${fullDomain}`);
 }
 
-serve(handleDomainChange)
+if (import.meta.main) {
+  serve(manageAppDomainsHandler);
+}

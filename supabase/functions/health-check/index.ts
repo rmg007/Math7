@@ -293,7 +293,12 @@ export const healthCheckHandler = async (req: Request): Promise<Response> => {
   }
   
   try {
-    const healthResult = await performHealthCheck();
+    const healthResult = await Promise.race([
+      performHealthCheck(),
+      new Promise<HealthCheckResult>((_, reject) =>
+        setTimeout(() => reject(new Error('Health check global deadline exceeded (5s)')), 5_000)
+      ),
+    ]);
     
     // Determine HTTP status code based on health
     let statusCode = 200;
