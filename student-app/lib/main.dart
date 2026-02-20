@@ -52,7 +52,7 @@ void main() async {
         child: const QuesterixApp(),
       ),
     );
-  } catch (e, stack) {
+  } catch (e) {
     // Critical initialization failure (e.g. Env.validate() failed)
     // Prevent white screen of death with a fallback UI
     debugPrint('CRITICAL: App initialization failed: $e');

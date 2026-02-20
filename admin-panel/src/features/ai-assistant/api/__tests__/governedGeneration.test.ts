@@ -42,7 +42,8 @@ describe('governedGenerateQuestions', () => {
       { text: 'Q1', question_type: 'mcq' as const, difficulty: 'easy' as const, metadata: {} },
     ],
     metadata: {
-      model: 'gemini-1.5-flash',
+      model: '@cf/meta/llama-3.1-8b-instruct',
+      subject_type: 'general',
       generation_time_ms: 100,
       token_count: 500,
       questions_generated: 1,

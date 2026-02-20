@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-02-20
+
 ### Added
+
+- **Workers AI**: New Cloudflare Workers project (`workers/`) with AI-powered question generation and content validation endpoints.
+- **Workers AI**: Model routing — DeepSeek R1 32B for math, Llama 3.1 8B for general subjects, DeepSeek R1 for all validation.
+- **Workers Email**: Critical alert email delivery via Cloudflare Email Workers with HTML templates.
+- **Admin Panel**: Workers-first AI integration with automatic Supabase Edge Function fallback via `VITE_WORKERS_URL` env var.
+- **Testing**: Workers test suite — 73 tests across 9 files covering shared modules, AI handlers, email handler, router, and regression guards (BUG-W1–W4).
+
+### Changed
+
+- **Code Hygiene**: Removed 50+ stale deploy logs, test outputs, and debug files from root, admin-panel, student-app, and workers directories.
+- **Code Hygiene**: Archived `.builder/` design docs to `docs/archive/`.
+- **Code Hygiene**: Fixed Dart warning (unused `stack` catch variable in `main.dart`).
 
 - **Admin Panel**: Improved responsive layout for 375px viewports across all curriculum management pages and forms.
 - **Admin Panel**: Added global `overflow-x-hidden` and adaptive typography to prevent layout breakage on small screens.

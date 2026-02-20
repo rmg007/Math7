@@ -1,6 +1,0 @@
-
-> admin-panel@0.0.0 typecheck
-> tsc --noEmit
-
-src/features/platform/pages/AppsPage.tsx(368,14): error TS2304: Cannot find name 'AppInsert'.
-src/features/platform/pages/SubjectsPage.tsx(387,14): error TS2304: Cannot find name 'SubjectInsert'.

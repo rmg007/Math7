@@ -2,6 +2,113 @@
 
 ---
 
+## 2026-02-20: Workers Test Suite & Code Hygiene [test created]
+
+### Session Context
+
+- **Trigger**: Create comprehensive test suite for Cloudflare Workers; clean project cruft
+- **Scope**: 73 tests across 9 files, 50+ stale files removed, CHANGELOG v2.1.0 cut
+- **Outcome**: All workers tests pass, project hygiene restored
+
+### Bugs Found & Regression Tests Created
+
+#### BUG-W1: `cloudflare:email` Unresolvable in Node [test created]
+
+- **Issue**: `send-alert.ts` imports `cloudflare:email`, a Cloudflare runtime-only module. Vitest (Node) crashes on import.
+- **Fix**: Created mock at `src/__mocks__/cloudflare-email.ts` and aliased in `vitest.config.ts`
+- **Lesson**: Any CF-specific imports need mock aliases for testing. Check for `cloudflare:*` patterns.
+
+#### BUG-W2: AI.run Prompt Format Mismatch [test created]
+
+- **Issue**: Tests assumed OpenAI-style `{ messages: [...] }` format, but our handler uses `{ prompt, temperature, max_tokens }`
+- **Fix**: Updated assertions to match actual API shape
+- **Lesson**: Always verify the exact API contract of the LLM binding before writing assertions. Read the handler source, don't assume.
+
+#### BUG-W3: Rate Limiter State Leaks Across Tests [test created]
+
+- **Issue**: In-memory rate limiter persists across test files (module-level `Map`). After 5 requests, subsequent tests get 429s.
+- **Fix**: Mock rate limiter in handler tests. Use `vi.clearAllMocks()` NOT `vi.restoreAllMocks()` in `beforeEach`.
+- **Lesson**: `clearAllMocks` resets call counts but preserves implementations. `restoreAllMocks` removes implementations entirely. Critical difference for module-level `vi.mock()`.
+
+#### BUG-W4: Payload Validation Missing in send-alert [test created]
+
+- **Issue**: Destructuring `{ record, type }` from payload without null checks caused crashes on malformed webhook payloads.
+- **Fix**: Added `if (!record || !type)` guard returning 400
+- **Lesson**: Always validate webhook payloads before destructuring. External callers can send anything.
+
+### Code Hygiene Findings
+
+- **50+ stale files**: Deploy logs, test outputs, lint results, debug traces scattered across all project dirs
+- **No Cursor temp files**: `.cursor*`, `.bak`, `.tmp`, `.old` patterns all clean
+- **2 legitimate TODOs**: In `DashboardPage.tsx` for future time-series data — these are valid future-work markers
+- **No FIXMEs**: All FIXMEs found were in `node_modules/` (3rd party)
+- **`.builder/` archived**: 3 design docs moved to `docs/archive/`
+
+---
+
+## 2026-02-20: Cloudflare Workers AI & Email Integration [no test needed]
+
+### Session Context
+
+- **Trigger**: Migrate AI question generation from Supabase Edge Functions (Gemini API) to Cloudflare Workers AI; add email alerting
+- **Scope**: New `workers/` project, admin panel integration, deployment & secret management
+- **Outcome**: Workers deployed and live at `https://questerix-workers.mhalim80.workers.dev`, all 4 secrets configured
+
+### Architecture Decisions
+
+#### ARCH-01: Model Routing by Subject Type
+
+- **Decision**: DeepSeek R1 32B for math subjects (multi-step reasoning), Llama 3.1 8B for all others (cost-effective)
+- **Rationale**: Math questions require chain-of-thought reasoning; general subjects don't need it
+- **Validation always uses DeepSeek R1** regardless of subject — stronger model catches more issues
+
+#### ARCH-02: No Supabase SDK in Workers
+
+- **Issue**: `@supabase/supabase-js` isn't designed for Cloudflare Workers runtime
+- **Solution**: Direct `fetch` calls to Supabase Auth API (`/auth/v1/user`) and REST API (`/rest/v1/rpc/...`)
+- **Lesson**: Workers have a different runtime than Node.js — always verify SDK compatibility first
+
+#### ARCH-03: Workers-First with Supabase Fallback
+
+- **Decision**: Admin panel checks `VITE_WORKERS_URL` env var; if set, calls Workers, otherwise falls back to Supabase Edge Functions
+- **Benefit**: Zero-disruption rollback — just unset the env var
+
+### Gotchas & Lessons
+
+#### GOTCHA-01: `@cloudflare/workers-types` Lag
+
+- **Issue**: TypeScript definitions for Workers AI don't include all available models
+- **Fix**: `(env.AI as any).run(model, ...)` type assertion with explanatory comment
+- **Lesson**: Cloudflare's type packages lag behind available models/features
+
+#### GOTCHA-02: DRY Violation in AI Handlers
+
+- **Issue**: `consumeTenantTokens` was copy-pasted across both AI handlers during initial implementation
+- **Fix**: Extracted to `shared/tokens.ts` during self-review
+- **Lesson**: Always extract shared logic immediately — don't defer "for later"
+
+#### GOTCHA-03: Service Role Key Not in `.secrets`
+
+- **Issue**: `.secrets` had `SUPABASE_SERVICE_KEY= (Update needed)` — the QuesterixDB-v2 service role key was never saved locally after project migration
+- **Fix**: Retrieved from Supabase Dashboard, saved to gitignored `.secrets`, set via `wrangler secret put`
+- **Lesson**: When migrating Supabase projects, update ALL secret storage locations
+
+#### GOTCHA-04: Email Routing Requires Manual Setup
+
+- **Issue**: Cloudflare Email Routing can't be enabled via API/Wrangler — requires Dashboard click
+- **Lesson**: Document manual steps prominently in deployment checklists
+
+### Files Changed
+
+| Area                      | Files                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------- |
+| **New: Workers**          | `workers/src/**` (9 files), `wrangler.toml`, `package.json`, `tsconfig.json` |
+| **Modified: Admin Panel** | `generateQuestions.ts`, `validateContent.ts`, `use-ai-generator.ts`          |
+| **Modified: Tests**       | `governedGeneration.test.ts`, `use-ai-generator.test.tsx`                    |
+| **Modified: Config**      | `.env`, `.env.local`, `.env.production`, `.env.example`, `.secrets`          |
+
+---
+
 ## 2026-02-19: Certification Sprint & Production Release [test created]
 
 ### Session Context

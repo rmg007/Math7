@@ -1,21 +1,24 @@
 # Questerix — Tasks
 
-## 🛡️ Phase 5: Certification & Release Sprint
+## Current Sprint
 
-- [x] **Logic Audit**: Run `/codescene` and `/forensics` to verify bootstrapping stability. (Verified - 13 Crit identified as false positives)
-- [x] **Security Validation**: Run `/security-hardening-audit` to verify the new `apps_anon_read` RLS policy. (Verified)
-- [x] **Security Validation**: Run `/security-hardening-workflow` to verify the new `apps_anon_read` RLS policy. (Verified)
-- [x] **Functional Verification**: Run `npm run test:e2e` (Auth Flow) to ensure CSP doesn't block redirects. (Passed)
-- [x] **Source Sync**: Push all fixes to GitHub (`git push`). (Done)
-- [x] **Production Release**: Execute `powershell .\scripts\deploy-all.ps1`. (Done via orchestrator.ps1)
-- [x] **Auth Refactor**: Implement `AuthController` and `AsyncValue` pattern. (Done)
-- [x] **State Management Migration**: Migrate `AppConfigService` to `AsyncValue`. (Done)
-- [x] **Initialization UX**: Improve splash screen and error handling for multi-tenant boot. (Done)
+- [ ] add forget password and reset password links to login page and sign up page and anywhere it should be. and test it and create test cases to cover it.
+- [ ] for every issue/bug/error you fix, create test cases to avoid falling in same mistakes again. document it. document what you learned from it
+- [ ] Deploy to production
+- [ ] Quick visual test that everything is working as expected
+- [ ] Push to GitHub (~250 changes) and make sure we have only one branch (main)
+
+- [ ] I see so many files need to be added to github. it is dimmed in the explorer. please check all files and add them to github.
+
+- [ ] so many files should be deleted.
 
 ---
 
 ## Postponed
 
-- [ ] (postponed) **P1: Visual Regression Suite**
-- [ ] (postponed) **P3: Platform Settings**
-- [ ] (postponed) **P3: Rollback Procedures**
+- [ ] P1: Visual Regression Suite (Playwright screenshot tests)
+- [ ] P3: Platform Settings
+- [ ] P3: Rollback Procedures
+- [ ] Mobile Card Layout for tables
+- [ ] Row Selection & Bulk Actions
+- [ ] Advanced Table Features

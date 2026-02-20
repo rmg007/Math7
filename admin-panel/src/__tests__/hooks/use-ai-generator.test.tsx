@@ -44,7 +44,8 @@ describe('useAIGenerator', () => {
     vi.mocked(generateQuestions).mockResolvedValue({
       questions: mockQuestions,
       metadata: {
-        model: 'gemini-1.5-flash',
+        model: '@cf/meta/llama-3.1-8b-instruct',
+        subject_type: 'general',
         generation_time_ms: 1000,
         token_count: 500,
         questions_generated: 2,
@@ -86,7 +87,6 @@ describe('useAIGenerator', () => {
         text: params.context,
         difficulty_distribution: expect.any(Object),
         custom_instructions: 'Focus on the skill/topic: "Algebra". Focus on equations',
-        model: 'gemini-1.5-flash',
       });
 
       expect(mockToast).toHaveBeenCalledWith({

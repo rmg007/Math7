@@ -17,6 +17,7 @@ export interface QuestionData {
 export interface ValidationRequest {
   questions: QuestionData[];
   source_text: string;
+  subject_type?: 'math' | 'english' | 'general';
   rules?: ValidationRule[];
 }
 
@@ -34,12 +35,46 @@ export interface ValidationResponse {
   metadata: {
     model: string;
     validation_time_ms: number;
+    token_count?: number;
   };
 }
 
-export async function validateContent(
-  request: ValidationRequest
-): Promise<ValidationResponse> {
+const WORKERS_URL = import.meta.env.VITE_WORKERS_URL;
+
+export async function validateContent(request: ValidationRequest): Promise<ValidationResponse> {
+  // Use Cloudflare Workers AI if configured, fall back to Supabase Edge Functions
+  if (WORKERS_URL) {
+    return validateViaWorkers(request);
+  }
+  return validateViaSupabase(request);
+}
+
+async function validateViaWorkers(request: ValidationRequest): Promise<ValidationResponse> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not authenticated');
+
+  const response = await fetch(`${WORKERS_URL}/ai/validate-content`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(
+      (errorBody as { error?: string }).error || `Workers AI error: ${response.status}`
+    );
+  }
+
+  return response.json() as Promise<ValidationResponse>;
+}
+
+async function validateViaSupabase(request: ValidationRequest): Promise<ValidationResponse> {
   const { data, error } = await supabase.functions.invoke<ValidationResponse>('validate-content', {
     body: request,
   });
