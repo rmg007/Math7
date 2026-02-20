@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -120,7 +120,11 @@ export function LoginPage() {
     setError(null);
     setIsResetting(true);
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
-      redirectTo: `${window.location.origin}/login`,
+      // Always redirect to the production admin panel's /auth/confirm page.
+      // Using window.location.origin here would send localhost links in development,
+      // which create broken/expired links. The /auth/confirm page is the safe relay
+      // that defeats Microsoft Defender Safe Links pre-fetching.
+      redirectTo: 'https://admin.questerix.com/auth/confirm',
     });
     setIsResetting(false);
     if (error) {
@@ -227,7 +231,7 @@ export function LoginPage() {
             </CardTitle>
             <CardDescription>
               {isForgotPassword
-                ? 'Enter your email and we\'ll send you a reset link'
+                ? "Enter your email and we'll send you a reset link"
                 : isRegister
                   ? 'Enter your details to get started'
                   : ''}
@@ -242,7 +246,8 @@ export function LoginPage() {
                       <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Check your email for a password reset link. If you don&apos;t see it, check your spam folder.
+                      Check your email for a password reset link. If you don&apos;t see it, check
+                      your spam folder.
                     </p>
                     <Button
                       variant="link"
@@ -277,11 +282,7 @@ export function LoginPage() {
                         {error}
                       </div>
                     )}
-                    <Button
-                      className="w-full"
-                      onClick={onForgotPassword}
-                      disabled={isResetting}
-                    >
+                    <Button className="w-full" onClick={onForgotPassword} disabled={isResetting}>
                       {isResetting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Send Reset Link
                     </Button>
@@ -502,7 +503,9 @@ export function LoginPage() {
                 }}
                 className="text-muted-foreground"
               >
-                {isRegister ? 'Already have an account? Sign in' : "Don't have an account? Register"}
+                {isRegister
+                  ? 'Already have an account? Sign in'
+                  : "Don't have an account? Register"}
               </Button>
             )}
           </CardFooter>

@@ -80,6 +80,11 @@ const AccountSettingsPage = lazy(() =>
     default: m.AccountSettingsPage,
   }))
 );
+const AuthConfirmPage = lazy(() =>
+  import('./features/auth/pages/AuthConfirmPage').then((m) => ({
+    default: m.AuthConfirmPage,
+  }))
+);
 const InvitationCodesPage = lazy(() =>
   import('./features/auth/pages/InvitationCodesPage').then((m) => ({
     default: m.InvitationCodesPage,
@@ -217,6 +222,18 @@ const router = createBrowserRouter([
     element: (
       <Suspense fallback={<LoadingPage />}>
         <LoginPage />
+      </Suspense>
+    ),
+  },
+  {
+    // Public route — no AuthGuard. Users arrive here from Supabase auth emails
+    // (password reset, magic link, email confirmation). The page acts as a
+    // safe relay: Microsoft Defender Safe Links pre-fetches pages but never
+    // activates buttons, so the OTP is only consumed when the user clicks.
+    path: '/auth/confirm',
+    element: (
+      <Suspense fallback={<LoadingPage />}>
+        <AuthConfirmPage />
       </Suspense>
     ),
   },
