@@ -40,7 +40,12 @@ useDefault = true
 
     # Test fixtures that use fake keys
     '''supabase/tests/''',
+    '''supabase/functions/_shared/.*\.test\.ts''',
     '''admin-panel/tests/''',
+
+    # Gitleaks temp artifacts
+    '''full_diff\.txt''',
+    '''gitleaks-report\.json''',
 
     # Session reports that document past incidents (references, not live secrets)
     '''docs/reports/SESSION_REPORT_''',
@@ -60,4 +65,7 @@ useDefault = true
     '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3MiOiJzdXBhYmFzZS1kZW1v''',
     # Test user passwords in test fixtures
     '''test-.*@example\.com''',
+    # Error message strings that contain placeholder values (not real secrets)
+    '''REDACTED''',
+    '''=REDACTED\b''',
   ]
