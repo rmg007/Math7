@@ -2,6 +2,73 @@
 
 ---
 
+## 2026-02-20: Governance Audit Remediation — Single Source of Truth [no test needed]
+
+### Session Context
+
+- **Trigger**: Comprehensive governance audit identified authority fragmentation, dead references, and a hardcoded secret in a git-tracked file
+- **Scope**: Agent workflows, skill directories, `.gitignore`, gitleaks config
+- **Outcome**: All 8 fixable findings resolved; 2 critical security items flagged for manual action (token rotation)
+
+### Fixes Applied
+
+#### FIX-G1: Legacy Skill Directory Deleted [no test needed]
+
+- **Issue**: `.agent/skills/loki-mode/` (v1.0.0) existed alongside `.antigravity/skills/loki-mode/` (v2.0.26), creating a silent authority split. `loki.md` was loading the outdated v1 config.
+- **Fix**: Deleted `.agent/skills/loki-mode/` entirely. `.antigravity/skills/loki-mode/` is the sole canonical location.
+- **Lesson**: Two configs for the same skill = guaranteed drift. Delete the old one, don't maintain both.
+
+#### FIX-G2: autopilot.md Slimmed from 427 → 50 Lines [no test needed]
+
+- **Issue**: `autopilot.md` duplicated the entire `GEMINI.md` permission list, creating triple redundancy (GEMINI.md + autopilot.md + default.md all listed turbo commands).
+- **Fix**: Replaced with a thin shim that explicitly defers to `GEMINI.md` as the SSoT for permissions.
+- **Lesson**: Permission lists must live in exactly one place. All references must point there.
+
+#### FIX-G3: Hardcoded Supabase URL Redacted from Tracked File [no test needed]
+
+- **Issue**: `reindex_docs.md` (a git-tracked file in `.agent/workflows/`) contained the literal Supabase project URL `qvslbiceoonrgjxzkotb.supabase.co`.
+- **Fix**: Replaced with `$env:SUPABASE_URL = "..."` and a comment pointing to the source.
+- **Lesson**: Project URLs in tracked files = effectively a public commitment. Always use env vars in tracked files.
+
+#### FIX-G4: .gitignore Deduplicated & Sectioned [no test needed]
+
+- **Issue**: 8 duplicate entries, no section headers, confusing order.
+- **Fix**: Full rewrite with clear `# ===` section headers. Removed all duplicates.
+- **Lesson**: An unsectioned .gitignore becomes unreadable after ~60 entries. Structure it from day one.
+
+#### FIX-G5: guardrails.md Expanded from 3 → 19 Entries [no test needed]
+
+- **Issue**: The agent's "muscle memory" file was almost empty despite months of bug fixes with documented patterns.
+- **Fix**: Backfilled 16 entries from BUG-A1 through BUG-A6, security learnings, testing patterns, and governance rules.
+- **Lesson**: Guardrails only help if they're populated. The KB system should feed back into guardrails.
+
+#### FIX-G6: .antigravity/SKILL.md Path References Fixed [no test needed]
+
+- **Issue**: SKILL.md contained 3 references to `.agent/skills/loki-mode/` after the skill dir was consolidated.
+- **Fix**: Updated all paths to `.antigravity/skills/loki-mode/`.
+
+#### FIX-G7: 2-File Governance Model Defined [no test needed]
+
+- **Fix**: Added governance model block to `AGENTS.md` header and `default.md` Universal Protocol:
+  - `AGENTS.md` = universal rules (all agents/IDEs)
+  - `GEMINI.md` user memory = Antigravity-specific permissions
+  - When they conflict, `GEMINI.md` wins
+
+#### FIX-G8: Gitleaks False Positives Fixed [no test needed]
+
+- **Issue**: `supabase/functions/_shared/*.test.ts` strings like `"API_KEY=REDACTED"` were failing the pre-push secret scan.
+- **Fix**: Added `supabase/functions/_shared/.*\.test\.ts` to path allowlist and `REDACTED` to regex allowlist.
+
+### Remaining Manual Actions Required
+
+⚠️ **These require your action — the agent cannot rotate secrets**:
+
+1. **CRITICAL**: Rotate `GITHUB_TOKEN` — exposed in `.secrets` on-disk (check `.secrets` for current value)
+2. **CRITICAL**: Rotate `GEMINI_API_KEY` — same
+3. **RECOMMENDATION**: Move `.secrets` contents to Windows Credential Manager or 1Password and read via `cmdkey`/SecretManagement instead of a flat file
+
+---
+
 ## 2026-02-21: Project Hades — Security Hardening & Trust Chain Verification [test created]
 
 ### Session Context
