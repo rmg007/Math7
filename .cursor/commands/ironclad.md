@@ -1,0 +1,1 @@
+Read `.agent/skills/ironclad-architect/SKILL.md` and execute the full Ironclad Architect v2 forensic protocol on the code I provide. Run all 17 bug patterns, the IDD protocol, RARV cycle, Silent Failure audit, Tenant Isolation audit, and Forbidden Patterns scan. Output the full required format.

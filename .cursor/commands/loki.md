@@ -1,0 +1,1 @@
+Read `.agent/workflows/loki.md` and `.agent/skills/loki-mode/SKILL.md` and enter Loki Mode — full autonomous developer with RARV cycles, self-healing, circuit breakers, and persistent state. Remove human gates (except deployment).
