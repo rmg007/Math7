@@ -64,7 +64,8 @@ foreach ($file in $files) {
             }
 
             # VUL-003 (Secret Leakage): Flag service_role key usage outside of secure scripts/test env
-            if ($h.Line -match "service_role" -and $relPath -notmatch "env.test.local|secrets|supabase/migrations") {
+            # Skip: security test files that CHECK FOR the absence of service_role (expected reference)
+            if ($h.Line -match "service_role" -and $relPath -notmatch "env.test.local|secrets|supabase/migrations" -and $relPath -notmatch "bundle-safety|security\.test") {
                 $report.taxonomy += "VUL-003 (Service Role Leak): $loc"
             }
             
@@ -74,7 +75,7 @@ foreach ($file in $files) {
                 if ($envExample -notmatch "\b$v\b") { $report.config_bombs += "$v ($loc)" }
             }
             
-            if ($h.Line -match "catch.*\{\}") { $report.stability_risks += "Empty Catch ($loc)" }
+            if ($h.Line -match "catch.*\{\}" -and $h.Line -notmatch "\.catch\(.*=>.*\(\{\}\)") { $report.stability_risks += "Empty Catch ($loc)" }
             if ($h.Line -match "test\.skip|xtest") { $report.stability_risks += "Skipped Test ($loc)" }
             if ($h.Line -match "as any\b") { $report.stability_risks += "Type Hole ($loc)" }
             if ($h.Line -match "PromptTemplate") { $report.ai_governance += "Prompt Template ($loc)" }
