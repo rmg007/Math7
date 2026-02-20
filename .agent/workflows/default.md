@@ -64,7 +64,9 @@ By default, any new feature or fix should follow the **`/process`** workflow ste
 
 ## 🦾 Universal Protocol
 
-- **SafeToAutoRun**: Always set to `true` for all `run_command` calls (per `user_global` memory).
+- **SafeToAutoRun**: Always set to `true` for all `run_command` calls (per `GEMINI.md` user memory — the SSoT for turbo permissions).
+- **Governance Model**: `AGENTS.md` = universal rules (all agents/IDEs). `GEMINI.md` = Antigravity-specific permissions. When they conflict, `GEMINI.md` wins.
+- **Guardrails**: Before any ACT phase, scan `.antigravity/skills/loki-mode/guardrails.md` — it contains accumulated lessons from past failures.
 - **Preventative Protocol**: **"Bug Fixed? Test Added."** Never fix a bug without a test that would have caught it.
 - **Learning Flag Protocol**: When documenting a learning, append `[need test]`, `[test created]`, or `[no test needed]` to the entry.
 - **No Hallucinations**: Run self-verifications before declaring success.

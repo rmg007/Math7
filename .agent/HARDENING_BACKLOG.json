@@ -1,715 +1,1247 @@
-﻿{
-    "verdict":  " STOP SHIP",
-    "findings":  [
-                     {
-                         "id":  "851019599",
-                         "message":  "VUL-003 (Service Role Leak)",
-                         "line":  40,
-                         "type":  "security",
-                         "severity":  "CRITICAL",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\security\\bundle-safety.test.ts"
-                     },
-                     {
-                         "id":  "-1474579229",
-                         "message":  "VUL-003 (Service Role Leak)",
-                         "line":  44,
-                         "type":  "security",
-                         "severity":  "CRITICAL",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\security\\bundle-safety.test.ts"
-                     },
-                     {
-                         "id":  "851019598",
-                         "message":  "VUL-003 (Service Role Leak)",
-                         "line":  50,
-                         "type":  "security",
-                         "severity":  "CRITICAL",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\security\\bundle-safety.test.ts"
-                     },
-                     {
-                         "id":  "-1776562171",
-                         "message":  "VUL-003 (Service Role Leak)",
-                         "line":  59,
-                         "type":  "security",
-                         "severity":  "CRITICAL",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\generate-questions\\index.ts"
-                     },
-                     {
-                         "id":  "-65399660",
-                         "message":  "VUL-003 (Service Role Leak)",
-                         "line":  9,
-                         "type":  "security",
-                         "severity":  "CRITICAL",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\generate-questions\\security.test.ts"
-                     },
-                     {
-                         "id":  "-1740471952",
-                         "message":  "VUL-003 (Service Role Leak)",
-                         "line":  14,
-                         "type":  "security",
-                         "severity":  "CRITICAL",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\generate-questions\\test.ts"
-                     },
-                     {
-                         "id":  "268834847",
-                         "message":  "VUL-003 (Service Role Leak)",
-                         "line":  244,
-                         "type":  "security",
-                         "severity":  "CRITICAL",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\health-check\\index.ts"
-                     },
-                     {
-                         "id":  "1647867240",
-                         "message":  "VUL-003 (Service Role Leak)",
-                         "line":  31,
-                         "type":  "security",
-                         "severity":  "CRITICAL",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\parse-import-prompt\\index.ts"
-                     },
-                     {
-                         "id":  "1711760018",
-                         "message":  "VUL-003 (Service Role Leak)",
-                         "line":  26,
-                         "type":  "security",
-                         "severity":  "CRITICAL",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\revoke-user-sessions\\index.ts"
-                     },
-                     {
-                         "id":  "677637179",
-                         "message":  "VUL-003 (Service Role Leak)",
-                         "line":  56,
-                         "type":  "security",
-                         "severity":  "CRITICAL",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\validate-content\\index.ts"
-                     },
-                     {
-                         "id":  "-1048698727",
-                         "message":  "VUL-003 (Service Role Leak)",
-                         "line":  14,
-                         "type":  "security",
-                         "severity":  "CRITICAL",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\validate-content\\test.ts"
-                     },
-                     {
-                         "id":  "228821448",
-                         "message":  "VUL-003 (Service Role Leak)",
-                         "line":  38,
-                         "type":  "security",
-                         "severity":  "CRITICAL",
-                         "status":  "OPEN",
-                         "file":  "supabase\\migrations\\20260214210000_super_admin_jwt_claims.sql"
-                     },
-                     {
-                         "id":  "231553473",
-                         "message":  "VUL-003 (Service Role Leak)",
-                         "line":  162,
-                         "type":  "security",
-                         "severity":  "CRITICAL",
-                         "status":  "OPEN",
-                         "file":  "supabase\\migrations\\20260216161700_hades_rpc_hardening.sql"
-                     },
-                     {
-                         "id":  "-219460816",
-                         "message":  "Missing Temp",
-                         "line":  136,
-                         "type":  "ai_governance",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\generate-questions\\index.ts"
-                     },
-                     {
-                         "id":  "-1716739928",
-                         "message":  "Missing Temp",
-                         "line":  93,
-                         "type":  "ai_governance",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\generate-questions\\test.ts"
-                     },
-                     {
-                         "id":  "-480106113",
-                         "message":  "Missing Temp",
-                         "line":  91,
-                         "type":  "ai_governance",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\parse-import-prompt\\index.ts"
-                     },
-                     {
-                         "id":  "860703615",
-                         "message":  "Missing Temp",
-                         "line":  112,
-                         "type":  "ai_governance",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\validate-content\\index.ts"
-                     },
-                     {
-                         "id":  "-838348021",
-                         "message":  "Missing Temp",
-                         "line":  93,
-                         "type":  "ai_governance",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\validate-content\\test.ts"
-                     },
-                     {
-                         "id":  "509919161",
-                         "message":  "Hollow Placeholder (1277 bytes)",
-                         "type":  "dead_file",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\lib\\schema-sync.test.ts"
-                     },
-                     {
-                         "id":  "-1309473970",
-                         "message":  "Hollow Placeholder (1135 bytes)",
-                         "type":  "dead_file",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\lib\\utils.test.ts"
-                     },
-                     {
-                         "id":  "-411070097",
-                         "message":  "Hollow Placeholder (1126 bytes)",
-                         "type":  "dead_file",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\vite-env.d.ts"
-                     },
-                     {
-                         "id":  "1390766810",
-                         "message":  "Hollow Placeholder (647 bytes)",
-                         "type":  "dead_file",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\vitest.setup.ts"
-                     },
-                     {
-                         "id":  "257161412",
-                         "message":  "Hollow Placeholder (1180 bytes)",
-                         "type":  "dead_file",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "student-app\\lib\\src\\core\\theme\\generated\\app_borders.g.dart"
-                     },
-                     {
-                         "id":  "1798414140",
-                         "message":  "Hollow Placeholder (265 bytes)",
-                         "type":  "dead_file",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "student-app\\lib\\src\\core\\theme\\generated\\generated.dart"
-                     },
-                     {
-                         "id":  "-1257092078",
-                         "message":  "Hollow Placeholder (1498 bytes)",
-                         "type":  "dead_file",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "student-app\\lib\\src\\core\\core_providers.dart"
-                     },
-                     {
-                         "id":  "711334166",
-                         "message":  "Type Hole",
-                         "line":  99,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx"
-                     },
-                     {
-                         "id":  "-2027921723",
-                         "message":  "Type Hole",
-                         "line":  115,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx"
-                     },
-                     {
-                         "id":  "-1604434220",
-                         "message":  "Type Hole",
-                         "line":  125,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx"
-                     },
-                     {
-                         "id":  "-1322109216",
-                         "message":  "Type Hole",
-                         "line":  147,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx"
-                     },
-                     {
-                         "id":  "-1039784219",
-                         "message":  "Type Hole",
-                         "line":  162,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx"
-                     },
-                     {
-                         "id":  "-44998506",
-                         "message":  "Type Hole",
-                         "line":  189,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx"
-                     },
-                     {
-                         "id":  "-1754687601",
-                         "message":  "Type Hole",
-                         "line":  67,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx"
-                     },
-                     {
-                         "id":  "-591888154",
-                         "message":  "Type Hole",
-                         "line":  75,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx"
-                     },
-                     {
-                         "id":  "2136995350",
-                         "message":  "Type Hole",
-                         "line":  84,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx"
-                     },
-                     {
-                         "id":  "1049959139",
-                         "message":  "Type Hole",
-                         "line":  119,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx"
-                     },
-                     {
-                         "id":  "1332284140",
-                         "message":  "Type Hole",
-                         "line":  138,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx"
-                     },
-                     {
-                         "id":  "577388555",
-                         "message":  "Type Hole",
-                         "line":  98,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
-                     },
-                     {
-                         "id":  "1055250751",
-                         "message":  "Type Hole",
-                         "line":  115,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
-                     },
-                     {
-                         "id":  "772925751",
-                         "message":  "Type Hole",
-                         "line":  137,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
-                     },
-                     {
-                         "id":  "208275742",
-                         "message":  "Type Hole",
-                         "line":  170,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
-                     },
-                     {
-                         "id":  "-786509979",
-                         "message":  "Type Hole",
-                         "line":  193,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
-                     },
-                     {
-                         "id":  "-490630255",
-                         "message":  "Type Hole",
-                         "line":  209,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
-                     },
-                     {
-                         "id":  "-772955252",
-                         "message":  "Type Hole",
-                         "line":  222,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
-                     },
-                     {
-                         "id":  "-1055280251",
-                         "message":  "Type Hole",
-                         "line":  241,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
-                     },
-                     {
-                         "id":  "208275704",
-                         "message":  "Type Hole",
-                         "line":  279,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
-                     },
-                     {
-                         "id":  "-1055280153",
-                         "message":  "Type Hole",
-                         "line":  346,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx"
-                     },
-                     {
-                         "id":  "862721484",
-                         "message":  "Type Hole",
-                         "line":  106,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
-                     },
-                     {
-                         "id":  "1669290472",
-                         "message":  "Type Hole",
-                         "line":  120,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
-                     },
-                     {
-                         "id":  "1266005912",
-                         "message":  "Type Hole",
-                         "line":  133,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
-                     },
-                     {
-                         "id":  "1669290373",
-                         "message":  "Type Hole",
-                         "line":  150,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
-                     },
-                     {
-                         "id":  "103206366",
-                         "message":  "Type Hole",
-                         "line":  171,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
-                     },
-                     {
-                         "id":  "103206316",
-                         "message":  "Type Hole",
-                         "line":  191,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
-                     },
-                     {
-                         "id":  "-394186297",
-                         "message":  "Type Hole",
-                         "line":  219,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
-                     },
-                     {
-                         "id":  "721558785",
-                         "message":  "Type Hole",
-                         "line":  264,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
-                     },
-                     {
-                         "id":  "1030735077",
-                         "message":  "Type Hole",
-                         "line":  338,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx"
-                     },
-                     {
-                         "id":  "-1333600597",
-                         "message":  "Type Hole",
-                         "line":  62,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\platform\\hooks\\__tests__\\use-apps.test.tsx"
-                     },
-                     {
-                         "id":  "1966580976",
-                         "message":  "Type Hole",
-                         "line":  81,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\platform\\hooks\\__tests__\\use-apps.test.tsx"
-                     },
-                     {
-                         "id":  "-709464520",
-                         "message":  "Type Hole",
-                         "line":  113,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\features\\platform\\hooks\\__tests__\\use-apps.test.tsx"
-                     },
-                     {
-                         "id":  "43420652",
-                         "message":  "Type Hole",
-                         "line":  67,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
-                     },
-                     {
-                         "id":  "-489891959",
-                         "message":  "Type Hole",
-                         "line":  103,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
-                     },
-                     {
-                         "id":  "1029137749",
-                         "message":  "Type Hole",
-                         "line":  129,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
-                     },
-                     {
-                         "id":  "-893176387",
-                         "message":  "Type Hole",
-                         "line":  156,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
-                     },
-                     {
-                         "id":  "1855909812",
-                         "message":  "Type Hole",
-                         "line":  214,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
-                     },
-                     {
-                         "id":  "-469688917",
-                         "message":  "Type Hole",
-                         "line":  260,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
-                     },
-                     {
-                         "id":  "-872973477",
-                         "message":  "Type Hole",
-                         "line":  275,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
-                     },
-                     {
-                         "id":  "-1276258318",
-                         "message":  "Type Hole",
-                         "line":  296,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
-                     },
-                     {
-                         "id":  "1714747311",
-                         "message":  "Type Hole",
-                         "line":  316,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx"
-                     },
-                     {
-                         "id":  "-1804685276",
-                         "message":  "Type Hole",
-                         "line":  48,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "admin-panel\\src\\__tests__\\ui\\react-resilience.test.tsx"
-                     },
-                     {
-                         "id":  "-602181754",
-                         "message":  "Type Hole",
-                         "line":  60,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\generate-questions\\index.ts"
-                     },
-                     {
-                         "id":  "-530233294",
-                         "message":  "Type Hole",
-                         "line":  112,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\generate-questions\\index.ts"
-                     },
-                     {
-                         "id":  "-1094883299",
-                         "message":  "Type Hole",
-                         "line":  153,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\generate-questions\\index.ts"
-                     },
-                     {
-                         "id":  "-671395822",
-                         "message":  "Type Hole",
-                         "line":  206,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\generate-questions\\index.ts"
-                     },
-                     {
-                         "id":  "410197410",
-                         "message":  "Type Hole",
-                         "line":  196,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\health-check\\index.ts"
-                     },
-                     {
-                         "id":  "-1196034181",
-                         "message":  "Type Hole",
-                         "line":  278,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\health-check\\index.ts"
-                     },
-                     {
-                         "id":  "1614922654",
-                         "message":  "Type Hole",
-                         "line":  96,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\parse-import-prompt\\index.ts"
-                     },
-                     {
-                         "id":  "674931009",
-                         "message":  "Type Hole",
-                         "line":  57,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\validate-content\\index.ts"
-                     },
-                     {
-                         "id":  "-891153312",
-                         "message":  "Type Hole",
-                         "line":  94,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\validate-content\\index.ts"
-                     },
-                     {
-                         "id":  "-146728343",
-                         "message":  "Type Hole",
-                         "line":  129,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\validate-content\\index.ts"
-                     },
-                     {
-                         "id":  "834502617",
-                         "message":  "Type Hole",
-                         "line":  178,
-                         "type":  "stability",
-                         "severity":  "WARNING",
-                         "status":  "OPEN",
-                         "file":  "supabase\\functions\\validate-content\\index.ts"
-                     }
-                 ],
-    "stats":  {
-                  "critical":  13,
-                  "warning":  66,
-                  "info":  0
-              },
-    "last_run":  "2026-02-18 20:35"
+{
+  "stats": {
+    "warning": 131,
+    "critical": 14,
+    "info": 0
+  },
+  "last_run": "2026-02-20 13:41",
+  "verdict": " STOP SHIP",
+  "findings": [
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\security\\bundle-safety.test.ts",
+      "severity": "CRITICAL",
+      "id": "-1436995814",
+      "type": "security",
+      "line": 40,
+      "message": "VUL-003 (Service Role Leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\security\\bundle-safety.test.ts",
+      "severity": "CRITICAL",
+      "id": "941631043",
+      "type": "security",
+      "line": 44,
+      "message": "VUL-003 (Service Role Leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\security\\bundle-safety.test.ts",
+      "severity": "CRITICAL",
+      "id": "-147662224",
+      "type": "security",
+      "line": 50,
+      "message": "VUL-003 (Service Role Leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\generate-questions\\index.ts",
+      "severity": "CRITICAL",
+      "id": "1563302635",
+      "type": "security",
+      "line": 59,
+      "message": "VUL-003 (Service Role Leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\generate-questions\\security.test.ts",
+      "severity": "CRITICAL",
+      "id": "1558770463",
+      "type": "security",
+      "line": 9,
+      "message": "VUL-003 (Service Role Leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\generate-questions\\test.ts",
+      "severity": "CRITICAL",
+      "id": "2007798484",
+      "type": "security",
+      "line": 14,
+      "message": "VUL-003 (Service Role Leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\health-check\\index.ts",
+      "severity": "CRITICAL",
+      "id": "-1088645067",
+      "type": "security",
+      "line": 244,
+      "message": "VUL-003 (Service Role Leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\parse-import-prompt\\index.ts",
+      "severity": "CRITICAL",
+      "id": "1578451973",
+      "type": "security",
+      "line": 57,
+      "message": "VUL-003 (Service Role Leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\revoke-user-sessions\\index.ts",
+      "severity": "CRITICAL",
+      "id": "-1362825970",
+      "type": "security",
+      "line": 50,
+      "message": "VUL-003 (Service Role Leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\validate-content\\index.ts",
+      "severity": "CRITICAL",
+      "id": "-288043732",
+      "type": "security",
+      "line": 55,
+      "message": "VUL-003 (Service Role Leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\validate-content\\test.ts",
+      "severity": "CRITICAL",
+      "id": "24386012",
+      "type": "security",
+      "line": 14,
+      "message": "VUL-003 (Service Role Leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260214210000_super_admin_jwt_claims.sql",
+      "severity": "CRITICAL",
+      "id": "1150651612",
+      "type": "security",
+      "line": 38,
+      "message": "VUL-003 (Service Role Leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260216161700_hades_rpc_hardening.sql",
+      "severity": "CRITICAL",
+      "id": "958686556",
+      "type": "security",
+      "line": 162,
+      "message": "VUL-003 (Service Role Leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\generate-questions\\index.ts",
+      "severity": "WARNING",
+      "id": "1258854662",
+      "type": "ai_governance",
+      "line": 136,
+      "message": "Missing Temp"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\generate-questions\\test.ts",
+      "severity": "WARNING",
+      "id": "-939946227",
+      "type": "ai_governance",
+      "line": 93,
+      "message": "Missing Temp"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\parse-import-prompt\\index.ts",
+      "severity": "WARNING",
+      "id": "-1095329004",
+      "type": "ai_governance",
+      "line": 117,
+      "message": "Missing Temp"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\validate-content\\index.ts",
+      "severity": "WARNING",
+      "id": "1667085453",
+      "type": "ai_governance",
+      "line": 120,
+      "message": "Missing Temp"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\validate-content\\test.ts",
+      "severity": "WARNING",
+      "id": "-803640201",
+      "type": "ai_governance",
+      "line": 93,
+      "message": "Missing Temp"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\lib\\schema-sync.test.ts",
+      "severity": "WARNING",
+      "id": "1563926263",
+      "type": "dead_file",
+      "message": "Hollow Placeholder (1277 bytes)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\lib\\utils.test.ts",
+      "severity": "WARNING",
+      "id": "1341644463",
+      "type": "dead_file",
+      "message": "Hollow Placeholder (1135 bytes)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\vite-env.d.ts",
+      "severity": "WARNING",
+      "id": "1672886528",
+      "type": "dead_file",
+      "message": "Hollow Placeholder (1126 bytes)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\vitest.setup.ts",
+      "severity": "WARNING",
+      "id": "-916871065",
+      "type": "dead_file",
+      "message": "Hollow Placeholder (647 bytes)"
+    },
+    {
+      "status": "OPEN",
+      "file": "student-app\\lib\\src\\core\\theme\\generated\\app_borders.g.dart",
+      "severity": "WARNING",
+      "id": "1445775949",
+      "type": "dead_file",
+      "message": "Hollow Placeholder (1180 bytes)"
+    },
+    {
+      "status": "OPEN",
+      "file": "student-app\\lib\\src\\core\\theme\\generated\\generated.dart",
+      "severity": "WARNING",
+      "id": "-708141330",
+      "type": "dead_file",
+      "message": "Hollow Placeholder (265 bytes)"
+    },
+    {
+      "status": "OPEN",
+      "file": "student-app\\lib\\src\\core\\core_providers.dart",
+      "severity": "WARNING",
+      "id": "-1772355657",
+      "type": "dead_file",
+      "message": "Hollow Placeholder (1498 bytes)"
+    },
+    {
+      "status": "OPEN",
+      "file": "student-app\\lib\\src\\features\\auth\\controllers\\auth_controller.dart",
+      "severity": "WARNING",
+      "id": "1963512413",
+      "type": "dead_file",
+      "message": "Hollow Placeholder (1427 bytes)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx",
+      "severity": "WARNING",
+      "id": "-1518559922",
+      "type": "stability",
+      "line": 68,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx",
+      "severity": "WARNING",
+      "id": "-315775378",
+      "type": "stability",
+      "line": 103,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx",
+      "severity": "WARNING",
+      "id": "-932410919",
+      "type": "stability",
+      "line": 129,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx",
+      "severity": "WARNING",
+      "id": "309243803",
+      "type": "stability",
+      "line": 156,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx",
+      "severity": "WARNING",
+      "id": "-2095742653",
+      "type": "stability",
+      "line": 214,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx",
+      "severity": "WARNING",
+      "id": "576875479",
+      "type": "stability",
+      "line": 260,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx",
+      "severity": "WARNING",
+      "id": "-977404355",
+      "type": "stability",
+      "line": 275,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx",
+      "severity": "WARNING",
+      "id": "1236898604",
+      "type": "stability",
+      "line": 296,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\hooks\\use-ai-generator.test.tsx",
+      "severity": "WARNING",
+      "id": "538044028",
+      "type": "stability",
+      "line": 316,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\ui\\react-resilience.test.tsx",
+      "severity": "WARNING",
+      "id": "1979733512",
+      "type": "stability",
+      "line": 48,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\ai-assistant\\api\\generateQuestions.ts",
+      "severity": "WARNING",
+      "id": "371206346",
+      "type": "stability",
+      "line": 65,
+      "message": "Empty Catch"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\ai-assistant\\api\\validateContent.ts",
+      "severity": "WARNING",
+      "id": "1430722087",
+      "type": "stability",
+      "line": 69,
+      "message": "Empty Catch"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\regression.test.tsx",
+      "severity": "WARNING",
+      "id": "1905313742",
+      "type": "stability",
+      "line": 71,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\regression.test.tsx",
+      "severity": "WARNING",
+      "id": "682604007",
+      "type": "stability",
+      "line": 85,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\regression.test.tsx",
+      "severity": "WARNING",
+      "id": "453184404",
+      "type": "stability",
+      "line": 98,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx",
+      "severity": "WARNING",
+      "id": "210182331",
+      "type": "stability",
+      "line": 99,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx",
+      "severity": "WARNING",
+      "id": "618626852",
+      "type": "stability",
+      "line": 115,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx",
+      "severity": "WARNING",
+      "id": "-695870410",
+      "type": "stability",
+      "line": 125,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx",
+      "severity": "WARNING",
+      "id": "2093842234",
+      "type": "stability",
+      "line": 147,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx",
+      "severity": "WARNING",
+      "id": "-2133906413",
+      "type": "stability",
+      "line": 162,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-domains.test.tsx",
+      "severity": "WARNING",
+      "id": "897881208",
+      "type": "stability",
+      "line": 189,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx",
+      "severity": "WARNING",
+      "id": "1478816271",
+      "type": "stability",
+      "line": 67,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx",
+      "severity": "WARNING",
+      "id": "1169553347",
+      "type": "stability",
+      "line": 75,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx",
+      "severity": "WARNING",
+      "id": "1683066350",
+      "type": "stability",
+      "line": 84,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx",
+      "severity": "WARNING",
+      "id": "-200902669",
+      "type": "stability",
+      "line": 119,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-publish.test.tsx",
+      "severity": "WARNING",
+      "id": "2000640968",
+      "type": "stability",
+      "line": 138,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx",
+      "severity": "WARNING",
+      "id": "1309619658",
+      "type": "stability",
+      "line": 98,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx",
+      "severity": "WARNING",
+      "id": "-1577613923",
+      "type": "stability",
+      "line": 115,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx",
+      "severity": "WARNING",
+      "id": "282149353",
+      "type": "stability",
+      "line": 137,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx",
+      "severity": "WARNING",
+      "id": "-775539859",
+      "type": "stability",
+      "line": 170,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx",
+      "severity": "WARNING",
+      "id": "1738166598",
+      "type": "stability",
+      "line": 193,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx",
+      "severity": "WARNING",
+      "id": "55311417",
+      "type": "stability",
+      "line": 209,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx",
+      "severity": "WARNING",
+      "id": "-1085510949",
+      "type": "stability",
+      "line": 222,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx",
+      "severity": "WARNING",
+      "id": "-1638318224",
+      "type": "stability",
+      "line": 241,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx",
+      "severity": "WARNING",
+      "id": "1186112313",
+      "type": "stability",
+      "line": 279,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-questions.test.tsx",
+      "severity": "WARNING",
+      "id": "-1710215166",
+      "type": "stability",
+      "line": 346,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx",
+      "severity": "WARNING",
+      "id": "466070767",
+      "type": "stability",
+      "line": 106,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx",
+      "severity": "WARNING",
+      "id": "-1488194848",
+      "type": "stability",
+      "line": 120,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx",
+      "severity": "WARNING",
+      "id": "1207521049",
+      "type": "stability",
+      "line": 133,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx",
+      "severity": "WARNING",
+      "id": "-1470824168",
+      "type": "stability",
+      "line": 150,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx",
+      "severity": "WARNING",
+      "id": "-870625500",
+      "type": "stability",
+      "line": 171,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx",
+      "severity": "WARNING",
+      "id": "886341689",
+      "type": "stability",
+      "line": 191,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx",
+      "severity": "WARNING",
+      "id": "467107928",
+      "type": "stability",
+      "line": 219,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx",
+      "severity": "WARNING",
+      "id": "-1002481057",
+      "type": "stability",
+      "line": 264,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\hooks\\__tests__\\use-skills.test.tsx",
+      "severity": "WARNING",
+      "id": "553257517",
+      "type": "stability",
+      "line": 338,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\platform\\hooks\\__tests__\\use-apps.test.tsx",
+      "severity": "WARNING",
+      "id": "165158644",
+      "type": "stability",
+      "line": 62,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\platform\\hooks\\__tests__\\use-apps.test.tsx",
+      "severity": "WARNING",
+      "id": "1785852537",
+      "type": "stability",
+      "line": 81,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\platform\\hooks\\__tests__\\use-apps.test.tsx",
+      "severity": "WARNING",
+      "id": "1054409455",
+      "type": "stability",
+      "line": 113,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\generate-questions\\index.ts",
+      "severity": "WARNING",
+      "id": "262015651",
+      "type": "stability",
+      "line": 60,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\generate-questions\\index.ts",
+      "severity": "WARNING",
+      "id": "370606140",
+      "type": "stability",
+      "line": 112,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\generate-questions\\index.ts",
+      "severity": "WARNING",
+      "id": "1738886221",
+      "type": "stability",
+      "line": 153,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\generate-questions\\index.ts",
+      "severity": "WARNING",
+      "id": "124115806",
+      "type": "stability",
+      "line": 206,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\health-check\\index.ts",
+      "severity": "WARNING",
+      "id": "1721500053",
+      "type": "stability",
+      "line": 196,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\health-check\\index.ts",
+      "severity": "WARNING",
+      "id": "196387286",
+      "type": "stability",
+      "line": 278,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\parse-import-prompt\\index.ts",
+      "severity": "WARNING",
+      "id": "-1389249270",
+      "type": "stability",
+      "line": 126,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\validate-content\\index.ts",
+      "severity": "WARNING",
+      "id": "158170423",
+      "type": "stability",
+      "line": 56,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\validate-content\\index.ts",
+      "severity": "WARNING",
+      "id": "100615997",
+      "type": "stability",
+      "line": 102,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\validate-content\\index.ts",
+      "severity": "WARNING",
+      "id": "-1402669670",
+      "type": "stability",
+      "line": 136,
+      "message": "Type Hole"
+    },
+    {
+      "status": "OPEN",
+      "file": "student-app\\lib\\src\\core\\sync\\sync_service.dart — retryWithBackoff + manual retryCount found",
+      "severity": "CRITICAL",
+      "id": "316786138",
+      "type": "reliability",
+      "message": "REL-02 (Double-Retry Logic)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\00000000000001_baseline.sql:496",
+      "severity": "WARNING",
+      "id": "-2058542660",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260204000002_ironclad_rpcs.sql:61",
+      "severity": "WARNING",
+      "id": "2093005220",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260204000002_ironclad_rpcs.sql:101",
+      "severity": "WARNING",
+      "id": "691256895",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260204000002_ironclad_rpcs.sql:141",
+      "severity": "WARNING",
+      "id": "-417511788",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260204000003_trigger_update.sql:17",
+      "severity": "WARNING",
+      "id": "-1266163215",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260204000005_ai_content_generation.sql:139",
+      "severity": "WARNING",
+      "id": "-829994122",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260204000006_create_knowledge_index.sql:124",
+      "severity": "WARNING",
+      "id": "1740928221",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260204000007_ai_governance.sql:120",
+      "severity": "WARNING",
+      "id": "1907559427",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260204210135_security_and_known_issues.sql:89",
+      "severity": "WARNING",
+      "id": "24652163",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260204214407_error_tracking_system.sql:112",
+      "severity": "WARNING",
+      "id": "-169207415",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260204214407_error_tracking_system.sql:161",
+      "severity": "WARNING",
+      "id": "2103150148",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260205_operation_integrity.sql:124",
+      "severity": "WARNING",
+      "id": "-1671395321",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260205_operation_integrity.sql:181",
+      "severity": "WARNING",
+      "id": "629181561",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260205_operation_integrity.sql:199",
+      "severity": "WARNING",
+      "id": "1874610025",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260205_operation_integrity.sql:207",
+      "severity": "WARNING",
+      "id": "951626298",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260205_operation_integrity.sql:343",
+      "severity": "WARNING",
+      "id": "-709672223",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260205_operation_integrity.sql:456",
+      "severity": "WARNING",
+      "id": "-1487979499",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260205121000_maintenance_and_alerts.sql:10",
+      "severity": "WARNING",
+      "id": "-637748416",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260205123000_standardize_sync_schema.sql:28",
+      "severity": "WARNING",
+      "id": "-501526801",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260205123000_standardize_sync_schema.sql:138",
+      "severity": "WARNING",
+      "id": "-49545094",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260205124000_update_pull_changes.sql:11",
+      "severity": "WARNING",
+      "id": "1615100083",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260205193000_oracle_plus_helpers.sql:5",
+      "severity": "WARNING",
+      "id": "1057240891",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260206000001_harden_attempts_rls.sql:20",
+      "severity": "WARNING",
+      "id": "1609647576",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260206000002_harden_batch_submit_rpc.sql:81",
+      "severity": "WARNING",
+      "id": "-1574761226",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260206000002_harden_batch_submit_rpc.sql:143",
+      "severity": "WARNING",
+      "id": "-1326268890",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260206000003_implement_mastery_trigger.sql:148",
+      "severity": "WARNING",
+      "id": "1448326580",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260206000005_sync_tombstones.sql:17",
+      "severity": "WARNING",
+      "id": "-1807925729",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260210001106_fix_admin_rls_policies.sql:7",
+      "severity": "WARNING",
+      "id": "1507199059",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260210001106_fix_admin_rls_policies.sql:19",
+      "severity": "WARNING",
+      "id": "1172456839",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260210001200_bulk_import_rpc.sql:65",
+      "severity": "WARNING",
+      "id": "1479808666",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260210001500_bulk_import_hardening.sql:107",
+      "severity": "WARNING",
+      "id": "-2085084352",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\archive\\20260210001600_fix_and_restore_tenant_hardening.sql:118",
+      "severity": "WARNING",
+      "id": "-1487680776",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\00000000000000_schema_master.sql:74",
+      "severity": "WARNING",
+      "id": "-111703609",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\00000000000000_schema_master.sql:86",
+      "severity": "WARNING",
+      "id": "-1230431294",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260212_fix_publish_curriculum_rpc.sql:174",
+      "severity": "WARNING",
+      "id": "-990824786",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260213101531_reconcile_schema_gap.sql:60",
+      "severity": "WARNING",
+      "id": "-757251538",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260213101531_reconcile_schema_gap.sql:97",
+      "severity": "WARNING",
+      "id": "-57678816",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260213101531_reconcile_schema_gap.sql:121",
+      "severity": "WARNING",
+      "id": "2086447045",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260213101531_reconcile_schema_gap.sql:141",
+      "severity": "WARNING",
+      "id": "1753433031",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260213101531_reconcile_schema_gap.sql:154",
+      "severity": "WARNING",
+      "id": "-69630404",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260213101531_reconcile_schema_gap.sql:177",
+      "severity": "WARNING",
+      "id": "1795252424",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260213101531_reconcile_schema_gap.sql:240",
+      "severity": "WARNING",
+      "id": "1514662041",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260214120000_observability_and_maintenance.sql:79",
+      "severity": "WARNING",
+      "id": "1804197326",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260214120000_observability_and_maintenance.sql:122",
+      "severity": "WARNING",
+      "id": "-55973458",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260214120000_observability_and_maintenance.sql:166",
+      "severity": "WARNING",
+      "id": "1334902263",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260214120000_observability_and_maintenance.sql:183",
+      "severity": "WARNING",
+      "id": "1195762991",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\migrations\\20260216200000_automate_app_domains.sql:28",
+      "severity": "WARNING",
+      "id": "-1106308130",
+      "type": "reliability",
+      "message": "REL-03 / BUG-10 (SECURITY DEFINER missing SET search_path)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\components\\ErrorBoundary.tsx:50",
+      "severity": "WARNING",
+      "id": "1464147242",
+      "type": "reliability",
+      "message": "REL-08 / BUG-16 (Possible const-in-try scope leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\contexts\\AppContext.tsx:22",
+      "severity": "WARNING",
+      "id": "1335427053",
+      "type": "reliability",
+      "message": "REL-08 / BUG-16 (Possible const-in-try scope leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\contexts\\AppContext.tsx:132",
+      "severity": "WARNING",
+      "id": "-713121647",
+      "type": "reliability",
+      "message": "REL-08 / BUG-16 (Possible const-in-try scope leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\contexts\\AppContext.tsx:143",
+      "severity": "WARNING",
+      "id": "1712345235",
+      "type": "reliability",
+      "message": "REL-08 / BUG-16 (Possible const-in-try scope leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\components\\question-list.tsx:568",
+      "severity": "WARNING",
+      "id": "-1761411233",
+      "type": "reliability",
+      "message": "REL-08 / BUG-16 (Possible const-in-try scope leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\components\\question-list.tsx:581",
+      "severity": "WARNING",
+      "id": "181488344",
+      "type": "reliability",
+      "message": "REL-08 / BUG-16 (Possible const-in-try scope leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\components\\question-list.tsx:585",
+      "severity": "WARNING",
+      "id": "-1216395748",
+      "type": "reliability",
+      "message": "REL-08 / BUG-16 (Possible const-in-try scope leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\features\\curriculum\\pages\\publish-page.tsx:52",
+      "severity": "WARNING",
+      "id": "-471326858",
+      "type": "reliability",
+      "message": "REL-08 / BUG-16 (Possible const-in-try scope leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\hooks\\use-bulk-import.ts:9",
+      "severity": "WARNING",
+      "id": "-279472358",
+      "type": "reliability",
+      "message": "REL-08 / BUG-16 (Possible const-in-try scope leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\generate-questions\\index.ts:135",
+      "severity": "WARNING",
+      "id": "-1794687088",
+      "type": "reliability",
+      "message": "REL-08 / BUG-16 (Possible const-in-try scope leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "supabase\\functions\\validate-content\\index.ts:119",
+      "severity": "WARNING",
+      "id": "-1746829564",
+      "type": "reliability",
+      "message": "REL-08 / BUG-16 (Possible const-in-try scope leak)"
+    },
+    {
+      "status": "OPEN",
+      "file": "admin-panel\\src\\__tests__\\security\\bundle-safety.test.ts",
+      "severity": "WARNING",
+      "id": "1856207659",
+      "type": "reliability",
+      "message": "REL-09 / BUG-17 (Global regex .test() — possible lastIndex side effect)"
+    },
+    {
+      "status": "OPEN",
+      "file": "_performPull does not check deleted_at — deleted records may reappear after sync",
+      "severity": "WARNING",
+      "id": "1508141756",
+      "type": "reliability",
+      "message": "REL-11 / BUG-05 (Ghost Data)"
+    }
+  ]
 }

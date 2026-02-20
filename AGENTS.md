@@ -1,6 +1,14 @@
 # Agent Rules & Conventions
 
 > These rules apply to **all AI coding agents** working on Questerix, in any IDE.
+>
+> **Governance Model (2-file SSoT)**:
+>
+> - `AGENTS.md` (this file) — **Universal**: applies to Cursor, Claude, Copilot, Antigravity, and any other agent
+> - `GEMINI.md` (user memory) — **Antigravity-specific**: turbo permissions, ops_runner fallback, MCP stack, circuit breaker counts
+>
+> When the two files conflict, **`GEMINI.md` wins for Antigravity IDE** sessions.
+> When adding a new universal coding rule, add it here. When adding an Antigravity-specific permission, add it to `GEMINI.md`.
 
 ## Core Rules
 

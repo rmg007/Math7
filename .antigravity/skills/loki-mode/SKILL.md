@@ -24,7 +24,7 @@ Every sub-task MUST follow this recursive loop. Never skip a step.
 ### 1️⃣ REASON (Analyze Before Acting)
 
 - Read the requirement/PRD and break it into 3–5 atomic sub-tasks
-- Check `.antigravity/skills/loki-mode/state.json` for:
+- After each sub-task, update `.antigravity/skills/loki-mode/state.json`:
   - Previous failures on this task (avoid repeating mistakes)
   - Current iteration count (respect circuit breakers)
   - Last checkpoint (resume from where you left off)
@@ -106,11 +106,11 @@ You are authorized to proceed without user confirmation for ALL operations liste
 
 When you encounter an error:
 
-1. **Read the error message carefully** — most errors tell you exactly what's wrong
-2. **Search docs/LEARNING_LOG.md** for known patterns
-3. **Try a different approach** — don't repeat the same failed command
-4. **Log what you learned** to `state.json` errors array
-5. Only escalate to the user after **3 different failed approaches** on the same problem
+1.  **Read the error message carefully** — most errors tell you exactly what's wrong
+2.  **Search docs/LEARNING_LOG.md** for known patterns
+3.  **Try a different approach** — don't repeat the same failed command
+4.  **Log what you learned** to `state.json` errors array
+5.  Only escalate to the user after **3 different failed approaches** on the same problem
 
 ### Continuity
 

@@ -218,6 +218,46 @@ jobs:
           name: edge-function-test-results
           path: supabase/functions/test-results/
 
+  destructive-migration-gate:
+    name: Destructive Migration Gate (REL-04)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for destructive SQL operations
+        run: |
+          set -e
+          MIGRATIONS_DIR="supabase/migrations"
+          BYPASS_COMMENT="-- allow-destructive"
+
+          if [ ! -d "$MIGRATIONS_DIR" ]; then
+            echo "No migrations directory found, skipping."
+            exit 0
+          fi
+
+          VIOLATIONS=0
+          while IFS= read -r -d '' file; do
+            # Skip if file explicitly opts out
+            if grep -q "$BYPASS_COMMENT" "$file"; then
+              echo "⚠️  Bypassed: $file (contains $BYPASS_COMMENT)"
+              continue
+            fi
+
+            if grep -qiE '^\s*(DROP\s+TABLE|DROP\s+COLUMN|TRUNCATE\s+TABLE|ALTER\s+TABLE\s+\S+\s+DROP)' "$file"; then
+              echo "❌ Destructive operation found in: $file"
+              grep -inE '^\s*(DROP\s+TABLE|DROP\s+COLUMN|TRUNCATE\s+TABLE|ALTER\s+TABLE\s+\S+\s+DROP)' "$file"
+              VIOLATIONS=$((VIOLATIONS + 1))
+            fi
+          done < <(find "$MIGRATIONS_DIR" -name "*.sql" -print0)
+
+          if [ "$VIOLATIONS" -gt 0 ]; then
+            echo ""
+            echo "❌ $VIOLATIONS migration(s) contain destructive operations."
+            echo "   To override, add '-- allow-destructive' as the first line of the migration."
+            exit 1
+          fi
+
+          echo "✅ No unapproved destructive migrations found."
+
   supabase-regression-tests:
     name: Security Regression Tests
     runs-on: ubuntu-latest

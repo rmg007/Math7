@@ -11,15 +11,31 @@ description: Autonomous Developer Mode
 
 ---
 
+## Canonical Skill Location
+
+All Loki Mode resources are in **`.antigravity/skills/loki-mode/`** — this is the single source of truth.
+
+```
+.antigravity/skills/loki-mode/
+├── SKILL.md        ← Operational mandate (read first)
+├── config.json     ← Permissions, circuit breakers, deny list (v2.x)
+├── state.json      ← Persistent session state
+├── guardrails.md   ← Accumulated lessons from past failures
+└── logs/           ← RARV reasoning traces
+```
+
+---
+
 ## Activation
 
 When `/loki` is invoked:
 
-1. **Read the Skill**: `view_file .agent/skills/loki-mode/SKILL.md` — this is your operational mandate
-2. **Load Config**: `view_file .agent/skills/loki-mode/config.json` — your permissions and boundaries
-3. **Load or Init State**: Check `.agent/skills/loki-mode/state.json`
+1. **Read the Skill**: `view_file .antigravity/skills/loki-mode/SKILL.md` — this is your operational mandate
+2. **Load Config**: `view_file .antigravity/skills/loki-mode/config.json` — your permissions and boundaries
+3. **Load or Init State**: Check `.antigravity/skills/loki-mode/state.json`
    - If exists with active session → resume from last checkpoint
    - If idle → initialize fresh state with current mission
+4. **Scan Guardrails**: `view_file .antigravity/skills/loki-mode/guardrails.md` — muscle memory from past failures
 
 ## Workflow
 
@@ -27,7 +43,7 @@ When `/loki` is invoked:
 
 - Read the user's requirement (PRD, task description, or brief)
 - Break it into 3–12 atomic sub-tasks
-- Write the plan to `state.json`
+- Write the plan to `.antigravity/skills/loki-mode/state.json`
 
 ### Step 2: Execute RARV Loop (per sub-task)
 
@@ -56,8 +72,8 @@ Follow the `/process` lifecycle autonomously:
 
 ### Step 4: Finalize
 
-- Save final state to `state.json`
-- Write session summary to `logs/`
+- Save final state to `.antigravity/skills/loki-mode/state.json`
+- Write session summary to `.antigravity/skills/loki-mode/logs/`
 - Clean up `tasks.md` by deleting all completed items (`[x]` or `✅`)
 - Perform **Repository Hygiene**: Delete temp files (`test_output.txt`, `*.log`) and consolidate files
 - Commit and push all changes with `docs:` or `fix:` prefix
@@ -88,7 +104,7 @@ cd student-app && flutter analyze && flutter test
 
 ## State Persistence
 
-After every completed sub-task, update `.agent/skills/loki-mode/state.json`:
+After every completed sub-task, update `.antigravity/skills/loki-mode/state.json`:
 
 ```json
 {
@@ -114,7 +130,7 @@ After every completed sub-task, update `.agent/skills/loki-mode/state.json`:
 
 Check progress via:
 
-- `.agent/skills/loki-mode/state.json` — current progress
-- `.agent/skills/loki-mode/logs/` — RARV reasoning traces
+- `.antigravity/skills/loki-mode/state.json` — current progress
+- `.antigravity/skills/loki-mode/logs/` — RARV reasoning traces
 - `git log --oneline` — commit history shows work done
 - Cloud sync folder — view logs remotely

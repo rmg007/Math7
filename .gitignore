@@ -13,10 +13,6 @@ Thumbs.db
 node_modules/
 dist/
 build/
-.env
-.env.test
-.env.local
-.env.*.local
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -31,7 +27,6 @@ lighthouse-*.json
 .dart_tool/
 .packages
 .pub/
-build/
 ios/Flutter/App.framework
 ios/Flutter/Flutter.framework
 ios/Flutter/Generated.xcconfig
@@ -47,7 +42,9 @@ android/app/src/main/assets/
 android/app/src/main/res/
 pubspec.lock
 
-# Environment files
+# =============================================================================
+# ENVIRONMENT FILES
+# =============================================================================
 .env
 .env.local
 .env.test
@@ -58,11 +55,8 @@ pubspec.lock
 !*.env.example
 *.env.*
 !*.env.example
-
-# Temporary Scrub Scripts (Local only)
-scrub.ps1
-scrub.js
-replacements.txt
+admin-panel/.env.local
+admin-panel/.env.production.local
 
 # =============================================================================
 # DEPLOYMENT PIPELINE SECURITY
@@ -73,11 +67,8 @@ replacements.txt
 temp-secrets-*.json
 .mcp_config.json
 
-
 # Generated environment files (recreated each deploy)
 .flutter-defines.tmp
-admin-panel/.env.local
-admin-panel/.env.production.local
 
 # Deployment logs
 deploy-*.log
@@ -86,22 +77,19 @@ deploy-*.log
 admin-panel/dist/
 student-app/build/
 
+# =============================================================================
+# AGENT & IDE CONFIGURATIONS
+# =============================================================================
+.agent/
+!.agent/workflows/
+.windsurf/
 
-#Ignore vscode AI rules
-.github\instructions\codacy.instructions.md
+# Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
 
-dependency-report.html
-dependency-graph.dot
-architecture-graph.dot
-deps-output.txt
-
-# Session management (local only)
-docs/HANDOVER.md
-.session/
-logs/
-tasks.status.json
-
-# Test and Research artifacts
+# =============================================================================
+# TEST & ANALYSIS ARTIFACTS
+# =============================================================================
 arch_test_output.txt
 test-output.txt
 *.test-output.txt
@@ -112,21 +100,34 @@ dependency-graph.dot
 architecture-graph.dot
 deps-output.txt
 
-# Antigravity Knowledge (Synced from Supabase)
-.gemini/antigravity/knowledge/
-!.gemini/antigravity/knowledge/.keep
+# =============================================================================
+# TEMPORARY / DIAGNOSTIC FILES
+# =============================================================================
+# Temporary Scrub Scripts (Local only)
+scrub.ps1
+scrub.js
+replacements.txt
 
-# Agent & IDE Configurations
-.agent/
-!.agent/workflows/
-.windsurf/
+# Session management (local only)
+docs/HANDOVER.md
+.session/
+logs/
 
+# TypeScript error dumps
+tsc_errors*.txt
 
-# Tool binaries (install via package manager, never commit)
-tools/bin/
+# One-off audit/debug files
+git_status.txt
+*.tmp
 
 # CI Failure Audit (local forensic data)
 _gh_failures/
+
+# =============================================================================
+# TOOLING
+# =============================================================================
+# Tool binaries (install via package manager, never commit)
+tools/bin/
 
 # Python tool caches
 .pytest_cache/
@@ -137,12 +138,13 @@ __pycache__/
 # Wrangler deployment temp
 .wrangler/
 
-# Dead projects (DO NOT PUBLISH)
+# =============================================================================
+# DEAD PROJECTS (DO NOT PUBLISH)
+# =============================================================================
 landing-pages/
 
-# TypeScript error dumps
-tsc_errors*.txt
-
-# One-off audit/debug files
-git_status.txt
-*.tmp
+# =============================================================================
+# ANTIGRAVITY KNOWLEDGE (Synced from Supabase)
+# =============================================================================
+.gemini/antigravity/knowledge/
+!.gemini/antigravity/knowledge/.keep

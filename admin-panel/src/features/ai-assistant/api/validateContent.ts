@@ -76,15 +76,23 @@ async function validateViaWorkers(request: ValidationRequest): Promise<Validatio
 }
 
 async function validateViaSupabase(request: ValidationRequest): Promise<ValidationResponse> {
-  const { data, error } = await supabase.functions.invoke<ValidationResponse>('validate-content', {
-    body: request,
-    headers: {
-      'x-timeout': '45000',
-    },
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 45_000);
 
-  if (error) throw error;
-  if (!data) throw new Error('No data returned from validation Edge Function');
+  try {
+    const { data, error } = await supabase.functions.invoke<ValidationResponse>(
+      'validate-content',
+      {
+        body: request,
+        headers: { 'x-timeout': '45000' },
+        signal: controller.signal,
+      }
+    );
 
-  return data;
+    if (error) throw error;
+    if (!data) throw new Error('No data returned from validation Edge Function');
+    return data;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }

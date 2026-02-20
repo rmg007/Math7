@@ -74,15 +74,20 @@ async function generateViaWorkers(
 async function generateViaSupabase(
   request: GenerateQuestionsRequest
 ): Promise<GenerateQuestionsResponse> {
-  const { data, error } = await supabase.functions.invoke('generate-questions', {
-    body: request,
-    headers: {
-      'x-timeout': '45000', // Hint for some gateways
-    },
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 45_000);
 
-  if (error) throw error;
-  if (!data) throw new Error('No data returned from Edge Function');
+  try {
+    const { data, error } = await supabase.functions.invoke('generate-questions', {
+      body: request,
+      headers: { 'x-timeout': '45000' },
+      signal: controller.signal,
+    });
 
-  return data as GenerateQuestionsResponse;
+    if (error) throw error;
+    if (!data) throw new Error('No data returned from Edge Function');
+    return data as GenerateQuestionsResponse;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }

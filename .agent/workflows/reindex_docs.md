@@ -13,9 +13,10 @@ description: Reindex all project documentation into Supabase Project Oracle
 1. **Environment Variables** (set these first):
 
 ```powershell
-$env:OPENAI_API_KEY = "sk-proj-..."
-$env:SUPABASE_URL = "https://qvslbiceoonrgjxzkotb.supabase.co"
-$env:SUPABASE_SERVICE_ROLE_KEY = "eyJ..."
+# Set from your .secrets file or Windows Credential Store — never hardcode here
+$env:OPENAI_API_KEY = "sk-proj-..."       # Get from: https://platform.openai.com/api-keys
+$env:SUPABASE_URL = "..."                 # Get from: .secrets or Supabase Dashboard → Settings → API
+$env:SUPABASE_SERVICE_ROLE_KEY = "..."    # Get from: .secrets or Supabase Dashboard → Settings → API
 ```
 
 2. **Python Dependencies**:
