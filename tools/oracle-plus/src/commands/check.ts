@@ -51,18 +51,40 @@ export async function checkCommand(options: CheckOptions) {
     for (const spec of specs) {
       spinner.text = `Checking: ${spec.entity_name}...`;
 
-      // Call Edge Function for drift analysis
-      const { data, error } = await supabase.functions.invoke('analyze-spec-drift', {
-        body: { specId: spec.id, scope: 'all' }
-      });
-
-      if (error) {
-        results.push({
-          spec: spec.entity_name,
-          status: 'error',
-          error: error.message
+      // Call Workers AI for drift analysis (falls back to Supabase Edge Function)
+      let data: any;
+      const workersUrl = process.env.WORKERS_URL;
+      if (workersUrl) {
+        const token = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        const response = await fetch(`${workersUrl}/ai/analyze-spec-drift`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            spec: JSON.stringify(spec),
+            implementation: `specId: ${spec.id}, scope: all`,
+          }),
+          signal: AbortSignal.timeout(60_000),
         });
-        continue;
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          results.push({ spec: spec.entity_name, status: 'error', error: (body as any).error || `Workers error: ${response.status}` });
+          continue;
+        }
+        const workerResult = (await response.json()) as any;
+        data = workerResult.drift_report;
+      } else {
+        // Fallback: Supabase Edge Function (Gemini)
+        const { data: edgeData, error } = await supabase.functions.invoke('analyze-spec-drift', {
+          body: { specId: spec.id, scope: 'all' }
+        });
+        if (error) {
+          results.push({ spec: spec.entity_name, status: 'error', error: error.message });
+          continue;
+        }
+        data = edgeData;
       }
 
       results.push({

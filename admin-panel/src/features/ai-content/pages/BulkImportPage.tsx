@@ -9,11 +9,11 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -21,6 +21,35 @@ import { Textarea } from '@/components/ui/textarea';
 import { useSkills } from '@/features/curriculum/hooks/use-skills';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+
+const WORKERS_URL = import.meta.env.VITE_WORKERS_URL;
+
+async function parseImportPrompt(prompt: string, skillId: string): Promise<{ questions: unknown[] }> {
+  if (WORKERS_URL) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Not authenticated');
+    const response = await fetch(`${WORKERS_URL}/ai/parse-import-prompt`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ prompt, skillId }),
+      signal: AbortSignal.timeout(45_000),
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error((body as { error?: string }).error || `Workers AI error: ${response.status}`);
+    }
+    return response.json() as Promise<{ questions: unknown[] }>;
+  }
+  // Fallback: Supabase Edge Function (Gemini)
+  const { data, error } = await supabase.functions.invoke('parse-import-prompt', {
+    body: { prompt, skillId },
+  });
+  if (error) throw error;
+  return data as { questions: unknown[] };
+}
 
 export default function BulkImportPage() {
   const {
@@ -50,21 +79,10 @@ export default function BulkImportPage() {
 
     setIsAiParsing(true);
     try {
-      const { data, error } = await supabase.functions.invoke('parse-import-prompt', {
-        body: { prompt: importPrompt, skillId: selectedSkillId },
-      });
-
-      if (error) {
-        toast({
-          title: 'Import failed',
-          description: error.message,
-          variant: 'destructive',
-        });
-        return;
-      }
+      const data = await parseImportPrompt(importPrompt, selectedSkillId);
 
       if (data?.questions) {
-        setImportQueue((prev) => [...prev, ...data.questions]);
+        setImportQueue((prev) => [...prev, ...(data.questions as typeof prev)]);
         setImportPrompt('');
         toast({
           title: 'AI Sync Successful',
@@ -73,7 +91,7 @@ export default function BulkImportPage() {
       }
     } catch (err: unknown) {
       toast({
-        title: 'Unexpected Error',
+        title: 'Import failed',
         description: err instanceof Error ? err.message : 'An error occurred',
         variant: 'destructive',
       });

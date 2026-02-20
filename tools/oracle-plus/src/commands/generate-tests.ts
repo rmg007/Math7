@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import chalk from 'chalk';
-import ora from 'ora';
 import fs from 'fs/promises';
+import ora from 'ora';
 
 interface GenerateTestsOptions {
   specId: string;
@@ -19,16 +19,46 @@ export async function generateTestsCommand(options: GenerateTestsOptions) {
       process.env.SUPABASE_ANON_KEY!
     );
 
-    // Call Edge Function to generate tests
-    const { data, error } = await supabase.functions.invoke('generate-test-from-spec', {
-      body: {
-        specId: options.specId,
-        testType: options.type,
-        framework: options.framework
+    // Call Workers AI for test generation (falls back to Supabase Edge Function)
+    let data: any;
+    const workersUrl = process.env.WORKERS_URL;
+    if (workersUrl) {
+      const token = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      const response = await fetch(`${workersUrl}/ai/analyze-spec-drift`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          spec: `specId: ${options.specId}, framework: ${options.framework}, type: ${options.type}`,
+          implementation: `Generate ${options.type} tests using ${options.framework} for spec ${options.specId}`,
+          context: `Output ONLY runnable ${options.framework} test code with no explanations.`,
+        }),
+        signal: AbortSignal.timeout(60_000),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error((body as any).error || `Workers error: ${response.status}`);
       }
-    });
-
-    if (error) throw error;
+      const workerResult = (await response.json()) as any;
+      // Map drift_report.recommended_tests to testCode format
+      data = {
+        testCode: workerResult.drift_report?.recommended_tests?.join('\n\n') ?? '// No test suggestions generated',
+        fileName: `${options.specId}.${options.framework}.test.ts`,
+      };
+    } else {
+      // Fallback: Supabase Edge Function (Gemini)
+      const { data: edgeData, error } = await supabase.functions.invoke('generate-test-from-spec', {
+        body: {
+          specId: options.specId,
+          testType: options.type,
+          framework: options.framework
+        }
+      });
+      if (error) throw error;
+      data = edgeData;
+    }
 
     spinner.succeed('Test generated successfully');
 
@@ -45,7 +75,7 @@ export async function generateTestsCommand(options: GenerateTestsOptions) {
 
   } catch (error) {
     spinner.fail('Test generation failed');
-    console.error(chalk.red('Error:'), error.message);
+    console.error(chalk.red('Error:'), error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
 }
