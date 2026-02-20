@@ -23,6 +23,9 @@ yarn-error.log*
 playwright-report/
 test-results/
 coverage/
+__checks__/
+tests/__screenshots__/
+lighthouse-*.json
 
 # Flutter (Student App)
 .dart_tool/
@@ -52,7 +55,9 @@ pubspec.lock
 .env.development.local
 .env.production.local
 *.env
+!*.env.example
 *.env.*
+!*.env.example
 
 # Temporary Scrub Scripts (Local only)
 scrub.ps1
@@ -113,6 +118,7 @@ deps-output.txt
 
 # Agent & IDE Configurations
 .agent/
+!.agent/workflows/
 .windsurf/
 
 

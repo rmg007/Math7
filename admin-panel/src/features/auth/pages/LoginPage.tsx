@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/lib/supabase';
 import { SecurityLogger } from '@/services/SecurityLogger';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Eye, EyeOff, Loader2, Rocket } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2, Eye, EyeOff, Loader2, Rocket } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -38,6 +38,10 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [isRegister, setIsRegister] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -105,6 +109,24 @@ export function LoginPage() {
       await SecurityLogger.logLogin(authData.user.id);
 
       navigate('/');
+    }
+  };
+
+  const onForgotPassword = async () => {
+    if (!resetEmail.trim()) {
+      setError('Please enter your email address');
+      return;
+    }
+    setError(null);
+    setIsResetting(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
+      redirectTo: `${window.location.origin}/login`,
+    });
+    setIsResetting(false);
+    if (error) {
+      setError(error.message);
+    } else {
+      setResetEmailSent(true);
     }
   };
 
@@ -200,13 +222,84 @@ export function LoginPage() {
 
         <Card className="border-border/40 shadow-none sm:shadow-xl overflow-hidden">
           <CardHeader>
-            <CardTitle>{isRegister ? 'Create Account' : 'Welcome Back'}</CardTitle>
+            <CardTitle>
+              {isForgotPassword ? 'Reset Password' : isRegister ? 'Create Account' : 'Welcome Back'}
+            </CardTitle>
             <CardDescription>
-              {isRegister ? 'Enter your details to get started' : ''}
+              {isForgotPassword
+                ? 'Enter your email and we\'ll send you a reset link'
+                : isRegister
+                  ? 'Enter your details to get started'
+                  : ''}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isRegister ? (
+            {isForgotPassword ? (
+              <div className="space-y-4">
+                {resetEmailSent ? (
+                  <div className="text-center space-y-3">
+                    <div className="mx-auto w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                      <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Check your email for a password reset link. If you don&apos;t see it, check your spam folder.
+                    </p>
+                    <Button
+                      variant="link"
+                      onClick={() => {
+                        setIsForgotPassword(false);
+                        setResetEmailSent(false);
+                        setResetEmail('');
+                        setError(null);
+                      }}
+                      className="text-muted-foreground"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-1" />
+                      Back to Sign In
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email">Email</Label>
+                      <Input
+                        id="reset-email"
+                        type="email"
+                        placeholder="name@example.com"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && onForgotPassword()}
+                      />
+                    </div>
+                    {error && (
+                      <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4" />
+                        {error}
+                      </div>
+                    )}
+                    <Button
+                      className="w-full"
+                      onClick={onForgotPassword}
+                      disabled={isResetting}
+                    >
+                      {isResetting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Send Reset Link
+                    </Button>
+                    <Button
+                      variant="link"
+                      onClick={() => {
+                        setIsForgotPassword(false);
+                        setError(null);
+                      }}
+                      className="w-full text-muted-foreground"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-1" />
+                      Back to Sign In
+                    </Button>
+                  </>
+                )}
+              </div>
+            ) : isRegister ? (
               <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name</Label>
@@ -359,18 +452,31 @@ export function LoginPage() {
                   </div>
                 )}
 
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="remember-me"
-                    checked={rememberMe}
-                    onCheckedChange={(checked) => setRememberMe(checked === true)}
-                  />
-                  <Label
-                    htmlFor="remember-me"
-                    className="text-sm font-normal text-muted-foreground cursor-pointer"
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="remember-me"
+                      checked={rememberMe}
+                      onCheckedChange={(checked) => setRememberMe(checked === true)}
+                    />
+                    <Label
+                      htmlFor="remember-me"
+                      className="text-sm font-normal text-muted-foreground cursor-pointer"
+                    >
+                      Remember me
+                    </Label>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-sm text-muted-foreground px-0 h-auto"
+                    onClick={() => {
+                      setIsForgotPassword(true);
+                      setError(null);
+                    }}
                   >
-                    Remember me
-                  </Label>
+                    Forgot password?
+                  </Button>
                 </div>
 
                 <Button
@@ -387,16 +493,18 @@ export function LoginPage() {
             )}
           </CardContent>
           <CardFooter className="flex justify-center">
-            <Button
-              variant="link"
-              onClick={() => {
-                setIsRegister(!isRegister);
-                setError(null);
-              }}
-              className="text-muted-foreground"
-            >
-              {isRegister ? 'Already have an account? Sign in' : "Don't have an account? Register"}
-            </Button>
+            {!isForgotPassword && (
+              <Button
+                variant="link"
+                onClick={() => {
+                  setIsRegister(!isRegister);
+                  setError(null);
+                }}
+                className="text-muted-foreground"
+              >
+                {isRegister ? 'Already have an account? Sign in' : "Don't have an account? Register"}
+              </Button>
+            )}
           </CardFooter>
         </Card>
       </div>

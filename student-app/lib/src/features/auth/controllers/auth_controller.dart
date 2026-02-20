@@ -29,6 +29,12 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
           fullName: fullName,
         ));
   }
+
+  Future<void> resetPassword({required String email}) async {
+    state = const AsyncLoading();
+    state =
+        await AsyncValue.guard(() => _authService.resetPasswordForEmail(email));
+  }
 }
 
 final authControllerProvider =

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:student_app/src/core/theme/app_theme.dart';
 import 'package:student_app/src/features/auth/controllers/auth_controller.dart';
+import 'package:student_app/src/features/auth/screens/forgot_password_screen.dart';
 import 'package:student_app/src/features/auth/screens/onboarding_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -197,7 +198,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ForgotPasswordScreen(),
+                                  ),
+                                );
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.primary,
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 32),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text(
+                                'Forgot password?',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
                           if (authState.hasError)
                             Container(
                               padding: const EdgeInsets.all(12),

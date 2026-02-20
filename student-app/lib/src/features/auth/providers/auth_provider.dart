@@ -1,9 +1,11 @@
 import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:questerix_domain/questerix_domain.dart' as model;
 import 'package:student_app/src/core/core_providers.dart';
 import 'package:student_app/src/core/services/security_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+
 import '../repositories/supabase_auth_repository.dart';
 
 // --- SERVICE & REPOSITORY PROVIDERS ---
@@ -67,6 +69,24 @@ class AuthService {
     } catch (e) {
       await _securityService.log(
         eventType: 'failed_register',
+        severity: 'low',
+        metadata: {'email': email, 'reason': e.toString()},
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> resetPasswordForEmail(String email) async {
+    try {
+      await _client.auth.resetPasswordForEmail(email);
+      await _securityService.log(
+        eventType: 'password_reset_requested',
+        severity: 'info',
+        metadata: {'email': email},
+      );
+    } catch (e) {
+      await _securityService.log(
+        eventType: 'password_reset_failed',
         severity: 'low',
         metadata: {'email': email, 'reason': e.toString()},
       );
