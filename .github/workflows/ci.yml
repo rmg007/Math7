@@ -264,29 +264,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
-      - name: Start Supabase
-        run: |
-          cd supabase
-          supabase start
-
       - name: Run Regression Tests
         run: |
           cd supabase
           chmod +x tests/run_all.sh
           ./tests/run_all.sh
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:54322/postgres
-
-      - name: Stop Supabase
-        if: always()
-        run: |
-          cd supabase
-          supabase stop
+          DATABASE_URL: postgresql://postgres.${{ secrets.TEST_SUPABASE_PROJECT_ID }}:${{ secrets.TEST_DB_PASSWORD }}@aws-0-us-west-1.pooler.supabase.com:6543/postgres
 
   oracle-plus-validation:
     name: Spec Drift Detection
@@ -310,8 +294,6 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           oracle-plus check --all --format github > drift-report.md
 

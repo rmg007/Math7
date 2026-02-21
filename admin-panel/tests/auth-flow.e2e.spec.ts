@@ -5,7 +5,7 @@ import { TEST_USERS, login } from './test-utils';
 const supabaseUrl = process.env.VITE_SUPABASE_URL ?? '';
 
 // Load environment variables if not already present
-if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+if (!process.env.TEST_SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
   try {
     const dotenv = await import('dotenv');
     dotenv.config({ path: '.env.test.local' });

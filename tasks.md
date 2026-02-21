@@ -1,86 +1,113 @@
 # Questerix — Tasks
 
-## 🔍 Phase 6: Post-Cursor Integration & Remaining Work
-
-### Cursor Review Summary
-
-**Feature 1: SubjectsPage Redesign** — ✅ Accepted (design stable)
-Minor deviations from spec noted in review. User accepted current state.
-
-**Feature 2: Student App Auth Refactor** — ✅ Complete
-AuthController with AsyncValue, login trap fix, themed error/loading splash, regression tests.
+> **Documentation discipline**: After every session, append a dated entry to [`docs/LEARNING_LOG.md`](docs/LEARNING_LOG.md) covering: what was done, bugs found, root cause, fix, and a prevention rule. This is non-negotiable.
+>
+> **Env var convention**: All test-DB variables are prefixed `TEST_` (e.g. `TEST_VITE_SUPABASE_URL`, `TEST_SUPABASE_SERVICE_ROLE_KEY`). Prod variables have no prefix. Never mix them.
 
 ---
 
-## ✅ Phase 7: Cloudflare Workers AI & Email — DONE
+## ✅ Secret Gaps (audit: 2026-02-21) — all closed
 
-### Workers AI — Question Generation
-
-- [x] **Model Routing**: DeepSeek R1 (`@cf/deepseek-ai/deepseek-r1-distill-qwen-32b`) for math, Llama 3.1 8B (`@cf/meta/llama-3.1-8b-instruct`) for all other subjects
-- [x] **generate-questions** handler with auth, rate limiting, tenant token tracking
-- [x] **validate-content** handler — always uses DeepSeek R1 for chain-of-thought reasoning
-- [x] Shared auth (Supabase JWT via REST API), rate limiter, HTTP helpers
-
-### Email Workers — Alert Notifications
-
-- [x] **send-alert** handler using `cloudflare:email` + `mimetext`
-- [x] Rich HTML email templates for critical alerts
-- [x] Webhook secret authentication
-- [x] Graceful degradation (logs if email not configured)
-
-### Infrastructure
-
-- [x] `workers/` project: wrangler.toml (AI + email bindings), package.json, tsconfig.json
-- [x] Health check endpoint (`GET /health`)
-- [x] TypeScript compiles with zero errors
-
-### Before Deploying
-
-- [x] run best workflow to help us confirm that the app is okay and production ready.
-- [ ] Enable Email Routing on domain in Cloudflare Dashboard ⚠️ _Manual step — requires Cloudflare Dashboard click_
-- [x] Set secrets: ✅ all 4 set (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ALERT_WEBHOOK_SECRET`, `ADMIN_ALERT_EMAIL`)
-- [x] Deploy: `cd workers && npx wrangler deploy` → https://questerix-workers.mhalim80.workers.dev
-- [x] Update admin panel env with Workers URL
-- [ ] Test AI endpoint with sample curriculum text ⚠️ _Manual smoke test_
-- [ ] Test email alert delivery ⚠️ _Requires Email Routing enabled first_
+- [x] `TEST_SUPABASE_SERVICE_ROLE_KEY` — set in GitHub + `admin-panel/.env.local`
+- [x] `LHCI_GITHUB_APP_TOKEN` — set
+- [x] `GITLEAKS_LICENSE` — community mode confirmed sufficient
+- [x] Stale `STAGING_*` secrets — deleted
 
 ---
 
-## ✅ Phase 8: Security Hardening Audit Triage — DONE
+## 🏗️ Phase 9: QA Foundation
 
-### Findings from HARDENING_BACKLOG.json — Fully Triaged
+> **Locked decisions**: E2E runs against `QuesterixDB-test` · serialized via `concurrency:` · 3-layer POM abstraction · `TEST_COVERAGE.md` auto-generated on merge to main
+>
+> Steps 1–2 complete. Next active: Step 3.
 
-| Finding                                                      | Status                              | Resolution                                                                                                                                  |
-| ------------------------------------------------------------ | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| REL-03: `SECURITY DEFINER` missing `SET search_path`         | ✅ False positive — already fixed   | `20260219100000` applies `ALTER FUNCTION` to all; `20260220213000` covers remainder; `20260219` DO block catches any stragglers dynamically |
-| VUL-003: Service Role Leak in edge functions                 | ✅ False positive                   | All hits are `Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')` — correct server-side usage. No key hardcoded.                                     |
-| REL-02: Double-retry in `sync_service.dart`                  | ✅ False positive — already cleaned | grep for `retryWithBackoff`, `retryCount`, `maxRetries` = 0 results                                                                         |
-| `schema-sync.test.ts` hollow                                 | ✅ False positive                   | Has 3 real integration tests                                                                                                                |
-| `utils.test.ts` hollow                                       | ✅ False positive                   | Has 2 real tests                                                                                                                            |
-| Empty catch in `generateQuestions.ts` / `validateContent.ts` | ✅ Intentional                      | `response.json().catch(() => ({}))` = safe fallback on error body parse failure                                                             |
+### Step 3: CI Cleanup ✅
 
-### Real Bug Fixed
+- [ ] `docs/quality/TEST_DECISIONS.md` — ADR log (TDR-001..005)
+- [ ] `docs/quality/TEST_OWNERS.md` — spec file → component + persona map
+- [x] `admin-panel-e2e.yml` `deploy-preview` — stub only; acceptable as-is (echoes, doesn't fail)
+- [x] `ci.yml` `oracle-plus-validation` — removed `GEMINI_API_KEY` + `OPENAI_API_KEY` refs ✅
+- [x] `ci.yml` `supabase-regression-tests` — replaced `supabase start` (Docker) with remote `TEST_SUPABASE_PROJECT_ID`/`TEST_DB_PASSWORD` connection ✅
 
-- [x] **`main.dart` outer catch drops stack trace** — Fixed: `catch (e)` → `catch (e, stack)` + `debugPrintStack()` (commit: `fix(dart): capture stack in outer main() catch block`)
+### Step 4: Shared Test Infrastructure
+
+- [ ] `admin-panel/tests/fixtures/questions.ts` — 5 Zod-valid question fixtures
+- [ ] `student-app/test/fixtures/question_fixtures.dart` — Dart mirror
+- [ ] `admin-panel/src/__tests__/mocks/supabase-factory.ts` — shared mock factory; migrate 3+ inline mocks
+- [ ] `student-app/test/helpers/test_database_factory.dart` — `createEmptyDb()` + `createSeededDb()`
+
+### Step 5: Add `data-testid` Attributes
+
+- [ ] Sweep 9 pages (~30 attrs): DomainsPage, SkillsPage, QuestionsPage, GroupsPage, PublishPage, LoginPage, SettingsPage, BulkImportPage, AppsPage
+
+### Step 6: Build 3-Layer E2E Abstraction
+
+- [ ] `admin-panel/tests/pages/` — 6 POM classes (Login, Domains, Skills, Questions, Groups, Publish)
+- [ ] `admin-panel/tests/actions/` — `loginAs(role)`, `createDomain()`, `publishCurriculum()`, etc.
+- [ ] Migrate `curriculum-lifecycle.e2e.spec.ts` to POM + Actions (prove adoption)
+
+### Step 7: Fix & Migrate Broken E2E Suites
+
+> Do after Step 6. `curriculum-lifecycle.e2e.spec.ts` already passes ✅ (4/4).
+
+- [ ] `auth-flow.e2e.spec.ts`
+- [ ] `rbac-guards.e2e.spec.ts`
+- [ ] `mentor-hub.e2e.spec.ts`
+- [ ] `bulk-import.e2e.spec.ts`
+- [ ] `apps.e2e.spec.ts`
+- [ ] `admin-panel.e2e.spec.ts`
+- [ ] `rls-bypass.e2e.spec.ts`
+- [ ] `accessibility.spec.ts`, `a11y-audit.spec.ts`
+- [ ] `responsiveness.spec.ts`
+
+### Step 8: Complete `docs/TEST_PLAN.md`
+
+> Sections A–E exist. F, G, H missing.
+
+- [ ] Append Database Strategy (4-tier: Mocks → Local → Drift → Staging)
+- [ ] Append Section F — UAT Scenarios (4 roles × 3–5 journeys)
+- [ ] Append Section G — System Test Plan (SYS-001..005 + contract testing table)
+- [ ] Append Section H — CI Pipeline Matrix (8 triggers + gaps)
+- [ ] Backfill Test Phase + Infra Deps tags on all 65 existing test IDs
+
+### Step 9: `/test` Workflow
+
+- [ ] `.agent/workflows/test.md` — modes: `plan`, `infra`, `write`, `verify`, `commit`
+- [ ] `.cursor/commands/test.md` — thin stub
+
+### Step 10: QA Autoloop Workflow
+
+- [ ] `.agent/workflows/qa-autoloop.md` — Scan → Plan → Write → Run → Fix → Commit
+- [ ] Circuit breakers: 5 failures, 25 iterations max, bug fixes always pause for user
+
+### Step 11: QA Health Dashboard
+
+- [ ] `scripts/generate-test-report.js`
+- [ ] CI step: auto-write `docs/reports/TEST_COVERAGE.md` on merge to `main`
+
+### Step 12: Fix Doc Inconsistencies
+
+- [ ] `docs/quality/testing-strategy.md` — coverage targets, DB strategy, stale gaps
+- [ ] `.agent/TEST_WRITING_GUIDE.md` — Flutter patterns, `page.route()`, shared infra section
+- [ ] `docs/QA_MASTER_PROMPT.md` — 4-tier DB, accurate counts (18 specs, 32 Vitest, 28 Flutter)
+- [ ] `AGENTS.md` — reference `/test` workflow + `docs/TEST_INFRASTRUCTURE.md`
+
+### Step 13: Migration Safety Gate _(deferred until schema stable)_
+
+- [ ] `ci.yml`: migration changes → auto-trigger P0 E2E + SQL RLS tests
+- [ ] Document as known risk in `TEST_DECISIONS.md`
 
 ---
 
-### Code Hygiene (Backlog)
+## 📋 Backlog
 
-- [x] ~~Fix Dart warning: `main.dart` line 55 — unused catch stack variable~~ Fixed ✅
-- [ ] Enable Email Routing on domain in Cloudflare Dashboard (manual)
-- [ ] Test AI endpoint with sample curriculum text (manual)
-- [ ] Test email alert delivery (manual, after Email Routing enabled)
-- [ ] review codebase for any remaining TODOs, FIXMEs, and other comments
-- [ ] delete any unused files (there are plenty of them)
-
----
-
-## Postponed
-
-- [ ] P1: Visual Regression Suite (Playwright screenshot tests)
-- [ ] P3: Platform Settings
-- [ ] P3: Rollback Procedures
-- [ ] Mobile Card Layout for tables
-- [ ] Row Selection & Bulk Actions
-- [ ] Advanced Table Features
+- [ ] **Env var hygiene sweep** — audit all `.env*` files across the project; apply `TEST_` prefix consistently; remove stale vars; update `secrets.example.env` and `master-config.test.json`; document full inventory in `docs/ENV_VARS.md`
+- [ ] Code hygiene: find and fix `TODO` / `FIXME` comments
+- [ ] Delete unused/legacy files
+- [ ] P1: Visual Regression Suite (Playwright `toHaveScreenshot`)
+- [ ] P1: Cloudflare Workers Paid monitoring — alert if AI generation nears limits
+- [ ] P3: Platform Settings page
+- [ ] P3: Rollback procedures
+- [ ] Mobile card layout for data tables
+- [ ] Row selection & bulk actions
+- [ ] Advanced table features

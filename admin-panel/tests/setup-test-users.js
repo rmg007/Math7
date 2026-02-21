@@ -20,15 +20,16 @@ dotenv.config({ path: path.resolve(__dirname, '../.env.test.local') });
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl = process.env.TEST_VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseServiceKey = process.env.TEST_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ Missing required environment variables:');
-  console.error('   - VITE_SUPABASE_URL');
-  console.error('   - SUPABASE_SERVICE_ROLE_KEY');
-  console.error('\nPlease add SUPABASE_SERVICE_ROLE_KEY to your .env file');
-  console.error('You can find it in: Supabase Dashboard > Settings > API > service_role key');
+  console.error('   - TEST_VITE_SUPABASE_URL (or VITE_SUPABASE_URL)');
+  console.error('   - TEST_SUPABASE_SERVICE_ROLE_KEY');
+  console.error('\nPlease add to your .env.local file:');
+  console.error('  TEST_VITE_SUPABASE_URL=https://rfhzukdjbahdlakjupyg.supabase.co');
+  console.error('  TEST_SUPABASE_SERVICE_ROLE_KEY=<from QuesterixDB-test > Settings > API>');
   process.exit(1);
 }
 

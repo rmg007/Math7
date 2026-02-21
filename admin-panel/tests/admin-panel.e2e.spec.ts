@@ -48,6 +48,7 @@ test.describe('Admin Panel E2E Tests', () => {
 
     const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey =
+      process.env.TEST_SUPABASE_SERVICE_ROLE_KEY ||
       process.env.SUPABASE_SERVICE_ROLE_KEY ||
       process.env.VITE_SUPABASE_ANON_KEY ||
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -63,7 +64,7 @@ test.describe('Admin Panel E2E Tests', () => {
 
     // Authenticate as super_admin so RLS allows seed operations
     // (when using anon key without service_role, we need a real session)
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (!process.env.TEST_SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       const { error: authError } = await supabase.auth.signInWithPassword({
         email: TEST_USERS.SUPER_ADMIN.email,
         password: TEST_USERS.SUPER_ADMIN.password,
