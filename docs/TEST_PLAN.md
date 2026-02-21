@@ -1,8 +1,8 @@
 # Questerix — Comprehensive QA Test Plan
 
-**Version**: 1.0  
-**Date**: 2026-02-20  
-**Author**: Loki Mode (Senior QA / Test Lead persona)  
+**Version**: 1.1
+**Date**: 2026-02-21
+**Author**: Loki Mode (Senior QA / Test Lead persona)
 **Scope**: NEW coverage only — existing tests are not duplicated.
 
 ---
@@ -61,31 +61,32 @@
 
 ## B) TEST COVERAGE MAP
 
-| Feature/Module          | Roles                  | Key Workflows                                  | Risk     | Test Types                  | Existing                                | Gaps                                                     |
-| ----------------------- | ---------------------- | ---------------------------------------------- | -------- | --------------------------- | --------------------------------------- | -------------------------------------------------------- |
-| Auth: Login/Logout      | All                    | login, logout, remember-me, token refresh      | HIGH     | Unit, E2E                   | LoginPage.test (28), auth-flow.e2e (14) | **Token expiry auto-refresh; remember-me persistance**   |
-| Auth: Registration      | All                    | invitation code → signUp → consume             | HIGH     | Unit, E2E                   | LoginPage.test (28)                     | **Atomic consume race condition; code reuse prevention** |
-| Auth: Password Reset    | All                    | email → /auth/confirm → PKCE → set password    | HIGH     | Unit, E2E                   | AuthConfirmPage.test (46)               | **Full flow E2E with mocked email link**                 |
-| Route Guards            | All                    | direct URL access, role redirect               | CRITICAL | E2E                         | None                                    | **ALL guard routes untested E2E**                        |
-| Curriculum: Domains     | Admin, SA              | CRUD, slug uniqueness, sort order              | HIGH     | E2E                         | admin-panel.e2e (partial)               | **Duplicate slug rejection; sort reorder**               |
-| Curriculum: Skills      | Admin, SA              | CRUD, difficulty levels, domain link           | HIGH     | E2E                         | admin-panel.e2e (partial)               | **Skill-to-domain FK; all difficulty levels**            |
-| Curriculum: Questions   | Admin, SA              | CRUD × 5 types, points, status                 | CRITICAL | E2E, Unit                   | None specific                           | **All 5 question types (P0)**                            |
-| Publish + Versions      | Admin, SA              | publish_curriculum RPC, version bump, rollback | HIGH     | E2E, Integration            | None                                    | **Full publish flow + version history**                  |
-| AI Generation           | Admin, SA              | generate-questions edge fn, token tracking     | HIGH     | Unit (Workers), Integration | generate-questions.test (partial)       | **Token limit enforcement; model routing**               |
-| AI Governance           | SA only                | token limit config, governance settings        | MEDIUM   | E2E                         | None                                    | **Super-admin-only access; limit update**                |
-| Bulk Import             | Admin, SA              | CSV parse, validate, upsert                    | MEDIUM   | E2E                         | bulk-import.e2e (exists)                | **Malformed CSV; partial failure recovery**              |
-| Mentor Hub: Groups      | Admin, Mentor          | create class/family, join code, members        | HIGH     | E2E                         | None                                    | **Full CRUD group lifecycle (P0)**                       |
-| Mentor Hub: Assignments | Admin, Mentor, Student | create assignment × 3 types, due date, status  | HIGH     | E2E                         | None                                    | **Full lifecycle (P0)**                                  |
-| User Management         | SA only                | invite, role change, deactivate                | HIGH     | E2E                         | None                                    | **invite flow; role change reflects in JWT**             |
-| Invitation Codes        | SA only                | create, use, expire, revoke                    | HIGH     | E2E                         | rls-bypass (partial)                    | **Brute-force rate limiting; expiry**                    |
-| RLS Isolation           | All                    | cross-tenant access prevention                 | CRITICAL | E2E, SQL                    | rls-bypass (6 tests)                    | **All tables; super-admin bypass**                       |
-| Error Logs              | All                    | SecurityLogger → error_logs table              | MEDIUM   | Integration                 | SecurityLogger.test                     | **Error appears in known-issues UI**                     |
-| Student: Offline Sync   | Student                | offline practice → sync on reconnect           | CRITICAL | Flutter integration         | sync_service_test                       | **Conflict resolution; partial sync**                    |
-| Student: Practice       | Student                | 5 question types, scoring, streak              | HIGH     | Flutter widget              | practice_screen (partial)               | **All 5 types; wrong answer handling**                   |
-| Student: Mastery        | Student                | skill_progress update trigger                  | HIGH     | Flutter integration         | None                                    | **Mastery level transitions (P1)**                       |
-| Workers: Auth           | —                      | JWT validation, CORS                           | HIGH     | Unit                        | auth.test                               | **Expired JWT; tampered claims**                         |
-| Workers: Rate Limit     | —                      | per-IP, per-app-id limits                      | HIGH     | Unit                        | rate-limiter.test                       | **Burst; sliding window; bypass attempt**                |
-| Security Headers        | —                      | CSP, HSTS, X-Frame                             | MEDIUM   | E2E                         | security-stress (partial)               | **CORS preflight; CSP violation report**                 |
+| Feature/Module          | Roles                  | Key Workflows                                  | Risk     | Test Types                  | Existing                                      | Gaps                                                                                      |
+| ----------------------- | ---------------------- | ---------------------------------------------- | -------- | --------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Auth: Login/Logout      | All                    | login, logout, remember-me, token refresh      | HIGH     | Unit, E2E                   | LoginPage.test (28), auth-flow.e2e (14)       | **Token expiry auto-refresh; remember-me persistance**                                    |
+| Auth: Registration      | All                    | invitation code → signUp → consume             | HIGH     | Unit, E2E                   | LoginPage.test (28)                           | **Atomic consume race condition; code reuse prevention**                                  |
+| Auth: Password Reset    | All                    | email → /auth/confirm → PKCE → set password    | HIGH     | Unit, E2E                   | AuthConfirmPage.test (46)                     | **Full flow E2E with mocked email link**                                                  |
+| Route Guards            | All                    | direct URL access, role redirect               | CRITICAL | E2E                         | None                                          | **ALL guard routes untested E2E**                                                         |
+| Curriculum: Domains     | Admin, SA              | CRUD, slug uniqueness, sort order              | HIGH     | E2E                         | admin-panel.e2e (partial)                     | **Duplicate slug rejection; sort reorder**                                                |
+| Curriculum: Skills      | Admin, SA              | CRUD, difficulty levels, domain link           | HIGH     | E2E                         | admin-panel.e2e (partial)                     | **Skill-to-domain FK; all difficulty levels**                                             |
+| Curriculum: Questions   | Admin, SA              | CRUD × 5 types, points, status                 | CRITICAL | E2E, Unit                   | ~~None specific~~ ✅ use-questions-types.test | **E2E 5-type question CRUD flows**                                                        |
+| Publish + Versions      | Admin, SA              | publish_curriculum RPC, version bump, rollback | HIGH     | E2E, Integration            | None                                          | **Full publish flow + version history**                                                   |
+| AI Generation           | Admin, SA              | generate-questions edge fn, token tracking     | HIGH     | Unit (Workers), Integration | generate-questions.test (partial)             | ~~Token limit enforcement; model routing~~ ✅ (generate-questions.security.test)          |
+| AI Validate             | Admin, SA              | validate-content worker, rate limit, JWT       | HIGH     | Unit (Workers)              | validate-content.test (partial)               | ~~Empty array 400; AI.run try/catch; security tests~~ ✅ (validate-content.security.test) |
+| AI Governance           | SA only                | token limit config, governance settings        | MEDIUM   | E2E                         | None                                          | **Super-admin-only access; limit update**                                                 |
+| Bulk Import             | Admin, SA              | CSV parse, validate, upsert                    | MEDIUM   | E2E                         | bulk-import.e2e (exists)                      | **Malformed CSV; partial failure recovery**                                               |
+| Mentor Hub: Groups      | Admin, Mentor          | create class/family, join code, members        | HIGH     | E2E                         | None                                          | **Full CRUD group lifecycle (P0)**                                                        |
+| Mentor Hub: Assignments | Admin, Mentor, Student | create assignment × 3 types, due date, status  | HIGH     | E2E                         | None                                          | **Full lifecycle (P0)**                                                                   |
+| User Management         | SA only                | invite, role change, deactivate                | HIGH     | E2E                         | None                                          | **invite flow; role change reflects in JWT**                                              |
+| Invitation Codes        | SA only                | create, use, expire, revoke                    | HIGH     | E2E                         | rls-bypass (partial)                          | **Brute-force rate limiting; expiry**                                                     |
+| RLS Isolation           | All                    | cross-tenant access prevention                 | CRITICAL | E2E, SQL                    | rls-bypass (6 tests)                          | **All tables; super-admin bypass**                                                        |
+| Error Logs              | All                    | SecurityLogger → error_logs table              | MEDIUM   | Integration                 | SecurityLogger.test                           | **Error appears in known-issues UI**                                                      |
+| Student: Offline Sync   | Student                | offline practice → sync on reconnect           | CRITICAL | Flutter integration         | sync_service_test                             | **Conflict resolution; partial sync**                                                     |
+| Student: Practice       | Student                | 5 question types, scoring, streak              | HIGH     | Flutter widget              | practice_screen (partial)                     | **All 5 types; wrong answer handling**                                                    |
+| Student: Mastery        | Student                | skill_progress update trigger                  | HIGH     | Flutter integration         | None                                          | **Mastery level transitions (P1)**                                                        |
+| Workers: Auth           | —                      | JWT validation, CORS                           | HIGH     | Unit                        | auth.test                                     | **Expired JWT; tampered claims**                                                          |
+| Workers: Rate Limit     | —                      | per-IP, per-app-id limits                      | HIGH     | Unit                        | rate-limiter.test                             | **Burst; sliding window; bypass attempt**                                                 |
+| Security Headers        | —                      | CSP, HSTS, X-Frame                             | MEDIUM   | E2E                         | security-stress (partial)                     | **CORS preflight; CSP violation report**                                                  |
 
 ---
 
