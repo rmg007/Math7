@@ -6,27 +6,27 @@ import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Activity,
-  AlertCircle,
-  ArrowDownRight,
-  ArrowUpRight,
-  BookOpen,
-  BrainCircuit,
-  Database,
-  Layers,
+    Activity,
+    AlertCircle,
+    ArrowDownRight,
+    ArrowUpRight,
+    BookOpen,
+    BrainCircuit,
+    Database,
+    Layers,
 } from 'lucide-react';
 import React, { useState } from 'react';
 import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
+    Area,
+    AreaChart,
+    CartesianGrid,
+    Cell,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
 } from 'recharts';
 
 const COLORS = ['#6366f1', '#a855f7', '#ec4899', '#f43f5e'];
@@ -101,7 +101,9 @@ export function DashboardPage() {
     enabled: Boolean(currentApp),
   });
 
-  // TODO: Replace with real time-series data when import/error logging tracks daily counts
+  // STUB: activityData uses static placeholder values until error_logs exposes per-day bucketed counts.
+  // Track: add a `get_activity_summary(days INT)` RPC that returns {day, import_count, error_count}[]
+  // and wire it here. Phase backlog item — not a bug.
   const activityData = [
     { name: 'Mon', imports: 40, errors: 24 },
     { name: 'Tue', imports: 30, errors: 13 },
@@ -213,7 +215,7 @@ export function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Core Activity Chart — TODO: wire to real time-series data */}
+        {/* Core Activity Chart — uses stub data; see STUB comment above activityData */}
         <Card className="lg:col-span-2 border-white/40 shadow-xl shadow-indigo-500/5 bg-white/60 backdrop-blur-xl overflow-hidden group">
           <CardHeader className="flex flex-row items-center justify-between pb-8">
             <div>
@@ -337,9 +339,10 @@ export function DashboardPage() {
             <div className="grid grid-cols-2 gap-4 w-full mt-4">
               {aiUsageData.map((d, i) => (
                 <div key={d.name} className="flex items-center gap-2">
+                  {/* Inline style is required: backgroundColor is runtime-dynamic (COLORS[i]) and cannot be a static CSS class */}
                   <div
                     className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: COLORS[i % COLORS.length] }}
+                    style={{ backgroundColor: COLORS[i % COLORS.length] }} // required: dynamic color
                   />
                   <span className="text-2xs font-black uppercase text-gray-700 truncate">
                     {d.name}
