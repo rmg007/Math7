@@ -71,6 +71,14 @@ export function AuthConfirmPage() {
       // Our email template's safe format: #token_hash=...&type=...
       setTokenHash(tokenHashInFragment);
       setAuthType(typeInFragment);
+    } else if (tokenHashInFragment && !typeInFragment) {
+      // Defensive fallback: token_hash present but type missing.
+      // This can happen if the email client decoded &amp; back to & at the wrong
+      // stage and then truncated the URL at the raw &. Assume 'recovery' since
+      // that is the ONLY flow that uses this hash-fragment pattern in our template.
+      // Regression guard for the &amp; HTML entity bug fixed 2026-02-20.
+      setTokenHash(tokenHashInFragment);
+      setAuthType('recovery');
     } else if (tokenHashInParams && typeInParams) {
       // Supabase PKCE redirect after verify: ?token_hash=...&type=...
       setTokenHash(tokenHashInParams);
