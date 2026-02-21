@@ -52,10 +52,12 @@ void main() async {
         child: const QuesterixApp(),
       ),
     );
-  } catch (e) {
+  } catch (e, stack) {
     // Critical initialization failure (e.g. Env.validate() failed)
     // Prevent white screen of death with a fallback UI
     debugPrint('CRITICAL: App initialization failed: $e');
+    debugPrintStack(
+        stackTrace: stack, label: 'main.dart critical init failure');
     runApp(
       MaterialApp(
         debugShowCheckedModeBanner: false,
