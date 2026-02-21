@@ -2,79 +2,100 @@ import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Pagination } from '@/components/ui/pagination';
 import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/contexts/AppContext';
+import { useDebounce } from '@/hooks/use-debounce';
 import { useToast } from '@/hooks/use-toast';
+import { useUrlState } from '@/hooks/use-url-state';
 import { DataColumn } from '@/lib/data-utils';
 import { cn } from '@/lib/utils';
 import {
-  AlertTriangle,
-  ArrowUpRight,
-  Bug,
-  CheckCircle2,
-  CheckSquare,
-  Clock,
-  Copy,
-  Eye,
-  EyeOff,
-  Filter,
-  Globe,
-  Info,
-  Monitor,
-  RefreshCw,
-  Search,
-  Smartphone,
-  Square,
-  Trash2,
-  X,
+    AlertTriangle,
+    ArrowUpRight,
+    Bug,
+    CheckCircle2,
+    CheckSquare,
+    Clock,
+    Copy,
+    Eye,
+    EyeOff,
+    Filter,
+    Globe,
+    Info,
+    Monitor,
+    RefreshCw,
+    Search,
+    Smartphone,
+    Square,
+    Trash2,
+    X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  ErrorLog,
-  useBulkDeleteErrorLogs,
-  useBulkUpdateErrorStatus,
-  useDeleteErrorLog,
-  useErrorLogs,
-  useErrorLogStats,
-  usePromoteToIssue,
-  useUpdateErrorStatus,
+    ErrorLog,
+    useBulkDeleteErrorLogs,
+    useBulkUpdateErrorStatus,
+    useDeleteErrorLog,
+    useErrorLogs,
+    useErrorLogStats,
+    usePromoteToIssue,
+    useUpdateErrorStatus,
 } from '../hooks/use-error-logs';
 
 export function ErrorLogsPage() {
   const { toast } = useToast();
   const { currentApp, isSuperAdmin } = useApp();
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useUrlState('status', 'all');
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
+  const [pageStr, setPage] = useUrlState('page', '1');
+  const [pageSizeStr, setPageSize] = useUrlState('pageSize', '50');
+
+  const page = parseInt(pageStr, 10);
+  const pageSize = parseInt(pageSizeStr, 10);
+
   const [selectedError, setSelectedError] = useState<ErrorLog | null>(null);
   const [promoteDialogOpen, setPromoteDialogOpen] = useState(false);
   const [promoteData, setPromoteData] = useState({ title: '', rootCause: '', resolution: '' });
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const {
-    data: errors,
+    data: errorData,
     isLoading,
     refetch,
     isFetching,
-  } = useErrorLogs(statusFilter, isSuperAdmin ? undefined : currentApp?.app_id);
+  } = useErrorLogs({
+    status: statusFilter,
+    appId: isSuperAdmin ? undefined : currentApp?.app_id,
+    page,
+    pageSize,
+    search: debouncedSearch,
+  });
+
+  const errors = errorData?.data || [];
+  const totalCount = errorData?.count || 0;
+  const totalPages = Math.ceil(totalCount / pageSize);
+
   const { data: stats } = useErrorLogStats();
   const updateStatus = useUpdateErrorStatus();
   const deleteError = useDeleteErrorLog();
@@ -82,11 +103,10 @@ export function ErrorLogsPage() {
   const bulkUpdateStatus = useBulkUpdateErrorStatus();
   const bulkDeleteErrors = useBulkDeleteErrorLogs();
 
-  const filteredErrors = errors?.filter(
-    (error) =>
-      error.error_message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      error.error_type.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Reset page when filters change
+  useEffect(() => {
+    setPage('1');
+  }, [statusFilter, debouncedSearch, setPage]);
 
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
@@ -195,11 +215,11 @@ export function ErrorLogsPage() {
   ];
 
   const handleSelectAll = () => {
-    if (!filteredErrors) return;
-    if (selectedIds.size === filteredErrors.length) {
+    if (!errors) return;
+    if (selectedIds.size === errors.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(filteredErrors.map((e) => e.id)));
+      setSelectedIds(new Set(errors.map((e) => e.id)));
     }
   };
 
@@ -246,7 +266,7 @@ export function ErrorLogsPage() {
         actions={
           <div className="flex items-center gap-2">
             <DataToolbar
-              data={filteredErrors || []}
+              data={errors || []}
               columns={columns}
               entityName="Error Logs"
               importDisabled
@@ -255,6 +275,7 @@ export function ErrorLogsPage() {
               variant="outline"
               onClick={() => refetch()}
               disabled={isFetching}
+              title="Refresh error logs"
               className="h-9 px-3 rounded border-gray-200 text-gray-500 hover:text-teal-600 hover:border-teal-500 hover:bg-teal-50 text-xs font-semibold gap-1.5"
             >
               <RefreshCw className={cn('w-3.5 h-3.5', isFetching && 'animate-spin')} />
@@ -296,6 +317,7 @@ export function ErrorLogsPage() {
               variant="ghost"
               size="sm"
               onClick={() => handleBulkStatusUpdate('seen')}
+              title="Mark selected as seen"
               className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
               <Eye className="h-3 w-3" />
@@ -305,6 +327,7 @@ export function ErrorLogsPage() {
               variant="ghost"
               size="sm"
               onClick={() => handleBulkStatusUpdate('ignored')}
+              title="Ignore selected"
               className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
             >
               <EyeOff className="h-3 w-3" />
@@ -314,6 +337,7 @@ export function ErrorLogsPage() {
               variant="ghost"
               size="sm"
               onClick={() => handleBulkStatusUpdate('resolved')}
+              title="Resolve selected"
               className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-emerald-600 gap-1"
             >
               <CheckCircle2 className="h-3 w-3" />
@@ -323,6 +347,7 @@ export function ErrorLogsPage() {
               variant="ghost"
               size="sm"
               onClick={handleBulkDelete}
+              title="Delete selected"
               className="h-7 px-3 rounded text-xs text-red-300 hover:text-white hover:bg-red-600 gap-1"
             >
               <Trash2 className="h-3 w-3" />
@@ -333,6 +358,7 @@ export function ErrorLogsPage() {
               variant="ghost"
               size="sm"
               onClick={() => setSelectedIds(new Set())}
+              title="Clear selection"
               className="h-7 px-2 rounded text-xs text-teal-300 hover:text-white hover:bg-white/10"
             >
               <X className="h-3 w-3" />
@@ -383,7 +409,7 @@ export function ErrorLogsPage() {
           </div>
 
           <span className="text-[11px] text-gray-500 whitespace-nowrap">
-            {filteredErrors?.length || 0} {(filteredErrors?.length || 0) === 1 ? 'error' : 'errors'}
+            {totalCount} {totalCount === 1 ? 'error' : 'errors'}
           </span>
         </div>
 
@@ -396,12 +422,12 @@ export function ErrorLogsPage() {
                   className="text-gray-300 hover:text-gray-500"
                   title="Select all"
                   aria-label={
-                    selectedIds.size > 0 && selectedIds.size === filteredErrors?.length
+                    selectedIds.size > 0 && selectedIds.size === errors?.length
                       ? 'Deselect all'
                       : 'Select all'
                   }
                 >
-                  {selectedIds.size > 0 && selectedIds.size === filteredErrors?.length ? (
+                  {selectedIds.size > 0 && selectedIds.size === errors?.length ? (
                     <CheckSquare className="h-4 w-4 text-teal-600" />
                   ) : (
                     <Square className="h-4 w-4" />
@@ -445,9 +471,9 @@ export function ErrorLogsPage() {
                   </TableCell>
                 </TableRow>
               ))
-            ) : filteredErrors?.length === 0 ? (
+            ) : errors?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="py-20">
+                <TableCell colSpan={6} className="py-20">
                   <EmptyState
                     icon={CheckCircle2}
                     title={searchTerm ? 'No matches found' : 'No errors found'}
@@ -470,7 +496,7 @@ export function ErrorLogsPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredErrors?.map((error) => (
+              errors?.map((error) => (
                 <TableRow
                   key={error.id}
                   onClick={() => setSelectedError(error)}
@@ -565,6 +591,23 @@ export function ErrorLogsPage() {
             )}
           </TableBody>
         </Table>
+
+        {/* Pagination Footer */}
+        {totalCount > 0 && (
+          <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={pageSize}
+              onPageChange={(p) => setPage(String(p))}
+              onPageSizeChange={(s) => {
+                setPageSize(String(s));
+                setPage('1');
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Error Detail Dialog */}
@@ -612,6 +655,7 @@ export function ErrorLogsPage() {
                     {selectedError.user_id && (
                       <button
                         className="text-gray-400 hover:text-teal-600"
+                        title="Copy User ID"
                         onClick={() => copyToClipboard(selectedError.user_id ?? '')}
                       >
                         <Copy className="w-3 h-3" />
@@ -672,6 +716,7 @@ export function ErrorLogsPage() {
                     <span className="text-[11px] text-gray-400">Stack Trace</span>
                     <button
                       className="text-[11px] text-gray-400 hover:text-teal-600 flex items-center gap-1"
+                      title="Copy stack trace"
                       onClick={() => copyToClipboard(selectedError.stack_trace ?? '')}
                     >
                       <Copy className="w-3 h-3" /> Copy
@@ -693,6 +738,7 @@ export function ErrorLogsPage() {
                       </span>
                       <button
                         className="text-[11px] text-gray-400 hover:text-teal-600 flex items-center gap-1"
+                        title="Copy extra context"
                         onClick={() =>
                           copyToClipboard(JSON.stringify(selectedError.extra_context, null, 2))
                         }
@@ -712,6 +758,7 @@ export function ErrorLogsPage() {
             <Button
               variant="ghost"
               size="sm"
+              title="Delete error log"
               className="h-8 px-3 rounded text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
               onClick={() => selectedError && handleDelete(selectedError)}
             >
@@ -721,6 +768,7 @@ export function ErrorLogsPage() {
             <Button
               variant="ghost"
               size="sm"
+              title="Ignore error"
               className="h-8 px-3 rounded text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100"
               onClick={() => {
                 if (selectedError) {
@@ -735,6 +783,7 @@ export function ErrorLogsPage() {
             <Button
               variant="ghost"
               size="sm"
+              title="Resolve error"
               className="h-8 px-3 rounded text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
               onClick={() => {
                 if (selectedError) {
@@ -749,6 +798,7 @@ export function ErrorLogsPage() {
             {selectedError?.status !== 'promoted' && (
               <Button
                 size="sm"
+                title="Create known issue from error"
                 className="h-8 px-4 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs shadow-sm"
                 onClick={() => selectedError && handlePromote(selectedError)}
               >

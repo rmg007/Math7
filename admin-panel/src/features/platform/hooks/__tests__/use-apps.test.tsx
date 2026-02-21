@@ -110,7 +110,7 @@ describe('useApps', () => {
 
 // ── useCreateApp ──────────────────────────────────────────────────────────────
 describe('useCreateApp', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('inserts a new app and also inserts its landing page', async () => {
     const { wrapper } = makeWrapper();
@@ -254,7 +254,7 @@ describe('useUpdateApp', () => {
 
 // ── useDeleteApp ──────────────────────────────────────────────────────────────
 describe('useDeleteApp', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('deletes an app by app_id', async () => {
     const { wrapper } = makeWrapper();
@@ -300,7 +300,7 @@ describe('useDeleteApp', () => {
 
 // ── useBulkUpdateAppsStatus ───────────────────────────────────────────────────
 describe('useBulkUpdateAppsStatus', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('sets is_active = true for multiple apps', async () => {
     const { wrapper } = makeWrapper();
@@ -351,7 +351,7 @@ describe('useBulkUpdateAppsStatus', () => {
 
 // ── useBulkDeleteApps ─────────────────────────────────────────────────────────
 describe('useBulkDeleteApps', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('deletes multiple apps by app_id list', async () => {
     const { wrapper } = makeWrapper();
@@ -388,7 +388,7 @@ describe('useBulkDeleteApps', () => {
 
 // ── useBulkCreateApps ─────────────────────────────────────────────────────────
 describe('useBulkCreateApps', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('inserts multiple apps and creates landing pages for each', async () => {
     const { wrapper } = makeWrapper();

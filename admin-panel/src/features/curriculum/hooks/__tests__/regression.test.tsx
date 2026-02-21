@@ -108,6 +108,15 @@ describe('Hook Regression: Single Entity Fetch Independence', () => {
   });
 
   it('hooks should have stable query keys independent of app context', async () => {
+    // Render each hook to populate the query cache, then assert stable keys
+    const { result: dr } = renderHook(() => useDomain(validId), { wrapper });
+    const { result: sr } = renderHook(() => useSkill(validId), { wrapper });
+    const { result: qr } = renderHook(() => useQuestion(validId), { wrapper });
+
+    await waitFor(() => expect(dr.current.isSuccess).toBe(true));
+    await waitFor(() => expect(sr.current.isSuccess).toBe(true));
+    await waitFor(() => expect(qr.current.isSuccess).toBe(true));
+
     // Check Domain query key
     const domainQuery = queryClient.getQueryCache().find({ queryKey: ['domain', validId] });
     expect(domainQuery).toBeDefined();
