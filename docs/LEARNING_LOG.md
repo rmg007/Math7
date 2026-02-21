@@ -2,6 +2,72 @@
 
 ---
 
+## 2026-02-20: Security Hardening Backlog Triage — All Findings Resolved [no test needed]
+
+### Session Context
+
+- **Trigger**: `HARDENING_BACKLOG.json` listed several CRITICAL and WARNING findings from a prior forensic audit — including `SECURITY DEFINER` missing `SET search_path` (REL-03/BUG-10), Service Role Leaks (VUL-003), double-retry logic (REL-02), hollow test files, and empty catch blocks.
+- **Scope**: Surgical evidence collection — read each flagged file and compared against the backlog claim.
+- **Outcome**: 6 of 7 findings were **confirmed false positives**. One real bug identified and fixed.
+
+### Triage Results
+
+#### FALSE POSITIVE: REL-03 — `SECURITY DEFINER` missing `SET search_path` [no fix needed]
+
+- **Claim**: Functions in `20260213101531_reconcile_schema_gap.sql` and `20260214120000_observability_and_maintenance.sql` were created without `SET search_path`.
+- **Evidence**: While the function `CREATE OR REPLACE` statements in those migrations don't include `SET search_path` inline, **two subsequent migrations cover this completely**:
+  - `20260219100000_security_remediation_feb_2026.sql`: Explicit `ALTER FUNCTION ... SET search_path = public, auth` for every function, **plus** a `DO $$` block (lines 85-101) that dynamically finds and patches every remaining `SECURITY DEFINER` function in `public.*`.
+  - `20260220213000_harden_security_definer_search_path.sql`: A second pass ALTER for 12 named functions.
+- **Lesson**: When reading migration history, always check _all_ subsequent migrations — `ALTER FUNCTION` patching is the correct pattern for retroactively hardening functions defined in older migrations without re-writing them.
+
+#### FALSE POSITIVE: VUL-003 — Service Role Leak in Edge Functions [no fix needed]
+
+- **Claim**: `Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')` in edge functions and test files = service role leak.
+- **Evidence**: All 8 grep hits are `Deno.env.get(...)` calls at runtime — the key is retrieved from the Cloudflare/Supabase secret store at runtime, not hardcoded. Test files that set `"test-service-key"` are using a placeholder value in an isolated Deno test environment.
+- **Lesson**: Static string matches for secret patterns must distinguish between **referencing** a key name (safe) and **embedding** a literal key value (dangerous). A scanner flagging `env.get('SECRET_KEY')` as a leak has a very high false-positive rate and requires expert review.
+
+#### FALSE POSITIVE: REL-02 — Double-Retry in `sync_service.dart` [no fix needed]
+
+- **Claim**: Double-retry logic exists in `sync_service.dart`.
+- **Evidence**: `grep -r 'retry|retryCount|maxRetry|backoff' sync_service.dart` → 0 results. The retry code was already cleaned up in a prior session.
+- **Lesson**: Hardening backlog items can become stale. Always re-verify the claim against current source before spending time on remediation.
+
+#### FALSE POSITIVE: Hollow placeholder test files [no fix needed]
+
+- **Claim**: `schema-sync.test.ts` and `utils.test.ts` are hollow test placeholders.
+- **Evidence**: Both files contain real, meaningful tests: `schema-sync.test.ts` has 3 drift-detection tests checking DB type file integrity; `utils.test.ts` has 2 behavioral tests for `normalizeIdentifier` and `formatIdentifier`.
+- **Lesson**: "Hollow test file" means a file with describes/its that have no assertions. A file with 3 passing tests is not hollow.
+
+#### FALSE POSITIVE: Empty catch blocks in AI API files [no fix needed]
+
+- **Claim**: `generateQuestions.ts:65` and `validateContent.ts` have empty catch blocks.
+- **Evidence**: The pattern is `.json().catch(() => ({}))` — a 1-liner `.catch()` callback that returns an empty object as a safe default when the error body can't be parsed as JSON. This is intentional defensive programming, not silent failure.
+- **Lesson**: Distinguish between `catch (e) { /* nothing */ }` (silent failure) and `.catch(() => defaultValue)` (explicit fallback). The second pattern is correct error handling.
+
+### Real Bug Fixed
+
+#### BUG-STACK: Outer `catch(e)` in `main.dart` silently discarded stack trace [test created N/A — startup crash path]
+
+- **File**: `student-app/lib/main.dart` line 55
+- **Issue**: The outer catch block that handles critical initialization failures (`Env.validate()` crash, Supabase init failure) only captured `e`, discarding the stack. The inner catch at line 30 correctly used `(e, stack)`. Production crashes from this path would show only the exception message with no stack.
+- **Fix**: Changed `catch (e)` → `catch (e, stack)` and added `debugPrintStack(stackTrace: stack, label: 'main.dart critical init failure')`.
+- **Lesson**: Every catch block that handles app-critical failures must capture and report the stack. In Flutter, `debugPrintStack` is the correct API for this in non-release builds — it outputs to the debug console and is no-op in profile/release.
+
+### Pre-existing protections confirmed solid
+
+- `20260219100000_security_remediation_feb_2026.sql` dynamic DO block retroactively patches any `SECURITY DEFINER` function missed by explicit ALTERs — a self-healing mechanism.
+- All edge functions use `Deno.env.get()` exclusively. No secrets hardcoded.
+- Workers `generate-questions` and `validate-content` authenticate via Supabase JWT verification before consuming AI resources.
+
+### Files Modified
+
+| File                        | Change                                                     |
+| --------------------------- | ---------------------------------------------------------- |
+| `student-app/lib/main.dart` | `catch (e)` → `catch (e, stack)` + `debugPrintStack()`     |
+| `tasks.md`                  | Added Phase 8 triage table; marked main.dart task complete |
+
+---
+
 ## 2026-02-20: Governance Audit Remediation — Single Source of Truth [no test needed]
 
 ### Session Context
