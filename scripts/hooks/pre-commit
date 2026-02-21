@@ -25,7 +25,7 @@ fi
 echo "🔍 Scanning staged changes for secrets..."
 
 # Scan only staged changes (fast)
-gitleaks git --pre-commit --staged --verbose
+gitleaks git --pre-commit --staged
 
 EXIT_CODE=$?
 
