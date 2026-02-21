@@ -25,8 +25,8 @@ export async function handleValidateContent(
   // Parse request
   const body = (await request.json()) as ValidationRequest;
 
-  if (!body.questions || !Array.isArray(body.questions)) {
-    return errorResponse('questions array is required', 400, request);
+  if (!body.questions || !Array.isArray(body.questions) || body.questions.length === 0) {
+    return errorResponse('questions array is required and must not be empty', 400, request);
   }
 
   if (!body.source_text || typeof body.source_text !== 'string') {
@@ -38,14 +38,19 @@ export async function handleValidateContent(
   const model = getModelForSubject('math');
   const prompt = buildValidationPrompt(body.questions, body.source_text, body.rules || []);
 
+  let aiResponse: unknown;
   const startTime = Date.now();
-
-  // Type assertion needed: @cloudflare/workers-types may lag behind available models
-  const aiResponse = await (env.AI as any).run(model, {
-    prompt,
-    max_tokens: 4096,
-    temperature: 0.1,
-  });
+  try {
+    // Type assertion needed: @cloudflare/workers-types may lag behind available models
+    aiResponse = await (env.AI as any).run(model, {
+      prompt,
+      max_tokens: 4096,
+      temperature: 0.1,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'AI model unavailable';
+    return errorResponse(`AI inference failed: ${message}`, 500, request);
+  }
 
   const duration = Date.now() - startTime;
   const validationText =

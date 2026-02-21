@@ -190,18 +190,16 @@ describe('handleValidateContent — security & robustness', () => {
 
   // ── Input validation ──────────────────────────────────────────────────────
   describe('input validation', () => {
-    it('allows empty questions array (validation enforced at prompt level, not schema)', async () => {
-      // Empty [] passes Array.isArray([]) — source does not 400 on empty array.
-      // This is a known gap: an empty questions array will call the AI unnecessarily.
-      // Document as improvement opportunity (AP-IMPROVEMENT-001).
+    it('returns 400 for empty questions array — AP-IMPROVEMENT-001 fixed', async () => {
+      // Empty [] is now rejected at the validation layer (validate-content.ts:28).
       const env = mockEnv();
       const response = await handleValidateContent(
         makeRequest({ ...VALID_BODY, questions: [] }),
         env,
       );
-      // Current behaviour: 200 (AI called with empty list)
-      expect(response.status).toBe(200);
-      // Improvement: should return 400 with descriptive message
+      expect(response.status).toBe(400);
+      // AI must NOT have been called
+      expect(env.AI.run).not.toHaveBeenCalled();
     });
 
     it('returns 400 when questions is not an array (string passed)', async () => {
@@ -242,18 +240,14 @@ describe('handleValidateContent — security & robustness', () => {
       expect(response.status).toBe(500);
     });
 
-    it('AI.run rejection is currently unhandled — documents improvement opportunity', async () => {
-      // The source (validate-content.ts:44) does NOT wrap env.AI.run in try/catch.
-      // A thrown error propagates uncaught. In a real Cloudflare Worker runtime this
-      // becomes a 500 via the runtime. In the test environment the Promise rejects.
-      // Document as AP-IMPROVEMENT-002: wrap AI.run in try/catch and return 500.
+    it('returns 500 when AI.run throws — AP-IMPROVEMENT-002 fixed', async () => {
+      // validate-content.ts now wraps AI.run in try/catch and returns 500.
       const env = mockEnv();
       (env.AI.run as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
         new Error('AI model unavailable')
       );
-      await expect(handleValidateContent(makeRequest(VALID_BODY), env)).rejects.toThrow(
-        'AI model unavailable'
-      );
+      const response = await handleValidateContent(makeRequest(VALID_BODY), env);
+      expect(response.status).toBe(500);
     });
 
     it('returns 200 with valid quality report shape on success', async () => {
