@@ -141,4 +141,47 @@ test.describe('Security: RLS Bypass & Tenant Isolation', () => {
       expect(updateData?.length || 0).toBe(0);
     }
   });
+
+  // ===========================================================================
+  // invitation_codes table — RLS (AI-08: student cannot read invitation codes)
+  // ===========================================================================
+
+  test('Invitation Codes: Anonymous user cannot SELECT from invitation_codes (AI-08)', async () => {
+    const supabase = await getClientForUser(); // anon
+
+    const { data, error } = await supabase.from('invitation_codes').select('*');
+
+    // RLS must return 0 rows OR an access error — never expose codes to anon users
+    if (error) {
+      // Explicit deny is acceptable
+      expect(['42501', 'PGRST301', '401']).toContain(String(error.code));
+    } else {
+      expect(data?.length || 0).toBe(0);
+    }
+  });
+
+  test('Invitation Codes: Student-role user cannot SELECT from invitation_codes (AI-08)', async () => {
+    // Uses the MENTOR test user which has role=student equivalent access (non-admin)
+    // If no student test user is available, this test is skipped
+    const studentEmail = process.env.TEST_STUDENT_EMAIL;
+    const studentPassword = process.env.TEST_STUDENT_PASSWORD;
+
+    if (!studentEmail || !studentPassword) {
+      console.warn(
+        'Skipping student invitation_codes RLS test — TEST_STUDENT_EMAIL/PASSWORD not set'
+      );
+      return;
+    }
+
+    const supabase = await getClientForUser(studentEmail, studentPassword);
+    const { data, error } = await supabase.from('invitation_codes').select('*');
+
+    if (error) {
+      // Explicit RLS deny is the correct outcome
+      expect(['42501', 'PGRST301']).toContain(String(error.code));
+    } else {
+      // Silent empty result is also acceptable (RLS returns zero rows)
+      expect(data?.length || 0).toBe(0);
+    }
+  });
 });
