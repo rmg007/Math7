@@ -43,7 +43,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 const TEST_USERS = [
   {
     email: 'mhalim80@hotmail.com',
-    password: 'mhalim80@hotmail.com',
+    password: '9eZCpZHhP9ArGuz',
     role: 'super_admin',
     metadata: {
       name: 'Ryan Gonzalez',
@@ -75,6 +75,15 @@ const TEST_USERS = [
     metadata: {
       name: 'Test Mentor',
       role: 'mentor',
+    },
+  },
+  {
+    email: 'teststudent@example.com',
+    password: 'teststudent@example.com',
+    role: 'student',
+    metadata: {
+      name: 'Test Student',
+      role: 'student',
     },
   },
 ];

@@ -20,11 +20,59 @@ export interface SeedData {
   questions: Tables['questions']['Insert'][];
 }
 
+export interface GroupSeedResult {
+  groupIds: { class: string; family: string };
+  assignmentId: string;
+}
+
+export interface AIUsageSeedResult {
+  totalTokensSeeded: number;
+  rowsInserted: number;
+}
+
 /**
- * Clean all E2E test data from database (identified by slug prefix)
+ * Clean all E2E test data from database (identified by slug prefix).
+ * Deletes in FK-safe order: assignments → group_members → groups →
+ * ai_token_usage → questions → skills → domains → apps → subjects
+ *
+ * @param appId - Optional app_id to scope ai_token_usage cleanup.
+ *                If not provided, will be resolved via getTestContext().
  */
-export async function cleanTestData(supabase: SupabaseClient<Database>) {
-  // Delete in FK order: questions → skills → domains → apps → subjects
+export async function cleanTestData(supabase: SupabaseClient<Database>, appId?: string) {
+  // Resolve appId for ai_token_usage cleanup if not provided
+  let resolvedAppId = appId;
+  if (!resolvedAppId) {
+    const { data: apps } = await supabase
+      .from('apps')
+      .select('app_id')
+      .eq('subdomain', `${TEST_SLUG_PREFIX}_app`)
+      .limit(1)
+      .single();
+    resolvedAppId = apps?.app_id;
+  }
+
+  // --- Group / assignment cleanup first (FK deps on groups) ---
+  // Get E2E group IDs for targeted deletes
+  const { data: e2eGroups } = await supabase.from('groups').select('id').like('name', 'E2E Test%');
+
+  const e2eGroupIds = (e2eGroups ?? []).map((g) => g.id);
+
+  if (e2eGroupIds.length > 0) {
+    await supabase.from('assignments').delete().in('group_id', e2eGroupIds);
+    await supabase.from('group_members').delete().in('group_id', e2eGroupIds);
+  }
+  await supabase.from('groups').delete().like('name', 'E2E Test%');
+
+  // --- AI token usage cleanup ---
+  if (resolvedAppId) {
+    await supabase
+      .from('ai_token_usage')
+      .delete()
+      .eq('app_id', resolvedAppId)
+      .eq('operation', 'generate_questions_e2e');
+  }
+
+  // --- Curriculum cleanup (original order) ---
   await supabase.from('questions').delete().like('content', '%E2E Test%');
   await supabase.from('skills').delete().like('slug', `${TEST_SLUG_PREFIX}_%`);
   await supabase.from('domains').delete().like('slug', `${TEST_SLUG_PREFIX}_%`);
@@ -83,6 +131,8 @@ async function getTestContext(supabase: SupabaseClient<Database>) {
       subdomain: `${TEST_SLUG_PREFIX}_app`,
       subject_id: subjectId,
       is_active: true,
+      grade_level: 'middle',
+      ai_token_limit: 100000,
     })
     .select('app_id, subject_id')
     .single();
@@ -167,6 +217,7 @@ export function generateTestData(appId: string): SeedData {
   ];
 
   const questions: Tables['questions']['Insert'][] = [
+    // --- multiple_choice (existing) ---
     {
       skill_id: '', // set after skill insertion
       type: 'multiple_choice',
@@ -213,6 +264,7 @@ export function generateTestData(appId: string): SeedData {
       sort_order: 1,
       app_id: appId,
     },
+    // --- text_input (existing) ---
     {
       skill_id: '', // Circle
       type: 'text_input',
@@ -233,6 +285,44 @@ export function generateTestData(appId: string): SeedData {
       explanation: 'Sum: 4+8+6+5+3+7 = 33. Mean: 33÷6 = 5.5',
       points: 10,
       sort_order: 1,
+      app_id: appId,
+    },
+    // --- mcq_multi (NEW) ---
+    {
+      skill_id: '', // Linear Equations
+      type: 'mcq_multi',
+      content: 'E2E Test: Which of the following are prime numbers?',
+      solution: JSON.parse('{"correct_answers": ["2", "3", "5"]}'),
+      options: JSON.parse('["1", "2", "3", "4", "5"]'),
+      explanation: '2, 3, and 5 are prime. 1 is not prime by definition. 4 is divisible by 2.',
+      points: 10,
+      sort_order: 3,
+      app_id: appId,
+    },
+    // --- boolean (NEW) ---
+    {
+      skill_id: '', // Triangle Properties
+      type: 'boolean',
+      content: 'E2E Test: Is the square root of 144 equal to 12?',
+      solution: JSON.parse('{"correct_answer": true}'),
+      options: JSON.parse('[]'),
+      explanation: '√144 = 12, because 12 × 12 = 144.',
+      points: 5,
+      sort_order: 2,
+      app_id: appId,
+    },
+    // --- reorder_steps (NEW) ---
+    {
+      skill_id: '', // Linear Equations
+      type: 'reorder_steps',
+      content: 'E2E Test: Order these steps to solve 3x = 12.',
+      solution: JSON.parse('{"correct_order": [0, 1, 2]}'),
+      options: JSON.parse(
+        '["Write the equation: 3x = 12", "Divide both sides by 3: x = 12 / 3", "Simplify: x = 4"]'
+      ),
+      explanation: 'Step 1: state the equation. Step 2: divide by 3. Step 3: simplify.',
+      points: 10,
+      sort_order: 4,
       app_id: appId,
     },
   ];
@@ -291,12 +381,21 @@ export async function seedTestData(supabase: SupabaseClient<Database>): Promise<
 
   // Insert questions (link to skills)
   const questionsWithSkills = [
+    // multiple_choice × 4
     { ...data.questions[0], skill_id: skillIds['Linear Equations'] },
     { ...data.questions[1], skill_id: skillIds['Linear Equations'] },
     { ...data.questions[2], skill_id: skillIds['Quadratic Equations'] },
     { ...data.questions[3], skill_id: skillIds['Triangle Properties'] },
+    // text_input × 1
     { ...data.questions[4], skill_id: skillIds['Circle Measurements'] },
+    // mean/median multiple_choice
     { ...data.questions[5], skill_id: skillIds['Mean and Median'] },
+    // mcq_multi (index 6)
+    { ...data.questions[6], skill_id: skillIds['Linear Equations'] },
+    // boolean (index 7)
+    { ...data.questions[7], skill_id: skillIds['Triangle Properties'] },
+    // reorder_steps (index 8)
+    { ...data.questions[8], skill_id: skillIds['Linear Equations'] },
   ];
 
   for (const question of questionsWithSkills) {
@@ -314,6 +413,184 @@ export async function seedTestData(supabase: SupabaseClient<Database>): Promise<
   }
 
   return { domainIds, skillIds, questionIds };
+}
+
+/**
+ * Seed group data: 1 class group + 1 family group + a member + an assignment.
+ *
+ * Requires `testmentor@example.com` and `teststudent@example.com` to already
+ * exist (created by setup-test-users.js).
+ *
+ * Returns groupIds and the assignmentId for use in tests.
+ */
+export async function seedGroupData(supabase: SupabaseClient<Database>): Promise<GroupSeedResult> {
+  const { appId } = await getTestContext(supabase);
+
+  // Resolve mentor profile (group owner)
+  const { data: mentorProfile, error: mentorError } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('email', 'testmentor@example.com')
+    .single();
+
+  if (mentorError || !mentorProfile) {
+    throw new Error(
+      `Could not find mentor profile. Run setup-test-users.js first. ${mentorError?.message ?? ''}`
+    );
+  }
+
+  // Resolve student profile (group member)
+  const { data: studentProfile, error: studentError } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('email', 'teststudent@example.com')
+    .single();
+
+  if (studentError || !studentProfile) {
+    throw new Error(
+      `Could not find student profile. Run setup-test-users.js first. ${studentError?.message ?? ''}`
+    );
+  }
+
+  // Insert class group
+  const { data: classGroup, error: classGroupError } = await supabase
+    .from('groups')
+    .insert({
+      app_id: appId,
+      name: 'E2E Test Class Group',
+      owner_id: mentorProfile.id,
+      join_code: 'E2EGRP1',
+      type: 'class',
+      requires_approval: false,
+      allow_anonymous_join: false,
+    })
+    .select('id')
+    .single();
+
+  if (classGroupError || !classGroup) {
+    throw new Error(`Failed to create class group: ${classGroupError?.message ?? 'unknown error'}`);
+  }
+
+  // Insert family group
+  const { data: familyGroup, error: familyGroupError } = await supabase
+    .from('groups')
+    .insert({
+      app_id: appId,
+      name: 'E2E Test Family Group',
+      owner_id: mentorProfile.id,
+      join_code: 'E2EGRP2',
+      type: 'family',
+      requires_approval: false,
+      allow_anonymous_join: false,
+    })
+    .select('id')
+    .single();
+
+  if (familyGroupError || !familyGroup) {
+    throw new Error(
+      `Failed to create family group: ${familyGroupError?.message ?? 'unknown error'}`
+    );
+  }
+
+  // Add student as member of the class group
+  // group_members PK is composite (group_id, student_id) — no id column returned
+  const { error: memberError } = await supabase.from('group_members').insert({
+    group_id: classGroup.id,
+    student_id: studentProfile.id,
+    role: 'student',
+  });
+
+  if (memberError) {
+    throw new Error(`Failed to add group member: ${memberError.message}`);
+  }
+
+  // Resolve a seeded skill to assign (use first e2e skill found)
+  const { data: seededSkill } = await supabase
+    .from('skills')
+    .select('skill_id')
+    .like('slug', `${TEST_SLUG_PREFIX}_%`)
+    .limit(1)
+    .single();
+
+  if (!seededSkill) {
+    throw new Error('No seeded skills found. Run seedTestData() before seedGroupData().');
+  }
+
+  // Insert assignment scoped to class group
+  const { data: assignment, error: assignmentError } = await supabase
+    .from('assignments')
+    .insert({
+      group_id: classGroup.id,
+      type: 'skill_mastery',
+      target_id: seededSkill.skill_id,
+      scope: 'mandatory',
+      status: 'pending',
+    })
+    .select('id')
+    .single();
+
+  if (assignmentError || !assignment) {
+    throw new Error(`Failed to create assignment: ${assignmentError?.message ?? 'unknown error'}`);
+  }
+
+  return {
+    groupIds: { class: classGroup.id, family: familyGroup.id },
+    assignmentId: assignment.id,
+  };
+}
+
+/**
+ * Seed AI token usage rows summing to ~95% of the test app's token limit.
+ * Used for edge-case testing (near-quota behaviour).
+ *
+ * All rows use operation = 'generate_questions_e2e' so cleanTestData()
+ * can identify and delete them precisely.
+ */
+export async function seedAIUsage(supabase: SupabaseClient<Database>): Promise<AIUsageSeedResult> {
+  const { appId } = await getTestContext(supabase);
+
+  // Fetch the app's token limit
+  const { data: app, error: appError } = await supabase
+    .from('apps')
+    .select('ai_token_limit')
+    .eq('app_id', appId)
+    .single();
+
+  if (appError) {
+    throw new Error(`Failed to fetch app token limit: ${appError.message}`);
+  }
+
+  const tokenLimit = app?.ai_token_limit ?? 100000;
+  const target = Math.floor(tokenLimit * 0.95);
+
+  // Seed in chunks of 5000 tokens to keep row count manageable
+  const chunkSize = 5000;
+  let totalSeeded = 0;
+  let rowsInserted = 0;
+
+  while (totalSeeded < target) {
+    const tokensForThisRow = Math.min(chunkSize, target - totalSeeded);
+
+    const { error } = await supabase.from('ai_token_usage').insert({
+      app_id: appId,
+      operation: 'generate_questions_e2e',
+      tokens_used: tokensForThisRow,
+      user_id: null,
+    });
+
+    if (error) {
+      throw new Error(`Failed to insert ai_token_usage row: ${error.message}`);
+    }
+
+    totalSeeded += tokensForThisRow;
+    rowsInserted++;
+  }
+
+  console.log(
+    `Seeded ${rowsInserted} ai_token_usage rows — ${totalSeeded} / ${tokenLimit} tokens (${Math.round((totalSeeded / tokenLimit) * 100)}%)`
+  );
+
+  return { totalTokensSeeded: totalSeeded, rowsInserted };
 }
 
 /**
@@ -362,6 +639,10 @@ export function getTestUser() {
     mentor: {
       email: process.env.TEST_MENTOR_EMAIL || 'testmentor@example.com',
       password: process.env.TEST_MENTOR_PASSWORD || 'testmentor@example.com',
+    },
+    student: {
+      email: process.env.TEST_STUDENT_EMAIL || 'teststudent@example.com',
+      password: process.env.TEST_STUDENT_PASSWORD || 'teststudent@example.com',
     },
   };
 }
