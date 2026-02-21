@@ -13,14 +13,17 @@ import { useNavigate } from 'react-router-dom';
  * and the user gets "link expired" errors before they ever click anything.
  *
  * HOW it works:
- * Supabase's `redirectTo` points here. We read the URL fragment (#token_hash,
- * #type, or legacy #access_token) ONLY when the user explicitly clicks the
- * "Set New Password" button. Microsoft's scanner never activates the OTP
- * because it sees an HTML page, not a Supabase confirmation endpoint.
+ * Our email template links to:
+ *   https://admin.questerix.com/auth/confirm#token_hash=XXX&type=recovery
  *
- * Token formats handled:
- * - PKCE (modern): ?token_hash=...&type=recovery   (URL params, not hash)
- * - Legacy:        #access_token=...&type=recovery  (URL fragment / hash)
+ * The "#" (hash fragment) is NEVER sent to any server — it is client-side only.
+ * Safe Links scans https://admin.questerix.com/auth/confirm (just an HTML page)
+ * and cannot see anything after the "#". The OTP survives until the user clicks.
+ *
+ * Token formats handled (in priority order):
+ * 1. Hash fragment:  #token_hash=...&type=... (our email template — Safe Links safe)
+ * 2. URL params:     ?token_hash=...&type=...  (Supabase PKCE redirect)
+ * 3. Hash fragment:  #access_token=...&type=...  (Supabase legacy implicit flow)
  */
 export function AuthConfirmPage() {
   const navigate = useNavigate();
@@ -37,7 +40,7 @@ export function AuthConfirmPage() {
     const searchParams = new URLSearchParams(window.location.search);
     const hashParams = new URLSearchParams(window.location.hash.slice(1));
 
-    // Check for errors first (e.g. already-expired links)
+    // Check for errors first (e.g. already-expired links landing via Supabase redirect)
     const errorCode = hashParams.get('error_code') ?? searchParams.get('error_code');
     const errorDesc = hashParams.get('error_description') ?? searchParams.get('error_description');
     if (errorCode) {
@@ -50,20 +53,31 @@ export function AuthConfirmPage() {
       return;
     }
 
-    // PKCE flow: token_hash in URL params
-    const tokenHashParam = searchParams.get('token_hash');
-    const typeParam = searchParams.get('type');
+    // Priority 1: Hash fragment with token_hash — our email template's Safe Links bypass.
+    // Format: #token_hash=xxx&type=recovery
+    // Hash fragments are client-side only, never sent to servers — scanner can't see them.
+    const tokenHashInFragment = hashParams.get('token_hash');
+    const typeInFragment = hashParams.get('type');
 
-    // Legacy flow: access_token in URL fragment
+    // Priority 2: PKCE flow — Supabase puts token_hash in URL params after redirect
+    const tokenHashInParams = searchParams.get('token_hash');
+    const typeInParams = searchParams.get('type');
+
+    // Priority 3: Legacy implicit flow — access_token in URL fragment
     const accessToken = hashParams.get('access_token');
-    const typeHash = hashParams.get('type');
+    const typeInHashLegacy = hashParams.get('type');
 
-    if (tokenHashParam && typeParam) {
-      setTokenHash(tokenHashParam);
-      setAuthType(typeParam);
-    } else if (accessToken && typeHash) {
-      // Legacy: Supabase JS SDK will pick up the hash automatically on verifyOtp
-      setAuthType(typeHash);
+    if (tokenHashInFragment && typeInFragment) {
+      // Our email template's safe format: #token_hash=...&type=...
+      setTokenHash(tokenHashInFragment);
+      setAuthType(typeInFragment);
+    } else if (tokenHashInParams && typeInParams) {
+      // Supabase PKCE redirect after verify: ?token_hash=...&type=...
+      setTokenHash(tokenHashInParams);
+      setAuthType(typeInParams);
+    } else if (accessToken && typeInHashLegacy) {
+      // Legacy implicit flow — Supabase JS SDK detects the hash automatically
+      setAuthType(typeInHashLegacy);
     } else {
       // No token at all — redirect to login
       navigate('/login', { replace: true });
