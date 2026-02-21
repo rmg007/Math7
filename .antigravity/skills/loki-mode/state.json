@@ -1,40 +1,60 @@
 {
-  "session_id": "loki-phase7-2026-02-17-001",
-  "started_at": "2026-02-17T06:50:00-08:00",
-  "last_checkpoint": "2026-02-17T07:30:00-08:00",
-  "current_phase": 7,
-  "current_subtask": "Verification Complete",
-  "iteration_count": 5,
-  "budget_iterations_remaining": 45,
-  "status": "completed",
+  "session_id": "loki-qa-testplan-2026-02-20-002",
+  "started_at": "2026-02-20T23:01:08-08:00",
+  "last_checkpoint": "2026-02-20T23:01:08-08:00",
+  "current_phase": 1,
+  "current_subtask": "ST-1: Produce comprehensive test plan document",
+  "iteration_count": 1,
+  "budget_iterations_remaining": 24,
+  "status": "active",
   "plan": {
-    "total_subtasks": 2,
-    "completed": 2,
+    "total_subtasks": 8,
+    "completed": 0,
     "failed": 0,
-    "remaining": 0,
+    "remaining": 8,
     "subtasks": [
       {
-        "id": 0,
-        "description": "8.1 Flutter student-app tests",
-        "status": "completed"
+        "id": 1,
+        "description": "Write TEST_PLAN.md — all sections A/B/C/D/E",
+        "status": "in_progress"
       },
       {
-        "id": 1,
-        "description": "8.2 Supabase SQL unit tests",
-        "status": "completed"
+        "id": 2,
+        "description": "Implement P0 curriculum CRUD E2E: curriculum-lifecycle.e2e.spec.ts",
+        "status": "pending"
+      },
+      {
+        "id": 3,
+        "description": "Implement P0 RBAC guard tests: rbac-guards.e2e.spec.ts",
+        "status": "pending"
+      },
+      {
+        "id": 4,
+        "description": "Implement P0 AI feature unit tests: workers generate-questions expansion",
+        "status": "pending"
+      },
+      {
+        "id": 5,
+        "description": "Implement P0 Mentor Hub E2E: mentor-hub.e2e.spec.ts",
+        "status": "pending"
+      },
+      {
+        "id": 6,
+        "description": "Run unit tests, fix failures",
+        "status": "pending"
+      },
+      {
+        "id": 7,
+        "description": "Run admin-panel tests, fix failures",
+        "status": "pending"
+      },
+      {
+        "id": 8,
+        "description": "Commit all test files + plan",
+        "status": "pending"
       }
     ]
   },
-  "files_modified": [
-    "tasks.md",
-    "docs/LEARNING_LOG.md",
-    "student-app/lib/src/features/curriculum/widgets/question_widgets.dart",
-    "student-app/test/ui/app_flow_test.dart"
-  ],
-  "commits": [],
-  "errors": [],
-  "learnings": [
-    "Fixed Flutter widget crash on Map/List options mismatch",
-    "Fixed Flutter UI test crash on missing AppConfig provider"
-  ]
+  "files_created": [],
+  "key_learnings": []
 }
