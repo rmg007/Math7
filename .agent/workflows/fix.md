@@ -54,7 +54,15 @@ This workflow is optimized for speed, surgical precision, and long-term stabilit
 3. **Audit History**:
    - Check `docs/LEARNING_LOG.md` to see if this is a recurring regression.
 
-4. **🔬 Ironclad Architect Scan** _(mandatory)_:
+4. **🔐 RLS Completeness Check** _(mandatory for any DB-related bug)_:
+   - If the bug involves missing data, permission errors, or silent Supabase failures, run the RLS audit immediately:
+     ```sql
+     -- psql $DATABASE_URL -f supabase/scripts/audit-rls.sql
+     ```
+   - Or query via MCP: look for any admin-managed table with a missing DELETE or UPDATE policy.
+   - Check `GEMINI.md → MANDATORY: RLS Checklist` for the canonical list of tables that must have all 4 policies.
+   - **If a gap is found**: apply a migration fix NOW before any other work. Then document it in `LEARNING_LOG.md`.
+
    - Read `.agent/skills/ironclad-architect/SKILL.md` now.
    - Run the **17-pattern production bug scanner** on the affected files.
    - Run the **Silent Failure Audit** (5.2) on all modified files.
@@ -192,11 +200,12 @@ This workflow is optimized for speed, surgical precision, and long-term stabilit
 
 These are mistakes that have occurred in past sessions. They are permanently banned:
 
-| Anti-Pattern                                      | Why It's Banned                                                                       | Rule                                                            |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Double retry logic                                | `retryWithBackoff` + outer recursive retry = up to 4× attempts, exponential hang time | If `retryWithBackoff` is present, remove any outer retry loop   |
-| `thenReturn` for a Future-returning mock          | Throws at runtime in mocktail                                                         | Always use `thenAnswer((_) => Future.value(...))`               |
-| Unused import after refactor                      | Fails `dart analyze`, `tsc --noEmit`                                                  | After removing a function's caller, always remove its import    |
-| Bare throw in `main.tsx` before React mounts      | Results in a blank white page                                                         | Always render a native DOM fallback before throwing             |
-| Catching the mock but not its chain               | `rpc()` returns a builder; the chain (`.timeout()`, `.select()`) must also be mocked  | In `setUp`, mock every chained accessor you expect to be called |
-| Adding a timeout around an already-timed-out call | Creates unpredictable race between two timeout mechanisms                             | Read the whole function before adding timeouts                  |
+| Anti-Pattern                                         | Why It's Banned                                                                       | Rule                                                                                                                                                                 |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Double retry logic                                   | `retryWithBackoff` + outer recursive retry = up to 4× attempts, exponential hang time | If `retryWithBackoff` is present, remove any outer retry loop                                                                                                        |
+| `thenReturn` for a Future-returning mock             | Throws at runtime in mocktail                                                         | Always use `thenAnswer((_) => Future.value(...))`                                                                                                                    |
+| Unused import after refactor                         | Fails `dart analyze`, `tsc --noEmit`                                                  | After removing a function's caller, always remove its import                                                                                                         |
+| Bare throw in `main.tsx` before React mounts         | Results in a blank white page                                                         | Always render a native DOM fallback before throwing                                                                                                                  |
+| Catching the mock but not its chain                  | `rpc()` returns a builder; the chain (`.timeout()`, `.select()`) must also be mocked  | In `setUp`, mock every chained accessor you expect to be called                                                                                                      |
+| Adding a timeout around an already-timed-out call    | Creates unpredictable race between two timeout mechanisms                             | Read the whole function before adding timeouts                                                                                                                       |
+| Creating a table without all applicable RLS policies | Silent permission failures appear only in production when users try to delete/update  | Always add SELECT/INSERT/UPDATE/DELETE policies at table creation time. Run `supabase/scripts/audit-rls.sql` after every migration. See `GEMINI.md → RLS Checklist`. |

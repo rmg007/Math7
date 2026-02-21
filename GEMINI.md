@@ -62,6 +62,40 @@ When any circuit breaker triggers, output:
 - **Tests**: Co-locate unit tests, use `--bail` flag, focus on behavior not implementation
 - **Commits**: Use conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`)
 
+## 🔐 MANDATORY: RLS Checklist for Every Migration
+
+**CRITICAL RULE**: Any migration that creates a new table MUST include all applicable RLS policies.
+This rule exists because missing policies cause silent data access failures that are hard to debug in production.
+
+### For every new table, decide and document which operations apply:
+
+| Operation | Add a policy if...                | Omit if...                                                   |
+| --------- | --------------------------------- | ------------------------------------------------------------ |
+| `SELECT`  | Users or admins need to read rows | Read is via SECURITY DEFINER RPC only                        |
+| `INSERT`  | Users/admins create rows directly | Created via trigger or service role RPC                      |
+| `UPDATE`  | Rows are mutable                  | Data is intentionally immutable (e.g., audit logs, attempts) |
+| `DELETE`  | Admins need to prune data         | Rows are permanent records (e.g., audit trails)              |
+
+### Required comment in migration for any OMITTED policy:
+
+```sql
+-- UPDATE intentionally omitted: curriculum_snapshots are immutable once published
+-- DELETE intentionally omitted: generation_audit_log is append-only
+```
+
+### After any migration touching the schema, run the RLS audit:
+
+```sql
+-- psql $DATABASE_URL -f supabase/scripts/audit-rls.sql
+-- Expect ZERO 🔴 rows in the output.
+```
+
+### Admin-managed tables that MUST have SELECT + INSERT + UPDATE + DELETE policies:
+
+`known_issues`, `error_logs`, `source_documents`, `app_landing_pages`, `curriculum_meta`, `security_logs`
+
+---
+
 ## Key Files
 
 | What            | Where                                     |
