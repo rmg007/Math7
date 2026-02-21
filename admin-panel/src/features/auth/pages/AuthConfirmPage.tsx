@@ -124,15 +124,17 @@ export function AuthConfirmPage() {
 
         setStatus('success');
         setTimeout(() => navigate('/login', { replace: true }), 2000);
-      } else if (authType === 'signup' || authType === 'magiclink') {
-        // For email confirmations & magic links, verifying the OTP creates the session
-        if (tokenHash) {
-          const { error } = await supabase.auth.verifyOtp({
-            token_hash: tokenHash,
-            type: authType as 'signup' | 'magiclink',
-          });
-          if (error) throw error;
+      } else if (authType === 'signup' || authType === 'magiclink' || authType === 'email_change') {
+        // For email confirmations, magic links, and email changes — verifying the OTP creates the session.
+        // We MUST have a tokenHash here; without it we cannot safely verify anything.
+        if (!tokenHash) {
+          throw new Error('No verification token found. Please use the link from your email.');
         }
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: authType as 'signup' | 'magiclink' | 'email_change',
+        });
+        if (error) throw error;
         setStatus('success');
         setTimeout(() => navigate('/', { replace: true }), 1500);
       } else {
