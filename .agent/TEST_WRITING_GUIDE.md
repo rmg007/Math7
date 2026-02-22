@@ -282,5 +282,105 @@ npm run test -- --coverage
 
 ---
 
-**Last Updated**: 2026-02-13  
-**See Also**: `.agent/learnings/test-implementation-feb-13-2026.md`
+**Last Updated**: 2026-02-21  
+**See Also**: `.agent/learnings/test-implementation-feb-13-2026.md`, `docs/quality/testing-strategy.md`
+
+---
+
+## 🎭 Playwright E2E Patterns
+
+### File Header Template
+
+```typescript
+/**
+ * <feature>.e2e.spec.ts
+ *
+ * <AP-ID range>: <Brief description>
+ * Coverage: <what this spec tests>
+ *
+ * Strategy:
+ * - Real login for auth; page.route() mocks for DB reads
+ * - Assert on persistent DOM state, NOT transient toasts
+ */
+import { expect, test } from "@playwright/test";
+import { TEST_USERS, login } from "./test-utils";
+```
+
+### Selector Priority
+
+```typescript
+// 1. BEST: data-testid (most stable, explicit contract)
+page.getByTestId("domain-list");
+
+// 2. GOOD: ARIA role + name
+page.getByRole("button", { name: /Create Domain/i });
+page.getByRole("heading", { name: "Domains" });
+
+// 3. OK: semantic text (only if unique on the page)
+page.getByText("Math 7A");
+
+// ❌ AVOID: CSS classes, nth-child, XPath
+page.locator(".lucide-pencil"); // fragile
+page.locator("tr:nth-child(2) > td"); // fragile
+```
+
+### Mocking Supabase REST
+
+```typescript
+// Mock a table read — always include content-range header
+await page.route("**/rest/v1/domains**", (route) => {
+  if (route.request().method() === "GET") {
+    void route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([
+        { domain_id: "...", title: "Algebra", slug: "algebra" },
+      ]),
+      headers: { "content-range": "0-0/1" },
+    });
+  } else {
+    void route.continue(); // Let mutations pass through
+  }
+});
+
+// Mock an RPC call
+await page.route("**/*publish_curriculum*", (route) => {
+  void route.fulfill({ status: 200, body: JSON.stringify([{ version: 2 }]) });
+});
+```
+
+### What to Assert
+
+```typescript
+// ✅ GOOD: Persistent DOM state
+await expect(page.getByText("Algebra")).toBeVisible({ timeout: 10000 });
+await expect(page.getByTestId("domains-list")).toContainText("Algebra");
+
+// ✅ GOOD: URL change after navigation
+await expect(page).toHaveURL(/\/domains/, { timeout: 10000 });
+
+// ❌ BAD: Toasts (vanish too fast, unreliable in CI)
+await expect(page.getByText("Successfully created!")).toBeVisible();
+
+// ❌ BAD: Fixed timeouts
+await page.waitForTimeout(2000);
+
+// ✅ Correct: State-based waits
+await page.waitForLoadState("networkidle");
+await page.waitForSelector('[data-testid="domains-list"] tr');
+```
+
+### Skip for Optional Credentials
+
+```typescript
+test.skip(!process.env.TEST_ADMIN_EMAIL, "Skipped: TEST_ADMIN_EMAIL not set");
+```
+
+### E2E Test ID Naming
+
+| Test                    | ID Format          | Example       |
+| ----------------------- | ------------------ | ------------- |
+| Admin Panel E2E         | `AP-<FEATURE>-NNN` | `AP-AUTH-001` |
+| Student App integration | `SA-<FEATURE>-NNN` | `SA-PRAC-001` |
+| Database/RLS            | `DB-RLS-NNN`       | `DB-RLS-001`  |
+| System-level            | `SYS-NNN`          | `SYS-001`     |
