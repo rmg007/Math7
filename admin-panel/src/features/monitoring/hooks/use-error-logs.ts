@@ -5,15 +5,26 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export type ErrorLog = Tables<'error_logs'>;
 
-export function useErrorLogs(status?: string, appId?: string) {
+export function useErrorLogs({
+  status,
+  appId,
+  page = 1,
+  pageSize = 50,
+  search = '',
+}: {
+  status?: string;
+  appId?: string;
+  page?: number;
+  pageSize?: number;
+  search?: string;
+} = {}) {
   return useQuery({
-    queryKey: ['error-logs', status, appId],
+    queryKey: ['error-logs', status, appId, page, pageSize, search],
     queryFn: async () => {
       let query = supabase
         .from('error_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false });
 
       if (status && status !== 'all') {
         query = query.eq('status', status);
@@ -23,10 +34,23 @@ export function useErrorLogs(status?: string, appId?: string) {
         query = query.eq('app_id', appId);
       }
 
-      const { data, error } = await query;
+      if (search) {
+        // Search in both message and type
+        query = query.or(`error_message.ilike.%${search}%,error_type.ilike.%${search}%`);
+      }
+
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
 
       if (error) throw error;
-      return data ?? [];
+      return {
+        data: (data ?? []) as ErrorLog[],
+        count: count ?? 0,
+      };
     },
   });
 }

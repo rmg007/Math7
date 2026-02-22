@@ -5,6 +5,20 @@ All notable changes to the Questerix project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] - 2026-02-21
+
+### Fixed
+
+- **Error Monitoring**: Resolved inability to delete error logs by applying missing `DELETE` and `UPDATE` RLS policies for tenant/super admins.
+- **Accessibility**: Fixed 12+ "discernible text" lint errors in `ErrorLogsPage.tsx` by adding `title` attributes to all buttons and inputs.
+
+### Added
+
+- **Error Monitoring**: Implemented high-performance server-side filtration and pagination for error logs.
+- **Error Monitoring**: Debounced search functionality (500ms) with server-side `ilike` matching.
+- **Error Monitoring**: URL-persisted state for status filters and pagination to enable deep-linking and improved browser navigation.
+- **Testing**: Added comprehensive unit test suite for `useErrorLogs` hook covering pagination, searching, and deletion calls.
+
 ## [2.2.0] - 2026-02-21
 
 ### Security (Project HADES Hardening)

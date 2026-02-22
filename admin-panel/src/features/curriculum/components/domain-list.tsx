@@ -632,7 +632,7 @@ export function DomainList() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
+    <div data-testid="domains-list" className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
         title="Domains"
         description="Organize domain categories."

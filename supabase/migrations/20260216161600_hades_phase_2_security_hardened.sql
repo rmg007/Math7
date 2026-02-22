@@ -9,38 +9,13 @@
 -- ----------------------------------------------------------------------------
 DO $$ 
 BEGIN
-    -- ai_generation_sessions
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'ai_generation_sessions' AND column_name = 'app_id') THEN
-        ALTER TABLE public.ai_generation_sessions ADD COLUMN app_id UUID REFERENCES public.apps(app_id);
-    END IF;
-
-    -- Update Backfill for sessions
-    UPDATE public.ai_generation_sessions s
-    SET app_id = p.app_id
-    FROM public.profiles p
-    WHERE s.created_by = p.id AND s.app_id IS NULL;
-
-    -- invitation_codes
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'invitation_codes' AND column_name = 'app_id') THEN
-        ALTER TABLE public.invitation_codes ADD COLUMN app_id UUID REFERENCES public.apps(app_id);
-    END IF;
-
-    -- Update Backfill for codes
-    UPDATE public.invitation_codes i
-    SET app_id = p.app_id
-    FROM public.profiles p
-    WHERE i.created_by = p.id AND i.app_id IS NULL;
 
     -- known_issues
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'known_issues' AND column_name = 'app_id') THEN
         ALTER TABLE public.known_issues ADD COLUMN app_id UUID REFERENCES public.apps(app_id);
     END IF;
 
-    -- Update Backfill for issues
-    UPDATE public.known_issues k
-    SET app_id = p.app_id
-    FROM public.profiles p
-    WHERE k.created_by = p.id AND k.app_id IS NULL;
+    -- Update Backfill for issues (Skipped: created_by column missing in known_issues)
 END $$;
 
 -- 2. HARDEN JWT HELPER FUNCTIONS (TENANT-AWARE)
@@ -98,23 +73,6 @@ CREATE POLICY "security_logs_tenant_isolation" ON public.security_logs
     OR public.jwt_is_super_admin()
   );
 
--- AI GENERATION SESSIONS
-DROP POLICY IF EXISTS "Admins can manage generation sessions" ON public.ai_generation_sessions;
-CREATE POLICY "ai_generation_sessions_tenant_isolation" ON public.ai_generation_sessions
-  FOR ALL TO authenticated
-  USING (
-    (public.jwt_is_tenant_admin() AND app_id = public.current_app_id())
-    OR public.jwt_is_super_admin()
-  );
-
--- INVITATION CODES
-DROP POLICY IF EXISTS "invitation_codes_admin" ON public.invitation_codes;
-CREATE POLICY "invitation_codes_tenant_isolation" ON public.invitation_codes
-  FOR ALL TO authenticated
-  USING (
-    (public.jwt_is_tenant_admin() AND app_id = public.current_app_id())
-    OR public.jwt_is_super_admin()
-  );
 
 -- KNOWN ISSUES
 DROP POLICY IF EXISTS "Admins can manage known issues" ON public.known_issues;
@@ -125,32 +83,12 @@ CREATE POLICY "known_issues_tenant_isolation" ON public.known_issues
     OR public.jwt_is_super_admin()
   );
 
--- TENANT QUOTAS
-DROP POLICY IF EXISTS "Admins can manage tenant quotas" ON public.tenant_quotas;
-CREATE POLICY "tenant_quotas_tenant_isolation" ON public.tenant_quotas
-  FOR ALL TO authenticated
-  USING (
-    (public.jwt_is_tenant_admin() AND app_id = public.current_app_id())
-    OR public.jwt_is_super_admin()
-  );
-
--- CONTENT VALIDATION RULES
-DROP POLICY IF EXISTS "Admins can manage validation rules" ON public.content_validation_rules;
-CREATE POLICY "content_validation_rules_tenant_isolation" ON public.content_validation_rules
-  FOR ALL TO authenticated
-  USING (
-    (public.jwt_is_tenant_admin() AND app_id = public.current_app_id())
-    OR public.jwt_is_super_admin()
-  );
-
--- APPROVAL WORKFLOWS
-DROP POLICY IF EXISTS "Admins can manage approval workflows" ON public.approval_workflows;
-CREATE POLICY "approval_workflows_tenant_isolation" ON public.approval_workflows
-  FOR ALL TO authenticated
-  USING (
-    (public.jwt_is_tenant_admin() AND app_id = public.current_app_id())
-    OR public.jwt_is_super_admin()
-  );
+-- TENANT QUOTAS (Table missing in current schema sequence - skipping)
+-- DROP POLICY IF EXISTS "Admins can manage tenant quotas" ON public.tenant_quotas;
+-- CONTENT VALIDATION RULES (Table missing)
+-- DROP POLICY IF EXISTS "Admins can manage validation rules" ON public.content_validation_rules;
+-- APPROVAL WORKFLOWS (Table missing)
+-- DROP POLICY IF EXISTS "Admins can manage approval workflows" ON public.approval_workflows;
 
 -- PROFILES
 DROP POLICY IF EXISTS "profiles_tenant_isolation" ON public.profiles;

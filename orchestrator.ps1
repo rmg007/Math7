@@ -6,26 +6,40 @@
     - Landing Pages (Static HTML/CSS)
     - Admin Panel (React + Vite)
     - Student App (Flutter Web)
+    - Supabase (Schema migrations + Edge Functions)
 .PARAMETER Env
-    Environment to deploy to: 'production' or 'staging'
+    Environment to deploy to: 'production' or 'test'
+.PARAMETER Target
+    Which app(s) to deploy: 'admin-panel', 'student-app', or 'all' (default)
+.PARAMETER ConfirmProd
+    Required safety flag for production deploys. Without it, production deploys are blocked.
 .PARAMETER SkipBuild
     Skip the build phase (useful for re-deploying existing builds)
+.PARAMETER SkipSupabase
+    Skip the Supabase sync phase (schema push + Edge Functions deploy)
 .PARAMETER DryRun
     Validate everything but don't actually deploy
 .EXAMPLE
-    ./orchestrator.ps1
-    ./orchestrator.ps1 -Env staging
-    ./orchestrator.ps1 -DryRun
-    ./orchestrator.ps1 -SkipBuild
+    ./orchestrator.ps1 -Env test -Target admin-panel
+    ./orchestrator.ps1 -Env production -ConfirmProd -Target all
+    ./orchestrator.ps1 -Env test -DryRun
+    ./orchestrator.ps1 -Env production -ConfirmProd -SkipBuild
 #>
 
 param(
-    [ValidateSet('production', 'staging')]
+    [ValidateSet('production', 'test')]
     [string]$Env = 'production',
+    
+    [ValidateSet('admin-panel', 'student-app', 'all')]
+    [string]$Target = 'all',
+    
+    [switch]$ConfirmProd,
     
     [switch]$SkipBuild,
     
     [switch]$SkipTesting,
+    
+    [switch]$SkipSupabase,
     
     [switch]$DryRun
 )
@@ -175,8 +189,8 @@ function Invoke-PhaseValidation {
     
     # Determine config file
     $script:ConfigFile = Join-Path $ScriptDir 'master-config.json'
-    if ($Env -eq 'staging') {
-        $script:ConfigFile = Join-Path $ScriptDir 'master-config.staging.json'
+    if ($Env -eq 'test') {
+        $script:ConfigFile = Join-Path $ScriptDir 'master-config.test.json'
     }
     
     if (-not (Test-Path $script:ConfigFile)) {
@@ -213,6 +227,44 @@ function Invoke-PhaseGenerateEnv {
         Write-Err "Environment files generated but verification failed: $definesPath NOT FOUND"
         exit 1
     }
+}
+
+# =============================================================================
+# PHASE 2.5: SUPABASE SYNC (Schema + Edge Functions)
+# =============================================================================
+function Invoke-PhaseSupabaseSync {
+    Write-Phase "PHASE 2.5: SUPABASE SYNC"
+    
+    $projectRef = $script:Config.supabase.project_ref
+    if (-not $projectRef) {
+        Write-Err "supabase.project_ref not set in config file. Cannot sync."
+        exit 1
+    }
+    
+    Write-Info "Target Supabase project: $projectRef (env: $Env)"
+    
+    if ($DryRun) {
+        Write-Warn "Dry run - would push migrations and deploy Edge Functions to $projectRef"
+        return
+    }
+    
+    # Push schema migrations
+    Write-Info "Pushing schema migrations..."
+    npx supabase db push --project-ref $projectRef
+    if ($LASTEXITCODE -ne 0) {
+        Write-Err "Schema migration push FAILED for project $projectRef"
+        exit 1
+    }
+    Write-Success "Schema migrations applied to $projectRef"
+    
+    # Deploy Edge Functions
+    Write-Info "Deploying Edge Functions..."
+    npx supabase functions deploy --project-ref $projectRef
+    if ($LASTEXITCODE -ne 0) {
+        Write-Err "Edge Functions deployment FAILED for project $projectRef"
+        exit 1
+    }
+    Write-Success "Edge Functions deployed to $projectRef"
 }
 
 # =============================================================================
@@ -293,7 +345,7 @@ function Invoke-PhaseDeploy {
         return
     }
     
-    & (Join-Path $ScriptDir 'scripts\deploy\deploy-all.ps1') -ConfigFile $script:ConfigFile -SkipLanding:$SkipLanding
+    & (Join-Path $ScriptDir 'scripts\deploy\deploy-all.ps1') -ConfigFile $script:ConfigFile -Target $Target -SkipLanding:$SkipLanding
     
     Write-Success "All applications deployed"
 }
@@ -350,7 +402,15 @@ function Main {
     Write-Host ""
     Write-Info "QUESTERIX UNIFIED DEPLOYMENT PIPELINE"
     Write-Info "Started at: $(Get-Date)"
+    Write-Info "Environment: $Env | Target: $Target"
     Write-Host ""
+    
+    # ---- PRODUCTION SAFETY LOCK ----
+    if ($Env -eq 'production' -and -not $ConfirmProd) {
+        Write-Err "PRODUCTION DEPLOY BLOCKED: You must pass -ConfirmProd to deploy to production."
+        Write-Err "Example: ./orchestrator.ps1 -Env production -ConfirmProd -Target admin-panel"
+        exit 1
+    }
     
     if (-not $SkipTesting) {
         Invoke-PhaseTesting
@@ -359,6 +419,13 @@ function Main {
     }
     Invoke-PhaseValidation
     Invoke-PhaseGenerateEnv
+    
+    if (-not $SkipSupabase) {
+        Invoke-PhaseSupabaseSync
+    } else {
+        Write-Warn "Skipping Supabase sync phase (--SkipSupabase flag)"
+    }
+    
     Invoke-PhaseBuild
     Invoke-PhaseDeploy
     Invoke-PhaseCleanup

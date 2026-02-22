@@ -73,7 +73,10 @@ export function PublishPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
+    <div
+      data-testid="publish-page"
+      className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8"
+    >
       <AdminHeader
         title="Curriculum Release"
         description="Publish curriculum updates."

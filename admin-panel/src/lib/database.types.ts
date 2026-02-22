@@ -10,6 +10,7 @@ export type Database = {
     Tables: {
       ai_generation_sessions: {
         Row: {
+          app_id: string | null;
           created_at: string;
           created_by: string;
           deleted_at: string | null;
@@ -30,6 +31,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          app_id?: string | null;
           created_at?: string;
           created_by: string;
           deleted_at?: string | null;
@@ -50,6 +52,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          app_id?: string | null;
           created_at?: string;
           created_by?: string;
           deleted_at?: string | null;
@@ -70,6 +73,13 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: 'ai_generation_sessions_app_id_fkey';
+            columns: ['app_id'];
+            isOneToOne: false;
+            referencedRelation: 'apps';
+            referencedColumns: ['app_id'];
+          },
           {
             foreignKeyName: 'ai_generation_sessions_created_by_fkey';
             columns: ['created_by'];
@@ -358,33 +368,39 @@ export type Database = {
       };
       attempts: {
         Row: {
-          answered: Json;
           created_at: string;
+          deleted_at: string | null;
           id: string;
           is_correct: boolean;
-          points_earned: number;
           question_id: string;
+          response: Json;
+          score_awarded: number;
           time_spent_ms: number | null;
+          updated_at: string | null;
           user_id: string;
         };
         Insert: {
-          answered: Json;
           created_at?: string;
+          deleted_at?: string | null;
           id?: string;
           is_correct: boolean;
-          points_earned?: number;
           question_id: string;
+          response: Json;
+          score_awarded?: number;
           time_spent_ms?: number | null;
+          updated_at?: string | null;
           user_id: string;
         };
         Update: {
-          answered?: Json;
           created_at?: string;
+          deleted_at?: string | null;
           id?: string;
           is_correct?: boolean;
-          points_earned?: number;
           question_id?: string;
+          response?: Json;
+          score_awarded?: number;
           time_spent_ms?: number | null;
+          updated_at?: string | null;
           user_id?: string;
         };
         Relationships: [
@@ -831,6 +847,7 @@ export type Database = {
       };
       invitation_codes: {
         Row: {
+          app_id: string | null;
           code: string;
           created_at: string;
           created_by: string | null;
@@ -842,6 +859,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          app_id?: string | null;
           code: string;
           created_at?: string;
           created_by?: string | null;
@@ -853,6 +871,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          app_id?: string | null;
           code?: string;
           created_at?: string;
           created_by?: string | null;
@@ -865,6 +884,13 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: 'invitation_codes_app_id_fkey';
+            columns: ['app_id'];
+            isOneToOne: false;
+            referencedRelation: 'apps';
+            referencedColumns: ['app_id'];
+          },
+          {
             foreignKeyName: 'invitation_codes_created_by_fkey';
             columns: ['created_by'];
             isOneToOne: false;
@@ -875,6 +901,7 @@ export type Database = {
       };
       known_issues: {
         Row: {
+          app_id: string | null;
           created_at: string | null;
           created_by: string | null;
           description: string | null;
@@ -889,6 +916,7 @@ export type Database = {
           updated_at: string | null;
         };
         Insert: {
+          app_id?: string | null;
           created_at?: string | null;
           created_by?: string | null;
           description?: string | null;
@@ -903,6 +931,7 @@ export type Database = {
           updated_at?: string | null;
         };
         Update: {
+          app_id?: string | null;
           created_at?: string | null;
           created_by?: string | null;
           description?: string | null;
@@ -916,7 +945,15 @@ export type Database = {
           title?: string;
           updated_at?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'known_issues_app_id_fkey';
+            columns: ['app_id'];
+            isOneToOne: false;
+            referencedRelation: 'apps';
+            referencedColumns: ['app_id'];
+          },
+        ];
       };
       profiles: {
         Row: {
@@ -1075,11 +1112,62 @@ export type Database = {
           },
         ];
       };
+      sessions: {
+        Row: {
+          created_at: string | null;
+          deleted_at: string | null;
+          ended_at: string | null;
+          id: string;
+          questions_attempted: number | null;
+          questions_correct: number | null;
+          skill_id: string | null;
+          started_at: string;
+          total_time_ms: number | null;
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          deleted_at?: string | null;
+          ended_at?: string | null;
+          id?: string;
+          questions_attempted?: number | null;
+          questions_correct?: number | null;
+          skill_id?: string | null;
+          started_at?: string;
+          total_time_ms?: number | null;
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string | null;
+          deleted_at?: string | null;
+          ended_at?: string | null;
+          id?: string;
+          questions_attempted?: number | null;
+          questions_correct?: number | null;
+          skill_id?: string | null;
+          started_at?: string;
+          total_time_ms?: number | null;
+          updated_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'sessions_skill_id_fkey';
+            columns: ['skill_id'];
+            isOneToOne: false;
+            referencedRelation: 'skills';
+            referencedColumns: ['skill_id'];
+          },
+        ];
+      };
       skill_progress: {
         Row: {
           correct_attempts: number | null;
           created_at: string;
           current_streak: number | null;
+          deleted_at: string | null;
           id: string;
           last_attempt_at: string | null;
           longest_streak: number | null;
@@ -1094,6 +1182,7 @@ export type Database = {
           correct_attempts?: number | null;
           created_at?: string;
           current_streak?: number | null;
+          deleted_at?: string | null;
           id?: string;
           last_attempt_at?: string | null;
           longest_streak?: number | null;
@@ -1108,6 +1197,7 @@ export type Database = {
           correct_attempts?: number | null;
           created_at?: string;
           current_streak?: number | null;
+          deleted_at?: string | null;
           id?: string;
           last_attempt_at?: string | null;
           longest_streak?: number | null;
@@ -1407,11 +1497,14 @@ export type Database = {
           success: boolean;
         }[];
       };
-      is_admin: { Args: never; Returns: boolean };
-      is_tenant_admin: { Args: never; Returns: boolean };
+      is_group_in_app: {
+        Args: { p_app_id: string; p_group_id: string };
+        Returns: boolean;
+      };
       jwt_is_admin: { Args: never; Returns: boolean };
       jwt_is_mentor: { Args: never; Returns: boolean };
       jwt_is_super_admin: { Args: never; Returns: boolean };
+      jwt_is_tenant_admin: { Args: never; Returns: boolean };
       log_error: {
         Args: {
           p_app_id?: string;
@@ -1446,6 +1539,34 @@ export type Database = {
         Returns: string;
       };
       publish_curriculum: { Args: { p_app_id?: string }; Returns: Json };
+      pull_changes: {
+        Args: { last_sync_time?: string; table_name: string };
+        Returns: Json;
+      };
+      submit_attempt_and_update_progress: {
+        Args: { attempts_json: Json };
+        Returns: {
+          correct_attempts: number | null;
+          created_at: string;
+          current_streak: number | null;
+          deleted_at: string | null;
+          id: string;
+          last_attempt_at: string | null;
+          longest_streak: number | null;
+          mastery_level: number | null;
+          skill_id: string;
+          total_attempts: number | null;
+          total_points: number | null;
+          updated_at: string;
+          user_id: string;
+        }[];
+        SetofOptions: {
+          from: '*';
+          to: 'skill_progress';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
       validate_and_use_invitation_code: {
         Args: { p_code: string };
         Returns: boolean;

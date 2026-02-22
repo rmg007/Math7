@@ -44,20 +44,5 @@ CREATE POLICY curriculum_snapshots_admin_delete ON public.curriculum_snapshots
   USING (jwt_is_tenant_admin() OR jwt_is_super_admin());
 
 
--- ---- source_documents ----
--- Admins fully manage the source documents library (CRUD).
-CREATE POLICY source_documents_admin_select ON public.source_documents
-  FOR SELECT TO authenticated
-  USING (jwt_is_tenant_admin() OR jwt_is_super_admin());
-
-CREATE POLICY source_documents_admin_insert ON public.source_documents
-  FOR INSERT TO authenticated
-  WITH CHECK (jwt_is_tenant_admin() OR jwt_is_super_admin());
-
-CREATE POLICY source_documents_admin_update ON public.source_documents
-  FOR UPDATE TO authenticated
-  USING (jwt_is_tenant_admin() OR jwt_is_super_admin());
-
-CREATE POLICY source_documents_admin_delete ON public.source_documents
-  FOR DELETE TO authenticated
-  USING (jwt_is_tenant_admin() OR jwt_is_super_admin());
+-- ---- source_documents ---- (Table missing in current schema sequence - skipping)
+-- CREATE POLICY source_documents_admin_select ON public.source_documents ...

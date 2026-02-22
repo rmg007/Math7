@@ -32,87 +32,33 @@ const SUPER_ADMIN_ROUTES = [
 // ── StandardAdmin routes (admin+mentor only, not student) ────────────────────
 const STANDARD_ADMIN_ROUTES = ['/groups', '/groups/new'] as const;
 
-// ── All protected routes (require any auth) ──────────────────────────────────
-const AUTH_REQUIRED_ROUTES = [
-  '/domains',
-  '/skills',
-  '/questions',
-  '/publish',
-  '/settings',
-  '/known-issues',
-  '/error-logs',
-  ...SUPER_ADMIN_ROUTES,
-  ...STANDARD_ADMIN_ROUTES,
-] as const;
+// stubSessionAs removed as it's unused (using real logins for E2E)
 
-// ---------------------------------------------------------------------------
-// Helper: stub a session with a given role so we don't need real accounts
-// for every role variant. Uses page.route() to intercept the Supabase session
-// endpoint and synthesize a JWT-bearing session.
-// ---------------------------------------------------------------------------
-async function stubSessionAs(
-  page: import('@playwright/test').Page,
-  role: 'admin' | 'mentor' | 'super_admin' | 'student'
-) {
-  // Intercept Supabase auth/v1/user and return a synthetic profile
-  await page.route('**/auth/v1/user**', (route) => {
-    void route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        id: `test-${role}-id`,
-        email: `test-${role}@example.com`,
-        user_metadata: {},
-        app_metadata: { user_role: role },
-        role: 'authenticated',
-      }),
-    });
-  });
-
-  // Intercept Supabase profiles RPC / select to return app_id + role
-  await page.route('**/rest/v1/profiles**', (route) => {
-    void route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify([
-        {
-          id: `test-${role}-id`,
-          app_id: 'test-app-id',
-          role: role,
-          email: `test-${role}@example.com`,
-          full_name: `Test ${role}`,
-        },
-      ]),
-    });
-  });
-}
-
-// ============================================================================
-// AP-RBAC-001: Super-admin routes block admin-role users
-// ============================================================================
-test.describe('AP-RBAC-001: Super-Admin Routes Blocked for Admin Role', () => {
-  // We perform a real login as ADMIN then try to navigate to super-admin routes.
+test.describe('AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role', () => {
+  // We perform a real login then try to navigate to super-admin routes.
   // The guards should redirect away from these routes.
-  test.skip(!process.env.TEST_ADMIN_EMAIL, 'Skipped: TEST_ADMIN_EMAIL not set');
 
-  for (const route of SUPER_ADMIN_ROUTES) {
-    test(`admin-role cannot access ${route}`, async ({ page }) => {
-      // Real login as admin-role user
-      await login(page, TEST_USERS.ADMIN.email, TEST_USERS.ADMIN.password);
+  const ROLES_TO_LOCK_OUT = [
+    { role: 'admin', user: TEST_USERS.ADMIN },
+    { role: 'mentor', user: TEST_USERS.MENTOR },
+    { role: 'student', user: TEST_USERS.STUDENT },
+  ];
 
-      // Navigate directly to the super-admin route
-      await page.goto(route);
-
-      // Wait for navigation to settle
-      await page.waitForURL(
-        (url) =>
-          !SUPER_ADMIN_ROUTES.some((r) => url.pathname === r) &&
-          !url.pathname.startsWith('/login'),
-        { timeout: 10000 }
-      );
-
-      // Must NOT be on the target route
-      expect(SUPER_ADMIN_ROUTES).not.toContain(page.url().split('?')[0].replace(/.*localhost:\d+/, ''));
+  for (const { role, user } of ROLES_TO_LOCK_OUT) {
+    test.describe(`${role} lockout`, () => {
+      for (const route of SUPER_ADMIN_ROUTES) {
+        test(`${role} cannot access ${route}`, async ({ page }) => {
+          await login(page, user.email, user.password);
+          await page.goto(route);
+          await page.waitForURL(
+            (url) =>
+              !SUPER_ADMIN_ROUTES.some((r) => url.pathname === r) &&
+              !url.pathname.startsWith('/login'),
+            { timeout: 10000 }
+          );
+          expect(SUPER_ADMIN_ROUTES).not.toContain(new URL(page.url()).pathname);
+        });
+      }
     });
   }
 });
@@ -123,24 +69,12 @@ test.describe('AP-RBAC-001: Super-Admin Routes Blocked for Admin Role', () => {
 test.describe('AP-RBAC-002: StandardAdmin Routes Blocked for Student Role', () => {
   for (const route of STANDARD_ADMIN_ROUTES) {
     test(`student-role cannot access ${route}`, async ({ page }) => {
-      // If student account exists in test env, use it; otherwise use mocked session
-      const studentEmail = process.env.TEST_STUDENT_EMAIL;
-      const studentPassword = process.env.TEST_STUDENT_PASSWORD;
-
-      if (studentEmail && studentPassword) {
-        await login(page, studentEmail, studentPassword);
-      } else {
-        // Stub: navigate to login first to get a page context, then mock auth
-        // This path skips if no real student account — mark the test as expected-skip
-        test.skip(true, 'No TEST_STUDENT_EMAIL configured — skipping student role test');
-      }
-
+      await login(page, TEST_USERS.STUDENT.email, TEST_USERS.STUDENT.password);
       await page.goto(route);
 
-      await page.waitForURL(
-        (url) => !STANDARD_ADMIN_ROUTES.some((r) => url.pathname === r),
-        { timeout: 10000 }
-      );
+      await page.waitForURL((url) => !STANDARD_ADMIN_ROUTES.some((r) => url.pathname === r), {
+        timeout: 10000,
+      });
 
       const currentPath = new URL(page.url()).pathname;
       expect(STANDARD_ADMIN_ROUTES as readonly string[]).not.toContain(currentPath);
@@ -188,8 +122,6 @@ test.describe('AP-RBAC-003: Unauthenticated Users Redirected to /login', () => {
 // AP-RBAC-004: Super admin can access ALL super-admin routes
 // ============================================================================
 test.describe('AP-RBAC-004: Super Admin Accesses All Routes', () => {
-  test.skip(!process.env.TEST_SUPER_ADMIN_EMAIL, 'Skipped: TEST_SUPER_ADMIN_EMAIL not set');
-
   test.beforeEach(async ({ page }) => {
     await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
   });
@@ -216,14 +148,12 @@ test.describe('AP-RBAC-004: Super Admin Accesses All Routes', () => {
 // ============================================================================
 test.describe('AP-RBAC-005: RoleRedirect at / (root)', () => {
   test('super_admin navigating to / lands on /dashboard', async ({ page }) => {
-    test.skip(!process.env.TEST_SUPER_ADMIN_EMAIL, 'No TEST_SUPER_ADMIN_EMAIL');
     await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
     await page.goto('/');
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
   });
 
   test('admin navigating to / lands on /domains', async ({ page }) => {
-    test.skip(!process.env.TEST_ADMIN_EMAIL, 'No TEST_ADMIN_EMAIL');
     await login(page, TEST_USERS.ADMIN.email, TEST_USERS.ADMIN.password);
     await page.goto('/');
     await expect(page).toHaveURL(/\/domains/, { timeout: 10000 });
@@ -234,14 +164,11 @@ test.describe('AP-RBAC-005: RoleRedirect at / (root)', () => {
 // AP-RBAC-006: API-level — direct supabase call with wrong app_id is blocked by RLS
 // ============================================================================
 test.describe('AP-RBAC-006: API-level multi-tenant isolation', () => {
-  test('admin cannot SELECT domains from another tenant via raw API call', async ({
-    page,
-  }) => {
+  test('admin cannot SELECT domains from another tenant via raw API call', async ({ page }) => {
     const supabaseUrl = process.env.VITE_SUPABASE_URL ?? '';
     const anonKey = process.env.VITE_SUPABASE_ANON_KEY ?? '';
 
     test.skip(!supabaseUrl || !anonKey, 'Supabase env vars not set');
-    test.skip(!process.env.TEST_ADMIN_EMAIL, 'No TEST_ADMIN_EMAIL');
 
     // Login as admin to get a real session token
     await login(page, TEST_USERS.ADMIN.email, TEST_USERS.ADMIN.password);
@@ -276,7 +203,7 @@ test.describe('AP-RBAC-006: API-level multi-tenant isolation', () => {
     );
 
     // RLS must return 0 rows for a fake app_id, never throw an error
-    const data = await response.json() as unknown[];
+    const data = (await response.json()) as unknown[];
     expect(data).toHaveLength(0);
   });
 });

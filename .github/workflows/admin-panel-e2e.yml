@@ -11,9 +11,14 @@ on:
       - "admin-panel/**"
   workflow_dispatch:
 
+# Serialize E2E runs — only one at a time against the shared test DB
+concurrency:
+  group: e2e-test-database
+  cancel-in-progress: true
+
 env:
-  VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-  VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+  VITE_SUPABASE_URL: ${{ secrets.TEST_VITE_SUPABASE_URL }}
+  VITE_SUPABASE_ANON_KEY: ${{ secrets.TEST_VITE_SUPABASE_ANON_KEY }}
 
 jobs:
   test-e2e:
@@ -26,6 +31,7 @@ jobs:
       TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
       TEST_SUPER_ADMIN_EMAIL: ${{ secrets.TEST_SUPER_ADMIN_EMAIL }}
       TEST_SUPER_ADMIN_PASSWORD: ${{ secrets.TEST_SUPER_ADMIN_PASSWORD }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
     defaults:
       run:
@@ -42,8 +48,29 @@ jobs:
           cache: "npm"
           cache-dependency-path: admin-panel/package-lock.json
 
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Sync test database schema
+        working-directory: .
+        run: |
+          echo "Pushing migrations to test database..."
+          supabase db push --project-ref ${{ secrets.TEST_SUPABASE_PROJECT_ID }}
+          echo "✅ Test database schema is in sync"
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+
+      - name: Deploy Edge Functions to test
+        working-directory: .
+        run: |
+          echo "Deploying Edge Functions to test database..."
+          supabase functions deploy --project-ref ${{ secrets.TEST_SUPABASE_PROJECT_ID }}
+          echo "✅ Edge Functions deployed to test"
+
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps --legacy-peer-deps
+        run: npm ci --legacy-peer-deps
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium webkit
@@ -125,6 +152,7 @@ jobs:
               const comment = `## ${emoji} E2E Test Results
               
               **Status**: ${status}
+              **Database**: QuesterixDB-test (isolated)
               
               | Metric | Count |
               |--------|-------|
@@ -169,7 +197,7 @@ jobs:
           cache-dependency-path: admin-panel/package-lock.json
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps --legacy-peer-deps
+        run: npm ci --legacy-peer-deps
 
       - name: Build application
         run: npm run build

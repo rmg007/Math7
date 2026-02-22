@@ -1,16 +1,16 @@
 {
   "version": "0.9.0",
-  "environment": "production",
+  "environment": "test",
   "global": {
-    "SUPABASE_URL": "https://bkfhorslctqieetzqdtd.supabase.co",
-    "API_BASE_URL": "https://api.questerix.com",
-    "STUDENT_APP_URL": "https://app.questerix.com",
-    "ADMIN_PANEL_URL": "https://admin.questerix.com",
+    "SUPABASE_URL": "https://rfhzukdjbahdlakjupyg.supabase.co",
+    "API_BASE_URL": "https://rfhzukdjbahdlakjupyg.supabase.co",
+    "STUDENT_APP_URL": "http://localhost:3000",
+    "ADMIN_PANEL_URL": "http://localhost:5000",
     "THEME_PRIMARY_COLOR": "0xFF319795",
     "SENTRY_DSN": ""
   },
   "admin": {
-    "VITE_APP_NAME": "Questerix Admin",
+    "VITE_APP_NAME": "Questerix Admin (Test)",
     "VITE_APP_VERSION": "${version}",
     "VITE_SUPABASE_URL": "${global.SUPABASE_URL}",
     "VITE_SUPABASE_ANON_KEY": "${global.SUPABASE_ANON_KEY}",
@@ -19,15 +19,15 @@
     "VITE_GEMINI_API_KEY": "${global.GEMINI_API_KEY}"
   },
   "student": {
-    "APP_NAME": "Questerix",
+    "APP_NAME": "Questerix (Test)",
     "APP_VERSION": "${version}",
     "SUPABASE_URL": "${global.SUPABASE_URL}",
     "SUPABASE_ANON_KEY": "${global.SUPABASE_ANON_KEY}",
     "THEME_PRIMARY_COLOR": "${global.THEME_PRIMARY_COLOR}",
     "ENABLE_OFFLINE_FIRST": "true",
     "DRIFT_DB_VERSION": "1",
-    "SENTRY_ENABLED": "true",
-    "SENTRY_DSN": "${global.SENTRY_DSN}",
+    "SENTRY_ENABLED": "false",
+    "SENTRY_DSN": "",
     "DEV_SUBDOMAIN": "app"
   },
   "cloudflare": {
@@ -36,6 +36,6 @@
     "student_project": "questerix-student"
   },
   "supabase": {
-    "project_ref": "bkfhorslctqieetzqdtd"
+    "project_ref": "rfhzukdjbahdlakjupyg"
   }
 }

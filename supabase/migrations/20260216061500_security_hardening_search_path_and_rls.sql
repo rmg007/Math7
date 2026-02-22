@@ -20,9 +20,6 @@ CREATE POLICY "landing_pages_admin_delete" ON public.app_landing_pages
   USING (public.jwt_is_admin() OR public.jwt_is_super_admin());
 
 -- 2. Fix search_path on all flagged functions
-ALTER FUNCTION public.custom_access_token_hook(jsonb) SET search_path = '';
-ALTER FUNCTION public.deactivate_own_account() SET search_path = '';
-ALTER FUNCTION public.delete_own_account() SET search_path = '';
 ALTER FUNCTION public.log_security_event(text, text, jsonb, uuid, text) SET search_path = '';
 ALTER FUNCTION public.update_updated_at_column() SET search_path = '';
 ALTER FUNCTION public.jwt_is_admin() SET search_path = '';
@@ -31,9 +28,7 @@ ALTER FUNCTION public.jwt_is_super_admin() SET search_path = '';
 ALTER FUNCTION public.is_tenant_admin() SET search_path = '';
 ALTER FUNCTION public.current_app_id() SET search_path = '';
 ALTER FUNCTION public.publish_curriculum(uuid) SET search_path = '';
-ALTER FUNCTION public.log_error(text, text, text, text, text, text, text, uuid, jsonb) SET search_path = '';
-ALTER FUNCTION public.is_admin() SET search_path = '';
-ALTER FUNCTION public.consume_tenant_tokens(uuid, integer, text) SET search_path = '';
+ALTER FUNCTION public.log_error(text, text, text, text, text, text, text, jsonb, uuid) SET search_path = '';
 ALTER FUNCTION public.validate_invitation_code(text) SET search_path = '';
 ALTER FUNCTION public.generate_invitation_code(integer, integer) SET search_path = '';
 ALTER FUNCTION public.deactivate_invitation_code(uuid) SET search_path = '';
@@ -79,8 +74,3 @@ CREATE POLICY "skill_progress_own_or_admin" ON public.skill_progress
     OR public.jwt_is_super_admin()
   );
 
--- student_recovery_keys: only own keys
-CREATE POLICY "recovery_keys_own_only" ON public.student_recovery_keys
-  FOR ALL TO authenticated
-  USING (student_id = auth.uid())
-  WITH CHECK (student_id = auth.uid());

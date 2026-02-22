@@ -217,13 +217,20 @@ export function DomainForm() {
       />
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          data-testid="domain-form"
+          className="space-y-8"
+        >
           <fieldset
             disabled={form.formState.isSubmitting}
             className="space-y-8 disabled:opacity-60"
           >
             {error && (
-              <div className="p-4 rounded-2xl bg-red-50 border border-red-100 flex items-start gap-4">
+              <div
+                data-testid="form-error"
+                className="p-4 rounded-2xl bg-red-50 border border-red-100 flex items-start gap-4"
+              >
                 <div className="p-2 bg-red-100 rounded-full shrink-0">
                   <ShieldCheck className="w-5 h-5 text-red-600" />
                 </div>

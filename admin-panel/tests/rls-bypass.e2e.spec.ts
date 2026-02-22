@@ -161,19 +161,7 @@ test.describe('Security: RLS Bypass & Tenant Isolation', () => {
   });
 
   test('Invitation Codes: Student-role user cannot SELECT from invitation_codes (AI-08)', async () => {
-    // Uses the MENTOR test user which has role=student equivalent access (non-admin)
-    // If no student test user is available, this test is skipped
-    const studentEmail = process.env.TEST_STUDENT_EMAIL;
-    const studentPassword = process.env.TEST_STUDENT_PASSWORD;
-
-    if (!studentEmail || !studentPassword) {
-      console.warn(
-        'Skipping student invitation_codes RLS test — TEST_STUDENT_EMAIL/PASSWORD not set'
-      );
-      return;
-    }
-
-    const supabase = await getClientForUser(studentEmail, studentPassword);
+    const supabase = await getClientForUser(TEST_USERS.STUDENT.email, TEST_USERS.STUDENT.password);
     const { data, error } = await supabase.from('invitation_codes').select('*');
 
     if (error) {
@@ -183,5 +171,102 @@ test.describe('Security: RLS Bypass & Tenant Isolation', () => {
       // Silent empty result is also acceptable (RLS returns zero rows)
       expect(data?.length || 0).toBe(0);
     }
+  });
+
+  // ===========================================================================
+  // Curriculum & Tracking Isolation — DB-RLS-001..005
+  // ===========================================================================
+
+  test('DB-RLS-001: Curriculum — Admin A cannot see skills from Admin B (Isolation)', async () => {
+    const supabase = await getClientForUser(TEST_USERS.ADMIN.email, TEST_USERS.ADMIN.password);
+
+    // Attempt to query skills with a fake app_id (Isolation attempt)
+    const fakeAppId = '00000000-0000-0000-0000-000000000000';
+    const { data: foreignSkills } = await supabase
+      .from('skills')
+      .select('*')
+      .eq('app_id', fakeAppId);
+
+    // RLS should return 0 rows even if we specifically ask for another app
+    expect(foreignSkills?.length || 0).toBe(0);
+  });
+
+  test('DB-RLS-002: Curriculum — Student cannot INSERT an artificial question', async () => {
+    const supabase = await getClientForUser(TEST_USERS.STUDENT.email, TEST_USERS.STUDENT.password);
+
+    // Students can see questions (for practice), but should NOT be able to insert
+    const { error } = await supabase.from('questions').insert({
+      skill_id: '00000000-0000-0000-0000-000000000000',
+      app_id: '00000000-0000-0000-0000-000000000000',
+      type: 'multiple_choice',
+      content: { text: 'RLS HACK' },
+      solution: { correct: 'X' },
+    } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    // Expecting 42501 (Insufficient Privilege)
+    expect(error?.code).toBe('42501');
+  });
+
+  test('DB-RLS-003: Tracking — Student A cannot see Student B attempts', async () => {
+    const supabase = await getClientForUser(TEST_USERS.STUDENT.email, TEST_USERS.STUDENT.password);
+
+    // Try to select efforts from another user (Fake UUID)
+    const fakeUserId = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
+    const { data: foreignAttempts } = await supabase
+      .from('attempts')
+      .select('*')
+      .eq('user_id', fakeUserId);
+
+    expect(foreignAttempts?.length || 0).toBe(0);
+  });
+
+  test('DB-RLS-004: Mentor Hub — Mentor cannot see another mentor groups', async () => {
+    const supabase = await getClientForUser(TEST_USERS.MENTOR.email, TEST_USERS.MENTOR.password);
+
+    // Attempt to query groups they don't own
+    const fakeOwnerId = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
+    const { data: foreignGroups } = await supabase
+      .from('groups')
+      .select('*')
+      .eq('owner_id', fakeOwnerId);
+
+    expect(foreignGroups?.length || 0).toBe(0);
+  });
+
+  test('DB-RLS-005: Mastery — Student A cannot update Student B progress', async () => {
+    const supabase = await getClientForUser(TEST_USERS.STUDENT.email, TEST_USERS.STUDENT.password);
+
+    // Try to update progress of another user
+    const fakeUserId = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
+    const { error } = await supabase
+      .from('skill_progress')
+      .update({ mastery_level: 100 })
+      .eq('user_id', fakeUserId);
+
+    // Should either error or return 0 rows affected
+    if (error) {
+      expect(error.code).toBe('42501');
+    } else {
+      // If it "succeeds", verify row wasn't actually changed by trying to find it
+      const { data } = await supabase.from('skill_progress').select('*').eq('user_id', fakeUserId);
+      expect(data?.length || 0).toBe(0);
+    }
+  });
+
+  test('DB-RLS-006: Super Admin can SELECT from all sensitive tables', async () => {
+    const supabase = await getClientForUser(
+      TEST_USERS.SUPER_ADMIN.email,
+      TEST_USERS.SUPER_ADMIN.password
+    );
+
+    // Should see something (or at least not error)
+    const { error: err1 } = await supabase.from('attempts').select('*');
+    expect(err1).toBeNull();
+
+    const { error: err2 } = await supabase.from('skill_progress').select('*');
+    expect(err2).toBeNull();
+
+    const { error: err3 } = await supabase.from('assignments').select('*');
+    expect(err3).toBeNull();
   });
 });

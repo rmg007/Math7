@@ -49,52 +49,6 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
--- ┌─────────────────────────────────────────────────────────────────────────────┐
--- │ SECTION 3: HELPER FUNCTIONS (Security & Logic)                              │
--- └─────────────────────────────────────────────────────────────────────────────┘
-
--- JWT-based admin check (No DB query)
-CREATE OR REPLACE FUNCTION public.jwt_is_admin()
-RETURNS BOOLEAN LANGUAGE sql STABLE AS $$
-  SELECT COALESCE((auth.jwt() ->> 'user_role') IN ('super_admin', 'admin'), false);
-$$;
-
-CREATE OR REPLACE FUNCTION public.jwt_is_super_admin()
-RETURNS BOOLEAN LANGUAGE sql STABLE AS $$
-  SELECT COALESCE((auth.jwt() ->> 'user_role') = 'super_admin', false);
-$$;
-
-CREATE OR REPLACE FUNCTION public.jwt_is_mentor()
-RETURNS BOOLEAN LANGUAGE sql STABLE AS $$
-  SELECT COALESCE((auth.jwt() ->> 'user_role') = 'mentor', false);
-$$;
-
--- Tenant context helpers (Cached in session where possible)
-CREATE OR REPLACE FUNCTION public.is_tenant_admin()
-RETURNS BOOLEAN LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
-BEGIN
-    RETURN EXISTS (
-        SELECT 1 FROM public.profiles 
-        WHERE id = auth.uid() 
-        AND role IN ('admin', 'super_admin') 
-        AND app_id IS NOT NULL
-    );
-END;
-$$;
-
-CREATE OR REPLACE FUNCTION public.current_app_id()
-RETURNS UUID LANGUAGE sql STABLE SECURITY DEFINER AS $$
-    SELECT app_id FROM public.profiles WHERE id = auth.uid();
-$$;
-
--- Utility: Generic timestamp updater
-CREATE OR REPLACE FUNCTION public.update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
 
 -- ┌─────────────────────────────────────────────────────────────────────────────┐
 -- │ SECTION 4: CORE TABLES                                                       │
@@ -290,6 +244,53 @@ CREATE TABLE IF NOT EXISTS public.ai_token_usage (
   user_id UUID REFERENCES public.profiles(id),
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- ┌─────────────────────────────────────────────────────────────────────────────┐
+-- │ SECTION 3: HELPER FUNCTIONS (Security & Logic)                              │
+-- └─────────────────────────────────────────────────────────────────────────────┘
+
+-- JWT-based admin check (No DB query)
+CREATE OR REPLACE FUNCTION public.jwt_is_admin()
+RETURNS BOOLEAN LANGUAGE sql STABLE AS $$
+  SELECT COALESCE((auth.jwt() ->> 'user_role') IN ('super_admin', 'admin'), false);
+$$;
+
+CREATE OR REPLACE FUNCTION public.jwt_is_super_admin()
+RETURNS BOOLEAN LANGUAGE sql STABLE AS $$
+  SELECT COALESCE((auth.jwt() ->> 'user_role') = 'super_admin', false);
+$$;
+
+CREATE OR REPLACE FUNCTION public.jwt_is_mentor()
+RETURNS BOOLEAN LANGUAGE sql STABLE AS $$
+  SELECT COALESCE((auth.jwt() ->> 'user_role') = 'mentor', false);
+$$;
+
+-- Tenant context helpers (Cached in session where possible)
+CREATE OR REPLACE FUNCTION public.is_tenant_admin()
+RETURNS BOOLEAN LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1 FROM public.profiles 
+        WHERE id = auth.uid() 
+        AND role IN ('admin', 'super_admin') 
+        AND app_id IS NOT NULL
+    );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.current_app_id()
+RETURNS UUID LANGUAGE sql STABLE SECURITY DEFINER AS $$
+    SELECT app_id FROM public.profiles WHERE id = auth.uid();
+$$;
+
+-- Utility: Generic timestamp updater
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
 -- ┌─────────────────────────────────────────────────────────────────────────────┐
 -- │ SECTION 9: ROW LEVEL SECURITY                                               │

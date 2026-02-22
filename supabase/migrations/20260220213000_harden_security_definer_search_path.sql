@@ -25,10 +25,8 @@ ALTER FUNCTION public.generate_invitation_code(integer, integer)
 ALTER FUNCTION public.import_questions_bulk(jsonb)
   SET search_path = public, auth;
 
-ALTER FUNCTION public.is_group_in_app(uuid, uuid)
-  SET search_path = public, auth;
 
-ALTER FUNCTION public.log_error(text, text, text, text, text, text, text, uuid, jsonb)
+ALTER FUNCTION public.log_error(text, text, text, text, text, text, text, jsonb, uuid)
   SET search_path = public, auth;
 
 ALTER FUNCTION public.log_security_event(text, text, jsonb, uuid, text)
@@ -40,8 +38,6 @@ ALTER FUNCTION public.promote_error_to_issue(uuid, text, text, text)
 ALTER FUNCTION public.publish_curriculum(uuid)
   SET search_path = public, auth;
 
-ALTER FUNCTION public.sync_user_role()
-  SET search_path = public, auth;
 
 ALTER FUNCTION public.validate_invitation_code(text)
   SET search_path = public, auth;

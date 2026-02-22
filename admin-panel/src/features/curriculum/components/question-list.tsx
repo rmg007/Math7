@@ -712,7 +712,7 @@ export function QuestionList() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
+    <div data-testid="questions-list" className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
         title="Questions"
         description="Manage your question bank."

@@ -3,21 +3,22 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useApp } from '@/hooks/use-app';
@@ -26,14 +27,14 @@ import { Database } from '@/lib/database.types';
 import { normalizeFormData } from '@/lib/normalization';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-    CheckCircle2,
-    FileText,
-    HelpCircle,
-    Layers,
-    Loader2,
-    Plus,
-    Settings,
-    Trash,
+  CheckCircle2,
+  FileText,
+  HelpCircle,
+  Layers,
+  Loader2,
+  Plus,
+  Settings,
+  Trash,
 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -42,12 +43,12 @@ import { z } from 'zod';
 import { useCreateQuestion, useUpdateQuestion } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 import {
-    BooleanSolution,
-    McqMultiSolution,
-    McqSolution,
-    QuestionOptions,
-    ReorderStepsSolution,
-    TextInputSolution,
+  BooleanSolution,
+  McqMultiSolution,
+  McqSolution,
+  QuestionOptions,
+  ReorderStepsSolution,
+  TextInputSolution,
 } from '../types/question-types';
 
 type Question = Database['public']['Tables']['questions']['Row'];
@@ -342,6 +343,72 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                         {questionType.replace('_', ' ')}
                       </span>
                     </div>
+
+                    {/* Multiple Choice Implementation */}
+                    {questionType === 'multiple_choice' && (
+                      <div className="space-y-6">
+                        <RadioGroup
+                          value={form.watch('solution') as string}
+                          onValueChange={(val) => form.setValue('solution', val)}
+                          className="space-y-4"
+                        >
+                          {currentOptions.map(
+                            (opt: { id: string; text: string }, index: number) => (
+                              <div key={index} className="flex items-center gap-4 group">
+                                <RadioGroupItem
+                                  value={opt.id}
+                                  className="w-6 h-6 border-2 border-gray-200 text-indigo-600 focus:ring-indigo-500/20"
+                                />
+                                <div className="flex-1 flex gap-3">
+                                  <Input
+                                    value={opt.text}
+                                    onChange={(e) => {
+                                      const newOpts = [...currentOptions];
+                                      newOpts[index].text = e.target.value;
+                                      form.setValue('options', { options: newOpts });
+                                    }}
+                                    placeholder={`Option ${opt.id.toUpperCase()}`}
+                                    className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                                    required
+                                  />
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => {
+                                    const newOpts = [...currentOptions];
+                                    newOpts.splice(index, 1);
+                                    form.setValue('options', { options: newOpts });
+                                    // If this was the correct answer, clear the solution
+                                    if (form.getValues('solution') === opt.id) {
+                                      form.setValue('solution', '');
+                                    }
+                                  }}
+                                  className="text-red-400 hover:text-red-600 hover:bg-red-50"
+                                >
+                                  <Trash className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )
+                          )}
+                        </RadioGroup>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const nextId = String.fromCharCode(97 + currentOptions.length);
+                            form.setValue('options', {
+                              options: [...currentOptions, { id: nextId, text: '' }],
+                            });
+                          }}
+                          className="rounded-xl border-dashed border-2 border-gray-200 text-gray-400 hover:text-indigo-600 hover:border-indigo-200 transition-all font-bold text-2xs uppercase tracking-widest"
+                        >
+                          <Plus className="mr-2 h-3 w-3" /> Append Option
+                        </Button>
+                      </div>
+                    )}
 
                     {/* MCQ Multi Implementation */}
                     {questionType === 'mcq_multi' && (

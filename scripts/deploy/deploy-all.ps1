@@ -1,9 +1,13 @@
 # deploy-all.ps1 - Sequential Deployment to Cloudflare Pages
 # Hardened for reliability in this environment.
+# Supports selective deployment via --Target parameter.
 
 param(
     [Parameter(Mandatory=$true)]
     [string]$ConfigFile,
+
+    [ValidateSet('admin-panel', 'student-app', 'all')]
+    [string]$Target = 'all',
 
     [switch]$IncludeLanding,
     
@@ -21,7 +25,7 @@ $cfLanding = $config.cloudflare.landing_project
 $cfAdmin = $config.cloudflare.admin_project
 $cfStudent = $config.cloudflare.student_project
 
-Write-Host "Starting deployments sequentially for reliability..." -ForegroundColor Cyan
+Write-Host "Starting deployments (Target: $Target)..." -ForegroundColor Cyan
 
 # Use current environment's CLOUDFLARE_API_TOKEN if set
 if ($env:CLOUDFLARE_API_TOKEN) {
@@ -29,7 +33,7 @@ if ($env:CLOUDFLARE_API_TOKEN) {
 }
 
 # 1. Landing Pages (Optional)
-if ($IncludeLanding -and $cfLanding) {
+if ($IncludeLanding -and $cfLanding -and ($Target -eq 'all')) {
     Write-Host "[DEPLOY] Deploying Landing Pages..." -ForegroundColor Cyan
     $landingDir = Join-Path $RootDir 'landing-pages\dist'
     npx -y wrangler pages deploy $landingDir --project-name $cfLanding --commit-dirty --branch main
@@ -41,23 +45,27 @@ if ($IncludeLanding -and $cfLanding) {
 }
 
 # 2. Admin Panel
-Write-Host "[DEPLOY] Deploying Admin Panel..." -ForegroundColor Cyan
-$adminDist = Join-Path $RootDir 'admin-panel\dist'
-npx -y wrangler pages deploy $adminDist --project-name $cfAdmin --commit-dirty --branch main
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "[PASS] Admin Panel deployed successfully" -ForegroundColor Green
-} else {
-    Write-Error "Admin Panel deployment FAILED"
+if ($Target -eq 'all' -or $Target -eq 'admin-panel') {
+    Write-Host "[DEPLOY] Deploying Admin Panel..." -ForegroundColor Cyan
+    $adminDist = Join-Path $RootDir 'admin-panel\dist'
+    npx -y wrangler pages deploy $adminDist --project-name $cfAdmin --commit-dirty --branch main
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[PASS] Admin Panel deployed successfully" -ForegroundColor Green
+    } else {
+        Write-Error "Admin Panel deployment FAILED"
+    }
 }
 
 # 3. Student App
-Write-Host "[DEPLOY] Deploying Student App..." -ForegroundColor Cyan
-$studentBuild = Join-Path $RootDir 'student-app\build\web'
-npx -y wrangler pages deploy $studentBuild --project-name $cfStudent --commit-dirty --branch main
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "[PASS] Student App deployed successfully" -ForegroundColor Green
-} else {
-    Write-Error "Student App deployment FAILED"
+if ($Target -eq 'all' -or $Target -eq 'student-app') {
+    Write-Host "[DEPLOY] Deploying Student App..." -ForegroundColor Cyan
+    $studentBuild = Join-Path $RootDir 'student-app\build\web'
+    npx -y wrangler pages deploy $studentBuild --project-name $cfStudent --commit-dirty --branch main
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[PASS] Student App deployed successfully" -ForegroundColor Green
+    } else {
+        Write-Error "Student App deployment FAILED"
+    }
 }
 
 # Cleanup temp files
@@ -66,4 +74,4 @@ if (Test-Path $flutterDefines) {
     Remove-Item -Force $flutterDefines
 }
 
-Write-Host "All deployments complete." -ForegroundColor Green
+Write-Host "Deployments complete (Target: $Target)." -ForegroundColor Green

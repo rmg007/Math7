@@ -683,7 +683,7 @@ export function SkillList() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
+    <div data-testid="skills-list" className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
         title="Skills"
         description="Manage learning skills."

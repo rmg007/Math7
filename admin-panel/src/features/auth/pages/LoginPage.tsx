@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -402,6 +402,7 @@ export function LoginPage() {
                   <Label htmlFor="login-email">Email</Label>
                   <Input
                     id="login-email"
+                    data-testid="login-email"
                     type="email"
                     placeholder="name@example.com"
                     {...loginForm.register('email')}
@@ -418,6 +419,7 @@ export function LoginPage() {
                   <div className="relative">
                     <Input
                       id="login-password"
+                      data-testid="login-password"
                       type={showPassword ? 'text' : 'password'}
                       {...loginForm.register('password')}
                       className="pr-10"
@@ -447,7 +449,10 @@ export function LoginPage() {
                 </div>
 
                 {error && (
-                  <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md flex items-center gap-2">
+                  <div
+                    data-testid="auth-error"
+                    className="bg-destructive/10 text-destructive text-sm p-3 rounded-md flex items-center gap-2"
+                  >
                     <AlertCircle className="w-4 h-4" />
                     {error}
                   </div>
@@ -481,6 +486,7 @@ export function LoginPage() {
                 </div>
 
                 <Button
+                  data-testid="signin-button"
                   className="w-full"
                   type="submit"
                   disabled={loginForm.formState.isSubmitting}

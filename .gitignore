@@ -138,6 +138,9 @@ __pycache__/
 # Wrangler deployment temp
 .wrangler/
 
+# Supabase CLI local state (project-ref link — never commit)
+.supabase/
+
 # =============================================================================
 # DEAD PROJECTS (DO NOT PUBLISH)
 # =============================================================================
