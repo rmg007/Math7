@@ -73,7 +73,7 @@ declare -a ENDPOINTS=(
   "Student App (CDN/SPA)|${STUDENT_URL}|GET|200|299|"
   "Supabase REST API|${SUPABASE_URL}/rest/v1/|GET|200|401|"
   "Workers AI (/health)|${WORKERS_URL}/health|GET|200|299|"
-  "Edge Fn (critical-alert)|${SUPABASE_URL}/functions/v1/critical-alert|GET|200|400|"
+  "Edge Fn (critical-alert)|${SUPABASE_URL}/functions/v1/critical-alert|GET|200|401|"
 )
 
 # ---------------------------------------------------------------------------

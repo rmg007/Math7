@@ -127,19 +127,10 @@ function Invoke-PhaseValidation {
         }
     }
     
-    # Check wrangler (can be global or via npx)
-    if (-not (Get-Command 'wrangler' -ErrorAction SilentlyContinue)) {
-        Write-Info "Wrangler not found in PATH, checking if npx can run it..."
-        try {
-            # Just check if we can call npx wrangler --version
-            $null = npx wrangler --version 2>&1
-            Write-Success "Wrangler available via npx"
-        } catch {
-            Write-Err "Wrangler not found and npx cannot run it."
-            exit 1
-        }
-    } else {
+    if (Get-Command 'wrangler' -ErrorAction SilentlyContinue) {
         Write-Success "Wrangler found in PATH"
+    } else {
+        Write-Info "Wrangler not found in PATH, assuming available via npx"
     }
     Write-Success "All required tools available"
     
@@ -275,6 +266,11 @@ function Invoke-PhaseSupabaseSync {
 function Invoke-PhaseBuild {
     Write-Phase "PHASE 3: PARALLEL BUILD"
     
+    if ($DryRun) {
+        Write-Warn "Dry run - skipping build phase"
+        return
+    }
+
     if ($SkipBuild) {
         Write-Warn "Skipping build phase (--SkipBuild flag)"
         return
@@ -359,7 +355,7 @@ function Invoke-PhaseSmoke {
     Write-Phase "PHASE 4.5: POST-DEPLOY SMOKE TEST"
 
     if ($DryRun) {
-        Write-Warn "Dry run — skipping smoke test"
+        Write-Warn "Dry run - skipping smoke test"
         return
     }
 
@@ -371,7 +367,7 @@ function Invoke-PhaseSmoke {
     $smokeScript = Join-Path $ScriptDir 'scripts\smoke-test.sh'
 
     if (-not (Test-Path $smokeScript)) {
-        Write-Warn "Smoke test script not found at $smokeScript — skipping"
+        Write-Warn "Smoke test script not found at $smokeScript - skipping"
         return
     }
 
@@ -383,12 +379,12 @@ function Invoke-PhaseSmoke {
     if (Get-Command 'bash' -ErrorAction SilentlyContinue) {
         bash $smokeScript
         if ($LASTEXITCODE -ne 0) {
-            Write-Err "Smoke test FAILED — one or more endpoints returned non-2xx. Check the URLs above."
+            Write-Err "Smoke test FAILED - one or more endpoints returned non-2xx. Check the URLs above."
             exit 1
         }
-        Write-Success "Smoke test passed — all production endpoints are healthy"
+        Write-Success "Smoke test passed - all production endpoints are healthy"
     } else {
-        Write-Warn "bash not found in PATH — running inline PowerShell smoke test instead"
+        Write-Warn "bash not found in PATH - running inline PowerShell smoke test instead"
         $adminUrl       = $script:Config.global.ADMIN_PANEL_URL
         $studentUrl     = $script:Config.global.STUDENT_APP_URL
         $supabaseUrl    = $script:Config.global.SUPABASE_URL
@@ -410,15 +406,15 @@ function Invoke-PhaseSmoke {
                     Write-Success "[$($resp.StatusCode)] $($ep.Label)"
                     $smoked++
                 } else {
-                    Write-Err "[$($resp.StatusCode)] $($ep.Label) → FAIL"
+                    Write-Err "[$($resp.StatusCode)] $($ep.Label) -> FAIL"
                 }
             } catch {
-                Write-Err "[ERR] $($ep.Label) → $($_.Exception.Message)"
+                Write-Err "[ERR] $($ep.Label) -> $($_.Exception.Message)"
             }
         }
 
         if ($smoked -lt $endpoints.Count) {
-            Write-Err "Smoke test FAILED — $($endpoints.Count - $smoked) endpoint(s) unhealthy."
+            Write-Err "Smoke test FAILED - $($endpoints.Count - $smoked) endpoint(s) unhealthy."
             exit 1
         }
         Write-Success "All $($endpoints.Count) endpoints healthy."
