@@ -1,3 +1,5 @@
+# QA Master Prompt
+
 You are a Senior QA Engineer and Test Lead. Review my application end-to-end and produce a comprehensive, prioritized test plan listing every test case we should add.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -10,7 +12,7 @@ Project: Questerix — an offline-first educational platform for curriculum auth
 
 Components:
 
-1. Admin Panel (web) — React 18 + Vite + shadcn/ui + TanStack Query. Deployed on Cloudflare Pages.
+1. Admin Panel (web) — React 18 + Vite + shadcn/ui + TanStack Query. Features advanced table controls (Column Visibility, Bulk Action Bar). Deployed on Cloudflare Pages.
 
 2. Student App (tablet/web) — Flutter + Riverpod + Drift (offline-first SQLite). Deployed as PWA.
 
@@ -682,25 +684,25 @@ For each system test case (ID prefix SYS-):
 
 Include at minimum:
 
-1.  Full curriculum publish flow: Admin creates domain+skills+questions → calls
+1. Full curriculum publish flow: Admin creates domain+skills+questions → calls
 
-    publish_curriculum RPC → Student App incremental sync → local Drift DB has new content
+   publish_curriculum RPC → Student App incremental sync → local Drift DB has new content
 
-2.  AI token exhaustion cascade: admin requests AI generation → token limit hit → 429 in
+2. AI token exhaustion cascade: admin requests AI generation → token limit hit → 429 in
 
-    Worker → Edge Function not called → UI shows correct error → ai_token_usage not written
+   Worker → Edge Function not called → UI shows correct error → ai_token_usage not written
 
-3.  Offline practice → sync: student answers offline → outbox accumulates → network returns
+3. Offline practice → sync: student answers offline → outbox accumulates → network returns
 
-    → sync runs → attempts table updated → skill_progress updated → UI reflects mastery
+   → sync runs → attempts table updated → skill_progress updated → UI reflects mastery
 
-4.  RLS cross-tenant: admin of App A calls Edge Function with App B's skill_id — confirm
+4. RLS cross-tenant: admin of App A calls Edge Function with App B's skill_id — confirm
 
-    the RLS policy blocks the DB write and the correct error propagates to the UI
+   the RLS policy blocks the DB write and the correct error propagates to the UI
 
-5.  Fault injection: Edge Function returns 500 → Worker surfaces error → Admin Panel shows
+5. Fault injection: Edge Function returns 500 → Worker surfaces error → Admin Panel shows
 
-    error state (not crash) → no partial writes to ai_token_usage
+   error state (not crash) → no partial writes to ai_token_usage
 
 H) Continuous Testing Pipeline Matrix
 

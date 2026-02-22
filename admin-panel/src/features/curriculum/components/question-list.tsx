@@ -9,7 +9,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
+import { ColumnToggle } from '@/components/ui/column-toggle';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
@@ -59,9 +61,17 @@ import {
   Sparkles,
   Square,
   Trash2,
-  X,
 } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MutableRefObject,
+} from 'react';
 import { Link } from 'react-router-dom';
 import {
   QuestionInsert,
@@ -86,6 +96,14 @@ const QUESTION_COLUMNS: DataColumn[] = [
   { key: 'explanation', header: 'explanation' },
 ];
 
+const QUESTION_TOGGLE_COLUMNS = [
+  { key: 'content', header: 'Content', alwaysVisible: true },
+  { key: 'type', header: 'Type' },
+  { key: 'skill', header: 'Skill' },
+  { key: 'points', header: 'Points' },
+  { key: 'status', header: 'Status' },
+];
+
 const DEFAULT_PAGE_SIZE = 10;
 
 interface SortableRowProps {
@@ -96,6 +114,7 @@ interface SortableRowProps {
   onDuplicate: (id: string) => void;
   isDragDisabled: boolean;
   isDuplicating: boolean;
+  visibleColumns: Set<string>;
 }
 
 const SortableRow = memo(
@@ -107,25 +126,34 @@ const SortableRow = memo(
     onDuplicate,
     isDragDisabled,
     isDuplicating,
+    visibleColumns,
   }: SortableRowProps) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
       id: question.question_id,
       disabled: isDragDisabled,
     });
 
-    const style = {
-      transform: CSS.Transform.toString(transform),
-      transition,
-      opacity: isDragging ? 0.5 : 1,
-      position: 'relative' as const,
-      zIndex: isDragging ? 10 : undefined,
-    };
+    const rowRef = useRef<HTMLTableRowElement>(null);
+
+    useLayoutEffect(() => {
+      if (rowRef.current) {
+        rowRef.current.style.transform = CSS.Transform.toString(transform) || '';
+        rowRef.current.style.transition = transition || '';
+      }
+    }, [transform, transition]);
 
     return (
       <TableRow
-        ref={setNodeRef}
-        style={style}
-        className={`even:bg-gray-50/40 ${isDragging ? 'bg-gray-50 shadow-md' : ''}`}
+        ref={(node) => {
+          setNodeRef(node);
+          if (rowRef.current !== node) {
+            (rowRef as MutableRefObject<HTMLTableRowElement | null>).current = node;
+          }
+        }}
+        className={cn(
+          'even:bg-gray-50/40 relative',
+          isDragging && 'bg-gray-50 shadow-md opacity-50 z-10'
+        )}
       >
         <TableCell className="w-8 px-2">
           {!isDragDisabled ? (
@@ -174,24 +202,32 @@ const SortableRow = memo(
             )}
           </div>
         </TableCell>
-        <TableCell>
-          <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium border border-gray-200/50">
-            {formatIdentifier(question.type)}
-          </span>
-        </TableCell>
-        <TableCell>
-          <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium border border-gray-200/50">
-            {question.skills?.title || 'No Skill'}
-          </span>
-        </TableCell>
-        <TableCell className="text-center">
-          <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-gray-600 font-semibold text-xs tabular-nums">
-            {question.points}
-          </span>
-        </TableCell>
-        <TableCell>
-          <StatusBadge status={(question.status?.toLowerCase() as StatusType) || 'draft'} />
-        </TableCell>
+        {visibleColumns.has('type') && (
+          <TableCell>
+            <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium border border-gray-200/50">
+              {formatIdentifier(question.type)}
+            </span>
+          </TableCell>
+        )}
+        {visibleColumns.has('skill') && (
+          <TableCell>
+            <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium border border-gray-200/50">
+              {question.skills?.title || 'No Skill'}
+            </span>
+          </TableCell>
+        )}
+        {visibleColumns.has('points') && (
+          <TableCell className="text-center">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-gray-600 font-semibold text-xs tabular-nums">
+              {question.points}
+            </span>
+          </TableCell>
+        )}
+        {visibleColumns.has('status') && (
+          <TableCell>
+            <StatusBadge status={(question.status?.toLowerCase() as StatusType) || 'draft'} />
+          </TableCell>
+        )}
         <TableCell className="px-4 text-right border-l border-gray-100">
           <div className="flex items-center justify-end gap-0.5">
             <Link
@@ -235,27 +271,34 @@ const SortableCard = memo(
     onDuplicate,
     isDragDisabled,
     isDuplicating,
+    visibleColumns,
   }: SortableRowProps) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
       id: question.question_id,
       disabled: isDragDisabled,
     });
 
-    const style = {
-      transform: CSS.Transform.toString(transform),
-      transition,
-      opacity: isDragging ? 0.5 : 1,
-      position: 'relative' as const,
-      zIndex: isDragging ? 10 : undefined,
-    };
+    const cardRef = useRef<HTMLDivElement>(null);
+
+    useLayoutEffect(() => {
+      if (cardRef.current) {
+        cardRef.current.style.transform = CSS.Transform.toString(transform) || '';
+        cardRef.current.style.transition = transition || '';
+      }
+    }, [transform, transition]);
 
     return (
       <div
-        ref={setNodeRef}
-        style={style}
+        ref={(node) => {
+          setNodeRef(node);
+          if (cardRef.current !== node) {
+            (cardRef as MutableRefObject<HTMLDivElement | null>).current = node;
+          }
+        }}
         className={cn(
-          'bg-white rounded-lg border p-3 space-y-2',
-          isSelected ? 'border-teal-300 bg-teal-50/30' : 'border-gray-200'
+          'bg-white rounded-lg border p-3 space-y-3 relative',
+          isSelected ? 'border-teal-300 bg-teal-50/30' : 'border-gray-200',
+          isDragging ? 'opacity-50 z-10 shadow-lg' : 'hover:border-gray-300'
         )}
       >
         <div className="flex items-start gap-2">
@@ -301,20 +344,26 @@ const SortableCard = memo(
               </span>
             )}
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-              <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium">
-                {formatIdentifier(question.type)}
-              </span>
-              {question.skills?.title && (
+              {visibleColumns.has('type') && (
+                <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium">
+                  {formatIdentifier(question.type)}
+                </span>
+              )}
+              {visibleColumns.has('skill') && question.skills?.title && (
                 <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium">
                   {question.skills.title}
                 </span>
               )}
-              <span className="text-[10px] text-gray-400">{question.points} pts</span>
+              {visibleColumns.has('points') && (
+                <span className="text-[10px] text-gray-400">{question.points} pts</span>
+              )}
             </div>
           </div>
-          <div className="shrink-0">
-            <StatusBadge status={(question.status?.toLowerCase() as StatusType) || 'draft'} />
-          </div>
+          {visibleColumns.has('status') && (
+            <div className="shrink-0">
+              <StatusBadge status={(question.status?.toLowerCase() as StatusType) || 'draft'} />
+            </div>
+          )}
         </div>
         <div className="flex items-center justify-end gap-0.5 pt-2 border-t border-gray-100">
           <Link
@@ -361,6 +410,9 @@ export function QuestionList() {
     id?: string;
   } | null>(null);
   const [appFilter, setAppFilter] = useState<string>('all');
+  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
+    new Set(QUESTION_TOGGLE_COLUMNS.map((c) => c.key))
+  );
 
   const {
     data: paginatedData,
@@ -755,71 +807,35 @@ export function QuestionList() {
       />
 
       {/* Bulk Actions Bar */}
-      {selectedIds.size > 0 && (
-        <div className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md">
-          <div className="flex items-center gap-3 pl-2">
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold">
-              {selectedIds.size}
-            </span>
-            <span className="text-xs text-teal-200 font-medium">selected</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={bulkUpdateStatus.isPending}
-              onClick={handleMarkPublished}
-              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
-            >
-              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
-              Publish
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={bulkUpdateStatus.isPending}
-              onClick={handleMarkLive}
-              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
-            >
-              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
-              Go Live
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={bulkUpdateStatus.isPending}
-              onClick={handleMarkDraft}
-              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
-            >
-              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
-              Draft
-            </Button>
-            <div className="w-px h-5 bg-teal-700 mx-1" />
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={bulkDelete.isPending}
-              onClick={() => setDeleteConfirmation({ type: 'bulk' })}
-              className="h-7 px-3 rounded text-xs text-red-400 hover:text-white hover:bg-red-600 gap-1"
-            >
-              {bulkDelete.isPending ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
-              ) : (
-                <Trash2 className="h-3 w-3" />
-              )}
-              Delete
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedIds(new Set())}
-              className="h-7 px-2 rounded text-xs text-teal-300 hover:text-white hover:bg-white/10"
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        onClear={() => setSelectedIds(new Set())}
+        onDelete={() => setDeleteConfirmation({ type: 'bulk' })}
+        isDeleting={bulkDelete.isPending}
+        actions={[
+          {
+            label: 'Publish',
+            onClick: handleMarkPublished,
+            icon: bulkUpdateStatus.isPending ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : null,
+          },
+          {
+            label: 'Go Live',
+            onClick: handleMarkLive,
+            icon: bulkUpdateStatus.isPending ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : null,
+          },
+          {
+            label: 'Draft',
+            onClick: handleMarkDraft,
+            icon: bulkUpdateStatus.isPending ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : null,
+          },
+        ]}
+      />
 
       <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
         <CurriculumFilterBar
@@ -863,9 +879,20 @@ export function QuestionList() {
                       </option>
                     ))}
                   </select>
-                  <Filter className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
                 </div>
               ) : undefined}
+              <ColumnToggle
+                columns={QUESTION_TOGGLE_COLUMNS}
+                visibleColumns={visibleColumns}
+                onToggle={(key) =>
+                  setVisibleColumns((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(key)) next.delete(key);
+                    else next.add(key);
+                    return next;
+                  })
+                }
+              />
             </>
           }
         />
@@ -901,42 +928,50 @@ export function QuestionList() {
                       onSort={handleSort}
                     />
                   </TableHead>
-                  <TableHead>
-                    <SortableHeader
-                      label="Type"
-                      column="type"
-                      currentSortBy={sortBy}
-                      currentSortOrder={sortOrder}
-                      onSort={handleSort}
-                    />
-                  </TableHead>
-                  <TableHead>
-                    <SortableHeader
-                      label="Skill"
-                      column="skills.title"
-                      currentSortBy={sortBy}
-                      currentSortOrder={sortOrder}
-                      onSort={handleSort}
-                    />
-                  </TableHead>
-                  <TableHead className="text-center">
-                    <SortableHeader
-                      label="Points"
-                      column="points"
-                      currentSortBy={sortBy}
-                      currentSortOrder={sortOrder}
-                      onSort={handleSort}
-                    />
-                  </TableHead>
-                  <TableHead>
-                    <SortableHeader
-                      label="Status"
-                      column="status"
-                      currentSortBy={sortBy}
-                      currentSortOrder={sortOrder}
-                      onSort={handleSort}
-                    />
-                  </TableHead>
+                  {visibleColumns.has('type') && (
+                    <TableHead>
+                      <SortableHeader
+                        label="Type"
+                        column="type"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                  )}
+                  {visibleColumns.has('skill') && (
+                    <TableHead>
+                      <SortableHeader
+                        label="Skill"
+                        column="skill_id"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                  )}
+                  {visibleColumns.has('points') && (
+                    <TableHead className="text-center w-20">
+                      <SortableHeader
+                        label="Points"
+                        column="points"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                  )}
+                  {visibleColumns.has('status') && (
+                    <TableHead>
+                      <SortableHeader
+                        label="Status"
+                        column="status"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                  )}
                   <TableHead className="text-right px-4 border-l border-gray-100">
                     Actions
                   </TableHead>
@@ -946,7 +981,7 @@ export function QuestionList() {
                 <TableBody>
                   {!questions.length ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="py-20">
+                      <TableCell colSpan={visibleColumns.size + 3} className="py-20">
                         <EmptyState
                           icon={FileText}
                           title={hasActiveFilters ? 'No matches found' : 'No questions yet'}
@@ -985,6 +1020,7 @@ export function QuestionList() {
                         onDuplicate={handleDuplicate}
                         isDragDisabled={isDragDisabled}
                         isDuplicating={duplicateQuestion.isPending}
+                        visibleColumns={visibleColumns}
                       />
                     ))
                   )}
@@ -1036,6 +1072,7 @@ export function QuestionList() {
                       onDuplicate={handleDuplicate}
                       isDragDisabled={isDragDisabled}
                       isDuplicating={duplicateQuestion.isPending}
+                      visibleColumns={visibleColumns}
                     />
                   ))}
                 </div>

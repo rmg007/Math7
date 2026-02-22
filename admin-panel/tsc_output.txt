@@ -1,0 +1,59 @@
+src/features/curriculum/components/skill-list.tsx(437,3): error TS2304: Cannot find name 'useEffect'.
+src/features/curriculum/components/skill-list.tsx(445,3): error TS2304: Cannot find name 'useEffect'.
+src/features/platform/pages/AppsPage.tsx(59,5): error TS2305: Module '"../hooks/use-apps"' has no exported member 'AlertTriangle'.
+src/features/platform/pages/AppsPage.tsx(60,5): error TS2305: Module '"../hooks/use-apps"' has no exported member 'CheckSquare'.
+src/features/platform/pages/AppsPage.tsx(61,5): error TS2305: Module '"../hooks/use-apps"' has no exported member 'ExternalLink'.
+src/features/platform/pages/AppsPage.tsx(62,5): error TS2305: Module '"../hooks/use-apps"' has no exported member 'Layers'.
+src/features/platform/pages/AppsPage.tsx(63,5): error TS2305: Module '"../hooks/use-apps"' has no exported member 'Layout'.
+src/features/platform/pages/AppsPage.tsx(64,5): error TS2305: Module '"../hooks/use-apps"' has no exported member 'Loader2'.
+src/features/platform/pages/AppsPage.tsx(65,5): error TS2305: Module '"../hooks/use-apps"' has no exported member 'Pencil'.
+src/features/platform/pages/AppsPage.tsx(66,5): error TS2305: Module '"../hooks/use-apps"' has no exported member 'Plus'.
+src/features/platform/pages/AppsPage.tsx(67,5): error TS2305: Module '"../hooks/use-apps"' has no exported member 'Power'.
+src/features/platform/pages/AppsPage.tsx(68,5): error TS2305: Module '"../hooks/use-apps"' has no exported member 'Search'.
+src/features/platform/pages/AppsPage.tsx(69,5): error TS2305: Module '"../hooks/use-apps"' has no exported member 'Square'.
+src/features/platform/pages/AppsPage.tsx(70,5): error TS2305: Module '"../hooks/use-apps"' has no exported member 'Trash2'.
+src/features/platform/pages/AppsPage.tsx(71,5): error TS2305: Module '"../hooks/use-apps"' has no exported member 'X'.
+src/features/platform/pages/AppsPage.tsx(86,16): error TS2304: Cannot find name 'memo'.
+src/features/platform/pages/AppsPage.tsx(137,71): error TS2322: Type '{ status: "active" | "inactive"; size: string; }' is not assignable to type 'IntrinsicAttributes & StatusBadgeProps'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & StatusBadgeProps'.
+src/features/platform/pages/AppsPage.tsx(166,17): error TS2304: Cannot find name 'memo'.
+src/features/platform/pages/AppsPage.tsx(265,19): error TS2304: Cannot find name 'z'.
+src/features/platform/pages/AppsPage.tsx(266,15): error TS2304: Cannot find name 'z'.
+src/features/platform/pages/AppsPage.tsx(267,17): error TS2304: Cannot find name 'z'.
+src/features/platform/pages/AppsPage.tsx(268,14): error TS2304: Cannot find name 'z'.
+src/features/platform/pages/AppsPage.tsx(273,16): error TS2304: Cannot find name 'z'.
+src/features/platform/pages/AppsPage.tsx(274,17): error TS2304: Cannot find name 'z'.
+src/features/platform/pages/AppsPage.tsx(275,14): error TS2304: Cannot find name 'z'.
+src/features/platform/pages/AppsPage.tsx(278,20): error TS2503: Cannot find namespace 'z'.
+src/features/platform/pages/AppsPage.tsx(281,50): error TS2304: Cannot find name 'useApps'.
+src/features/platform/pages/AppsPage.tsx(283,21): error TS2304: Cannot find name 'useCreateApp'.
+src/features/platform/pages/AppsPage.tsx(284,21): error TS2304: Cannot find name 'useUpdateApp'.
+src/features/platform/pages/AppsPage.tsx(285,21): error TS2304: Cannot find name 'useDeleteApp'.
+src/features/platform/pages/AppsPage.tsx(286,22): error TS2304: Cannot find name 'useBulkDeleteApps'.
+src/features/platform/pages/AppsPage.tsx(287,28): error TS2304: Cannot find name 'useBulkUpdateAppsStatus'.
+src/features/platform/pages/AppsPage.tsx(288,22): error TS2304: Cannot find name 'useBulkCreateApps'.
+src/features/platform/pages/AppsPage.tsx(291,41): error TS2304: Cannot find name 'useState'.
+src/features/platform/pages/AppsPage.tsx(292,41): error TS2304: Cannot find name 'useState'.
+src/features/platform/pages/AppsPage.tsx(293,43): error TS2304: Cannot find name 'useState'.
+src/features/platform/pages/AppsPage.tsx(294,47): error TS2304: Cannot find name 'useState'.
+src/features/platform/pages/AppsPage.tsx(298,41): error TS2304: Cannot find name 'useState'.
+src/features/platform/pages/AppsPage.tsx(299,35): error TS2304: Cannot find name 'useState'.
+src/features/platform/pages/AppsPage.tsx(300,31): error TS2304: Cannot find name 'useState'.
+src/features/platform/pages/AppsPage.tsx(301,37): error TS2304: Cannot find name 'useState'.
+src/features/platform/pages/AppsPage.tsx(302,43): error TS2304: Cannot find name 'useState'.
+src/features/platform/pages/AppsPage.tsx(303,39): error TS2304: Cannot find name 'useState'.
+src/features/platform/pages/AppsPage.tsx(304,55): error TS2304: Cannot find name 'useState'.
+src/features/platform/pages/AppsPage.tsx(309,16): error TS2304: Cannot find name 'useForm'.
+src/features/platform/pages/AppsPage.tsx(322,3): error TS2304: Cannot find name 'useEffect'.
+src/features/platform/pages/AppsPage.tsx(346,28): error TS2304: Cannot find name 'useCallback'.
+src/features/platform/pages/AppsPage.tsx(351,24): error TS2304: Cannot find name 'useMemo'.
+src/features/platform/pages/AppsPage.tsx(353,21): error TS7006: Parameter 'app' implicitly has an 'any' type.
+src/features/platform/pages/AppsPage.tsx(366,22): error TS2304: Cannot find name 'useMemo'.
+src/features/platform/pages/AppsPage.tsx(398,25): error TS2304: Cannot find name 'useMemo'.
+src/features/platform/pages/AppsPage.tsx(403,27): error TS2304: Cannot find name 'useCallback'.
+src/features/platform/pages/AppsPage.tsx(404,21): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+src/features/platform/pages/AppsPage.tsx(415,27): error TS2304: Cannot find name 'useCallback'.
+src/features/platform/pages/AppsPage.tsx(419,48): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/features/platform/pages/AppsPage.tsx(664,38): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+src/features/platform/pages/AppsPage.tsx(861,36): error TS7006: Parameter 'app' implicitly has an 'any' type.
+src/features/platform/pages/AppsPage.tsx(919,35): error TS7006: Parameter 'app' implicitly has an 'any' type.

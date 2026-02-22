@@ -16,6 +16,7 @@
     "test:full": "vitest run --coverage --reporter=json --outputFile=test-results.json",
     "test:arch": "vitest run src/__tests__/architecture.test.ts",
     "test:e2e": "playwright test",
+    "test:e2e:smoke": "playwright test auth-flow.e2e.spec.ts rbac-guards.e2e.spec.ts curriculum-lifecycle.e2e.spec.ts",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",

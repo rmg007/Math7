@@ -1,5 +1,6 @@
 import { authenticateRequest } from '../shared/auth';
 import { errorResponse, jsonResponse } from '../shared/http';
+import { checkGlobalAiQuota } from '../shared/monitoring';
 import { checkRateLimit, RATE_LIMITS, rateLimitResponse } from '../shared/rate-limiter';
 import { consumeTenantTokens } from '../shared/tokens';
 import type { Env, GenerationRequest } from '../shared/types';
@@ -78,6 +79,9 @@ export async function handleGenerateQuestions(
   // Consume tenant tokens via Supabase RPC
   const estimatedTokens = Math.ceil((prompt.length + generatedText.length) / 4);
   await consumeTenantTokens(env, auth.user.app_id, estimatedTokens, 'generate_questions');
+
+  // Trigger global quota monitoring (non-blocking)
+  await checkGlobalAiQuota(env);
 
   return jsonResponse(
     {

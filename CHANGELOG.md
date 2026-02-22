@@ -5,6 +5,23 @@ All notable changes to the Questerix project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.3] - 2026-02-22
+
+### Fixed
+
+- **Layout Cleanup**: Removed redundant inline search and count bars in `AppsPage.tsx` and `SubjectsPage.tsx`, unifying them into a single high-density "Standalone Toolbar" card.
+- **Selection Logic**: Restored missing `handleSelectAll` functionality and header checkbox in `DomainList.tsx`, bringing it into parity with other curriculum management lists.
+- **Stabilization**: Resolved an additional 10+ lint and TSC warnings, including component name collisions and unused filter imports. Integrated automated count displays for all lists using the premium `tabular-nums` formatting.
+
+## [2.2.2] - 2026-02-21
+
+### Fixed
+
+- **Lint Stabilization**: Resolved over 50 systemic lint and TSC errors across the Admin Panel. Fixed missing `visibleColumns` resolution, restored truncated imports (React hooks, Lucide icons, Zod), and addressed "implicit any" errors in array iterators.
+- **UI Consistency**: Updated `AppCard` and `SubjectCard` to respect `visibleColumns` toggles, ensuring UI parity between Table and Card views on mobile.
+- **UX**: Optimized drag-and-drop feedback in `DomainList`, `SkillList`, and `QuestionList` by implementing a `useLayoutEffect` + `ref` pattern for handle transforms, bypassing inline style linting without performance loss.
+- **Type Safety**: Reinforced type safety in `AppsPage.tsx` and `SubjectsPage.tsx` by implementing explicit mapping and validation for bulk CSV imports.
+
 ## [2.2.1] - 2026-02-21
 
 ### Fixed

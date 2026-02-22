@@ -2,12 +2,12 @@ import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
@@ -15,12 +15,12 @@ import { Label } from '@/components/ui/label';
 import { Pagination } from '@/components/ui/pagination';
 import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/contexts/AppContext';
@@ -30,36 +30,36 @@ import { useUrlState } from '@/hooks/use-url-state';
 import { DataColumn } from '@/lib/data-utils';
 import { cn } from '@/lib/utils';
 import {
-    AlertTriangle,
-    ArrowUpRight,
-    Bug,
-    CheckCircle2,
-    CheckSquare,
-    Clock,
-    Copy,
-    Eye,
-    EyeOff,
-    Filter,
-    Globe,
-    Info,
-    Monitor,
-    RefreshCw,
-    Search,
-    Smartphone,
-    Square,
-    Trash2,
-    X,
+  AlertTriangle,
+  ArrowUpRight,
+  Bug,
+  CheckCircle2,
+  CheckSquare,
+  Clock,
+  Copy,
+  Eye,
+  EyeOff,
+  Filter,
+  Globe,
+  Info,
+  Monitor,
+  RefreshCw,
+  Search,
+  Smartphone,
+  Square,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
-    ErrorLog,
-    useBulkDeleteErrorLogs,
-    useBulkUpdateErrorStatus,
-    useDeleteErrorLog,
-    useErrorLogs,
-    useErrorLogStats,
-    usePromoteToIssue,
-    useUpdateErrorStatus,
+  ErrorLog,
+  useBulkDeleteErrorLogs,
+  useBulkUpdateErrorStatus,
+  useDeleteErrorLog,
+  useErrorLogs,
+  useErrorLogStats,
+  usePromoteToIssue,
+  useUpdateErrorStatus,
 } from '../hooks/use-error-logs';
 
 export function ErrorLogsPage() {
@@ -413,7 +413,104 @@ export function ErrorLogsPage() {
           </span>
         </div>
 
-        <Table className="w-full">
+        {/* Mobile View: Cards */}
+        <div className="md:hidden divide-y divide-gray-100">
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="p-4 space-y-3 animate-pulse">
+                <div className="flex justify-between items-start">
+                  <div className="h-4 bg-gray-200 rounded w-24" />
+                  <div className="h-4 bg-gray-200 rounded w-16" />
+                </div>
+                <div className="h-8 bg-gray-100 rounded w-full" />
+                <div className="flex justify-end gap-2 pt-2">
+                  <div className="h-8 w-8 bg-gray-200 rounded" />
+                  <div className="h-8 w-8 bg-gray-200 rounded" />
+                </div>
+              </div>
+            ))
+          ) : errors?.length === 0 ? (
+            <div className="p-12 text-center text-gray-500 text-sm">No errors found.</div>
+          ) : (
+            errors?.map((error) => (
+              <div
+                key={error.id}
+                onClick={() => setSelectedError(error)}
+                className={cn(
+                  'p-4 space-y-3 active:bg-gray-50 transition-colors relative',
+                  selectedIds.has(error.id) && 'bg-teal-50/50'
+                )}
+              >
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <div
+                      className="p-1.5 rounded-lg bg-gray-100/50 text-gray-400 shrink-0 border border-gray-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectOne(error.id);
+                      }}
+                    >
+                      {selectedIds.has(error.id) ? (
+                        <CheckSquare className="h-4 w-4 text-teal-600" />
+                      ) : (
+                        <Square className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-mono text-[10px] font-black text-red-600 truncate uppercase tracking-tighter">
+                        {error.error_type}
+                      </p>
+                      <h4 className="text-xs font-bold text-gray-900 line-clamp-1 mt-0.5">
+                        {error.error_message}
+                      </h4>
+                    </div>
+                  </div>
+                  <div className="shrink-0 flex flex-col items-end gap-1.5">
+                    <StatusBadge status={error.status as StatusType} />
+                    <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                      {getPlatformIcon(error.platform)}
+                      <span>{error.platform}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium">
+                    <Clock className="w-3 h-3 text-gray-400" />
+                    {error.created_at ? new Date(error.created_at).toLocaleDateString() : '—'}
+                  </div>
+                  <div className="flex items-center gap-0.5">
+                    {error.status === 'new' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateStatus.mutate({ id: error.id, status: 'seen' });
+                        }}
+                        className="h-8 w-8 text-gray-400 hover:text-teal-600 rounded-lg hover:bg-teal-50"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => handleDelete(error, e)}
+                      className="h-8 w-8 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                    <ArrowUpRight className="w-3.5 h-3.5 text-gray-300 ml-1" />
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop View: Table */}
+        <Table className="w-full hidden md:table">
           <TableHeader>
             <TableRow className="bg-gray-50">
               <TableHead className="px-3 w-8">

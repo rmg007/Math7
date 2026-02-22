@@ -6,6 +6,30 @@
 
 ---
 
+## 🔥 ACTIVE INCOMPLETE TASKS (By Priority)
+
+### P0: Critical / Safety Gate
+
+- [x] `ci.yml`: migration changes → auto-trigger P0 E2E + SQL RLS tests (from Step 13) ✅
+- [x] Document as known migration risk in `TEST_DECISIONS.md` (from Step 13) ✅
+- [x] `docs/quality/TEST_DECISIONS.md` — ADR log (TDR-001..005) (from Step 3) ✅
+- [x] `docs/quality/TEST_OWNERS.md` — spec file → component + persona map (from Step 3) ✅
+- [x] `student-app/test/fixtures/question_fixtures.dart` — Dart mirror (from Step 4) ✅
+- [x] `student-app/test/helpers/test_database_factory.dart` — `createEmptyDb()` + `createSeededDb()` (from Step 4) ✅
+
+### P2: UI & Features
+
+- [x] Mobile card layout for data tables ✅
+- [x] Advanced table features (Column visibility, Extended filtering, Bulk status updates) ✅
+
+### P3: Documentation & Hygiene
+
+- [x] `docs/QA_MASTER_PROMPT.md` — low priority (from Step 12) ✅
+- [x] `AGENTS.md` — low priority (from Step 12) ✅
+- [x] Delete unused/legacy files (from Backlog) ✅
+
+---
+
 ## ✅ Secret Gaps (audit: 2026-02-21) — all closed
 
 - [x] `TEST_SUPABASE_SERVICE_ROLE_KEY` — set in GitHub + `admin-panel/.env.local`
@@ -19,22 +43,19 @@
 
 > **Locked decisions**: E2E runs against `QuesterixDB-test` · serialized via `concurrency:` · 3-layer POM abstraction · `TEST_COVERAGE.md` auto-generated on merge to main
 >
-> Steps 1–12 complete ✅ committed `c256381c`. Step 13 deferred until schema stable.
+> Steps 1–13 complete ✅ committed `c256381c` → `a6fd455e`.
 
 ### Step 3: CI Cleanup ✅ — committed `4447e4a7`
 
-- [ ] `docs/quality/TEST_DECISIONS.md` — ADR log (TDR-001..005)
-- [ ] `docs/quality/TEST_OWNERS.md` — spec file → component + persona map
-- [x] `admin-panel-e2e.yml` `deploy-preview` — stub only; acceptable as-is (echoes, doesn't fail)
+- [x] Pin GitHub Actions to SHAs in `ci.yml` (REL-04 hardening) ✅
+- [x] `admin-panel-e2e.yml` `deploy-preview` — stub only; acceptable as-is
 - [x] `ci.yml` `oracle-plus-validation` — removed `GEMINI_API_KEY` + `OPENAI_API_KEY` refs ✅
-- [x] `ci.yml` `supabase-regression-tests` — replaced `supabase start` (Docker) with remote `TEST_SUPABASE_PROJECT_ID`/`TEST_DB_PASSWORD` connection ✅
+- [x] `ci.yml` `supabase-regression-tests` — replaced `supabase start` with remote connection ✅
 
 ### Step 4: Shared Test Infrastructure ✅
 
 - [x] `admin-panel/tests/fixtures/questions.ts` — 5 Zod-valid question fixtures
-- [ ] `student-app/test/fixtures/question_fixtures.dart` — Dart mirror _(deferred)_
 - [x] `admin-panel/src/__tests__/mocks/supabase-factory.ts` — shared mock factory; migrate 3+ inline mocks
-- [ ] `student-app/test/helpers/test_database_factory.dart` — `createEmptyDb()` + `createSeededDb()` _(deferred)_
 
 ### Step 5: Add `data-testid` Attributes ✅
 
@@ -45,70 +66,54 @@
 - [x] `skill-list.tsx` — `skills-list` (container)
 - [x] `question-list.tsx` — `questions-list` (container)
 - [x] `publish-page.tsx` — `publish-page` (container)
-- [ ] (hold up on this )SettingsPage, BulkImportPage, AppsPage — deferred (low priority)
 
-### Step 6: Build 3-Layer E2E Abstraction ✅
+### Steps 6–12: E2E, POM, Test Plan, Workflows & Dashboard ✅ — committed `c256381c`
 
-- [x] `admin-panel/tests/pages/` — 6 POM classes (Login, Domains, Skills, Questions, Groups, Publish)
-- [x] `admin-panel/tests/actions/` — `loginAs(role)`, `createDomain()`, `publishCurriculum()`, etc.
-- [x] Migrate `curriculum-lifecycle.e2e.spec.ts` to POM + Actions (prove adoption)
-
-### Step 7: Fix & Migrate Broken E2E Suites ✅
-
-> Verified all 8 specs — clean imports, no rewrites needed. `curriculum-lifecycle` already migrated to POM.
-
-- [x] `auth-flow.e2e.spec.ts`
-- [x] `rbac-guards.e2e.spec.ts`
-- [x] `mentor-hub.e2e.spec.ts`
-- [x] `bulk-import.e2e.spec.ts`
-- [x] `apps.e2e.spec.ts`
-- [x] `admin-panel.e2e.spec.ts`
-- [x] `rls-bypass.e2e.spec.ts`
-- [x] `accessibility.spec.ts`
-- [x] `responsiveness.spec.ts`
-
-### Step 8: Complete `docs/TEST_PLAN.md` ✅
-
-- [x] Append Section F — UAT Scenarios (4 roles × 3–5 journeys each)
-- [x] Append Section G — System Test Plan (SYS-001..005 + contract testing table)
-- [x] Append Section H — CI Pipeline Matrix (8 triggers)
-
-### Step 9: `/test` Workflow ✅
-
-- [x] `.agent/workflows/test.md` — 5 modes: plan, infra, write, verify, commit
-
-### Step 10: QA Autoloop Workflow ✅
-
-- [x] `.agent/workflows/qa-autoloop.md` — Scan → Plan → Write → Run → Fix → Commit with hard circuit breakers
-
-### Step 11: QA Health Dashboard ✅
-
-- [x] `scripts/generate-test-report.js` — reads Vitest + Playwright JSON, generates `docs/reports/TEST_COVERAGE.md`
-- [x] `--ci` flag exits with code 1 when thresholds not met
-
-### Step 12: Fix Doc Inconsistencies ✅
-
-- [x] `docs/quality/testing-strategy.md` — expanded with dual-DB pattern, test pyramid, full spec table, QA dashboard
-- [x] `.agent/TEST_WRITING_GUIDE.md` — appended Playwright E2E section (selectors, mocks, assertions, test IDs)
-- [ ] `docs/QA_MASTER_PROMPT.md` — deferred (low priority)
-- [ ] `AGENTS.md` — deferred (low priority)
-
-### Step 13: Migration Safety Gate _(deferred until schema stable)_
-
-- [ ] `ci.yml`: migration changes → auto-trigger P0 E2E + SQL RLS tests
-- [ ] Document as known risk in `TEST_DECISIONS.md`
+- [x] POM & Actions abstraction (Login, Domains, Skills, Questions, Groups, Publish)
+- [x] All 8 E2E specs migrated/fixed (Auth, RBAC, MentorHub, BulkImport, Apps, RLS, etc.)
+- [x] `docs/TEST_PLAN.md` complete (UAT, System, CI Matrix)
+- [x] `/test` and `qa-autoloop` workflows implemented
+- [x] QA Health Dashboard (`scripts/generate-test-report.js`)
+- [x] Documentation synchronized (Dual-DB, Pyramid, Writing Guide)
 
 ---
 
-## 📋 Backlog
+## 🏗️ Phase 10: Maintenance & Testing (ACTIVE)
 
-- [ ] **Env var hygiene sweep** — audit all `.env*` files across the project; apply `TEST_` prefix consistently; remove stale vars; update `secrets.example.env` and `master-config.test.json`; document full inventory in `docs/ENV_VARS.md`
-- [ ] Code hygiene: find and fix `TODO` / `FIXME` comments
-- [ ] Delete unused/legacy files
-- [ ] P1: Visual Regression Suite (Playwright `toHaveScreenshot`)
-- [ ] P1: Cloudflare Workers Paid monitoring — alert if AI generation nears limits
-- [ ] P3: Platform Settings page
-- [ ] P3: Rollback procedures
-- [ ] Mobile card layout for data tables
-- [ ] Row selection & bulk actions
-- [ ] Advanced table features
+> **Objective**: Hardened stability and UI consistency within the current feature set. Strictly follows the Admin Panel Feature Freeze.
+
+### Step 1: UI Consistency (Maintenance)
+
+- [x] **Bulk Actions Unification**: Replaced legacy inline bars across all curriculum lists with the floating `BulkActionBar` and unified `Select All` header logic. ✅
+- [x] **Mobile Parity Sweep**: Carried the `SortableCard` layout pattern to all curriculum lists and fixed missing props. ✅
+- [x] **Refinement**: Add `ColumnToggle` support and standalone Premium Toolbars to `AppsPage` and `SubjectsPage`. ✅
+- [x] **Stabilization Sweep**: Resolved 60+ lint and TSC errors. Removed redundant UI bars and unified selection logic in `DomainList`. ✅
+
+### Step 2: QA & Infrastructure (Testing)
+
+- [ ] (Stalled - don't process this) **Visual Stability**: Implement the first set of Playwright `toHaveScreenshot` tests for the Dashboard and Curriculum list views.
+- [x] **Test-ID Sweep**: Add standard `data-testid` attributes to `SettingsPage`, `BulkImportPage`, and `AppsPage` fields to support E2E automation. ✅ — `AccountSettingsPage` (deactivate/delete panels + confirm input/buttons), `BulkImportPage` (page root, tabs, AI textarea, sync btn, dryrun switch, commit btn, buffer card, template btn, skill select), `AppsPage` (search input, clear btn, status filter, list container), `question-form.tsx` (form root, type select, skill select, MCQ/multi options, boolean switch, text_input answer, submit btn)
+- [x] **Regression Coverage**: Step 13 — Feature-specific E2E for MCQ, Subjective, and AI-generated question types. ✅ — `tests/pages/QuestionFormPage.ts` (new POM with typed helpers for all question types) + `tests/question-types-regression.e2e.spec.ts` (14 tests across 5 describe blocks: MCQ create/validate/append, Subjective create/validate, Boolean TRUE+FALSE, Bulk-import AI mocked suite, cross-type empty-form guards)
+
+---
+
+## 🏗️ Phase 11: Platform Resilience (Student & Infra)
+
+### Step 1: Security & Compliance
+
+- [x] **Local Encryption (F-15)**: Migrate Student App SQLite storage to `sqflite_sqlcipher`. ✅ - Swapped `sqlite3_flutter_libs` → `sqlcipher_flutter_libs ^0.6.8` (mutually exclusive) - `database.dart` now uses `NativeDatabase.createInBackground` + `PRAGMA key` via AES-256 SQLCipher - Encryption key stored in OS keychain via `flutter_secure_storage` (AndroidKeystore / iOS Keychain) - `setupSqlCipher()` called in `main()` before any DB access; background isolate also initialised - Web platform falls back to unencrypted WASM (acceptable per threat model) - `build_runner` regenerated `database.g.dart` cleanly; `flutter analyze --no-fatal-infos` exits 0
+- [x] **Edge Function Rollback**: Implement `rollback-publish` logic in Supabase to revert curriculum deployments. ✅ - Migration `20260221220000_rollback_publish_rpc.sql` — adds two SECURITY DEFINER RPCs: - `rollback_publish(app_id, version)` — soft-unpublishes live content, restores from snapshot JSON, updates `curriculum_meta` - `list_curriculum_snapshots(app_id)` — returns all available versions for admin UI rollback picker - Applied to production (`QuesterixDB-v2`) via Supabase MCP
+
+### Step 2: DevSecOps Hygiene
+
+- [x] **Secret Rotation**: Re-issue and update `GITHUB_TOKEN` in CI/CD secrets. ✅ - `GITHUB_TOKEN` is auto-provisioned by GitHub Actions per-run (ephemeral, cannot be manually rotated — by design) - Created `.github/workflows/secret-rotation.yml` — runs every 90 days + on-demand - Generates a GitHub Issue checklist for all manually-rotated secrets (Supabase service role keys, Cloudflare API tokens, etc.) - Documents rotation SOP inline in the workflow
+- [x] **Audit Automation**: Integrate the RLS Audit script into the CI pipeline to run automatically post-migration. ✅ - Added `rls-audit` job to `ci.yml` (runs after `supabase-regression-tests` when migrations change) - Installs `psql`, runs `supabase/scripts/audit-rls.sql` against test DB - Fails the build if any **🔴 REAL GAP** rows are returned - Uploads `rls-audit-report.txt` as a CI artifact on every run
+
+---
+
+## 📋 Completed Backlog
+
+- [x] **Env var hygiene sweep** — audited all `.env*` files; applied `TEST_` prefix consistently; refactored `env.ts` for dual-DB support; updated `docs/ENV_VARS.md` ✅
+- [x] **Code hygiene sweep** — audited source for `TODO`/`FIXME`; refactored inline CSS to Tailwind in curriculum components; resolved `cn` imports; pinned CI Actions SHAs ✅
+- [x] **Documentation hygiene** — de-duplicated headings in `LEARNING_LOG.md` to resolve MD024 lints ✅
+- [x] P1: Cloudflare Workers Paid monitoring — alert if AI generation nears limits ✅

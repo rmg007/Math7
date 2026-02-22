@@ -247,3 +247,9 @@ textarea:focus-visible {
 .skip-to-content:focus {
   top: 0;
 }
+
+/* Sortable Item Utilities */
+.sortable-item {
+  transform: var(--dnd-transform);
+  transition: var(--dnd-transition);
+}

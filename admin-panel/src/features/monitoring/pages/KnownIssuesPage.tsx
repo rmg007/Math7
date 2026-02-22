@@ -443,7 +443,96 @@ export function KnownIssuesPage() {
           </span>
         </div>
 
-        <Table className="w-full">
+        {/* Mobile View: Cards */}
+        <div className="md:hidden divide-y divide-gray-100">
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="p-4 space-y-3 animate-pulse">
+                <div className="flex justify-between items-start">
+                  <div className="h-4 bg-gray-200 rounded w-24" />
+                  <div className="h-4 bg-gray-200 rounded w-16" />
+                </div>
+                <div className="h-4 bg-gray-200 rounded w-full" />
+                <div className="h-3 bg-gray-200 rounded w-2/3" />
+              </div>
+            ))
+          ) : filteredIssues?.length === 0 ? (
+            <div className="p-12 text-center text-gray-500 text-sm">No issues found.</div>
+          ) : (
+            filteredIssues?.map((issue) => (
+              <div
+                key={issue.id}
+                onClick={() => handleOpenDialog(issue)}
+                className={cn(
+                  'p-4 space-y-3 active:bg-gray-50 transition-colors relative',
+                  selectedIds.has(issue.id) && 'bg-teal-50/50'
+                )}
+              >
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <div
+                      className="p-1.5 rounded-lg bg-gray-100/50 text-gray-400 shrink-0 border border-gray-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectOne(issue.id);
+                      }}
+                    >
+                      {selectedIds.has(issue.id) ? (
+                        <CheckSquare className="h-4 w-4 text-teal-600" />
+                      ) : (
+                        <Square className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-xs font-bold text-gray-900 line-clamp-1">
+                        {issue.title}
+                      </h4>
+                      <p className="text-[10px] text-gray-400 line-clamp-1 mt-0.5">
+                        {sanitizeHtml(issue.description) || 'No description'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="shrink-0 flex flex-col items-end gap-1.5">
+                    {getStatusBadge(issue.status)}
+                    {getSeverityBadge(issue.severity)}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium">
+                    <Clock className="w-3 h-3 text-gray-400" />
+                    {issue.created_at ? new Date(issue.created_at).toLocaleDateString() : '—'}
+                  </div>
+                  <div className="flex items-center gap-0.5">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenDialog(issue);
+                      }}
+                      className="h-8 w-8 text-gray-400 hover:text-teal-600 rounded-lg hover:bg-teal-50"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => handleDelete(issue.id, e)}
+                      className="h-8 w-8 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                    <ArrowRight className="w-3.5 h-3.5 text-gray-300 ml-1" />
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop View: Table */}
+        <Table className="w-full hidden md:table">
           <TableHeader>
             <TableRow className="bg-gray-50">
               <TableHead className="px-3 w-8">

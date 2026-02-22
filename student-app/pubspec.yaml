@@ -1,10 +1,10 @@
 name: student_app
 description: A new Flutter project.
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.5.0 <4.0.0'
+  sdk: ">=3.5.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -15,7 +15,10 @@ dependencies:
   drift: ^2.24.0
   drift_flutter: ^0.2.4
   sqlite3: ^2.7.2
-  sqlite3_flutter_libs: ^0.5.0
+  # F-15: sqlcipher_flutter_libs replaces sqlite3_flutter_libs — they are mutually exclusive.
+  # Use ^0.6.8 (last version compatible with sqlite3 ^2.x used by drift 2.x).
+  # sqlcipher_flutter_libs provides AES-256 encrypted SQLite (SQLCipher) for native platforms.
+  sqlcipher_flutter_libs: ^0.6.8
   connectivity_plus: ^7.0.0
   uuid: ^4.3.0
   json_annotation: ^4.9.0

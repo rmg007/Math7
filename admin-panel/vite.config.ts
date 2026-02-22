@@ -18,6 +18,7 @@ export default defineConfig({
       ],
     }),
   ],
+  envPrefix: ['VITE_', 'TEST_'],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

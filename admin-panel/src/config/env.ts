@@ -43,6 +43,10 @@ interface EnvConfig {
  * @returns The environment variable value or empty string
  */
 function getEnvVar(key: string, required = true): string {
+  // Check for TEST_ prefixed version first (e.g. TEST_VITE_SUPABASE_URL)
+  const testValue = import.meta.env[`TEST_${key}`];
+  if (testValue) return typeof testValue === 'string' ? testValue : '';
+
   const value = import.meta.env[key];
   if (required && !value) {
     console.error(`Missing required environment variable: ${key}`);

@@ -16,6 +16,8 @@
 2. **Document after every task.** Append a session entry to `docs/LEARNING_LOG.md` (what was done, what was learned).
 3. **Tasks only in `tasks.md`.** No rules, docs, or history in that file.
 4. **DO NOT PUBLISH landing-pages.** This component is for local development only. Orchestrator scripts are locked to skip it.
+5. **Admin Panel Feature Freeze.** DO NOT add any new features to `admin-panel/`. Bug fixes and maintenance only. No new pages, components, hooks, routes, or UI elements.
+6. **Use Premium UI Components.** If maintaining tables, use `ColumnToggle` (visibility) and `BulkActionBar` (multi-select actions) to ensure UI consistency.
 
 ## File Placement
 
@@ -31,13 +33,13 @@
 
 ## Testing Strategy
 
-**Tier 1 — Functional E2E (Playwright, chromium only)**
+### Tier 1 — Functional E2E (Playwright, chromium only)
 
 - Auth, CRUD, navigation, data integrity. No visual assertions.
 - `npx playwright test tests/admin-panel.e2e.spec.ts`
 - `npx playwright test tests/bulk-import.e2e.spec.ts`
 
-**Tier 2 — Visual Regression (Playwright `toHaveScreenshot`)**
+### Tier 2 — Visual Regression (Playwright `toHaveScreenshot`)
 
 - 5 pages × 2 viewports (Desktop + iPad Pro). Baselines in `tests/__screenshots__/`.
 - `npx playwright test tests/visual-regression.spec.ts`
@@ -191,7 +193,7 @@ Deno.test('function handles auth correctly', async () => {
 });
 ```
 
-### Testing Strategy
+### Testing Implementation Tiers
 
 #### **Tier 1 — Functional E2E (Playwright)**
 

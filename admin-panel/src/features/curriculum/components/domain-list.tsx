@@ -9,7 +9,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
+import { ColumnToggle } from '@/components/ui/column-toggle';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
@@ -27,6 +29,7 @@ import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
 import { supabase } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 import {
   Book,
   CheckSquare,
@@ -37,9 +40,16 @@ import {
   Plus,
   Square,
   Trash2,
-  X,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MutableRefObject,
+} from 'react';
 import { Link } from 'react-router-dom';
 import {
   useBulkCreateDomains,
@@ -80,6 +90,13 @@ const DOMAIN_COLUMNS: DataColumn[] = [
   { key: 'status', header: 'status' },
 ];
 
+const DOMAIN_TOGGLE_COLUMNS = [
+  { key: 'title', header: 'Title', alwaysVisible: true },
+  { key: 'sort_order', header: 'Order' },
+  { key: 'updated_at', header: 'Last Updated' },
+  { key: 'status', header: 'Status' },
+];
+
 interface Domain {
   domain_id: string;
   title: string;
@@ -89,6 +106,7 @@ interface Domain {
   updated_at: string;
   app_id: string;
   apps?: { display_name: string } | null;
+  color_hex?: string | null;
 }
 
 interface SortableRowProps {
@@ -98,6 +116,7 @@ interface SortableRowProps {
   onDelete: (id: string) => void;
   renderStatusBadge: (status: string) => JSX.Element;
   isDragDisabled: boolean;
+  visibleColumns: Set<string>;
 }
 
 function SortableRow({
@@ -107,25 +126,35 @@ function SortableRow({
   onDelete,
   renderStatusBadge,
   isDragDisabled,
+  visibleColumns,
 }: SortableRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: domain.domain_id,
     disabled: isDragDisabled,
   });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    position: 'relative' as const,
-    zIndex: isDragging ? 10 : undefined,
-  };
+  const rowRef = useRef<HTMLTableRowElement>(null);
+
+  useLayoutEffect(() => {
+    if (rowRef.current) {
+      rowRef.current.style.transform = CSS.Transform.toString(transform) || '';
+      rowRef.current.style.transition = transition || '';
+    }
+  }, [transform, transition]);
 
   return (
     <TableRow
-      ref={setNodeRef}
-      style={style}
-      className={`even:bg-gray-50/40 ${isDragging ? 'bg-gray-50 shadow-md' : ''}`}
+      ref={(node) => {
+        setNodeRef(node);
+        if (rowRef.current !== node) {
+          (rowRef as MutableRefObject<HTMLTableRowElement | null>).current = node;
+        }
+      }}
+      className={cn(
+        'group/row even:bg-gray-50/40',
+        isSelected && 'bg-teal-50/50',
+        isDragging && 'bg-gray-50 shadow-md opacity-50 z-10'
+      )}
     >
       <TableCell className="w-8 px-2">
         {!isDragDisabled ? (
@@ -157,11 +186,13 @@ function SortableRow({
           )}
         </button>
       </TableCell>
-      <TableCell className="text-center w-12">
-        <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-gray-600 font-semibold text-xs tabular-nums">
-          {domain.sort_order ?? 0}
-        </span>
-      </TableCell>
+      {visibleColumns.has('sort_order') && (
+        <TableCell className="text-center w-12">
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-gray-600 font-semibold text-xs tabular-nums">
+            {domain.sort_order ?? 0}
+          </span>
+        </TableCell>
+      )}
       <TableCell className="px-4">
         <div className="flex flex-col">
           <span className="font-medium text-gray-900 text-xs">{domain.title}</span>
@@ -170,18 +201,22 @@ function SortableRow({
           )}
         </div>
       </TableCell>
-      <TableCell className="hidden lg:table-cell">
-        <span className="text-xs text-gray-500">
-          {new Date(domain.updated_at).toLocaleDateString()}{' '}
-          <span className="text-gray-400">
-            {new Date(domain.updated_at).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+      {visibleColumns.has('updated_at') && (
+        <TableCell className="hidden lg:table-cell">
+          <span className="text-xs text-gray-500">
+            {new Date(domain.updated_at).toLocaleDateString()}{' '}
+            <span className="text-gray-400">
+              {new Date(domain.updated_at).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </span>
           </span>
-        </span>
-      </TableCell>
-      <TableCell>{renderStatusBadge(domain.status || 'draft')}</TableCell>
+        </TableCell>
+      )}
+      {visibleColumns.has('status') && (
+        <TableCell>{renderStatusBadge(domain.status || 'draft')}</TableCell>
+      )}
       <TableCell className="px-4 text-right border-l border-gray-100">
         <div className="flex items-center justify-end gap-0.5">
           <Link
@@ -213,25 +248,35 @@ function SortableCard({
   onDelete,
   renderStatusBadge,
   isDragDisabled,
+  visibleColumns,
 }: SortableRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: domain.domain_id,
     disabled: isDragDisabled,
   });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    position: 'relative' as const,
-    zIndex: isDragging ? 10 : undefined,
-  };
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (cardRef.current) {
+      cardRef.current.style.transform = CSS.Transform.toString(transform) || '';
+      cardRef.current.style.transition = transition || '';
+    }
+  }, [transform, transition]);
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      className={`bg-white rounded-lg border ${isSelected ? 'border-teal-300 bg-teal-50/30' : 'border-gray-200'} p-3 space-y-2`}
+      ref={(node) => {
+        setNodeRef(node);
+        if (cardRef.current !== node) {
+          (cardRef as MutableRefObject<HTMLDivElement | null>).current = node;
+        }
+      }}
+      className={cn(
+        'bg-white rounded-lg border p-3 space-y-2 relative',
+        isSelected ? 'border-teal-300 bg-teal-50/30' : 'border-gray-200',
+        isDragging && 'opacity-50 z-10'
+      )}
     >
       <div className="flex items-start gap-2">
         {!isDragDisabled ? (
@@ -274,10 +319,13 @@ function SortableCard({
             </div>
           </div>
           <div className="text-[10px] text-gray-400">
-            Modified: {new Date(domain.updated_at).toLocaleDateString()}
+            {visibleColumns.has('updated_at') &&
+              `Modified: ${new Date(domain.updated_at).toLocaleDateString()}`}
           </div>
         </div>
-        <div className="shrink-0">{renderStatusBadge(domain.status || 'draft')}</div>
+        {visibleColumns.has('status') && (
+          <div className="shrink-0">{renderStatusBadge(domain.status || 'draft')}</div>
+        )}
       </div>
       <div className="flex items-center justify-end gap-0.5 pt-2 border-t border-gray-100">
         <Link
@@ -313,6 +361,9 @@ export function DomainList() {
     type: 'single' | 'bulk';
     id?: string;
   } | null>(null);
+  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
+    new Set(DOMAIN_TOGGLE_COLUMNS.map((c) => c.key))
+  );
   const [deleteImpact, setDeleteImpact] = useState<{
     skillCount: number;
     questionCount: number;
@@ -422,6 +473,14 @@ export function DomainList() {
     }
     setPage(1);
   };
+
+  const handleSelectAll = useCallback(() => {
+    if (selectedIds.size === domains.length && domains.length > 0) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(domains.map((d) => d.domain_id)));
+    }
+  }, [domains, selectedIds.size]);
 
   const handleSelectOne = useCallback((id: string) => {
     setSelectedIds((prev) => {
@@ -580,6 +639,7 @@ export function DomainList() {
     setSelectedIds(new Set());
   };
 
+  const isAllSelected = domains.length > 0 && selectedIds.size === domains.length;
   const hasActiveFilters = searchQuery || statusFilter !== 'all';
 
   const clearFilters = () => {
@@ -657,74 +717,38 @@ export function DomainList() {
       />
 
       {/* Bulk Actions Bar */}
-      {selectedIds.size > 0 && (
-        <div className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md">
-          <div className="flex items-center gap-3 pl-2">
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold">
-              {selectedIds.size}
-            </span>
-            <span className="text-xs text-teal-200 font-medium">selected</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={bulkUpdateStatus.isPending}
-              onClick={handleMarkPublished}
-              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
-            >
-              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
-              Publish
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={bulkUpdateStatus.isPending}
-              onClick={handleMarkLive}
-              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
-            >
-              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
-              Go Live
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={bulkUpdateStatus.isPending}
-              onClick={handleMarkDraft}
-              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
-            >
-              {bulkUpdateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
-              Draft
-            </Button>
-            <div className="w-px h-5 bg-teal-700 mx-1" />
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={bulkDelete.isPending}
-              onClick={() => {
-                setDeleteConfirmation({ type: 'bulk' });
-                fetchDeleteImpact(Array.from(selectedIds));
-              }}
-              className="h-7 px-3 rounded text-xs text-red-400 hover:text-white hover:bg-red-600 gap-1"
-            >
-              {bulkDelete.isPending ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
-              ) : (
-                <Trash2 className="h-3 w-3" />
-              )}
-              Delete
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedIds(new Set())}
-              className="h-7 px-2 rounded text-xs text-teal-300 hover:text-white hover:bg-white/10"
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        onClear={() => setSelectedIds(new Set())}
+        onDelete={() => {
+          setDeleteConfirmation({ type: 'bulk' });
+          fetchDeleteImpact(Array.from(selectedIds));
+        }}
+        isDeleting={bulkDelete.isPending}
+        actions={[
+          {
+            label: 'Publish',
+            onClick: handleMarkPublished,
+            icon: bulkUpdateStatus.isPending ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : null,
+          },
+          {
+            label: 'Go Live',
+            onClick: handleMarkLive,
+            icon: bulkUpdateStatus.isPending ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : null,
+          },
+          {
+            label: 'Draft',
+            onClick: handleMarkDraft,
+            icon: bulkUpdateStatus.isPending ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : null,
+          },
+        ]}
+      />
 
       <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
         <CurriculumFilterBar
@@ -736,24 +760,38 @@ export function DomainList() {
           count={totalCount}
           countLabel={totalCount === 1 ? 'domain' : 'domains'}
           extraFilters={
-            isSuperAdmin ? (
-              <div className="relative">
-                <select
-                  aria-label="Filter by app"
-                  value={appFilter}
-                  onChange={(e) => setAppFilter(e.target.value)}
-                  className="h-8 appearance-none pl-3 pr-8 text-xs font-medium rounded border border-gray-200 bg-white text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none cursor-pointer"
-                >
-                  <option value="all">All Apps</option>
-                  {apps.map((app) => (
-                    <option key={app.app_id} value={app.app_id}>
-                      {app.display_name}
-                    </option>
-                  ))}
-                </select>
-                <Filter className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
-              </div>
-            ) : undefined
+            <>
+              {isSuperAdmin ? (
+                <div className="relative">
+                  <select
+                    aria-label="Filter by app"
+                    value={appFilter}
+                    onChange={(e) => setAppFilter(e.target.value)}
+                    className="h-8 appearance-none pl-3 pr-8 text-xs font-medium rounded border border-gray-200 bg-white text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none cursor-pointer"
+                  >
+                    <option value="all">All Apps</option>
+                    {apps.map((app) => (
+                      <option key={app.app_id} value={app.app_id}>
+                        {app.display_name}
+                      </option>
+                    ))}
+                  </select>
+                  <Filter className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
+                </div>
+              ) : undefined}
+              <ColumnToggle
+                columns={DOMAIN_TOGGLE_COLUMNS}
+                visibleColumns={visibleColumns}
+                onToggle={(key) =>
+                  setVisibleColumns((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(key)) next.delete(key);
+                    else next.add(key);
+                    return next;
+                  })
+                }
+              />
+            </>
           }
         />
 
@@ -766,16 +804,30 @@ export function DomainList() {
                   <TableHead className="w-8 px-2">
                     <GripVertical className="h-3.5 w-3.5 text-gray-300" />
                   </TableHead>
-                  <TableHead className="w-8 px-2" />
-                  <TableHead className="text-center w-12">
-                    <SortableHeader
-                      label="#"
-                      column="sort_order"
-                      currentSortBy={sortBy}
-                      currentSortOrder={sortOrder}
-                      onSort={handleSort}
-                    />
+                  <TableHead className="w-8 px-2">
+                    <button
+                      onClick={handleSelectAll}
+                      aria-label={isAllSelected ? 'Deselect all' : 'Select all'}
+                      className="text-gray-300 hover:text-gray-500"
+                    >
+                      {isAllSelected && domains.length > 0 ? (
+                        <CheckSquare className="h-4 w-4 text-teal-600" />
+                      ) : (
+                        <Square className="h-4 w-4" />
+                      )}
+                    </button>
                   </TableHead>
+                  {visibleColumns.has('sort_order') && (
+                    <TableHead className="text-center w-12">
+                      <SortableHeader
+                        label="#"
+                        column="sort_order"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                  )}
                   <TableHead className="px-4">
                     <SortableHeader
                       label="Domain"
@@ -785,24 +837,28 @@ export function DomainList() {
                       onSort={handleSort}
                     />
                   </TableHead>
-                  <TableHead className="hidden lg:table-cell">
-                    <SortableHeader
-                      label="Last Updated"
-                      column="updated_at"
-                      currentSortBy={sortBy}
-                      currentSortOrder={sortOrder}
-                      onSort={handleSort}
-                    />
-                  </TableHead>
-                  <TableHead>
-                    <SortableHeader
-                      label="Status"
-                      column="status"
-                      currentSortBy={sortBy}
-                      currentSortOrder={sortOrder}
-                      onSort={handleSort}
-                    />
-                  </TableHead>
+                  {visibleColumns.has('updated_at') && (
+                    <TableHead className="hidden lg:table-cell">
+                      <SortableHeader
+                        label="Last Updated"
+                        column="updated_at"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                  )}
+                  {visibleColumns.has('status') && (
+                    <TableHead>
+                      <SortableHeader
+                        label="Status"
+                        column="status"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                  )}
                   <TableHead className="text-right px-4 border-l border-gray-100">
                     Actions
                   </TableHead>
@@ -850,6 +906,7 @@ export function DomainList() {
                         onDelete={handleDelete}
                         renderStatusBadge={renderStatusBadge}
                         isDragDisabled={isDragDisabled}
+                        visibleColumns={visibleColumns}
                       />
                     ))
                   )}
@@ -900,6 +957,7 @@ export function DomainList() {
                       onDelete={handleDelete}
                       renderStatusBadge={renderStatusBadge}
                       isDragDisabled={isDragDisabled}
+                      visibleColumns={visibleColumns}
                     />
                   ))}
                 </div>

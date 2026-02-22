@@ -5,10 +5,15 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'src/app.dart';
 import 'src/core/config/app_config_service.dart';
 import 'src/core/config/env.dart';
+import 'src/core/database/database.dart';
 import 'src/core/errors/error_tracker.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // F-15: Initialise SQLCipher native library loader on Android.
+  // Must be called before any NativeDatabase is opened.
+  await setupSqlCipher();
 
   try {
     // Validate environment configuration early (fail-fast)
