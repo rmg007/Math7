@@ -122,7 +122,10 @@ export function AccountSettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
+    <div
+      className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8"
+      data-testid="settings-page"
+    >
       <AdminHeader
         title="Settings"
         description="Manage your profile and account security."
@@ -137,7 +140,10 @@ export function AccountSettingsPage() {
       )}
 
       {/* Profile Information Section */}
-      <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-10 shadow-sm hover:shadow-xl transition-all">
+      <div
+        className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-10 shadow-sm hover:shadow-xl transition-all"
+        data-testid="settings-profile-section"
+      >
         <div className="flex items-center gap-4 mb-8">
           <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/10">
             <BadgeCheck className="h-6 w-6 text-indigo-600" />
@@ -236,12 +242,16 @@ export function AccountSettingsPage() {
               <Button
                 onClick={() => setShowDeactivateConfirm(true)}
                 variant="outline"
+                data-testid="settings-deactivate-btn"
                 className="w-full h-12 rounded-2xl border-amber-500/20 text-amber-600 hover:bg-amber-50/50 font-black text-xs uppercase tracking-widest transition-all"
               >
                 Deactivate Account
               </Button>
             ) : (
-              <div className="bg-amber-500/5 backdrop-blur-md border border-amber-500/20 rounded-2xl p-6 space-y-4 animate-in zoom-in-95 duration-300">
+              <div
+                className="bg-amber-500/5 backdrop-blur-md border border-amber-500/20 rounded-2xl p-6 space-y-4 animate-in zoom-in-95 duration-300"
+                data-testid="settings-deactivate-confirm-panel"
+              >
                 <p className="text-xs font-bold text-amber-800 leading-relaxed uppercase tracking-tight">
                   Are you sure you want to deactivate your account? You will be signed out
                   immediately.
@@ -250,6 +260,7 @@ export function AccountSettingsPage() {
                   <Button
                     onClick={handleDeactivateAccount}
                     disabled={actionLoading}
+                    data-testid="settings-deactivate-confirm-btn"
                     className="w-full bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest h-10 shadow-lg shadow-amber-600/20"
                   >
                     {actionLoading ? 'Deactivating...' : 'Yes, Deactivate'}
@@ -257,6 +268,7 @@ export function AccountSettingsPage() {
                   <Button
                     onClick={() => setShowDeactivateConfirm(false)}
                     variant="ghost"
+                    data-testid="settings-deactivate-abort-btn"
                     className="w-full py-2 text-xs font-black text-amber-400 hover:text-amber-600 uppercase tracking-widest"
                     disabled={actionLoading}
                   >
@@ -286,12 +298,16 @@ export function AccountSettingsPage() {
               <Button
                 onClick={() => setShowDeleteConfirm(true)}
                 variant="outline"
+                data-testid="settings-delete-btn"
                 className="w-full h-12 rounded-2xl border-red-500/20 text-red-600 hover:bg-red-50/50 font-black text-xs uppercase tracking-widest transition-all"
               >
                 Delete Account
               </Button>
             ) : (
-              <div className="bg-red-500/5 backdrop-blur-md border border-red-500/20 rounded-2xl p-6 space-y-4 animate-in zoom-in-95 duration-300">
+              <div
+                className="bg-red-500/5 backdrop-blur-md border border-red-500/20 rounded-2xl p-6 space-y-4 animate-in zoom-in-95 duration-300"
+                data-testid="settings-delete-confirm-panel"
+              >
                 <p className="text-2xs font-black text-red-800 leading-relaxed uppercase tracking-widest">
                   Type{' '}
                   <span className="bg-red-600 text-white px-1.5 py-0.5 rounded italic">DELETE</span>{' '}
@@ -301,12 +317,14 @@ export function AccountSettingsPage() {
                   value={deleteConfirmText}
                   onChange={(e) => setDeleteConfirmText(e.target.value)}
                   placeholder="AUTHORIZATION CODE"
+                  data-testid="settings-delete-confirm-input"
                   className="bg-white/50 border-red-200/50 rounded-xl h-10 font-mono font-black text-red-600 text-center tracking-[0.5em] focus:ring-red-500/20"
                 />
                 <div className="flex flex-col gap-2">
                   <Button
                     onClick={handleDeleteAccount}
                     disabled={actionLoading || deleteConfirmText !== 'DELETE'}
+                    data-testid="settings-delete-confirm-btn"
                     className="w-full bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest h-10 shadow-lg shadow-red-600/20 disabled:opacity-30"
                   >
                     {actionLoading ? 'Deleting...' : 'Delete Account'}
@@ -317,6 +335,7 @@ export function AccountSettingsPage() {
                       setDeleteConfirmText('');
                     }}
                     variant="ghost"
+                    data-testid="settings-delete-abort-btn"
                     className="w-full py-2 text-xs font-black text-red-400 hover:text-red-600 uppercase tracking-widest"
                     disabled={actionLoading}
                   >

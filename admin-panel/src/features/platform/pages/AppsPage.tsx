@@ -9,7 +9,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
+import { ColumnToggle } from '@/components/ui/column-toggle';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import {
   Dialog,
@@ -54,8 +56,11 @@ import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   AlertTriangle,
+  CheckCircle2,
   CheckSquare,
+  Circle,
   ExternalLink,
+  Filter,
   Layers,
   Layout,
   Loader2,
@@ -81,7 +86,6 @@ import {
   type AppInsert,
   type CompiledApp,
 } from '../hooks/use-apps';
-
 import { useSubjects } from '../hooks/use-subjects';
 
 interface AppRowProps {
@@ -90,80 +94,185 @@ interface AppRowProps {
   onSelect: (id: string) => void;
   onEdit: (app: CompiledApp) => void;
   onDelete: (id: string) => void;
+  visibleColumns: Set<string>;
 }
 
-const AppRow = memo(({ app, isSelected, onSelect, onEdit, onDelete }: AppRowProps) => {
-  return (
-    <TableRow
-      key={app.app_id}
-      className={cn('group/row even:bg-gray-50/40', isSelected && 'bg-teal-50/50')}
-    >
-      <TableCell className="w-8 px-2">
-        <button
-          onClick={() => onSelect(app.app_id)}
-          className="text-gray-300 hover:text-gray-500"
-          aria-label={isSelected ? 'Deselect application' : 'Select application'}
-          title={isSelected ? 'Deselect' : 'Select'}
-        >
-          {isSelected ? (
-            <CheckSquare className="h-4 w-4 text-teal-600" />
-          ) : (
-            <Square className="h-4 w-4" />
+const AppRow = memo(
+  ({ app, isSelected, onSelect, onEdit, onDelete, visibleColumns }: AppRowProps) => {
+    return (
+      <TableRow
+        key={app.app_id}
+        className={cn('group/row even:bg-gray-50/40', isSelected && 'bg-teal-50/50')}
+      >
+        <TableCell className="w-8 px-2">
+          <button
+            onClick={() => onSelect(app.app_id)}
+            className="text-gray-300 hover:text-gray-500"
+            aria-label={isSelected ? 'Deselect application' : 'Select application'}
+            title={isSelected ? 'Deselect' : 'Select'}
+          >
+            {isSelected ? (
+              <CheckSquare className="h-4 w-4 text-teal-600" />
+            ) : (
+              <Square className="h-4 w-4" />
+            )}
+          </button>
+        </TableCell>
+        {visibleColumns.has('display_name') && (
+          <TableCell className="px-4">
+            <span className="font-medium text-gray-900 text-xs truncate">{app.display_name}</span>
+          </TableCell>
+        )}
+        {visibleColumns.has('subject') && (
+          <TableCell>
+            <span className="text-xs text-gray-600 truncate">{app.subjects?.title ?? '—'}</span>
+          </TableCell>
+        )}
+        {visibleColumns.has('subdomain') && (
+          <TableCell>
+            <a
+              href={`http://${app.subdomain}.questerix.com`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 group/link"
+              title="Launch App"
+            >
+              <code className="text-xs text-teal-600 font-mono">{app.subdomain}</code>
+              <ExternalLink className="w-3 h-3 text-gray-300 group-hover/link:text-teal-500" />
+            </a>
+          </TableCell>
+        )}
+        {visibleColumns.has('grade_level') && (
+          <TableCell className="hidden md:table-cell">
+            <span className="text-xs text-gray-500">{app.grade_level || '—'}</span>
+          </TableCell>
+        )}
+        {visibleColumns.has('is_active') && (
+          <TableCell>
+            <StatusBadge status={app.is_active ? 'active' : 'inactive'} />
+          </TableCell>
+        )}
+        <TableCell className="px-4 text-right border-l border-gray-100">
+          <div className="flex justify-end gap-0.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onEdit(app)}
+              className="h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50 focus:ring-2 focus:ring-teal-600 focus:ring-offset-1"
+              title="Edit"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onDelete(app.app_id)}
+              className="h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 focus:ring-2 focus:ring-red-600 focus:ring-offset-1"
+              title="Delete"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
+    );
+  }
+);
+
+const AppCard = memo(
+  ({ app, isSelected, onSelect, onEdit, onDelete, visibleColumns }: AppRowProps) => {
+    return (
+      <div
+        className={cn(
+          'bg-white rounded-lg border p-3 space-y-3 relative transition-all',
+          isSelected ? 'border-teal-300 bg-teal-50/30' : 'border-gray-200 hover:border-gray-300'
+        )}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            <button
+              onClick={() => onSelect(app.app_id)}
+              className="mt-0.5 shrink-0 text-gray-300 hover:text-teal-600 transition-colors"
+              title={isSelected ? 'Deselect' : 'Select'}
+            >
+              {isSelected ? (
+                <CheckSquare className="h-4.5 w-4.5 text-teal-600" />
+              ) : (
+                <Square className="h-4.5 w-4.5" />
+              )}
+            </button>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-gray-900 text-sm truncate leading-tight">
+                {app.display_name}
+              </h3>
+              <div className="flex items-center gap-2 mt-1">
+                {visibleColumns.has('subject') && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-600 text-[10px] font-medium border border-gray-200/50">
+                    {app.subjects?.title ?? 'Unlinked'}
+                  </span>
+                )}
+                {visibleColumns.has('grade_level') && (
+                  <span className="text-[10px] text-gray-400 font-medium">
+                    Grade {app.grade_level || 'N/A'}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          {visibleColumns.has('is_active') && (
+            <StatusBadge status={app.is_active ? 'active' : 'inactive'} />
           )}
-        </button>
-      </TableCell>
-      <TableCell className="px-4">
-        <span className="font-medium text-gray-900 text-xs truncate">{app.display_name}</span>
-      </TableCell>
-      <TableCell>
-        <span className="text-xs text-gray-500">{app.subjects?.title ?? 'Unlinked'}</span>
-      </TableCell>
-      <TableCell>
-        <a
-          href={`http://${app.subdomain}.questerix.com`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 group/link"
-          title="Launch App"
-        >
-          <code className="text-xs text-teal-600 font-mono">{app.subdomain}.questerix.com</code>
-          <ExternalLink className="w-3 h-3 text-gray-300 group-hover/link:text-teal-500" />
-        </a>
-      </TableCell>
-      <TableCell className="hidden lg:table-cell">
-        <code className="text-xs text-gray-400 font-mono">questerix-student.pages.dev</code>
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        <span className="text-xs text-gray-500">{app.grade_level || 'N/A'}</span>
-      </TableCell>
-      <TableCell>
-        <StatusBadge status={app.is_active ? 'active' : 'inactive'} />
-      </TableCell>
-      <TableCell className="px-4 text-right border-l border-gray-100">
-        <div className="flex justify-end gap-0.5">
+        </div>
+
+        <div className="flex flex-col gap-1.5 p-2 bg-gray-50/50 rounded-md border border-gray-100">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">
+              Subdomain
+            </span>
+            <a
+              href={`http://${app.subdomain}.questerix.com`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 group/link hover:opacity-80 transition-opacity"
+            >
+              <code className="text-[11px] text-teal-600 font-mono font-medium">
+                {app.subdomain}
+              </code>
+              <ExternalLink className="w-2.5 h-2.5 text-teal-400 group-hover/link:text-teal-600" />
+            </a>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">
+              DNS Target
+            </span>
+            <code className="text-[10px] text-gray-500 font-mono">pages.dev</code>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 pt-1 border-t border-gray-100/50">
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={() => onEdit(app)}
-            className="h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50 focus:ring-2 focus:ring-teal-600 focus:ring-offset-1"
-            title="Edit"
+            className="h-8 px-3 rounded-md text-gray-500 hover:text-teal-600 hover:bg-teal-50 gap-1.5 font-medium text-xs"
           >
             <Pencil className="w-3.5 h-3.5" />
+            Edit
           </Button>
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={() => onDelete(app.app_id)}
-            className="h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 focus:ring-2 focus:ring-red-600 focus:ring-offset-1"
-            title="Delete"
+            className="h-8 px-3 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 gap-1.5 font-medium text-xs"
           >
             <Trash2 className="w-3.5 h-3.5" />
+            Delete
           </Button>
         </div>
-      </TableCell>
-    </TableRow>
-  );
-});
+      </div>
+    );
+  }
+);
 
 const APP_COLUMNS: DataColumn[] = [
   { key: 'display_name', header: 'Name' },
@@ -200,6 +309,11 @@ export function AppsPage() {
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
+    new Set(APP_COLUMNS.map((c: DataColumn) => c.key))
+  );
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sortBy, setSortBy] = useState<string>('display_name');
@@ -255,13 +369,16 @@ export function AppsPage() {
 
   const filteredApps = useMemo(
     () =>
-      apps?.filter(
-        (app) =>
+      apps?.filter((app: CompiledApp) => {
+        const matchesSearch =
           app.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           app.subdomain.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (app.subjects?.title || '').toLowerCase().includes(searchQuery.toLowerCase())
-      ) || [],
-    [apps, searchQuery]
+          (app.subjects?.title || '').toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus =
+          statusFilter === 'all' || (statusFilter === 'active' ? app.is_active : !app.is_active);
+        return matchesSearch && matchesStatus;
+      }) || [],
+    [apps, searchQuery, statusFilter]
   );
 
   const sortedApps = useMemo(
@@ -317,7 +434,7 @@ export function AppsPage() {
     if (selectedIds.size === filteredApps.length && filteredApps.length > 0) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(filteredApps.map((a) => a.app_id)));
+      setSelectedIds(new Set(filteredApps.map((a: CompiledApp) => a.app_id)));
     }
   }, [filteredApps, selectedIds.size]);
 
@@ -491,539 +608,623 @@ export function AppsPage() {
   const isAllSelected = filteredApps.length > 0 && selectedIds.size === filteredApps.length;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
-      <AdminHeader
-        title="Applications"
-        description="Manage apps and deployments."
-        icon={Layout}
-        className="mb-2"
-        actions={
-          <div className="flex items-center gap-2">
-            <DataToolbar
-              data={apps as unknown as Record<string, unknown>[]}
-              columns={APP_COLUMNS}
-              entityName="Applications"
-              onImport={handleImport}
-            />
+    <>
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        onClear={() => setSelectedIds(new Set())}
+        onDelete={handleBulkDelete}
+        actions={[
+          {
+            label: 'Activate',
+            onClick: () => handleBulkStatusUpdate(true),
+            icon: <CheckCircle2 className="h-3.5 w-3.5" />,
+            className: 'text-emerald-400 hover:bg-emerald-500/10',
+          },
+          {
+            label: 'Deactivate',
+            onClick: () => handleBulkStatusUpdate(false),
+            icon: <Circle className="h-3.5 w-3.5" />,
+            className: 'text-slate-400 hover:bg-slate-500/10',
+          },
+        ]}
+      />
+
+      <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6" data-testid="apps-page">
+        <AdminHeader
+          title="Applications"
+          description="Manage educational apps and their customized instances."
+          icon={Layout}
+          className="mb-2"
+          actions={
             <Button
               onClick={() => handleOpenDialog()}
               className="h-9 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1"
             >
               <Plus className="w-3.5 h-3.5" /> New Application
             </Button>
-          </div>
-        }
-      />
+          }
+        />
 
-      {/* Bulk Actions Bar */}
-      {selectedIds.size > 0 && (
-        <div className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md">
-          <div className="flex items-center gap-3 pl-2">
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold">
-              {selectedIds.size}
-            </span>
-            <span className="text-xs text-teal-200 font-medium">selected</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleBulkStatusUpdate(true)}
-              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10"
-            >
-              Activate
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleBulkStatusUpdate(false)}
-              className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10"
-            >
-              Deactivate
-            </Button>
-            <div className="w-px h-5 bg-teal-700 mx-1" />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBulkDelete}
-              className="h-7 px-3 rounded text-xs text-red-400 hover:text-white hover:bg-red-600 gap-1"
-            >
-              <Trash2 className="h-3 w-3" />
-              Delete
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedIds(new Set())}
-              className="h-7 px-2 rounded text-xs text-teal-300 hover:text-white hover:bg-white/10"
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
-        {/* Card Header: Search + Count */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search applications..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full pl-9 pr-8 py-1.5 rounded border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none focus-visible:outline-none text-sm"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => {
-                  setSearchQuery('');
+        {/* Card Header: Main Toolbar */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-6">
+          <div className="flex flex-col md:flex-row md:items-center gap-4 p-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search applications..."
+                value={searchQuery}
+                data-testid="apps-search-input"
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-200 text-gray-400 hover:text-gray-600 rounded"
-                title="Clear"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            )}
-          </div>
-          <span className="text-[11px] text-gray-500 whitespace-nowrap">
-            {filteredApps.length} {filteredApps.length === 1 ? 'app' : 'apps'}
-          </span>
-        </div>
-
-        <Table className="w-full">
-          <TableHeader>
-            <TableRow className="bg-gray-50">
-              <TableHead className="w-8 px-2">
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 bg-gray-50/50 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/5 outline-none transition-all text-sm"
+              />
+              {searchQuery && (
                 <button
-                  onClick={handleSelectAll}
-                  className="text-gray-300 hover:text-gray-500"
-                  aria-label={
-                    isAllSelected ? 'Deselect all applications' : 'Select all applications'
-                  }
-                  title={isAllSelected ? 'Deselect all' : 'Select all'}
+                  onClick={() => {
+                    setSearchQuery('');
+                    setCurrentPage(1);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-md transition-colors"
+                  title="Clear search"
+                  data-testid="apps-clear-search-btn"
                 >
-                  {isAllSelected ? (
-                    <CheckSquare className="h-4 w-4 text-teal-600" />
-                  ) : (
-                    <Square className="h-4 w-4" />
-                  )}
+                  <X className="h-3.5 w-3.5" />
                 </button>
-              </TableHead>
-              <TableHead className="px-4">
-                <SortableHeader
-                  label="Name"
-                  column="display_name"
-                  currentSortBy={sortBy}
-                  currentSortOrder={sortOrder}
-                  onSort={handleSort}
-                />
-              </TableHead>
-              <TableHead>
-                <SortableHeader
-                  label="Subject"
-                  column="subject"
-                  currentSortBy={sortBy}
-                  currentSortOrder={sortOrder}
-                  onSort={handleSort}
-                />
-              </TableHead>
-              <TableHead>
-                <SortableHeader
-                  label="Subdomain"
-                  column="subdomain"
-                  currentSortBy={sortBy}
-                  currentSortOrder={sortOrder}
-                  onSort={handleSort}
-                />
-              </TableHead>
-              <TableHead
-                className="hidden lg:table-cell"
-                title="Point your custom domain CNAME record to this target"
-              >
-                DNS Target
-              </TableHead>
-              <TableHead className="hidden md:table-cell">
-                <SortableHeader
-                  label="Grade"
-                  column="grade_level"
-                  currentSortBy={sortBy}
-                  currentSortOrder={sortOrder}
-                  onSort={handleSort}
-                />
-              </TableHead>
-              <TableHead>
-                <SortableHeader
-                  label="Status"
-                  column="is_active"
-                  currentSortBy={sortBy}
-                  currentSortOrder={sortOrder}
-                  onSort={handleSort}
-                />
-              </TableHead>
-              <TableHead className="text-right px-4 border-l border-gray-100">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {appsLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i} className="even:bg-gray-50/40">
-                  <TableCell className="w-8 px-2">
-                    <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
-                  </TableCell>
-                  <TableCell className="px-4">
-                    <div className="h-3.5 bg-gray-200 rounded w-28 animate-pulse"></div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="h-3.5 bg-gray-200 rounded w-16 animate-pulse"></div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="h-3.5 bg-gray-200 rounded w-32 animate-pulse"></div>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell">
-                    <div className="h-3.5 bg-gray-200 rounded w-36 animate-pulse"></div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <div className="h-3.5 bg-gray-200 rounded w-12 animate-pulse"></div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="h-4 bg-gray-200 rounded-full w-14 animate-pulse"></div>
-                  </TableCell>
-                  <TableCell className="px-4">
-                    <div className="flex gap-0.5 justify-end">
-                      <div className="h-7 w-7 bg-gray-200 rounded animate-pulse"></div>
-                      <div className="h-7 w-7 bg-gray-200 rounded animate-pulse"></div>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : paginatedApps.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} className="py-20">
-                  <EmptyState
-                    icon={Layers}
-                    title={searchQuery ? 'No matches found' : 'No applications yet'}
-                    description={
-                      searchQuery
-                        ? `No applications match "${searchQuery}".`
-                        : 'Create your first application to get started.'
-                    }
-                    action={
-                      searchQuery ? (
-                        <Button
-                          onClick={() => {
-                            setSearchQuery('');
-                            setCurrentPage(1);
-                          }}
-                          className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
-                        >
-                          Clear Search
-                        </Button>
-                      ) : (
-                        <Button
-                          onClick={() => handleOpenDialog()}
-                          className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
-                        >
-                          New Application
-                        </Button>
-                      )
-                    }
-                  />
-                </TableCell>
-              </TableRow>
-            ) : (
-              paginatedApps.map((app) => (
-                <AppRow
-                  key={app.app_id}
-                  app={app}
-                  isSelected={selectedIds.has(app.app_id)}
-                  onSelect={handleSelectOne}
-                  onEdit={handleOpenDialog}
-                  onDelete={handleDelete}
-                />
-              ))
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </div>
 
-        {filteredApps.length > 0 && (
-          <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={Math.ceil(filteredApps.length / pageSize)}
-              totalCount={filteredApps.length}
-              pageSize={pageSize}
-              onPageChange={setCurrentPage}
-              onPageSizeChange={(size) => {
-                setPageSize(size);
-                setCurrentPage(1);
-              }}
-            />
-          </div>
-        )}
-      </div>
+            <div className="hidden lg:flex items-center px-3 py-1.5 bg-gray-50/50 border border-gray-100 rounded-lg">
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mr-2">
+                Count
+              </span>
+              <span className="text-xs font-bold text-teal-600 tabular-nums">
+                {filteredApps.length}
+              </span>
+            </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="rounded-lg border border-gray-200 bg-white p-0 overflow-hidden shadow-lg max-w-md">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
-              <div className="px-6 pt-6 pb-4 space-y-4">
-                <div>
-                  <h2 className="text-base font-semibold text-gray-900">
-                    <DialogTitle>{editingApp ? 'Edit' : 'Create'} Application</DialogTitle>
-                  </h2>
-                  <DialogDescription className="text-xs text-gray-500 mt-0.5">
-                    {editingApp
-                      ? 'Update the application details below.'
-                      : 'Fill in the details to create a new application.'}
-                  </DialogDescription>
-                </div>
-
-                {/* DNS Notice */}
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded flex gap-2.5">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                  <div className="text-xs text-amber-800 leading-relaxed">
-                    <span className="font-semibold">DNS required:</span> Map{' '}
-                    <code className="font-mono bg-amber-100 px-1 rounded text-[11px]">
-                      {form.watch('subdomain') || '...'}.questerix.com
-                    </code>{' '}
-                    to{' '}
-                    <code className="font-mono bg-amber-100 px-1 rounded text-[11px]">
-                      questerix-student.pages.dev
-                    </code>{' '}
-                    and add the subdomain as a Custom Domain in Cloudflare Pages.
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <FormField
-                      control={form.control}
-                      name="display_name"
-                      render={({ field }) => (
-                        <FormItem className="space-y-1">
-                          <FormLabel className="text-xs font-medium text-gray-700">
-                            Display Name
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g. Mathematics G12"
-                              {...field}
-                              data-testid="app-display-name"
-                              className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
-                              required
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="subdomain"
-                      render={({ field }) => (
-                        <FormItem className="space-y-1">
-                          <FormLabel className="text-xs font-medium text-gray-700">
-                            Subdomain
-                          </FormLabel>
-                          <div className="flex">
-                            <FormControl>
-                              <Input
-                                placeholder="e.g. math-g12"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(
-                                    e.target.value
-                                      .toLowerCase()
-                                      .replace(/[^a-z0-9-]/g, '')
-                                      .slice(0, 63)
-                                  )
-                                }
-                                data-testid="app-subdomain"
-                                className="h-9 rounded-l rounded-r-none border border-r-0 border-gray-300 bg-white text-gray-700 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none font-mono text-xs"
-                                required
-                                pattern="[a-z0-9-]+"
-                                title="Lowercase letters, numbers, and dashes only"
-                              />
-                            </FormControl>
-                            <span className="h-9 px-2 flex items-center bg-gray-50 border border-gray-300 rounded-r text-[11px] text-gray-500">
-                              .questerix.com
-                            </span>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="subject_id"
-                    render={({ field }) => (
-                      <FormItem className="space-y-1">
-                        <FormLabel className="text-xs font-medium text-gray-700">Subject</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="h-9 rounded border border-gray-300 bg-white text-gray-900 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm">
-                              <SelectValue placeholder="Select subject" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="rounded-lg border border-gray-200 shadow-md">
-                            {subjects?.map((s) => (
-                              <SelectItem
-                                key={s.subject_id}
-                                value={s.subject_id}
-                                className="text-sm"
-                              >
-                                {s.title}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <FormField
-                      control={form.control}
-                      name="grade_level"
-                      render={({ field }) => (
-                        <FormItem className="space-y-1">
-                          <FormLabel className="text-xs font-medium text-gray-700">
-                            Grade Level
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g. Grade 12"
-                              {...field}
-                              data-testid="app-grade-level"
-                              className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
-                              required
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="grade_number"
-                      render={({ field }) => (
-                        <FormItem className="space-y-1">
-                          <FormLabel className="text-xs font-medium text-gray-700">
-                            Grade Number
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="is_active"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between p-3 rounded bg-gray-50 border border-gray-200 space-y-0">
-                        <div className="flex items-center gap-3">
-                          <Power
-                            className={cn(
-                              'w-4 h-4',
-                              field.value ? 'text-teal-600' : 'text-gray-300'
-                            )}
-                          />
-                          <div>
-                            <FormLabel className="text-xs font-medium text-gray-700">
-                              Active
-                            </FormLabel>
-                            <p className="text-[11px] text-gray-500 mt-0">
-                              Make this app publicly available
-                            </p>
-                          </div>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            className="data-[state=checked]:bg-teal-600"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg">
+                <Filter className="h-3.5 w-3.5 text-gray-400" />
+                <select
+                  aria-label="Filter by status"
+                  title="Filter by status"
+                  value={statusFilter}
+                  data-testid="apps-status-filter"
+                  onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
+                  className="bg-transparent border-none text-xs font-bold text-gray-600 focus:ring-0 outline-none cursor-pointer"
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
               </div>
 
-              <DialogFooter className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setIsDialogOpen(false)}
-                  className="h-9 px-4 rounded text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={createApp.isPending || updateApp.isPending}
-                  className="h-9 px-4 rounded bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 gap-1.5"
-                >
-                  {(createApp.isPending || updateApp.isPending) && (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  )}
-                  {editingApp ? 'Update Application' : 'Create Application'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+              <ColumnToggle
+                columns={APP_COLUMNS}
+                visibleColumns={visibleColumns}
+                onToggle={(key) =>
+                  setVisibleColumns((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(key)) next.delete(key);
+                    else next.add(key);
+                    return next;
+                  })
+                }
+              />
 
-      <AlertDialog
-        open={Boolean(deleteConfirmation)}
-        onOpenChange={(open) => !open && setDeleteConfirmation(null)}
-      >
-        <AlertDialogContent className="max-w-[400px]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription className="text-sm">
-              {deleteConfirmation?.type === 'bulk'
-                ? `This will permanently delete ${selectedIds.size} applications. This will also delete their associated landing pages. This action cannot be undone.`
-                : 'This will permanently delete this application and its associated landing page. This action cannot be undone.'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="h-9 text-xs">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={
-                deleteConfirmation?.type === 'bulk' ? confirmBulkDelete : confirmSingleDelete
-              }
-              className="h-9 text-xs bg-red-600 hover:bg-red-700 text-white"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+              <div className="w-px h-6 bg-gray-200 mx-1 hidden md:block" />
+
+              <DataToolbar
+                data={apps as unknown as Record<string, unknown>[]}
+                columns={APP_COLUMNS}
+                entityName="Applications"
+                onImport={handleImport}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden"
+          data-testid="apps-list-container"
+        >
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow className="bg-gray-50 border-b border-gray-100 hover:bg-gray-50">
+                  <TableHead className="w-8 px-2">
+                    <button
+                      onClick={handleSelectAll}
+                      className="text-gray-300 hover:text-teal-600 transition-colors"
+                    >
+                      {isAllSelected ? (
+                        <CheckSquare className="h-4 w-4 text-teal-600" />
+                      ) : (
+                        <Square className="h-4 w-4" />
+                      )}
+                    </button>
+                  </TableHead>
+                  {visibleColumns.has('display_name') && (
+                    <TableHead className="px-4">
+                      <SortableHeader
+                        label="Name"
+                        column="display_name"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                  )}
+                  {visibleColumns.has('subject') && (
+                    <TableHead>
+                      <SortableHeader
+                        label="Subject"
+                        column="subject"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                  )}
+                  {visibleColumns.has('subdomain') && (
+                    <TableHead>
+                      <SortableHeader
+                        label="Subdomain"
+                        column="subdomain"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                  )}
+                  {visibleColumns.has('grade_level') && (
+                    <TableHead className="hidden md:table-cell">
+                      <SortableHeader
+                        label="Grade"
+                        column="grade_level"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                  )}
+                  {visibleColumns.has('is_active') && (
+                    <TableHead>
+                      <SortableHeader
+                        label="Status"
+                        column="is_active"
+                        currentSortBy={sortBy}
+                        currentSortOrder={sortOrder}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                  )}
+                  <TableHead className="text-right px-4 border-l border-gray-100">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {appsLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i} className="even:bg-gray-50/40">
+                      <TableCell className="w-8 px-2">
+                        <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+                      </TableCell>
+                      <TableCell className="px-4">
+                        <div className="h-3.5 bg-gray-200 rounded w-28 animate-pulse"></div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-3.5 bg-gray-200 rounded w-16 animate-pulse"></div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-3.5 bg-gray-200 rounded w-32 animate-pulse"></div>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        <div className="h-3.5 bg-gray-200 rounded w-36 animate-pulse"></div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div className="h-3.5 bg-gray-200 rounded w-12 animate-pulse"></div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-4 bg-gray-200 rounded-full w-14 animate-pulse"></div>
+                      </TableCell>
+                      <TableCell className="px-4">
+                        <div className="flex gap-0.5 justify-end">
+                          <div className="h-7 w-7 bg-gray-200 rounded animate-pulse"></div>
+                          <div className="h-7 w-7 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : paginatedApps.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="py-20">
+                      <EmptyState
+                        icon={Layers}
+                        title={searchQuery ? 'No matches found' : 'No applications yet'}
+                        description={
+                          searchQuery
+                            ? `No applications match "${searchQuery}".`
+                            : 'Create your first application to get started.'
+                        }
+                        action={
+                          searchQuery ? (
+                            <Button
+                              onClick={() => {
+                                setSearchQuery('');
+                                setCurrentPage(1);
+                              }}
+                              className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                            >
+                              Clear Search
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={() => handleOpenDialog()}
+                              className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                            >
+                              New Application
+                            </Button>
+                          )
+                        }
+                      />
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedApps.map((app) => (
+                    <AppRow
+                      key={app.app_id}
+                      app={app}
+                      isSelected={selectedIds.has(app.app_id)}
+                      onSelect={handleSelectOne}
+                      onEdit={handleOpenDialog}
+                      onDelete={handleDelete}
+                      visibleColumns={visibleColumns}
+                    />
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden p-3 bg-gray-50/30">
+            {appsLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="h-32 bg-gray-100 rounded-lg animate-pulse" />
+                ))}
+              </div>
+            ) : paginatedApps.length === 0 ? (
+              <div className="py-12">
+                <EmptyState
+                  icon={Layers}
+                  title={searchQuery ? 'No matches found' : 'No applications yet'}
+                  description={
+                    searchQuery
+                      ? `No applications match "${searchQuery}".`
+                      : 'Create your first application to get started.'
+                  }
+                  action={
+                    searchQuery ? (
+                      <Button
+                        onClick={() => {
+                          setSearchQuery('');
+                          setCurrentPage(1);
+                        }}
+                        className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                      >
+                        Clear Search
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => handleOpenDialog()}
+                        className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                      >
+                        New Application
+                      </Button>
+                    )
+                  }
+                />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {paginatedApps.map((app) => (
+                  <AppCard
+                    key={app.app_id}
+                    app={app}
+                    isSelected={selectedIds.has(app.app_id)}
+                    onSelect={handleSelectOne}
+                    onEdit={handleOpenDialog}
+                    onDelete={handleDelete}
+                    visibleColumns={visibleColumns}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {filteredApps.length > 0 && (
+            <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={Math.ceil(filteredApps.length / pageSize)}
+                totalCount={filteredApps.length}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          )}
+        </div>
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="rounded-lg border border-gray-200 bg-white p-0 overflow-hidden shadow-lg max-w-md">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
+                <div className="px-6 pt-6 pb-4 space-y-4">
+                  <div>
+                    <h2 className="text-base font-semibold text-gray-900">
+                      <DialogTitle>{editingApp ? 'Edit' : 'Create'} Application</DialogTitle>
+                    </h2>
+                    <DialogDescription className="text-xs text-gray-500 mt-0.5">
+                      {editingApp
+                        ? 'Update the application details below.'
+                        : 'Fill in the details to create a new application.'}
+                    </DialogDescription>
+                  </div>
+
+                  {/* DNS Notice */}
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded flex gap-2.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="text-xs text-amber-800 leading-relaxed">
+                      <span className="font-semibold">DNS required:</span> Map{' '}
+                      <code className="font-mono bg-amber-100 px-1 rounded text-[11px]">
+                        {form.watch('subdomain') || '...'}.questerix.com
+                      </code>{' '}
+                      to{' '}
+                      <code className="font-mono bg-amber-100 px-1 rounded text-[11px]">
+                        questerix-student.pages.dev
+                      </code>{' '}
+                      and add the subdomain as a Custom Domain in Cloudflare Pages.
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <FormField
+                        control={form.control}
+                        name="display_name"
+                        render={({ field }) => (
+                          <FormItem className="space-y-1">
+                            <FormLabel className="text-xs font-medium text-gray-700">
+                              Display Name
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="e.g. Mathematics G12"
+                                {...field}
+                                data-testid="app-display-name"
+                                className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
+                                required
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="subdomain"
+                        render={({ field }) => (
+                          <FormItem className="space-y-1">
+                            <FormLabel className="text-xs font-medium text-gray-700">
+                              Subdomain
+                            </FormLabel>
+                            <div className="flex">
+                              <FormControl>
+                                <Input
+                                  placeholder="e.g. math-g12"
+                                  {...field}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      e.target.value
+                                        .toLowerCase()
+                                        .replace(/[^a-z0-9-]/g, '')
+                                        .slice(0, 63)
+                                    )
+                                  }
+                                  data-testid="app-subdomain"
+                                  className="h-9 rounded-l rounded-r-none border border-r-0 border-gray-300 bg-white text-gray-700 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none font-mono text-xs"
+                                  required
+                                  pattern="[a-z0-9-]+"
+                                  title="Lowercase letters, numbers, and dashes only"
+                                />
+                              </FormControl>
+                              <span className="h-9 px-2 flex items-center bg-gray-50 border border-gray-300 rounded-r text-[11px] text-gray-500">
+                                .questerix.com
+                              </span>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="subject_id"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1">
+                          <FormLabel className="text-xs font-medium text-gray-700">
+                            Subject
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="h-9 rounded border border-gray-300 bg-white text-gray-900 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm">
+                                <SelectValue placeholder="Select subject" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="rounded-lg border border-gray-200 shadow-md">
+                              {subjects?.map((s) => (
+                                <SelectItem
+                                  key={s.subject_id}
+                                  value={s.subject_id}
+                                  className="text-sm"
+                                >
+                                  {s.title}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <FormField
+                        control={form.control}
+                        name="grade_level"
+                        render={({ field }) => (
+                          <FormItem className="space-y-1">
+                            <FormLabel className="text-xs font-medium text-gray-700">
+                              Grade Level
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="e.g. Grade 12"
+                                {...field}
+                                data-testid="app-grade-level"
+                                className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
+                                required
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="grade_number"
+                        render={({ field }) => (
+                          <FormItem className="space-y-1">
+                            <FormLabel className="text-xs font-medium text-gray-700">
+                              Grade Number
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                className="h-9 rounded border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="is_active"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between p-3 rounded bg-gray-50 border border-gray-200 space-y-0">
+                          <div className="flex items-center gap-3">
+                            <Power
+                              className={cn(
+                                'w-4 h-4',
+                                field.value ? 'text-teal-600' : 'text-gray-300'
+                              )}
+                            />
+                            <div>
+                              <FormLabel className="text-xs font-medium text-gray-700">
+                                Active
+                              </FormLabel>
+                              <p className="text-[11px] text-gray-500 mt-0">
+                                Make this app publicly available
+                              </p>
+                            </div>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              className="data-[state=checked]:bg-teal-600"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <DialogFooter className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setIsDialogOpen(false)}
+                    className="h-9 px-4 rounded text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={createApp.isPending || updateApp.isPending}
+                    className="h-9 px-4 rounded bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 gap-1.5"
+                  >
+                    {(createApp.isPending || updateApp.isPending) && (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    )}
+                    {editingApp ? 'Update Application' : 'Create Application'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
+        <AlertDialog
+          open={Boolean(deleteConfirmation)}
+          onOpenChange={(open) => !open && setDeleteConfirmation(null)}
+        >
+          <AlertDialogContent className="max-w-[400px]">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription className="text-sm">
+                {deleteConfirmation?.type === 'bulk'
+                  ? `This will permanently delete ${selectedIds.size} applications. This will also delete their associated landing pages. This action cannot be undone.`
+                  : 'This will permanently delete this application and its associated landing page. This action cannot be undone.'}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="h-9 text-xs">Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={
+                  deleteConfirmation?.type === 'bulk' ? confirmBulkDelete : confirmSingleDelete
+                }
+                className="h-9 text-xs bg-red-600 hover:bg-red-700 text-white"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </>
   );
 }

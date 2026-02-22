@@ -9,11 +9,11 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -24,9 +24,14 @@ import { supabase } from '@/lib/supabase';
 
 const WORKERS_URL = import.meta.env.VITE_WORKERS_URL;
 
-async function parseImportPrompt(prompt: string, skillId: string): Promise<{ questions: unknown[] }> {
+async function parseImportPrompt(
+  prompt: string,
+  skillId: string
+): Promise<{ questions: unknown[] }> {
   if (WORKERS_URL) {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
     const response = await fetch(`${WORKERS_URL}/ai/parse-import-prompt`, {
       method: 'POST',
@@ -101,7 +106,10 @@ export default function BulkImportPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
+    <div
+      className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8"
+      data-testid="bulk-import-page"
+    >
       <AdminHeader
         title="Curriculum Nexus"
         description="Import content via CSV or AI."
@@ -110,6 +118,7 @@ export default function BulkImportPage() {
           <Button
             variant="outline"
             onClick={downloadTemplate}
+            data-testid="bulk-import-template-btn"
             className="h-10 px-4 rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50 font-bold uppercase tracking-widest text-[9px] gap-2"
           >
             <Download className="w-4 h-4" /> Template
@@ -137,6 +146,7 @@ export default function BulkImportPage() {
                 <Select value={selectedSkillId} onValueChange={setSelectedSkillId}>
                   <SelectTrigger
                     aria-label="Select target skill"
+                    data-testid="bulk-import-skill-select"
                     className="w-full h-12 rounded-xl border-gray-100 bg-gray-50 font-bold text-xs uppercase tracking-tight italic"
                   >
                     <SelectValue placeholder="Select target skill..." />
@@ -151,16 +161,18 @@ export default function BulkImportPage() {
                 </Select>
               </div>
 
-              <Tabs defaultValue="file" className="w-full">
+              <Tabs defaultValue="file" className="w-full" data-testid="bulk-import-tabs">
                 <TabsList className="grid w-full grid-cols-2 rounded-xl h-12 p-1 bg-gray-100 mb-6">
                   <TabsTrigger
                     value="file"
+                    data-testid="bulk-import-tab-csv"
                     className="rounded-lg font-bold text-2xs uppercase tracking-widest"
                   >
                     CSV File
                   </TabsTrigger>
                   <TabsTrigger
                     value="ai"
+                    data-testid="bulk-import-tab-ai"
                     className="rounded-lg font-bold text-2xs uppercase tracking-widest flex gap-2"
                   >
                     <Sparkles className="w-3 h-3" /> AI Prompt
@@ -193,6 +205,7 @@ export default function BulkImportPage() {
                   <div className="space-y-4">
                     <Textarea
                       placeholder="Paste unstructured questions here..."
+                      data-testid="bulk-import-ai-textarea"
                       className="min-h-[200px] rounded-2xl border-gray-100 bg-gray-50 focus:bg-white resize-none text-sm placeholder:text-gray-300 transition-all focus:border-indigo-500"
                       value={importPrompt}
                       onChange={(e) => setImportPrompt(e.target.value)}
@@ -200,6 +213,7 @@ export default function BulkImportPage() {
                     <Button
                       className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-xs uppercase tracking-widest gap-2"
                       onClick={handleAiImport}
+                      data-testid="bulk-import-sync-btn"
                       disabled={isAiParsing || !importPrompt.trim()}
                     >
                       {isAiParsing ? (
@@ -227,12 +241,14 @@ export default function BulkImportPage() {
                     checked={isDryRun}
                     onCheckedChange={setIsDryRun}
                     aria-label="Toggle dry run mode"
+                    data-testid="bulk-import-dryrun-switch"
                   />
                 </div>
 
                 <Button
                   className="w-full h-14 bg-gray-900 hover:bg-black text-white rounded-2xl font-black text-xs uppercase tracking-widest gap-3 shadow-xl"
                   disabled={importQueue.length === 0 || isProcessing}
+                  data-testid="bulk-import-commit-btn"
                   onClick={processImport}
                 >
                   {isProcessing ? (
@@ -258,7 +274,10 @@ export default function BulkImportPage() {
         </div>
 
         <div className="lg:col-span-8 space-y-6">
-          <Card className="rounded-[2.5rem] border-0 shadow-sm bg-white overflow-hidden min-h-[600px] flex flex-col">
+          <Card
+            className="rounded-[2.5rem] border-0 shadow-sm bg-white overflow-hidden min-h-[600px] flex flex-col"
+            data-testid="bulk-import-buffer-card"
+          >
             <CardHeader className="p-8 border-b border-gray-50 flex flex-row items-center justify-between bg-gray-50/30">
               <div>
                 <CardTitle className="text-xl font-black tracking-tight text-gray-900">

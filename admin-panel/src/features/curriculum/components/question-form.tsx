@@ -278,7 +278,11 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
       />
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10 pb-20">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-10 pb-20"
+          data-testid="question-form"
+        >
           <fieldset
             disabled={form.formState.isSubmitting}
             className="space-y-10 disabled:opacity-60"
@@ -368,6 +372,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                                       form.setValue('options', { options: newOpts });
                                     }}
                                     placeholder={`Option ${opt.id.toUpperCase()}`}
+                                    data-testid={`question-mcq-option-${index}`}
                                     className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-indigo-500/10 transition-all"
                                     required
                                   />
@@ -440,6 +445,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                                         form.setValue('options', { options: newOpts });
                                       }}
                                       placeholder={`Option ${opt.id.toUpperCase()}`}
+                                      data-testid={`question-multi-option-${index}`}
                                       className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-indigo-500/10 transition-all"
                                       required
                                     />
@@ -501,6 +507,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                               <Switch
                                 checked={(form.watch('solution') as boolean) ?? false}
                                 onCheckedChange={(val) => form.setValue('solution', val)}
+                                data-testid="question-boolean-switch"
                                 className="data-[state=checked]:bg-emerald-500"
                               />
                               <span
@@ -563,6 +570,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                             value={form.watch('solution') as string}
                             onChange={(e) => form.setValue('solution', e.target.value)}
                             placeholder="Enter the authoritative response..."
+                            data-testid="question-text-input-answer"
                             className="h-14 rounded-2xl bg-white/50 border-gray-100 text-lg font-black tracking-tight focus:ring-8 focus:ring-emerald-500/5 transition-all"
                             required
                           />
@@ -756,7 +764,10 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                           </FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <SelectTrigger className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-slate-500/10 transition-all">
+                              <SelectTrigger
+                                className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-slate-500/10 transition-all"
+                                data-testid="question-type-select"
+                              >
                                 <SelectValue placeholder="Protocol type" />
                               </SelectTrigger>
                             </FormControl>
@@ -852,7 +863,10 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-purple-500/10 transition-all">
+                              <SelectTrigger
+                                className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-purple-500/10 transition-all"
+                                data-testid="question-skill-select"
+                              >
                                 <SelectValue placeholder="Link to ontology" />
                               </SelectTrigger>
                             </FormControl>
@@ -880,6 +894,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
+                    data-testid="question-submit-btn"
                     className="w-full h-16 rounded-[1.5rem] font-black text-sm uppercase tracking-widest bg-indigo-600 hover:bg-indigo-700 text-white shadow-2xl shadow-indigo-600/30 transition-all hover:-translate-y-1"
                   >
                     {isSubmitting ? (
