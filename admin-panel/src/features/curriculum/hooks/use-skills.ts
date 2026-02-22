@@ -412,3 +412,29 @@ export function useBulkCreateSkills() {
     },
   });
 }
+
+export function useCheckSkillSlug() {
+  const { currentApp } = useApp();
+
+  return {
+    checkSlug: async (slug: string, excludeSkillId?: string) => {
+      if (!currentApp?.app_id) return true;
+      if (!slug) return true;
+
+      let query = supabase
+        .from('skills')
+        .select('skill_id', { count: 'exact', head: true })
+        .eq('app_id', currentApp.app_id)
+        .eq('slug', slug.trim().toLowerCase())
+        .is('deleted_at', null);
+
+      if (excludeSkillId) {
+        query = query.neq('skill_id', excludeSkillId);
+      }
+
+      const { count, error } = await query;
+      if (error) return true; // Assume available if error or handle differently
+      return (count ?? 0) === 0;
+    },
+  };
+}

@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import { Database } from '@/lib/database.types';
 import { normalizeFormData } from '@/lib/normalization';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,7 +27,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useDomains } from '../hooks/use-domains';
-import { useCreateSkill, useUpdateSkill } from '../hooks/use-skills';
+import { useCheckSkillSlug, useCreateSkill, useUpdateSkill } from '../hooks/use-skills';
 
 type Skill = Database['public']['Tables']['skills']['Row'];
 
@@ -67,6 +68,8 @@ export function SkillForm({ initialData }: SkillFormProps) {
   const { data: domains, isLoading: isLoadingDomains } = useDomains();
 
   const isEditing = Boolean(initialData);
+  const { toast } = useToast();
+  const { checkSlug } = useCheckSkillSlug();
 
   const form = useForm<SkillFormData>({
     mode: 'onBlur',
@@ -81,6 +84,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
       status: (initialData?.status as 'draft' | 'published' | 'live') || 'draft',
     },
   });
+
   const onSubmit = async (data: SkillFormData) => {
     // Normalize text fields: trim whitespace, lowercase the slug
     const normalizedData = normalizeFormData(data, {
@@ -89,17 +93,57 @@ export function SkillForm({ initialData }: SkillFormProps) {
     });
 
     try {
+      // Pre-flight check for slug availability
+      const isAvailable = await checkSlug(normalizedData.slug, initialData?.skill_id);
+      if (!isAvailable) {
+        form.setError('slug', {
+          type: 'manual',
+          message: 'This slug is already in use in this app. Please choose another one.',
+        });
+        toast({
+          title: 'Slug conflict',
+          description: 'A skill with this slug already exists. Please use a unique slug.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       if (initialData) {
         await updateSkill.mutateAsync({
           skill_id: initialData.skill_id,
           ...normalizedData,
         });
+        toast({
+          title: 'Skill updated',
+          description: `Skill "${normalizedData.title}" has been updated successfully.`,
+        });
       } else {
         await createSkill.mutateAsync(normalizedData);
+        toast({
+          title: 'Skill created',
+          description: `Skill "${normalizedData.title}" has been created successfully.`,
+        });
       }
       navigate('/skills');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to save skill:', error);
+
+      let errorMessage = 'An unexpected error occurred while saving the skill.';
+
+      const supabaseError = error as { code?: string; status?: number };
+
+      // Handle Supabase/Postgres 409 Conflict (Duplicate Key)
+      if (supabaseError?.code === '23505' || supabaseError?.status === 409) {
+        errorMessage =
+          'A skill with this slug already exists in this app. Please use a different slug.';
+        form.setError('slug', { type: 'manual', message: errorMessage });
+      }
+
+      toast({
+        title: 'Error saving skill',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -207,7 +251,8 @@ export function SkillForm({ initialData }: SkillFormProps) {
                           <Input
                             placeholder="e.g. addition_basic"
                             {...field}
-                            className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all border"
+                            disabled={isEditing}
+                            className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all border disabled:opacity-50"
                             required
                             pattern="[a-z0-9_]+"
                             title="Lowercase letters, numbers, and underscores only"
@@ -287,7 +332,10 @@ export function SkillForm({ initialData }: SkillFormProps) {
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all border">
+                            <SelectTrigger
+                              data-testid="status-select"
+                              className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all border"
+                            >
                               <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                           </FormControl>

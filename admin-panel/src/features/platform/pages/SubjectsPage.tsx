@@ -72,6 +72,7 @@ import {
   useBulkCreateSubjects,
   useBulkDeleteSubjects,
   useBulkUpdateSubjectsStatus,
+  useCheckSubjectSlug,
   useCreateSubject,
   useDeleteSubject,
   useSubjects,
@@ -377,6 +378,7 @@ export function SubjectsPage() {
   const bulkCreate = useBulkCreateSubjects();
   const bulkDelete = useBulkDeleteSubjects();
   const bulkUpdateStatus = useBulkUpdateSubjectsStatus();
+  const { checkSlug } = useCheckSubjectSlug();
 
   const filteredSubjects = useMemo(
     () =>
@@ -467,6 +469,21 @@ export function SubjectsPage() {
     });
 
     try {
+      // Pre-flight check for slug availability
+      const isAvailable = await checkSlug(normalizedData.slug, editingSubject?.subject_id);
+      if (!isAvailable) {
+        form.setError('slug', {
+          type: 'manual',
+          message: 'This slug is already in use. Please choose another one.',
+        });
+        toast({
+          title: 'Slug conflict',
+          description: 'A subject with this slug already exists. Please use a unique slug.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       if (editingSubject) {
         await updateSubject.mutateAsync({ id: editingSubject.subject_id, ...normalizedData });
         toast({ title: 'Success', description: 'Subject updated' });
@@ -475,10 +492,21 @@ export function SubjectsPage() {
         toast({ title: 'Success', description: 'Subject created' });
       }
       setIsDialogOpen(false);
-    } catch (error) {
+    } catch (error: unknown) {
+      console.error('Failed to save subject:', error);
+
+      let errorMessage = 'An unexpected error occurred while saving the subject.';
+      const supabaseError = error as { code?: string; status?: number };
+
+      // Handle Supabase/Postgres 409 Conflict (Duplicate Key)
+      if (supabaseError?.code === '23505' || supabaseError?.status === 409) {
+        errorMessage = 'A subject with this slug already exists. Please use a different slug.';
+        form.setError('slug', { type: 'manual', message: errorMessage });
+      }
+
       toast({
-        title: 'Error',
-        description: 'Failed to persist subject data',
+        title: 'Error saving subject',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -996,13 +1024,14 @@ export function SubjectsPage() {
                               <Input
                                 placeholder="e.g. math"
                                 {...field}
+                                disabled={Boolean(editingSubject)}
                                 onChange={(e) =>
                                   field.onChange(
                                     e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')
                                   )
                                 }
                                 data-testid="subject-slug"
-                                className="h-9 rounded border border-gray-300 bg-white text-gray-700 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none font-mono text-xs"
+                                className="h-9 rounded border border-gray-300 bg-white text-gray-700 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none font-mono text-xs disabled:opacity-50 disabled:bg-gray-50"
                                 required
                                 pattern="[a-z0-9_]+"
                                 title="Lowercase letters, numbers, and underscores only"

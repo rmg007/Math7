@@ -132,7 +132,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
         case 'mcq_multi':
           return [];
         case 'boolean':
-          return null;
+          return false;
         case 'text_input':
           return '';
         case 'reorder_steps':
@@ -801,7 +801,10 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                           </FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <SelectTrigger className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-emerald-500/10 transition-all">
+                              <SelectTrigger
+                                data-testid="status-select"
+                                className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-emerald-500/10 transition-all"
+                              >
                                 <SelectValue placeholder="Deployment status" />
                               </SelectTrigger>
                             </FormControl>

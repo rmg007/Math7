@@ -62,6 +62,15 @@ export class QuestionsPage {
     await this.correctAnswerRadios.nth(index).click();
   }
 
+  async selectStatus(status: 'draft' | 'live') {
+    const trigger = this.page.locator('[data-testid="status-select"]');
+    await trigger.waitFor({ state: 'visible' });
+    await trigger.click({ delay: 100 });
+    const option = this.page.locator(`[role="option"] >> text=/^${status}$/i`).first();
+    await option.waitFor({ state: 'visible', timeout: 5_000 });
+    await option.click({ force: true });
+  }
+
   async submit() {
     await this.submitButton.click();
   }
@@ -71,12 +80,16 @@ export class QuestionsPage {
     skillName: RegExp | string;
     options: string[];
     correctIndex?: number;
+    status?: 'draft' | 'live';
   }) {
     await this.gotoNew();
     await this.selectSkill(opts.skillName);
     await this.typeQuestionText(opts.questionText);
     await this.fillOptions(opts.options);
     await this.selectCorrectAnswer(opts.correctIndex ?? 0);
+    if (opts.status) {
+      await this.selectStatus(opts.status);
+    }
     await this.submit();
   }
 }

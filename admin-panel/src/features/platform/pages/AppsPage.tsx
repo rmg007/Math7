@@ -80,6 +80,7 @@ import {
   useBulkCreateApps,
   useBulkDeleteApps,
   useBulkUpdateAppsStatus,
+  useCheckAppSubdomain,
   useCreateApp,
   useDeleteApp,
   useUpdateApp,
@@ -305,6 +306,7 @@ export function AppsPage() {
   const bulkDelete = useBulkDeleteApps();
   const bulkUpdateStatus = useBulkUpdateAppsStatus();
   const bulkCreate = useBulkCreateApps();
+  const { checkSubdomain } = useCheckAppSubdomain();
   const { toast } = useToast();
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -561,6 +563,22 @@ export function AppsPage() {
     });
 
     try {
+      // Pre-flight check for subdomain availability
+      const isAvailable = await checkSubdomain(normalizedData.subdomain, editingApp?.app_id);
+      if (!isAvailable) {
+        form.setError('subdomain', {
+          type: 'manual',
+          message: 'This subdomain is already in use. Please choose another one.',
+        });
+        toast({
+          title: 'Subdomain conflict',
+          description:
+            'An application with this subdomain already exists. Please use a unique subdomain.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       if (editingApp) {
         await updateApp.mutateAsync({ id: editingApp.app_id, ...normalizedData });
         toast({ title: 'Success', description: 'Application updated' });
@@ -569,8 +587,24 @@ export function AppsPage() {
         toast({ title: 'Success', description: 'Application created' });
       }
       setIsDialogOpen(false);
-    } catch (error) {
-      toast({ title: 'Error', description: 'Failed to save application', variant: 'destructive' });
+    } catch (error: unknown) {
+      console.error('Failed to save application:', error);
+
+      let errorMessage = 'An unexpected error occurred while saving the application.';
+      const supabaseError = error as { code?: string; status?: number };
+
+      // Handle Supabase/Postgres 409 Conflict (Duplicate Key)
+      if (supabaseError?.code === '23505' || supabaseError?.status === 409) {
+        errorMessage =
+          'An application with this subdomain already exists. Please use a different subdomain.';
+        form.setError('subdomain', { type: 'manual', message: errorMessage });
+      }
+
+      toast({
+        title: 'Error saving application',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -1033,18 +1067,16 @@ export function AppsPage() {
                             <div className="flex">
                               <FormControl>
                                 <Input
-                                  placeholder="e.g. math-g12"
+                                  placeholder="e.g. math-academy"
                                   {...field}
+                                  disabled={Boolean(editingApp)}
                                   onChange={(e) =>
                                     field.onChange(
-                                      e.target.value
-                                        .toLowerCase()
-                                        .replace(/[^a-z0-9-]/g, '')
-                                        .slice(0, 63)
+                                      e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
                                     )
                                   }
                                   data-testid="app-subdomain"
-                                  className="h-9 rounded-l rounded-r-none border border-r-0 border-gray-300 bg-white text-gray-700 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none font-mono text-xs"
+                                  className="h-9 rounded-l rounded-r-none border border-r-0 border-gray-300 bg-white text-gray-700 placeholder:text-gray-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none font-mono text-xs disabled:opacity-50 disabled:bg-gray-50"
                                   required
                                   pattern="[a-z0-9-]+"
                                   title="Lowercase letters, numbers, and dashes only"

@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:student_app/src/core/config/app_config_service.dart';
 import 'package:student_app/src/features/auth/screens/welcome_screen.dart';
 
+import '../../../helpers/test_helpers.dart';
+
 // Mock Config Service ensuring AppContext is available for downstream screens
 class MockAppConfigService extends StateNotifier<AsyncValue<AppContext>>
     implements AppConfigService {
@@ -19,6 +21,7 @@ void main() {
   Widget createSubject() {
     return ProviderScope(
       overrides: [
+        ...getTestOverrides(),
         appConfigProvider.overrideWith((ref) => MockAppConfigService()),
       ],
       child: const MaterialApp(

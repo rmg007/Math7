@@ -12,21 +12,21 @@
 
 ### Step 0: Clear the Build (IMMEDIATE)
 
-- [ ] **Husky Gate**: Last commit (`docs(tasks): archive Phase 12`) was rejected by pre-commit hooks. Run `npm run lint` + `npx tsc --noEmit` in admin-panel, identify the exact failure, fix it, and get the commit through.
+- [x] **Husky Gate**: Last commit (`docs(tasks): archive Phase 12`) was rejected by pre-commit hooks. Run `npm run lint` + `npx tsc --noEmit` in admin-panel, identify the exact failure, fix it, and get the commit through. (Verified green)
 
 ### Step 1: Verify What We Just Shipped
 
-- [ ] **Run the 14 New E2E Tests**: `question-types-regression.e2e.spec.ts` has never executed in CI. Run it locally against the test DB. Fix whatever breaks. This is the single highest-risk item — we told ourselves Step 13 regression coverage is "done" but we've never seen green.
-- [ ] **SQLCipher Smoke Test**: The F-15 encryption migration swapped `sqlite3_flutter_libs` → `sqlcipher_flutter_libs`. Run `flutter test` in `student-app/` and confirm the Drift DB still opens, seeds, and queries correctly. If any test touches the DB and fails, the encryption key flow is broken.
-- [ ] **Rollback RPC Dry Run**: Call `list_curriculum_snapshots(app_id)` against production via Supabase MCP. Confirm it returns data. Then call `rollback_publish(app_id, version)` against the **test** DB to verify the restore logic without risking production content.
+- [x] **Run the 14 New E2E Tests**: `question-types-regression.e2e.spec.ts` has never executed in CI. Run it locally against the test DB. Fix whatever breaks. (Verified 18 tests passed)
+- [x] **SQLCipher Smoke Test**: The F-15 encryption migration swapped `sqlite3_flutter_libs` → `sqlcipher_flutter_libs`. Run `flutter test` in `student-app/` and confirm the Drift DB still opens, seeds, and queries correctly. (Verified via `encryption_smoke_test.dart` and `flutter test`)
+- [x] **Rollback RPC Dry Run**: Call `list_curriculum_snapshots(app_id)` against production via Supabase MCP. Confirm it returns data. Then call `rollback_publish(app_id, version)` against the **test** DB to verify the restore logic without risking production content. (Verified: Fixed auth bug in RPC, confirmed production data, verified rollback logic on TEST DB)
 
 ### Step 2: Fix the Bugs We Keep Having
 
 These are patterns from `LEARNING_LOG.md` that have bitten us **more than once**:
 
-- [ ] **Platform Drift Guard**: Create a single Vitest test that imports the Dart `question_fixtures.dart` field names (as a JSON snapshot) and asserts they match the TypeScript `questions.ts` fixture field names. This catches the `master_level` vs `mastery_level` class of bug before it reaches production. No fancy framework — one test, one assertion.
-- [ ] **Import Crash Prevention**: Add a `tsc --noEmit` step to the Husky pre-commit hook if it's not already there. We've had 3+ incidents of missing imports (`Badge`, `Loader2`, `useEffect`) that compiled in dev (HMR is forgiving) but crashed in production builds. This is a 1-line fix that prevents an entire class of bugs.
-- [ ] **Flutter `getTestOverrides()` Adoption**: 11 of 13 Flutter test files bypass our standard test helper. Pick the 3 most critical test files (sync, practice, mastery) and migrate them. Don't touch the others — diminishing returns.
+- [x] **Platform Drift Guard**: Created `src/__tests__/contract-drift.test.ts`. This verifies that Dart and TypeScript fixtures for Questions, QuestionType, and Difficulty remain in sync, preventing contract drift.
+- [x] **Import Crash Prevention**: Added `cd admin-panel && npm run typecheck` to the Husky pre-commit hook to catch missing imports before they reach production.
+- [x] **Flutter `getTestOverrides()` Adoption**: Migrated `sync_service_test.dart`, `progress_screen_test.dart`, and `practice_screen_test.dart` to use the standard `getTestOverrides()` helper for consistent provider management.
 
 ### Step 3: Post-Deploy Confidence
 

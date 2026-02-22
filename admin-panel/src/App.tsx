@@ -277,73 +277,109 @@ const router = createBrowserRouter([
       {
         path: '/domains',
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <DomainsPage />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingPage />}>
+              <DomainsPage />
+            </Suspense>
+          </ErrorBoundary>
         ),
       },
       {
         path: '/domains/new',
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <DomainCreatePage />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingPage />}>
+              <DomainCreatePage />
+            </Suspense>
+          </ErrorBoundary>
         ),
       },
       {
         path: '/domains/:id/edit',
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <DomainEditPage />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingPage />}>
+              <DomainEditPage />
+            </Suspense>
+          </ErrorBoundary>
         ),
       },
       {
         path: '/skills',
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <SkillsPage />
-          </Suspense>
+          <ErrorBoundary
+            fallback={
+              <div className="min-h-screen flex items-center justify-center p-4">
+                <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-xl border border-teal-100 text-center">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">Skills Directory Error</h2>
+                  <p className="text-gray-600 mb-6 font-medium">
+                    The skills catalog is temporarily unavailable. This might be due to a
+                    synchronization issue.
+                  </p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-6 py-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-all font-bold text-sm"
+                  >
+                    Refresh Catalog
+                  </button>
+                </div>
+              </div>
+            }
+          >
+            <Suspense fallback={<LoadingPage />}>
+              <SkillsPage />
+            </Suspense>
+          </ErrorBoundary>
         ),
       },
       {
         path: '/skills/new',
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <SkillCreatePage />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingPage />}>
+              <SkillCreatePage />
+            </Suspense>
+          </ErrorBoundary>
         ),
       },
       {
         path: '/skills/:id/edit',
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <SkillEditPage />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingPage />}>
+              <SkillEditPage />
+            </Suspense>
+          </ErrorBoundary>
         ),
       },
       {
         path: '/questions',
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <QuestionsPage />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingPage />}>
+              <QuestionsPage />
+            </Suspense>
+          </ErrorBoundary>
         ),
       },
       {
         path: '/questions/new',
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <QuestionCreatePage />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingPage />}>
+              <QuestionCreatePage />
+            </Suspense>
+          </ErrorBoundary>
         ),
       },
       {
         path: '/questions/:id/edit',
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <QuestionEditPage />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingPage />}>
+              <QuestionEditPage />
+            </Suspense>
+          </ErrorBoundary>
         ),
       },
       {
@@ -478,11 +514,13 @@ const router = createBrowserRouter([
       {
         path: '/subjects',
         element: (
-          <SuperAdminGuard>
-            <Suspense fallback={<LoadingPage />}>
-              <SubjectsPage />
-            </Suspense>
-          </SuperAdminGuard>
+          <ErrorBoundary>
+            <SuperAdminGuard>
+              <Suspense fallback={<LoadingPage />}>
+                <SubjectsPage />
+              </Suspense>
+            </SuperAdminGuard>
+          </ErrorBoundary>
         ),
       },
       {

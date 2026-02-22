@@ -117,3 +117,24 @@ export function useBulkCreateSubjects() {
     },
   });
 }
+
+export function useCheckSubjectSlug() {
+  const checkSlug = async (slug: string, subject_id?: string) => {
+    if (!slug) return true;
+
+    let query = supabase
+      .from('subjects')
+      .select('subject_id', { count: 'exact', head: true })
+      .eq('slug', slug.trim().toLowerCase());
+
+    if (subject_id) {
+      query = query.neq('subject_id', subject_id);
+    }
+
+    const { count, error } = await query;
+    if (error) return true; // Assume available on error to avoid blocking saves
+    return (count ?? 0) === 0;
+  };
+
+  return { checkSlug };
+}

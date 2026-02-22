@@ -40,7 +40,7 @@ void main() {
   });
 
   // Helper: set up an rpc mock that always throws with the given error.
-  void _stubRpcToThrow(MockPostgrestFilterBuilder builder, Object error) {
+  void stubRpcToThrow(MockPostgrestFilterBuilder builder, Object error) {
     when(() => mockSupabase.rpc<dynamic>(
           any(),
           params: any(named: 'params'),
@@ -57,7 +57,7 @@ void main() {
   // ------------------------------------------------------------------
   test('REL-01: SyncService times out with injectable Duration', () async {
     final mockBuilder = MockPostgrestFilterBuilder();
-    _stubRpcToThrow(mockBuilder, Exception('Supabase call timed out after 0s'));
+    stubRpcToThrow(mockBuilder, Exception('Supabase call timed out after 0s'));
 
     final syncService = SyncService(database, mockSupabase, mockRepo,
         timeout: const Duration(milliseconds: 50));
@@ -124,7 +124,7 @@ void main() {
         );
 
     final mockBuilder = MockPostgrestFilterBuilder();
-    _stubRpcToThrow(mockBuilder, Exception('network error'));
+    stubRpcToThrow(mockBuilder, Exception('network error'));
 
     final syncService = SyncService(database, mockSupabase, mockRepo,
         timeout: const Duration(milliseconds: 100));

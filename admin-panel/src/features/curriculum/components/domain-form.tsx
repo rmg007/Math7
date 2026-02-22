@@ -20,13 +20,20 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/hooks/use-app';
+import { useToast } from '@/hooks/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Book, FileText, Globe, ListOrdered, Loader2, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
-import { useCreateDomain, useDomain, useDomains, useUpdateDomain } from '../hooks/use-domains';
+import {
+  useCheckDomainSlug,
+  useCreateDomain,
+  useDomain,
+  useDomains,
+  useUpdateDomain,
+} from '../hooks/use-domains';
 
 const STATUS_OPTIONS: { value: 'draft' | 'live'; label: string; description?: string }[] = [
   { value: 'draft', label: 'Draft', description: 'Not visible to students' },
@@ -54,6 +61,8 @@ export function DomainForm() {
   const { currentApp, isLoading: isAppLoading, isSuperAdmin, apps } = useApp();
   const createDomain = useCreateDomain();
   const updateDomain = useUpdateDomain();
+  const { checkSlug } = useCheckDomainSlug();
+  const { toast } = useToast();
 
   // Use useDomain specific hook for fetching the target domain
   // This allows finding domains across apps for Super Admins
@@ -135,31 +144,51 @@ export function DomainForm() {
     };
 
     try {
+      // Pre-flight check for slug availability
+      const isAvailable = await checkSlug(normalizedData.slug, id);
+      if (!isAvailable) {
+        form.setError('slug', {
+          type: 'manual',
+          message: 'This slug is already in use in this app. Please choose another one.',
+        });
+        toast({
+          title: 'Slug conflict',
+          description: 'A domain with this slug already exists. Please use a unique slug.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       if (isEditing && id) {
         await updateDomain.mutateAsync({ domain_id: id, ...normalizedData });
+        toast({ title: 'Success', description: 'Domain updated' });
       } else {
         await createDomain.mutateAsync(normalizedData);
+        toast({ title: 'Success', description: 'Domain created' });
       }
       navigate('/domains');
     } catch (err: unknown) {
       console.error('Failed to save domain:', err);
       let message =
-        err instanceof Error ? err.message : 'An unexpected error occurred while saving.';
+        err instanceof Error
+          ? err.message
+          : 'An unexpected error occurred while saving the domain.';
 
-      // Handle duplicate slug error (Postgres error code 23505)
-      if (
-        (err && typeof err === 'object' && 'code' in err && err.code === '23505') ||
-        (err &&
-          typeof err === 'object' &&
-          'message' in err &&
-          typeof err.message === 'string' &&
-          err.message.includes('unique constraint "domains_app_id_slug_key"'))
-      ) {
+      const supabaseError = err as { code?: string; status?: number };
+
+      // Handle duplicate slug error (Postgres error code 23505 or 409 status)
+      if (supabaseError?.code === '23505' || supabaseError?.status === 409) {
         message =
           'A domain with this slug already exists for this application. Please use a different slug.';
+        form.setError('slug', { type: 'manual', message: message });
       }
 
       setError(message);
+      toast({
+        title: 'Error saving domain',
+        description: message,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -382,7 +411,10 @@ export function DomainForm() {
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all border">
+                            <SelectTrigger
+                              data-testid="status-select"
+                              className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all border"
+                            >
                               <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                           </FormControl>

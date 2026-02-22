@@ -4,7 +4,7 @@
  * Abstracts all DOM interactions for the /questions/new route.
  * Uses data-testid anchors added in the Step 13 test-ID sweep.
  *
- * Supported question types: mcq | multi_mcq | boolean | text_input
+ * Supported question types: multiple_choice | mcq_multi | boolean | text_input
  */
 import { Locator, Page } from '@playwright/test';
 
@@ -51,83 +51,181 @@ export class QuestionFormPage {
 
   /** Type text into the ProseMirror question content editor */
   async typeContent(text: string) {
+    await this.contentEditor.waitFor({ state: 'visible' });
     await this.contentEditor.click();
     await this.page.keyboard.type(text);
   }
 
   /** Open the question-type dropdown and pick a type */
-  async selectType(type: 'mcq' | 'multi_mcq' | 'boolean' | 'text_input' | 'reorder_steps') {
-    await this.typeSelect.click();
-    // The SelectContent appears as a portal with role="option"
-    await this.page.waitForSelector('[role="option"]', { timeout: 10_000 });
-    await this.page.locator(`[data-testid="question-form-type-select-item-${type}"]`).click();
+  async selectType(
+    type: 'multiple_choice' | 'mcq_multi' | 'boolean' | 'text_input' | 'reorder_steps'
+  ) {
+    await this.typeSelect.waitFor({ state: 'visible' });
+    await this.typeSelect.click({ delay: 100 });
+
+    const item = this.page.locator(`[data-testid="question-form-type-select-item-${type}"]`);
+    await item.waitFor({ state: 'visible', timeout: 10_000 });
+    await item.click({ force: true });
+  }
+
+  /** Select status (Draft/Live) */
+  async selectStatus(status: 'draft' | 'live') {
+    const trigger = this.page.locator('[data-testid="status-select"]');
+    await trigger.waitFor({ state: 'visible' });
+    await trigger.click({ delay: 100 });
+
+    // Exact mapping for status options
+    const option = this.page.locator(`[role="option"] >> text=/^${status}$/i`).first();
+    await option.waitFor({ state: 'visible', timeout: 5_000 });
+    await option.click({ force: true });
   }
 
   /** Open the skill dropdown and pick by visible text */
   async selectSkill(skillName: string | RegExp) {
-    await this.skillSelect.click();
+    await this.skillSelect.waitFor({ state: 'visible' });
+    await this.skillSelect.click({ delay: 100 });
+
     await this.page.waitForSelector('[role="option"]', { timeout: 10_000 });
-    await this.page.getByRole('option', { name: skillName }).click();
+    const option = this.page.getByRole('option', { name: skillName }).first();
+    await option.waitFor({ state: 'visible', timeout: 5_000 });
+    await option.click({ force: true });
   }
 
   /** Fill the Nth MCQ option input (0-indexed) */
   async fillMCQOption(index: number, text: string) {
-    await this.page.locator(`[data-testid="question-mcq-option-${index}"]`).fill(text);
+    const locator = this.page.locator(`[data-testid="question-mcq-option-${index}"]`);
+    // If option doesn't exist, we might need to click "Append Option"
+    const exists = await locator.isVisible().catch(() => false);
+    if (!exists && index >= 2) {
+      // Assuming minimum 2 options. For index 2+, we might need to append.
+      // We click append until it appears or we hit a limit.
+      let currentIdx =
+        (await this.page.locator('[data-testid^="question-mcq-option-"]').count()) - 1;
+      while (currentIdx < index) {
+        await this.appendOptionButton.click();
+        currentIdx++;
+        await this.page
+          .locator(`[data-testid="question-mcq-option-${currentIdx}"]`)
+          .waitFor({ state: 'visible' });
+      }
+    }
+    await locator.waitFor({ state: 'visible', timeout: 10_000 });
+    await locator.fill(text);
   }
 
   /** Fill the Nth multi-MCQ option input (0-indexed) */
   async fillMultiOption(index: number, text: string) {
-    await this.page.locator(`[data-testid="question-multi-option-${index}"]`).fill(text);
+    const locator = this.page.locator(`[data-testid="question-multi-option-${index}"]`);
+    const exists = await locator.isVisible().catch(() => false);
+    if (!exists && index >= 2) {
+      let currentIdx =
+        (await this.page.locator('[data-testid^="question-multi-option-"]').count()) - 1;
+      while (currentIdx < index) {
+        await this.page.locator('[data-testid="question-form-append-option-multi"]').click();
+        currentIdx++;
+        await this.page
+          .locator(`[data-testid="question-multi-option-${currentIdx}"]`)
+          .waitFor({ state: 'visible' });
+      }
+    }
+    await locator.waitFor({ state: 'visible', timeout: 10_000 });
+    await locator.fill(text);
   }
 
   /** Pick the correct answer radio for MCQ (0-indexed) */
   async selectCorrectAnswer(index: number) {
-    await this.page.getByRole('radio').nth(index).click();
+    const radio = this.page.getByRole('radio').nth(index);
+    await radio.waitFor({ state: 'visible' });
+    await radio.click();
   }
 
   /** Toggle a checkbox-correct-answer for multi-MCQ (0-indexed) */
   async toggleMultiCorrectAnswer(index: number) {
-    await this.page.getByRole('checkbox').nth(index).click();
+    const check = this.page.getByRole('checkbox').nth(index);
+    await check.waitFor({ state: 'visible' });
+    await check.click();
   }
 
   /** Toggle the boolean truth-value switch */
   async toggleBooleanAnswer() {
+    await this.booleanSwitch.waitFor({ state: 'visible' });
     await this.booleanSwitch.click();
   }
 
   /** Fill the text_input exact answer */
   async fillTextInputAnswer(answer: string) {
+    await this.textInputAnswer.waitFor({ state: 'visible' });
     await this.textInputAnswer.fill(answer);
   }
 
-  async submit() {
-    await this.submitButton.click();
+  /** Composites: Full create flows */
+
+  async createMCQ(opts: {
+    questionText: string;
+    skillName: string | RegExp;
+    options: string[];
+    correctIndex?: number;
+    status?: 'draft' | 'live';
+  }) {
+    await this.gotoNew();
+    await this.selectSkill(opts.skillName);
+    await this.typeContent(opts.questionText);
+    for (let i = 0; i < opts.options.length; i++) {
+      await this.fillMCQOption(i, opts.options[i]);
+    }
+    if (opts.correctIndex !== undefined) {
+      await this.selectCorrectAnswer(opts.correctIndex);
+    }
+    if (opts.status) {
+      await this.selectStatus(opts.status);
+    }
+    await this.submit();
   }
 
-  /** Full flow: create a text_input (subjective) question */
   async createSubjective(opts: {
     questionText: string;
     skillName: string | RegExp;
     answer: string;
+    status?: 'draft' | 'live';
   }) {
     await this.gotoNew();
     await this.selectType('text_input');
     await this.selectSkill(opts.skillName);
     await this.typeContent(opts.questionText);
     await this.fillTextInputAnswer(opts.answer);
+    if (opts.status) {
+      await this.selectStatus(opts.status);
+    }
     await this.submit();
   }
 
-  /** Full flow: create a boolean question */
-  async createBoolean(opts: { questionText: string; skillName: string | RegExp; isTrue: boolean }) {
+  async createBoolean(opts: {
+    questionText: string;
+    skillName: string | RegExp;
+    correctIsTrue: boolean;
+    status?: 'draft' | 'live';
+  }) {
     await this.gotoNew();
     await this.selectType('boolean');
     await this.selectSkill(opts.skillName);
     await this.typeContent(opts.questionText);
-    // Switch starts at false; click if we need true
-    if (opts.isTrue) {
+    if (opts.correctIsTrue) {
+      await this.toggleBooleanAnswer();
+    } else {
+      // Stability: toggle on then off to ensure "false" state is registered vs null
+      await this.toggleBooleanAnswer();
       await this.toggleBooleanAnswer();
     }
+    if (opts.status) {
+      await this.selectStatus(opts.status);
+    }
     await this.submit();
+  }
+
+  async submit() {
+    await this.submitButton.waitFor({ state: 'visible' });
+    // Small stability wait for React state reconciliation
+    await this.page.waitForTimeout(500);
+    await this.submitButton.click();
   }
 }

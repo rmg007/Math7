@@ -1,34 +1,31 @@
+import 'package:drift/drift.dart' hide isNotNull, isNull;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:student_app/src/core/core_providers.dart';
 import 'package:student_app/src/core/database/database.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:drift/drift.dart' hide isNotNull, isNull;
-import 'package:drift/native.dart';
 
-// Mocks
-class MockSupabaseClient extends Mock implements SupabaseClient {}
-
-class MockPostgrestFilterBuilder extends Mock
-    implements PostgrestFilterBuilder {}
-
-class MockPostgrestBuilder extends Mock implements PostgrestBuilder {}
+import '../../helpers/test_helpers.dart';
 
 void main() {
   late AppDatabase database;
-  // ignore: unused_local_variable - kept for future integration tests
-  late MockSupabaseClient mockSupabase;
+  late ProviderContainer container;
 
   setUp(() async {
-    // Create in-memory database for testing
-    database = AppDatabase(NativeDatabase.memory());
-    mockSupabase = MockSupabaseClient();
+    // Use the central test overrides helper
+    container = ProviderContainer(
+      overrides: getTestOverrides(),
+    );
+
+    database = container.read(databaseProvider);
 
     // Register fallback values for mocktail
     registerFallbackValue(Uri());
   });
 
   tearDown(() async {
-    await database.close();
+    // ProviderContainer will close the database via onDispose in getTestOverrides
+    container.dispose();
   });
 
   group('Outbox Grouping Logic', () {

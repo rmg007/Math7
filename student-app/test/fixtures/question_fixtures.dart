@@ -1,13 +1,13 @@
-/// Shared Student App Question Fixtures
-///
-/// Mirror of: admin-panel/tests/fixtures/questions.ts
-/// Aligned with the database schema for the questions table.
+// Shared Student App Question Fixtures
+//
+// Mirror of: admin-panel/tests/fixtures/questions.ts
+// Aligned with the database schema for the questions table.
 
 enum QuestionType {
   mcq,
   boolean,
-  short_answer,
-  fill_in_blank,
+  shortAnswer,
+  fillInBlank,
   ordering;
 
   String toJson() => name;
@@ -95,7 +95,7 @@ const mcqMedium = QuestionFixture(
 /// Short answer — no choices, expects free text
 const shortAnswer = QuestionFixture(
   text: 'In one sentence, explain what a pointer is in C.',
-  questionType: QuestionType.short_answer,
+  questionType: QuestionType.shortAnswer,
   difficulty: DifficultyLevel.hard,
   metadata: {
     'sample_answer':

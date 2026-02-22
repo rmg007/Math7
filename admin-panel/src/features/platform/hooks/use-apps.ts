@@ -1,16 +1,10 @@
-import { Tables, TablesInsert, TablesUpdate } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { isValidUUID } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-export type App = Tables<'apps'>;
-export interface CompiledApp extends App {
-  subjects: {
-    title: string;
-  } | null;
-}
-export type AppInsert = TablesInsert<'apps'>;
-export type AppUpdate = TablesUpdate<'apps'>;
+import { AppInsert, AppUpdate, CompiledApp } from '@/types/platform';
+
+export type { App, AppInsert, AppUpdate, CompiledApp } from '@/types/platform';
 
 export function useApps() {
   return useQuery({
@@ -162,4 +156,25 @@ export function useBulkCreateApps() {
       queryClient.invalidateQueries({ queryKey: ['apps'] });
     },
   });
+}
+
+export function useCheckAppSubdomain() {
+  const checkSubdomain = async (subdomain: string, app_id?: string) => {
+    if (!subdomain) return true;
+
+    let query = supabase
+      .from('apps')
+      .select('app_id', { count: 'exact', head: true })
+      .eq('subdomain', subdomain.trim().toLowerCase());
+
+    if (app_id) {
+      query = query.neq('app_id', app_id);
+    }
+
+    const { count, error } = await query;
+    if (error) return true; // Assume available on error to avoid blocking saves
+    return (count ?? 0) === 0;
+  };
+
+  return { checkSubdomain };
 }

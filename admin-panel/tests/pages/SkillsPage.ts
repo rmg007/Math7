@@ -62,6 +62,15 @@ export class SkillsPage {
     if (description) await this.descriptionInput.fill(description);
   }
 
+  async selectStatus(status: 'draft' | 'live') {
+    const trigger = this.page.locator('[data-testid="status-select"]');
+    await trigger.waitFor({ state: 'visible' });
+    await trigger.click({ delay: 100 });
+    const option = this.page.locator(`[role="option"] >> text=/^${status}$/i`).first();
+    await option.waitFor({ state: 'visible', timeout: 5_000 });
+    await option.click({ force: true });
+  }
+
   async submit() {
     await this.submitButton.click();
   }
@@ -71,9 +80,13 @@ export class SkillsPage {
     slug: string;
     description?: string;
     domainName: RegExp | string;
+    status?: 'draft' | 'live';
   }) {
     await this.gotoNew();
     await this.fillForm(opts);
+    if (opts.status) {
+      await this.selectStatus(opts.status);
+    }
     await this.submit();
   }
 }

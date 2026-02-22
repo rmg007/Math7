@@ -1,6 +1,62 @@
 # Questerix Learning Log
 
-## 2026-02-21: Phase 10 & 11 — Test-ID Completeness, Visual Baselines & Security Hardening [test created]
+## 2026-02-22: Phase 13 — Platform Alignment, Architecture Integrity & Test Hardening [test created]
+
+### [2026-02-22-Phase13] Session Context
+
+- **Trigger**: Tasks.md Phase 13 Step 2: Fix patterns that have bitten us multiple times (contract drift, missing imports, inconsistent test setups).
+- **Scope**: `admin-panel/__tests__`, `admin-panel/src/features`, `Husky pre-commit`, `student-app/test`.
+- **Outcome**: Established automated contract guard between Dart/TS fixtures; hardened Admin Panel architecture with generalized isolation tests; integrated global type-checking in CI/CD pipeline; migrated 3 critical Flutter test files to standard helpers.
+
+### Implementation Details
+
+#### Platform Drift Guard (Contract Safety)
+
+- **Feature**: Created `admin-panel/src/__tests__/contract-drift.test.ts` to solve the "master_level vs mastery_level" class of bugs.
+- **Pattern**: A single Vitest file that uses regex to parse the canonical Dart `question_fixtures.dart` and compares it against the TypeScript `questions.ts` fixtures.
+- **Verification**: Asserts that `QuestionType`, `Difficulty`, and the fields of the Question objects remain identical across languages.
+- **Lesson**: High-fidelity contract guards don't always need complex schemas (JSON/JSONS). Regex parsing of source code is often faster and easier to maintain for simple fixture alignment.
+
+#### Architecture Hardening (Admin Panel)
+
+- **Feature**: Generalized the feature isolation rules in `architecture.test.ts`. Instead of manually adding rules for every feature pair, we now use `it.each` to enforce that no feature imports from another feature.
+- **Resolution**:
+  - Found and resolved a coupling where `curriculum` was importing the `App` type from `platform`.
+  - Fix: Extracted platform-related types to a shared `src/types/platform.ts` file.
+  - Exception: Added authorized exceptions for satellite features (`ai-assistant`, `ai-content`) to depend on the core `curriculum` feature.
+- **Lesson**: Architectural tests should use patterns, not enumerations. A loop ensures that as we add new features, they are born isolated.
+
+#### Husky Pre-Commit Typecheck (Import Safety)
+
+- **Feature**: Added `cd admin-panel && npm run typecheck` to the Husky `pre-commit` hook.
+- **Issue**: Multiple production crashes occurred because HMR (Dev mode) masked missing imports or dead references that were caught only at build time.
+- **Fix**: The pre-commit hook now blocks any commit that has TypeScript errors in the admin panel.
+- **Lesson**: Static analysis is only useful if it gates the code. Gating at the pre-commit stage is the last line of defense before broken code enters git history.
+
+#### Flutter Test Refactoring (`getTestOverrides`)
+
+- **Feature**: Migrated `sync_service_test.dart`, `progress_screen_test.dart`, and `practice_screen_test.dart` to use the standardized `getTestOverrides()` helper.
+- **Outcome**: Deleted hundreds of lines of redundant mock boilerplate. Ensured that all tests use the same `MockSupabaseClient` and `MockDatabase` configuration.
+- **Bug Fixed**: Resolved 3+ compilation errors in `practice_screen_test.dart` caused by stale relative imports and missing spread syntax for overrides.
+- **Lesson**: Test boilerplate is a liability. Centralizing `ProviderScope` overrides prevents "test environment drift" where different tests mock the same service in conflicting ways.
+
+### [2026-02-22-Phase13] Files Modified
+
+| Area              | Files                                                                                                                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Testing**       | `admin-panel/src/__tests__/contract-drift.test.ts` (new), `admin-panel/src/__tests__/architecture.test.ts`                                                                                    |
+| **Core**          | `admin-panel/src/types/platform.ts` (new), `admin-panel/src/features/platform/hooks/use-apps.ts`, `admin-panel/src/features/curriculum/components/skill-list.tsx`                             |
+| **Husky**         | `.husky/pre-commit`                                                                                                                                                                           |
+| **Student Tests** | `student-app/test/core/sync/sync_service_test.dart`, `student-app/test/features/progress/progress_screen_test.dart`, `student-app/test/features/curriculum/screens/practice_screen_test.dart` |
+| **Documentation** | `tasks.md`, `LEARNING_LOG.md`                                                                                                                                                                 |
+
+### [2026-02-22-Phase13] Verification
+
+- **Vitest**: `npm run test:arch` and `contract-drift.test.ts` -> All 64 tests passed.
+- **Flutter**: `flutter test` on all modified files -> All tests passed.
+- **Typecheck**: `npm run typecheck` -> exit 0.
+
+---
 
 ### [2026-02-21-Phase11] Session Context
 

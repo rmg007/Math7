@@ -385,7 +385,7 @@ describe('useUpdateQuestion — update mutation', () => {
     const eqCalls = updateChain.eq.mock.calls as [string, string][];
     const appIdFilter = eqCalls.find(([col]) => col === 'app_id');
     expect(appIdFilter).toBeDefined();
-    expect(appIdFilter![1]).toBe(MOCK_APP_ID);
+    expect(appIdFilter?.[1]).toBe(MOCK_APP_ID);
   });
 
   it('surfaces error from Supabase on update failure', async () => {

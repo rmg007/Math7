@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect, test } from '@playwright/test';
 import {
   createDomain,
@@ -41,6 +40,7 @@ test.describe('Curriculum Lifecycle (P0)', () => {
       title: `E2E Domain ${timestamp}`,
       slug: domainSlug,
       description: 'Created by Playwright E2E',
+      status: 'live',
     });
     await expect(page.getByText(title).first()).toBeVisible();
   });
@@ -51,6 +51,7 @@ test.describe('Curriculum Lifecycle (P0)', () => {
       slug: skillSlug,
       description: 'Created by Playwright E2E',
       domainName: new RegExp(`E2E Domain ${timestamp}`, 'i'),
+      status: 'live',
     });
     await expect(page.getByText(`E2E Skill ${timestamp}`).first()).toBeVisible();
   });
@@ -61,6 +62,7 @@ test.describe('Curriculum Lifecycle (P0)', () => {
       skillName: new RegExp(`E2E Skill ${timestamp}`, 'i'),
       options: [`${timestamp + 1}`, `${timestamp + 2}`, `${timestamp + 3}`, `${timestamp + 4}`],
       correctIndex: 0,
+      status: 'live',
     });
     await expect(page.getByText(`What is ${timestamp} + 1?`).first()).toBeVisible();
   });

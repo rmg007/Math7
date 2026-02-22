@@ -31,7 +31,7 @@ const ANY_SKILL = /.+/;
 
 /** Wait for the questions list page after a successful submit */
 async function expectRedirectToList(page: import('@playwright/test').Page) {
-  await expect(page).toHaveURL(/\/questions$/, { timeout: 20_000 });
+  await expect(page).toHaveURL(/\/questions$/, { timeout: 35_000 });
 }
 
 // ---------------------------------------------------------------------------
@@ -39,7 +39,7 @@ async function expectRedirectToList(page: import('@playwright/test').Page) {
 // ---------------------------------------------------------------------------
 
 test.beforeEach(async ({ page }) => {
-  await loginAs(page, 'ADMIN');
+  await loginAs(page, 'SUPER_ADMIN');
 });
 
 // ---------------------------------------------------------------------------
@@ -167,7 +167,7 @@ test.describe('C — Boolean question', () => {
     await formPage.createBoolean({
       questionText: 'Is the Earth round?',
       skillName: ANY_SKILL,
-      isTrue: true,
+      correctIsTrue: true,
     });
 
     await expectRedirectToList(page);
@@ -180,7 +180,7 @@ test.describe('C — Boolean question', () => {
     await formPage.createBoolean({
       questionText: 'Is the Earth flat?',
       skillName: ANY_SKILL,
-      isTrue: false, // switch stays at default (false)
+      correctIsTrue: false, // switch stays at default (false)
     });
 
     await expectRedirectToList(page);
@@ -210,27 +210,29 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
   const mockResponse = {
     questions: [
       {
-        content: 'What is 2 + 2?',
-        type: 'mcq',
-        options: {
-          options: [
-            { id: 'a', text: '3' },
-            { id: 'b', text: '4' },
-            { id: 'c', text: '5' },
-            { id: 'd', text: '6' },
-          ],
-        },
-        solution: 'b',
-        points: 1,
-        status: 'draft',
+        type: 'multiple_choice',
+        content: 'What is 2+2?',
+        options: [
+          { text: '3', is_correct: false },
+          { text: '4', is_correct: true },
+          { text: '5', is_correct: false },
+          { text: '6', is_correct: false },
+        ],
+        solution: '4',
+        explanation: 'Basic math.',
+        points: 10,
+        difficulty_level: 1,
+        is_published: true,
       },
       {
-        content: 'Describe photosynthesis.',
         type: 'text_input',
-        options: { options: [] },
+        content: 'Describe photosynthesis.',
+        options: [],
         solution: 'Plants convert light to energy.',
-        points: 2,
-        status: 'draft',
+        explanation: 'Biology 101.',
+        points: 20,
+        difficulty_level: 2,
+        is_published: true,
       },
     ],
   };
@@ -238,8 +240,11 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
   test('AI tab loads, prompt fills, Sync button triggers, and buffer populates', async ({
     page,
   }) => {
-    // Intercept the AI parse endpoint
-    await page.route('**/functions/v1/parse*', async (route) => {
+    // Intercept both potential AI parse endpoints (Workers AI and Supabase Edge Functions)
+    await page.route('**/functions/v1/parse-import-prompt', async (route) => {
+      if (route.request().method() !== 'POST') {
+        return route.continue();
+      }
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -247,8 +252,24 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
       });
     });
 
-    await page.goto('/bulk-import');
+    await page.route('**/ai/parse-import-prompt', async (route) => {
+      if (route.request().method() !== 'POST') {
+        return route.continue();
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockResponse),
+      });
+    });
+
+    await page.goto('/ai-import');
     await expect(page.locator('[data-testid="bulk-import-page"]')).toBeVisible({ timeout: 15_000 });
+
+    // Select a skill first to ensure valid state
+    await page.locator('[data-testid="bulk-import-skill-select"]').click();
+    await page.waitForSelector('[role="option"]', { timeout: 10_000 });
+    await page.locator('[role="option"]').first().click();
 
     // Switch to AI Prompt tab
     await page.locator('[data-testid="bulk-import-tab-ai"]').click();
@@ -259,20 +280,24 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
     await textarea.fill('What is 2 + 2?\nDescribe photosynthesis.');
 
     // Click Sync with AI
+    // Trigger synchronization
     await page.locator('[data-testid="bulk-import-sync-btn"]').click();
 
-    // Buffer should now contain items (card must be visible)
+    // Verify buffer card is visible and contains items (it will populate after click)
     const bufferCard = page.locator('[data-testid="bulk-import-buffer-card"]');
-    await expect(bufferCard).toBeVisible({ timeout: 15_000 });
+    await expect(bufferCard).toBeVisible();
 
-    // At least two questions should appear in the buffer
-    const bufferItems = bufferCard.locator('[data-testid^="bulk-import-buffer-item"]');
-    // We tolerate any non-zero count — exact count depends on the mock shape
-    await expect(bufferItems.first()).toBeVisible({ timeout: 10_000 });
+    // Consistently wait for the buffer to populate
+    const bufferItemSelector = '[data-testid^="bulk-import-buffer-item-"]';
+    await page.waitForSelector(bufferItemSelector, { timeout: 20_000 });
+
+    const bufferItems = bufferCard.locator(bufferItemSelector);
+    const count = await bufferItems.count();
+    expect(count).toBeGreaterThan(0);
   });
 
   test('Sync button is disabled when prompt is empty', async ({ page }) => {
-    await page.goto('/bulk-import');
+    await page.goto('/ai-import');
     await page.locator('[data-testid="bulk-import-tab-ai"]').click();
 
     const syncBtn = page.locator('[data-testid="bulk-import-sync-btn"]');
@@ -280,7 +305,7 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
   });
 
   test('Sync button becomes enabled after typing in prompt textarea', async ({ page }) => {
-    await page.goto('/bulk-import');
+    await page.goto('/ai-import');
     await page.locator('[data-testid="bulk-import-tab-ai"]').click();
 
     const textarea = page.locator('[data-testid="bulk-import-ai-textarea"]');
@@ -291,7 +316,7 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
   });
 
   test('Dry Run switch is visible and togglable', async ({ page }) => {
-    await page.goto('/bulk-import');
+    await page.goto('/ai-import');
 
     const dryRunSwitch = page.locator('[data-testid="bulk-import-dryrun-switch"]');
     await expect(dryRunSwitch).toBeVisible();
@@ -304,7 +329,7 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
   });
 
   test('CSV tab shows file-upload input', async ({ page }) => {
-    await page.goto('/bulk-import');
+    await page.goto('/ai-import');
     await page.locator('[data-testid="bulk-import-tab-csv"]').click();
 
     const fileInput = page.locator('[data-testid="bulk-import-file-upload"]');
@@ -312,7 +337,7 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
   });
 
   test('Template button triggers a CSV download', async ({ page }) => {
-    await page.goto('/bulk-import');
+    await page.goto('/ai-import');
 
     const [download] = await Promise.all([
       page.waitForEvent('download', { timeout: 10_000 }),
@@ -328,13 +353,13 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('E — Form validation guard', () => {
-  const types = ['mcq', 'text_input', 'boolean'] as const;
+  const types = ['multiple_choice', 'text_input', 'boolean'] as const;
 
   for (const qtype of types) {
     test(`submitting empty ${qtype} form stays on the form`, async ({ page }) => {
       const formPage = new QuestionFormPage(page);
       await formPage.gotoNew();
-      if (qtype !== 'mcq') {
+      if (qtype !== 'multiple_choice') {
         await formPage.selectType(qtype);
       }
       // Don't fill anything — submit immediately

@@ -1,15 +1,14 @@
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:drift/drift.dart' hide Column;
-import 'package:student_app/src/features/progress/screens/progress_screen.dart';
-import 'package:student_app/src/features/progress/repositories/skill_progress_repository.dart';
-import 'package:student_app/src/features/progress/repositories/session_repository.dart';
 import 'package:student_app/src/features/curriculum/repositories/curriculum_repositories.dart';
-import 'package:student_app/src/core/core_providers.dart';
-import 'package:student_app/src/features/auth/providers/auth_provider.dart';
+import 'package:student_app/src/features/progress/repositories/session_repository.dart';
+import 'package:student_app/src/features/progress/repositories/skill_progress_repository.dart';
+import 'package:student_app/src/features/progress/screens/progress_screen.dart';
+
+import '../../helpers/test_helpers.dart';
 
 class MockSkillProgressRepository extends Mock
     implements SkillProgressRepository {}
@@ -18,10 +17,6 @@ class MockPracticeSessionRepository extends Mock
     implements PracticeSessionRepository {}
 
 class MockCurriculumRepository extends Mock implements CurriculumRepository {}
-
-class MockSupabaseClient extends Mock implements SupabaseClient {}
-
-class MockAuthService extends Mock implements AuthService {}
 
 void main() {
   setUpAll(() {
@@ -59,12 +54,13 @@ void main() {
 
     container = ProviderContainer(
       overrides: [
+        ...getTestOverrides(
+          mockSupabaseClient: mockSupabaseClient,
+          mockAuthService: mockAuthService,
+        ),
         skillProgressRepositoryProvider.overrideWithValue(mockProgressRepo),
         practiceSessionRepositoryProvider.overrideWithValue(mockSessionRepo),
         domainRepositoryProvider.overrideWithValue(mockCurriculumRepo),
-        supabaseClientProvider.overrideWithValue(mockSupabaseClient),
-        authServiceProvider.overrideWithValue(mockAuthService),
-        currentUserProvider.overrideWithValue(null),
       ],
     );
   });

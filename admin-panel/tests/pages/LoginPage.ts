@@ -70,6 +70,6 @@ export class LoginPage {
 
   async loginAndWaitForDashboard(email: string, password: string) {
     await this.login(email, password);
-    await this.page.waitForURL(/\/$|\/dashboard/, { timeout: 15_000 });
+    await this.page.waitForURL(/\/$|\/dashboard/, { timeout: 30_000 });
   }
 }

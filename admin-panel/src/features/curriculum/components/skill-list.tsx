@@ -83,8 +83,8 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-import type { App } from '@/features/platform/hooks/use-apps';
 import type { Tables } from '@/lib/database.types';
+import type { App } from '@/types/platform';
 import type { CurriculumStatus } from '../types';
 
 const DEFAULT_PAGE_SIZE = 10;

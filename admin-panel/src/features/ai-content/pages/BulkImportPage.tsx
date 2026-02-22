@@ -151,9 +151,13 @@ export default function BulkImportPage() {
                   >
                     <SelectValue placeholder="Select target skill..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent data-testid="bulk-import-skill-options">
                     {skills?.map((skill) => (
-                      <SelectItem key={skill.skill_id} value={skill.skill_id}>
+                      <SelectItem
+                        key={skill.skill_id}
+                        value={skill.skill_id}
+                        data-testid={`bulk-import-skill-option-${skill.skill_id}`}
+                      >
                         {skill.title}
                       </SelectItem>
                     ))}
@@ -310,7 +314,11 @@ export default function BulkImportPage() {
               ) : (
                 <div className="divide-y divide-gray-50">
                   {importQueue.map((item, index) => (
-                    <div key={index} className="p-6 hover:bg-gray-50/50 transition-colors group">
+                    <div
+                      key={index}
+                      className="p-6 hover:bg-gray-50/50 transition-colors group"
+                      data-testid={`bulk-import-buffer-item-${index}`}
+                    >
                       <div className="flex items-start gap-4">
                         <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-2xs font-black text-gray-600 shrink-0">
                           {index + 1}

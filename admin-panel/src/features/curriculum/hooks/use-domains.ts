@@ -333,3 +333,29 @@ export function useBulkCreateDomains() {
     },
   });
 }
+
+export function useCheckDomainSlug() {
+  const { currentApp } = useApp();
+
+  const checkSlug = async (slug: string, domain_id?: string) => {
+    if (!currentApp?.app_id) return true;
+    if (!slug) return true;
+
+    let query = supabase
+      .from('domains')
+      .select('domain_id', { count: 'exact', head: true })
+      .eq('app_id', currentApp.app_id)
+      .eq('slug', slug.trim().toLowerCase())
+      .is('deleted_at', null);
+
+    if (domain_id) {
+      query = query.neq('domain_id', domain_id);
+    }
+
+    const { count, error } = await query;
+    if (error) return true; // Assume available on error to avoid blocking saves
+    return (count ?? 0) === 0;
+  };
+
+  return { checkSlug };
+}

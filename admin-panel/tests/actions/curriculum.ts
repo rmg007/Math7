@@ -29,11 +29,11 @@ export async function loginAs(
   const credentials: Record<typeof role, { email: string; password: string }> = {
     SUPER_ADMIN: {
       email: process.env.TEST_SUPER_ADMIN_EMAIL ?? 'super_admin@questerix.com',
-      password: process.env.TEST_SUPER_ADMIN_PASS ?? 'super_admin@questerix.com',
+      password: process.env.TEST_SUPER_ADMIN_PASSWORD ?? 'super_admin@questerix.com',
     },
     ADMIN: {
       email: process.env.TEST_ADMIN_EMAIL ?? 'admin@questerix.com',
-      password: process.env.TEST_ADMIN_PASS ?? 'admin@questerix.com',
+      password: process.env.TEST_ADMIN_PASSWORD ?? 'admin@questerix.com',
     },
     VIEWER: {
       email: process.env.TEST_VIEWER_EMAIL ?? 'viewer@questerix.com',
@@ -61,7 +61,7 @@ export async function loginAs(
  */
 export async function createDomain(
   page: Page,
-  opts: { title: string; slug: string; description?: string }
+  opts: { title: string; slug: string; description?: string; status?: 'draft' | 'live' }
 ): Promise<string> {
   const domainsPage = new DomainsPage(page);
   await domainsPage.createDomain(opts);
@@ -75,7 +75,13 @@ export async function createDomain(
  */
 export async function createSkill(
   page: Page,
-  opts: { title: string; slug: string; description?: string; domainName: RegExp | string }
+  opts: {
+    title: string;
+    slug: string;
+    description?: string;
+    domainName: RegExp | string;
+    status?: 'draft' | 'live';
+  }
 ): Promise<string> {
   const skillsPage = new SkillsPage(page);
   await skillsPage.createSkill(opts);
@@ -94,6 +100,7 @@ export async function createMCQQuestion(
     skillName: RegExp | string;
     options: string[];
     correctIndex?: number;
+    status?: 'draft' | 'live';
   }
 ): Promise<void> {
   const questionsPage = new QuestionsPage(page);
@@ -133,6 +140,7 @@ export async function runCurriculumLifecycle(
     title: `E2E Domain ${timestamp}`,
     slug: domainSlug,
     description: 'Created by Playwright E2E',
+    status: 'live',
   });
 
   await createSkill(page, {
@@ -140,6 +148,7 @@ export async function runCurriculumLifecycle(
     slug: skillSlug,
     description: 'Created by Playwright E2E',
     domainName: new RegExp(`E2E Domain ${timestamp}`, 'i'),
+    status: 'live',
   });
 
   await createMCQQuestion(page, {
@@ -147,6 +156,7 @@ export async function runCurriculumLifecycle(
     skillName: new RegExp(`E2E Skill ${timestamp}`, 'i'),
     options: [`${timestamp + 1}`, `${timestamp + 2}`, `${timestamp + 3}`, `${timestamp + 4}`],
     correctIndex: 0,
+    status: 'live',
   });
 
   await publishCurriculum(page);
