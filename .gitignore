@@ -92,7 +92,11 @@ student-app/build/
 # =============================================================================
 arch_test_output.txt
 test-output.txt
+test_output.txt
+*_output.txt
+*_error.txt
 *.test-output.txt
+staged_files.txt
 gitleaks-report.json
 a11y-report.md
 dependency-report.html

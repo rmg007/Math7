@@ -1,5 +1,65 @@
 # Questerix Learning Log
 
+## 2026-02-22: Phase 13 — Admin Panel E2E Stability & Cross-Viewport Verification [test created]
+
+### [2026-02-22-E2E] Session Context
+
+- **Trigger**: Systemic E2E failures in `admin-panel.e2e.spec.ts` specifically on mobile and tablet viewports during regression testing.
+- **Scope**: `admin-panel/tests/admin-panel.e2e.spec.ts`, mobile sidebar navigation, logout detachment, and domain edit forms.
+- **Outcome**: Restored 100% stable E2E suite; verified 39/45 tests passing (6 skipped as per logic); eliminated "element outside of viewport" and "detached from DOM" flakiness.
+
+### Implementation Details: Robust E2E Patterns
+
+#### Cross-Viewport Navigation Resilience
+
+- **Issue**: Mobile sidebar navigation links were occasionally "hidden" or "clipped" by the viewport during automated clicks, despite the sidebar being open.
+- **Root Cause**: Playwright's default click logic requires elements to be visible and stable. Mobile animations (CSS transitions) were not fully complete when clicks fired.
+- **Fix**:
+  - Added `ensureMobileMenuOpen` helper with a mandatory `waitForTimeout(600)` animation buffer.
+  - Implemented `scrollIntoViewIfNeeded()` before clicking navigation links.
+  - Used `{ force: true }` for links that might be overlapped by transparent overlay elements during transition.
+- **Lesson**: UI animations are the #1 cause of E2E flakiness. Always wait for the "End State" of a transition before interacting.
+
+#### Logout Reliability (Detachment Fix)
+
+- **Issue**: Logout tests failed on tablet viewports because the "Sign Out" button would detach from the DOM during the scroll/click sequence.
+- **Fix**: Implemented a retry-safe locator predicate: `page.locator('button:has-text("Sign out"), a[href="/logout"]').filter({ visible: true }).first()`. Added `scrollIntoViewIfNeeded()` and a retry loop to catch `Error: element is not attached to the DOM`.
+- **Lesson**: Sidebar items in responsive layouts often have multiple instances (one for desktop, one for mobile). Use `.filter({ visible: true })` to ensure you target the one the user actually sees.
+
+#### Viewport-Agnostic Assertions
+
+- **Issue**: Tests were asserting against `tr` (table rows), which don't exist in the "Card View" layout used on mobile/tablet.
+- **Fix**: Updated locators to look for **either** a table row OR a card container: `page.locator('tr, div[class*="bg-white"][class*="rounded-lg"]')`.
+- **Lesson**: Don't tie E2E assertions to specific HTML tag names (like `tr`) if the UI uses responsive layout shifts. Assert against shared text content or cross-layout classes.
+
+### Bugs Found & Fixed
+
+#### BUG-LOCATOR: Incorrect "Update Domain" Text
+
+- **Issue**: The "Edit Domain" test was timing out because it looked for a button with text "Update Signature".
+- **Fix**: Corrected to `Update Domain`.
+- **Root Cause**: Copy-paste drift from a sibling feature (likely Signature/Contract management).
+- **Prevention**: POMs (Page Object Models) should be updated immediately when form labels change in source.
+
+#### BUG-DELETE: Floating "Delete" Button Locator
+
+- **Issue**: The delete confirmation button locator was too broad, occasionally matching buttons in the background behind the modal.
+- **Fix**: Scoped the delete button locator to the specific row/card instance identified by title, and added a visibility filter.
+
+### [2026-02-22-E2E] Files Modified
+
+| Area              | Files                                       |
+| ----------------- | ------------------------------------------- |
+| **E2E Testing**   | `admin-panel/tests/admin-panel.e2e.spec.ts` |
+| **Documentation** | `tasks.md`, `LEARNING_LOG.md`               |
+
+### [2026-02-22-E2E] Verification
+
+- **Playwright**: `npx playwright test tests/admin-panel.e2e.spec.ts` -> 39 passed, 6 skipped, 0 failed.
+- **Viewport Coverage**: Confirmed pass on `desktop`, `mobile`, and `tablet` projects.
+
+---
+
 ## 2026-02-22: Phase 13 — Platform Alignment, Architecture Integrity & Test Hardening [test created]
 
 ### [2026-02-22-Phase13] Session Context

@@ -40,6 +40,8 @@ param(
     [switch]$SkipTesting,
     
     [switch]$SkipSupabase,
+
+    [switch]$SkipSmoke,
     
     [switch]$DryRun
 )
@@ -351,6 +353,79 @@ function Invoke-PhaseDeploy {
 }
 
 # =============================================================================
+# PHASE 4.5: POST-DEPLOY SMOKE TEST
+# =============================================================================
+function Invoke-PhaseSmoke {
+    Write-Phase "PHASE 4.5: POST-DEPLOY SMOKE TEST"
+
+    if ($DryRun) {
+        Write-Warn "Dry run — skipping smoke test"
+        return
+    }
+
+    if ($SkipSmoke) {
+        Write-Warn "Skipping smoke test (--SkipSmoke flag)"
+        return
+    }
+
+    $smokeScript = Join-Path $ScriptDir 'scripts\smoke-test.sh'
+
+    if (-not (Test-Path $smokeScript)) {
+        Write-Warn "Smoke test script not found at $smokeScript — skipping"
+        return
+    }
+
+    # Pass Supabase anon key so the edge-function endpoint gets authenticated
+    Write-Info "Running post-deploy smoke test against production endpoints..."
+    $env:SUPABASE_ANON_KEY = $script:Config.global.SUPABASE_ANON_KEY
+
+    # Use bash if available (native Linux/macOS/WSL), otherwise skip gracefully
+    if (Get-Command 'bash' -ErrorAction SilentlyContinue) {
+        bash $smokeScript
+        if ($LASTEXITCODE -ne 0) {
+            Write-Err "Smoke test FAILED — one or more endpoints returned non-2xx. Check the URLs above."
+            exit 1
+        }
+        Write-Success "Smoke test passed — all production endpoints are healthy"
+    } else {
+        Write-Warn "bash not found in PATH — running inline PowerShell smoke test instead"
+        $adminUrl       = $script:Config.global.ADMIN_PANEL_URL
+        $studentUrl     = $script:Config.global.STUDENT_APP_URL
+        $supabaseUrl    = $script:Config.global.SUPABASE_URL
+        $workersUrl     = 'https://questerix-workers.mhalim80.workers.dev'
+
+        $endpoints = @(
+            @{ Label = 'Admin Panel';             Url = $adminUrl },
+            @{ Label = 'Student App';             Url = $studentUrl },
+            @{ Label = 'Supabase Auth';           Url = "$supabaseUrl/auth/v1/health" },
+            @{ Label = 'Workers AI';              Url = "$workersUrl/health" },
+            @{ Label = 'Edge Function (health)';  Url = "$supabaseUrl/functions/v1/health-check" }
+        )
+
+        $smoked = 0
+        foreach ($ep in $endpoints) {
+            try {
+                $resp = Invoke-WebRequest -Uri $ep.Url -TimeoutSec 10 -UseBasicParsing -ErrorAction Stop
+                if ($resp.StatusCode -ge 200 -and $resp.StatusCode -le 299) {
+                    Write-Success "[$($resp.StatusCode)] $($ep.Label)"
+                    $smoked++
+                } else {
+                    Write-Err "[$($resp.StatusCode)] $($ep.Label) → FAIL"
+                }
+            } catch {
+                Write-Err "[ERR] $($ep.Label) → $($_.Exception.Message)"
+            }
+        }
+
+        if ($smoked -lt $endpoints.Count) {
+            Write-Err "Smoke test FAILED — $($endpoints.Count - $smoked) endpoint(s) unhealthy."
+            exit 1
+        }
+        Write-Success "All $($endpoints.Count) endpoints healthy."
+    }
+}
+
+# =============================================================================
 # PHASE 5: CLEANUP & REPORT
 # =============================================================================
 function Invoke-PhaseCleanup {
@@ -428,6 +503,7 @@ function Main {
     
     Invoke-PhaseBuild
     Invoke-PhaseDeploy
+    Invoke-PhaseSmoke
     Invoke-PhaseCleanup
 }
 

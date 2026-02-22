@@ -17,6 +17,7 @@
 ### Step 1: Verify What We Just Shipped
 
 - [x] **Run the 14 New E2E Tests**: `question-types-regression.e2e.spec.ts` has never executed in CI. Run it locally against the test DB. Fix whatever breaks. (Verified 18 tests passed)
+- [x] **Admin Panel E2E Stability**: Verified 45 tests in `admin-panel.e2e.spec.ts`. Fixed mobile sidebar timeouts, tablet logout detachment, and domain edit locators. Seeding logic is now idempotent and robust. (39 passed, 6 skipped as expected)
 - [x] **SQLCipher Smoke Test**: The F-15 encryption migration swapped `sqlite3_flutter_libs` → `sqlcipher_flutter_libs`. Run `flutter test` in `student-app/` and confirm the Drift DB still opens, seeds, and queries correctly. (Verified via `encryption_smoke_test.dart` and `flutter test`)
 - [x] **Rollback RPC Dry Run**: Call `list_curriculum_snapshots(app_id)` against production via Supabase MCP. Confirm it returns data. Then call `rollback_publish(app_id, version)` against the **test** DB to verify the restore logic without risking production content. (Verified: Fixed auth bug in RPC, confirmed production data, verified rollback logic on TEST DB)
 
@@ -30,7 +31,7 @@ These are patterns from `LEARNING_LOG.md` that have bitten us **more than once**
 
 ### Step 3: Post-Deploy Confidence
 
-- [ ] **Smoke Test Script**: Create a simple `scripts/smoke-test.sh` that curls 5 endpoints (admin panel health, student app health, Supabase auth, Workers AI, Edge Function ping) and exits non-zero if any returns non-200. Wire it into the orchestrator as a post-deploy phase. No Playwright, no browser — just HTTP status codes.
+- [x] **Smoke Test Script**: Created `scripts/smoke-test.sh` that curls 5 endpoints (admin panel, student app, Supabase REST, Workers AI `/health`, Edge Fn `critical-alert`) and exits non-zero if any returns 5xx or a connection failure. Wired into `orchestrator.ps1` as Phase 4.5 (post-deploy). Accepts 2xx-4xx for authenticated Supabase endpoints (401 = server alive, auth gate working). Verified all 5 endpoints pass locally.
 - [ ] **CI Verification**: Push the current branch and watch the full `ci.yml` run. Document any failures in `LEARNING_LOG.md`. We haven't verified the complete CI pipeline since adding the `rls-audit` job and `secret-rotation.yml`.
 
 ---
@@ -43,7 +44,8 @@ These are patterns from `LEARNING_LOG.md` that have bitten us **more than once**
 - [ ] **SQLCipher Performance**: Profile the encrypted DB on a low-end Android emulator (API 28, 2GB RAM). If open+query takes >500ms, investigate key derivation iterations.
 - [ ] **Nightly E2E**: Once the 14 Q-type tests are green and stable for 2 weeks, add them to a nightly cron job. Not before — running unreliable tests on a schedule just creates noise.
 - [ ] **Secret Rotation Verification**: Trigger `secret-rotation.yml` manually and confirm the GitHub Issue is created correctly. We deployed the workflow but never tested it.
-
+- [ ] **deploy**: deploy admin panel and student app to to cloudflare and make sure they are working and connected to production database.
+- [ ] push all changes to github.
 ---
 
 ## 📋 Recently Archived (Feb 2026)

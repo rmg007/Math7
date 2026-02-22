@@ -15,7 +15,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1, // Set to 1 to avoid race conditions during seeding in local/cloud DB
   timeout: 60000, // 60 seconds per test
   expect: {
     timeout: 10000, // 10 seconds for assertions
