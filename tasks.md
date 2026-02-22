@@ -46,7 +46,7 @@ These are patterns from `LEARNING_LOG.md` that have bitten us **more than once**
 - [x] **Secret Rotation Verification**: Manually triggered `secret-rotation.yml` and confirmed GitHub Issue #1 was created successfully.
 - [x] **deploy**: Deployed Admin Panel and Student App to production (SkipSupabase due to Docker environment constraints, manual Edge Function deployment verified). Post-deploy smoke tests PASSED for all 5 critical endpoints.
 - [x] **clean the clutter**: Resolved PowerShell profile conflicts (used -NoProfile), fixed orchestrator syntax/encoding issues, and purged temporary build/log files.
-- [ ] **push all changes to github**: Final sync of hardening and deployment work. (PENDING FINAL PUSH)
+- [x] **push all changes to github**: Final sync of hardening and deployment work. (Verified commit adb4ace0 successfully pushed to main).
 
 ---
 
