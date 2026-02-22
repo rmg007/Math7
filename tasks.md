@@ -78,36 +78,41 @@
 
 ---
 
-## 🏗️ Phase 10: Maintenance & Testing (ACTIVE)
+## 🏗️ Phase 10: Maintenance & Testing ✅ — committed `a6fd455e`
 
-> **Objective**: Hardened stability and UI consistency within the current feature set. Strictly follows the Admin Panel Feature Freeze.
+> All steps complete. Phase archived.
 
-### Step 1: UI Consistency (Maintenance)
-
-- [x] **Bulk Actions Unification**: Replaced legacy inline bars across all curriculum lists with the floating `BulkActionBar` and unified `Select All` header logic. ✅
-- [x] **Mobile Parity Sweep**: Carried the `SortableCard` layout pattern to all curriculum lists and fixed missing props. ✅
-- [x] **Refinement**: Add `ColumnToggle` support and standalone Premium Toolbars to `AppsPage` and `SubjectsPage`. ✅
-- [x] **Stabilization Sweep**: Resolved 60+ lint and TSC errors. Removed redundant UI bars and unified selection logic in `DomainList`. ✅
-
-### Step 2: QA & Infrastructure (Testing)
-
-- [ ] (Stalled - don't process this) **Visual Stability**: Implement the first set of Playwright `toHaveScreenshot` tests for the Dashboard and Curriculum list views.
-- [x] **Test-ID Sweep**: Add standard `data-testid` attributes to `SettingsPage`, `BulkImportPage`, and `AppsPage` fields to support E2E automation. ✅ — `AccountSettingsPage` (deactivate/delete panels + confirm input/buttons), `BulkImportPage` (page root, tabs, AI textarea, sync btn, dryrun switch, commit btn, buffer card, template btn, skill select), `AppsPage` (search input, clear btn, status filter, list container), `question-form.tsx` (form root, type select, skill select, MCQ/multi options, boolean switch, text_input answer, submit btn)
-- [x] **Regression Coverage**: Step 13 — Feature-specific E2E for MCQ, Subjective, and AI-generated question types. ✅ — `tests/pages/QuestionFormPage.ts` (new POM with typed helpers for all question types) + `tests/question-types-regression.e2e.spec.ts` (14 tests across 5 describe blocks: MCQ create/validate/append, Subjective create/validate, Boolean TRUE+FALSE, Bulk-import AI mocked suite, cross-type empty-form guards)
+- [x] UI Unification (BulkActionBar, ColumnToggle, Mobile Cards, Stabilization Sweep)
+- [x] Test-ID Sweep (AccountSettingsPage, BulkImportPage, AppsPage, question-form.tsx)
+- [x] Step 13 Regression Coverage (14 tests: MCQ, Subjective, Boolean, AI-import, empty-form guards)
+- ~~Visual Stability (`toHaveScreenshot`)~~ — stalled, deferred to Phase 12
 
 ---
 
-## 🏗️ Phase 11: Platform Resilience (Student & Infra)
+## 🏗️ Phase 11: Platform Resilience ✅ — committed `a6fd455e`
 
-### Step 1: Security & Compliance
+> All steps complete. Phase archived.
 
-- [x] **Local Encryption (F-15)**: Migrate Student App SQLite storage to `sqflite_sqlcipher`. ✅ - Swapped `sqlite3_flutter_libs` → `sqlcipher_flutter_libs ^0.6.8` (mutually exclusive) - `database.dart` now uses `NativeDatabase.createInBackground` + `PRAGMA key` via AES-256 SQLCipher - Encryption key stored in OS keychain via `flutter_secure_storage` (AndroidKeystore / iOS Keychain) - `setupSqlCipher()` called in `main()` before any DB access; background isolate also initialised - Web platform falls back to unencrypted WASM (acceptable per threat model) - `build_runner` regenerated `database.g.dart` cleanly; `flutter analyze --no-fatal-infos` exits 0
-- [x] **Edge Function Rollback**: Implement `rollback-publish` logic in Supabase to revert curriculum deployments. ✅ - Migration `20260221220000_rollback_publish_rpc.sql` — adds two SECURITY DEFINER RPCs: - `rollback_publish(app_id, version)` — soft-unpublishes live content, restores from snapshot JSON, updates `curriculum_meta` - `list_curriculum_snapshots(app_id)` — returns all available versions for admin UI rollback picker - Applied to production (`QuesterixDB-v2`) via Supabase MCP
+- [x] Local Encryption F-15 (`sqflite_sqlcipher`, AES-256, OS keychain key storage)
+- [x] Edge Function Rollback (`rollback_publish` + `list_curriculum_snapshots` RPCs)
+- [x] Secret Rotation Workflow (90-day reminder, GitHub Issue checklist)
+- [x] RLS Audit CI job (`rls-audit` in `ci.yml`, `🔴 REAL GAP` = build fail)
 
-### Step 2: DevSecOps Hygiene
+---
 
-- [x] **Secret Rotation**: Re-issue and update `GITHUB_TOKEN` in CI/CD secrets. ✅ - `GITHUB_TOKEN` is auto-provisioned by GitHub Actions per-run (ephemeral, cannot be manually rotated — by design) - Created `.github/workflows/secret-rotation.yml` — runs every 90 days + on-demand - Generates a GitHub Issue checklist for all manually-rotated secrets (Supabase service role keys, Cloudflare API tokens, etc.) - Documents rotation SOP inline in the workflow
-- [x] **Audit Automation**: Integrate the RLS Audit script into the CI pipeline to run automatically post-migration. ✅ - Added `rls-audit` job to `ci.yml` (runs after `supabase-regression-tests` when migrations change) - Installs `psql`, runs `supabase/scripts/audit-rls.sql` against test DB - Fails the build if any **🔴 REAL GAP** rows are returned - Uploads `rls-audit-report.txt` as a CI artifact on every run
+## 🏗️ Phase 12: Closing Open Loops (ACTIVE)
+
+> **Objective**: Address three gaps found in the Phase 10/11 review. Strictly maintenance — no new features.
+
+### Step 1: Test Quality Gaps
+
+- [ ] **`question-form.tsx` Test-IDs incomplete**: The POM references `data-testid="question-form-type-select-item-{type}"` for each question type option, but these type-option items are not yet confirmed to be in the source. Audit `question-form.tsx` and add missing `data-testid` attributes to all `SelectItem` nodes for question types (`mcq`, `text_input`, `boolean`, `multi_mcq`, `reorder_steps`).
+- [ ] **`BulkImportPage` `data-testid="bulk-import-file-upload"`**: Verify this exists in `BulkImportPage.tsx` source (POM references it but it may be hidden). Add if missing.
+- [ ] **Visual Regression Baseline** (previously stalled): Now that test-IDs are comprehensive, record Playwright `toHaveScreenshot` snapshots for Dashboard and Domains/Skills list views as the stable baseline.
+
+### Step 2: Documentation
+
+- [ ] **LEARNING_LOG.md entry**: Add a dated `2026-02-21` entry covering Phases 10 & 11 work (UI unification, SQLCipher migration, rollback RPC, RLS CI gate, Q-type E2E).
 
 ---
 

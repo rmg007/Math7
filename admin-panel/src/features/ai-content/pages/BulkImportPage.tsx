@@ -187,6 +187,7 @@ export default function BulkImportPage() {
                       accept=".csv"
                       onChange={handleFileUpload}
                       aria-label="Upload CSV file"
+                      data-testid="bulk-import-file-upload"
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                     />
                     <label

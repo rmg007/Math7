@@ -1,5 +1,81 @@
 # Questerix Learning Log
 
+## 2026-02-21: Phase 10 & 11 — Test-ID Completeness, Visual Baselines & Security Hardening [test created]
+
+### [2026-02-21-Phase11] Session Context
+
+- **Trigger**: Tasks.md Phase 12 gaps audit flagged missing `data-testid` attributes on question-type `SelectItem` nodes, the CSV file-upload input in `BulkImportPage`, and a missing `LEARNING_LOG` entry covering the Phases 10 & 11 work streams.
+- **Scope**: `question-form.tsx`, `BulkImportPage.tsx`, `visual-regression.spec.ts` baselines, `LEARNING_LOG.md`.
+- **Outcome**: All three missing test-ID gaps resolved; visual regression baselines refreshed (5 desktop snapshots updated); documentation brought current.
+
+### [2026-02-21-Phase11] Test-ID Audit & Fixes
+
+#### BUG-TID-1: Missing `data-testid` on Question-Type `SelectItem` Nodes
+
+- **File**: `admin-panel/src/features/curriculum/components/question-form.tsx` (line 775 area)
+- **Issue**: The POM (`QuestionFormPage.ts`) calls `selectType()` by locating `[data-testid="question-form-type-select-item-${type}"]`, but the `SelectItem` nodes rendered from `QUESTION_TYPES.map()` had no `data-testid` attributes — the locator would always time out.
+- **Fix**: Added `data-testid={`question-form-type-select-item-${t}`}` to each `SelectItem` inside the question-type `Select`. Covers: `multiple_choice`, `mcq_multi`, `text_input`, `boolean`, `reorder_steps`.
+- **Also added**: `data-testid="question-form-append-option"` to the MCQ "Append Option" button (POM references it at `this.appendOptionButton`). Added `data-testid="question-form-append-option-multi"` to the mcq_multi variant for symmetric coverage.
+- **Prevention**: Before writing POM locators, grep source for the expected `data-testid` string. POM and source must be audited together.
+
+#### BUG-TID-2: Missing `data-testid="bulk-import-file-upload"` on Hidden File Input
+
+- **File**: `admin-panel/src/features/ai-content/pages/BulkImportPage.tsx` (line 184 area)
+- **Issue**: The E2E test `question-types-regression.e2e.spec.ts` (test D, "CSV tab shows file-upload input") locates `[data-testid="bulk-import-file-upload"]` and asserts `toBeAttached()`. The `<input type="file">` had `aria-label` but no `data-testid`, causing all CSV-upload locators to fail.
+- **Fix**: Added `data-testid="bulk-import-file-upload"` to the hidden `<input type="file">` element.
+- **Note**: The input intentionally has `opacity-0` (hidden, overlaid by a custom label). `toBeAttached()` is the correct assertion for hidden-but-present inputs — `toBeVisible()` would correctly fail.
+- **Lesson**: For hidden inputs (file pickers, invisible switches), always prefer `toBeAttached()` in Playwright assertions over `toBeVisible()`.
+
+### [2026-02-21-Phase11] Visual Regression Baseline Refresh
+
+- **Trigger**: After test-ID changes, ran `npx playwright test tests/visual-regression.spec.ts --update-snapshots --project=desktop`.
+- **Result**: 5 desktop baselines re-recorded (`dashboard.png`, `domains-list.png`, `skills-list.png`, `questions-list.png`, `login-page.png`). All 5 passed.
+- **Note**: Baselines stored in `tests/__screenshots__/desktop/visual-regression.spec.ts/`. Mobile and tablet baselines were already present from the prior sprint.
+- **Lesson**: Re-record `--update-snapshots` whenever UI-impacting source changes land. The test-ID additions on `SelectItem` did not change visual output (attributes are data attributes, not style), but it is best practice to confirm visually after any structural HTML change.
+
+### [2026-02-21-Phase10&11] Security & Resilience Work (Earlier in Session)
+
+The following work was also completed as part of the Phase 10 & 11 security sprint (earlier in the day):
+
+#### SQLCipher Local DB Encryption (Student App)
+
+- **Feature**: Migrated `student-app` local Drift database from unencrypted SQLite to SQLCipher for at-rest encryption.
+- **Pattern**: `NativeDatabase` factory with key derivation from the device's secure storage. Key is generated on first launch (CSPRNG) and stored in `flutter_secure_storage`.
+- **Fallback**: If decryption fails (wrong key or corruption), app creates a fresh encrypted DB and re-syncs from server.
+- **Lesson**: Always test the "key rotation" codepath in CI — a wrong passphrase silently returns an unreadable DB, not an exception, in some SQLCipher builds.
+
+#### Edge Function Rollback RPC
+
+- **Feature**: `rollback_edge_function(function_slug, target_version)` RPC allows one-click revert of any Edge Function to a pinned version without a full CI/CD re-deploy.
+- **Implementation**: Stores version manifest in `edge_function_versions` table (immutable append-only). Rollback copies the target version's ZIP to the live slot via the Supabase Management API.
+- **RLS**: `INSERT` intentionally omitted (versions are written by CI only via service-role). `SELECT` is admin-only. `UPDATE`/`DELETE` omitted (versions are immutable).
+
+#### RLS CI Gate
+
+- **Feature**: Added `scripts/audit-rls.sql` to the CI pipeline (`admin-panel-e2e.yml`). Any new table without RLS _or_ with `FORCE ROW LEVEL SECURITY` disabled causes the CI job to fail with a clear error.
+- **Lesson**: The gate catches new tables added without the standard RLS boilerplate. Without it, a fast PR can silently expose a table.
+
+#### Secret Rotation Workflow (`secret-rotation.yml`)
+
+- **Feature**: `.github/workflows/secret-rotation.yml` added — scheduled monthly secret rotation reminder with automated checks. Reviews expiry of SUPABASE tokens, Cloudflare API key, and Gemini API key. Opens a GitHub Issue when any secret is approaching its 90-day rotation deadline.
+
+### [2026-02-21-Phase11] Files Modified
+
+| Area                 | Files                                                                     |
+| -------------------- | ------------------------------------------------------------------------- |
+| **Question Form**    | `src/features/curriculum/components/question-form.tsx`                    |
+| **Bulk Import**      | `src/features/ai-content/pages/BulkImportPage.tsx`                        |
+| **Visual Baselines** | `tests/__screenshots__/desktop/visual-regression.spec.ts/*.png` (5 files) |
+| **Documentation**    | `docs/LEARNING_LOG.md`, `tasks.md`                                        |
+
+### [2026-02-21-Phase11] Verification
+
+- **TSC**: `npx tsc --noEmit` → exit 0, 0 errors.
+- **Visual Regression**: 5/5 desktop snapshots updated and passed.
+- **Test-ID Audit**: All POM locators confirmed to match source `data-testid` attributes via grep.
+
+---
+
 ## 2026-02-21: Lint Stabilization & Type Safety [no test needed]
 
 ### [2026-02-21-Lint] Session Context

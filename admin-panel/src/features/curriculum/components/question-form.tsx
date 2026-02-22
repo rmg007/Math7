@@ -402,6 +402,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                           type="button"
                           variant="outline"
                           size="sm"
+                          data-testid="question-form-append-option"
                           onClick={() => {
                             const nextId = String.fromCharCode(97 + currentOptions.length);
                             form.setValue('options', {
@@ -477,6 +478,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                           type="button"
                           variant="outline"
                           size="sm"
+                          data-testid="question-form-append-option-multi"
                           onClick={() => {
                             const nextId = String.fromCharCode(97 + currentOptions.length);
                             form.setValue('options', {
@@ -773,7 +775,12 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                             </FormControl>
                             <SelectContent className="rounded-xl border-gray-100 shadow-xl">
                               {QUESTION_TYPES.map((t) => (
-                                <SelectItem key={t} value={t} className="font-bold py-2">
+                                <SelectItem
+                                  key={t}
+                                  value={t}
+                                  className="font-bold py-2"
+                                  data-testid={`question-form-type-select-item-${t}`}
+                                >
                                   {t.replace('_', ' ').toUpperCase()}
                                 </SelectItem>
                               ))}
