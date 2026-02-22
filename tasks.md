@@ -2,123 +2,51 @@
 
 > **Documentation discipline**: After every session, append a dated entry to [`docs/LEARNING_LOG.md`](docs/LEARNING_LOG.md) covering: what was done, bugs found, root cause, fix, and a prevention rule. This is non-negotiable.
 >
-> **Env var convention**: All test-DB variables are prefixed `TEST_` (e.g. `TEST_VITE_SUPABASE_URL`, `TEST_SUPABASE_SERVICE_ROLE_KEY`). Prod variables have no prefix. Never mix them.
+> **Env var convention**: All test-DB variables are prefixed `TEST_` (e.g. `TEST_VITE_SUPABASE_URL`, `TEST_SB_SERV_ROLE_KEY`). Prod variables have no prefix. Never mix them.
 
 ---
 
-## 🔥 ACTIVE INCOMPLETE TASKS (By Priority)
+## 🔥 Phase 13: Prove It Works (ACTIVE)
 
-### P0: Critical / Safety Gate
+> **Objective**: Stop building test infrastructure. Start proving the product works. Every task here exists because a real bug has bitten us or because we shipped code we never verified.
 
-- [x] `ci.yml`: migration changes → auto-trigger P0 E2E + SQL RLS tests (from Step 13) ✅
-- [x] Document as known migration risk in `TEST_DECISIONS.md` (from Step 13) ✅
-- [x] `docs/quality/TEST_DECISIONS.md` — ADR log (TDR-001..005) (from Step 3) ✅
-- [x] `docs/quality/TEST_OWNERS.md` — spec file → component + persona map (from Step 3) ✅
-- [x] `student-app/test/fixtures/question_fixtures.dart` — Dart mirror (from Step 4) ✅
-- [x] `student-app/test/helpers/test_database_factory.dart` — `createEmptyDb()` + `createSeededDb()` (from Step 4) ✅
+### Step 0: Clear the Build (IMMEDIATE)
 
-### P2: UI & Features
+- [ ] **Husky Gate**: Last commit (`docs(tasks): archive Phase 12`) was rejected by pre-commit hooks. Run `npm run lint` + `npx tsc --noEmit` in admin-panel, identify the exact failure, fix it, and get the commit through.
 
-- [x] Mobile card layout for data tables ✅
-- [x] Advanced table features (Column visibility, Extended filtering, Bulk status updates) ✅
+### Step 1: Verify What We Just Shipped
 
-### P3: Documentation & Hygiene
+- [ ] **Run the 14 New E2E Tests**: `question-types-regression.e2e.spec.ts` has never executed in CI. Run it locally against the test DB. Fix whatever breaks. This is the single highest-risk item — we told ourselves Step 13 regression coverage is "done" but we've never seen green.
+- [ ] **SQLCipher Smoke Test**: The F-15 encryption migration swapped `sqlite3_flutter_libs` → `sqlcipher_flutter_libs`. Run `flutter test` in `student-app/` and confirm the Drift DB still opens, seeds, and queries correctly. If any test touches the DB and fails, the encryption key flow is broken.
+- [ ] **Rollback RPC Dry Run**: Call `list_curriculum_snapshots(app_id)` against production via Supabase MCP. Confirm it returns data. Then call `rollback_publish(app_id, version)` against the **test** DB to verify the restore logic without risking production content.
 
-- [x] `docs/QA_MASTER_PROMPT.md` — low priority (from Step 12) ✅
-- [x] `AGENTS.md` — low priority (from Step 12) ✅
-- [x] Delete unused/legacy files (from Backlog) ✅
+### Step 2: Fix the Bugs We Keep Having
 
----
+These are patterns from `LEARNING_LOG.md` that have bitten us **more than once**:
 
-## ✅ Secret Gaps (audit: 2026-02-21) — all closed
+- [ ] **Platform Drift Guard**: Create a single Vitest test that imports the Dart `question_fixtures.dart` field names (as a JSON snapshot) and asserts they match the TypeScript `questions.ts` fixture field names. This catches the `master_level` vs `mastery_level` class of bug before it reaches production. No fancy framework — one test, one assertion.
+- [ ] **Import Crash Prevention**: Add a `tsc --noEmit` step to the Husky pre-commit hook if it's not already there. We've had 3+ incidents of missing imports (`Badge`, `Loader2`, `useEffect`) that compiled in dev (HMR is forgiving) but crashed in production builds. This is a 1-line fix that prevents an entire class of bugs.
+- [ ] **Flutter `getTestOverrides()` Adoption**: 11 of 13 Flutter test files bypass our standard test helper. Pick the 3 most critical test files (sync, practice, mastery) and migrate them. Don't touch the others — diminishing returns.
 
-- [x] `TEST_SUPABASE_SERVICE_ROLE_KEY` — set in GitHub + `admin-panel/.env.local`
-- [x] `LHCI_GITHUB_APP_TOKEN` — set
-- [x] `GITLEAKS_LICENSE` — community mode confirmed sufficient
-- [x] Stale `STAGING_*` secrets — deleted
+### Step 3: Post-Deploy Confidence
+
+- [ ] **Smoke Test Script**: Create a simple `scripts/smoke-test.sh` that curls 5 endpoints (admin panel health, student app health, Supabase auth, Workers AI, Edge Function ping) and exits non-zero if any returns non-200. Wire it into the orchestrator as a post-deploy phase. No Playwright, no browser — just HTTP status codes.
+- [ ] **CI Verification**: Push the current branch and watch the full `ci.yml` run. Document any failures in `LEARNING_LOG.md`. We haven't verified the complete CI pipeline since adding the `rls-audit` job and `secret-rotation.yml`.
 
 ---
 
-## 🏗️ Phase 9: QA Foundation
+## 📋 Phase 14: Hardening (When Phase 13 is Green)
 
-> **Locked decisions**: E2E runs against `QuesterixDB-test` · serialized via `concurrency:` · 3-layer POM abstraction · `TEST_COVERAGE.md` auto-generated on merge to main
->
-> Steps 1–13 complete ✅ committed `c256381c` → `a6fd455e`.
+> Don't start these until Phase 13 is fully verified. These are important but not urgent.
 
-### Step 3: CI Cleanup ✅ — committed `4447e4a7`
-
-- [x] Pin GitHub Actions to SHAs in `ci.yml` (REL-04 hardening) ✅
-- [x] `admin-panel-e2e.yml` `deploy-preview` — stub only; acceptable as-is
-- [x] `ci.yml` `oracle-plus-validation` — removed `GEMINI_API_KEY` + `OPENAI_API_KEY` refs ✅
-- [x] `ci.yml` `supabase-regression-tests` — replaced `supabase start` with remote connection ✅
-
-### Step 4: Shared Test Infrastructure ✅
-
-- [x] `admin-panel/tests/fixtures/questions.ts` — 5 Zod-valid question fixtures
-- [x] `admin-panel/src/__tests__/mocks/supabase-factory.ts` — shared mock factory; migrate 3+ inline mocks
-
-### Step 5: Add `data-testid` Attributes ✅
-
-- [x] LoginPage — `login-email`, `login-password`, `auth-error`, `forgot-password`, `remember-me`
-- [x] `domain-form.tsx` — `domain-form`, `form-error`
-- [x] `skill-form.tsx` — `skill-form`
-- [x] `domain-list.tsx` — `domains-list` (container)
-- [x] `skill-list.tsx` — `skills-list` (container)
-- [x] `question-list.tsx` — `questions-list` (container)
-- [x] `publish-page.tsx` — `publish-page` (container)
-
-### Steps 6–12: E2E, POM, Test Plan, Workflows & Dashboard ✅ — committed `c256381c`
-
-- [x] POM & Actions abstraction (Login, Domains, Skills, Questions, Groups, Publish)
-- [x] All 8 E2E specs migrated/fixed (Auth, RBAC, MentorHub, BulkImport, Apps, RLS, etc.)
-- [x] `docs/TEST_PLAN.md` complete (UAT, System, CI Matrix)
-- [x] `/test` and `qa-autoloop` workflows implemented
-- [x] QA Health Dashboard (`scripts/generate-test-report.js`)
-- [x] Documentation synchronized (Dual-DB, Pyramid, Writing Guide)
+- [ ] **Contract Drift Detection**: If the Platform Drift Guard (Step 2) catches real bugs, expand it to cover all sync-critical tables (domains, skills, questions, attempts, skill_progress). If it catches nothing, skip this — the problem is solved.
+- [ ] **SQLCipher Performance**: Profile the encrypted DB on a low-end Android emulator (API 28, 2GB RAM). If open+query takes >500ms, investigate key derivation iterations.
+- [ ] **Nightly E2E**: Once the 14 Q-type tests are green and stable for 2 weeks, add them to a nightly cron job. Not before — running unreliable tests on a schedule just creates noise.
+- [ ] **Secret Rotation Verification**: Trigger `secret-rotation.yml` manually and confirm the GitHub Issue is created correctly. We deployed the workflow but never tested it.
 
 ---
 
-## 🏗️ Phase 10: Maintenance & Testing ✅ — committed `a6fd455e`
+## 📋 Recently Archived (Feb 2026)
 
-> All steps complete. Phase archived.
-
-- [x] UI Unification (BulkActionBar, ColumnToggle, Mobile Cards, Stabilization Sweep)
-- [x] Test-ID Sweep (AccountSettingsPage, BulkImportPage, AppsPage, question-form.tsx)
-- [x] Step 13 Regression Coverage (14 tests: MCQ, Subjective, Boolean, AI-import, empty-form guards)
-- ~~Visual Stability (`toHaveScreenshot`)~~ — stalled, deferred to Phase 12
-
----
-
-## 🏗️ Phase 11: Platform Resilience ✅ — committed `a6fd455e`
-
-> All steps complete. Phase archived.
-
-- [x] Local Encryption F-15 (`sqflite_sqlcipher`, AES-256, OS keychain key storage)
-- [x] Edge Function Rollback (`rollback_publish` + `list_curriculum_snapshots` RPCs)
-- [x] Secret Rotation Workflow (90-day reminder, GitHub Issue checklist)
-- [x] RLS Audit CI job (`rls-audit` in `ci.yml`, `🔴 REAL GAP` = build fail)
-
----
-
-## 🏗️ Phase 12: Closing Open Loops ✅ — committed `3abdf13b`
-
-> All steps complete. Phase archived.
-
-### Step 1: Test Quality Gaps ✅
-
-- [x] **`question-form.tsx` Test-IDs**: Added `data-testid="question-form-type-select-item-{type}"` to all `SelectItem` nodes in the question-type dropdown (`multiple_choice`, `mcq_multi`, `text_input`, `boolean`, `reorder_steps`). Also added `data-testid="question-form-append-option"` to the MCQ append-option button (POM `appendOptionButton` was broken).
-- [x] **`BulkImportPage` `data-testid="bulk-import-file-upload"`**: Confirmed missing; added to the hidden `<input type="file">` element. E2E `toBeAttached()` assertion now resolves correctly.
-- [x] **Visual Regression Baseline**: Re-recorded 5 desktop snapshots (`dashboard`, `domains-list`, `skills-list`, `questions-list`, `login-page`) via `--update-snapshots`. All 5 passed. Mobile + tablet baselines were already present from Phase 10.
-
-### Step 2: Documentation ✅
-
-- [x] **LEARNING_LOG.md entry**: Dated `2026-02-21` entry added covering Phases 10 & 11 work (test-ID fixes, visual baseline refresh, SQLCipher, rollback RPC, RLS CI gate, secret rotation).
-
----
-
-## 📋 Completed Backlog
-
-- [x] **Env var hygiene sweep** — audited all `.env*` files; applied `TEST_` prefix consistently; refactored `env.ts` for dual-DB support; updated `docs/ENV_VARS.md` ✅
-- [x] **Code hygiene sweep** — audited source for `TODO`/`FIXME`; refactored inline CSS to Tailwind in curriculum components; resolved `cn` imports; pinned CI Actions SHAs ✅
-- [x] **Documentation hygiene** — de-duplicated headings in `LEARNING_LOG.md` to resolve MD024 lints ✅
-- [x] P1: Cloudflare Workers Paid monitoring — alert if AI generation nears limits ✅
+> Phases 9–12 complete. QA Foundation, UI Unification, Platform Resilience, Open Loops — all closed.
+> Details: Security (F-15 SQLCipher, Rollback RPCs, RLS CI Gate), Testing (14 Q-type E2E, POM abstraction, data-testid sweep), Infrastructure (Dual-DB, Secret Rotation, Oracle Plus Drift Detection), Hygiene (Env vars, MD024 linting, CF Worker AI Monitoring).
