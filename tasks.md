@@ -100,19 +100,19 @@
 
 ---
 
-## 🏗️ Phase 12: Closing Open Loops (ACTIVE)
+## 🏗️ Phase 12: Closing Open Loops ✅ — committed `3abdf13b`
 
-> **Objective**: Address three gaps found in the Phase 10/11 review. Strictly maintenance — no new features.
+> All steps complete. Phase archived.
 
-### Step 1: Test Quality Gaps
+### Step 1: Test Quality Gaps ✅
 
-- [ ] **`question-form.tsx` Test-IDs incomplete**: The POM references `data-testid="question-form-type-select-item-{type}"` for each question type option, but these type-option items are not yet confirmed to be in the source. Audit `question-form.tsx` and add missing `data-testid` attributes to all `SelectItem` nodes for question types (`mcq`, `text_input`, `boolean`, `multi_mcq`, `reorder_steps`).
-- [ ] **`BulkImportPage` `data-testid="bulk-import-file-upload"`**: Verify this exists in `BulkImportPage.tsx` source (POM references it but it may be hidden). Add if missing.
-- [ ] **Visual Regression Baseline** (previously stalled): Now that test-IDs are comprehensive, record Playwright `toHaveScreenshot` snapshots for Dashboard and Domains/Skills list views as the stable baseline.
+- [x] **`question-form.tsx` Test-IDs**: Added `data-testid="question-form-type-select-item-{type}"` to all `SelectItem` nodes in the question-type dropdown (`multiple_choice`, `mcq_multi`, `text_input`, `boolean`, `reorder_steps`). Also added `data-testid="question-form-append-option"` to the MCQ append-option button (POM `appendOptionButton` was broken).
+- [x] **`BulkImportPage` `data-testid="bulk-import-file-upload"`**: Confirmed missing; added to the hidden `<input type="file">` element. E2E `toBeAttached()` assertion now resolves correctly.
+- [x] **Visual Regression Baseline**: Re-recorded 5 desktop snapshots (`dashboard`, `domains-list`, `skills-list`, `questions-list`, `login-page`) via `--update-snapshots`. All 5 passed. Mobile + tablet baselines were already present from Phase 10.
 
-### Step 2: Documentation
+### Step 2: Documentation ✅
 
-- [ ] **LEARNING_LOG.md entry**: Add a dated `2026-02-21` entry covering Phases 10 & 11 work (UI unification, SQLCipher migration, rollback RPC, RLS CI gate, Q-type E2E).
+- [x] **LEARNING_LOG.md entry**: Dated `2026-02-21` entry added covering Phases 10 & 11 work (test-ID fixes, visual baseline refresh, SQLCipher, rollback RPC, RLS CI gate, secret rotation).
 
 ---
 
