@@ -18,7 +18,7 @@ dependencies:
   # F-15: sqlcipher_flutter_libs replaces sqlite3_flutter_libs — they are mutually exclusive.
   # Use ^0.6.8 (last version compatible with sqlite3 ^2.x used by drift 2.x).
   # sqlcipher_flutter_libs provides AES-256 encrypted SQLite (SQLCipher) for native platforms.
-  sqlcipher_flutter_libs: ^0.6.8
+  sqlcipher_flutter_libs: ^0.7.0+eol
   connectivity_plus: ^7.0.0
   uuid: ^4.3.0
   json_annotation: ^4.9.0
