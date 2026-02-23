@@ -1,0 +1,42 @@
+#!/bin/sh
+# Gitleaks Pre-Commit Hook
+# Prevents secrets from being committed to git history.
+#
+# Installation:
+#   cp scripts/hooks/pre-commit .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+#
+# Requires: gitleaks installed (https://github.com/gitleaks/gitleaks#installing)
+#   - Windows: winget install Gitleaks
+#   - Mac: brew install gitleaks
+#   - Linux: snap install gitleaks
+
+# Check if gitleaks is installed
+if ! command -v gitleaks &> /dev/null; then
+    echo "⚠️  gitleaks is not installed. Install it:"
+    echo "    Windows: winget install Gitleaks"
+    echo "    Mac:     brew install gitleaks"
+    echo "    Linux:   snap install gitleaks"
+    echo ""
+    echo "Skipping secret scan (install gitleaks to enable)."
+    exit 0
+fi
+
+echo "🔍 Scanning staged changes for secrets..."
+
+# Scan only staged changes (fast)
+gitleaks git --pre-commit --staged
+
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+    echo ""
+    echo "❌ SECRET DETECTED! Commit blocked."
+    echo ""
+    echo "If this is a false positive, add an allowlist entry to .gitleaks.toml"
+    echo "or use: git commit --no-verify (NOT recommended)"
+    exit 1
+fi
+
+echo "✅ No secrets detected."
+exit 0

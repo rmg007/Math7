@@ -23,7 +23,7 @@ $ErrorActionPreference = "Stop"
 
 # Paths
 $TokensDir = Join-Path $ProjectRoot "design-system/tokens"
-$OutputDir = Join-Path $ProjectRoot "student-app/lib/src/core/theme/generated"
+$OutputDir = Join-Path $ProjectRoot "questerix-student-app/lib/src/core/theme/generated"
 
 # Ensure output directory exists
 New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null

@@ -1,0 +1,41 @@
+{
+  "version": "0.9.0",
+  "environment": "production",
+  "global": {
+    "SUPABASE_URL": "https://bkfhorslctqieetzqdtd.supabase.co",
+    "API_BASE_URL": "https://api.questerix.com",
+    "STUDENT_APP_URL": "https://app.questerix.com",
+    "ADMIN_PANEL_URL": "https://admin.questerix.com",
+    "THEME_PRIMARY_COLOR": "0xFF319795",
+    "SENTRY_DSN": ""
+  },
+  "admin": {
+    "VITE_APP_NAME": "Questerix Admin",
+    "VITE_APP_VERSION": "${version}",
+    "VITE_SUPABASE_URL": "${global.SUPABASE_URL}",
+    "VITE_SUPABASE_ANON_KEY": "${global.SUPABASE_ANON_KEY}",
+    "VITE_ENABLE_OFFLINE_MODE": "true",
+    "VITE_ANALYTICS_ID": "",
+    "VITE_GEMINI_API_KEY": "${global.GEMINI_API_KEY}"
+  },
+  "student": {
+    "APP_NAME": "Questerix",
+    "APP_VERSION": "${version}",
+    "SUPABASE_URL": "${global.SUPABASE_URL}",
+    "SUPABASE_ANON_KEY": "${global.SUPABASE_ANON_KEY}",
+    "THEME_PRIMARY_COLOR": "${global.THEME_PRIMARY_COLOR}",
+    "ENABLE_OFFLINE_FIRST": "true",
+    "DRIFT_DB_VERSION": "1",
+    "SENTRY_ENABLED": "true",
+    "SENTRY_DSN": "${global.SENTRY_DSN}",
+    "DEV_SUBDOMAIN": "app"
+  },
+  "cloudflare": {
+    "account_id": "1ad655f025b0db1974614aac7ebec10a",
+    "admin_project": "questerix-admin",
+    "student_project": "questerix-student"
+  },
+  "supabase": {
+    "project_ref": "bkfhorslctqieetzqdtd"
+  }
+}

@@ -6,7 +6,7 @@ param(
     [Parameter(Mandatory=$true)]
     [string]$ConfigFile,
 
-    [ValidateSet('admin-panel', 'student-app', 'all')]
+    [ValidateSet('admin-panel', 'questerix-student-app', 'all')]
     [string]$Target = 'all',
 
     [switch]$IncludeLanding,
@@ -57,9 +57,9 @@ if ($Target -eq 'all' -or $Target -eq 'admin-panel') {
 }
 
 # 3. Student App
-if ($Target -eq 'all' -or $Target -eq 'student-app') {
+if ($Target -eq 'all' -or $Target -eq 'questerix-student-app') {
     Write-Host "[DEPLOY] Deploying Student App..." -ForegroundColor Cyan
-    $studentBuild = Join-Path $RootDir 'student-app\build\web'
+    $studentBuild = Join-Path $RootDir 'questerix-student-app\build\web'
     npx -y wrangler pages deploy $studentBuild --project-name $cfStudent --commit-dirty --branch main
     if ($LASTEXITCODE -eq 0) {
         Write-Host "[PASS] Student App deployed successfully" -ForegroundColor Green

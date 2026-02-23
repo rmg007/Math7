@@ -22,8 +22,8 @@ $jobs += Start-Job -Name "admin-tests" -ScriptBlock {
 # 2. Student App Tests
 $jobs += Start-Job -Name "student-tests" -ScriptBlock {
     param($root)
-    if (Test-Path "$root/student-app") {
-        Set-Location "$root/student-app"
+    if (Test-Path "$root/questerix-student-app") {
+        Set-Location "$root/questerix-student-app"
         flutter test --coverage 2>&1 | Out-File "$root/.agent/logs/tests/student-tests.log"
     }
 } -ArgumentList $rootPath

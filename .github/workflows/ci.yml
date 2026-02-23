@@ -40,28 +40,28 @@ jobs:
         with:
           channel: stable
       - name: Flutter pub get
-        run: cd student-app && flutter pub get
+        run: cd questerix-student-app && flutter pub get
       - name: Flutter analyze
-        run: cd student-app && flutter analyze
+        run: cd questerix-student-app && flutter analyze
       - name: Flutter test with coverage
-        run: cd student-app && flutter test --coverage
+        run: cd questerix-student-app && flutter test --coverage
 
       - name: Coverage Gate (60% minimum)
         uses: verygoodopensource/very_good_coverage@f018d9f1b95f137e96b79753e161048b111e1945 # v2.1.0
         with:
-          path: "./student-app/coverage/lcov.info"
+          path: "./questerix-student-app/coverage/lcov.info"
           min_coverage: 60
       - name: Upload Flutter coverage artifact
         uses: actions/upload-artifact@0b2256b8c012f0828dc542b3feb70da27092497d # v4.4.1
         with:
           name: flutter-coverage
-          path: student-app/coverage/lcov.info
+          path: questerix-student-app/coverage/lcov.info
 
       - name: Upload coverage to Codacy
         uses: codacy/codacy-coverage-reporter-action@89d6c8427e33553250162095cc28172828bcead7 # v1.3.0
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: ./student-app/coverage/lcov.info
+          coverage-reports: ./questerix-student-app/coverage/lcov.info
 
   python:
     runs-on: ubuntu-latest

@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "name": "Questerix Knowledge Map",
+  "description": "Single Source of Truth (SSoT) Mapping for AI Agents",
+  "ssot_root": "docs/",
+  "primary_entry_point": "docs/strategy/AGENTS.md",
+  "knowledge_domains": {
+    "architecture": "docs/architecture/",
+    "strategy": "docs/strategy/",
+    "technical": "docs/technical/",
+    "operational": "docs/operational/",
+    "status": "docs/status/"
+  },
+  "deprecated": [
+    "scripts/universal-knowledge/",
+    "scripts/knowledge-manager.ts",
+    "scripts/seed-knowledge.ts"
+  ]
+}
