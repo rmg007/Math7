@@ -10,7 +10,7 @@
 .PARAMETER Env
     Environment to deploy to: 'production' or 'test'
 .PARAMETER Target
-    Which app(s) to deploy: 'admin-panel', 'student-app', or 'all' (default)
+    Which app(s) to deploy: 'admin-panel', 'questerix-student-app', or 'all' (default)
 .PARAMETER ConfirmProd
     Required safety flag for production deploys. Without it, production deploys are blocked.
 .PARAMETER SkipBuild
@@ -30,7 +30,7 @@ param(
     [ValidateSet('production', 'test')]
     [string]$Env = 'production',
     
-    [ValidateSet('admin-panel', 'student-app', 'all')]
+    [ValidateSet('admin-panel', 'questerix-student-app', 'all')]
     [string]$Target = 'all',
     
     [switch]$ConfirmProd,
@@ -279,7 +279,7 @@ function Invoke-PhaseBuild {
     # Clean previous builds (immutable build principle)
     Write-Info "Cleaning previous build artifacts..."
     $adminDist = Join-Path $ScriptDir 'admin-panel\dist'
-    $studentBuild = Join-Path $ScriptDir 'student-app\build\web'
+    $studentBuild = Join-Path $ScriptDir 'questerix-student-app\build\web'
     
     if (Test-Path $adminDist) { Remove-Item -Recurse -Force $adminDist }
     if (Test-Path $studentBuild) { Remove-Item -Recurse -Force $studentBuild }
@@ -291,7 +291,7 @@ function Invoke-PhaseBuild {
     Set-Location $ScriptDir
 
     Write-Host "[BUILD] Building Student App..." -ForegroundColor Cyan
-    Set-Location (Join-Path $ScriptDir 'student-app')
+    Set-Location (Join-Path $ScriptDir 'questerix-student-app')
     flutter clean
     # Proper format dart defines
 

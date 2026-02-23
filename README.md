@@ -4,12 +4,13 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/ca061805934446349d970335029a9937)](https://app.codacy.com/gh/rmg007/Questerix/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 
 > **The "Golden Command" to start development:**
-> 
+>
 > ```text
 > "Start with docs/strategy/QUICKSTART_AGENTS.md. Then check docs/technical/CONTEXT_MAP.md."
 > ```
 
 ---
+
 ## 🔗 Essential Links
 
 - **🔥 Start Development**: Follow instructions in `AGENTS.md` (Phase 0)
@@ -18,16 +19,25 @@
 - **🔒 Security Model**: [SECURITY.md](./SECURITY.md)
 
 ---
+
 ## 🚀 Overview
 
 This repository contains the complete **Executive Specification** for **Questerix** - an offline-first educational platform. It is designed to be consumed by AI Coding Agents (Cursor, Antigravity, etc.) to autonomously build the application.
 
 The project consists:
+
 1.  **Student App** (`student-app/`): A Flutter tablet app (offline-first, Drift DB).
 2.  **Admin Panel** (`admin-panel/`): A React dashboard (shadcn/ui, Supabase Auth).
-3.  **Landing Pages** (`landing-pages/`): Marketing site (React/Vite, Tailwind CSS).
-4.  **Domain Models** (`questerix_domain/`): Shared Dart models and validators.
-5.  **Backend**: Supabase (PostgreSQL, Edge Functions, Realtime).
+3.  **Domain Models** (`questerix_domain/`): Shared Dart models and validators.
+4.  **Backend**: Supabase (PostgreSQL, Edge Functions, Realtime).
+5.  **Workers** (`workers/`): Cloudflare Worker for AI generation and email alerts.
+
+## 🌐 Sibling Repositories
+
+| Repo                                                                         | Purpose                                              | Status    |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------- | --------- |
+| [questerix-landing-pages](https://github.com/rmg007/questerix-landing-pages) | Public marketing site (React/Vite, Cloudflare Pages) | Extracted |
+| [questerix-help-docs](https://github.com/rmg007/questerix-help-docs)         | User help center (VitePress, Cloudflare Pages)       | Extracted |
 
 ## 📂 Key Files
 
@@ -51,17 +61,18 @@ The project consists:
 ## 🛠️ Development Automation
 
 This project uses **Husky** and **lint-staged** to ensure code quality:
+
 - **Pre-commit**: Automatically lints and formats changed files (<5s).
 - **Pre-push**: Validates types (Admin Panel) and analyzes code (Student App).
 
 To set up locally:
+
 ```bash
 # On Windows/Bash
 bash scripts/setup-automation.sh
 # On Windows/PowerShell
 .\scripts\setup-automation.ps1
 ```
-
 
 ## 🤖 For AI Agents
 
@@ -74,11 +85,11 @@ bash scripts/setup-automation.sh
 **Do not deviate from the Phase State.**
 
 ### 🦾 Agent Commands
+
 - **`/autopilot`**: Triggers full autonomous build & maintenance capability.
 - **`/test`**: Runs the recommended "Enterprise QA" suite (Offline-Sync integration, E2E, Lint).
 - **`/map`**: Displays the Context Map.
 - **`/oracle`**: Queries the Knowledge Index.
 - **`/certify`**: Runs high-integrity auditing (IDD protocol).
 
-*See `docs/technical/DEVELOPMENT.md` for full command details.*
-
+_See `docs/technical/DEVELOPMENT.md` for full command details._

@@ -573,9 +573,11 @@ const router = createBrowserRouter([
       {
         path: '/known-issues',
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <KnownIssuesPage />
-          </Suspense>
+          <SuperAdminGuard>
+            <Suspense fallback={<LoadingPage />}>
+              <KnownIssuesPage />
+            </Suspense>
+          </SuperAdminGuard>
         ),
       },
       {
@@ -615,9 +617,11 @@ const router = createBrowserRouter([
               </div>
             }
           >
-            <Suspense fallback={<LoadingPage />}>
-              <ErrorLogsPage />
-            </Suspense>
+            <SuperAdminGuard>
+              <Suspense fallback={<LoadingPage />}>
+                <ErrorLogsPage />
+              </Suspense>
+            </SuperAdminGuard>
           </ErrorBoundary>
         ),
       },

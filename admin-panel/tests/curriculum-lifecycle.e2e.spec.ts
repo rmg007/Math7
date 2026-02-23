@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test';
 import {
-  createDomain,
-  createMCQQuestion,
-  createSkill,
-  loginAs,
-  publishCurriculum,
+    createDomain,
+    createMCQQuestion,
+    createSkill,
+    loginAs,
+    publishCurriculum,
 } from './actions/curriculum';
+import { VersionHistoryPage } from './pages/VersionHistoryPage';
 
 /**
  * curriculum-lifecycle.e2e.spec.ts (POM Edition)
@@ -67,8 +68,30 @@ test.describe('Curriculum Lifecycle (P0)', () => {
     await expect(page.getByText(`What is ${timestamp} + 1?`).first()).toBeVisible();
   });
 
-  test('AP-CURR-007: Publish Curriculum', async ({ page }) => {
+  test('AP-CURR-007: Publish Curriculum and Verify Snapshot', async ({ page }) => {
+    // 1. Get current versions to compare
+    const vhPage = new VersionHistoryPage(page);
+    await vhPage.goto();
+    let initialVersion = 0;
+    try {
+      initialVersion = await vhPage.getLatestVersionNumber();
+    } catch (e) {
+      // Might be first version
+    }
+
+    // 2. Publish
     await publishCurriculum(page);
     await expect(page.getByText(/Deployment Succeeded/i)).toBeVisible({ timeout: 30_000 });
+
+    // 3. Verify Version Bumped
+    await vhPage.goto();
+    const newVersion = await vhPage.getLatestVersionNumber();
+    expect(newVersion).toBeGreaterThan(initialVersion);
+
+    // 4. Verify Counts (at least 1 of each since we just created them)
+    const counts = await vhPage.getLatestSnapshotCounts();
+    expect(counts.domains).toBeGreaterThanOrEqual(1);
+    expect(counts.skills).toBeGreaterThanOrEqual(1);
+    expect(counts.questions).toBeGreaterThanOrEqual(1);
   });
 });

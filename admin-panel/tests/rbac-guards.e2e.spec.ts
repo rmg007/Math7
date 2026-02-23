@@ -27,6 +27,9 @@ const SUPER_ADMIN_ROUTES = [
   '/users',
   '/invitation-codes',
   '/governance',
+  '/known-issues',
+  '/error-logs',
+  '/landings',
 ] as const;
 
 // ── StandardAdmin routes (admin+mentor only, not student) ────────────────────

@@ -37,9 +37,9 @@ export async function login(
   // Wait for navigation and dashboard element
   await expect(page).not.toHaveURL(/\/login/, { timeout: 15000 });
 
-  // Wait for sidebar or dashboard content to ensure auth success
-  // Using a generic locator that appears on dashboard/logged-in pages
-  await expect(page.getByRole('link', { name: /Dashboard/i }).first()).toBeVisible({
+  // Wait for sidebar or any common navigation element to ensure auth success
+  // We use 'Domains' as it's visible to both super_admin and regular admin roles.
+  await expect(page.getByRole('link', { name: /Domains/i }).first()).toBeVisible({
     timeout: 15000,
   });
 }
