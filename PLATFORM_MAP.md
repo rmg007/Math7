@@ -4,13 +4,13 @@
 
 ## Repository Responsibilities
 
-| Repository                 | URL | Purpose                                   | Status    |
-| -------------------------- | --- | ----------------------------------------- | --------- |
-| questerix-core (this repo) | —   | Admin Panel, Supabase Backend             | Active    |
-| questerix-student-app      | —   | Flutter App + Domain Logic (Consolidated) | Active    |
-| questerix-landing-pages    | TBD | Public marketing site, articles, SEO      | Extracted |
-| questerix-help-docs        | TBD | User help center                          | Extracted |
-| questerix-content-engine   | TBD | AI Generation, Workers                    | Extracted |
+| Repository                 | URL                                                                             | Purpose                                   | Status    |
+| -------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------- | --------- |
+| questerix-core (this repo) | —                                                                               | Admin Panel, Supabase Backend             | Active    |
+| questerix-student-app      | [rmg007/questerix-student-app](https://github.com/rmg007/questerix-student-app) | Flutter App + Domain Logic (Consolidated) | Active    |
+| questerix-landing-pages    | TBD                                                                             | Public marketing site, articles, SEO      | Extracted |
+| questerix-help-docs        | TBD                                                                             | User help center                          | Extracted |
+| questerix-content-engine   | TBD                                                                             | AI Generation, Workers                    | Extracted |
 
 ## Cloudflare Projects
 
@@ -46,3 +46,5 @@ The master design tokens live at `design-system/generated/css-variables.css`.
 - `help-docs/` → **questerix-help-docs** repo (COMPLETED)
 - `content-engine/` → **questerix-content-engine** repo (COMPLETED)
 - `workers/` → **questerix-content-engine** repo (COMPLETED)
+- `student-app/` → **questerix-student-app** repo (COMPLETED)
+- `questerix_domain/` → **questerix-student-app** repo (COMPLETED)

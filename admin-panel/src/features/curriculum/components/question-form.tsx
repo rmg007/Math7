@@ -3,22 +3,22 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useApp } from '@/hooks/use-app';
@@ -27,14 +27,14 @@ import { Database } from '@/lib/database.types';
 import { normalizeFormData } from '@/lib/normalization';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  CheckCircle2,
-  FileText,
-  HelpCircle,
-  Layers,
-  Loader2,
-  Plus,
-  Settings,
-  Trash,
+    CheckCircle2,
+    FileText,
+    HelpCircle,
+    Layers,
+    Loader2,
+    Plus,
+    Settings,
+    Trash,
 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -43,12 +43,12 @@ import { z } from 'zod';
 import { useCreateQuestion, useUpdateQuestion } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 import {
-  BooleanSolution,
-  McqMultiSolution,
-  McqSolution,
-  QuestionOptions,
-  ReorderStepsSolution,
-  TextInputSolution,
+    BooleanSolution,
+    McqMultiSolution,
+    McqSolution,
+    QuestionOptions,
+    ReorderStepsSolution,
+    TextInputSolution,
 } from '../types/question-types';
 
 type Question = Database['public']['Tables']['questions']['Row'];
@@ -290,7 +290,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
                 {/* Content Area */}
-                <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
+                <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem]">
                   <CardContent className="p-4 sm:p-8 md:p-10 space-y-8">
                     <div className="flex items-center gap-4 mb-2">
                       <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/10">
@@ -327,7 +327,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                 </Card>
 
                 {/* Answer Logic */}
-                <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
+                <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem]">
                   <CardContent className="p-4 sm:p-8 md:p-10 space-y-8">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-4">
@@ -709,7 +709,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                 </Card>
 
                 {/* Explanation */}
-                <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
+                <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem]">
                   <CardContent className="p-4 sm:p-8 md:p-10 space-y-8">
                     <div className="flex items-center gap-4 mb-2">
                       <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/10">
@@ -747,7 +747,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
 
               <div className="space-y-8">
                 {/* Protocol Settings */}
-                <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
+                <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem]">
                   <CardContent className="p-4 sm:p-8 space-y-8">
                     <div className="flex items-center gap-4">
                       <div className="p-2.5 rounded-xl bg-slate-500/10 border border-slate-500/10">
