@@ -213,6 +213,12 @@ jobs:
           npx wait-on http://localhost:4173
           npx pa11y http://localhost:4173 --standard WCAG2AA || echo "Accessibility issues detected"
 
+      - name: High-Fidelity A11y Audit (axe-core)
+        run: |
+          cd admin-panel
+          # To be implemented by the next agent: npx playwright test tests/accessibility.spec.ts
+          echo "Placeholder for axe-core regression tests"
+
   edge-functions:
     runs-on: ubuntu-latest
     steps:

@@ -14,21 +14,21 @@
 
 Based on `TEST_PLAN.md` critical journeys:
 
-- [ ] **AP-RBAC Guard Sweep**: Implement `tests/rbac-guards.e2e.spec.ts` to verify that direct URL access to super-admin routes (`/apps`, `/governance`, `/users`) redirects correctly for `admin` and `student` roles.
-- [ ] **Curriculum Lifecycle E2E**: Verify the full path: Create Domain → Create Skill → Create 5 Question Types → Publish → Verify Version History. Currently, these exist as fragmented tests; we need one cohesive "Curriculum Happy Path" spec.
-- [ ] **Student Account Journey**: Verify Invitation Code → Sign Up → Onboarding → First Practice Session → Progress Sync. This is the "First 5 Minutes" of the user experience.
+- [ ] **AP-RBAC Guard Sweep**: Implement `tests/rbac-guards.e2e.spec.ts`. Verify `/apps`, `/governance`, `/users`, and `/monitoring` (new) are blocked for non-super-admins.
+- [ ] **Curriculum Lifecycle E2E**: Implement `tests/curriculum-journey.e2e.spec.ts`. Full path: Domain → Skill → Question → Publish → Verify Snapshot.
+- [ ] **Student Account Journey**: Implement `tests/student-onboarding.e2e.spec.ts`. Verify Invitation Code → Auth → Profile → First Practice.
 
 ### Step 2: Performance & Accessibility (P1)
 
-- [ ] **SQLCipher Performance Audit**: Profile the encrypted Student App DB on a low-end emulator. Measure latency for `open`, `sync` (100+ items), and `search`. Document findings in `LEARNING_LOG.md`.
-- [ ] **Accessibility (WCAG 2.1 AA) Audit**: Run a Playwright `axe-core` sweep across all 5 main Admin Panel pages and the Student App's core screens. Focus on color contrast, screen reader labels, and keyboard focus traps.
-- [ ] **Responsive Visual Sweep**: Audit the "Premium UI" components (`BulkActionBar`, `ColumnToggle`) on narrow mobile viewports. Ensure no overlapping elements or broken touch targets.
+- [ ] **SQLCipher Performance Audit**: Profile encrypted Drift DB. Measure `SyncService` latency with 100+ items.
+- [ ] **Accessibility (axe-core) Integration**: Update `ci.yml` or integration tests to use `@axe-core/playwright`. Audit: `QuestionForm`, `BulkImport`, `Settings`.
+- [ ] **Responsive Visual Sweep**: verify `BulkActionBar` and `ColumnToggle` on mobile viewports (375px/390px).
 
 ### Step 3: Observability & Support (P2)
 
-- [ ] **Health Dashboard (Admin)**: Create a simple, read-only "System Health" view in the Admin Panel (Maintenance segment) that surfaces recent `error_logs`, `ai_token_usage` trends, and the status of the 5 production endpoints from `smoke-test.sh`.
-- [ ] **Nightly E2E Workflow**: Wire the 18+ regression tests into a nightly GitHub Action cron job. Configure it to post failures to a GitHub Issue (similar to secret-rotation).
-- [ ] **Landing Page SEO Hardening**: Add missing meta tags, OG images, and structured data (JSON-LD) to the student app's web landing page to prepare for indexing.
+- [ ] **Health Dashboard (Admin)**: Implement `/admin/maintenance` route surfacing `error_logs` and `smoke-test` statuses.
+- [ ] **Nightly Failure Reporting**: Update `.github/workflows/nightly-e2e.yml` (infra created) to create a GitHub Issue automatically when regressions fail.
+- [ ] **Landing Page SEO Hardening**: Add JSON-LD and OG tags to Student App Landing Page.
 
 ---
 
