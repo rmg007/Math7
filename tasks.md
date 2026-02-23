@@ -6,7 +6,7 @@
 
 ---
 
-## � Phase 15: Launch Readiness & Operational Excellence (ACTIVE)
+## 🚀 Phase 15: Launch Readiness & Operational Excellence (ACTIVE)
 
 > **Objective**: Move from "it works in tests" to "it's ready for users." Focus on performance, accessibility, and high-fidelity user journeys.
 
@@ -29,18 +29,6 @@ Based on `TEST_PLAN.md` critical journeys:
 - [ ] **Health Dashboard (Admin)**: Create a simple, read-only "System Health" view in the Admin Panel (Maintenance segment) that surfaces recent `error_logs`, `ai_token_usage` trends, and the status of the 5 production endpoints from `smoke-test.sh`.
 - [ ] **Nightly E2E Workflow**: Wire the 18+ regression tests into a nightly GitHub Action cron job. Configure it to post failures to a GitHub Issue (similar to secret-rotation).
 - [ ] **Landing Page SEO Hardening**: Add missing meta tags, OG images, and structured data (JSON-LD) to the student app's web landing page to prepare for indexing.
-
----
-
-## 📋 Recently Archived (Feb 2026)
-
-> **Phase 13 & 14 — Prove It Works & Hardening**: COMPLETED.
->
-> - **Achievements**: 18+ regression tests green, SQLCipher migration verified, Rollback RPCs tested, Platform Drift Guard implemented, Husky typechecking gated, and Production Deployment (Admin/Student/Workers) successfully orchestrated and smoke-tested.
->
-> **Phases 9–12 — Foundation & Loops**: COMPLETED.
->
-> - **Achievements**: Security (RLS CI Gate, Secret Rotation), Testing (POM abstraction, data-testid sweep), UI (BulkActionBar, ColumnToggle), Hygiene (Env vars, MD024).
 
 ---
 
