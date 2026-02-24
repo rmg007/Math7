@@ -11,6 +11,7 @@ import { Page, expect } from '@playwright/test';
 import { DomainsPage } from '../pages/DomainsPage';
 import { LoginPage } from '../pages/LoginPage';
 import { PublishPage } from '../pages/PublishPage';
+import { QuestionFormPage } from '../pages/QuestionFormPage';
 import { QuestionsPage } from '../pages/QuestionsPage';
 import { SkillsPage } from '../pages/SkillsPage';
 
@@ -66,7 +67,8 @@ export async function createDomain(
   const domainsPage = new DomainsPage(page);
   await domainsPage.createDomain(opts);
   await expect(page).toHaveURL(/\/domains$/, { timeout: 15_000 });
-  await expect(domainsPage.domainVisible(opts.title)).resolves.toBeVisible();
+  await domainsPage.search(opts.title);
+  await expect(domainsPage.domainVisible(opts.title)).toBeVisible();
   return opts.title;
 }
 
@@ -86,6 +88,7 @@ export async function createSkill(
   const skillsPage = new SkillsPage(page);
   await skillsPage.createSkill(opts);
   await expect(page).toHaveURL(/\/skills$/, { timeout: 15_000 });
+  await skillsPage.search(opts.title);
   await expect(page.getByText(opts.title).first()).toBeVisible();
   return opts.title;
 }
@@ -103,9 +106,12 @@ export async function createMCQQuestion(
     status?: 'draft' | 'live';
   }
 ): Promise<void> {
+  const form = new QuestionFormPage(page);
+  await form.createMCQ(opts);
+
   const questionsPage = new QuestionsPage(page);
-  await questionsPage.createMCQ(opts);
   await expect(page).toHaveURL(/\/questions$/, { timeout: 15_000 });
+  await questionsPage.search(opts.questionText);
   await expect(page.getByText(opts.questionText).first()).toBeVisible();
 }
 
@@ -140,7 +146,7 @@ export async function runCurriculumLifecycle(
     title: `E2E Domain ${timestamp}`,
     slug: domainSlug,
     description: 'Created by Playwright E2E',
-    status: 'live',
+    status: 'draft',
   });
 
   await createSkill(page, {
@@ -148,7 +154,7 @@ export async function runCurriculumLifecycle(
     slug: skillSlug,
     description: 'Created by Playwright E2E',
     domainName: new RegExp(`E2E Domain ${timestamp}`, 'i'),
-    status: 'live',
+    status: 'draft',
   });
 
   await createMCQQuestion(page, {
@@ -156,7 +162,7 @@ export async function runCurriculumLifecycle(
     skillName: new RegExp(`E2E Skill ${timestamp}`, 'i'),
     options: [`${timestamp + 1}`, `${timestamp + 2}`, `${timestamp + 3}`, `${timestamp + 4}`],
     correctIndex: 0,
-    status: 'live',
+    status: 'draft',
   });
 
   await publishCurriculum(page);

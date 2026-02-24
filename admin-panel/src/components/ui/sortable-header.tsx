@@ -1,4 +1,4 @@
-import { ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 
 interface SortableHeaderProps {
   label: string;
@@ -25,7 +25,6 @@ export function SortableHeader({
       className={`inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded ${
         isActive ? 'text-teal-600' : 'text-gray-600 hover:text-teal-600'
       } ${className}`}
-      aria-sort={isActive ? (currentSortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
     >
       {label}
       {isActive ? (

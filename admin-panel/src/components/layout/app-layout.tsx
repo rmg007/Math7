@@ -27,7 +27,7 @@ export function AppLayout() {
   }, [toggleSidebar])
 
   return (
-    <div className="flex min-h-screen bg-gray-50 overflow-x-hidden">
+    <div className="flex min-h-screen bg-gray-50">
       <div className="hidden md:block">
         <Sidebar />
       </div>
@@ -48,7 +48,7 @@ export function AppLayout() {
       </div>
 
       <div className={cn(
-        "flex-1 flex flex-col min-w-0 overflow-hidden transition-all duration-300 ease-in-out",
+        "flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out",
         "md:ml-0"
       )}>
         <header className="md:hidden flex items-center h-16 px-4 bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 border-b border-white/10">
@@ -69,7 +69,7 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="flex-1 overflow-y-auto">
           <div className="p-4 md:p-8">
             <Outlet />
           </div>

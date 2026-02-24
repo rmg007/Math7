@@ -19,6 +19,8 @@ export class QuestionFormPage {
   readonly submitButton: Locator;
   readonly abortButton: Locator;
   readonly aiPromptTextarea: Locator;
+  readonly symbolMatrixButton: Locator;
+  readonly symbolPalette: Locator;
 
   // --- MCQ-specific ---
   readonly appendOptionButton: Locator;
@@ -40,6 +42,8 @@ export class QuestionFormPage {
     this.abortButton = page.getByRole('button', { name: /abort execution/i });
     this.aiPromptTextarea = page.locator('[data-testid="question-form-ai-prompt"]');
     this.appendOptionButton = page.locator('[data-testid="question-form-append-option"]');
+    this.symbolMatrixButton = page.locator('div:has-text("Assessment Matrix")').locator('button[title*="Insert Math"]').first();
+    this.symbolPalette = page.getByTestId('symbol-matrix-palette').first();
     this.booleanSwitch = page.locator('[data-testid="question-boolean-switch"]');
     this.textInputAnswer = page.locator('[data-testid="question-text-input-answer"]');
   }
@@ -52,8 +56,19 @@ export class QuestionFormPage {
   /** Type text into the ProseMirror question content editor */
   async typeContent(text: string) {
     await this.contentEditor.waitFor({ state: 'visible' });
-    await this.contentEditor.click();
-    await this.page.keyboard.type(text);
+    await this.contentEditor.focus();
+    await this.contentEditor.click({ delay: 100 });
+    await this.page.keyboard.type(text, { delay: 10 });
+  }
+
+  /** Open the Symbol Matrix (LaTeX/Math editor) popup */
+  async openSymbolMatrix() {
+    await this.symbolMatrixButton.waitFor({ state: 'visible' });
+    if (!await this.symbolPalette.isVisible()) {
+      await this.symbolMatrixButton.click({ force: true });
+      await this.symbolPalette.waitFor({ state: 'visible' });
+      await this.symbolPalette.page().waitForTimeout(300);
+    }
   }
 
   /** Open the question-type dropdown and pick a type */
@@ -61,7 +76,14 @@ export class QuestionFormPage {
     type: 'multiple_choice' | 'mcq_multi' | 'boolean' | 'text_input' | 'reorder_steps'
   ) {
     await this.typeSelect.waitFor({ state: 'visible' });
-    await this.typeSelect.click({ delay: 100 });
+    await this.typeSelect.click({ force: true });
+    
+    try {
+      await this.page.locator(`[data-testid="question-form-type-select-item-${type}"]`).waitFor({ state: 'visible', timeout: 5_000 });
+    } catch (e) {
+      console.warn(`Type dropdown did not open for ${type}, retrying...`);
+      await this.typeSelect.click({ force: true });
+    }
 
     const item = this.page.locator(`[data-testid="question-form-type-select-item-${type}"]`);
     await item.waitFor({ state: 'visible', timeout: 10_000 });
@@ -72,22 +94,47 @@ export class QuestionFormPage {
   async selectStatus(status: 'draft' | 'live') {
     const trigger = this.page.locator('[data-testid="status-select"]');
     await trigger.waitFor({ state: 'visible' });
-    await trigger.click({ delay: 100 });
+    await trigger.click({ force: true });
+
+    try {
+      await this.page.locator('[role="option"]').first().waitFor({ state: 'visible', timeout: 5_000 });
+    } catch (e) {
+      console.warn(`Status dropdown did not open for ${status}, retrying...`);
+      await trigger.click({ force: true });
+    }
 
     // Exact mapping for status options
-    const option = this.page.locator(`[role="option"] >> text=/^${status}$/i`).first();
-    await option.waitFor({ state: 'visible', timeout: 5_000 });
+    const option = this.page.locator('[role="option"]').filter({ hasText: new RegExp(`^${status}$`, 'i') }).first();
+    await option.waitFor({ state: 'visible', timeout: 10_000 });
     await option.click({ force: true });
   }
 
   /** Open the skill dropdown and pick by visible text */
   async selectSkill(skillName: string | RegExp) {
     await this.skillSelect.waitFor({ state: 'visible' });
-    await this.skillSelect.click({ delay: 100 });
+    await this.skillSelect.scrollIntoViewIfNeeded();
+    
+    // Try to click the trigger
+    await this.skillSelect.click({ force: true });
+    
+    try {
+      // Wait for ANY option to appear - confirm dropdown is open
+      await this.page.locator('[role="option"]').first().waitFor({ state: 'visible', timeout: 8_000 });
+    } catch (e) {
+      console.warn('Dropdown options did not appear on first click, retrying...');
+      await this.skillSelect.click({ force: true });
+      await this.page.locator('[role="option"]').first().waitFor({ state: 'visible', timeout: 8_000 });
+    }
 
-    await this.page.waitForSelector('[role="option"]', { timeout: 10_000 });
     const option = this.page.getByRole('option', { name: skillName }).first();
-    await option.waitFor({ state: 'visible', timeout: 5_000 });
+    const isVisible = await option.isVisible();
+    if (!isVisible) {
+       // Log all available options for debugging
+       const options = await this.page.locator('[role="option"]').allTextContents();
+       console.log('Available skills in dropdown:', options);
+    }
+    
+    await option.waitFor({ state: 'visible', timeout: 10_000 });
     await option.click({ force: true });
   }
 

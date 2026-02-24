@@ -1,0 +1,287 @@
+
+> admin-panel@0.0.0 test
+> vitest run --run --coverage
+
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mC:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel[39m
+[2m      Coverage enabled with [22m[33mv8[39m
+
+ [32mΓ£ô[39m src/__tests__/lib/data-utils.test.ts [2m ([22m[2m28 tests[22m[2m)[22m[90m 133[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/hooks/use-toast.test.tsx [2m ([22m[2m20 tests[22m[2m)[22m[33m 309[2mms[22m[39m
+stderr | src/features/platform/hooks/__tests__/use-apps.test.tsx > useCreateApp > still resolves when landing page insert fails (non-fatal)
+Failed to create landing page for new app: { message: 'FK violation' }
+
+stderr | src/features/platform/hooks/__tests__/use-apps.test.tsx > useBulkCreateApps > still resolves when landing page bulk insert fails (non-fatal)
+Failed to create bulk landing pages: { message: 'lp error' }
+
+ [32mΓ£ô[39m src/features/curriculum/hooks/__tests__/use-skills.test.tsx [2m ([22m[2m9 tests[22m[2m)[22m[33m 443[2mms[22m[39m
+ [32mΓ£ô[39m src/features/curriculum/hooks/__tests__/use-questions-types.test.tsx [2m ([22m[2m12 tests[22m[2m)[22m[90m 265[2mms[22m[39m
+ [32mΓ£ô[39m src/features/platform/hooks/__tests__/use-apps.test.tsx [2m ([22m[2m21 tests[22m[2m)[22m[33m 414[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/lib/validation/import-schema.test.ts [2m ([22m[2m26 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+stderr | src/features/auth/pages/AuthConfirmPage.test.tsx > AuthConfirmPage > Token detection > Priority 1 ΓÇö hash fragment (#token_hash=ΓÇª) ΓÇö our email template format > recovery: shows password form and h1="Set New Password"
+ΓÜá∩╕Å React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+ΓÜá∩╕Å React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32mΓ£ô[39m src/features/curriculum/hooks/__tests__/use-domains-bulk.test.tsx [2m ([22m[2m13 tests[22m[2m)[22m[90m 188[2mms[22m[39m
+[90mstdout[2m | src\config\env.ts:104:11[22m[39m
+[ENV] Loaded configuration: {
+  appVersion: [32m'0.9.0'[39m,
+  appName: [32m'Questerix Admin (E2E CLOUD)'[39m,
+  mode: [32m'test'[39m,
+  supabaseUrl: [32m'***configured***'[39m,
+  supabaseAnonKey: [32m'***configured***'[39m,
+  enableOfflineMode: [33mtrue[39m,
+  analyticsId: [1mnull[22m
+}
+
+ [32mΓ£ô[39m src/__tests__/hooks/use-bulk-import.test.tsx [2m ([22m[2m13 tests[22m[2m)[22m[33m 822[2mms[22m[39m
+ [32mΓ£ô[39m src/features/curriculum/hooks/__tests__/use-questions.test.tsx [2m ([22m[2m9 tests[22m[2m)[22m[33m 1346[2mms[22m[39m
+ [32mΓ£ô[39m src/features/auth/pages/AuthConfirmPage.test.tsx [2m ([22m[2m46 tests[22m[2m)[22m[33m 8631[2mms[22m[39m
+[90mstdout[2m | src\config\env.ts:104:11[22m[39m
+[ENV] Loaded configuration: {
+  appVersion: [32m'0.9.0'[39m,
+  appName: [32m'Questerix Admin (E2E CLOUD)'[39m,
+  mode: [32m'test'[39m,
+  supabaseUrl: [32m'***configured***'[39m,
+  supabaseAnonKey: [32m'***configured***'[39m,
+  enableOfflineMode: [33mtrue[39m,
+  analyticsId: [1mnull[22m
+}
+
+[90mstdout[2m | src/__tests__/services/CurriculumService.test.ts[2m > [22m[2mCurriculumService[2m > [22m[2mimportQuestionsBulk[2m > [22m[2mshould batch questions when count exceeds batch size[22m[39m
+Importing batch 1 of 2...
+Importing batch 2 of 2...
+
+[90mstdout[2m | src/__tests__/services/CurriculumService.test.ts[2m > [22m[2mCurriculumService[2m > [22m[2mimportQuestionsBulk[2m > [22m[2mshould handle RPC errors gracefully[22m[39m
+Importing batch 1 of 1...
+
+[90mstdout[2m | src/__tests__/services/CurriculumService.test.ts[2m > [22m[2mCurriculumService[2m > [22m[2mimportQuestionsBulk[2m > [22m[2mshould handle database rejection[22m[39m
+Importing batch 1 of 1...
+
+[90mstdout[2m | src/__tests__/services/CurriculumService.test.ts[2m > [22m[2mCurriculumService[2m > [22m[2mimportQuestionsBulk[2m > [22m[2mshould handle partial batch failures[22m[39m
+Importing batch 1 of 2...
+Importing batch 2 of 2...
+
+stderr | src/__tests__/services/CurriculumService.test.ts > CurriculumService > importQuestionsBulk > should handle unexpected errors
+CurriculumService.importQuestionsBulk failure: Error: Unexpected validation error
+    at Object.<anonymous> (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\services\CurriculumService.test.ts:217:15)
+    at Object.mockCall (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/admin-panel/node_modules/@vitest/spy/dist/index.js:50:17)
+    at Object.spy [as safeParse] (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/admin-panel/node_modules/tinyspy/dist/index.js:42:80)
+    at Function.importQuestionsBulk (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\services\CurriculumService.ts:28:45)
+[90mstdout[2m | src/__tests__/services/CurriculumService.test.ts[2m > [22m[2mCurriculumService[2m > [22m[2mimportQuestionsBulk[2m > [22m[2mshould use default batch size of 50[22m[39m
+Importing batch 1 of 2...
+Importing batch 2 of 2...
+
+    at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\services\CurriculumService.test.ts:220:46
+    at runTest (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/admin-panel/node_modules/@vitest/runner/dist/index.js:781:11)
+    at runSuite (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/admin-panel/node_modules/@vitest/runner/dist/index.js:909:15)
+    at runSuite (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/admin-panel/node_modules/@vitest/runner/dist/index.js:909:15)
+    at runSuite (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/admin-panel/node_modules/@vitest/runner/dist/index.js:909:15)
+    at runFiles (file:///C:/Users/mhali/OneDrive/Desktop/Important%20Projects/Questerix/admin-panel/node_modules/@vitest/runner/dist/index.js:958:5)
+
+ [32mΓ£ô[39m src/__tests__/services/CurriculumService.test.ts [2m ([22m[2m9 tests[22m[2m)[22m[90m 61[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/hooks/use-ai-generator.test.tsx [2m ([22m[2m11 tests[22m[2m)[22m[33m 331[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/lib/sanitize.test.ts [2m ([22m[2m18 tests[22m[2m)[22m[90m 36[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/lib/file-parsers.test.ts [2m ([22m[2m10 tests[22m[2m)[22m[90m 102[2mms[22m[39m
+ [32mΓ£ô[39m src/features/curriculum/hooks/__tests__/use-domains.test.tsx [2m ([22m[2m6 tests[22m[2m)[22m[33m 344[2mms[22m[39m
+ [32mΓ£ô[39m src/features/curriculum/hooks/__tests__/regression.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[33m 618[2mms[22m[39m
+ [32mΓ£ô[39m src/features/auth/pages/LoginPage.test.tsx [2m ([22m[2m28 tests[22m[2m)[22m[33m 18595[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/contexts/AppContext.test.tsx [2m ([22m[2m19 tests[22m[2m)[22m[33m 508[2mms[22m[39m
+[90mstdout[2m | src/__tests__/services/SecurityLogger.test.ts[2m > [22m[2mSecurityLogger[2m > [22m[2mlog[2m > [22m[2mshould call log_security_event RPC with correct parameters[22m[39m
+[SecurityLogger] Event logged: test_event
+
+[90mstdout[2m | src/__tests__/services/SecurityLogger.test.ts[2m > [22m[2mSecurityLogger[2m > [22m[2mlog[2m > [22m[2mshould handle optional fields[22m[39m
+[SecurityLogger] Event logged: minimal_event
+
+ [32mΓ£ô[39m src/__tests__/services/SecurityLogger.test.ts [2m ([22m[2m8 tests[22m[2m)[22m[90m 49[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/services/OracleService.test.ts [2m ([22m[2m8 tests[22m[2m)[22m[90m 47[2mms[22m[39m
+ [32mΓ£ô[39m src/features/ai-assistant/api/__tests__/governedGeneration.test.ts [2m ([22m[2m2 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/security/multi-tenant-guards.test.ts [2m ([22m[2m2 tests[22m[2m)[22m[90m 186[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/security/bundle-safety.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 240[2mms[22m[39m
+ [32mΓ£ô[39m src/features/curriculum/hooks/__tests__/use-publish.test.tsx [2m ([22m[2m3 tests[22m[2m)[22m[33m 815[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/performance/chunk-analysis.test.ts [2m ([22m[2m2 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+ [32mΓ£ô[39m src/features/monitoring/hooks/__tests__/use-error-logs.test.tsx [2m ([22m[2m2 tests[22m[2m)[22m[90m 237[2mms[22m[39m
+stderr | src/__tests__/ui/react-resilience.test.tsx > UI Resilience & Prevention > should render back button in AdminHeader when backTo prop is provided
+ΓÜá∩╕Å React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+ΓÜá∩╕Å React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32mΓ£ô[39m src/__tests__/ui/react-resilience.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[33m 2898[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/normalization.test.ts [2m ([22m[2m6 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/security/input-escaping.test.ts [2m ([22m[2m2 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/lib/schema-sync.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/hooks/use-app.test.tsx [2m ([22m[2m4 tests[22m[2m)[22m[90m 108[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/lib/utils.test.ts [2m ([22m[2m2 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32mΓ£ô[39m src/utils/math.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/architecture.test.ts [2m ([22m[2m62 tests[22m[2m)[22m[33m 25889[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m34 passed[39m[22m[90m (34)[39m
+[2m      Tests [22m [1m[32m417 passed[39m[22m[90m (417)[39m
+[2m   Start at [22m 09:55:04
+[2m   Duration [22m 75.29s[2m (transform 20.70s, setup 49.00s, collect 49.75s, tests 63.74s, environment 385.07s, prepare 44.48s)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   13.37 |     67.3 |   56.18 |   13.37 |                   
+ src               |       0 |        0 |       0 |       0 |                   
+  App.tsx          |       0 |        0 |       0 |       0 | 1-663             
+  main.tsx         |       0 |        0 |       0 |       0 | 1-138             
+ src/components    |       0 |        0 |       0 |       0 |                   
+  ...rBoundary.tsx |       0 |        0 |       0 |       0 | 1-176             
+ ...ponents/layout |   77.11 |    49.31 |      25 |   77.11 |                   
+  app-layout.tsx   |       0 |        0 |       0 |       0 | 1-82              
+  sidebar.tsx      |   89.25 |       50 |   28.57 |   89.25 | ...07,457,487-504 
+ src/components/ui |   10.73 |    32.69 |    3.12 |   10.73 |                   
+  admin-header.tsx |   88.88 |       40 |     100 |   88.88 | 37-39,47-49       
+  alert-dialog.tsx |       0 |        0 |       0 |       0 | 1-139             
+  avatar.tsx       |       0 |        0 |       0 |       0 | 1-50              
+  badge.tsx        |       0 |        0 |       0 |       0 | 1-36              
+  breadcrumbs.tsx  |       0 |        0 |       0 |       0 | 1-46              
+  ...ction-bar.tsx |       0 |        0 |       0 |       0 | 1-84              
+  button.tsx       |     100 |       50 |     100 |     100 | 45                
+  ...n_variants.ts |       0 |        0 |       0 |       0 | 1-30              
+  card.tsx         |     100 |      100 |     100 |     100 |                   
+  checkbox.tsx     |     100 |      100 |     100 |     100 |                   
+  ...mn-toggle.tsx |       0 |        0 |       0 |       0 | 1-53              
+  data-toolbar.tsx |       0 |        0 |       0 |       0 | 1-152             
+  dialog.tsx       |       0 |        0 |       0 |       0 | 1-120             
+  ...down-menu.tsx |       0 |        0 |       0 |       0 | 1-199             
+  empty-state.tsx  |       0 |        0 |       0 |       0 | 1-38              
+  form-actions.tsx |       0 |        0 |       0 |       0 | 1-54              
+  form.tsx         |       0 |        0 |       0 |       0 | 1-176             
+  input.tsx        |     100 |      100 |     100 |     100 |                   
+  ...ts-dialog.tsx |       0 |        0 |       0 |       0 | 1-109             
+  label.tsx        |     100 |      100 |     100 |     100 |                   
+  ...extensions.ts |       0 |        0 |       0 |       0 | 1-222             
+  ...-skeleton.tsx |       0 |        0 |       0 |       0 | 1-155             
+  pagination.tsx   |       0 |        0 |       0 |       0 | 1-151             
+  progress.tsx     |       0 |        0 |       0 |       0 | 1-26              
+  radio-group.tsx  |       0 |        0 |       0 |       0 | 1-42              
+  ...xt-editor.tsx |       0 |        0 |       0 |       0 | 1-677             
+  select.tsx       |    92.1 |      100 |     100 |    92.1 | 99-104,133-138    
+  separator.tsx    |       0 |        0 |       0 |       0 | 1-29              
+  sheet.tsx        |       0 |        0 |       0 |       0 | 1-140             
+  skeleton.tsx     |       0 |        0 |       0 |       0 | 1-15              
+  ...le-header.tsx |       0 |        0 |       0 |       0 | 1-41              
+  status-badge.tsx |       0 |        0 |       0 |       0 | 1-97              
+  switch.tsx       |       0 |        0 |       0 |       0 | 1-27              
+  table.tsx        |       0 |        0 |       0 |       0 | 1-120             
+  tabs.tsx         |       0 |        0 |       0 |       0 | 1-55              
+  textarea.tsx     |       0 |        0 |       0 |       0 | 1-23              
+  toast.tsx        |       0 |        0 |       0 |       0 | 1-127             
+  toaster.tsx      |       0 |        0 |       0 |       0 | 1-33              
+ src/config        |   81.41 |       20 |      50 |   81.41 |                   
+  env.ts           |   81.41 |       20 |      50 |   81.41 | 52-59,88-100      
+ src/contexts      |   16.75 |      100 |       0 |   16.75 |                   
+  AppContext.tsx   |    9.39 |      100 |       0 |    9.39 | 14-177            
+  ...Definition.ts |     100 |      100 |     100 |     100 |                   
+ ...-assistant/api |   42.47 |       50 |      20 |   42.47 |                   
+  ...eQuestions.ts |   37.16 |        0 |       0 |   37.16 | ...0,52-78,80-113 
+  ...Generation.ts |   96.59 |    58.33 |     100 |   96.59 | 73-75             
+  ...ateContent.ts |       0 |        0 |       0 |       0 | 1-98              
+ ...ant/components |       0 |        0 |       0 |       0 |                   
+  ...tUploader.tsx |       0 |        0 |       0 |       0 | 1-242             
+  ...eviewGrid.tsx |       0 |        0 |       0 |       0 | 1-251             
+ ...ssistant/pages |       0 |        0 |       0 |       0 |                   
+  ...ationPage.tsx |       0 |        0 |       0 |       0 | 1-554             
+  ...nancePage.tsx |       0 |        0 |       0 |       0 | 1-330             
+  SessionsPage.tsx |       0 |        0 |       0 |       0 | 1-322             
+ ...-content/pages |       0 |        0 |       0 |       0 |                   
+  ...mportPage.tsx |       0 |        0 |       0 |       0 | 1-398             
+ ...uth/components |       0 |        0 |       0 |       0 |                   
+  auth-guard.tsx   |       0 |        0 |       0 |       0 | 1-116             
+  ...min-guard.tsx |       0 |        0 |       0 |       0 | 1-61              
+  ...min-guard.tsx |       0 |        0 |       0 |       0 | 1-60              
+ ...res/auth/pages |   32.71 |     92.9 |      76 |   32.71 |                   
+  ...tingsPage.tsx |       0 |        0 |       0 |       0 | 1-352             
+  ...nfirmPage.tsx |   97.15 |    95.29 |     100 |   97.15 | 75-81,139-140     
+  ...CodesPage.tsx |       0 |        0 |       0 |       0 | 1-587             
+  LoginPage.tsx    |   95.59 |    94.02 |   78.57 |   95.59 | ...28-330,375-377 
+  ...ementPage.tsx |       0 |        0 |       0 |       0 | 1-687             
+ ...res/curriculum |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-14              
+ ...lum/components |       0 |        0 |       0 |       0 |                   
+  ...ilter-bar.tsx |       0 |        0 |       0 |       0 | 1-72              
+  domain-form.tsx  |       0 |        0 |       0 |       0 | 1-482             
+  domain-list.tsx  |       0 |        0 |       0 |       0 | 1-1028            
+  ...-uploader.tsx |       0 |        0 |       0 |       0 | 1-113             
+  ...tion-form.tsx |       0 |        0 |       0 |       0 | 1-944             
+  ...tion-list.tsx |       0 |        0 |       0 |       0 | 1-1143            
+  skill-form.tsx   |       0 |        0 |       0 |       0 | 1-403             
+  skill-list.tsx   |       0 |        0 |       0 |       0 | 1-1074            
+  ...tion-card.tsx |       0 |        0 |       0 |       0 | 1-321             
+ ...rriculum/hooks |   62.66 |    50.51 |   82.27 |   62.66 |                   
+  use-dashboard.ts |       0 |        0 |       0 |       0 | 1-184             
+  use-domains.ts   |   88.08 |     62.5 |   96.42 |   88.08 | ...96,176,338-361 
+  use-publish.ts   |   76.02 |    29.16 |    87.5 |   76.02 | ...24-126,141-145 
+  use-questions.ts |   72.06 |    53.44 |    82.6 |   72.06 | ...19-348,395-426 
+  use-skills.ts    |   52.95 |    38.46 |   63.15 |   52.95 | ...87-414,417-440 
+ ...rriculum/pages |       0 |        0 |       0 |       0 |                   
+  ...ator-page.tsx |       0 |        0 |       0 |       0 | 1-411             
+  ...oard-page.tsx |       0 |        0 |       0 |       0 | 1-392             
+  ...eate-page.tsx |       0 |        0 |       0 |       0 | 1-5               
+  ...edit-page.tsx |       0 |        0 |       0 |       0 | 1-5               
+  domains-page.tsx |       0 |        0 |       0 |       0 | 1-5               
+  publish-page.tsx |       0 |        0 |       0 |       0 | 1-503             
+  ...eate-page.tsx |       0 |        0 |       0 |       0 | 1-5               
+  ...edit-page.tsx |       0 |        0 |       0 |       0 | 1-43              
+  ...udio-page.tsx |       0 |        0 |       0 |       0 | 1-783             
+  ...ions-page.tsx |       0 |        0 |       0 |       0 | 1-5               
+  ...eate-page.tsx |       0 |        0 |       0 |       0 | 1-5               
+  ...edit-page.tsx |       0 |        0 |       0 |       0 | 1-41              
+  skills-page.tsx  |       0 |        0 |       0 |       0 | 1-5               
+  ...tory-page.tsx |       0 |        0 |       0 |       0 | 1-324             
+ ...ashboard/pages |       0 |        0 |       0 |       0 |                   
+  ...boardPage.tsx |       0 |        0 |       0 |       0 | 1-482             
+ ...ntorship/hooks |       0 |        0 |       0 |       0 |                   
+  use-groups.ts    |       0 |        0 |       0 |       0 | 1-27              
+ ...ntorship/pages |       0 |        0 |       0 |       0 |                   
+  ...reatePage.tsx |       0 |        0 |       0 |       0 | 1-397             
+  ...reatePage.tsx |       0 |        0 |       0 |       0 | 1-203             
+  ...etailPage.tsx |       0 |        0 |       0 |       0 | 1-830             
+  GroupsPage.tsx   |       0 |        0 |       0 |       0 | 1-208             
+ ...nitoring/hooks |   25.07 |    33.33 |   41.66 |   25.07 |                   
+  ...error-logs.ts |    40.1 |    38.46 |      50 |    40.1 | ...70-182,185-197 
+  ...-mutations.ts |       0 |        0 |       0 |       0 | 1-97              
+  ...own-issues.ts |       0 |        0 |       0 |       0 | 1-21              
+ ...nitoring/pages |       0 |        0 |       0 |       0 |                   
+  ...rLogsPage.tsx |       0 |        0 |       0 |       0 | 1-979             
+  ...ssuesPage.tsx |       0 |        0 |       0 |       0 | 1-937             
+ ...platform/hooks |   39.55 |    93.33 |   86.95 |   39.55 |                   
+  use-apps.ts      |   89.44 |    97.67 |   95.23 |   89.44 | 162-180           
+  use-landings.ts  |       0 |        0 |       0 |       0 | 1-87              
+  use-subjects.ts  |       0 |        0 |       0 |       0 | 1-140             
+ ...platform/pages |       0 |        0 |       0 |       0 |                   
+  AppsPage.tsx     |       0 |        0 |       0 |       0 | 1-1265            
+  LandingsPage.tsx |       0 |        0 |       0 |       0 | 1-479             
+  SubjectsPage.tsx |       0 |        0 |       0 |       0 | 1-1213            
+ src/hooks         |   48.74 |       89 |    82.6 |   48.74 |                   
+  ...-generator.ts |     100 |    94.73 |     100 |     100 | 88                
+  use-app.ts       |     100 |      100 |     100 |     100 |                   
+  ...ulk-import.ts |   98.54 |    90.69 |     100 |   98.54 | 12-13             
+  use-debounce.ts  |       0 |        0 |       0 |       0 | 1-17              
+  ...-generator.ts |       0 |        0 |       0 |       0 | 1-343             
+  use-toast.ts     |   97.35 |    93.54 |     100 |   97.35 | 115-119           
+  ...nges-guard.ts |       0 |        0 |       0 |       0 | 1-40              
+  use-url-state.ts |       0 |        0 |       0 |       0 | 1-42              
+ src/lib           |   15.25 |    93.33 |   83.87 |   15.25 |                   
+  data-utils.ts    |     100 |    97.43 |     100 |     100 | 78                
+  ...base.types.ts |       0 |        0 |       0 |       0 | 1-1718            
+  error-tracker.ts |       0 |        0 |       0 |       0 | 1-176             
+  file-parsers.ts  |   94.93 |    95.23 |     100 |   94.93 | 18-21             
+  labels.ts        |       0 |        0 |       0 |       0 | 1-112             
+  normalization.ts |     100 |      100 |     100 |     100 |                   
+  ...rest-utils.ts |     100 |      100 |     100 |     100 |                   
+  sanitize.ts      |     100 |      100 |     100 |     100 |                   
+  supabase.ts      |     100 |      100 |     100 |     100 |                   
+  utils.ts         |   73.91 |     90.9 |   66.66 |   73.91 | 55-78             
+ ...lib/validation |     100 |      100 |     100 |     100 |                   
+  import-schema.ts |     100 |      100 |     100 |     100 |                   
+ src/services      |     100 |    92.68 |     100 |     100 |                   
+  ...lumService.ts |     100 |    89.47 |     100 |     100 | 75,97             
+  OracleService.ts |     100 |    91.66 |     100 |     100 | 29                
+  ...rityLogger.ts |     100 |      100 |     100 |     100 |                   
+ src/utils         |       0 |        0 |       0 |       0 |                   
+  csv-templates.ts |       0 |        0 |       0 |       0 | 1-64              
+-------------------|---------|----------|---------|---------|-------------------

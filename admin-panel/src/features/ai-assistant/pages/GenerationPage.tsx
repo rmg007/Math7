@@ -1,29 +1,29 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Wand2, Download, AlertCircle, Save, CheckCircle2, FileUp } from 'lucide-react';
-import { StatusBadge, StatusType } from '@/components/ui/status-badge';
-import { DocumentUploader } from '../components/DocumentUploader';
-import { QuestionReviewGrid, GeneratedQuestion } from '../components/QuestionReviewGrid';
-import { useSkills } from '@/features/curriculum/hooks/use-skills';
-import { useBulkCreateQuestions } from '@/features/curriculum/hooks/use-questions';
-import { useToast } from '@/hooks/use-toast';
-import { useApp } from '@/contexts/AppContext';
-import { governedGenerateQuestions } from '../api/governedGeneration';
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { useApp } from '@/contexts/AppContext';
+import { useBulkCreateQuestions } from '@/features/curriculum/hooks/use-questions';
+import { useSkills } from '@/features/curriculum/hooks/use-skills';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { AlertCircle, CheckCircle2, Download, FileUp, Save, Sparkles, Wand2, Zap } from 'lucide-react';
 import Papa from 'papaparse';
+import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { Link } from 'react-router-dom';
+import { governedGenerateQuestions } from '../api/governedGeneration';
+import { DocumentUploader } from '../components/DocumentUploader';
+import { GeneratedQuestion, QuestionReviewGrid } from '../components/QuestionReviewGrid';
 
 interface DifficultyConfig {
   easy: number;
@@ -229,258 +229,258 @@ export const GenerationPage: React.FC = () => {
   const totalQuestions = difficultyConfig.easy + difficultyConfig.medium + difficultyConfig.hard;
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-7xl mx-auto space-y-10 pb-12">
       <AdminHeader
         title="AI Question Generator"
-        description="Generate questions with AI."
+        description="Craft high-quality educational content through intelligent document analysis and behavioral generation."
         icon={Wand2}
         actions={
           <Link to="/ai-import">
-            <Button variant="outline" className="gap-2 bg-white hover:bg-gray-50">
-              <FileUp className="w-4 h-4" />
-              Bulk Import CSV
+            <Button 
+              variant="outline" 
+              className="group gap-2 bg-white/50 backdrop-blur-sm border-gray-200/50 hover:bg-white hover:border-purple-200 transition-all duration-300"
+            >
+              <FileUp className="w-4 h-4 text-purple-600 transition-transform group-hover:-translate-y-0.5" />
+              <span className="bg-gradient-to-r from-purple-700 to-blue-700 bg-clip-text text-transparent font-medium">
+                Bulk Import CSV
+              </span>
             </Button>
           </Link>
         }
       />
 
-      {/* Step 1: Upload Document */}
-      <Card className="border-blue-100 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-blue-900">
-            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-sm font-bold">
-              1
-            </span>
-            Source Document
-          </CardTitle>
-          <CardDescription>
-            Upload a PDF, Word doc, or image to extract content for generation.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DocumentUploader onTextExtracted={handleTextExtracted} />
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="lg:col-span-4 space-y-8">
+          {/* Step 1: Upload Document */}
+          <Card className="glass-card overflow-hidden border-0 shadow-xl shadow-blue-500/5 group">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <CardHeader className="relative pb-2">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-blue-600/10 text-blue-600 text-sm font-bold shadow-inner">
+                  1
+                </div>
+                <CardTitle className="text-gray-900 font-bold tracking-tight">Source Material</CardTitle>
+              </div>
+              <CardDescription className="text-gray-500 text-xs leading-relaxed">
+                Upload a document to serve as the ground truth for generation.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="relative pt-4">
+              <DocumentUploader onTextExtracted={handleTextExtracted} />
+            </CardContent>
+          </Card>
 
-      {/* Step 2: Configure Generation */}
-      {extractedText && (
-        <Card className="border-purple-100 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-purple-900">
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-100 text-purple-600 text-sm font-bold">
-                2
-              </span>
-              Generation Settings
-            </CardTitle>
-            <CardDescription>
-              Define question distribution and custom instructions for the AI model.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-4">
-                <Label className="text-purple-900 font-semibold">Difficulty Distribution</Label>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="easy"
-                      className="text-2xs uppercase tracking-wider text-gray-500"
-                    >
-                      Easy
-                    </Label>
-                    <Input
-                      id="easy"
-                      type="number"
-                      min="0"
-                      value={difficultyConfig.easy}
-                      onChange={(e) =>
-                        setDifficultyConfig({
-                          ...difficultyConfig,
-                          easy: parseInt(e.target.value) || 0,
-                        })
-                      }
-                      className="border-purple-100 focus:ring-purple-200"
-                    />
+          {/* Governance Mini-View (Only show if gen has happened) */}
+          {governanceInfo && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-700 delay-200">
+              <div className="glass-card p-5 border-0 shadow-lg shadow-purple-500/5">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      Daily Usage
+                    </h4>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent font-mono">
+                      {governanceInfo.tokens_consumed.toLocaleString()}
+                    </p>
                   </div>
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="medium"
-                      className="text-2xs uppercase tracking-wider text-gray-500"
-                    >
-                      Medium
-                    </Label>
-                    <Input
-                      id="medium"
-                      type="number"
-                      min="0"
-                      value={difficultyConfig.medium}
-                      onChange={(e) =>
-                        setDifficultyConfig({
-                          ...difficultyConfig,
-                          medium: parseInt(e.target.value) || 0,
-                        })
-                      }
-                      className="border-purple-100 focus:ring-purple-200"
-                    />
+                  <div className="p-2 bg-purple-50 rounded-lg">
+                    <Zap className="w-4 h-4 text-purple-600" />
                   </div>
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="hard"
-                      className="text-2xs uppercase tracking-wider text-gray-500"
-                    >
-                      Hard
-                    </Label>
-                    <Input
-                      id="hard"
-                      type="number"
-                      min="0"
-                      value={difficultyConfig.hard}
-                      onChange={(e) =>
-                        setDifficultyConfig({
-                          ...difficultyConfig,
-                          hard: parseInt(e.target.value) || 0,
-                        })
-                      }
-                      className="border-purple-100 focus:ring-purple-200"
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-[10px] font-medium text-gray-500">
+                    <span>Quota Remaining</span>
+                    <span className="text-purple-600">{governanceInfo.quota_remaining.toLocaleString()} tokens</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-1000 ease-out"
+                      style={{ width: `${Math.min(100, (governanceInfo.tokens_consumed / (governanceInfo.tokens_consumed + governanceInfo.quota_remaining)) * 100)}%` }}
                     />
                   </div>
                 </div>
-                <p className="text-xs text-purple-600 font-medium bg-purple-50 p-2 rounded-lg">
-                  Total targeting: <span className="font-bold">{totalQuestions}</span> questions
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="instructions" className="text-purple-900 font-semibold">
-                  Custom Instructions
-                </Label>
-                <Textarea
-                  id="instructions"
-                  value={customInstructions}
-                  onChange={(e) => setCustomInstructions(e.target.value)}
-                  placeholder="e.g., Focus on specific learning objectives, tone should be academic..."
-                  className="h-[104px] border-purple-100 focus:ring-purple-200 text-sm"
-                />
               </div>
             </div>
+          )}
+        </div>
 
-            {error && (
-              <div className="p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-700 font-medium">{error}</p>
+        <div className="lg:col-span-8 space-y-10">
+          {/* Step 2: Configure Generation */}
+          <Card className={cn(
+            "glass-card border-0 shadow-2xl transition-all duration-500",
+            extractedText ? "shadow-purple-500/10 opacity-100 translate-y-0" : "opacity-40 grayscale translate-y-4 pointer-events-none"
+          )}>
+            <div className="absolute top-0 right-0 p-8 opacity-10">
+              <Sparkles className="w-24 h-24 text-purple-600" />
+            </div>
+            
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-purple-600/10 text-purple-600 text-sm font-bold shadow-inner">
+                  2
+                </div>
+                <CardTitle className="text-gray-900 font-bold tracking-tight">Generation Strategy</CardTitle>
               </div>
-            )}
+              <CardDescription className="text-gray-500 text-xs">
+                Configure constraints and creative direction for the AI.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-8 pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-gray-700 font-bold text-sm tracking-tight">Complexity Distribution</Label>
+                    <span className="text-[10px] font-bold px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">
+                      {totalQuestions} Target
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    {[
+                      { id: 'easy', color: 'bg-green-500', label: 'Easy' },
+                      { id: 'medium', color: 'bg-amber-500', label: 'Medium' },
+                      { id: 'hard', color: 'bg-rose-500', label: 'Hard' }
+                    ].map((diff) => (
+                      <div key={diff.id} className="space-y-2 group">
+                        <div className="flex items-center gap-1.5 px-1">
+                          <div className={cn("w-1.5 h-1.5 rounded-full transition-all group-focus-within:scale-150", diff.color)} />
+                          <Label htmlFor={diff.id} className="text-[10px] font-bold text-gray-500 uppercase tracking-widest cursor-pointer">
+                            {diff.label}
+                          </Label>
+                        </div>
+                        <Input
+                          id={diff.id}
+                          type="number"
+                          min="0"
+                          value={difficultyConfig[diff.id as keyof DifficultyConfig]}
+                          onChange={(e) =>
+                            setDifficultyConfig({
+                              ...difficultyConfig,
+                              [diff.id]: parseInt(e.target.value) || 0,
+                            })
+                          }
+                          className="h-11 bg-white/50 border-gray-200/50 focus:border-purple-400 focus:ring-purple-400/20 rounded-xl transition-all font-mono font-bold"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-            <Button
-              onClick={handleGenerate}
-              disabled={isGenerating || !extractedText || totalQuestions === 0}
-              className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg shadow-purple-200"
-            >
-              {isGenerating ? (
-                <span className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Generating {totalQuestions} questions...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <Wand2 className="w-5 h-5" />
-                  Generate Questions
-                </span>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+                <div className="space-y-3">
+                  <Label htmlFor="instructions" className="text-gray-700 font-bold text-sm tracking-tight">
+                    Refinement Prompt
+                  </Label>
+                  <Textarea
+                    id="instructions"
+                    value={customInstructions}
+                    onChange={(e) => setCustomInstructions(e.target.value)}
+                    placeholder="e.g., Focus on bloom's taxonomy, maintain clinical terminology..."
+                    className="min-h-[110px] bg-white/50 border-gray-200/50 focus:border-purple-400 focus:ring-purple-400/20 rounded-xl text-sm leading-relaxed"
+                  />
+                </div>
+              </div>
 
-      {/* Governance & Validation Summary */}
-      {governanceInfo && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
-            <h4 className="text-2xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-              Tokens Consumed
-            </h4>
-            <div className="flex items-baseline gap-2">
-              <p className="text-3xl font-bold text-gray-900 font-mono">
-                {governanceInfo.tokens_consumed.toLocaleString()}
-              </p>
-              <span className="text-xs text-gray-400">total</span>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
-            <h4 className="text-2xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-              Quota Remaining
-            </h4>
-            <div className="flex items-baseline gap-2">
-              <p className="text-3xl font-bold text-purple-600 font-mono">
-                {governanceInfo.quota_remaining.toLocaleString()}
-              </p>
-              <span className="text-xs text-purple-300">available</span>
-            </div>
-          </div>
-          <div
-            className={`bg-white p-6 rounded-2xl shadow-sm border ${validationSummary?.status === 'approved' ? 'border-green-100' : 'border-red-100'} transition-all hover:shadow-md`}
-          >
-            <h4 className="text-2xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-              Validation Status
-            </h4>
-            <div className="flex items-center justify-between">
-              <StatusBadge
-                status={
-                  (validationSummary?.status === 'approved'
-                    ? 'resolved'
-                    : 'exhausted') as StatusType
-                }
-                label={validationSummary?.status.toUpperCase()}
-              />
-              <div className="text-right">
-                <span
-                  className={`text-xl font-bold font-mono ${validationSummary?.status === 'approved' ? 'text-green-600' : 'text-red-500'}`}
+              <div className="pt-2">
+                <Button
+                  onClick={handleGenerate}
+                  disabled={isGenerating || !extractedText || totalQuestions === 0}
+                  className="w-full h-14 relative group overflow-hidden bg-[#1a1b4b] hover:bg-[#25266b] text-white rounded-2xl shadow-2xl shadow-indigo-200 transition-all duration-300"
                 >
-                  {((validationSummary?.overall_score || 0) * 100).toFixed(0)}%
-                </span>
-                <p className="text-2xs text-gray-400 uppercase font-medium">Quality Score</p>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  
+                  {isGenerating ? (
+                    <span className="flex items-center gap-3 font-semibold tracking-wide">
+                      <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                      Synthesizing Knowledge...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2 font-semibold tracking-wide">
+                      <Wand2 className="w-5 h-5 text-purple-400 group-hover:rotate-12 transition-transform" />
+                      Initiate Intelligent Generation
+                    </span>
+                  )}
+                </Button>
+                
+                {error && (
+                  <div className="mt-4 p-4 bg-rose-50/50 border border-rose-100 rounded-xl flex items-center gap-3 animate-in shake-in duration-500">
+                    <AlertCircle className="w-5 h-5 text-rose-500 flex-shrink-0" />
+                    <p className="text-xs text-rose-700 font-semibold">{error}</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Validation Report (Approved/Flagged) */}
+          {validationSummary && (
+            <div className={cn(
+              "p-6 rounded-3xl border animate-in slide-in-from-top-4 duration-500",
+              validationSummary.status === 'approved' 
+                ? "bg-emerald-50/30 border-emerald-100/50" 
+                : "bg-amber-50/30 border-amber-100/50 text-amber-900"
+            )}>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={cn(
+                    "p-2 rounded-xl",
+                    validationSummary.status === 'approved' ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-600"
+                  )}>
+                    {validationSummary.status === 'approved' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold tracking-tight">AI Content Audit</h3>
+                    <p className="text-xs opacity-70">Automated quality evaluation results</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className={cn(
+                    "text-2xl font-black font-mono leading-none",
+                    validationSummary.status === 'approved' ? "text-emerald-600" : "text-amber-600"
+                  )}>
+                    {(validationSummary.overall_score * 100).toFixed(0)}%
+                  </span>
+                  <p className="text-[10px] uppercase font-bold tracking-widest opacity-50">Confidence Score</p>
+                </div>
+              </div>
+              <div className="prose prose-sm max-w-none text-gray-700 text-xs leading-relaxed">
+                <ReactMarkdown>{validationSummary.summary}</ReactMarkdown>
               </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
 
-      {validationSummary && validationSummary.status !== 'approved' && (
-        <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5" />
-          <div className="prose prose-sm max-w-none text-amber-900">
-            <h4 className="text-sm font-semibold mb-1">Validation Notice</h4>
-            <ReactMarkdown>{validationSummary.summary}</ReactMarkdown>
-          </div>
-        </div>
-      )}
-
-      {/* Step 3: Review & Export */}
+      {/* Step 3: Review & Library Integration */}
       {generatedQuestions.length > 0 && (
-        <Card className="border-indigo-100 shadow-sm animate-in fade-in zoom-in-95 duration-500">
-          <CardHeader>
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-indigo-900">
-                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 text-sm font-bold">
+        <Card className="glass-card border-0 shadow-3xl animate-in fade-in zoom-in-95 duration-700">
+          <CardHeader className="relative overflow-hidden border-b border-gray-100/50 pb-8">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
+            
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-8 relative">
+              <div className="space-y-1">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-600/10 text-indigo-600 text-sm font-bold shadow-inner">
                     3
-                  </span>
-                  Review & Finalize
-                </CardTitle>
-                <CardDescription>
-                  Review AI-generated content and save it to your curriculum library.
+                  </div>
+                  <CardTitle className="text-gray-900 font-extrabold text-2xl tracking-tight">Refine & Persist</CardTitle>
+                </div>
+                <CardDescription className="text-gray-500 font-medium">
+                  Review generated artifacts and synchronize with your curriculum library.
                 </CardDescription>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="w-64">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="w-full sm:w-72 group">
                   <Select value={selectedSkillId} onValueChange={setSelectedSkillId}>
-                    <SelectTrigger className="bg-white border-indigo-200">
-                      <SelectValue placeholder="Select Target Skill..." />
+                    <SelectTrigger className="h-12 bg-white/80 border-indigo-100 hover:border-indigo-300 focus:ring-indigo-400/20 rounded-xl transition-all">
+                      <SelectValue placeholder="Target Skill Context..." />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#1a1b4b] border-white/10 text-white">
+                    <SelectContent className="glass-card border-gray-800 bg-gray-900/95 text-white p-2">
                       {skills?.map((skill) => (
-                        <SelectItem key={skill.skill_id} value={skill.skill_id}>
+                        <SelectItem 
+                          key={skill.skill_id} 
+                          value={skill.skill_id}
+                          className="rounded-lg focus:bg-indigo-600 focus:text-white"
+                        >
                           {skill.title}
                         </SelectItem>
                       ))}
@@ -488,67 +488,63 @@ export const GenerationPage: React.FC = () => {
                   </Select>
                 </div>
 
-                <Button
-                  onClick={handleImportDirectly}
-                  disabled={isSaving || !selectedSkillId}
-                  className="bg-indigo-600 hover:bg-indigo-700 gap-2"
-                >
-                  {isSaving ? (
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}
-                  Save to Library
-                </Button>
+                <div className="flex items-center gap-3">
+                  <Button
+                    onClick={handleExportCSV}
+                    variant="ghost"
+                    className="h-12 px-6 rounded-xl text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 font-bold transition-all border border-transparent hover:border-emerald-100 gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    CSV Data
+                  </Button>
 
-                <Button
-                  variant="outline"
-                  onClick={handleExportCSV}
-                  className="border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800 gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Export CSV
-                </Button>
+                  <Button
+                    onClick={handleImportDirectly}
+                    disabled={isSaving || !selectedSkillId}
+                    className="h-12 px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 gap-3 transition-all active:scale-95"
+                  >
+                    {isSaving ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Save className="w-5 h-5" />
+                    )}
+                    Sync to Library
+                  </Button>
+                </div>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-8">
             <QuestionReviewGrid
               questions={generatedQuestions}
               onQuestionsChange={setGeneratedQuestions}
             />
 
-            <div className="mt-8 p-6 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl">
-              <h4 className="text-sm font-bold text-indigo-900 mb-3 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-indigo-600" />
-                Completion Workflow
-              </h4>
-              <ul className="text-xs text-indigo-800 space-y-2 grid grid-cols-1 md:grid-cols-2 gap-x-8">
-                <li className="flex items-center gap-2">
-                  <span className="w-5 h-5 flex items-center justify-center rounded-full bg-indigo-200 text-indigo-700 text-2xs font-bold">
-                    1
-                  </span>
-                  Review and refine generated questions in the grid.
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-5 h-5 flex items-center justify-center rounded-full bg-indigo-200 text-indigo-700 text-2xs font-bold">
-                    2
-                  </span>
-                  Select a target skill from the dropdown above.
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-5 h-5 flex items-center justify-center rounded-full bg-indigo-200 text-indigo-700 text-2xs font-bold">
-                    3
-                  </span>
-                  Click "Save to Library" to import directly.
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-5 h-5 flex items-center justify-center rounded-full bg-indigo-200 text-indigo-700 text-2xs font-bold">
-                    4
-                  </span>
-                  Verify your imported questions in the curriculum module.
-                </li>
-              </ul>
+            <div className="mt-12 p-8 bg-indigo-900 rounded-4xl text-white relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:rotate-12 transition-transform duration-1000">
+                <CheckCircle2 className="w-48 h-48" />
+              </div>
+              
+              <div className="relative">
+                <h4 className="text-lg font-black mb-6 flex items-center gap-3">
+                  <CheckCircle2 className="w-6 h-6 text-indigo-300" />
+                  Preservation Workflow
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                  {[
+                    { n: 1, t: "Verification", d: "Review each artifact in the interactive grid for accuracy." },
+                    { n: 2, t: "Contextualize", d: "Assign a target skill to provide pedagogical alignment." },
+                    { n: 3, t: "Persist", d: "Synchronize approved content with the global library." },
+                    { n: 4, t: "Distribute", d: "Questions become instantly available for student assignments." }
+                  ].map((step) => (
+                    <div key={step.n} className="space-y-2">
+                       <span className="text-xs font-black text-indigo-400 font-mono tracking-widest">{step.n.toString().padStart(2, '0')}</span>
+                       <h5 className="font-bold text-white leading-none mb-1">{step.t}</h5>
+                       <p className="text-indigo-200 text-[11px] leading-relaxed opacity-80">{step.d}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -33,6 +33,12 @@ export interface GenerateQuestionsResponse {
 
 const WORKERS_URL = import.meta.env.VITE_WORKERS_URL;
 
+// In development, route Worker requests through the Vite proxy (/api/workers)
+// to bypass CORS. In production, use the real Worker URL directly.
+const EFFECTIVE_WORKERS_URL = import.meta.env.DEV
+  ? '/api/workers'
+  : WORKERS_URL;
+
 export async function generateQuestions(
   request: GenerateQuestionsRequest
 ): Promise<GenerateQuestionsResponse> {
@@ -51,7 +57,7 @@ async function generateViaWorkers(
   } = await supabase.auth.getSession();
   if (!session) throw new Error('Not authenticated');
 
-  const response = await fetch(`${WORKERS_URL}/ai/generate-questions`, {
+  const response = await fetch(`${EFFECTIVE_WORKERS_URL}/ai/generate-questions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -74,20 +80,34 @@ async function generateViaWorkers(
 async function generateViaSupabase(
   request: GenerateQuestionsRequest
 ): Promise<GenerateQuestionsResponse> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 45_000);
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not authenticated');
 
-  try {
-    const { data, error } = await supabase.functions.invoke('generate-questions', {
-      body: request,
-      headers: { 'x-timeout': '45000' },
-      signal: controller.signal,
-    });
+  // In dev, route through the Vite proxy (/api/edge) to bypass Supabase CORS.
+  // In prod, call the Edge Function URL directly.
+  const baseUrl = import.meta.env.DEV
+    ? '/api/edge'
+    : `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
 
-    if (error) throw error;
-    if (!data) throw new Error('No data returned from Edge Function');
-    return data as GenerateQuestionsResponse;
-  } finally {
-    clearTimeout(timeoutId);
+  const response = await fetch(`${baseUrl}/generate-questions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.access_token}`,
+      apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify(request),
+    signal: AbortSignal.timeout(45_000),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(
+      (errorBody as { error?: string }).error || `Edge Function error: ${response.status}`
+    );
   }
+
+  return response.json() as Promise<GenerateQuestionsResponse>;
 }

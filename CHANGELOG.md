@@ -5,7 +5,39 @@ All notable changes to the Questerix project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.2.3] - 2026-02-22
+## [2.2.6] - 2026-02-24
+
+### Fixed
+
+- **Accessibility (WCAG AA Compliance)**: Resolved all critical and serious violations on Dashboard, Domains, Questions, and Bulk Import pages.
+- **Sortable Header**: Fixed critical `aria-allowed-attr` violation by removing `aria-sort` from button elements and relying on `aria-label`.
+- **Contrast Ratios**: Hardened color contrast by upgrading `teal-600` to `teal-700` and `gray-400` to `gray-500/600` across all curriculum management components.
+- **Readability**: Increased minimum font size for informative labels to `11px` and standardized on readable font slopes to support users with low vision.
+- **Empty States**: Fixed visibility issues in Bulk Import empty states by removing container-level opacity and using high-contrast text.
+
+### Added
+
+- **App Management Stability**: Implemented automatic subdomain normalization (lowercase, filtered characters, 63-char limit) to ensure RFC compliance and prevent database length errors.
+- **E2E Observability**: Added `data-testid="app-delete-btn"` and improved locator scoping for `AlertDialog` components to resolve background interaction interference in tests.
+
+### Fixed
+
+- **App Creation Bug**: Resolved a critical type mismatch where `grade_number` was sent as a string instead of an integer, causing `400 Bad Request` errors during app creation. Fixed via Zod coercion in `AppsPage.tsx`.
+- **E2E Reliability**: Hardened "Questions Management" tests by switching to keyboard-based navigation (`ArrowDown` + `Enter`) for Radix Select components, eliminating 401/Failed to fetch flakiness in headless environments.
+
+## [2.2.4] - 2026-02-24
+
+### Added
+
+- **Governed AI Content Generation**: Implemented a dual-model generation pipeline (Gemini Flash/Pro) with automated validation, score findings, and distractor quality analysis in `governedGeneration.ts`.
+- **AI Content Studio**: Interactive review grid for AI-synthesized curriculum, permitting real-time editing and direct injection into the pedagogy library.
+- **E2E Safety Net**: Added `governedGeneration.test.ts` for unit verification of the governance layer and established a baseline for E2E infrastructure validation.
+
+### Fixed
+
+- **E2E Seeding Stability**: Patched `.env.test` to disable dummy local keys that were interfering with cloud database connectivity during Playwright cycles.
+- **Project Hygiene**: Purged obsolete `contract-drift.test.ts` following the removal of the Student App codebase, resolving 1 stagnant CI failure.
+- **CSP Integrity**: Verified and consolidated CSP meta tags to ensure Cloudflare Workers connectivity is preserved across all viewport types.
 
 ### Fixed
 

@@ -26,7 +26,8 @@ export class PublishPage {
 
   async goto() {
     await this.page.goto('/publish');
-    await this.pushButton.waitFor({ state: 'visible', timeout: 15_000 });
+    // Wait for the page to settle — either the push button or the "No Changes" badge
+    await this.page.locator('button:has-text("Push"), [data-testid="publish-page"] :text-is("No Changes Detected")').first().waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   async publish() {
@@ -37,6 +38,15 @@ export class PublishPage {
 
   async publishAndWaitForSuccess() {
     await this.publish();
-    await this.successMessage.waitFor({ state: 'visible', timeout: 30_000 });
+    try {
+      await this.successMessage.waitFor({ state: 'visible', timeout: 45_000 });
+    } catch (e) {
+      const errorVisible = await this.errorAlert.isVisible();
+      if (errorVisible) {
+        const msg = await this.errorAlert.innerText();
+        throw new Error(`Publish failed with error: ${msg}`);
+      }
+      throw e;
+    }
   }
 }

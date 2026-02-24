@@ -18,6 +18,7 @@
 4. **DO NOT PUBLISH landing-pages.** This component is for local development only. Orchestrator scripts are locked to skip it.
 5. **Admin Panel Feature Freeze.** DO NOT add any new features to `admin-panel/`. Bug fixes and maintenance only. No new pages, components, hooks, routes, or UI elements.
 6. **Use Premium UI Components.** If maintaining tables, use `ColumnToggle` (visibility) and `BulkActionBar` (multi-select actions) to ensure UI consistency.
+7. **Every bug/issue requires a preventative test.** Before closing any bug or issue, you MUST write a new test case that reproduces the failure. The test must fail before the fix and pass after. No exceptions. Log the test file path in `docs/LEARNING_LOG.md` tagged `[test created]`.
 
 ## File Placement
 
@@ -65,81 +66,9 @@
 
 - TypeScript strict mode — zero `any` where avoidable. Use `as unknown as Type` only when bridging Supabase-generated types.
 - Admin Panel: React + Vite + shadcn/ui + TanStack Query.
-- Student App: Flutter + Riverpod + Drift (offline-first).
 - Supabase: Row Level Security on all tables. Multi-tenant via `app_id`.
 
 ## Testing Standards
-
-### Flutter Testing (Student App)
-
-#### **Mocking & Test Setup**
-
-- **Use `mocktail`** NOT `mockito` for Flutter compatibility
-- **Manual mock classes**: `class MockX extends Mock implements X {}`
-- **Provider setup**: Always dispose containers in tearDown
-- **Database tests**: Set `driftRuntimeOptions.dontWarnAboutMultipleDatabases = true`
-
-```dart
-// Standard test setup
-late ProviderContainer container;
-setUp(() {
-  container = ProviderContainer(overrides: getTestOverrides());
-});
-tearDown(() => container.dispose());
-
-// Mocktail usage
-when(() => mockRepo.getData()).thenAnswer((_) async => data);
-verify(() => mockRepo.getData()).called(1);
-```
-
-#### **Widget Testing Patterns**
-
-- **Screen size management**: Use `_setMobileSize(tester)` for consistent testing
-- **Robust cleanup**: Always call `_cleanup(tester)` to prevent timer leaks
-- **Provider containers**: Use `UncontrolledProviderScope(container: container)`
-
-```dart
-Future<void> _setMobileSize(WidgetTester tester) async {
-  tester.view.physicalSize = const Size(600, 1000);
-  tester.view.devicePixelRatio = 1.0;
-  addTearDown(() {
-    tester.view.resetPhysicalSize();
-    tester.view.resetDevicePixelRatio();
-  });
-}
-
-Future<void> _cleanup(WidgetTester tester) async {
-  await tester.pumpWidget(const SizedBox.shrink());
-  await tester.pump(const Duration(milliseconds: 100));
-  await tester.pumpAndSettle();
-}
-```
-
-#### **Sealed Classes & Pattern Matching**
-
-- **Never instantiate abstract sealed classes**
-- **Use concrete types in tests**: `NetworkError`, `SyncError`, `ValidationError`
-- **Pattern matching**: Use type-specific cases to avoid dead code warnings
-
-```dart
-// ❌ Wrong - abstract class
-const AppError error = AppError('message');
-
-// ✅ Correct - concrete types
-const NetworkError error = NetworkError('message');
-
-// Pattern matching
-switch (error) {
-  case NetworkError(): // Only matching possible types
-    break;
-}
-```
-
-#### **API Compatibility**
-
-- **Theme API**: Use `colorScheme.surface` NOT deprecated `backgroundColor`
-- **Provider containers**: Always required `container` parameter
-- **Imports**: Add `import 'package:flutter/services.dart'` for `LogicalKeyboardKey`
 
 ### TypeScript Testing (Admin Panel)
 
@@ -210,14 +139,12 @@ Deno.test('function handles auth correctly', async () => {
 #### **Tier 3 — Unit/Integration Tests**
 
 - **Admin Panel**: Vitest + React Testing Library
-- **Student App**: Flutter test framework + mocktail
 - **Edge Functions**: Deno testing framework
 - **Content Engine**: Python pytest
 
 #### **Coverage Requirements**
 
 - **Admin Panel**: 70% minimum coverage gate
-- **Student App**: 60% minimum coverage gate
 - **Python Content Engine**: 80% minimum coverage gate
 
 ### Test Data Management
@@ -233,13 +160,11 @@ Deno.test('function handles auth correctly', async () => {
 - **Never call real AI APIs** in tests - always mock
 - **Mock data must pass Zod validation** schemas
 - **Edge Functions**: Mock Supabase client, Gemini AI, environment variables
-- **Flutter**: Mock repositories, services, and external dependencies
 
 ### CI/CD Integration
 
 #### **Test Execution Order**
 
-1. **Lint & Type Checking** (`tsc --noEmit`, `flutter analyze`)
 2. **Unit/Integration Tests** (fast feedback)
 3. **E2E Tests** (full user flows)
 4. **Visual Regression** (UI consistency)
@@ -261,6 +186,7 @@ Deno.test('function handles auth correctly', async () => {
 - **Test data in production** - use dedicated test environments
 - **Brittle selectors** - use semantic HTML and accessible selectors
 - **Ignoring test failures** - never skip failing tests without investigation
+- **Fixing bugs without a regression test** - every bug fix MUST be accompanied by a new test case that reproduces the original failure (Core Rule #7)
 
 #### **✅ Preferred Patterns**
 

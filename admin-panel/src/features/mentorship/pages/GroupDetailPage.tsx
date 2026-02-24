@@ -1,14 +1,15 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -16,23 +17,23 @@ import { supabase } from '@/lib/supabase';
 import { cn, isValidUUID } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowLeft,
-  Check,
-  CheckCircle,
-  Circle,
-  ClipboardList,
-  Clock,
-  Copy,
-  Edit3,
-  Home,
-  Layers,
-  LayoutDashboard,
-  Plus,
-  School,
-  Settings,
-  Trash2,
-  UserPlus,
-  Users,
+    ArrowLeft,
+    Check,
+    CheckCircle,
+    Circle,
+    ClipboardList,
+    Clock,
+    Copy,
+    Edit3,
+    Home,
+    Layers,
+    LayoutDashboard,
+    Plus,
+    School,
+    Settings,
+    Trash2,
+    UserPlus,
+    Users,
 } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -493,295 +494,335 @@ export function GroupDetailPage() {
   const memberCount = members?.length || 0;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
-      <AdminHeader
-        title={group.name}
-        description="Group overview."
-        icon={group.type === 'class' ? School : Home}
-        actions={
-          <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                'text-2xs uppercase font-black px-3 py-1 rounded-full border tracking-widest',
-                group.type === 'class'
-                  ? 'bg-blue-500/10 text-blue-600 border-blue-500/20'
-                  : 'bg-purple-500/10 text-purple-600 border-purple-500/20'
-              )}
-            >
-              {group.type}
-            </span>
-          </div>
-        }
-      />
+    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in duration-700 p-4 md:p-8">
+      <div className="space-y-4">
+        <Button variant="ghost" size="sm" asChild className="text-indigo-600 hover:bg-indigo-50 -ml-2 font-black text-[10px] uppercase tracking-widest gap-2">
+          <Link to="/groups">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Registry
+          </Link>
+        </Button>
+        <AdminHeader
+          title={group.name}
+          description="Integrated oversight of cluster operations and pedagogical progress"
+          icon={group.type === 'class' ? School : Home}
+          actions={
+            <div className="flex items-center gap-3">
+              <span
+                className={cn(
+                  'text-[10px] uppercase font-black px-4 py-1.5 rounded-full border tracking-widest shadow-sm',
+                  group.type === 'class'
+                    ? 'bg-blue-50/50 text-blue-600 border-blue-200'
+                    : 'bg-purple-50/50 text-purple-600 border-purple-200'
+                )}
+              >
+                {group.type}
+              </span>
+            </div>
+          }
+        />
+      </div>
 
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="bg-white p-1 rounded-lg border border-gray-200 shadow-sm inline-flex">
+      <Tabs defaultValue="overview" className="space-y-8">
+        <TabsList className="bg-white/50 backdrop-blur-md p-1.5 rounded-2xl border border-indigo-50/50 shadow-sm inline-flex">
           <TabsTrigger
             value="overview"
-            className="rounded px-4 py-1.5 data-[state=active]:bg-teal-600 data-[state=active]:text-white data-[state=active]:shadow-sm font-semibold text-xs"
+            className="rounded-xl px-6 py-2.5 data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-600/20 font-black text-[10px] uppercase tracking-widest transition-all"
           >
-            <LayoutDashboard className="w-3.5 h-3.5 mr-1.5" /> Overview
+            <LayoutDashboard className="w-4 h-4 mr-2" /> Overview
           </TabsTrigger>
           <TabsTrigger
             value="progress"
-            className="rounded px-4 py-1.5 data-[state=active]:bg-teal-600 data-[state=active]:text-white data-[state=active]:shadow-sm font-semibold text-xs"
+            className="rounded-xl px-6 py-2.5 data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-600/20 font-black text-[10px] uppercase tracking-widest transition-all"
           >
-            <ClipboardList className="w-3.5 h-3.5 mr-1.5" /> Progress
+            <ClipboardList className="w-4 h-4 mr-2" /> Matrix
           </TabsTrigger>
           <TabsTrigger
             value="settings"
-            className="rounded px-4 py-1.5 data-[state=active]:bg-teal-600 data-[state=active]:text-white data-[state=active]:shadow-sm font-semibold text-xs"
+            className="rounded-xl px-6 py-2.5 data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-600/20 font-black text-[10px] uppercase tracking-widest transition-all"
           >
-            <Settings className="w-3.5 h-3.5 mr-1.5" /> Settings
+            <Settings className="w-4 h-4 mr-2" /> Settings
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 outline-none">
-          <div className="grid gap-3 md:grid-cols-3">
-            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">
-                  Members
-                </span>
-                <Users className="w-3.5 h-3.5 text-teal-500" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900 tabular-nums">{memberCount}</p>
-            </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/5 group hover:border-indigo-100/50 transition-all">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                    Cohort Size
+                  </span>
+                  <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-600">
+                    <Users className="w-5 h-5" />
+                  </div>
+                </div>
+                <p className="text-3xl font-black text-gray-900 tabular-nums tracking-tight">{memberCount}</p>
+                <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Active Members</p>
+              </CardContent>
+            </Card>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">
-                  Join Code
-                </span>
-                <Copy className="w-3.5 h-3.5 text-teal-500" />
-              </div>
-              <div className="flex items-center gap-2">
-                <code className="text-teal-700 font-mono text-lg font-bold tracking-wider">
-                  {group.join_code}
-                </code>
-                <Button
-                  onClick={() => copyJoinCode()}
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
-                >
-                  {copiedCode ? (
-                    <Check className="h-3.5 w-3.5 text-emerald-600" />
-                  ) : (
-                    <Copy className="h-3.5 w-3.5" />
-                  )}
-                </Button>
-              </div>
-            </div>
+            <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/5 group hover:border-indigo-100/50 transition-all">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                    Activation Code
+                  </span>
+                  <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600">
+                    <Copy className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <code className="text-2xl font-mono font-black text-indigo-600 tracking-extra-wide">
+                    {group.join_code}
+                  </code>
+                  <Button
+                    onClick={() => copyJoinCode()}
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-xl text-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+                  >
+                    {copiedCode ? (
+                      <Check className="h-5 w-5 text-emerald-500" />
+                    ) : (
+                      <Copy className="h-5 w-5" />
+                    )}
+                  </Button>
+                </div>
+                <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Security Authorization</p>
+              </CardContent>
+            </Card>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">
-                  Public Join
-                </span>
-                <UserPlus className="w-3.5 h-3.5 text-teal-500" />
-              </div>
-              <p
-                className={cn(
-                  'text-sm font-semibold',
+            <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/5 group hover:border-indigo-100/50 transition-all">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                    Anonymous Entry
+                  </span>
+                  <div className={cn(
+                    "p-2 rounded-xl",
+                    group.allow_anonymous_join ? "bg-emerald-500/10 text-emerald-600" : "bg-gray-100 text-gray-400"
+                  )}>
+                    <UserPlus className="w-5 h-5" />
+                  </div>
+                </div>
+                <p className={cn(
+                  'text-lg font-black uppercase tracking-tight',
                   group.allow_anonymous_join ? 'text-emerald-600' : 'text-gray-400'
-                )}
-              >
-                {group.allow_anonymous_join ? 'Enabled' : 'Disabled'}
-              </p>
-            </div>
+                )}>
+                  {group.allow_anonymous_join ? 'ACTIVE PROTOCOL' : 'RESTRICTED'}
+                </p>
+                <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Access Policy</p>
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2">
-            <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden flex flex-col">
-              <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-900">Members</h3>
-                  <p className="text-[11px] text-gray-500">Enrolled students</p>
-                </div>
-                <Button
-                  size="sm"
-                  className="h-8 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1"
-                >
-                  <Plus className="h-3.5 w-3.5" /> Add
-                </Button>
-              </div>
-
-              {membersLoading ? (
-                <div className="p-8 space-y-4">
-                  <Skeleton className="h-12 w-full rounded-xl" />
-                  <Skeleton className="h-12 w-full rounded-xl" />
-                  <Skeleton className="h-12 w-full rounded-xl" />
-                </div>
-              ) : members && members.length > 0 ? (
-                <div className="divide-y divide-gray-50 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
-                  {members.map((member: Member) => (
-                    <MemberRow
-                      key={member.user_id}
-                      member={member}
-                      onEdit={startEditingNickname}
-                      onRemove={removeMemberMutation.mutate}
-                      isEditing={editingMemberId === member.user_id}
-                      editNickname={editNickname}
-                      onNicknameChange={setEditNickname}
-                      onSave={handleSaveNickname}
-                      onCancel={cancelEditing}
-                      isPending={updateNicknameMutation.isPending}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <EmptyState
-                  icon={Users}
-                  title="Squad Empty"
-                  description={`Connect students using code ${group.join_code}`}
-                  className="py-20"
-                />
-              )}
-            </div>
-
-            <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-900">Assignments</h3>
-                  <p className="text-[11px] text-gray-500">Active tasks</p>
-                </div>
-                <Link to={`/groups/${id}/assignments/new`}>
+          <div className="grid gap-8 lg:grid-cols-2">
+            <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/5 overflow-hidden flex flex-col">
+              <CardContent className="p-0">
+                <div className="px-6 py-4 border-b border-indigo-50/50 flex items-center justify-between bg-white/30">
+                  <div>
+                    <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Members</h3>
+                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Enrolled Students</p>
+                  </div>
                   <Button
                     size="sm"
-                    className="h-8 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1"
+                    className="h-9 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest gap-2"
                   >
-                    <Plus className="h-3.5 w-3.5" /> New
+                    <Plus className="h-4 w-4" /> Add Member
                   </Button>
-                </Link>
-              </div>
+                </div>
 
-              {assignmentsLoading ? (
-                <div className="p-8 space-y-4">
-                  <Skeleton className="h-12 w-full rounded-xl" />
-                  <Skeleton className="h-12 w-full rounded-xl" />
-                  <Skeleton className="h-12 w-full rounded-xl" />
-                </div>
-              ) : assignments && assignments.length > 0 ? (
-                <div className="divide-y divide-gray-50 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
-                  {assignments.map((assignment: Assignment) => (
-                    <AssignmentRow key={assignment.id} assignment={assignment} />
-                  ))}
-                </div>
-              ) : (
-                <EmptyState
-                  icon={ClipboardList}
-                  title="No Active Tasks"
-                  description="No assignments yet."
-                  className="py-20"
-                  action={
+                {membersLoading ? (
+                  <div className="p-8 space-y-4">
+                    <Skeleton className="h-14 w-full rounded-2xl" />
+                    <Skeleton className="h-14 w-full rounded-2xl" />
+                    <Skeleton className="h-14 w-full rounded-2xl" />
+                  </div>
+                ) : members && members.length > 0 ? (
+                  <div className="divide-y divide-gray-100/50 max-h-[500px] overflow-y-auto">
+                    {members.map((member: Member) => (
+                      <MemberRow
+                        key={member.user_id}
+                        member={member}
+                        onEdit={startEditingNickname}
+                        onRemove={removeMemberMutation.mutate}
+                        isEditing={editingMemberId === member.user_id}
+                        editNickname={editNickname}
+                        onNicknameChange={setEditNickname}
+                        onSave={handleSaveNickname}
+                        onCancel={cancelEditing}
+                        isPending={updateNicknameMutation.isPending}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState
+                    icon={Users}
+                    title="Squad Empty"
+                    description={`Connect students using code ${group.join_code}`}
+                    className="py-20"
+                  />
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/5 overflow-hidden flex flex-col">
+              <CardContent className="p-0">
+                <div className="px-6 py-4 border-b border-indigo-50/50 flex items-center justify-between bg-white/30">
+                  <div>
+                    <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Assignments</h3>
+                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Active Tasks</p>
+                  </div>
+                  <Link to={`/groups/${id}/assignments/new`}>
                     <Button
-                      onClick={() => navigate(`/groups/${id}/assignments/new`)}
-                      className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                      size="sm"
+                      className="h-9 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest gap-2"
                     >
-                      Initialize Task
+                      <Plus className="h-4 w-4" /> New Task
                     </Button>
-                  }
-                />
-              )}
-            </div>
+                  </Link>
+                </div>
+
+                {assignmentsLoading ? (
+                  <div className="p-8 space-y-4">
+                    <Skeleton className="h-14 w-full rounded-2xl" />
+                    <Skeleton className="h-14 w-full rounded-2xl" />
+                    <Skeleton className="h-14 w-full rounded-2xl" />
+                  </div>
+                ) : assignments && assignments.length > 0 ? (
+                  <div className="divide-y divide-gray-100/50 max-h-[500px] overflow-y-auto">
+                    {assignments.map((assignment: Assignment) => (
+                      <AssignmentRow key={assignment.id} assignment={assignment} />
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState
+                    icon={ClipboardList}
+                    title="No Active Tasks"
+                    description="No assignments yet."
+                    className="py-20"
+                    action={
+                      <Button
+                        onClick={() => navigate(`/groups/${id}/assignments/new`)}
+                        className="h-10 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-600/20"
+                      >
+                        Initialize Task
+                      </Button>
+                    }
+                  />
+                )}
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
         <TabsContent value="progress" className="outline-none">
-          <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-200">
-              <h2 className="text-sm font-semibold text-gray-900">Progress Matrix</h2>
-              <p className="text-[11px] text-gray-500">Mastery tracking per student</p>
-            </div>
+          <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/5 overflow-hidden">
+            <CardContent className="p-0">
+              <div className="px-6 py-4 border-b border-indigo-50/50 bg-white/30">
+                <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Progress Matrix</h2>
+                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Mastery Tracking Intelligence</p>
+              </div>
 
-            {!members || members.length === 0 ? (
-              <div className="p-16 text-center text-gray-400 font-medium">
-                No students enrolled.
-              </div>
-            ) : !assignmentSkillIds || assignmentSkillIds.length === 0 ? (
-              <EmptyState
-                icon={Layers}
-                title="Matrix Not Initialized"
-                description="No skills assigned yet."
-                className="py-24"
-              />
-            ) : (
-              <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-200">
-                <Table className="border-collapse">
-                  <TableHeader>
-                    <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b-2 border-gray-100">
-                      <TableHead className="w-[200px] font-bold text-2xs uppercase tracking-widest text-gray-400 pl-6 h-12">
-                        Student
-                      </TableHead>
-                      {assignmentSkillIds.map((skillId: string) => (
-                        <TableHead
-                          key={skillId}
-                          className="text-center min-w-[140px] font-bold text-2xs uppercase tracking-widest text-gray-400 h-12"
-                        >
-                          {getSkillTitle(skillId)}
+              {!members || members.length === 0 ? (
+                <div className="py-24 text-center">
+                  <div className="p-4 bg-gray-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                    <Users className="w-10 h-10 text-gray-200" />
+                  </div>
+                  <h3 className="text-sm font-black text-gray-900 uppercase tracking-tight">No Students Registered</h3>
+                  <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Registry is currently empty</p>
+                </div>
+              ) : !assignmentSkillIds || assignmentSkillIds.length === 0 ? (
+                <EmptyState
+                  icon={Layers}
+                  title="Matrix Not Initialized"
+                  description="No skills assigned yet."
+                  className="py-24"
+                />
+              ) : (
+                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-indigo-100">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-indigo-50/20 hover:bg-indigo-50/20 border-b border-indigo-50">
+                        <TableHead className="w-[240px] font-black text-[10px] uppercase tracking-widest text-indigo-900/60 pl-8 h-16">
+                          Student Identity
                         </TableHead>
-                      ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {members.map((member: Member) => (
-                      <TableRow
-                        key={member.user_id || `${member.group_id}-anon`}
-                        className="hover:bg-gray-50/30 transition-colors"
-                      >
-                        <TableCell className="font-bold text-gray-700 pl-6 py-4 text-sm whitespace-nowrap">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-2xs font-black text-gray-400">
-                              {(member.nickname || member.profiles?.full_name || 'A').charAt(0)}
-                            </div>
-                            {member.nickname ||
-                              member.profiles?.full_name ||
-                              member.profiles?.email ||
-                              'Anonymous'}
-                          </div>
-                        </TableCell>
-                        {assignmentSkillIds.map((skillId: string) => {
-                          return (
-                            <ProgressCell
-                              key={skillId}
-                              status={
-                                member.user_id ? getStatus(member.user_id, skillId) : 'not_started'
-                              }
-                            />
-                          );
-                        })}
+                        {assignmentSkillIds.map((skillId: string) => (
+                          <TableHead
+                            key={skillId}
+                            className="text-center min-w-[160px] font-black text-[10px] uppercase tracking-widest text-indigo-900/60 h-16"
+                          >
+                            {getSkillTitle(skillId)}
+                          </TableHead>
+                        ))}
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </div>
+                    </TableHeader>
+                    <TableBody>
+                      {members.map((member: Member) => (
+                        <TableRow
+                          key={member.user_id || `${member.group_id}-anon`}
+                          className="hover:bg-indigo-50/10 transition-colors border-b border-indigo-50/30"
+                        >
+                          <TableCell className="pl-8 py-6 whitespace-nowrap">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs font-black text-indigo-400 shadow-sm">
+                                {(member.nickname || member.profiles?.full_name || 'A').charAt(0).toUpperCase()}
+                              </div>
+                              <div className="space-y-0.5">
+                                <p className="text-sm font-black text-gray-900 tabular-nums">
+                                  {member.nickname || member.profiles?.full_name || 'Anonymous'}
+                                </p>
+                                {member.profiles?.email && (
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{member.profiles.email}</p>
+                                )}
+                              </div>
+                            </div>
+                          </TableCell>
+                          {assignmentSkillIds.map((skillId: string) => {
+                            return (
+                              <ProgressCell
+                                key={skillId}
+                                status={
+                                  member.user_id ? getStatus(member.user_id, skillId) : 'not_started'
+                                }
+                              />
+                            );
+                          })}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="settings" className="outline-none">
-          <div className="bg-white rounded-lg border border-gray-200 shadow-md p-12 text-center">
-            <div className="w-12 h-12 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center mx-auto mb-4">
-              <Settings className="w-6 h-6 text-gray-300" />
-            </div>
-            <h3 className="text-base font-semibold text-gray-900 mb-1">Group Settings</h3>
-            <p className="text-xs text-gray-500 mb-6 max-w-sm mx-auto">
-              Group configuration is currently under development.
-            </p>
-            <div className="flex items-center justify-center gap-3">
-              <Button variant="outline" className="h-9 px-4 rounded text-sm text-gray-400" disabled>
-                Edit Details
-              </Button>
-              <Button
-                variant="outline"
-                className="h-9 px-4 rounded text-sm border-red-200 text-red-400"
-                disabled
-              >
-                Archive Group
-              </Button>
-            </div>
-          </div>
+          <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/5 overflow-hidden">
+            <CardContent className="p-20 text-center">
+              <div className="w-20 h-20 bg-indigo-50 rounded-[2rem] border border-indigo-100 flex items-center justify-center mx-auto mb-8 shadow-inner shadow-indigo-500/5">
+                <Settings className="w-10 h-10 text-indigo-300" />
+              </div>
+              <h3 className="text-xl font-black text-gray-900 tracking-tight mb-2 uppercase">Configuration Core</h3>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-10 max-w-sm mx-auto">
+                Advanced squad orchestration and data lifecycle management modules are in development.
+              </p>
+              <div className="flex items-center justify-center gap-4">
+                <Button variant="outline" className="h-12 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest border-indigo-100 text-indigo-400 opacity-50 cursor-not-allowed">
+                  Edit Registry
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-12 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest border-red-100 text-red-300 hover:text-red-400 hover:bg-red-50 transition-all font-bold"
+                  disabled
+                >
+                  DECOMMISSION UNIT
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

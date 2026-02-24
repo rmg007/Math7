@@ -28,6 +28,30 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5000,
     allowedHosts: true,
+    proxy: {
+      // Proxy Cloudflare Worker requests in dev to bypass CORS.
+      // The browser talks to localhost:5000/api/workers/* and Vite
+      // forwards the request server-side — no browser CORS preflight.
+      '/api/workers': {
+        target: 'https://questerix-workers.mhalim80.workers.dev',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/workers/, ''),
+      },
+      // Proxy Supabase Edge Function requests in dev to bypass CORS.
+      // Forwards to /functions/v1/* on the Supabase project.
+      // We set the origin to Supabase's own URL so the CORS check passes.
+      '/api/edge': {
+        target: 'https://bkfhorslctqieetzqdtd.supabase.co',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/edge/, '/functions/v1'),
+        headers: {
+          // Spoof Origin so Supabase's CORS check accepts the request.
+          // The actual fetch is done by Vite's Node process (not the browser),
+          // so browser CORS rules do not apply here.
+          Origin: 'http://localhost:3000',
+        },
+      },
+    },
   },
   build: {
     rollupOptions: {

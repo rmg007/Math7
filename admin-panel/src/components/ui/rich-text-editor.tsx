@@ -7,20 +7,21 @@ import StarterKit from '@tiptap/starter-kit';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import {
-  Bold,
-  Code,
-  Heading2,
-  Italic,
-  List,
-  ListOrdered,
-  Quote,
-  Redo,
-  Sparkles,
-  Subscript,
-  Superscript,
-  Table as TableIcon,
-  Underline as UnderlineIcon,
-  Undo,
+    Bold,
+    Code,
+    Heading2,
+    Italic,
+    List,
+    ListOrdered,
+    Quote,
+    Redo,
+    Sparkles,
+    Subscript,
+    Superscript,
+    Table as TableIcon,
+    Underline as UnderlineIcon,
+    Undo,
+    X,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BlockMath, InlineMath } from './math-extensions';
@@ -307,14 +308,20 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
   return (
     <div
       className={cn(
-        'rounded-[1.5rem] bg-white/70 backdrop-blur-xl border border-indigo-100/50 shadow-xl shadow-indigo-500/5 transition-all focus-within:border-indigo-400 focus-within:ring-8 focus-within:ring-indigo-500/5',
+        'relative rounded-[1.5rem] border border-indigo-100/50 shadow-xl shadow-indigo-500/5 transition-all focus-within:border-indigo-400 focus-within:ring-8 focus-within:ring-indigo-500/5',
         className
       )}
     >
+      {/* Background with blur - moved to separate layer to avoid clipping issues with fixed children */}
+      <div className="absolute inset-0 bg-white/70 backdrop-blur-xl rounded-[1.5rem] -z-10 pointer-events-none" />
+      
+      <div className="relative z-0 rounded-[1.5rem] overflow-visible">
       <div className="flex flex-wrap items-center gap-1.5 p-3 border-b border-indigo-50 bg-white/40 backdrop-blur-md">
         {/* --- Text formatting --- */}
         <MenuButton
-          onClick={() => editor.chain().focus().toggleBold().run()}
+          onClick={() => {
+            editor.chain().focus().toggleBold().run();
+          }}
           isActive={editor.isActive('bold')}
           title="Bold (Ctrl+B)"
         >
@@ -397,7 +404,21 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           </MenuButton>
 
           {showTablePicker && (
-            <div className="absolute top-full left-0 mt-3 p-4 bg-white border border-indigo-100 rounded-2xl shadow-2xl shadow-indigo-500/20 z-[500] animate-in zoom-in-95 duration-200">
+            <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 pointer-events-none">
+              <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm pointer-events-auto" onClick={() => setShowTablePicker(false)} />
+              
+              <div className={cn(
+                "p-6 bg-white border border-indigo-100 shadow-2xl shadow-indigo-500/20 z-[1001] animate-in zoom-in-95 duration-200 pointer-events-auto",
+                "overflow-y-auto max-h-[80vh] translate-z-0 rounded-[2rem] w-full max-w-[300px] relative"
+              )}>
+                <button 
+                  type="button"
+                  onClick={() => setShowTablePicker(false)}
+                  className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                  title="Close"
+                >
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
               <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">
                 {tableHover.rows > 0 ? `${tableHover.rows} × ${tableHover.cols}` : 'Insert Table'}
               </p>
@@ -410,6 +431,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
                     <button
                       key={i}
                       type="button"
+                      title={`Insert ${row}x${col} table`}
                       onMouseEnter={() => setTableHover({ rows: row, cols: col })}
                       onClick={() => {
                         editor
@@ -431,7 +453,8 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
                 })}
               </div>
             </div>
-          )}
+          </div>
+        )}
         </div>
 
         <div className="w-px h-6 bg-indigo-100 mx-1.5" />
@@ -487,7 +510,27 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           </button>
 
           {showMathInput && (
-            <div className="absolute top-full left-0 mt-3 p-6 bg-white border border-indigo-100 rounded-[2rem] shadow-2xl shadow-indigo-500/20 z-[500] min-w-[340px] animate-in zoom-in-95 duration-200">
+            <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 pointer-events-none">
+              {/* Universal backdrop shadow */}
+              <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm pointer-events-auto" onClick={() => setShowMathInput(false)} />
+              
+              <div
+                data-testid="symbol-matrix-palette"
+                className={cn(
+                  "bg-white border border-indigo-100 shadow-2xl shadow-indigo-500/20 z-[1001] animate-in zoom-in-95 duration-200 pointer-events-auto",
+                  "overflow-y-auto max-h-[90vh] translate-z-0",
+                  "w-full max-w-[calc(100vw-32px)] sm:max-w-[400px] rounded-[2rem] p-6 relative"
+                )}
+              >
+                {/* Close button */}
+                <button 
+                  type="button"
+                  onClick={() => setShowMathInput(false)}
+                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  title="Close"
+                >
+                  <X className="w-5 h-5 text-gray-400" />
+                </button>
               {/* Header */}
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center text-white scale-90">
@@ -510,6 +553,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
                         setShowMathInput(false);
                       }}
                       className="w-10 h-10 flex items-center justify-center border border-gray-100 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 text-lg transition-all active:scale-90"
+                      title={`Insert ${symbol}`}
                     >
                       {symbol}
                     </button>
@@ -530,6 +574,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
                         ? 'bg-indigo-600 text-white border-indigo-400'
                         : 'text-gray-400 border-gray-100 hover:border-indigo-200'
                     )}
+                    title="Inline Mode ($...$)"
                   >
                     Inline $…$
                   </button>
@@ -542,6 +587,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
                         ? 'bg-indigo-600 text-white border-indigo-400'
                         : 'text-gray-400 border-gray-100 hover:border-indigo-200'
                     )}
+                    title="Block Mode ($$...$$)"
                   >
                     Block $$…$$
                   </button>
@@ -561,6 +607,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
                       onClick={insertMath}
                       disabled={!mathExpression.trim() || Boolean(mathError)}
                       className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 disabled:opacity-20 transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
+                      title="Apply LaTeX"
                     >
                       Apply
                     </button>
@@ -601,6 +648,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
                       type="button"
                       onClick={() => insertSnippet(tex)}
                       className="px-3 py-2 text-[10px] font-black border border-gray-100 rounded-xl hover:bg-indigo-50 hover:border-indigo-200 text-gray-500 transition-all active:scale-95"
+                      title={`Insert ${label} snippet`}
                     >
                       {label}
                     </button>
@@ -615,7 +663,8 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
                 </p>
               </div>
             </div>
-          )}
+          </div>
+        )}
         </div>
       </div>
 
@@ -623,5 +672,6 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
         <EditorContent editor={editor} className="prose-indigo prose-lg" />
       </div>
     </div>
-  );
+  </div>
+);
 }

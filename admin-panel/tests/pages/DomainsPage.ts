@@ -15,6 +15,7 @@ export class DomainsPage {
   readonly descriptionInput: Locator;
   readonly appSelectCombobox: Locator;
   readonly submitButton: Locator;
+  readonly searchInput: Locator;
   readonly errorAlert: Locator;
 
   constructor(page: Page) {
@@ -39,6 +40,9 @@ export class DomainsPage {
       .filter({ hasText: /select.*app|related app/i })
       .or(page.getByRole('combobox').first());
     this.submitButton = page.getByRole('button', { name: /create domain/i });
+    this.searchInput = page
+      .getByPlaceholder(/search domains/i)
+      .or(page.locator('input[placeholder*="Search"]'));
     this.errorAlert = page
       .locator('[data-testid="form-error"]')
       .or(page.locator('[role="alert"]').first());
@@ -102,7 +106,12 @@ export class DomainsPage {
     await this.submit();
   }
 
-  async domainVisible(title: string) {
+  async search(query: string) {
+    await this.searchInput.fill(query);
+    await this.page.waitForTimeout(1000); // Wait for debounce
+  }
+
+  domainVisible(title: string) {
     return this.page.getByText(title).first();
   }
 }

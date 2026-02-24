@@ -1,53 +1,53 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
 import { ColumnToggle } from '@/components/ui/column-toggle';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Switch } from '@/components/ui/switch';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
@@ -55,37 +55,37 @@ import { normalizeFormData } from '@/lib/normalization';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  AlertTriangle,
-  CheckCircle2,
-  CheckSquare,
-  Circle,
-  ExternalLink,
-  Filter,
-  Layers,
-  Layout,
-  Loader2,
-  Pencil,
-  Plus,
-  Power,
-  Search,
-  Square,
-  Trash2,
-  X,
+    AlertTriangle,
+    CheckCircle2,
+    CheckSquare,
+    Circle,
+    ExternalLink,
+    Filter,
+    Layers,
+    Layout,
+    Loader2,
+    Pencil,
+    Plus,
+    Power,
+    Search,
+    Square,
+    Trash2,
+    X,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
-  useApps,
-  useBulkCreateApps,
-  useBulkDeleteApps,
-  useBulkUpdateAppsStatus,
-  useCheckAppSubdomain,
-  useCreateApp,
-  useDeleteApp,
-  useUpdateApp,
-  type AppInsert,
-  type CompiledApp,
+    useApps,
+    useBulkCreateApps,
+    useBulkDeleteApps,
+    useBulkUpdateAppsStatus,
+    useCheckAppSubdomain,
+    useCreateApp,
+    useDeleteApp,
+    useUpdateApp,
+    type AppInsert,
+    type CompiledApp,
 } from '../hooks/use-apps';
 import { useSubjects } from '../hooks/use-subjects';
 
@@ -170,6 +170,7 @@ const AppRow = memo(
               onClick={() => onDelete(app.app_id)}
               className="h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 focus:ring-2 focus:ring-red-600 focus:ring-offset-1"
               title="Delete"
+              data-testid="app-delete-btn"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
@@ -559,7 +560,8 @@ export function AppsPage() {
 
   const onSubmit = async (data: AppFormData) => {
     const normalizedData = normalizeFormData(data, {
-      lowercase: ['display_name', 'subdomain', 'grade_level'],
+      trim: ['display_name', 'subdomain', 'grade_level'],
+      lowercase: ['subdomain'],
     });
 
     try {
@@ -1072,7 +1074,7 @@ export function AppsPage() {
                                   disabled={Boolean(editingApp)}
                                   onChange={(e) =>
                                     field.onChange(
-                                      e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+                                      e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 63)
                                     )
                                   }
                                   data-testid="app-subdomain"
@@ -1212,17 +1214,18 @@ export function AppsPage() {
                     onClick={() => setIsDialogOpen(false)}
                     className="h-9 px-4 rounded text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   >
-                    Cancel
+                    Abort Changes
                   </Button>
                   <Button
                     type="submit"
                     disabled={createApp.isPending || updateApp.isPending}
+                    data-testid="app-submit-btn"
                     className="h-9 px-4 rounded bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 gap-1.5"
                   >
                     {(createApp.isPending || updateApp.isPending) && (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     )}
-                    {editingApp ? 'Update Application' : 'Create Application'}
+                    {editingApp ? 'UPDATE CLUSTER' : 'AUTHORIZE DEPLOYMENT'}
                   </Button>
                 </DialogFooter>
               </form>

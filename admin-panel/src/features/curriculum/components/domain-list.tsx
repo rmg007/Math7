@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
@@ -18,12 +18,12 @@ import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
@@ -31,52 +31,52 @@ import type { DataColumn } from '@/lib/data-utils';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import {
-  Book,
-  CheckSquare,
-  Filter,
-  GripVertical,
-  Loader2,
-  Pencil,
-  Plus,
-  Square,
-  Trash2,
+    Book,
+    CheckSquare,
+    Filter,
+    GripVertical,
+    Loader2,
+    Pencil,
+    Plus,
+    Square,
+    Trash2,
 } from 'lucide-react';
 import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type MutableRefObject,
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+    type MutableRefObject,
 } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  useBulkCreateDomains,
-  useBulkDeleteDomains,
-  useBulkUpdateDomainsStatus,
-  useDeleteDomain,
-  usePaginatedDomains,
-  useUpdateDomainOrder,
+    useBulkCreateDomains,
+    useBulkDeleteDomains,
+    useBulkUpdateDomainsStatus,
+    useDeleteDomain,
+    usePaginatedDomains,
+    useUpdateDomainOrder,
 } from '../hooks/use-domains';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -197,7 +197,7 @@ function SortableRow({
         <div className="flex flex-col">
           <span className="font-medium text-gray-900 text-xs">{domain.title}</span>
           {domain.apps?.display_name && (
-            <span className="text-[10px] text-gray-400 mt-0.5">{domain.apps.display_name}</span>
+            <span className="text-[11px] text-gray-500 mt-0.5">{domain.apps.display_name}</span>
           )}
         </div>
       </TableCell>
@@ -205,7 +205,7 @@ function SortableRow({
         <TableCell className="hidden lg:table-cell">
           <span className="text-xs text-gray-500">
             {new Date(domain.updated_at).toLocaleDateString()}{' '}
-            <span className="text-gray-400">
+            <span className="text-gray-500">
               {new Date(domain.updated_at).toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -215,13 +215,13 @@ function SortableRow({
         </TableCell>
       )}
       {visibleColumns.has('status') && (
-        <TableCell>{renderStatusBadge(domain.status || 'draft')}</TableCell>
+        <TableCell className="whitespace-nowrap">{renderStatusBadge(domain.status || 'draft')}</TableCell>
       )}
       <TableCell className="px-4 text-right border-l border-gray-100">
         <div className="flex items-center justify-end gap-0.5">
           <Link
             to={`/domains/${domain.domain_id}/edit`}
-            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50"
             title="Edit"
             aria-label="Edit domain"
           >
@@ -229,7 +229,7 @@ function SortableRow({
           </Link>
           <button
             onClick={() => onDelete(domain.domain_id)}
-            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-red-600 hover:bg-red-50"
             title="Delete"
             aria-label="Delete domain"
           >
@@ -312,13 +312,13 @@ function SortableCard({
             <div className="flex flex-col min-w-0">
               <h3 className="font-medium text-gray-900 text-xs truncate">{domain.title}</h3>
               {domain.apps?.display_name && (
-                <span className="text-[10px] text-gray-400 leading-none mt-0.5">
+                <span className="text-[11px] text-gray-500 leading-none mt-0.5">
                   {domain.apps.display_name}
                 </span>
               )}
             </div>
           </div>
-          <div className="text-[10px] text-gray-400">
+          <div className="text-[11px] text-gray-500">
             {visibleColumns.has('updated_at') &&
               `Modified: ${new Date(domain.updated_at).toLocaleDateString()}`}
           </div>
@@ -708,7 +708,7 @@ export function DomainList() {
               importDisabled={false}
             />
             <Link to="/domains/new">
-              <Button className="h-9 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1">
+              <Button className="h-9 px-3 rounded bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs gap-1">
                 <Plus className="w-3.5 h-3.5" /> New Domain
               </Button>
             </Link>
@@ -938,7 +938,7 @@ export function DomainList() {
                         </Button>
                       ) : (
                         <Link to="/domains/new">
-                          <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
+                          <Button className="bg-teal-700 hover:bg-teal-800 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
                             New Domain
                           </Button>
                         </Link>

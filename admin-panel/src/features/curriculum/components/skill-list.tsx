@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
@@ -18,68 +18,68 @@ import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
 import { cn } from '@/lib/utils';
 import {
-  CheckSquare,
-  Copy,
-  Filter,
-  GripVertical,
-  Layers,
-  Loader2,
-  Pencil,
-  Plus,
-  Square,
-  Trash2,
+    CheckSquare,
+    Copy,
+    Filter,
+    GripVertical,
+    Layers,
+    Loader2,
+    Pencil,
+    Plus,
+    Square,
+    Trash2,
 } from 'lucide-react';
 import {
-  memo,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type MutableRefObject,
+    memo,
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+    type MutableRefObject,
 } from 'react';
 import { Link } from 'react-router-dom';
 import { useDomains } from '../hooks/use-domains';
 import {
-  useBulkCreateSkills,
-  useBulkDeleteSkills,
-  useBulkUpdateSkillsStatus,
-  useDeleteSkill,
-  useDuplicateSkill,
-  usePaginatedSkills,
-  useUpdateSkillOrder,
+    useBulkCreateSkills,
+    useBulkDeleteSkills,
+    useBulkUpdateSkillsStatus,
+    useDeleteSkill,
+    useDuplicateSkill,
+    usePaginatedSkills,
+    useUpdateSkillOrder,
 } from '../hooks/use-skills';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -200,13 +200,13 @@ const SortableRow = memo(
           <div className="flex flex-col">
             <span className="font-medium text-gray-900 text-xs">{skill.title}</span>
             {skill.apps?.display_name && (
-              <span className="text-[10px] text-gray-400 mt-0.5">{skill.apps.display_name}</span>
+              <span className="text-[11px] text-gray-500 mt-0.5">{skill.apps.display_name}</span>
             )}
           </div>
         </TableCell>
         {visibleColumns.has('domain') && (
           <TableCell>
-            <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium border border-gray-200/50">
+            <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[11px] font-medium border border-gray-200/50">
               {skill.domains?.title || 'No Domain'}
             </span>
           </TableCell>
@@ -219,13 +219,13 @@ const SortableRow = memo(
           </TableCell>
         )}
         {visibleColumns.has('status') && (
-          <TableCell>{renderStatusBadge(skill.status || 'draft')}</TableCell>
+          <TableCell className="whitespace-nowrap">{renderStatusBadge(skill.status || 'draft')}</TableCell>
         )}
         <TableCell className="px-4 text-right border-l border-gray-100">
           <div className="flex items-center justify-end gap-0.5">
             <Link
               to={`/skills/${skill.skill_id}/edit`}
-              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50"
               title="Edit"
             >
               <Pencil className="h-3.5 w-3.5" />
@@ -233,14 +233,14 @@ const SortableRow = memo(
             <button
               onClick={() => onDuplicate(skill.skill_id)}
               disabled={isDuplicating}
-              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
               title="Duplicate"
             >
               <Copy className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => onDelete(skill.skill_id)}
-              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
+              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-red-600 hover:bg-red-50"
               title="Delete"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -322,19 +322,19 @@ const SortableCard = memo(
             <div className="flex flex-col min-w-0 mb-1">
               <h3 className="font-medium text-gray-900 text-xs truncate">{skill.title}</h3>
               {skill.apps?.display_name && (
-                <span className="text-[10px] text-gray-400 leading-none mt-0.5">
+                <span className="text-[11px] text-gray-500 leading-none mt-0.5">
                   {skill.apps.display_name}
                 </span>
               )}
             </div>
             <div className="flex items-center gap-2">
               {visibleColumns.has('domain') && (
-                <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium">
+                <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[11px] font-medium">
                   {skill.domains?.title || 'No Domain'}
                 </span>
               )}
               {visibleColumns.has('difficulty') && (
-                <span className="text-[10px] text-gray-400">Lvl {skill.difficulty_level}</span>
+                <span className="text-[11px] text-gray-500">Lvl {skill.difficulty_level}</span>
               )}
             </div>
           </div>
@@ -345,7 +345,7 @@ const SortableCard = memo(
         <div className="flex items-center justify-end gap-0.5 pt-2 border-t border-gray-100">
           <Link
             to={`/skills/${skill.skill_id}/edit`}
-            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50"
             title="Edit"
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -353,14 +353,14 @@ const SortableCard = memo(
           <button
             onClick={() => onDuplicate(skill.skill_id)}
             disabled={isDuplicating}
-            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
             title="Duplicate"
           >
             <Copy className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => onDelete(skill.skill_id)}
-            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-red-600 hover:bg-red-50"
             title="Delete"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -749,7 +749,7 @@ export function SkillList() {
               importDisabled={false}
             />
             <Link to="/skills/new">
-              <Button className="h-9 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1">
+              <Button className="h-9 px-3 rounded bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs gap-1">
                 <Plus className="w-3.5 h-3.5" /> New Skill
               </Button>
             </Link>
@@ -940,7 +940,7 @@ export function SkillList() {
                               </Button>
                             ) : (
                               <Link to="/skills/new">
-                                <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
+                                <Button className="bg-teal-700 hover:bg-teal-800 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
                                   New Skill
                                 </Button>
                               </Link>

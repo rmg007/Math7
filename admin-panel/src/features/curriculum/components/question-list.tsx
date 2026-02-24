@@ -1,16 +1,17 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { ColumnToggle } from '@/components/ui/column-toggle';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -18,12 +19,12 @@ import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
@@ -32,56 +33,56 @@ import { sanitizeHtml } from '@/lib/sanitize';
 import { cn, formatIdentifier } from '@/lib/utils';
 import type { QuestionListItem } from '@/types';
 import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  CheckSquare,
-  Copy,
-  FileText,
-  Filter,
-  GripVertical,
-  Loader2,
-  Pencil,
-  Plus,
-  Sparkles,
-  Square,
-  Trash2,
+    CheckSquare,
+    Copy,
+    FileText,
+    Filter,
+    GripVertical,
+    Loader2,
+    Pencil,
+    Plus,
+    Sparkles,
+    Square,
+    Trash2,
 } from 'lucide-react';
 import {
-  memo,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type MutableRefObject,
+    memo,
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+    type MutableRefObject,
 } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  QuestionInsert,
-  useBulkCreateQuestions,
-  useBulkDeleteQuestions,
-  useBulkUpdateQuestionsStatus,
-  useDeleteQuestion,
-  useDuplicateQuestion,
-  usePaginatedQuestions,
-  useUpdateQuestionOrder,
+    QuestionInsert,
+    useBulkCreateQuestions,
+    useBulkDeleteQuestions,
+    useBulkUpdateQuestionsStatus,
+    useDeleteQuestion,
+    useDuplicateQuestion,
+    usePaginatedQuestions,
+    useUpdateQuestionOrder,
 } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
@@ -198,20 +199,20 @@ const SortableRow = memo(
               }}
             />
             {question.apps?.display_name && (
-              <span className="text-[10px] text-gray-400 mt-0.5">{question.apps.display_name}</span>
+              <span className="text-[11px] text-gray-500 mt-0.5">{question.apps.display_name}</span>
             )}
           </div>
         </TableCell>
         {visibleColumns.has('type') && (
           <TableCell>
-            <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium border border-gray-200/50">
+            <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[11px] font-medium border border-gray-200/50">
               {formatIdentifier(question.type)}
             </span>
           </TableCell>
         )}
         {visibleColumns.has('skill') && (
           <TableCell>
-            <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium border border-gray-200/50">
+            <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[11px] font-medium border border-gray-200/50">
               {question.skills?.title || 'No Skill'}
             </span>
           </TableCell>
@@ -224,7 +225,7 @@ const SortableRow = memo(
           </TableCell>
         )}
         {visibleColumns.has('status') && (
-          <TableCell>
+          <TableCell className="whitespace-nowrap">
             <StatusBadge status={(question.status?.toLowerCase() as StatusType) || 'draft'} />
           </TableCell>
         )}
@@ -232,7 +233,7 @@ const SortableRow = memo(
           <div className="flex items-center justify-end gap-0.5">
             <Link
               to={`/questions/${question.question_id}/edit`}
-              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50"
               title="Edit"
               aria-label="Edit question"
             >
@@ -241,7 +242,7 @@ const SortableRow = memo(
             <button
               onClick={() => onDuplicate(question.question_id)}
               disabled={isDuplicating}
-              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
               title="Duplicate"
               aria-label="Duplicate question"
             >
@@ -249,7 +250,7 @@ const SortableRow = memo(
             </button>
             <button
               onClick={() => onDelete(question.question_id)}
-              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
+              className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-red-600 hover:bg-red-50"
               title="Delete"
               aria-label="Delete question"
             >
@@ -345,17 +346,17 @@ const SortableCard = memo(
             )}
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               {visibleColumns.has('type') && (
-                <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium">
+                <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[11px] font-medium">
                   {formatIdentifier(question.type)}
                 </span>
               )}
               {visibleColumns.has('skill') && question.skills?.title && (
-                <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium">
+                <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[11px] font-medium">
                   {question.skills.title}
                 </span>
               )}
               {visibleColumns.has('points') && (
-                <span className="text-[10px] text-gray-400">{question.points} pts</span>
+                <span className="text-[11px] text-gray-500">{question.points} pts</span>
               )}
             </div>
           </div>
@@ -368,7 +369,7 @@ const SortableCard = memo(
         <div className="flex items-center justify-end gap-0.5 pt-2 border-t border-gray-100">
           <Link
             to={`/questions/${question.question_id}/edit`}
-            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50"
             title="Edit"
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -376,14 +377,14 @@ const SortableCard = memo(
           <button
             onClick={() => onDuplicate(question.question_id)}
             disabled={isDuplicating}
-            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
             title="Duplicate"
           >
             <Copy className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => onDelete(question.question_id)}
-            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
+            className="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-red-600 hover:bg-red-50"
             title="Delete"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -764,29 +765,28 @@ export function QuestionList() {
   }
 
   return (
-    <div data-testid="questions-list" className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
+    <div data-testid="questions-list" className="max-w-7xl mx-auto space-y-10 pb-12">
       <AdminHeader
-        title="Questions"
-        description="Manage your question bank."
+        title="Question Bank"
+        description="Registry of all pedagogical assessment units"
         icon={FileText}
-        className="mb-2"
         actions={
           <div className="flex items-center gap-2">
             <Link to="/ai-questions">
               <Button
                 variant="outline"
-                className="h-9 px-3 rounded border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 font-medium text-xs gap-1"
+                className="h-10 px-4 rounded-xl border-indigo-100 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 font-black text-[10px] uppercase tracking-widest gap-2 transition-all shadow-sm"
               >
-                <Sparkles className="h-3.5 w-3.5" />
+                <Sparkles className="h-4 w-4" />
                 AI Generate
               </Button>
             </Link>
             <Link to="/ai-import">
               <Button
                 variant="outline"
-                className="h-9 px-3 rounded border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 font-medium text-xs gap-1"
+                className="h-10 px-4 rounded-xl border-emerald-100 text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 font-black text-[10px] uppercase tracking-widest gap-2 transition-all shadow-sm"
               >
-                <FileText className="h-3.5 w-3.5" />
+                <FileText className="h-4 w-4" />
                 Bulk Import
               </Button>
             </Link>
@@ -798,8 +798,9 @@ export function QuestionList() {
               importDisabled={false}
             />
             <Link to="/questions/new">
-              <Button className="h-9 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1">
-                <Plus className="w-3.5 h-3.5" /> New Question
+              <Button className="h-10 rounded-xl font-black text-xs uppercase tracking-widest bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 gap-2">
+                <Plus className="h-4 w-4" />
+                Create Unit
               </Button>
             </Link>
           </div>
@@ -837,7 +838,7 @@ export function QuestionList() {
         ]}
       />
 
-      <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
+      <div className="space-y-8">
         <CurriculumFilterBar
           searchPlaceholder="Search questions..."
           searchQuery={searchQuery}
@@ -853,16 +854,16 @@ export function QuestionList() {
                   aria-label="Filter by skill"
                   value={selectedSkillId}
                   onChange={(e) => setSelectedSkillId(e.target.value)}
-                  className="h-8 appearance-none pl-3 pr-8 text-xs font-medium rounded border border-gray-200 bg-white text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none cursor-pointer"
+                  className="h-10 appearance-none pl-4 pr-10 text-xs font-black uppercase tracking-widest rounded-xl border border-indigo-100 bg-white/50 text-indigo-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none cursor-pointer transition-all"
                 >
-                  <option value="all">All Skills</option>
+                  <option value="all">Skill Segment: All</option>
                   {skills?.map((skill: { skill_id: string; title: string }) => (
                     <option key={skill.skill_id} value={skill.skill_id}>
                       {skill.title}
                     </option>
                   ))}
                 </select>
-                <Filter className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
+                <Filter className="absolute right-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-indigo-400 pointer-events-none" />
               </div>
               {isSuperAdmin ? (
                 <div className="relative">
@@ -870,9 +871,9 @@ export function QuestionList() {
                     aria-label="Filter by app"
                     value={appFilter}
                     onChange={(e) => setAppFilter(e.target.value)}
-                    className="h-8 appearance-none pl-3 pr-8 text-xs font-medium rounded border border-gray-200 bg-white text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none cursor-pointer"
+                    className="h-10 appearance-none pl-4 pr-10 text-xs font-black uppercase tracking-widest rounded-xl border border-indigo-100 bg-white/50 text-indigo-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none cursor-pointer transition-all"
                   >
-                    <option value="all">All Apps</option>
+                    <option value="all">App Scope: All</option>
                     {apps.map((app) => (
                       <option key={app.app_id} value={app.app_id}>
                         {app.display_name}
@@ -897,7 +898,14 @@ export function QuestionList() {
           }
         />
 
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/5 overflow-hidden">
+          <CardContent className="p-0">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+
           {/* Desktop Table View */}
           <div className="hidden md:block">
             <Table className="w-full">
@@ -994,13 +1002,13 @@ export function QuestionList() {
                             hasActiveFilters ? (
                               <Button
                                 onClick={clearFilters}
-                                className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                                className="bg-teal-700 hover:bg-teal-800 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
                               >
                                 Clear Filters
                               </Button>
                             ) : (
                               <Link to="/questions/new">
-                                <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
+                                <Button className="bg-teal-700 hover:bg-teal-800 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
                                   New Question
                                 </Button>
                               </Link>
@@ -1046,13 +1054,13 @@ export function QuestionList() {
                       hasActiveFilters ? (
                         <Button
                           onClick={clearFilters}
-                          className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
                         >
                           Clear Filters
                         </Button>
                       ) : (
                         <Link to="/questions/new">
-                          <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
+                          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
                             New Question
                           </Button>
                         </Link>
@@ -1080,6 +1088,8 @@ export function QuestionList() {
             </SortableContext>
           </div>
         </DndContext>
+      </CardContent>
+    </Card>
 
         {totalCount > 0 && (
           <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">

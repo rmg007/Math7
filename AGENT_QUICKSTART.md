@@ -35,7 +35,7 @@
 | 4        | `match_knowledge_chunks()` RPC        | <2s      | Semantic search over documentation                   |
 | 5        | File system (`list_dir`, `view_file`) | Variable | Real-time source code inspection                     |
 
-> **Rule**: Never scan `node_modules`, `.dart_tool`, `build`, or `dist` directories.
+> **Rule**: Never scan `node_modules`, `build`, or `dist` directories.
 
 ## Authority Hierarchy
 
@@ -79,14 +79,13 @@ If two sources conflict, follow the highest-ranked:
 1. **NEVER PUBLISH LANDING-PAGES** — deployment is disabled
 2. **NEVER DEPLOY TO questerix.com** — root domain is off-limits
 3. **ALL queries MUST filter by `app_id`** — multi-tenant isolation
-4. **ALL writes go through SyncService** (student-app) — offline-first
+4. **ALL writes go through validated APIs** — multi-tenant isolation
 5. **RLS enforces authorization** — client-side checks are UX only
 
 ## Technology Stack (Locked)
 
 | Component      | Technology                                 |
 | -------------- | ------------------------------------------ |
-| Student App    | Flutter + Riverpod + Drift                 |
 | Admin Panel    | React + Vite + TypeScript                  |
 | Content Engine | Python + Pydantic                          |
 | Backend        | Supabase (Postgres + Edge Functions + RLS) |

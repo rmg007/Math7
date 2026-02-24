@@ -7,11 +7,7 @@ export class QuestionsPage {
   readonly page: Page;
 
   readonly listContainer: Locator;
-  readonly richTextEditor: Locator;
-  readonly skillSelectCombobox: Locator;
-  readonly optionInputs: Locator;
-  readonly correctAnswerRadios: Locator;
-  readonly submitButton: Locator;
+  readonly searchInput: Locator;
   readonly errorAlert: Locator;
 
   constructor(page: Page) {
@@ -20,11 +16,9 @@ export class QuestionsPage {
     this.listContainer = page
       .locator('[data-testid="questions-list"]')
       .or(page.locator('table, [role="table"]').first());
-    this.richTextEditor = page.locator('.ProseMirror').first();
-    this.skillSelectCombobox = page.getByRole('combobox').filter({ hasText: /link to ontology/i });
-    this.optionInputs = page.locator('input[placeholder*="Option"]');
-    this.correctAnswerRadios = page.getByRole('radio');
-    this.submitButton = page.getByRole('button', { name: /deploy question/i });
+    this.searchInput = page
+      .getByPlaceholder(/search questions/i)
+      .or(page.locator('input[placeholder*="Search"]'));
     this.errorAlert = page
       .locator('[data-testid="form-error"]')
       .or(page.locator('[role="alert"]').first());
@@ -34,62 +28,8 @@ export class QuestionsPage {
     await this.page.goto('/questions');
   }
 
-  async gotoNew() {
-    await this.page.goto('/questions/new');
-    await this.richTextEditor.waitFor({ state: 'visible', timeout: 10_000 });
-  }
-
-  async selectSkill(skillName: RegExp | string) {
-    await this.skillSelectCombobox.click();
-    await this.page.waitForSelector('[role="option"]', { timeout: 10_000 });
-    await this.page.getByRole('option', { name: skillName }).click();
-  }
-
-  async typeQuestionText(text: string) {
-    await this.richTextEditor.click();
-    await this.page.keyboard.type(text);
-  }
-
-  async fillOptions(options: string[]) {
-    await this.optionInputs.first().waitFor({ state: 'visible', timeout: 10_000 });
-    const count = await this.optionInputs.count();
-    for (let i = 0; i < Math.min(options.length, count); i++) {
-      await this.optionInputs.nth(i).fill(options[i]);
-    }
-  }
-
-  async selectCorrectAnswer(index = 0) {
-    await this.correctAnswerRadios.nth(index).click();
-  }
-
-  async selectStatus(status: 'draft' | 'live') {
-    const trigger = this.page.locator('[data-testid="status-select"]');
-    await trigger.waitFor({ state: 'visible' });
-    await trigger.click({ delay: 100 });
-    const option = this.page.locator(`[role="option"] >> text=/^${status}$/i`).first();
-    await option.waitFor({ state: 'visible', timeout: 5_000 });
-    await option.click({ force: true });
-  }
-
-  async submit() {
-    await this.submitButton.click();
-  }
-
-  async createMCQ(opts: {
-    questionText: string;
-    skillName: RegExp | string;
-    options: string[];
-    correctIndex?: number;
-    status?: 'draft' | 'live';
-  }) {
-    await this.gotoNew();
-    await this.selectSkill(opts.skillName);
-    await this.typeQuestionText(opts.questionText);
-    await this.fillOptions(opts.options);
-    await this.selectCorrectAnswer(opts.correctIndex ?? 0);
-    if (opts.status) {
-      await this.selectStatus(opts.status);
-    }
-    await this.submit();
+  async search(query: string) {
+    await this.searchInput.fill(query);
+    await this.page.waitForTimeout(1000); // Wait for debounce
   }
 }

@@ -5,7 +5,6 @@
 # and Proof of Run expectations).
 #
 # Layout:
-#   student-app/   (Flutter + Riverpod + Drift + supabase_flutter)
 #   admin-panel/   (React + Vite + TS + TanStack Query + shadcn/ui)
 #   supabase/      (Supabase project: migrations, config, scripts)
 
@@ -14,13 +13,11 @@ SHELL := /bin/bash
 .SILENT:
 
 # ---------- Paths ----------
-STUDENT_DIR := student-app
 ADMIN_DIR   := admin-panel
 SUPA_DIR    := supabase
 
 # ---------- Ports ----------
 WEB_PORT          ?= 5173
-FLUTTER_WEB_PORT  ?= 3000
 
 # ---------- Helpers ----------
 define require_cmd
@@ -39,13 +36,6 @@ help:
 	@echo "  make web_lint         Lint code"
 	@echo "  make web_test         Run tests"
 	@echo "  make web_build        Production build"
-	@echo ""
-	@echo "Student App (Flutter):"
-	@echo "  make flutter_setup    Install dependencies"
-	@echo "  make flutter_gen      Run codegen (build_runner)"
-	@echo "  make flutter_analyze  Static analysis"
-	@echo "  make flutter_test     Run tests"
-	@echo "  make flutter_run_web  Smoke test on web (0.0.0.0:$(FLUTTER_WEB_PORT))"
 	@echo ""
 	@echo "Database (Supabase):"
 	@echo "  make db_start         Start local Supabase stack"
@@ -105,41 +95,6 @@ web_build:
 	@echo "Building Admin Panel..."
 	cd "$(ADMIN_DIR)" && npm run build
 
-# ==========================================================================
-# Student App (Flutter)
-# ==========================================================================
-
-.PHONY: flutter_setup
-flutter_setup:
-	$(call require_cmd,flutter)
-	@echo "Installing Student App dependencies..."
-	cd "$(STUDENT_DIR)" && flutter --version && flutter pub get
-
-.PHONY: flutter_gen
-flutter_gen:
-	$(call require_cmd,flutter)
-	@echo "Running codegen for Student App..."
-	cd "$(STUDENT_DIR)" && dart run build_runner build --delete-conflicting-outputs
-
-.PHONY: flutter_analyze
-flutter_analyze:
-	$(call require_cmd,flutter)
-	@echo "Analyzing Student App..."
-	cd "$(STUDENT_DIR)" && flutter analyze
-
-.PHONY: flutter_test
-flutter_test:
-	$(call require_cmd,flutter)
-	@echo "Testing Student App..."
-	cd "$(STUDENT_DIR)" && flutter test
-
-.PHONY: flutter_run_web
-flutter_run_web:
-	$(call require_cmd,flutter)
-	@echo "Running Student App on web (smoke test) at 0.0.0.0:$(FLUTTER_WEB_PORT)..."
-	@echo "NOTE: This is a smoke test only, not a substitute for device testing."
-	cd "$(STUDENT_DIR)" && flutter config --enable-web && \
-	flutter run -d web-server --web-hostname 0.0.0.0 --web-port $(FLUTTER_WEB_PORT)
 
 # ==========================================================================
 # Database (Supabase)
@@ -185,7 +140,7 @@ db_verify_rls:
 # ==========================================================================
 
 .PHONY: ci
-ci: web_setup web_lint web_test web_build flutter_setup flutter_gen flutter_analyze flutter_test
+ci: web_setup web_lint web_test web_build
 	@echo ""
 	@echo "=========================================="
 	@echo "CI gates passed."

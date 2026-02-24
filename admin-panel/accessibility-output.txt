@@ -1,0 +1,291 @@
+[dotenv@17.2.3] injecting env (10) from .env.test.local -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+
+Running 5 tests using 1 worker
+
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+  Γ£ô  1 [desktop] ΓÇ║ tests\accessibility.spec.ts:59:3 ΓÇ║ Accessibility Audit ΓÇ║ Login page (2.7s)
+  Γ£ô  2 [desktop] ΓÇ║ tests\accessibility.spec.ts:79:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Dashboard (7.7s)
+Domains violations:
+[CRITICAL] aria-allowed-attr: Ensure an element's role supports its ARIA attributes
+  Help: https://dequeuniversity.com/rules/axe/4.11/aria-allowed-attr?application=playwright
+    ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-teal-600 " aria-sort="ascending">
+    ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+    ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+    ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+
+[SERIOUS] color-contrast: Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds
+  Help: https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright
+    ΓåÆ <button class="inline-flex items-ce...">
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">app 1771952295702</span>
+    ΓåÆ <span class="text-gray-400">09:42 AM</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+    ΓåÆ <span class="text-gray-400">07:33 AM</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Test App</span>
+    ΓåÆ <span class="text-gray-400">01:58 AM</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+    ΓåÆ <span class="text-gray-400">01:34 AM</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">app 1771952295702</span>
+    ΓåÆ <span class="text-gray-400">09:42 AM</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Test App</span>
+    ΓåÆ <span class="text-gray-400">09:29 PM</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">app 1771952295702</span>
+    ΓåÆ <span class="text-gray-400">09:42 AM</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+    ΓåÆ <span class="text-gray-400">01:27 AM</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+    ΓåÆ <span class="text-gray-400">01:27 AM</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">app 1771952295702</span>
+    ΓåÆ <span class="text-gray-400">09:42 AM</span>
+  Γ£ÿ  3 [desktop] ΓÇ║ tests\accessibility.spec.ts:95:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Domains List (7.4s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+Questions violations:
+[CRITICAL] aria-allowed-attr: Ensure an element's role supports its ARIA attributes
+  Help: https://dequeuniversity.com/rules/axe/4.11/aria-allowed-attr?application=playwright
+    ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+    ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+    ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+    ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+    ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+
+[SERIOUS] color-contrast: Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds
+  Help: https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright
+    ΓåÆ <button class="inline-flex items-ce...">
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+    ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+  Γ£ÿ  4 [desktop] ΓÇ║ tests\accessibility.spec.ts:111:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Questions List (7.6s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+Bulk Import violations:
+[SERIOUS] color-contrast: Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds
+  Help: https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright
+    ΓåÆ <label class="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[10px] font-black uppercase tracking-widest text-gray-400">Target Pedagogical Context</label>
+    ΓåÆ <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">Drop CSV Artifact</p>
+    ΓåÆ <label class="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[10px] font-black uppercase tracking-widest text-gray-400">Commit Safety</label>
+    ΓåÆ <div class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div>0 Pending Ingestion Units</div>
+    ΓåÆ <h3 class="text-xl font-black text-gray-900">Logical Void Detected</h3>
+    ΓåÆ <p class="text-xs font-medium text-gray-500 max-w-xs mx-auto">Initiate content stream via CSV matrix or AI synthesis to populate the nexus buffer.</p>
+  Γ£ÿ  5 [desktop] ΓÇ║ tests\accessibility.spec.ts:127:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Bulk Import (7.0s)
+
+
+  1) [desktop] ΓÇ║ tests\accessibility.spec.ts:95:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Domains List 
+
+    Error: Found 2 critical/serious violations on /domains:
+    [CRITICAL] aria-allowed-attr: Ensure an element's role supports its ARIA attributes
+      Help: https://dequeuniversity.com/rules/axe/4.11/aria-allowed-attr?application=playwright
+        ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-teal-600 " aria-sort="ascending">
+        ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+        ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+        ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+
+    [SERIOUS] color-contrast: Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds
+      Help: https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright
+        ΓåÆ <button class="inline-flex items-ce...">
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">app 1771952295702</span>
+        ΓåÆ <span class="text-gray-400">09:42 AM</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+        ΓåÆ <span class="text-gray-400">07:33 AM</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Test App</span>
+        ΓåÆ <span class="text-gray-400">01:58 AM</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+        ΓåÆ <span class="text-gray-400">01:34 AM</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">app 1771952295702</span>
+        ΓåÆ <span class="text-gray-400">09:42 AM</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Test App</span>
+        ΓåÆ <span class="text-gray-400">09:29 PM</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">app 1771952295702</span>
+        ΓåÆ <span class="text-gray-400">09:42 AM</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+        ΓåÆ <span class="text-gray-400">01:27 AM</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+        ΓåÆ <span class="text-gray-400">01:27 AM</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">app 1771952295702</span>
+        ΓåÆ <span class="text-gray-400">09:42 AM</span>
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoHaveLength[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected length: [32m0[39m
+    Received length: [31m2[39m
+    Received array:  [31m[{"description": "Ensure an element's role supports its ARIA attributes", "help": "Elements must only use supported ARIA attributes", "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-allowed-attr?application=playwright", "id": "aria-allowed-attr", "impact": "critical", "nodes": [{"all": [[Object]], "any": [], "failureSummary": "Fix all of the following:[39m
+    [31m  ARIA attribute is not allowed: aria-sort=\"ascending\"", "html": "<button class=\"inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-teal-600 \" aria-sort=\"ascending\">", "impact": "critical", "none": [], "target": ["button[aria-sort=\"ascending\"]"]}, {"all": [[Object]], "any": [], "failureSummary": "Fix all of the following:[39m
+    [31m  ARIA attribute is not allowed: aria-sort=\"none\"", "html": "<button class=\"inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 \" aria-sort=\"none\">", "impact": "critical", "none": [], "target": [".text-left:nth-child(4) > .focus\\:ring-teal-600.focus\\:ring-offset-1[aria-sort=\"none\"]"]}, {"all": [[Object]], "any": [], "failureSummary": "Fix all of the following:[39m
+    [31m  ARIA attribute is not allowed: aria-sort=\"none\"", "html": "<button class=\"inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 \" aria-sort=\"none\">", "impact": "critical", "none": [], "target": [".text-left:nth-child(5) > .focus\\:ring-teal-600.focus\\:ring-offset-1[aria-sort=\"none\"]"]}, {"all": [[Object]], "any": [], "failureSummary": "Fix all of the following:[39m
+    [31m  ARIA attribute is not allowed: aria-sort=\"none\"", "html": "<button class=\"inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 \" aria-sort=\"none\">", "impact": "critical", "none": [], "target": [".text-left:nth-child(6) > .focus\\:ring-teal-600.focus\\:ring-offset-1[aria-sort=\"none\"]"]}], "tags": ["cat.aria", "wcag2a", "wcag412", "EN-301-549", "EN-9.4.1.2", "RGAAv4", "RGAA-7.1.1"]}, {"description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds", "help": "Elements must meet minimum color contrast ratio thresholds", "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright", "id": "color-contrast", "impact": "serious", "nodes": [{"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 3.74 (foreground color: #ffffff, background color: #0d9488, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<button class=\"inline-flex items-ce...\">", "impact": "serious", "none": [], "target": [".shadow"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 mt-0.5\">app 1771952295702</span>", "impact": "serious", "none": [], "target": [".group\\/row.even\\:bg-gray-50\\/40:nth-child(1) > .px-4:nth-child(4) > .flex-col.flex > .mt-0\\.5.text-\\[10px\\].text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-gray-400\">09:42 AM</span>", "impact": "serious", "none": [], "target": [".group\\/row.even\\:bg-gray-50\\/40:nth-child(1) > .lg\\:table-cell.hidden > .text-gray-500.text-xs > .text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.49 (foreground color: #9ca3af, background color: #fdfdfd, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 mt-0.5\">Questerix Default</span>", "impact": "serious", "none": [], "target": [".group\\/row.even\\:bg-gray-50\\/40:nth-child(2) > .px-4:nth-child(4) > .flex-col.flex > .mt-0\\.5.text-\\[10px\\].text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.49 (foreground color: #9ca3af, background color: #fdfdfd, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-gray-400\">07:33 AM</span>", "impact": "serious", "none": [], "target": [".group\\/row.even\\:bg-gray-50\\/40:nth-child(2) > .lg\\:table-cell.hidden > .text-gray-500.text-xs > .text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 mt-0.5\">Test App</span>", "impact": "serious", "none": [], "target": [".group\\/row.even\\:bg-gray-50\\/40:nth-child(3) > .px-4:nth-child(4) > .flex-col.flex > .mt-0\\.5.text-\\[10px\\].text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-gray-400\">01:58 AM</span>", "impact": "serious", "none": [], "target": [".group\\/row.even\\:bg-gray-50\\/40:nth-child(3) > .lg\\:table-cell.hidden > .text-gray-500.text-xs > .text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.49 (foreground color: #9ca3af, background color: #fdfdfd, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 mt-0.5\">Questerix Default</span>", "impact": "serious", "none": [], "target": [".group\\/row.even\\:bg-gray-50\\/40:nth-child(4) > .px-4:nth-child(4) > .flex-col.flex > .mt-0\\.5.text-\\[10px\\].text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.49 (foreground color: #9ca3af, background color: #fdfdfd, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-gray-400\">01:34 AM</span>", "impact": "serious", "none": [], "target": [".group\\/row.even\\:bg-gray-50\\/40:nth-child(4) > .lg\\:table-cell.hidden > .text-gray-500.text-xs > .text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 mt-0.5\">app 1771952295702</span>", "impact": "serious", "none": [], "target": [".group\\/row.even\\:bg-gray-50\\/40:nth-child(5) > .px-4:nth-child(4) > .flex-col.flex > .mt-0\\.5.text-\\[10px\\].text-gray-400"]}, ΓÇª], "tags": ["cat.color", "wcag2aa", "wcag143", "TTv5", "TT13.c", "EN-301-549", "EN-9.1.4.3", "ACT", "RGAAv4", "RGAA-3.2.1"]}][39m
+
+      106 |         console.log('Domains violations:\n' + formatViolations(serious));
+      107 |       }
+    > 108 |       expect(serious, `Found ${serious.length} critical/serious violations on /domains:\n${formatViolations(serious)}`).toHaveLength(0);
+          |                                                                                                                         ^
+      109 |     });
+      110 |
+      111 |     test('Questions List', async ({ page }) => {
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\accessibility.spec.ts:108:121
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-5b338-nticated-pages-Domains-List-desktop\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-5b338-nticated-pages-Domains-List-desktop\video-1.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #3: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-5b338-nticated-pages-Domains-List-desktop\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\accessibility-Accessibilit-5b338-nticated-pages-Domains-List-desktop\error-context.md
+
+  2) [desktop] ΓÇ║ tests\accessibility.spec.ts:111:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Questions List 
+
+    Error: Found 2 critical/serious violations on /questions:
+    [CRITICAL] aria-allowed-attr: Ensure an element's role supports its ARIA attributes
+      Help: https://dequeuniversity.com/rules/axe/4.11/aria-allowed-attr?application=playwright
+        ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+        ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+        ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+        ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+        ΓåÆ <button class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 " aria-sort="none">
+
+    [SERIOUS] color-contrast: Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds
+      Help: https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright
+        ΓåÆ <button class="inline-flex items-ce...">
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+        ΓåÆ <span class="text-[10px] text-gray-400 mt-0.5">Questerix Default</span>
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoHaveLength[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected length: [32m0[39m
+    Received length: [31m2[39m
+    Received array:  [31m[{"description": "Ensure an element's role supports its ARIA attributes", "help": "Elements must only use supported ARIA attributes", "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-allowed-attr?application=playwright", "id": "aria-allowed-attr", "impact": "critical", "nodes": [{"all": [[Object]], "any": [], "failureSummary": "Fix all of the following:[39m
+    [31m  ARIA attribute is not allowed: aria-sort=\"none\"", "html": "<button class=\"inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 \" aria-sort=\"none\">", "impact": "critical", "none": [], "target": [".text-left:nth-child(3) > .focus\\:ring-teal-600.focus\\:ring-offset-1[aria-sort=\"none\"]"]}, {"all": [[Object]], "any": [], "failureSummary": "Fix all of the following:[39m
+    [31m  ARIA attribute is not allowed: aria-sort=\"none\"", "html": "<button class=\"inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 \" aria-sort=\"none\">", "impact": "critical", "none": [], "target": [".text-left:nth-child(4) > .focus\\:ring-teal-600.focus\\:ring-offset-1[aria-sort=\"none\"]"]}, {"all": [[Object]], "any": [], "failureSummary": "Fix all of the following:[39m
+    [31m  ARIA attribute is not allowed: aria-sort=\"none\"", "html": "<button class=\"inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 \" aria-sort=\"none\">", "impact": "critical", "none": [], "target": [".text-left:nth-child(5) > .focus\\:ring-teal-600.focus\\:ring-offset-1[aria-sort=\"none\"]"]}, {"all": [[Object]], "any": [], "failureSummary": "Fix all of the following:[39m
+    [31m  ARIA attribute is not allowed: aria-sort=\"none\"", "html": "<button class=\"inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 \" aria-sort=\"none\">", "impact": "critical", "none": [], "target": [".w-20 > .focus\\:ring-teal-600.focus\\:ring-offset-1[aria-sort=\"none\"]"]}, {"all": [[Object]], "any": [], "failureSummary": "Fix all of the following:[39m
+    [31m  ARIA attribute is not allowed: aria-sort=\"none\"", "html": "<button class=\"inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 \" aria-sort=\"none\">", "impact": "critical", "none": [], "target": [".text-left:nth-child(7) > .focus\\:ring-teal-600.focus\\:ring-offset-1[aria-sort=\"none\"]"]}], "tags": ["cat.aria", "wcag2a", "wcag412", "EN-301-549", "EN-9.4.1.2", "RGAAv4", "RGAA-7.1.1"]}, {"description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds", "help": "Elements must meet minimum color contrast ratio thresholds", "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright", "id": "color-contrast", "impact": "serious", "nodes": [{"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 3.76 (foreground color: #059669, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1", "html": "<button class=\"inline-flex items-ce...\">", "impact": "serious", "none": [], "target": [".border-emerald-100"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 mt-0.5\">Questerix Default</span>", "impact": "serious", "none": [], "target": [".even\\:bg-gray-50\\/40:nth-child(1) > .max-w-\\[350px\\].px-4 > .flex-col.min-w-0.flex > .mt-0\\.5.text-\\[10px\\].text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.49 (foreground color: #9ca3af, background color: #fdfdfd, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 mt-0.5\">Questerix Default</span>", "impact": "serious", "none": [], "target": [".even\\:bg-gray-50\\/40:nth-child(2) > .max-w-\\[350px\\].px-4 > .flex-col.min-w-0.flex > .mt-0\\.5.text-\\[10px\\].text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 mt-0.5\">Questerix Default</span>", "impact": "serious", "none": [], "target": [".even\\:bg-gray-50\\/40:nth-child(3) > .max-w-\\[350px\\].px-4 > .flex-col.min-w-0.flex > .mt-0\\.5.text-\\[10px\\].text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.49 (foreground color: #9ca3af, background color: #fdfdfd, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 mt-0.5\">Questerix Default</span>", "impact": "serious", "none": [], "target": [".even\\:bg-gray-50\\/40:nth-child(4) > .max-w-\\[350px\\].px-4 > .flex-col.min-w-0.flex > .mt-0\\.5.text-\\[10px\\].text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 mt-0.5\">Questerix Default</span>", "impact": "serious", "none": [], "target": [".even\\:bg-gray-50\\/40:nth-child(5) > .max-w-\\[350px\\].px-4 > .flex-col.min-w-0.flex > .mt-0\\.5.text-\\[10px\\].text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.49 (foreground color: #9ca3af, background color: #fdfdfd, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 mt-0.5\">Questerix Default</span>", "impact": "serious", "none": [], "target": [".even\\:bg-gray-50\\/40:nth-child(6) > .max-w-\\[350px\\].px-4 > .flex-col.min-w-0.flex > .mt-0\\.5.text-\\[10px\\].text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 mt-0.5\">Questerix Default</span>", "impact": "serious", "none": [], "target": [".even\\:bg-gray-50\\/40:nth-child(7) > .max-w-\\[350px\\].px-4 > .flex-col.min-w-0.flex > .mt-0\\.5.text-\\[10px\\].text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.47 (foreground color: #9ca3af, background color: #f6fefc, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 mt-0.5\">Questerix Default</span>", "impact": "serious", "none": [], "target": [".even\\:bg-gray-50\\/40:nth-child(8) > .max-w-\\[350px\\].px-4 > .flex-col.min-w-0.flex > .mt-0\\.5.text-\\[10px\\].text-gray-400"]}, {"all": [], "any": [[Object]], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<span class=\"text-[10px] text-gray-400 mt-0.5\">Questerix Default</span>", "impact": "serious", "none": [], "target": [".even\\:bg-gray-50\\/40:nth-child(9) > .max-w-\\[350px\\].px-4 > .flex-col.min-w-0.flex > .mt-0\\.5.text-\\[10px\\].text-gray-400"]}, ΓÇª], "tags": ["cat.color", "wcag2aa", "wcag143", "TTv5", "TT13.c", "EN-301-549", "EN-9.1.4.3", "ACT", "RGAAv4", "RGAA-3.2.1"]}][39m
+
+      122 |         console.log('Questions violations:\n' + formatViolations(serious));
+      123 |       }
+    > 124 |       expect(serious, `Found ${serious.length} critical/serious violations on /questions:\n${formatViolations(serious)}`).toHaveLength(0);
+          |                                                                                                                           ^
+      125 |     });
+      126 |
+      127 |     test('Bulk Import', async ({ page }) => {
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\accessibility.spec.ts:124:123
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-9641c-icated-pages-Questions-List-desktop\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-9641c-icated-pages-Questions-List-desktop\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #3: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-9641c-icated-pages-Questions-List-desktop\video-1.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\accessibility-Accessibilit-9641c-icated-pages-Questions-List-desktop\error-context.md
+
+  3) [desktop] ΓÇ║ tests\accessibility.spec.ts:127:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Bulk Import 
+
+    Error: Found 1 critical/serious violations on /ai-import:
+    [SERIOUS] color-contrast: Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds
+      Help: https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright
+        ΓåÆ <label class="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[10px] font-black uppercase tracking-widest text-gray-400">Target Pedagogical Context</label>
+        ΓåÆ <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">Drop CSV Artifact</p>
+        ΓåÆ <label class="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[10px] font-black uppercase tracking-widest text-gray-400">Commit Safety</label>
+        ΓåÆ <div class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div>0 Pending Ingestion Units</div>
+        ΓåÆ <h3 class="text-xl font-black text-gray-900">Logical Void Detected</h3>
+        ΓåÆ <p class="text-xs font-medium text-gray-500 max-w-xs mx-auto">Initiate content stream via CSV matrix or AI synthesis to populate the nexus buffer.</p>
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoHaveLength[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected length: [32m0[39m
+    Received length: [31m1[39m
+    Received array:  [31m[{"description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds", "help": "Elements must meet minimum color contrast ratio thresholds", "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright", "id": "color-contrast", "impact": "serious", "nodes": [{"all": [], "any": [{"data": {"bgColor": "#ffffff", "contrastRatio": 2.53, "expectedContrastRatio": "4.5:1", "fgColor": "#9ca3af", "fontSize": "7.5pt (10px)", "fontWeight": "bold", "messageKey": null}, "id": "color-contrast", "impact": "serious", "message": "Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1", "relatedNodes": [{"html": "<div class=\"rounded-xl bg-card text-card-foreground glass-card overflow-hidden border-0 shadow-2xl shadow-indigo-500/10 group\">", "target": [".lg\\:col-span-4 > .bg-card.text-card-foreground.glass-card"]}]}], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1", "html": "<label class=\"peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[10px] font-black uppercase tracking-widest text-gray-400\">Target Pedagogical Context</label>", "impact": "serious", "none": [], "target": [".space-y-4 > label"]}, {"all": [], "any": [{"data": {"bgColor": "#ffffff", "contrastRatio": 2.53, "expectedContrastRatio": "4.5:1", "fgColor": "#9ca3af", "fontSize": "7.5pt (10px)", "fontWeight": "bold", "messageKey": null}, "id": "color-contrast", "impact": "serious", "message": "Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1", "relatedNodes": [{"html": "<div class=\"rounded-xl bg-card text-card-foreground glass-card overflow-hidden border-0 shadow-2xl shadow-indigo-500/10 group\">", "target": [".lg\\:col-span-4 > .bg-card.text-card-foreground.glass-card"]}]}], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1", "html": "<p class=\"text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover:text-indigo-600 transition-colors\">Drop CSV Artifact</p>", "impact": "serious", "none": [], "target": [".group-hover\\:text-indigo-600"]}, {"all": [], "any": [{"data": {"bgColor": "#ffffff", "contrastRatio": 2.53, "expectedContrastRatio": "4.5:1", "fgColor": "#9ca3af", "fontSize": "7.5pt (10px)", "fontWeight": "bold", "messageKey": null}, "id": "color-contrast", "impact": "serious", "message": "Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1", "relatedNodes": [{"html": "<div class=\"rounded-xl bg-card text-card-foreground glass-card overflow-hidden border-0 shadow-2xl shadow-indigo-500/10 group\">", "target": [".lg\\:col-span-4 > .bg-card.text-card-foreground.glass-card"]}]}], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1", "html": "<label class=\"peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[10px] font-black uppercase tracking-widest text-gray-400\">Commit Safety</label>", "impact": "serious", "none": [], "target": [".px-2 > div > label"]}, {"all": [], "any": [{"data": {"bgColor": "#fdfefe", "contrastRatio": 4.42, "expectedContrastRatio": "4.5:1", "fgColor": "#6366f1", "fontSize": "7.5pt (10px)", "fontWeight": "bold", "messageKey": null}, "id": "color-contrast", "impact": "serious", "message": "Element has insufficient color contrast of 4.42 (foreground color: #6366f1, background color: #fdfefe, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1", "relatedNodes": [{"html": "<div class=\"space-y-1.5 p-10 border-b border-gray-100/50 flex flex-row items-center justify-between bg-gray-50/30\">", "target": [".flex-row"]}, {"html": "<div class=\"bg-card text-card-foreground glass-card border-0 shadow-3xl shadow-gray-200/50 overflow-hidden min-h-[700px] flex flex-col rounded-[3rem]\" data-testid=\"bulk-import-buffer-card\">", "target": [".shadow-3xl"]}]}], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 4.42 (foreground color: #6366f1, background color: #fdfefe, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1", "html": "<div class=\"text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 flex items-center gap-2\"><div class=\"w-2 h-2 rounded-full bg-indigo-500 animate-pulse\"></div>0 Pending Ingestion Units</div>", "impact": "serious", "none": [], "target": [".tracking-\\[0\\.2em\\].text-indigo-500.gap-2"]}, {"all": [], "any": [{"data": {"bgColor": "#ffffff", "contrastRatio": 1.94, "expectedContrastRatio": "3:1", "fgColor": "#b8babe", "fontSize": "15.0pt (20px)", "fontWeight": "bold", "messageKey": null}, "id": "color-contrast", "impact": "serious", "message": "Element has insufficient color contrast of 1.94 (foreground color: #b8babe, background color: #ffffff, font size: 15.0pt (20px), font weight: bold). Expected contrast ratio of 3:1", "relatedNodes": [{"html": "<div class=\"bg-card text-card-foreground glass-card border-0 shadow-3xl shadow-gray-200/50 overflow-hidden min-h-[700px] flex flex-col rounded-[3rem]\" data-testid=\"bulk-import-buffer-card\">", "target": [".shadow-3xl"]}]}], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 1.94 (foreground color: #b8babe, background color: #ffffff, font size: 15.0pt (20px), font weight: bold). Expected contrast ratio of 3:1", "html": "<h3 class=\"text-xl font-black text-gray-900\">Logical Void Detected</h3>", "impact": "serious", "none": [], "target": ["h3"]}, {"all": [], "any": [{"data": {"bgColor": "#ffffff", "contrastRatio": 1.46, "expectedContrastRatio": "4.5:1", "fgColor": "#d3d5d9", "fontSize": "9.0pt (12px)", "fontWeight": "normal", "messageKey": null}, "id": "color-contrast", "impact": "serious", "message": "Element has insufficient color contrast of 1.46 (foreground color: #d3d5d9, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1", "relatedNodes": [{"html": "<div class=\"bg-card text-card-foreground glass-card border-0 shadow-3xl shadow-gray-200/50 overflow-hidden min-h-[700px] flex flex-col rounded-[3rem]\" data-testid=\"bulk-import-buffer-card\">", "target": [".shadow-3xl"]}]}], "failureSummary": "Fix any of the following:[39m
+    [31m  Element has insufficient color contrast of 1.46 (foreground color: #d3d5d9, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1", "html": "<p class=\"text-xs font-medium text-gray-500 max-w-xs mx-auto\">Initiate content stream via CSV matrix or AI synthesis to populate the nexus buffer.</p>", "impact": "serious", "none": [], "target": [".text-gray-500"]}], "tags": ["cat.color", "wcag2aa", "wcag143", "TTv5", "TT13.c", "EN-301-549", "EN-9.1.4.3", "ACT", "RGAAv4", "RGAA-3.2.1"]}][39m
+
+      138 |         console.log('Bulk Import violations:\n' + formatViolations(serious));
+      139 |       }
+    > 140 |       expect(serious, `Found ${serious.length} critical/serious violations on /ai-import:\n${formatViolations(serious)}`).toHaveLength(0);
+          |                                                                                                                           ^
+      141 |     });
+      142 |   });
+      143 | });
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\accessibility.spec.ts:140:123
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-b1c33-enticated-pages-Bulk-Import-desktop\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-b1c33-enticated-pages-Bulk-Import-desktop\video-1.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #3: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\accessibility-Accessibilit-b1c33-enticated-pages-Bulk-Import-desktop\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\accessibility-Accessibilit-b1c33-enticated-pages-Bulk-Import-desktop\error-context.md
+
+  3 failed
+    [desktop] ΓÇ║ tests\accessibility.spec.ts:95:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Domains List 
+    [desktop] ΓÇ║ tests\accessibility.spec.ts:111:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Questions List 
+    [desktop] ΓÇ║ tests\accessibility.spec.ts:127:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Bulk Import 
+  2 passed (42.7s)
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m

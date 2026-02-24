@@ -1,6 +1,0 @@
-[dotenv@17.2.3] injecting env (10) from .env.test.local -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
-[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
-Error: Project(s) "chromium" not found. Available projects: "desktop", "mobile", "tablet"
-    at filterProjects (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\runner\projectUtils.js:80:11)
-    at runTests (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\program.js:208:42)
-    at i.<anonymous> (C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\node_modules\playwright\lib\program.js:70:7)

@@ -29,6 +29,7 @@ import {
   MessageSquare,
   Settings,
   Shield,
+  Sparkles,
   Upload,
   UserCog,
   Users,
@@ -65,11 +66,12 @@ const navigationGroups: NavGroup[] = [
   {
     title: 'Curriculum',
     items: [
-      { name: 'Subjects', href: '/subjects', icon: Boxes, superAdminOnly: true },
       { name: 'Apps', href: '/apps', icon: Layout, superAdminOnly: true },
+      { name: 'Subjects', href: '/subjects', icon: Boxes, superAdminOnly: true },
       { name: 'Domains', href: '/domains', icon: Book },
       { name: 'Skills', href: '/skills', icon: Layers },
       { name: 'Questions', href: '/questions', icon: FileText },
+      { name: 'AI Studio', href: '/questions/studio', icon: Sparkles },
       { name: 'Groups', href: '/groups', icon: Users },
       { name: 'Bulk Import', href: '/ai-import', icon: FileUp },
     ],
@@ -104,7 +106,7 @@ const navigationGroups: NavGroup[] = [
     items: [
       {
         name: 'Feedback',
-        href: 'https://github.com/rmg007/Questerix/issues',
+        href: 'mailto:support@Questerix.com',
         icon: MessageSquare,
         isExternal: true,
       },

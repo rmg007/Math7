@@ -1,0 +1,23 @@
+[dotenv@17.2.3] injecting env (10) from .env.test.local -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöæ add access controls to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+
+Running 5 tests using 1 worker
+
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+  Γ£ô  1 [desktop] ΓÇ║ tests\accessibility.spec.ts:59:3 ΓÇ║ Accessibility Audit ΓÇ║ Login page (2.6s)
+  Γ£ô  2 [desktop] ΓÇ║ tests\accessibility.spec.ts:79:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Dashboard (7.8s)
+  Γ£ô  3 [desktop] ΓÇ║ tests\accessibility.spec.ts:95:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Domains List (7.4s)
+  Γ£ô  4 [desktop] ΓÇ║ tests\accessibility.spec.ts:111:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Questions List (7.5s)
+  Γ£ô  5 [desktop] ΓÇ║ tests\accessibility.spec.ts:127:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Bulk Import (7.0s)
+
+  5 passed (36.0s)
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m

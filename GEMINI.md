@@ -11,9 +11,9 @@
 Questerix is an educational platform with:
 
 - **Admin Panel**: React/Vite/TypeScript (in `admin-panel/`)
-- **Student App**: Flutter/Dart (in `student-app/`)
+- **Admin Panel**: React/Vite/TypeScript (in `admin-panel/`)
 - **Backend**: Supabase (PostgreSQL, Edge Functions, Auth, Storage)
-- **Testing**: Vitest (unit), Playwright (E2E), Flutter Test
+- **Testing**: Vitest (unit), Playwright (E2E)
 - **Deployment**: Cloudflare Pages via `scripts/deploy-all.ps1`
 
 ## Autonomous Execution Rules
@@ -31,10 +31,10 @@ When encountering an error or unfamiliar API:
    - `supabase.com/docs` — Database, Auth, RLS, Edge Functions
    - `vitejs.dev` — Build tool, HMR, config
    - `react.dev` — React patterns, hooks, best practices
-   - `flutter.dev` — Flutter/Dart development
+   - `vitejs.dev` — Build tool, HMR, config
+   - `react.dev` — React patterns, hooks, best practices
    - `vitest.dev` — Unit testing configuration and APIs
    - `playwright.dev` — E2E testing patterns
-   - `pub.dev` — Dart packages
 3. **Use exact error messages** in search queries.
 4. **Prefer official docs** over blog posts.
 
@@ -58,7 +58,7 @@ When any circuit breaker triggers, output:
 
 - **TypeScript**: Strict mode, no `any`, no `@ts-ignore` without justification
 - **React**: Functional components, hooks-based, follow existing patterns in `features/`
-- **Flutter**: Follow `analysis_options.yaml`, use Riverpod for state management
+- **React**: Functional components, hooks-based, follow existing patterns in `features/`
 - **Tests**: Co-locate unit tests, use `--bail` flag, focus on behavior not implementation
 - **Commits**: Use conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`)
 

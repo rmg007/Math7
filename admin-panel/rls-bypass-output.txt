@@ -1,0 +1,126 @@
+[dotenv@17.2.3] injecting env (10) from .env.test.local -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+
+Running 13 tests using 1 worker
+
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒôí add observability to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+  Γ£ÿ   1 [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:27:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Anonymous User: Cannot access curriculum data (325ms)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+Anon log error: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "error_logs"'
+}
+  Γ£ÿ   2 [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:43:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Anonymous User: Can still log errors (intentional) (268ms)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒôí add observability to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+  Γ£ô   3 [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:60:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Regular Admin: Isolation Enforcement (771ms)
+  Γ£ô   4 [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:100:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Super Admin: Cross-Tenant Access (213ms)
+  Γ£ô   5 [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:118:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Account Hardening: Profile protection (318ms)
+  Γ£ÿ   6 [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:149:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Invitation Codes: Anonymous user cannot SELECT from invitation_codes (AI-08) (62ms)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+  Γ£ÿ   7 [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:163:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Invitation Codes: Student-role user cannot SELECT from invitation_codes (AI-08) (420ms)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+  Γ£ô   8 [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:180:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ DB-RLS-001: Curriculum ΓÇö Admin A cannot see skills from Admin B (Isolation) (442ms)
+  Γ£ô   9 [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:194:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ DB-RLS-002: Curriculum ΓÇö Student cannot INSERT an artificial question (219ms)
+  Γ£ô  10 [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:210:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ DB-RLS-003: Tracking ΓÇö Student A cannot see Student B attempts (226ms)
+  Γ£ô  11 [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:223:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ DB-RLS-004: Mentor Hub ΓÇö Mentor cannot see another mentor groups (218ms)
+  Γ£ô  12 [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:236:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ DB-RLS-005: Mastery ΓÇö Student A cannot update Student B progress (338ms)
+  Γ£ÿ  13 [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:256:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ DB-RLS-006: Super Admin can SELECT from all sensitive tables (254ms)
+
+
+  1) [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:27:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Anonymous User: Cannot access curriculum data 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m0[39m
+    Received: [31m12[39m
+
+      30 |     // Try to fetch apps
+      31 |     const { data: apps, error: _appsError } = await supabase.from('apps').select('*');
+    > 32 |     expect(apps?.length || 0).toBe(0);
+         |                               ^
+      33 |
+      34 |     // Try to fetch domains
+      35 |     const { data: domains, error: _domainsError } = await supabase.from('domains').select('*');
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\rls-bypass.e2e.spec.ts:32:31
+
+  2) [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:43:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Anonymous User: Can still log errors (intentional) 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeNull[2m()[22m
+
+    Received: [31m{"code": "42501", "details": null, "hint": null, "message": "new row violates row-level security policy for table \"error_logs\""}[39m
+
+      55 |
+      56 |     if (error) console.error('Anon log error:', error);
+    > 57 |     expect(error).toBeNull();
+         |                   ^
+      58 |   });
+      59 |
+      60 |   test('Regular Admin: Isolation Enforcement', async () => {
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\rls-bypass.e2e.spec.ts:57:19
+
+  3) [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:149:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Invitation Codes: Anonymous user cannot SELECT from invitation_codes (AI-08) 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected value: [32m"PGRST205"[39m
+    Received array: [31m["42501", "PGRST301", "401"][39m
+
+      155 |     if (error) {
+      156 |       // Explicit deny is acceptable
+    > 157 |       expect(['42501', 'PGRST301', '401']).toContain(String(error.code));
+          |                                            ^
+      158 |     } else {
+      159 |       expect(data?.length || 0).toBe(0);
+      160 |     }
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\rls-bypass.e2e.spec.ts:157:44
+
+  4) [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:163:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Invitation Codes: Student-role user cannot SELECT from invitation_codes (AI-08) 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected value: [32m"PGRST205"[39m
+    Received array: [31m["42501", "PGRST301"][39m
+
+      167 |     if (error) {
+      168 |       // Explicit RLS deny is the correct outcome
+    > 169 |       expect(['42501', 'PGRST301']).toContain(String(error.code));
+          |                                     ^
+      170 |     } else {
+      171 |       // Silent empty result is also acceptable (RLS returns zero rows)
+      172 |       expect(data?.length || 0).toBe(0);
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\rls-bypass.e2e.spec.ts:169:37
+
+  5) [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:256:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ DB-RLS-006: Super Admin can SELECT from all sensitive tables 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeNull[2m()[22m
+
+    Received: [31m{"code": "42P17", "details": null, "hint": null, "message": "infinite recursion detected in policy for relation \"groups\""}[39m
+
+      268 |
+      269 |     const { error: err3 } = await supabase.from('assignments').select('*');
+    > 270 |     expect(err3).toBeNull();
+          |                  ^
+      271 |   });
+      272 | });
+      273 |
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\rls-bypass.e2e.spec.ts:270:18
+
+  5 failed
+    [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:27:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Anonymous User: Cannot access curriculum data 
+    [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:43:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Anonymous User: Can still log errors (intentional) 
+    [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:149:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Invitation Codes: Anonymous user cannot SELECT from invitation_codes (AI-08) 
+    [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:163:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Invitation Codes: Student-role user cannot SELECT from invitation_codes (AI-08) 
+    [desktop] ΓÇ║ tests\rls-bypass.e2e.spec.ts:256:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ DB-RLS-006: Super Admin can SELECT from all sensitive tables 
+  8 passed (21.1s)
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m

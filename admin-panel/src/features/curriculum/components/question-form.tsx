@@ -34,7 +34,9 @@ import {
     Loader2,
     Plus,
     Settings,
+    Sparkles,
     Trash,
+    Zap,
 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -49,7 +51,7 @@ import {
     QuestionOptions,
     ReorderStepsSolution,
     TextInputSolution,
-} from '../types/question-types';
+} from '../types';
 
 type Question = Database['public']['Tables']['questions']['Row'];
 
@@ -270,10 +272,10 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
     );
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-7xl mx-auto space-y-10 pb-12">
       <AdminHeader
-        title={initialData ? 'Edit Question' : 'Add Question'}
-        description="Question details"
+        title={initialData ? 'Question Architect' : 'Question Genesis'}
+        description={initialData ? 'Modifying existing pedagogical assessment artifact' : 'Synthesizing new assessment unit for the curriculum'}
         icon={HelpCircle}
       />
 
@@ -290,18 +292,19 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
                 {/* Content Area */}
-                <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem]">
-                  <CardContent className="p-4 sm:p-8 md:p-10 space-y-8">
-                    <div className="flex items-center gap-4 mb-2">
-                      <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/10">
-                        <FileText className="h-5 w-5 text-indigo-600" />
+                <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/10 rounded-[2.5rem] group/card transition-all duration-500 hover:shadow-indigo-500/20 relative z-10">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-indigo-500/5 opacity-0 group-hover/card:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                  <CardContent className="relative p-12 space-y-10">
+                    <div className="flex items-center gap-6">
+                      <div className="p-4 rounded-[1.25rem] bg-indigo-600 text-white shadow-xl shadow-indigo-600/30 transform group-hover/card:scale-110 group-hover/card:rotate-3 transition-transform duration-500">
+                        <FileText className="h-6 w-6" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-black text-gray-900 tracking-tight">
-                          Question Core
+                        <h3 className="text-2xl font-black text-gray-900 tracking-tight">
+                          Assessment Matrix
                         </h3>
-                        <p className="text-2xs font-black text-gray-500 uppercase tracking-widest">
-                          Primary instructional text
+                        <p className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.3em] font-mono italic">
+                          Primary Instruction Prompt
                         </p>
                       </div>
                     </div>
@@ -327,25 +330,29 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                 </Card>
 
                 {/* Answer Logic */}
-                <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem]">
-                  <CardContent className="p-4 sm:p-8 md:p-10 space-y-8">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/10">
-                          <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                <Card className="glass-card border-0 shadow-2xl shadow-emerald-500/10 rounded-[2.5rem] group/card transition-all duration-500 hover:shadow-emerald-500/20">
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-emerald-500/5 opacity-0 group-hover/card:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                  <CardContent className="relative p-12 space-y-10">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-6">
+                        <div className="p-4 rounded-[1.25rem] bg-emerald-600 text-white shadow-xl shadow-emerald-600/30 transform group-hover/card:scale-110 group-hover/card:-rotate-3 transition-transform duration-500">
+                          <CheckCircle2 className="h-6 w-6" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-black text-gray-900 tracking-tight">
-                            Validation Logic
+                          <h3 className="text-2xl font-black text-gray-900 tracking-tight">
+                            Verification Logic
                           </h3>
-                          <p className="text-2xs font-black text-gray-500 uppercase tracking-widest">
-                            Answer configuration
+                          <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.3em] font-mono italic">
+                            Validation Schema
                           </p>
                         </div>
                       </div>
-                      <span className="text-2xs font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100 uppercase tracking-widest italic">
-                        {questionType.replace('_', ' ')}
-                      </span>
+                      <div className="flex items-center gap-3 px-5 py-2.5 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-600/30">
+                        <Zap className="w-4 h-4 text-indigo-300 animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-widest italic leading-none">
+                          {questionType.replace('_', ' ')}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Multiple Choice Implementation */}
@@ -698,29 +705,29 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
 
                     {/* Placeholder for other complex types to maintain UI consistency */}
                     {!(QUESTION_TYPES as readonly string[]).includes(questionType) && (
-                      <div className="p-12 text-center bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
-                        <p className="text-gray-500 font-bold italic">
-                          Dynamic configuration for {questionType.replace('_', ' ')} protocol
-                          active.
+                      <div className="p-12 text-center bg-gray-50/50 rounded-[2rem] border-2 border-dashed border-gray-100">
+                        <p className="text-gray-400 font-black text-xs uppercase tracking-widest italic scale-90 opacity-50">
+                          Dynamic configuration for {questionType.replace('_', ' ')} protocol active
                         </p>
                       </div>
                     )}
                   </CardContent>
                 </Card>
 
-                {/* Explanation */}
-                <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem]">
-                  <CardContent className="p-4 sm:p-8 md:p-10 space-y-8">
-                    <div className="flex items-center gap-4 mb-2">
-                      <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/10">
-                        <HelpCircle className="h-5 w-5 text-amber-600" />
+                {/* Rationalization */}
+                <Card className="glass-card border-0 shadow-2xl shadow-amber-500/10 rounded-[2.5rem] group/card transition-all duration-500 hover:shadow-amber-500/20">
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-amber-500/5 opacity-0 group-hover/card:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                  <CardContent className="relative p-12 space-y-10">
+                    <div className="flex items-center gap-6">
+                      <div className="p-4 rounded-[1.25rem] bg-amber-600 text-white shadow-xl shadow-amber-600/30 transform group-hover/card:scale-110 group-hover/card:rotate-3 transition-transform duration-500">
+                        <HelpCircle className="h-6 w-6" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-black text-gray-900 tracking-tight">
-                          Rationalization
+                        <h3 className="text-2xl font-black text-gray-900 tracking-tight">
+                          Pedagogical Anchor
                         </h3>
-                        <p className="text-2xs font-black text-gray-500 uppercase tracking-widest">
-                          Solution explanation
+                        <p className="text-[10px] font-black text-amber-600 uppercase tracking-[0.3em] font-mono italic">
+                           Cognitive Justification
                         </p>
                       </div>
                     </div>
@@ -747,13 +754,14 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
 
               <div className="space-y-8">
                 {/* Protocol Settings */}
-                <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem]">
-                  <CardContent className="p-4 sm:p-8 space-y-8">
+                <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/10 rounded-[2rem] group/card relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-indigo-500/5 opacity-0 group-hover/card:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                  <CardContent className="relative p-10 space-y-8">
                     <div className="flex items-center gap-4">
-                      <div className="p-2.5 rounded-xl bg-slate-500/10 border border-slate-500/10">
-                        <Settings className="h-5 w-5 text-slate-600" />
+                      <div className="p-3 rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
+                        <Settings className="h-4 w-4" />
                       </div>
-                      <h3 className="text-lg font-black text-gray-900 tracking-tight">Metadata</h3>
+                      <h3 className="text-xl font-black text-gray-900 tracking-tight leading-none pt-1">Protocol Matrix</h3>
                     </div>
 
                     <FormField
@@ -850,13 +858,14 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                 </Card>
 
                 {/* Categorization */}
-                <Card className="bg-white/70 backdrop-blur-xl border-white/20 shadow-xl rounded-[2.5rem] overflow-hidden">
-                  <CardContent className="p-4 sm:p-8 space-y-6">
+                <Card className="glass-card border-0 shadow-2xl shadow-purple-500/10 rounded-[2rem] group/card relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-purple-500/5 opacity-0 group-hover/card:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                  <CardContent className="relative p-10 space-y-8">
                     <div className="flex items-center gap-4">
-                      <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/10">
-                        <Layers className="h-5 w-5 text-purple-600" />
+                      <div className="p-3 rounded-xl bg-purple-600 text-white shadow-lg shadow-purple-600/20">
+                        <Layers className="h-4 w-4" />
                       </div>
-                      <h3 className="text-lg font-black text-gray-900 tracking-tight">Anchoring</h3>
+                      <h3 className="text-xl font-black text-gray-900 tracking-tight leading-none pt-1">Ontology Link</h3>
                     </div>
 
                     <FormField
@@ -899,29 +908,30 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                   </CardContent>
                 </Card>
 
-                {/* Actions Footer - Floating style for mobile/right for desktop handled by flex */}
-                <div className="flex flex-col gap-4">
+                {/* Actions Footer */}
+                <div className="flex flex-col gap-6 pt-6">
                   <Button
                     type="submit"
                     disabled={isSubmitting}
                     data-testid="question-submit-btn"
-                    className="w-full h-16 rounded-[1.5rem] font-black text-sm uppercase tracking-widest bg-indigo-600 hover:bg-indigo-700 text-white shadow-2xl shadow-indigo-600/30 transition-all hover:-translate-y-1"
+                    className="w-full h-20 rounded-[1.5rem] font-black text-sm uppercase tracking-[0.4em] bg-indigo-600 hover:bg-indigo-700 text-white shadow-2xl shadow-indigo-600/30 transition-all hover:-translate-y-2 active:scale-[0.98] gap-4 group/submit"
                   >
                     {isSubmitting ? (
-                      <Loader2 className="animate-spin h-5 w-5" />
-                    ) : initialData ? (
-                      'COMMIT UPDATE'
+                      <Loader2 className="animate-spin h-6 w-6" />
                     ) : (
-                      'DEPLOY QUESTION'
+                      <>
+                        <Sparkles className="w-6 h-6 text-indigo-200 transition-transform group-hover/submit:rotate-12 group-hover/submit:scale-125" />
+                        {initialData ? 'COMMIT ARTIFACT' : 'DEPLOY QUESTION'}
+                      </>
                     )}
                   </Button>
                   <Button
                     type="button"
                     variant="ghost"
                     onClick={() => navigate('/questions')}
-                    className="w-full h-12 rounded-xl font-black text-2xs uppercase tracking-[0.3em] text-gray-400 hover:text-gray-900"
+                    className="w-full h-14 rounded-2xl font-black text-[10px] uppercase tracking-[0.6em] text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-all duration-300"
                   >
-                    ABORT EXECUTION
+                    Abort Execution
                   </Button>
                 </div>
               </div>

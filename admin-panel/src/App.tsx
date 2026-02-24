@@ -47,6 +47,11 @@ const QuestionCreatePage = lazy(() =>
     default: m.QuestionCreatePage,
   }))
 );
+const QuestionStudioPage = lazy(() =>
+  import('./features/curriculum/pages/question-studio-page').then((m) => ({
+    default: m.QuestionStudioPage,
+  }))
+);
 const QuestionEditPage = lazy(() =>
   import('./features/curriculum/pages/question-edit-page').then((m) => ({
     default: m.QuestionEditPage,
@@ -368,6 +373,16 @@ const router = createBrowserRouter([
           <ErrorBoundary>
             <Suspense fallback={<LoadingPage />}>
               <QuestionCreatePage />
+            </Suspense>
+          </ErrorBoundary>
+        ),
+      },
+      {
+        path: '/questions/studio',
+        element: (
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingPage />}>
+              <QuestionStudioPage />
             </Suspense>
           </ErrorBoundary>
         ),

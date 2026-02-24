@@ -63,14 +63,14 @@ function StatCard({
               <span className="text-3xl font-black text-gray-900 tracking-tight">{value}</span>
             )}
           </div>
-          <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1">
+          <p className="text-[11px] font-black text-gray-500 uppercase tracking-extra-wide mt-1">
             {label}
           </p>
         </div>
       </div>
       {subValue && !isLoading && (
         <div className="mt-4 pt-4 border-t border-gray-100/50 flex items-center justify-between">
-          <span className="text-2xs font-black text-gray-400 uppercase tracking-widest">
+          <span className="text-[11px] font-black text-gray-500 uppercase tracking-widest">
             {subValue}
           </span>
           <TrendingUp className="w-3.5 h-3.5 text-emerald-500/50" />
@@ -179,7 +179,7 @@ export function DashboardPage() {
           <div className="px-6 sm:px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
             <div>
               <h3 className="text-xl font-black text-gray-900 tracking-tight">Command Center</h3>
-              <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
+              <p className="text-[11px] font-black text-gray-500 uppercase tracking-extra-wide mt-1 italic">
                 Authorized Core Actions
               </p>
             </div>
@@ -200,7 +200,7 @@ export function DashboardPage() {
                     <div className="font-black text-gray-900 text-sm italic tracking-tight uppercase">
                       Initialize Domain
                     </div>
-                    <div className="text-2xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                    <div className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
                       Scale subject area catalog
                     </div>
                   </div>
@@ -222,7 +222,7 @@ export function DashboardPage() {
                     <div className="font-black text-gray-900 text-sm italic tracking-tight uppercase">
                       Draft Objective
                     </div>
-                    <div className="text-2xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                    <div className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
                       Define learning milestones
                     </div>
                   </div>
@@ -244,7 +244,7 @@ export function DashboardPage() {
                     <div className="font-black text-gray-900 text-sm italic tracking-tight uppercase">
                       Forge Node
                     </div>
-                    <div className="text-2xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                    <div className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
                       Author assessment content
                     </div>
                   </div>
@@ -266,7 +266,7 @@ export function DashboardPage() {
                     <div className="font-black text-gray-900 text-sm italic tracking-tight uppercase">
                       Handover to Live
                     </div>
-                    <div className="text-2xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                    <div className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
                       Publish curriculum updates
                     </div>
                   </div>
@@ -280,7 +280,7 @@ export function DashboardPage() {
           <div className="px-6 sm:px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
             <div>
               <h3 className="text-xl font-black text-gray-900 tracking-tight">Signal Stream</h3>
-              <p className="text-2xs font-black text-gray-400 uppercase tracking-extra-wide mt-1 italic">
+              <p className="text-[11px] font-black text-gray-500 uppercase tracking-extra-wide mt-1 italic">
                 Real-time Activity Ledger
               </p>
             </div>
@@ -301,7 +301,7 @@ export function DashboardPage() {
                 <h4 className="text-lg font-bold text-gray-900 tracking-tight">
                   Zero Activity Recorded
                 </h4>
-                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">
+                <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest mt-1">
                   Initialize curriculum to see events
                 </p>
               </div>
@@ -327,11 +327,11 @@ export function DashboardPage() {
                         <p className="text-sm font-black text-gray-900 tracking-tight italic">
                           {activity.title}
                         </p>
-                        <p className="text-2xs font-black text-gray-400 uppercase tracking-widest mt-0.5">
+                        <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest mt-0.5">
                           {activity.type} {activity.action}
                         </p>
                       </div>
-                      <span className="text-2xs font-black text-gray-400 uppercase tracking-tighter tabular-nums whitespace-nowrap bg-gray-50 px-2 py-1 rounded-md">
+                      <span className="text-[11px] font-black text-gray-500 uppercase tracking-tighter tabular-nums whitespace-nowrap bg-gray-50 px-2 py-1 rounded-md">
                         {formatRelativeTime(activity.timestamp)}
                       </span>
                     </div>
@@ -366,7 +366,7 @@ export function DashboardPage() {
                     <span className="text-white font-black">{stats?.liveQuestions ?? 0}</span>{' '}
                     production nodes.
                     {stats?.readyToPublish ? (
-                      <span className="inline-flex items-center ml-2 px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/20 rounded-md text-2xs text-emerald-300 font-black uppercase tracking-widest">
+                      <span className="inline-flex items-center ml-2 px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/20 rounded-md text-[11px] text-emerald-400 font-black uppercase tracking-widest">
                         {stats.readyToPublish} UPDATES STAGED
                       </span>
                     ) : (

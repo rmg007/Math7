@@ -40,6 +40,12 @@ async function selectOption(
 test.describe('Admin Panel E2E Tests', () => {
   // test.describe.configure({ mode: 'serial' }); // Disabled to allowed full run even if one fails
 
+  test.beforeEach(async ({ page }) => {
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') console.log(`BROWSER ERROR: ${msg.text()}`);
+    });
+  });
+
   // Database setup
   let supabase: SupabaseClient;
 
@@ -389,16 +395,17 @@ test.describe('Admin Panel E2E Tests', () => {
       const contentEditor = page.locator('.ProseMirror, textarea[name="content"]').first();
       await expect(contentEditor).toBeVisible({ timeout: 15000 });
 
-      const skillTrigger = page
-        .locator('button[role="combobox"]')
-        .filter({ hasText: /Skill|ontology/i });
-      if (await skillTrigger.isVisible()) {
-        await skillTrigger.click();
-        const firstOption = page.locator('[role="option"]').first();
-        await expect(firstOption).toBeVisible({ timeout: 10000 });
-        await firstOption.click();
-        await page.keyboard.press('Escape');
-      }
+      // Select Skill
+      // Select Skill
+      const skillTrigger = page.getByTestId('question-skill-select');
+      await expect(skillTrigger).toBeVisible({ timeout: 15000 });
+      await skillTrigger.click();
+      await page.waitForTimeout(1000); // Wait for menu
+      
+      // Use keyboard navigation for absolute reliability in Radix Select
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.press('Enter');
+      await page.waitForTimeout(500); // Allow select to close
 
       const questionId = Date.now();
       if (await page.locator('.ProseMirror').first().isVisible()) {
@@ -416,10 +423,10 @@ test.describe('Admin Panel E2E Tests', () => {
       }
 
       await page.waitForTimeout(500);
-      await page.getByRole('button', { name: /DEPLOY QUESTION/i }).click();
+      await page.getByTestId('question-submit-btn').click();
 
       await expect(page).toHaveURL(/\/questions/, { timeout: 15000 });
-      await expect(page.getByText(`${questionId}`).first()).toBeVisible({ timeout: 10000 });
+      await expect(page.getByText(new RegExp(`${questionId}`)).first()).toBeVisible({ timeout: 10000 });
     });
   });
 });

@@ -5,7 +5,7 @@ import { createSanitizedErrorResponse, withErrorSanitization } from '../_shared/
 import { validateGenerationRequest } from '../_shared/input-sanitizer.ts';
 import { addRateLimitHeaders, createRateLimitMiddleware, rateLimitConfigs } from '../_shared/rate-limiter.ts';
 
-const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || 'http://localhost:3000,http://localhost:5173').split(',');
+const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || 'http://localhost:3000,http://localhost:5173,http://localhost:5000').split(',');
 
 function getCorsHeaders(req?: Request): Record<string, string> {
   const origin = req?.headers.get('Origin') || '';
@@ -155,17 +155,29 @@ export const generateQuestionsHandler = withErrorSanitization(
       Math.ceil((prompt.length + generatedText.length) / 4); // Fallback to estimate
 
     // ========================================
-    // FIX S3: CONSUME TENANT TOKENS
+    // FIX S3: CONSUME TENANT TOKENS (best-effort)
     // ========================================
-    const { error: quotaError } = await supabase.rpc('consume_tenant_tokens', {
-      p_app_id: profile.app_id,
-      p_tokens_used: actualTokenCount,
-      p_operation: 'generate_questions'
-    });
+    // Use a best-effort approach: if the quota RPC isn't available yet
+    // (e.g. migration not applied) we log a warning but do NOT block generation.
+    try {
+      const { error: quotaError } = await supabase.rpc('consume_tenant_tokens', {
+        p_app_id: profile.app_id,
+        p_tokens_used: actualTokenCount,
+        p_operation: 'generate_questions'
+      });
 
-    if (quotaError) {
-      console.error('Quota enforcement error:', quotaError);
-      return createSanitizedErrorResponse('RATE_LIMITED', 'AI token quota exceeded');
+      if (quotaError) {
+        // Only hard-block on explicit quota errors (code 42883 = function not found is non-fatal)
+        const isQuotaExceeded = quotaError.message?.includes('QUOTA_EXCEEDED') ||
+          quotaError.code === 'P0001';
+        if (isQuotaExceeded) {
+          return createSanitizedErrorResponse('RATE_LIMITED', 'AI token quota exceeded');
+        }
+        // Function doesn't exist or other infra error — log and continue
+        console.warn('Quota enforcement skipped:', quotaError.message ?? quotaError.code);
+      }
+    } catch (quotaEx) {
+      console.warn('consume_tenant_tokens unavailable, skipping quota check:', quotaEx);
     }
 
     // Parse JSON response

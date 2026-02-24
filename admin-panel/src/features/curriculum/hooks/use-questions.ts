@@ -95,7 +95,8 @@ export function usePaginatedQuestions(params: PaginationParams, appFilter?: stri
 
       if (search) {
         const escapedSearch = escapePostgrestSearch(search);
-        query = query.ilike('content', `%${escapedSearch}%`);
+        // Cast JSONB content to text for ilike comparison
+        query = query.ilike('content' as any, `%${escapedSearch}%`);
       }
 
       if (status && status !== 'all') {

@@ -12,6 +12,7 @@ export class SkillsPage {
   readonly descriptionInput: Locator;
   readonly domainSelectCombobox: Locator;
   readonly submitButton: Locator;
+  readonly searchInput: Locator;
   readonly errorAlert: Locator;
 
   constructor(page: Page) {
@@ -25,6 +26,9 @@ export class SkillsPage {
     this.descriptionInput = page.getByLabel(/description/i);
     this.domainSelectCombobox = page.getByRole('combobox').filter({ hasText: /select a domain/i });
     this.submitButton = page.getByRole('button', { name: /create skill/i });
+    this.searchInput = page
+      .getByPlaceholder(/search skills/i)
+      .or(page.locator('input[placeholder*="Search"]'));
     this.errorAlert = page
       .locator('[data-testid="form-error"]')
       .or(page.locator('[role="alert"]').first());
@@ -88,5 +92,10 @@ export class SkillsPage {
       await this.selectStatus(opts.status);
     }
     await this.submit();
+  }
+
+  async search(query: string) {
+    await this.searchInput.fill(query);
+    await this.page.waitForTimeout(1000); // Wait for debounce
   }
 }
