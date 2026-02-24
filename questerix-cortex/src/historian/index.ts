@@ -17,19 +17,19 @@ export class Historian {
   }
 
   record(record: HistoryRecord) {
-    let history: HistoryRecord[] = [];
-    if (fs.existsSync(this.historyPath)) {
-      history = JSON.parse(fs.readFileSync(this.historyPath, 'utf-8'));
-    }
-
+    let history: HistoryRecord[] = this.getHistory();
     history.push(record);
-
-    // Keep only last X runs
-    if (history.length > this.maxRuns) {
-      history = history.slice(-this.maxRuns);
-    }
-
+    if (history.length > this.maxRuns) history = history.slice(-this.maxRuns);
     fs.writeFileSync(this.historyPath, JSON.stringify(history, null, 2));
     return history;
+  }
+
+  getHistory(): HistoryRecord[] {
+    if (!fs.existsSync(this.historyPath)) return [];
+    try {
+      return JSON.parse(fs.readFileSync(this.historyPath, 'utf-8'));
+    } catch {
+      return [];
+    }
   }
 }

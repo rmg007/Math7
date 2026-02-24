@@ -1,0 +1,175 @@
+import { execSync, spawnSync } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
+
+export interface RlsAuditResult {
+  verdict: 'PASS' | 'CRITICAL GAP' | 'WARNINGS' | 'ERROR';
+  criticalCount: number;
+  warningCount: number;
+  unknownCount: number;
+  rows: RlsAuditRow[];
+  raw: string;
+}
+
+export interface RlsAuditRow {
+  tablename: string;
+  missing_policies: string;
+  verdict: string;
+  severity: 'critical' | 'warning' | 'info';
+}
+
+// ──────────────────────────────────────────────────────────────
+// Audit SQL — inlined so we can pipe it to supabase db query
+// without shell-quoting issues. Matches audit-rls.sql exactly.
+// Key: expands cmd='ALL' into individual operations to avoid
+// false positives on tables with catch-all policies.
+// ──────────────────────────────────────────────────────────────
+const AUDIT_SQL = `
+WITH all_tables AS (
+  SELECT tablename FROM pg_tables
+  WHERE schemaname = 'public'
+    AND tablename NOT LIKE 'pg_%'
+    AND tablename NOT LIKE 'supabase_%'
+    AND tablename NOT IN ('schema_migrations')
+),
+expanded_policies AS (
+  SELECT DISTINCT tablename, expanded_cmd AS cmd
+  FROM pg_policies,
+  LATERAL (
+    SELECT CASE WHEN cmd = 'ALL'
+      THEN unnest(ARRAY['SELECT','INSERT','UPDATE','DELETE'])
+      ELSE cmd END AS expanded_cmd
+  ) e
+  WHERE schemaname = 'public'
+),
+missing AS (
+  SELECT t.tablename, c.cmd
+  FROM all_tables t
+  CROSS JOIN (VALUES ('SELECT'),('INSERT'),('UPDATE'),('DELETE')) AS c(cmd)
+  LEFT JOIN expanded_policies ep ON t.tablename = ep.tablename AND c.cmd = ep.cmd
+  WHERE ep.cmd IS NULL
+)
+SELECT tablename,
+  STRING_AGG(cmd, ', ' ORDER BY cmd) AS missing_policies,
+  CASE
+    WHEN tablename IN ('known_issues','error_logs','source_documents',
+      'security_logs','curriculum_meta','app_landing_pages')
+      THEN 'REAL_GAP'
+    WHEN tablename IN ('attempts','sessions','skill_progress','profiles')
+      THEN 'INTENTIONAL_STUDENT'
+    WHEN tablename IN ('ai_token_usage','ai_generation_sessions',
+      'generation_audit_log','tenant_quotas','student_recovery_keys','platform_config')
+      THEN 'INTENTIONAL_SERVICE'
+    WHEN tablename IN ('domains','skills','questions','subjects',
+      'curriculum_snapshots','approval_workflows','content_validation_rules')
+      THEN 'INTENTIONAL_RPC'
+    ELSE 'UNKNOWN'
+  END AS verdict
+FROM missing
+GROUP BY tablename
+ORDER BY verdict, tablename;
+`.trim();
+
+/**
+ * RlsAuditor — runs the RLS audit against the live Supabase project
+ * using the Supabase CLI (`supabase db query`), which works as long as
+ * the CLI is installed and authenticated (supabase login).
+ *
+ * Falls back to a static error message if the CLI is unavailable.
+ */
+export class RlsAuditor {
+  private projectRef: string;
+
+  constructor(projectRef: string) {
+    this.projectRef = projectRef;
+  }
+
+  async audit(): Promise<RlsAuditResult> {
+    // Try supabase CLI first
+    const cliResult = this.trySupabaseCli();
+    if (cliResult) return cliResult;
+
+    // Try psql as secondary fallback (DATABASE_URL in env)
+    const dbUrl = process.env.DATABASE_URL;
+    if (dbUrl) {
+      try {
+        const raw = execSync(
+          `psql "${dbUrl}" -c "${AUDIT_SQL.replace(/"/g, '\\"')}" -t -A -F"|"`,
+          { encoding: 'utf-8', timeout: 20000, stdio: ['pipe','pipe','pipe'] }
+        );
+        return this.parseOutput(raw);
+      } catch { /* fall through */ }
+    }
+
+    return this.errorResult('Supabase CLI unavailable and DATABASE_URL not set.');
+  }
+
+  // ── Supabase CLI path ───────────────────────────────────────
+  private trySupabaseCli(): RlsAuditResult | null {
+    try {
+      // Write SQL to a temp file to avoid shell-quoting issues
+      const tmpFile = path.join(process.env.TEMP || '/tmp', 'rls-audit.sql');
+      fs.writeFileSync(tmpFile, AUDIT_SQL, 'utf-8');
+
+      const result = spawnSync(
+        'supabase',
+        ['db', 'query', `--project-ref=${this.projectRef}`, '--file', tmpFile],
+        { encoding: 'utf-8', timeout: 25000 }
+      );
+
+      // Clean up temp file
+      try { fs.unlinkSync(tmpFile); } catch { /* ignore */ }
+
+      if (result.status !== 0 || result.error) return null;
+
+      const output = (result.stdout || '').trim();
+      if (!output || output.includes('Error') || output.includes('error')) return null;
+
+      return this.parseOutput(output);
+    } catch {
+      return null;
+    }
+  }
+
+  // ── Output parser ───────────────────────────────────────────
+  private parseOutput(raw: string): RlsAuditResult {
+    // supabase db query returns TSV or pipe-delimited; handle both
+    const lines = raw.split('\n').filter(l => l.trim() && !l.startsWith('-') && !l.startsWith('('));
+    const rows: RlsAuditRow[] = [];
+    let criticalCount = 0, warningCount = 0, unknownCount = 0;
+
+    for (const line of lines) {
+      // Try pipe delimiter first (psql -F"|"), then tab, then whitespace-collapse
+      const delimiter = line.includes('|') ? '|' : '\t';
+      const parts = line.split(delimiter).map(p => p.trim()).filter(Boolean);
+      if (parts.length < 3) continue;
+
+      const [tablename, missing_policies, verdictKey] = parts;
+      let severity: 'critical' | 'warning' | 'info' = 'info';
+      let verdictLabel: string;
+
+      switch (verdictKey) {
+        case 'REAL_GAP':
+          severity = 'critical'; criticalCount++;
+          verdictLabel = '🔴 REAL GAP — fix required'; break;
+        case 'UNKNOWN':
+          severity = 'warning'; unknownCount++;
+          verdictLabel = '🟡 Unknown — investigate'; break;
+        default:
+          verdictLabel = '🔵 Intentional'; break;
+      }
+
+      rows.push({ tablename, missing_policies, verdict: verdictLabel, severity });
+    }
+
+    const verdict = criticalCount > 0 ? 'CRITICAL GAP'
+      : unknownCount > 0 ? 'WARNINGS'
+      : 'PASS';
+
+    return { verdict, criticalCount, warningCount, unknownCount, rows, raw };
+  }
+
+  private errorResult(msg: string): RlsAuditResult {
+    return { verdict: 'ERROR', criticalCount: 0, warningCount: 0, unknownCount: 0, rows: [], raw: msg };
+  }
+}

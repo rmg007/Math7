@@ -2,12 +2,16 @@
   "projectRoot": "..",
   "adminPanelPath": "../admin-panel",
   "supabasePath": "../supabase",
+  "supabaseProjectRef": "bkfhorslctqieetzqdtd",
   "outputs": {
     "healthReport": "outputs/HEALTH_REPORT.md",
     "agentContext": "outputs/AGENT_CONTEXT.md",
     "nextTask": "outputs/NEXT_TASK.md",
     "history": "outputs/HISTORY.json",
-    "surfaceMap": "outputs/SURFACE_MAP.json"
+    "surfaceMap": "outputs/SURFACE_MAP.json",
+    "machineBriefing": "outputs/MACHINE_BRIEFING.md",
+    "failureDigest": "outputs/FAILURE_DIGEST.md",
+    "lastChanged": "outputs/LAST_CHANGED.md"
   },
   "thresholds": {
     "minCoverage": 80,

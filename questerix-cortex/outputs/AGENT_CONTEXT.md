@@ -1,10 +1,16 @@
-# 🧠 Agent Briefing — DO NOT DELETE
+# 🧠 Agent Briefing
 
-> This file is for the AI agent to read at the start of a session.
+> For detailed machine context read MACHINE_BRIEFING.md first.
 
-## 📊 APP SURFACE
-- **Hooks**: 0 detected.
-- **Pages**: 0 detected.
+## Surface
 
-## 🚨 CURRENT FAILURES
-- **E2E Smoke (Desktop)**: Failing.
+- Hooks: 20
+- Pages: 33
+- Coverage gaps: 40
+  - Missing test for hook: hooks/use-debounce.ts
+  - Missing test for hook: hooks/use-unsaved-changes-guard.ts
+  - Missing test for hook: hooks/use-url-state.ts
+  - Missing E2E/Unit test for page: features/ai-assistant/pages/GenerationPage.tsx
+  - Missing E2E/Unit test for page: features/ai-assistant/pages/GovernancePage.tsx
+
+## ✅ All Green

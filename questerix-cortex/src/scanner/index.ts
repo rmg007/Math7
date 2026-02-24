@@ -1,55 +1,276 @@
+import * as fs from 'fs';
 import * as path from 'path';
 import { Project } from 'ts-morph';
 
+export interface HookEntry {
+  name: string;
+  file: string;
+  hasTest: boolean;
+  functions: string[];
+  exports: ExportEntry[];
+}
+
+export interface PageEntry {
+  name: string;
+  file: string;
+  hasTest: boolean;
+  routes: string[];
+}
+
+export interface UtilityEntry {
+  name: string;
+  file: string;
+  category: string;
+  exports: ExportEntry[];
+}
+
+export interface ExportEntry {
+  name: string;
+  kind: string; // 'function' | 'class' | 'type' | 'const' | 'variable'
+  parameters?: string[];
+}
+
 export interface SurfaceMap {
-  hooks: { name: string; file: string; functions: string[] }[];
-  pages: { name: string; file: string; routes: string[] }[];
+  hooks: HookEntry[];
+  pages: PageEntry[];
+  utilities: UtilityEntry[];
+  dependencies: Record<string, string[]>; // file -> list of hook/util imports
+  gaps: string[];
+  apiMap: Record<string, ExportEntry[]>; // relativePath -> export list
 }
 
 export class Scanner {
   private project: Project;
   private srcPath: string;
 
+  private projectRoot: string;
+
   constructor(srcPath: string) {
-    this.project = new Project();
+    this.project = new Project({ skipAddingFilesFromTsConfig: true });
     this.srcPath = srcPath;
+    // Derive project root as the parent of the srcPath (admin-panel/)
+    this.projectRoot = path.resolve(srcPath, '..');
     this.project.addSourceFilesAtPaths(path.join(srcPath, '**/*.{ts,tsx}'));
   }
 
   scan(): SurfaceMap {
     const map: SurfaceMap = {
       hooks: [],
-      pages: []
+      pages: [],
+      utilities: [],
+      dependencies: {},
+      gaps: [],
+      apiMap: {}
     };
 
     const sourceFiles = this.project.getSourceFiles();
 
     for (const sourceFile of sourceFiles) {
       const filePath = sourceFile.getFilePath();
-      const relativePath = path.relative(this.srcPath, filePath);
+      const normalizedPath = filePath.replace(/\\/g, '/');
+      const normalizedSrcPath = this.srcPath.replace(/\\/g, '/');
+      const relativePath = normalizedPath.replace(normalizedSrcPath, '').replace(/^\//, '');
 
-      // Simple heuristic for hooks
-      if (relativePath.includes('hooks/')) {
-        const functions = sourceFile.getExportedDeclarations();
-        const hookNames = Array.from(functions.keys());
-        
+      // Skip non-source files or test files themselves
+      if (
+        relativePath.includes('node_modules') ||
+        relativePath.includes('__tests__') ||
+        relativePath.includes('.test.')
+      ) continue;
+
+      const baseName = path.basename(filePath, path.extname(filePath));
+      const dirName = path.dirname(filePath);
+
+      // Tier 1: sibling __tests__/ folder (legacy / co-located tests)
+      const siblingTestTsx = path.join(dirName, '__tests__', `${baseName}.test.tsx`);
+      const siblingTestTs  = path.join(dirName, '__tests__', `${baseName}.test.ts`);
+
+      // Tier 2: centralised src/__tests__/**/<baseName>.test.{tsx,ts} (Vitest)
+      const centralTestDir = path.join(this.projectRoot, 'src', '__tests__');
+      const hasCentralTest = this.fileExistsInDirTree(centralTestDir, baseName, ['.test.tsx', '.test.ts']);
+
+      // Tier 3: Playwright tests/**/*<baseName>*.spec.ts
+      const playwrightDir = path.join(this.projectRoot, 'tests');
+      const hasE2ETest = this.fileExistsInDirTree(playwrightDir, baseName, ['.e2e.spec.ts', '.spec.ts']);
+
+      const hasTest =
+        fs.existsSync(siblingTestTsx) ||
+        fs.existsSync(siblingTestTs) ||
+        hasCentralTest ||
+        hasE2ETest;
+
+      // Build export entries using ts-morph
+      const exportedDeclarations = sourceFile.getExportedDeclarations();
+      const exportEntries: ExportEntry[] = [];
+
+      for (const [name, decls] of exportedDeclarations) {
+        for (const decl of decls) {
+          const kind = decl.getKindName();
+          const entry: ExportEntry = { name, kind };
+
+          // For functions, capture parameter names
+          if (kind === 'FunctionDeclaration' || kind === 'ArrowFunction') {
+            try {
+              const params = (decl as any).getParameters?.() ?? [];
+              entry.parameters = params.map((p: any) => p.getName?.() ?? '?');
+            } catch { /* skip param extraction on error */ }
+          }
+
+          exportEntries.push(entry);
+          break; // only first declaration per name
+        }
+      }
+
+      // Track in API map
+      map.apiMap[relativePath] = exportEntries;
+
+      // ── Hooks ─────────────────────────────────────────────────
+      if (relativePath.includes('/hooks/') || relativePath.startsWith('hooks/')) {
+        const hookNames = Array.from(exportedDeclarations.keys());
         map.hooks.push({
-          name: hookNames[0] || path.basename(filePath),
+          name: hookNames[0] || baseName,
           file: relativePath,
-          functions: hookNames
+          hasTest,
+          functions: hookNames,
+          exports: exportEntries
+        });
+
+        if (!hasTest) map.gaps.push(`Missing test for hook: ${relativePath}`);
+      }
+
+      // ── Pages ─────────────────────────────────────────────────
+      if (relativePath.includes('/pages/') || relativePath.startsWith('pages/')) {
+        map.pages.push({
+          name: baseName,
+          file: relativePath,
+          hasTest,
+          routes: []
+        });
+
+        if (!hasTest) map.gaps.push(`Missing E2E/Unit test for page: ${relativePath}`);
+      }
+
+      // ── Utilities ─────────────────────────────────────────────
+      const isUtility =
+        relativePath.includes('/lib/') ||
+        relativePath.includes('/utils/') ||
+        relativePath.includes('/helpers/') ||
+        relativePath.includes('/services/');
+
+      if (isUtility && exportEntries.length > 0) {
+        // Categorize by directory
+        let category = 'general';
+        if (relativePath.includes('/lib/')) category = 'lib';
+        if (relativePath.includes('/utils/')) category = 'utils';
+        if (relativePath.includes('/helpers/')) category = 'helpers';
+        if (relativePath.includes('/services/')) category = 'services';
+
+        map.utilities.push({
+          name: baseName,
+          file: relativePath,
+          category,
+          exports: exportEntries
         });
       }
 
-      // Simple heuristic for pages
-      if (relativePath.includes('pages/')) {
-        map.pages.push({
-          name: path.basename(filePath),
-          file: relativePath,
-          routes: [] // Would need more logic to extract routes
-        });
-      }
+      // ── Dependency Map ─────────────────────────────────────────
+      try {
+        const imports = sourceFile.getImportDeclarations();
+        const importedFrom: string[] = [];
+        for (const imp of imports) {
+          const mod = imp.getModuleSpecifierValue();
+          // Only track internal imports
+          if (mod.startsWith('.') || mod.startsWith('@/')) {
+            importedFrom.push(mod);
+          }
+        }
+        if (importedFrom.length > 0) {
+          map.dependencies[relativePath] = importedFrom;
+        }
+      } catch { /* skip on error */ }
     }
 
     return map;
+  }
+
+  /**
+   * Recursively searches `dir` for any file whose name equals `baseName + suffix`
+   * for any suffix in the `suffixes` list. Returns true if found.
+   */
+  private fileExistsInDirTree(dir: string, baseName: string, suffixes: string[]): boolean {
+    if (!fs.existsSync(dir)) return false;
+    try {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          if (this.fileExistsInDirTree(fullPath, baseName, suffixes)) return true;
+        } else if (entry.isFile()) {
+          for (const suffix of suffixes) {
+            if (entry.name === `${baseName}${suffix}`) return true;
+          }
+        }
+      }
+    } catch { /* skip unreadable dirs */ }
+    return false;
+  }
+
+  writeApiMap(map: SurfaceMap, outputsDir: string): void {
+    // 1. JSON API Map
+    const jsonPath = path.join(outputsDir, 'API_MAP.json');
+    fs.writeFileSync(jsonPath, JSON.stringify(map.apiMap, null, 2), 'utf-8');
+
+    // 2. Human-readable Utility Registry
+    const mdPath = path.join(outputsDir, 'UTILITY_REGISTRY.md');
+    let md = '# 🗂️ Utility Registry\n';
+    md += '> Auto-generated by Cortex Scanner. Check this BEFORE writing any new helper.\n\n';
+    md += `*Updated: ${new Date().toLocaleString()}*\n\n`;
+
+    if (map.utilities.length === 0) {
+      md += '_No utilities cataloged yet._\n';
+    } else {
+      const byCategory: Record<string, UtilityEntry[]> = {};
+      for (const u of map.utilities) {
+        if (!byCategory[u.category]) byCategory[u.category] = [];
+        byCategory[u.category].push(u);
+      }
+
+      for (const [category, entries] of Object.entries(byCategory)) {
+        md += `## ${category.charAt(0).toUpperCase() + category.slice(1)}\n\n`;
+        for (const entry of entries) {
+          md += `### \`${entry.name}\` — \`${entry.file}\`\n`;
+          if (entry.exports.length > 0) {
+            md += '| Export | Kind |\n|:---|:---|\n';
+            for (const exp of entry.exports) {
+              const params = exp.parameters ? `(${exp.parameters.join(', ')})` : '';
+              md += `| \`${exp.name}${params}\` | ${exp.kind} |\n`;
+            }
+          }
+          md += '\n';
+        }
+      }
+    }
+
+    // Also add hook exports for quick lookup
+    md += '## Hooks (Export Map)\n\n';
+    if (map.hooks.length === 0) {
+      md += '_No hooks found._\n';
+    } else {
+      for (const hook of map.hooks) {
+        md += `### \`${hook.name}\` — \`${hook.file}\`\n`;
+        const hasCoverage = hook.hasTest ? '✅' : '❌ No test';
+        md += `Coverage: ${hasCoverage}\n\n`;
+        if (hook.exports.length > 0) {
+          md += '| Export | Kind |\n|:---|:---|\n';
+          for (const exp of hook.exports) {
+            const params = exp.parameters ? `(${exp.parameters.join(', ')})` : '';
+            md += `| \`${exp.name}${params}\` | ${exp.kind} |\n`;
+          }
+        }
+        md += '\n';
+      }
+    }
+
+    fs.writeFileSync(mdPath, md, 'utf-8');
   }
 }

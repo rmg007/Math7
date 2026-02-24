@@ -26,6 +26,18 @@
 - Runs Vitest, Playwright (Desktop/Mobile/Tablet), ESLint, CSpell, Axe-core, and RLS Audits.
 - **UX**: Opens a **Live Browser Dashboard** at `http://localhost:5050` during the run.
 
+### 🚢 Deployer (Auto-Release)
+
+- **Tier 4 (Deploy)**: Executes production rollouts ONLY if all health tiers (Smoke, Deep, Release) are green.
+- **Wrangler Integration**: Deploys the Admin Panel to Cloudflare Pages.
+- **Supabase Integration**: Deploys Edge Functions via CLI.
+
+### 📦 Shipper (Git Operations)
+
+- **Tier 5 (Ship)**: Automates the Git push workflow ONLY if Deployment succeeds.
+- **SCM Integration**: Auto-stages, commits with an intelligent summary, and pushes to remote with tags.
+- **Verification**: Confirms that local HEAD matches remote before concluding.
+
 ### 🧠 Analyst (Intelligence)
 
 - **Drift Detection**: Database types vs Live schema.

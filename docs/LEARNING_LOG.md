@@ -5551,3 +5551,66 @@ The Subjects page is now a **production-ready admin interface**. Next phases:
 
 - Finalize the **Visual Stability** testing phase (Playwright screenshots).
 - Address remaining **index.css** scrollbar warnings by moving to a more resilient CSS-in-JS or custom hook based approach if needed (deferred).
+
+---
+
+## 2026-02-24: Cortex — React Dashboard SPA + Backend Integration
+
+### [2026-02-24-Cortex] Session Context
+
+- **Trigger**: Cortex dashboard UI/UX was hard to maintain (inline HTML in Express), and Cortex orchestrator had TypeScript type conflicts.
+- **Scope**: `questerix-cortex/run.ts`, `questerix-cortex/src/dashboard/index.ts`, `questerix-cortex/dashboard/*`.
+- **Outcome**: Replaced the dashboard UI with a React + Vite SPA (built to `dashboard/dist`) and integrated it into the existing Cortex Express server. Resolved `CortexConfig` type import conflict.
+
+### Implementation Details
+
+#### Centralized config typing (CortexConfig)
+
+- **Issue**: `run.ts` had both an imported `CortexConfig` and a duplicate local `interface CortexConfig`, producing an import/type conflict.
+- **Fix**: Removed the local interface and relied exclusively on `src/types.ts` as the SSoT.
+
+#### Dashboard modernization (React SPA)
+
+- **Change**: Created `questerix-cortex/dashboard/` React + TypeScript project with Tailwind, Socket.io client, and a componentized UI.
+- **Data flow**: Preserved existing Socket.io event contract:
+  - `update` event: `{ results, surfaceMap, analystResults, history, smokePass, driftResult, rlsResult }`
+  - `trigger` event: emits a suite/target string.
+
+#### Backend serving integration
+
+- **Issue**: Express dashboard served a single massive inline HTML string.
+- **Fix**: Updated `src/dashboard/index.ts` to serve the built SPA from `dashboard/dist` when present (static + SPA fallback), while retaining the inline HTML as a fallback when `dist` is missing.
+
+### [2026-02-24-Cortex] Files Modified
+
+| Area                    | Files                                                                                                                                                                               |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Orchestrator typing** | `questerix-cortex/run.ts`, `questerix-cortex/src/types.ts`                                                                                                                          |
+| **Backend dashboard**   | `questerix-cortex/src/dashboard/index.ts`                                                                                                                                           |
+| **Dashboard SPA**       | `questerix-cortex/dashboard/src/App.tsx`, `questerix-cortex/dashboard/src/components/*`, `questerix-cortex/dashboard/postcss.config.js`, `questerix-cortex/dashboard/src/index.css` |
+
+### [2026-02-24-Cortex] Verification
+
+- **Dashboard build**: `questerix-cortex/dashboard` -> `npm run build` succeeded and produced `dist/`.
+
+---
+
+## [2026-02-24] PowerShell Script Encoding Bug (Cortex Auto-Entry)
+
+### Suite: Forensic Audit
+
+**First Error**: `Unexpected token in expression or statement` (PowerShell ParserError)
+**Root Cause**: forensic_audit.ps1 contained Unicode em-dashes (U+2014) inside string literals, which PowerShell cannot parse as operators.
+**Fix Applied**: Rewrote the entire script using pure ASCII. Replaced all em-dashes with - and smart quotes with straight quotes. Also restored missing conditional blocks that had been accidentally removed.
+**Prevention Rule**: NEVER use em-dashes, smart quotes, or any non-ASCII characters in .ps1 files. Use - for dash separators in strings.
+
+---
+
+## [2026-02-24] Cortex Orchestrator Timeout Too Short (Cortex Auto-Entry)
+
+### Suite: Certify Phase 0
+
+**First Error**: `timeout` — process killed before completion
+**Root Cause**: The Cortex Orchestrator had a 300_000ms (5-minute) hard cap. certify-evidence.ps1 runs preflight, tests, and hygiene in parallel — this legitimately exceeds 5 minutes.
+**Fix Applied**: Increased timeout in questerix-cortex/src/orchestrator/index.ts from 300_000 to 900_000 (15 minutes).
+**Prevention Rule**: Any task that delegates to other scripts must be allocated at least 15 minutes. Never apply a global short timeout to compound orchestrator tasks.
