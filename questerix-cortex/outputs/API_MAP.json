@@ -30,7 +30,9 @@
     {
       "name": "AppProvider",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ children }"]
+      "parameters": [
+        "{ children }"
+      ]
     },
     {
       "name": "useAppContext",
@@ -72,7 +74,10 @@
     {
       "name": "useDebounce",
       "kind": "FunctionDeclaration",
-      "parameters": ["value", "delay"]
+      "parameters": [
+        "value",
+        "delay"
+      ]
     }
   ],
   "hooks/use-studio-generator.ts": [
@@ -118,7 +123,9 @@
     {
       "name": "toast",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ ...props }"]
+      "parameters": [
+        "{ ...props }"
+      ]
     },
     {
       "name": "useToast",
@@ -130,51 +137,77 @@
     {
       "name": "useUnsavedChangesGuard",
       "kind": "FunctionDeclaration",
-      "parameters": ["isDirty", "message"]
+      "parameters": [
+        "isDirty",
+        "message"
+      ]
     }
   ],
   "hooks/use-url-state.ts": [
     {
       "name": "useUrlState",
       "kind": "FunctionDeclaration",
-      "parameters": ["key", "defaultValue"]
+      "parameters": [
+        "key",
+        "defaultValue"
+      ]
     }
   ],
   "lib/data-utils.ts": [
     {
       "name": "exportToCSV",
       "kind": "FunctionDeclaration",
-      "parameters": ["data", "columns", "filename"]
+      "parameters": [
+        "data",
+        "columns",
+        "filename"
+      ]
     },
     {
       "name": "exportToJSON",
       "kind": "FunctionDeclaration",
-      "parameters": ["data", "filename"]
+      "parameters": [
+        "data",
+        "filename"
+      ]
     },
     {
       "name": "downloadTemplate",
       "kind": "FunctionDeclaration",
-      "parameters": ["columns", "filename"]
+      "parameters": [
+        "columns",
+        "filename"
+      ]
     },
     {
       "name": "parseCSV",
       "kind": "FunctionDeclaration",
-      "parameters": ["csvText"]
+      "parameters": [
+        "csvText"
+      ]
     },
     {
       "name": "parseJSON",
       "kind": "FunctionDeclaration",
-      "parameters": ["jsonText"]
+      "parameters": [
+        "jsonText"
+      ]
     },
     {
       "name": "readFileAsText",
       "kind": "FunctionDeclaration",
-      "parameters": ["file"]
+      "parameters": [
+        "file"
+      ]
     },
     {
       "name": "downloadFile",
       "kind": "FunctionDeclaration",
-      "parameters": ["content", "filename", "mimeType"]
+      "parameters": [
+        "content",
+        "filename",
+        "mimeType"
+      ]
     },
     {
       "name": "DataColumn",
@@ -219,22 +252,36 @@
     {
       "name": "addBreadcrumb",
       "kind": "FunctionDeclaration",
-      "parameters": ["message", "category", "data"]
+      "parameters": [
+        "message",
+        "category",
+        "data"
+      ]
     },
     {
       "name": "captureException",
       "kind": "FunctionDeclaration",
-      "parameters": ["error", "context"]
+      "parameters": [
+        "error",
+        "context"
+      ]
     },
     {
       "name": "captureMessage",
       "kind": "FunctionDeclaration",
-      "parameters": ["message", "level", "context"]
+      "parameters": [
+        "message",
+        "level",
+        "context"
+      ]
     },
     {
       "name": "setUser",
       "kind": "FunctionDeclaration",
-      "parameters": ["_userId", "_email"]
+      "parameters": [
+        "_userId",
+        "_email"
+      ]
     },
     {
       "name": "initErrorTracking",
@@ -246,7 +293,9 @@
     {
       "name": "parseFile",
       "kind": "FunctionDeclaration",
-      "parameters": ["file"]
+      "parameters": [
+        "file"
+      ]
     },
     {
       "name": "ParsedFile",
@@ -283,36 +332,50 @@
     {
       "name": "normalizeString",
       "kind": "FunctionDeclaration",
-      "parameters": ["value"]
+      "parameters": [
+        "value"
+      ]
     },
     {
       "name": "normalizeIdentifier",
       "kind": "FunctionDeclaration",
-      "parameters": ["value"]
+      "parameters": [
+        "value"
+      ]
     },
     {
       "name": "normalizeFormData",
       "kind": "FunctionDeclaration",
-      "parameters": ["data", "config"]
+      "parameters": [
+        "data",
+        "config"
+      ]
     }
   ],
   "lib/postgrest-utils.ts": [
     {
       "name": "escapePostgrestSearch",
       "kind": "FunctionDeclaration",
-      "parameters": ["input"]
+      "parameters": [
+        "input"
+      ]
     },
     {
       "name": "buildIlikeFilter",
       "kind": "FunctionDeclaration",
-      "parameters": ["column", "search"]
+      "parameters": [
+        "column",
+        "search"
+      ]
     }
   ],
   "lib/sanitize.ts": [
     {
       "name": "sanitizeHtml",
       "kind": "FunctionDeclaration",
-      "parameters": ["html"]
+      "parameters": [
+        "html"
+      ]
     }
   ],
   "lib/supabase.ts": [
@@ -333,27 +396,37 @@
     {
       "name": "cn",
       "kind": "FunctionDeclaration",
-      "parameters": ["inputs"]
+      "parameters": [
+        "inputs"
+      ]
     },
     {
       "name": "normalizeIdentifier",
       "kind": "FunctionDeclaration",
-      "parameters": ["text"]
+      "parameters": [
+        "text"
+      ]
     },
     {
       "name": "formatIdentifier",
       "kind": "FunctionDeclaration",
-      "parameters": ["text"]
+      "parameters": [
+        "text"
+      ]
     },
     {
       "name": "sanitizeHtml",
       "kind": "FunctionDeclaration",
-      "parameters": ["html"]
+      "parameters": [
+        "html"
+      ]
     },
     {
       "name": "isValidUUID",
       "kind": "FunctionDeclaration",
-      "parameters": ["uuid"]
+      "parameters": [
+        "uuid"
+      ]
     },
     {
       "name": "delay",
@@ -520,7 +593,9 @@
     {
       "name": "Sidebar",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ isOpen = true, onClose, isMobile = false }"]
+      "parameters": [
+        "{ isOpen = true, onClose, isMobile = false }"
+      ]
     }
   ],
   "components/ui/admin-header.tsx": [
@@ -600,7 +675,9 @@
     {
       "name": "Badge",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ className, variant, ...props }"]
+      "parameters": [
+        "{ className, variant, ...props }"
+      ]
     },
     {
       "name": "badgeVariants",
@@ -611,7 +688,9 @@
     {
       "name": "Breadcrumbs",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ items, className }"]
+      "parameters": [
+        "{ items, className }"
+      ]
     },
     {
       "name": "BreadcrumbItem",
@@ -683,7 +762,9 @@
     {
       "name": "ColumnToggle",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ columns, visibleColumns, onToggle }"]
+      "parameters": [
+        "{ columns, visibleColumns, onToggle }"
+      ]
     }
   ],
   "components/ui/data-toolbar.tsx": [
@@ -874,12 +955,18 @@
     {
       "name": "createInlineMathNode",
       "kind": "FunctionDeclaration",
-      "parameters": ["schema", "latex"]
+      "parameters": [
+        "schema",
+        "latex"
+      ]
     },
     {
       "name": "createBlockMathNode",
       "kind": "FunctionDeclaration",
-      "parameters": ["schema", "latex"]
+      "parameters": [
+        "schema",
+        "latex"
+      ]
     },
     {
       "name": "InlineMath",
@@ -894,7 +981,9 @@
     {
       "name": "PageSkeleton",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ variant, rows = 5, className }"]
+      "parameters": [
+        "{ variant, rows = 5, className }"
+      ]
     },
     {
       "name": "SkeletonFilterBar",
@@ -941,7 +1030,9 @@
     {
       "name": "RichTextEditor",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ value, onChange, placeholder, className }"]
+      "parameters": [
+        "{ value, onChange, placeholder, className }"
+      ]
     }
   ],
   "components/ui/select.tsx": [
@@ -1038,7 +1129,9 @@
     {
       "name": "Skeleton",
       "kind": "FunctionDeclaration",
-      "parameters": ["{\r\n  className,\r\n  ...props\r\n}"]
+      "parameters": [
+        "{\r\n  className,\r\n  ...props\r\n}"
+      ]
     }
   ],
   "components/ui/sortable-header.tsx": [
@@ -1054,7 +1147,9 @@
     {
       "name": "StatusBadge",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ status, label, className, icon }"]
+      "parameters": [
+        "{ status, label, className, icon }"
+      ]
     },
     {
       "name": "StatusType",
@@ -1188,12 +1283,16 @@
     {
       "name": "FileUploader",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ onFileParsed, onClear }"]
+      "parameters": [
+        "{ onFileParsed, onClear }"
+      ]
     },
     {
       "name": "QuestionForm",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ initialData }"]
+      "parameters": [
+        "{ initialData }"
+      ]
     },
     {
       "name": "QuestionList",
@@ -1203,7 +1302,9 @@
     {
       "name": "SkillForm",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ initialData }"]
+      "parameters": [
+        "{ initialData }"
+      ]
     },
     {
       "name": "SkillList",
@@ -1228,12 +1329,17 @@
     {
       "name": "usePaginatedDomains",
       "kind": "FunctionDeclaration",
-      "parameters": ["params", "appId"]
+      "parameters": [
+        "params",
+        "appId"
+      ]
     },
     {
       "name": "useDomain",
       "kind": "FunctionDeclaration",
-      "parameters": ["domainId"]
+      "parameters": [
+        "domainId"
+      ]
     },
     {
       "name": "useCreateDomain",
@@ -1287,7 +1393,9 @@
     {
       "name": "usePaginatedPublishHistory",
       "kind": "FunctionDeclaration",
-      "parameters": ["params"]
+      "parameters": [
+        "params"
+      ]
     },
     {
       "name": "usePublishPreview",
@@ -1302,17 +1410,24 @@
     {
       "name": "useQuestions",
       "kind": "FunctionDeclaration",
-      "parameters": ["skillId"]
+      "parameters": [
+        "skillId"
+      ]
     },
     {
       "name": "usePaginatedQuestions",
       "kind": "FunctionDeclaration",
-      "parameters": ["params", "appFilter"]
+      "parameters": [
+        "params",
+        "appFilter"
+      ]
     },
     {
       "name": "useQuestion",
       "kind": "FunctionDeclaration",
-      "parameters": ["question_id"]
+      "parameters": [
+        "question_id"
+      ]
     },
     {
       "name": "useCreateQuestion",
@@ -1361,17 +1476,24 @@
     {
       "name": "useSkills",
       "kind": "FunctionDeclaration",
-      "parameters": ["domainId"]
+      "parameters": [
+        "domainId"
+      ]
     },
     {
       "name": "usePaginatedSkills",
       "kind": "FunctionDeclaration",
-      "parameters": ["params", "appFilter"]
+      "parameters": [
+        "params",
+        "appFilter"
+      ]
     },
     {
       "name": "useSkill",
       "kind": "FunctionDeclaration",
-      "parameters": ["skill_id"]
+      "parameters": [
+        "skill_id"
+      ]
     },
     {
       "name": "useCreateSkill",
@@ -1591,7 +1713,9 @@
     {
       "name": "generateQuestions",
       "kind": "FunctionDeclaration",
-      "parameters": ["request"]
+      "parameters": [
+        "request"
+      ]
     },
     {
       "name": "GenerateQuestionsRequest",
@@ -1606,7 +1730,10 @@
     {
       "name": "governedGenerateQuestions",
       "kind": "FunctionDeclaration",
-      "parameters": ["appId", "request"]
+      "parameters": [
+        "appId",
+        "request"
+      ]
     },
     {
       "name": "GovernedGenerationResponse",
@@ -1617,7 +1744,9 @@
     {
       "name": "validateContent",
       "kind": "FunctionDeclaration",
-      "parameters": ["request"]
+      "parameters": [
+        "request"
+      ]
     },
     {
       "name": "ValidationRule",
@@ -1681,21 +1810,27 @@
     {
       "name": "AuthGuard",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ children }"]
+      "parameters": [
+        "{ children }"
+      ]
     }
   ],
   "features/auth/components/standard-admin-guard.tsx": [
     {
       "name": "StandardAdminGuard",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ children }"]
+      "parameters": [
+        "{ children }"
+      ]
     }
   ],
   "features/auth/components/super-admin-guard.tsx": [
     {
       "name": "SuperAdminGuard",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ children }"]
+      "parameters": [
+        "{ children }"
+      ]
     }
   ],
   "features/auth/pages/AccountSettingsPage.tsx": [
@@ -1760,14 +1895,18 @@
     {
       "name": "FileUploader",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ onFileParsed, onClear }"]
+      "parameters": [
+        "{ onFileParsed, onClear }"
+      ]
     }
   ],
   "features/curriculum/components/question-form.tsx": [
     {
       "name": "QuestionForm",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ initialData }"]
+      "parameters": [
+        "{ initialData }"
+      ]
     }
   ],
   "features/curriculum/components/question-list.tsx": [
@@ -1781,7 +1920,9 @@
     {
       "name": "SkillForm",
       "kind": "FunctionDeclaration",
-      "parameters": ["{ initialData }"]
+      "parameters": [
+        "{ initialData }"
+      ]
     }
   ],
   "features/curriculum/components/skill-list.tsx": [
@@ -1821,12 +1962,17 @@
     {
       "name": "usePaginatedDomains",
       "kind": "FunctionDeclaration",
-      "parameters": ["params", "appId"]
+      "parameters": [
+        "params",
+        "appId"
+      ]
     },
     {
       "name": "useDomain",
       "kind": "FunctionDeclaration",
-      "parameters": ["domainId"]
+      "parameters": [
+        "domainId"
+      ]
     },
     {
       "name": "useCreateDomain",
@@ -1882,7 +2028,9 @@
     {
       "name": "usePaginatedPublishHistory",
       "kind": "FunctionDeclaration",
-      "parameters": ["params"]
+      "parameters": [
+        "params"
+      ]
     },
     {
       "name": "usePublishPreview",
@@ -1899,17 +2047,24 @@
     {
       "name": "useQuestions",
       "kind": "FunctionDeclaration",
-      "parameters": ["skillId"]
+      "parameters": [
+        "skillId"
+      ]
     },
     {
       "name": "usePaginatedQuestions",
       "kind": "FunctionDeclaration",
-      "parameters": ["params", "appFilter"]
+      "parameters": [
+        "params",
+        "appFilter"
+      ]
     },
     {
       "name": "useQuestion",
       "kind": "FunctionDeclaration",
-      "parameters": ["question_id"]
+      "parameters": [
+        "question_id"
+      ]
     },
     {
       "name": "useCreateQuestion",
@@ -1960,17 +2115,24 @@
     {
       "name": "useSkills",
       "kind": "FunctionDeclaration",
-      "parameters": ["domainId"]
+      "parameters": [
+        "domainId"
+      ]
     },
     {
       "name": "usePaginatedSkills",
       "kind": "FunctionDeclaration",
-      "parameters": ["params", "appFilter"]
+      "parameters": [
+        "params",
+        "appFilter"
+      ]
     },
     {
       "name": "useSkill",
       "kind": "FunctionDeclaration",
-      "parameters": ["skill_id"]
+      "parameters": [
+        "skill_id"
+      ]
     },
     {
       "name": "useCreateSkill",
@@ -2312,7 +2474,9 @@
     {
       "name": "useLandingPage",
       "kind": "FunctionDeclaration",
-      "parameters": ["appId"]
+      "parameters": [
+        "appId"
+      ]
     },
     {
       "name": "useUpdateLandingPage",

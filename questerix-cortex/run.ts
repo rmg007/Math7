@@ -26,6 +26,7 @@ const allSuites: Array<{
   { id: 'unit',   name: 'Unit Tests (Lib)',    command: 'npx vitest run src/__tests__/lib/utils.test.ts', tier: 'smoke',   parallel: true  },
   { id: 'lint',   name: 'Lint Check',          command: 'npx eslint src/lib/utils.ts',                  tier: 'smoke',   parallel: true  },
   { id: 'e2e',    name: 'E2E Smoke (Desktop)', command: 'npx playwright test tests/auth-flow.e2e.spec.ts --project=desktop', tier: 'smoke', parallel: false },
+  { id: 'perf',   name: 'Performance Bench',   command: 'npx playwright test tests/performance.e2e.spec.ts', tier: 'smoke', parallel: false },
 
   // Deep — heavier, but tsc + audit are independent
   { id: 'tsc',             name: 'TypeScript Strict',      command: 'npx tsc --noEmit',                         tier: 'deep',    parallel: true  },
@@ -88,9 +89,10 @@ async function main() {
     );
     scanner.writeApiMap(surfaceMap, outputsPath);
 
-    let analystResults: { deadCode: string[]; bundleSize: number | null } = {
+    let analystResults: { deadCode: string[]; bundleSize: number | null; perfGaps: string[] } = {
       deadCode: [],
       bundleSize: analyst.getBundleSize(adminPath),
+      perfGaps: analyst.checkPerformanceInstrumentation(),
     };
 
     // ── Intelligence checks (fast, no test runner) ──────────────────────────
@@ -162,6 +164,7 @@ async function main() {
 
     // ── Post-run analysis ─────────────────────────────────────────────────────
     analystResults.deadCode = analyst.findDeadCode().slice(0, 10);
+    analystResults.perfGaps = analyst.checkPerformanceInstrumentation();
 
     const results    = orchestrator.getResults();
     const allResults = Object.values(results);

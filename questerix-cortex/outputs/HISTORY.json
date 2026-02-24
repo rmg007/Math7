@@ -1,17 +1,5 @@
 [
   {
-    "date": "2026-02-24T19:20:38.744Z",
-    "score": 100,
-    "coverage": 0,
-    "failures": 0
-  },
-  {
-    "date": "2026-02-24T19:22:58.469Z",
-    "score": 100,
-    "coverage": 0,
-    "failures": 0
-  },
-  {
     "date": "2026-02-24T19:34:40.699Z",
     "score": 100,
     "coverage": 0,
@@ -175,6 +163,18 @@
   },
   {
     "date": "2026-02-24T23:40:04.823Z",
+    "score": 100,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-24T23:41:58.311Z",
+    "score": 100,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-24T23:42:11.061Z",
     "score": 100,
     "coverage": 0,
     "failures": 0

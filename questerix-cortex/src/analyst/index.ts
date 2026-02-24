@@ -31,6 +31,28 @@ export class Analyst {
     return deadCode;
   }
 
+  /**
+   * Scans for useQuery hooks that lack performance.mark instrumentation.
+   * Encourages a 'Performance First' culture by flagging un-instrumented data fetching.
+   */
+  checkPerformanceInstrumentation(): string[] {
+    const uninstrumented: string[] = [];
+    const sourceFiles = this.project.getSourceFiles();
+
+    for (const sourceFile of sourceFiles) {
+      const fullText = sourceFile.getFullText();
+      
+      // Simple heuristic: if useQuery is used but performance.mark is missing
+      if (fullText.includes('useQuery') && !fullText.includes('performance.mark')) {
+        const filePath = sourceFile.getFilePath().replace(/\\/g, '/');
+        const relativePath = filePath.split('/admin-panel/src/')[1] || filePath;
+        uninstrumented.push(relativePath);
+      }
+    }
+
+    return uninstrumented;
+  }
+
   getBundleSize(adminPath: string) {
     const distPath = path.join(adminPath, 'dist');
     if (!fs.existsSync(distPath)) return null;
