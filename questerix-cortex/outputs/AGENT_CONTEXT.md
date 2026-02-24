@@ -12,4 +12,5 @@
   - Missing E2E/Unit test for page: features/ai-assistant/pages/GenerationPage.tsx
   - Missing E2E/Unit test for page: features/ai-assistant/pages/GovernancePage.tsx
 
-## ✅ All Green
+## 🚨 Failures
+- **Performance Bench**: failing — see FAILURE_DIGEST.md

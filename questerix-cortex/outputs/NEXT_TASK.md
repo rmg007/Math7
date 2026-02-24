@@ -2,13 +2,14 @@
 
 > Copy and paste to agent.
 
+### 🛠️ P0: Fix Regressions
+- [ ] Fix **Performance Bench** — see FAILURE_DIGEST.md for exact errors
+
 ### 🧪 P1: Fill Coverage Gaps
 - [ ] Missing test for hook: hooks/use-debounce.ts
 - [ ] Missing test for hook: hooks/use-unsaved-changes-guard.ts
 - [ ] Missing test for hook: hooks/use-url-state.ts
 
-### 🚀 P2: Proceed with Backlog
-- [ ] Codebase stable. Ready for next feature.
 
 ---
 ## ⚠️ Anti-Hallucination Guardrails

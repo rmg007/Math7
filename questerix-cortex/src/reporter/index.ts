@@ -118,6 +118,12 @@ export class Reporter {
       if (analystResults.perfGaps.length > 10) md += `*... and ${analystResults.perfGaps.length - 10} more*\n`;
     }
 
+    if (analystResults?.migrationGaps?.length > 0) {
+      md += '\n## 🛡️ Migration Governance\n';
+      md += `**RLS Violations**: ${analystResults.migrationGaps.length} detected in migrations\n`;
+      analystResults.migrationGaps.forEach((g: string) => md += `- [ ] \`${g}\`\n`);
+    }
+
     if (surfaceMap?.gaps?.length > 0) {
       md += '\n## 🚨 Coverage Gaps\n';
       surfaceMap.gaps.forEach((gap: string) => md += `- [ ] ${gap}\n`);
@@ -213,7 +219,8 @@ export class Reporter {
     md += `RLS Audit:  ${rlsStr}\n`;
     md += `Bundle:     ${analystResults?.bundleSize ? analystResults.bundleSize + ' KB' : 'not built'}\n`;
     md += `Coverage gaps: ${surfaceMap?.gaps?.length ?? 0}\n`;
-    md += `Perf gaps:     ${analystResults?.perfGaps?.length ?? 0}\n\n`;
+    md += `Perf gaps:     ${analystResults?.perfGaps?.length ?? 0}\n`;
+    md += `Migration gaps: ${analystResults?.migrationGaps?.length ?? 0}\n\n`;
 
     md += `## FAILURES\n${failureLines}\n\n`;
 
@@ -230,6 +237,12 @@ export class Reporter {
     md += `4. If RLS = NOT RUN, trigger it before any schema work\n`;
     md += `5. Check API_MAP.json before calling any hook method\n`;
     md += `6. Check UTILITY_REGISTRY.md before writing any new helper\n\n`;
+
+    md += `## 🤝 MANDATORY HANDSHAKE\n`;
+    md += `> AGENT: You must acknowledge this briefing. Before taking ANY action, summarize:\n`;
+    md += `> - The top failure (if any) from FAILURE_DIGEST.md\n`;
+    md += `> - The P0/P1 task from NEXT_TASK.md\n`;
+    md += `> - Any critical RLS or Drift warnings found above.\n\n`;
 
     // CONVENTIONS — extracted from GEMINI.md
     md += `## CONVENTIONS (extracted from GEMINI.md)\n`;

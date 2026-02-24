@@ -1,14 +1,31 @@
 # 🩺 Questerix Health Report
 
-*Generated: 2/24/2026, 3:42:11 PM*
+*Generated: 2/24/2026, 3:55:15 PM*
 
-## Overall Health Score: 100/100
+## Overall Health Score: 75/100
 
 | Suite | Status | Duration |
 | :--- | :--- | :--- |
-| Git Ship (Push) | ✅ PASSED | 9.2s |
+| Unit Tests (Lib) | ✅ PASSED | 6.1s |
+| Lint Check | ✅ PASSED | 3.4s |
+| E2E Smoke (Desktop) | ✅ PASSED | 39.9s |
+| Performance Bench | ❌ FAILED | 6.6s |
 
 **Production Bundle**: 7427 KB
+
+## ⚡ Performance Audit
+**Uninstrumented hooks**: 16 missing `performance.mark`
+- [ ] `features/curriculum/hooks/use-dashboard.ts`
+- [ ] `features/curriculum/hooks/use-domains.ts`
+- [ ] `features/curriculum/hooks/use-publish.ts`
+- [ ] `features/curriculum/hooks/use-questions.ts`
+- [ ] `features/curriculum/hooks/use-skills.ts`
+- [ ] `features/curriculum/pages/version-history-page.tsx`
+- [ ] `features/dashboard/pages/DashboardPage.tsx`
+- [ ] `features/mentorship/hooks/use-groups.ts`
+- [ ] `features/mentorship/pages/AssignmentCreatePage.tsx`
+- [ ] `features/mentorship/pages/GroupDetailPage.tsx`
+*... and 6 more*
 
 ## 🚨 Coverage Gaps
 - [ ] Missing test for hook: hooks/use-debounce.ts
@@ -56,4 +73,14 @@
 
 ## Failure Digest
 
-✅ No failures. System stable.
+### Performance Bench
+```
+[dotenv@17.2.3] injecting env (10) from .env.test.local -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ⚙️  write to custom object with { processEnv: myObject }
+Error: No tests found.
+Make sure that arguments are regular expressions matching test files.
+You may need to escape symbols like "$" or "*" and quote the arguments.
+
+
+```
+

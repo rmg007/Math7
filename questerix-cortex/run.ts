@@ -89,10 +89,16 @@ async function main() {
     );
     scanner.writeApiMap(surfaceMap, outputsPath);
 
-    let analystResults: { deadCode: string[]; bundleSize: number | null; perfGaps: string[] } = {
+    let analystResults: { 
+      deadCode: string[]; 
+      bundleSize: number | null; 
+      perfGaps: string[];
+      migrationGaps: string[];
+    } = {
       deadCode: [],
       bundleSize: analyst.getBundleSize(adminPath),
       perfGaps: analyst.checkPerformanceInstrumentation(),
+      migrationGaps: analyst.lintMigrations(path.join(supabasePath, 'migrations')),
     };
 
     // ── Intelligence checks (fast, no test runner) ──────────────────────────
@@ -165,6 +171,7 @@ async function main() {
     // ── Post-run analysis ─────────────────────────────────────────────────────
     analystResults.deadCode = analyst.findDeadCode().slice(0, 10);
     analystResults.perfGaps = analyst.checkPerformanceInstrumentation();
+    analystResults.migrationGaps = analyst.lintMigrations(path.join(supabasePath, 'migrations'));
 
     const results    = orchestrator.getResults();
     const allResults = Object.values(results);

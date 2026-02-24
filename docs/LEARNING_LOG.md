@@ -5614,3 +5614,15 @@ The Subjects page is now a **production-ready admin interface**. Next phases:
 **Root Cause**: The Cortex Orchestrator had a 300_000ms (5-minute) hard cap. certify-evidence.ps1 runs preflight, tests, and hygiene in parallel — this legitimately exceeds 5 minutes.
 **Fix Applied**: Increased timeout in questerix-cortex/src/orchestrator/index.ts from 300_000 to 900_000 (15 minutes).
 **Prevention Rule**: Any task that delegates to other scripts must be allocated at least 15 minutes. Never apply a global short timeout to compound orchestrator tasks.
+
+---
+
+## [2026-02-24] Cortex Auto-Entry
+
+### Suite: Performance Bench
+**First Error**: `Error: No tests found.`
+**Duration**: 6.6s
+**Root Cause**: *[Agent to fill in]*
+**Fix Applied**: *[Agent to fill in]*
+**Prevention Rule**: *[Agent to fill in]*
+

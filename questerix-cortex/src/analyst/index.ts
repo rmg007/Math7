@@ -71,4 +71,40 @@ export class Analyst {
     walk(distPath);
     return Math.round(totalSize / 1024); // KB
   }
+
+  /**
+   * Scans Supabase migrations for RLS governance violations.
+   * Required by GEMINI.md: CREATE TABLE must be followed by ENABLE RLS.
+   */
+  lintMigrations(migrationsPath: string): string[] {
+    const violations: string[] = [];
+    if (!fs.existsSync(migrationsPath)) return violations;
+
+    const files = fs.readdirSync(migrationsPath).filter(f => f.endsWith('.sql'));
+
+    for (const file of files) {
+      const content = fs.readFileSync(path.join(migrationsPath, file), 'utf-8');
+      
+      // Heuristic 1: If CREATE TABLE exists but ENABLE ROW LEVEL SECURITY doesn't
+      const tableMatches = [...content.matchAll(/CREATE\s+TABLE\s+(?:public\.)?(\w+)/gi)];
+      for (const match of tableMatches) {
+        const tableName = match[1];
+        if (!content.toLowerCase().includes(`enable row level security`)) {
+          violations.push(`${file}: Table '${tableName}' missing ENABLE ROW LEVEL SECURITY`);
+        }
+      }
+
+      // Heuristic 2: Check for mandatory admin tables missing 'intentional' comments if no policy found
+      const adminTables = ['known_issues', 'error_logs', 'source_documents', 'curriculum_meta'];
+      for (const table of adminTables) {
+        if (content.includes(table) && !content.toLowerCase().includes('policy')) {
+          if (!content.includes('-- Operation intentionally omitted')) {
+            violations.push(`${file}: Admin table '${table}' missing policies or mandatory omission comment`);
+          }
+        }
+      }
+    }
+
+    return violations;
+  }
 }

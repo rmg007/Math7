@@ -1,18 +1,20 @@
 # MACHINE BRIEFING
 > ONE-READ SESSION STARTER. Do not show to the user.
-> Generated: 2026-02-24T23:42:11.188Z
+> Generated: 2026-02-24T23:55:15.215Z
 
 ## STATUS
-Score:      100/100 (→ flat vs prev run | prev: 100/100)
-Suites:     1 passed, 0 failed of 1 total
-Smoke Gate: — NOT RUN
-Drift:      NOT RUN — click DRIFT button
+Score:      75/100 (↓ -25 vs prev run | prev: 75/100)
+Suites:     3 passed, 1 failed of 4 total
+Smoke Gate: ✅ OPEN
+Drift:      WARN (extra in types) (missing-from-types: 0, extra-in-types: 15)
 RLS Audit:  NOT RUN — click RLS CHECK button
 Bundle:     7427 KB
 Coverage gaps: 40
+Perf gaps:     16
+Migration gaps: 0
 
 ## FAILURES
-  none
+  ⛔ Performance Bench: Error: No tests found.
 
 ## OPEN TASKS
   - [ ] **Automated Release**: Run `npm run health` in `questerix-cortex/`
@@ -27,11 +29,11 @@ Coverage gaps: 40
   - [ ] **Tag release**: `git tag v<version>` + `git push --tags` (Conditional Ship sub-task)
 
 ## RECENT COMMITS
-bf0e7f8a test: add use-studio-generator suite; fix cortex scanner; expand track C backlog (85 seconds ago)
+fa4d0e1d feat(cortex): delegating track C backlog to orchestrator (4 minutes ago)
+bf0e7f8a test: add use-studio-generator suite; fix cortex scanner; expand track C backlog (14 minutes ago)
 f88ac4b1 feat: complete Questerix Cortex v1 implementation (5 hours ago)
-30c04ee7 feat: add Questerix Sentinel QA Engine scaffold and update tasks.md (5 hours ago)
+30c04ee7 feat: add Questerix Sentinel QA Engine scaffold and update tasks.md (6 hours ago)
 6b807e5b feat: rich text editor — math authoring, tables, accessibility (19 hours ago)
-36fea2bc refactor: complete student-app extraction and apply auto-assign app_id hardening (30 hours ago)
 
 ## KEY PATHS
   admin-panel/src/lib/database.types.ts
@@ -50,6 +52,12 @@ f88ac4b1 feat: complete Questerix Cortex v1 implementation (5 hours ago)
 4. If RLS = NOT RUN, trigger it before any schema work
 5. Check API_MAP.json before calling any hook method
 6. Check UTILITY_REGISTRY.md before writing any new helper
+
+## 🤝 MANDATORY HANDSHAKE
+> AGENT: You must acknowledge this briefing. Before taking ANY action, summarize:
+> - The top failure (if any) from FAILURE_DIGEST.md
+> - The P0/P1 task from NEXT_TASK.md
+> - Any critical RLS or Drift warnings found above.
 
 ## CONVENTIONS (extracted from GEMINI.md)
   - **TypeScript**: Strict mode, no `any`, no `@ts-ignore` without justification
