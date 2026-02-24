@@ -273,4 +273,72 @@ export class Scanner {
 
     fs.writeFileSync(mdPath, md, 'utf-8');
   }
+
+  generateSkeletons(map: SurfaceMap): string[] {
+    const generated: string[] = [];
+
+    // ── Hooks (Vitest) ──────────────────────────────────────────
+    for (const hook of map.hooks) {
+      if (hook.hasTest) continue;
+
+      const testDir = path.join(this.projectRoot, 'src', '__tests__', path.dirname(hook.file));
+      const testFile = path.join(testDir, `${path.basename(hook.file, path.extname(hook.file))}.test.ts`);
+
+      if (fs.existsSync(testFile)) continue;
+
+      if (!fs.existsSync(testDir)) fs.mkdirSync(testDir, { recursive: true });
+
+      let content = `import { renderHook } from '@testing-library/react';\n`;
+      content += `import { describe, it, expect, vi } from 'vitest';\n`;
+      content += `import { ${hook.name} } from '@/admin-panel/src/${hook.file.replace('.ts', '')}';\n\n`;
+      content += `describe('${hook.name}', () => {\n`;
+      content += `  it('should initialize correctly', () => {\n`;
+      content += `    const { result } = renderHook(() => ${hook.name}());\n`;
+      content += `    expect(result.current).toBeDefined();\n`;
+      content += `  });\n\n`;
+
+      hook.exports.forEach(exp => {
+        if (exp.kind === 'FunctionDeclaration' || exp.kind === 'ArrowFunction') {
+          if (exp.name === hook.name) return;
+          content += `  it('should handle ${exp.name} correctly', () => {\n`;
+          content += `    // TODO: Implement test for ${exp.name}\n`;
+          content += `  });\n\n`;
+        }
+      });
+
+      content += `});\n`;
+
+      fs.writeFileSync(testFile, content, 'utf-8');
+      generated.push(testFile);
+    }
+
+    // ── Pages (Playwright) ──────────────────────────────────────
+    for (const page of map.pages) {
+      if (page.hasTest) continue;
+
+      const testDir = path.join(this.projectRoot, 'tests');
+      const testFile = path.join(testDir, `${page.name}.spec.ts`);
+
+      if (fs.existsSync(testFile)) continue;
+
+      let content = `import { test, expect } from '@playwright/test';\n\n`;
+      content += `test.describe('${page.name} Page', () => {\n`;
+      content += `  test.beforeEach(async ({ page }) => {\n`;
+      content += `    // TODO: Update with actual route\n`;
+      content += `    await page.goto('/${page.name.toLowerCase()}');\n`;
+      content += `  });\n\n`;
+      content += `  test('should render basic elements', async ({ page }) => {\n`;
+      content += `    await expect(page.locator('h1')).toBeVisible();\n`;
+      content += `  });\n\n`;
+      content += `  test('should pass accessibility check', async ({ page }) => {\n`;
+      content += `    // TODO: Add axe-core check\n`;
+      content += `  });\n`;
+      content += `});\n`;
+
+      fs.writeFileSync(testFile, content, 'utf-8');
+      generated.push(testFile);
+    }
+
+    return generated;
+  }
 }

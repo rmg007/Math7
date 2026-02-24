@@ -70,8 +70,10 @@ async function main() {
   await open(`http://localhost:${config.dashboardPort}`);
 
   // ── Core run function ─────────────────────────────────────────────────────
-  const executeRun = async (target: string = 'all') => {
+  const executeRun = async (target: string = 'all', flags: string[] = []) => {
     const targets = target.split(',').map(t => t.trim());
+    const generateSkeletons = flags.includes('--generate-skeletons');
+    
     console.log(chalk.cyan.bold(`\n🔄 Run (${target}) started…`));
     dashboard.log(`\n🔄 Run (${target}) started…`, 'cyan', true);
 
@@ -88,6 +90,19 @@ async function main() {
       JSON.stringify(surfaceMap, null, 2)
     );
     scanner.writeApiMap(surfaceMap, outputsPath);
+
+    if (generateSkeletons) {
+      console.log(chalk.yellow('\n🧪 Generating test skeletons for gaps…'));
+      dashboard.log('\n🧪 Generating test skeletons for gaps…', 'yellow');
+      const skels = scanner.generateSkeletons(surfaceMap);
+      if (skels.length > 0) {
+        console.log(chalk.green(`   ✅ Generated ${skels.length} skeletons.`));
+        dashboard.log(`   ✅ Generated ${skels.length} skeletons.`, 'green');
+      } else {
+        console.log(chalk.gray('   ⏭️ No new gaps requiring skeletons.'));
+        dashboard.log('   ⏭️ No new gaps requiring skeletons.', 'gray');
+      }
+    }
 
     let analystResults: { 
       deadCode: string[]; 
@@ -223,7 +238,11 @@ async function main() {
   });
 
   // Initial run
-  await executeRun();
+  const args = process.argv.slice(2);
+  const targetArg = args.find(a => !a.startsWith('--')) || 'all';
+  const flags = args.filter(a => a.startsWith('--'));
+
+  await executeRun(targetArg, flags);
 }
 
 main().catch(err => {

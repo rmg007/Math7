@@ -1,15 +1,15 @@
 # 🩺 Questerix Health Report
 
-*Generated: 2/24/2026, 3:55:15 PM*
+*Generated: 2/24/2026, 3:58:26 PM*
 
 ## Overall Health Score: 75/100
 
 | Suite | Status | Duration |
 | :--- | :--- | :--- |
-| Unit Tests (Lib) | ✅ PASSED | 6.1s |
-| Lint Check | ✅ PASSED | 3.4s |
-| E2E Smoke (Desktop) | ✅ PASSED | 39.9s |
-| Performance Bench | ❌ FAILED | 6.6s |
+| Unit Tests (Lib) | ✅ PASSED | 6.0s |
+| Lint Check | ✅ PASSED | 3.9s |
+| E2E Smoke (Desktop) | ✅ PASSED | 29.6s |
+| Performance Bench | ❌ FAILED | 5.7s |
 
 **Production Bundle**: 7427 KB
 
@@ -75,8 +75,8 @@
 
 ### Performance Bench
 ```
-[dotenv@17.2.3] injecting env (10) from .env.test.local -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
-[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ⚙️  write to custom object with { processEnv: myObject }
+[dotenv@17.2.3] injecting env (10) from .env.test.local -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
 Error: No tests found.
 Make sure that arguments are regular expressions matching test files.
 You may need to escape symbols like "$" or "*" and quote the arguments.

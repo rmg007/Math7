@@ -141,6 +141,7 @@ export class Dashboard {
             .t-cyan { color: #22d3ee; font-weight: 700; }
             .t-green { color: #4ade80; }
             .t-red { color: #f87171; }
+            .t-yellow { color: #fbbf24; }
             .t-gray { color: #64748b; }
             .t-bold { font-weight: 700; }
 
@@ -476,7 +477,7 @@ export class Dashboard {
     });
   }
 
-  log(text: string, color?: 'cyan' | 'green' | 'red' | 'gray', bold: boolean = false) {
+  log(text: string, color?: 'cyan' | 'green' | 'red' | 'gray' | 'yellow', bold: boolean = false) {
     const logItem = { text, color, bold };
     this.logs.push(logItem);
     if (this.logs.length > 100) this.logs.shift(); // Keep last 100 lines

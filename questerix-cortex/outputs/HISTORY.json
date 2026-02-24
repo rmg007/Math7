@@ -1,11 +1,5 @@
 [
   {
-    "date": "2026-02-24T19:48:19.828Z",
-    "score": 100,
-    "coverage": 0,
-    "failures": 0
-  },
-  {
     "date": "2026-02-24T19:48:34.356Z",
     "score": 100,
     "coverage": 0,
@@ -175,6 +169,12 @@
   },
   {
     "date": "2026-02-24T23:55:15.089Z",
+    "score": 75,
+    "coverage": 0,
+    "failures": 1
+  },
+  {
+    "date": "2026-02-24T23:58:26.957Z",
     "score": 75,
     "coverage": 0,
     "failures": 1

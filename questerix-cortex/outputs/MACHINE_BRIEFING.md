@@ -1,12 +1,12 @@
 # MACHINE BRIEFING
 > ONE-READ SESSION STARTER. Do not show to the user.
-> Generated: 2026-02-24T23:55:15.215Z
+> Generated: 2026-02-24T23:58:27.159Z
 
 ## STATUS
-Score:      75/100 (↓ -25 vs prev run | prev: 75/100)
+Score:      75/100 (→ flat vs prev run | prev: 75/100)
 Suites:     3 passed, 1 failed of 4 total
 Smoke Gate: ✅ OPEN
-Drift:      WARN (extra in types) (missing-from-types: 0, extra-in-types: 15)
+Drift:      NOT RUN — click DRIFT button
 RLS Audit:  NOT RUN — click RLS CHECK button
 Bundle:     7427 KB
 Coverage gaps: 40
@@ -29,11 +29,11 @@ Migration gaps: 0
   - [ ] **Tag release**: `git tag v<version>` + `git push --tags` (Conditional Ship sub-task)
 
 ## RECENT COMMITS
-fa4d0e1d feat(cortex): delegating track C backlog to orchestrator (4 minutes ago)
-bf0e7f8a test: add use-studio-generator suite; fix cortex scanner; expand track C backlog (14 minutes ago)
+cf65ddf5 feat(cortex): maintenance tier 2 — handshake & migration linter (3 minutes ago)
+fa4d0e1d feat(cortex): delegating track C backlog to orchestrator (7 minutes ago)
+bf0e7f8a test: add use-studio-generator suite; fix cortex scanner; expand track C backlog (18 minutes ago)
 f88ac4b1 feat: complete Questerix Cortex v1 implementation (5 hours ago)
 30c04ee7 feat: add Questerix Sentinel QA Engine scaffold and update tasks.md (6 hours ago)
-6b807e5b feat: rich text editor — math authoring, tables, accessibility (19 hours ago)
 
 ## KEY PATHS
   admin-panel/src/lib/database.types.ts
