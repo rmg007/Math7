@@ -70,17 +70,17 @@
 
 ---
 
-## 🛠️ Phase 4: Questerix Sentinel — QA Engine & Live Dashboard
+## 🛠️ Phase 4: Questerix Cortex — Session Handover System
 
-> **Goal**: A standalone `questerix-qa/` utility that semantically maps the codebase, generates risk-weighted test cases, runs the full test suite with live browser progress, and outputs a premium health report.
+> **Goal**: A persistent intelligence layer in `questerix-cortex/` that manages project health, history, and AI-agent briefings.
 
-- [x] **4.0 Architecture**: Plan approved (`questerix-qa/ARCHITECTURE.md`).
-- [ ] **4.1 Infrastructure**: Initialize `questerix-qa/` as a standalone Node.js/TypeScript project (package.json, tsconfig).
-- [ ] **4.2 Semantic Scanner**: `ts-morph`-powered walker — maps Pages, Hooks, Services and their test coverage status → `SURFACE_MAP.json`.
-- [ ] **4.3 Risk-Weighted Factory**: Reads Surface Map, identifies logic gaps, generates prioritized `TEST_PLAN.md` (P0 mutations, P1 auth paths, P2 utilities).
-- [ ] **4.4 Unified Orchestrator**: Single command runs Vitest → Playwright (all viewports) → ESLint → RLS audit in sequence.
-- [ ] **4.5 Live Browser Dashboard**: Local server opens `http://localhost:5050` automatically — real-time progress as suites run, no terminal watching needed.
-- [ ] **4.6 Premium Reporter**: Outputs `HEALTH_REPORT.md` — Health Score, Coverage Heat Map, Failure Digest, and pre-written AI Agent Action Items.
+- [x] **4.0 Architecture**: Final plan approved (`questerix-cortex/ARCHITECTURE.md`).
+- [x] **4.1 Core Infrastructure**: Initialize `questerix-cortex/` with `package.json`, `tsconfig`, and `cortex.config.json`.
+- [x] **4.2 Orchestrator & Live UI**: Implement the health runner + `localhost:5050` real-time progress dashboard.
+- [x] **4.3 Semantic Scanner**: `ts-morph` mapper to identify unprotected logic and coverage gaps.
+- [x] **4.4 Analyst Module**: Implement schema drift detection, dead code hunting, and migration safety audits.
+- [x] **4.5 Intelligence Loop**: Generate the three outputs (`AGENT_CONTEXT`, `NEXT_TASK`, `HEALTH_REPORT`) with P0→P2 logic.
+- [x] **4.6 Historian**: Trend tracking for health scores and coverage across sessions (last 30 runs).
 
 ---
 

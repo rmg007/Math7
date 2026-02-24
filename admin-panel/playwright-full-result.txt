@@ -990,3 +990,380 @@ Navigating to /apps...
 [dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöæ add access controls to secrets: https://dotenvx.com/ops
 [dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: Γ£à audit secrets and track compliance: https://dotenvx.com/ops
 [dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+  -  327 [mobile] ΓÇ║ tests\verify-icon-removal.spec.ts:31:5 ΓÇ║ Icon Removal Verification ΓÇ║ should not have decorative icons in /domains table
+  -  328 [mobile] ΓÇ║ tests\verify-icon-removal.spec.ts:31:5 ΓÇ║ Icon Removal Verification ΓÇ║ should not have decorative icons in /skills table
+  -  329 [mobile] ΓÇ║ tests\verify-icon-removal.spec.ts:31:5 ΓÇ║ Icon Removal Verification ΓÇ║ should not have decorative icons in /questions table
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöæ add access controls to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+  Γ£ÿ  330 [mobile] ΓÇ║ tests\visual-regression.spec.ts:39:3 ΓÇ║ Visual Regression ΓÇö Key Pages ΓÇ║ Dashboard (10.8s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+  Γ£ÿ  331 [mobile] ΓÇ║ tests\visual-regression.spec.ts:51:3 ΓÇ║ Visual Regression ΓÇö Key Pages ΓÇ║ Domains List (10.3s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+  Γ£ÿ  332 [mobile] ΓÇ║ tests\visual-regression.spec.ts:64:3 ΓÇ║ Visual Regression ΓÇö Key Pages ΓÇ║ Skills List (11.2s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöæ add access controls to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+  Γ£ÿ  333 [mobile] ΓÇ║ tests\visual-regression.spec.ts:77:3 ΓÇ║ Visual Regression ΓÇö Key Pages ΓÇ║ Questions List (13.8s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+  Γ£ô  334 [mobile] ΓÇ║ tests\visual-regression.spec.ts:90:3 ΓÇ║ Visual Regression ΓÇö Key Pages ΓÇ║ Login Page (logged out) (8.7s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒôí add observability to secrets: https://dotenvx.com/ops
+# Accessibility Audit Report
+
+## Dashboard (/dashboard)
+Total violations: 0 | Critical/Serious: 0
+
+---
+
+## Domains (/domains)
+Total violations: 0 | Critical/Serious: 0
+
+---
+
+## Questions (/questions)
+Total violations: 0 | Critical/Serious: 0
+
+---
+
+## Bulk Import (/ai-import)
+Total violations: 0 | Critical/Serious: 0
+
+---
+
+  Γ£ô  335 [tablet] ΓÇ║ tests\a11y-audit.spec.ts:30:1 ΓÇ║ Audit all pages (23.7s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+  Γ£ô  336 [tablet] ΓÇ║ tests\accessibility.spec.ts:59:3 ΓÇ║ Accessibility Audit ΓÇ║ Login page (3.2s)
+  Γ£ô  337 [tablet] ΓÇ║ tests\accessibility.spec.ts:79:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Dashboard (11.6s)
+  Γ£ô  338 [tablet] ΓÇ║ tests\accessibility.spec.ts:95:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Domains List (10.6s)
+  Γ£ô  339 [tablet] ΓÇ║ tests\accessibility.spec.ts:111:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Questions List (10.6s)
+  Γ£ô  340 [tablet] ΓÇ║ tests\accessibility.spec.ts:127:5 ΓÇ║ Accessibility Audit ΓÇ║ Authenticated pages ΓÇ║ Bulk Import (10.2s)
+Seeding test data...
+Test data seeded successfully.
+  Γ£ô  341 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:114:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should load login page (2.1s)
+  Γ£ô  342 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:121:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should login with valid credentials (4.9s)
+BROWSER ERROR: Failed to load resource: the server responded with a status of 400 ()
+  Γ£ô  343 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:126:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should show error with invalid credentials (2.7s)
+  Γ£ô  344 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:134:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should logout successfully (4.7s)
+  Γ£ô  345 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:179:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Authentication ΓÇ║ should redirect to login when accessing protected route without auth (1.8s)
+BROWSER ERROR: TypeError: Load failed
+  Γ£ô  346 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:192:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Dashboard ΓÇ║ should load dashboard (5.3s)
+BROWSER ERROR: TypeError: Load failed
+  Γ£ô  347 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:197:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Dashboard ΓÇ║ should navigate to different sections from dashboard (5.6s)
+BROWSER ERROR: TypeError: Load failed
+  Γ£ô  348 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:226:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should list all domains (5.0s)
+BROWSER ERROR: TypeError: Load failed
+  Γ£ô  349 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:233:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should create a new domain (8.1s)
+BROWSER ERROR: TypeError: Load failed
+  -  350 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:277:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should edit an existing domain
+BROWSER ERROR: TypeError: Load failed
+  -  351 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:315:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Domains Management ΓÇ║ should delete a domain
+BROWSER ERROR: TypeError: Load failed
+  Γ£ô  352 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:351:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Skills Management ΓÇ║ should list all skills (4.2s)
+BROWSER ERROR: TypeError: Load failed
+  Γ£ô  353 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:358:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Skills Management ΓÇ║ should create a new skill (6.9s)
+BROWSER ERROR: TypeError: Load failed
+  Γ£ô  354 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:385:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Questions Management ΓÇ║ should list all questions (5.7s)
+BROWSER ERROR: TypeError: Load failed
+Cleaning up test data...
+  Γ£ô  355 [tablet] ΓÇ║ tests\admin-panel.e2e.spec.ts:392:5 ΓÇ║ Admin Panel E2E Tests ΓÇ║ Questions Management ΓÇ║ should create a new MCQ question (11.3s)
+  Γ£ô  356 [tablet] ΓÇ║ tests\ai-generation.e2e.spec.ts:120:3 ΓÇ║ AI Generation Flow ΓÇ║ should allow uploading a document and generating questions (6.0s)
+BROWSER ERROR: TypeError: Load failed
+BROWSER ERROR: Warning: validateDOMNesting(...): %s cannot appear as a child of <%s>.%s%s%s <h2> h2   
+h2
+Primitive.h2@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:313:49
+DialogTitle@http://localhost:5000/node_modules/.vite/deps/chunk-FTFN6A64.js:366:51
+_c7@http://localhost:5000/src/components/ui/dialog.tsx:148:10
+h2
+div
+div
+form
+FormProvider@http://localhost:5000/node_modules/.vite/deps/chunk-AXUYJGXJ.js:393:200
+div
+Primitive.div@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:313:49
+DismissableLayer@http://localhost:5000/node_modules/.vite/deps/chunk-3OGW5SX2.js:66:14
+Primitive.div.SlotClone@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:223:45
+Primitive.div.Slot@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:200:45
+Primitive.div@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:313:49
+FocusScope@http://localhost:5000/node_modules/.vite/deps/chunk-F77LVUXE.js:39:12
+@http://localhost:5000/node_modules/.vite/deps/chunk-FTFN6A64.js:327:99
+@http://localhost:5000/node_modules/.vite/deps/chunk-FTFN6A64.js:250:57
+Presence@http://localhost:5000/node_modules/.vite/deps/chunk-BXCYK5RW.js:24:38
+DialogContent@http://localhost:5000/node_modules/.vite/deps/chunk-FTFN6A64.js:241:63
+Primitive.div.SlotClone@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:223:45
+Primitive.div.Slot@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:200:45
+Primitive.div@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:313:49
+Portal@http://localhost:5000/node_modules/.vite/deps/chunk-3OGW5SX2.js:258:61
+Presence@http://localhost:5000/node_modules/.vite/deps/chunk-BXCYK5RW.js:24:38
+DialogPortalProvider@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:44:52
+DialogPortal@http://localhost:5000/node_modules/.vite/deps/chunk-FTFN6A64.js:203:67
+_c3@http://localhost:5000/src/components/ui/dialog.tsx:49:10
+DialogProvider@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:44:52
+Dialog@http://localhost:5000/node_modules/.vite/deps/chunk-FTFN6A64.js:149:12
+div
+AppsPage@http://localhost:5000/src/features/platform/pages/AppsPage.tsx:513:57
+Suspense
+SuperAdminGuard@http://localhost:5000/src/features/auth/components/super-admin-guard.tsx:22:5
+ErrorBoundary@http://localhost:5000/src/components/ErrorBoundary.tsx:8:10
+RenderedRoute@http://localhost:5000/node_modules/.vite/deps/react-router-dom.js:4134:11
+Outlet@http://localhost:5000/node_modules/.vite/deps/react-router-dom.js:4537:25
+div
+main
+div
+div
+AppLayout@http://localhost:5000/src/components/layout/app-layout.tsx:27:65
+AuthGuard@http://localhost:5000/src/features/auth/components/auth-guard.tsx:22:5
+RenderedRoute@http://localhost:5000/node_modules/.vite/deps/react-router-dom.js:4134:11
+RenderErrorBoundary@http://localhost:5000/node_modules/.vite/deps/react-router-dom.js:4091:10
+DataRoutes@http://localhost:5000/node_modules/.vite/deps/react-router-dom.js:5285:12
+Router@http://localhost:5000/node_modules/.vite/deps/react-router-dom.js:4551:12
+RouterProvider@http://localhost:5000/node_modules/.vite/deps/react-router-dom.js:5099:11
+ErrorBoundary@http://localhost:5000/src/components/ErrorBoundary.tsx:8:10
+AppProvider@http://localhost:5000/src/contexts/AppContext.tsx:30:6
+ToastProviderProvider@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:44:52
+ToastCollectionProviderProvider@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:44:52
+ToastCollectionProvider@http://localhost:5000/node_modules/.vite/deps/chunk-263D6K2M.js:128:38
+ToastProvider@http://localhost:5000/node_modules/.vite/deps/@radix-ui_react-toast.js:59:12
+QueryClientProvider@http://localhost:5000/node_modules/.vite/deps/@tanstack_react-query.js:3168:9
+App
+ErrorBoundary@http://localhost:5000/src/components/ErrorBoundary.tsx:8:10
+  Γ£ÿ  357 [tablet] ΓÇ║ tests\apps.e2e.spec.ts:13:3 ΓÇ║ Apps Management CRUD ΓÇ║ should handle full CRUD with normalization (32.3s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+BROWSER ERROR: TypeError: Load failed
+BROWSER ERROR: Warning: validateDOMNesting(...): %s cannot appear as a child of <%s>.%s%s%s <h2> h2   
+h2
+Primitive.h2@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:313:49
+DialogTitle@http://localhost:5000/node_modules/.vite/deps/chunk-FTFN6A64.js:366:51
+_c7@http://localhost:5000/src/components/ui/dialog.tsx:148:10
+h2
+div
+div
+form
+FormProvider@http://localhost:5000/node_modules/.vite/deps/chunk-AXUYJGXJ.js:393:200
+div
+Primitive.div@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:313:49
+DismissableLayer@http://localhost:5000/node_modules/.vite/deps/chunk-3OGW5SX2.js:66:14
+Primitive.div.SlotClone@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:223:45
+Primitive.div.Slot@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:200:45
+Primitive.div@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:313:49
+FocusScope@http://localhost:5000/node_modules/.vite/deps/chunk-F77LVUXE.js:39:12
+@http://localhost:5000/node_modules/.vite/deps/chunk-FTFN6A64.js:327:99
+@http://localhost:5000/node_modules/.vite/deps/chunk-FTFN6A64.js:250:57
+Presence@http://localhost:5000/node_modules/.vite/deps/chunk-BXCYK5RW.js:24:38
+DialogContent@http://localhost:5000/node_modules/.vite/deps/chunk-FTFN6A64.js:241:63
+Primitive.div.SlotClone@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:223:45
+Primitive.div.Slot@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:200:45
+Primitive.div@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:313:49
+Portal@http://localhost:5000/node_modules/.vite/deps/chunk-3OGW5SX2.js:258:61
+Presence@http://localhost:5000/node_modules/.vite/deps/chunk-BXCYK5RW.js:24:38
+DialogPortalProvider@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:44:52
+DialogPortal@http://localhost:5000/node_modules/.vite/deps/chunk-FTFN6A64.js:203:67
+_c3@http://localhost:5000/src/components/ui/dialog.tsx:49:10
+DialogProvider@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:44:52
+Dialog@http://localhost:5000/node_modules/.vite/deps/chunk-FTFN6A64.js:149:12
+div
+AppsPage@http://localhost:5000/src/features/platform/pages/AppsPage.tsx:513:57
+Suspense
+SuperAdminGuard@http://localhost:5000/src/features/auth/components/super-admin-guard.tsx:22:5
+ErrorBoundary@http://localhost:5000/src/components/ErrorBoundary.tsx:8:10
+RenderedRoute@http://localhost:5000/node_modules/.vite/deps/react-router-dom.js:4134:11
+Outlet@http://localhost:5000/node_modules/.vite/deps/react-router-dom.js:4537:25
+div
+main
+div
+div
+AppLayout@http://localhost:5000/src/components/layout/app-layout.tsx:27:65
+AuthGuard@http://localhost:5000/src/features/auth/components/auth-guard.tsx:22:5
+RenderedRoute@http://localhost:5000/node_modules/.vite/deps/react-router-dom.js:4134:11
+RenderErrorBoundary@http://localhost:5000/node_modules/.vite/deps/react-router-dom.js:4091:10
+DataRoutes@http://localhost:5000/node_modules/.vite/deps/react-router-dom.js:5285:12
+Router@http://localhost:5000/node_modules/.vite/deps/react-router-dom.js:4551:12
+RouterProvider@http://localhost:5000/node_modules/.vite/deps/react-router-dom.js:5099:11
+ErrorBoundary@http://localhost:5000/src/components/ErrorBoundary.tsx:8:10
+AppProvider@http://localhost:5000/src/contexts/AppContext.tsx:30:6
+ToastProviderProvider@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:44:52
+ToastCollectionProviderProvider@http://localhost:5000/node_modules/.vite/deps/chunk-IAKZIQOC.js:44:52
+ToastCollectionProvider@http://localhost:5000/node_modules/.vite/deps/chunk-263D6K2M.js:128:38
+ToastProvider@http://localhost:5000/node_modules/.vite/deps/@radix-ui_react-toast.js:59:12
+QueryClientProvider@http://localhost:5000/node_modules/.vite/deps/@tanstack_react-query.js:3168:9
+App
+ErrorBoundary@http://localhost:5000/src/components/ErrorBoundary.tsx:8:10
+Clicking save in apps form...
+  Γ£ô  358 [tablet] ΓÇ║ tests\apps.e2e.spec.ts:85:3 ΓÇ║ Apps Management CRUD ΓÇ║ should validate app form inputs (8.8s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+[dotenv@17.2.3] injecting env (0) from .env.local -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+  Γ£ô  359 [tablet] ΓÇ║ tests\auth-flow.e2e.spec.ts:20:3 ΓÇ║ Auth Flow & Guardrails ΓÇ║ Registration: Invalid invitation code is rejected (Task 1.8) (3.0s)
+  Γ£ô  360 [tablet] ΓÇ║ tests\auth-flow.e2e.spec.ts:50:3 ΓÇ║ Auth Flow & Guardrails ΓÇ║ AuthGuard: Redirects to /login if profile is deleted (Fail-Safe) (Task 1.9) (5.7s)
+  Γ£ô  361 [tablet] ΓÇ║ tests\auth-flow.e2e.spec.ts:118:3 ΓÇ║ Auth Flow & Guardrails ΓÇ║ RouteProtection: Unauthenticated user accessing "/" is redirected to /login (AC-04) (2.0s)
+  Γ£ô  362 [tablet] ΓÇ║ tests\auth-flow.e2e.spec.ts:127:3 ΓÇ║ Auth Flow & Guardrails ΓÇ║ RouteProtection: Unauthenticated user accessing a deep admin route is redirected to /login (1.6s)
+  Γ£ô  363 [tablet] ΓÇ║ tests\auth-flow.e2e.spec.ts:138:3 ΓÇ║ Auth Flow & Guardrails ΓÇ║ Login: Wrong password shows generic "Invalid login credentials" ΓÇö no field-level hint (SI-03) (2.8s)
+  Γ£ô  364 [tablet] ΓÇ║ tests\auth-flow.e2e.spec.ts:155:3 ΓÇ║ Auth Flow & Guardrails ΓÇ║ Login: Client-side validation rejects passwords shorter than 8 chars (2.4s)
+  Γ£ô  365 [tablet] ΓÇ║ tests\auth-flow.e2e.spec.ts:168:3 ΓÇ║ Auth Flow & Guardrails ΓÇ║ ForgotPassword: Generic success shown after submitting any email (anti-enumeration FP-01/FP-02) (2.7s)
+  Γ£ô  366 [tablet] ΓÇ║ tests\auth-flow.e2e.spec.ts:187:3 ΓÇ║ Auth Flow & Guardrails ΓÇ║ ForgotPassword: Empty email field triggers validation error (2.7s)
+  Γ£ô  367 [tablet] ΓÇ║ tests\auth-flow.e2e.spec.ts:197:3 ΓÇ║ Auth Flow & Guardrails ΓÇ║ ForgotPassword: "Back to Sign In" returns to login form (2.9s)
+  Γ£ô  368 [tablet] ΓÇ║ tests\auth-flow.e2e.spec.ts:210:3 ΓÇ║ Auth Flow & Guardrails ΓÇ║ Login: Successful admin login navigates to dashboard (SI-02) (3.8s)
+  Γ£ô  369 [tablet] ΓÇ║ tests\auth-flow.e2e.spec.ts:216:3 ΓÇ║ Auth Flow & Guardrails ΓÇ║ Login: Already-authenticated user visiting /login is redirected to dashboard (4.2s)
+  Γ£ô  370 [tablet] ΓÇ║ tests\auth-flow.e2e.spec.ts:230:3 ΓÇ║ Auth Flow & Guardrails ΓÇ║ AuthConfirmPage: Visiting /auth/confirm with a malformed code shows graceful error (EC-05) (2.8s)
+  Γ£ô  371 [tablet] ΓÇ║ tests\auth-flow.e2e.spec.ts:254:3 ΓÇ║ Auth Flow & Guardrails ΓÇ║ AuthConfirmPage: Visiting /auth/confirm with Supabase error params shows error state (EC-02) (2.1s)
+  Γ£ô  372 [tablet] ΓÇ║ tests\auth-flow.e2e.spec.ts:265:3 ΓÇ║ Auth Flow & Guardrails ΓÇ║ AuthConfirmPage: Visiting /auth/confirm with no token redirects to /login (EC-04) (1.8s)
+  Γ£ô  373 [tablet] ΓÇ║ tests\bulk-import.e2e.spec.ts:32:3 ΓÇ║ Bulk Import Feature (Golden Path) ΓÇ║ should allow downloading the CSV template (5.1s)
+  Γ£ô  374 [tablet] ΓÇ║ tests\bulk-import.e2e.spec.ts:39:3 ΓÇ║ Bulk Import Feature (Golden Path) ΓÇ║ should successfully parse questions from AI prompt (6.6s)
+  Γ£ô  375 [tablet] ΓÇ║ tests\bulk-import.e2e.spec.ts:58:3 ΓÇ║ Bulk Import Feature (Golden Path) ΓÇ║ should commit buffer to production matrix (Real Import) (6.9s)
+  Γ£ô  376 [tablet] ΓÇ║ tests\bulk-import.e2e.spec.ts:106:3 ΓÇ║ Bulk Import Feature (Golden Path) ΓÇ║ should handle import errors gracefully (9.7s)
+  Γ£ô  377 [tablet] ΓÇ║ tests\curriculum-lifecycle.e2e.spec.ts:39:3 ΓÇ║ Curriculum Lifecycle (P0) ΓÇ║ AP-CURR-001: Create Domain (8.9s)
+  Γ£ô  378 [tablet] ΓÇ║ tests\curriculum-lifecycle.e2e.spec.ts:49:3 ΓÇ║ Curriculum Lifecycle (P0) ΓÇ║ AP-CURR-004: Create Skill (10.3s)
+Screenshot: test-results/failure-AP-CURR-005:-Create-Question-(Multiple-Choice).png
+  Γ£ÿ  379 [tablet] ΓÇ║ tests\curriculum-lifecycle.e2e.spec.ts:60:3 ΓÇ║ Curriculum Lifecycle (P0) ΓÇ║ AP-CURR-005: Create Question (Multiple Choice) (6.4s)
+  -  380 [tablet] ΓÇ║ tests\curriculum-lifecycle.e2e.spec.ts:71:3 ΓÇ║ Curriculum Lifecycle (P0) ΓÇ║ AP-CURR-007: Publish Curriculum and Verify Snapshot
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+  Γ£ô  381 [tablet] ΓÇ║ tests\example.spec.ts:3:1 ΓÇ║ admin panel loads (1.7s)
+  Γ£ô  382 [tablet] ΓÇ║ tests\grid-layout.spec.ts:15:3 ΓÇ║ Grid Layout Standards ΓÇ║ Subjects table should not have icons before title (6.2s)
+  Γ£ô  383 [tablet] ΓÇ║ tests\grid-layout.spec.ts:42:3 ΓÇ║ Grid Layout Standards ΓÇ║ Domains table status column should be single line (6.1s)
+  Γ£ô  384 [tablet] ΓÇ║ tests\infrastructure.spec.ts:4:3 ΓÇ║ Infrastructure & Security Headers ΓÇ║ CSP: Content-Security-Policy allows Cloudflare Workers for AI (1.8s)
+  Γ£ô  385 [tablet] ΓÇ║ tests\infrastructure.spec.ts:27:3 ΓÇ║ Infrastructure & Security Headers ΓÇ║ Security: X-Frame-Options and other headers are configured (1.7s)
+  -  386 [tablet] ΓÇ║ tests\mentor-hub.e2e.spec.ts:90:3 ΓÇ║ AP-MENTOR-001: Create Class Group ΓÇ║ admin can create a class-type group with a join code
+  -  387 [tablet] ΓÇ║ tests\mentor-hub.e2e.spec.ts:132:3 ΓÇ║ AP-MENTOR-002: Create Family Group ΓÇ║ admin can create a family-type group
+  -  388 [tablet] ΓÇ║ tests\mentor-hub.e2e.spec.ts:164:3 ΓÇ║ AP-MENTOR-003: Group Detail Shows Members ΓÇ║ group detail page shows all members with roles
+  -  389 [tablet] ΓÇ║ tests\mentor-hub.e2e.spec.ts:222:3 ΓÇ║ AP-MENTOR-004: Create Skill Mastery Assignment ΓÇ║ admin can create a skill_mastery assignment for a group
+  -  390 [tablet] ΓÇ║ tests\mentor-hub.e2e.spec.ts:325:3 ΓÇ║ AP-MENTOR-005: Create Time Goal Assignment ΓÇ║ admin can create a time_goal assignment
+  Γ£ô  391 [tablet] ΓÇ║ tests\mentor-hub.e2e.spec.ts:386:3 ΓÇ║ AP-MENTOR-006: Student Cannot Access Groups ΓÇ║ unauthenticated user navigating to /groups is redirected to /login (2.4s)
+  Γ£ÿ  392 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:50:3 ΓÇ║ A ΓÇö MCQ question ΓÇ║ creates a valid MCQ and appears in the question list (5.8s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+  Γ£ÿ  393 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:76:3 ΓÇ║ A ΓÇö MCQ question ΓÇ║ requires a correct-answer selection ΓÇö shows validation error without it (5.4s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+  Γ£ô  394 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:101:3 ΓÇ║ A ΓÇö MCQ question ΓÇ║ append-option button adds a 5th input (above default 4) (5.7s)
+Type dropdown did not open for text_input, retrying...
+  Γ£ô  395 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:120:3 ΓÇ║ B ΓÇö Subjective (text_input) question ΓÇ║ creates a text_input question and appears in the question list (14.4s)
+  Γ£ÿ  396 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:135:3 ΓÇ║ B ΓÇö Subjective (text_input) question ΓÇ║ cannot submit without filling the answer field (14.5s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+  Γ£ô  397 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:150:3 ΓÇ║ B ΓÇö Subjective (text_input) question ΓÇ║ answer input is visible after switching to text_input type (5.1s)
+  Γ£ô  398 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:164:3 ΓÇ║ C ΓÇö Boolean question ΓÇ║ creates a TRUE boolean question and appears in the question list (11.0s)
+  Γ£ÿ  399 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:177:3 ΓÇ║ C ΓÇö Boolean question ΓÇ║ creates a FALSE boolean question and appears in the question list (5.5s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: Γ£à audit secrets and track compliance: https://dotenvx.com/ops
+  Γ£ô  400 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:190:3 ΓÇ║ C ΓÇö Boolean question ΓÇ║ boolean switch is visible after selecting boolean type (4.7s)
+  Γ£ô  401 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:240:3 ΓÇ║ D ΓÇö Bulk-import AI prompt (mocked) ΓÇ║ AI tab loads, prompt fills, Sync button triggers, and buffer populates (8.8s)
+  Γ£ô  402 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:299:3 ΓÇ║ D ΓÇö Bulk-import AI prompt (mocked) ΓÇ║ Sync button is disabled when prompt is empty (4.3s)
+  Γ£ô  403 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:307:3 ΓÇ║ D ΓÇö Bulk-import AI prompt (mocked) ΓÇ║ Sync button becomes enabled after typing in prompt textarea (4.2s)
+  Γ£ô  404 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:318:3 ΓÇ║ D ΓÇö Bulk-import AI prompt (mocked) ΓÇ║ Dry Run switch is visible and togglable (4.2s)
+  Γ£ô  405 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:331:3 ΓÇ║ D ΓÇö Bulk-import AI prompt (mocked) ΓÇ║ CSV tab shows file-upload input (4.4s)
+  Γ£ô  406 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:339:3 ΓÇ║ D ΓÇö Bulk-import AI prompt (mocked) ΓÇ║ Template button triggers a CSV download (4.2s)
+  Γ£ô  407 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:359:5 ΓÇ║ E ΓÇö Form validation guard ΓÇ║ submitting empty multiple_choice form stays on the form (5.4s)
+  Γ£ô  408 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:359:5 ΓÇ║ E ΓÇö Form validation guard ΓÇ║ submitting empty text_input form stays on the form (5.9s)
+  Γ£ô  409 [tablet] ΓÇ║ tests\question-types-regression.e2e.spec.ts:359:5 ΓÇ║ E ΓÇö Form validation guard ΓÇ║ submitting empty boolean form stays on the form (6.9s)
+  Γ£ô  410 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ admin lockout ΓÇ║ admin cannot access /dashboard (4.7s)
+  Γ£ô  411 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ admin lockout ΓÇ║ admin cannot access /subjects (4.9s)
+  Γ£ô  412 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ admin lockout ΓÇ║ admin cannot access /apps (5.6s)
+  Γ£ô  413 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ admin lockout ΓÇ║ admin cannot access /users (5.3s)
+  Γ£ô  414 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ admin lockout ΓÇ║ admin cannot access /invitation-codes (5.5s)
+  Γ£ô  415 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ admin lockout ΓÇ║ admin cannot access /governance (5.0s)
+  Γ£ô  416 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ admin lockout ΓÇ║ admin cannot access /known-issues (4.9s)
+  Γ£ô  417 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ admin lockout ΓÇ║ admin cannot access /error-logs (5.2s)
+  Γ£ô  418 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ admin lockout ΓÇ║ admin cannot access /landings (4.9s)
+  Γ£ô  419 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ mentor lockout ΓÇ║ mentor cannot access /dashboard (4.7s)
+  Γ£ô  420 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ mentor lockout ΓÇ║ mentor cannot access /subjects (5.0s)
+  Γ£ô  421 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ mentor lockout ΓÇ║ mentor cannot access /apps (4.8s)
+  Γ£ô  422 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ mentor lockout ΓÇ║ mentor cannot access /users (4.6s)
+  Γ£ô  423 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ mentor lockout ΓÇ║ mentor cannot access /invitation-codes (4.9s)
+  Γ£ô  424 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ mentor lockout ΓÇ║ mentor cannot access /governance (5.2s)
+  Γ£ô  425 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ mentor lockout ΓÇ║ mentor cannot access /known-issues (4.7s)
+  Γ£ô  426 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ mentor lockout ΓÇ║ mentor cannot access /error-logs (5.2s)
+  Γ£ô  427 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ mentor lockout ΓÇ║ mentor cannot access /landings (5.2s)
+  Γ£ô  428 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ student lockout ΓÇ║ student cannot access /dashboard (5.1s)
+  Γ£ô  429 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ student lockout ΓÇ║ student cannot access /subjects (5.7s)
+  Γ£ô  430 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ student lockout ΓÇ║ student cannot access /apps (7.0s)
+  Γ£ô  431 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ student lockout ΓÇ║ student cannot access /users (5.9s)
+  Γ£ô  432 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ student lockout ΓÇ║ student cannot access /invitation-codes (5.2s)
+  Γ£ô  433 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ student lockout ΓÇ║ student cannot access /governance (5.2s)
+  Γ£ô  434 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ student lockout ΓÇ║ student cannot access /known-issues (5.3s)
+  Γ£ô  435 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ student lockout ΓÇ║ student cannot access /error-logs (5.0s)
+  Γ£ô  436 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:53:9 ΓÇ║ AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role ΓÇ║ student lockout ΓÇ║ student cannot access /landings (4.8s)
+  Γ£ô  437 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:74:5 ΓÇ║ AP-RBAC-002: StandardAdmin Routes Blocked for Student Role ΓÇ║ student-role cannot access /groups (5.3s)
+  Γ£ô  438 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:74:5 ΓÇ║ AP-RBAC-002: StandardAdmin Routes Blocked for Student Role ΓÇ║ student-role cannot access /groups/new (4.8s)
+  Γ£ô  439 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:107:5 ΓÇ║ AP-RBAC-003: Unauthenticated Users Redirected to /login ΓÇ║ unauthenticated access to /domains ΓåÆ /login (2.6s)
+  Γ£ô  440 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:107:5 ΓÇ║ AP-RBAC-003: Unauthenticated Users Redirected to /login ΓÇ║ unauthenticated access to /skills ΓåÆ /login (2.3s)
+  Γ£ô  441 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:107:5 ΓÇ║ AP-RBAC-003: Unauthenticated Users Redirected to /login ΓÇ║ unauthenticated access to /questions ΓåÆ /login (2.6s)
+  Γ£ô  442 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:107:5 ΓÇ║ AP-RBAC-003: Unauthenticated Users Redirected to /login ΓÇ║ unauthenticated access to /publish ΓåÆ /login (2.2s)
+  Γ£ô  443 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:107:5 ΓÇ║ AP-RBAC-003: Unauthenticated Users Redirected to /login ΓÇ║ unauthenticated access to /settings ΓåÆ /login (2.4s)
+  Γ£ô  444 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:107:5 ΓÇ║ AP-RBAC-003: Unauthenticated Users Redirected to /login ΓÇ║ unauthenticated access to /dashboard ΓåÆ /login (2.2s)
+  Γ£ô  445 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:107:5 ΓÇ║ AP-RBAC-003: Unauthenticated Users Redirected to /login ΓÇ║ unauthenticated access to /groups ΓåÆ /login (2.2s)
+  Γ£ô  446 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:133:5 ΓÇ║ AP-RBAC-004: Super Admin Accesses All Routes ΓÇ║ super_admin can access /dashboard (3.6s)
+  Γ£ô  447 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:133:5 ΓÇ║ AP-RBAC-004: Super Admin Accesses All Routes ΓÇ║ super_admin can access /subjects (4.1s)
+  Γ£ô  448 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:133:5 ΓÇ║ AP-RBAC-004: Super Admin Accesses All Routes ΓÇ║ super_admin can access /apps (3.4s)
+  Γ£ô  449 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:133:5 ΓÇ║ AP-RBAC-004: Super Admin Accesses All Routes ΓÇ║ super_admin can access /users (4.0s)
+  Γ£ô  450 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:133:5 ΓÇ║ AP-RBAC-004: Super Admin Accesses All Routes ΓÇ║ super_admin can access /invitation-codes (4.4s)
+  Γ£ô  451 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:133:5 ΓÇ║ AP-RBAC-004: Super Admin Accesses All Routes ΓÇ║ super_admin can access /governance (7.7s)
+  Γ£ô  452 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:133:5 ΓÇ║ AP-RBAC-004: Super Admin Accesses All Routes ΓÇ║ super_admin can access /known-issues (5.0s)
+  Γ£ô  453 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:133:5 ΓÇ║ AP-RBAC-004: Super Admin Accesses All Routes ΓÇ║ super_admin can access /error-logs (4.6s)
+  Γ£ô  454 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:133:5 ΓÇ║ AP-RBAC-004: Super Admin Accesses All Routes ΓÇ║ super_admin can access /landings (4.7s)
+  Γ£ô  455 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:153:3 ΓÇ║ AP-RBAC-005: RoleRedirect at / (root) ΓÇ║ super_admin navigating to / lands on /dashboard (7.8s)
+  Γ£ô  456 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:159:3 ΓÇ║ AP-RBAC-005: RoleRedirect at / (root) ΓÇ║ admin navigating to / lands on /domains (7.5s)
+  Γ£ô  457 [tablet] ΓÇ║ tests\rbac-guards.e2e.spec.ts:170:3 ΓÇ║ AP-RBAC-006: API-level multi-tenant isolation ΓÇ║ admin cannot SELECT domains from another tenant via raw API call (4.4s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöæ add access controls to secrets: https://dotenvx.com/ops
+  Γ£ô  458 [tablet] ΓÇ║ tests\responsiveness.spec.ts:27:3 ΓÇ║ Responsive Layout Verification ΓÇ║ Dashboard should not have horizontal scroll (10.8s)
+  Γ£ô  459 [tablet] ΓÇ║ tests\responsiveness.spec.ts:38:3 ΓÇ║ Responsive Layout Verification ΓÇ║ Domain list page should be readable (10.8s)
+  Γ£ô  460 [tablet] ΓÇ║ tests\responsiveness.spec.ts:48:3 ΓÇ║ Responsive Layout Verification ΓÇ║ Skill list page should be readable (11.3s)
+  Γ£ô  461 [tablet] ΓÇ║ tests\responsiveness.spec.ts:58:3 ΓÇ║ Responsive Layout Verification ΓÇ║ Question list page should be readable (11.6s)
+  Γ£ô  462 [tablet] ΓÇ║ tests\responsiveness.spec.ts:68:3 ΓÇ║ Responsive Layout Verification ΓÇ║ Creation forms should be responsive (10.4s)
+  Γ£ÿ  463 [tablet] ΓÇ║ tests\rls-bypass.e2e.spec.ts:27:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Anonymous User: Cannot access curriculum data (256ms)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+Anon log error: {
+  code: '42501',
+  details: null,
+  hint: null,
+  message: 'new row violates row-level security policy for table "error_logs"'
+}
+  Γ£ÿ  464 [tablet] ΓÇ║ tests\rls-bypass.e2e.spec.ts:43:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Anonymous User: Can still log errors (intentional) (335ms)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+  Γ£ô  465 [tablet] ΓÇ║ tests\rls-bypass.e2e.spec.ts:60:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Regular Admin: Isolation Enforcement (672ms)
+  Γ£ô  466 [tablet] ΓÇ║ tests\rls-bypass.e2e.spec.ts:100:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Super Admin: Cross-Tenant Access (267ms)
+  Γ£ô  467 [tablet] ΓÇ║ tests\rls-bypass.e2e.spec.ts:118:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Account Hardening: Profile protection (378ms)
+  Γ£ÿ  468 [tablet] ΓÇ║ tests\rls-bypass.e2e.spec.ts:149:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Invitation Codes: Anonymous user cannot SELECT from invitation_codes (AI-08) (80ms)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+  Γ£ÿ  469 [tablet] ΓÇ║ tests\rls-bypass.e2e.spec.ts:163:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ Invitation Codes: Student-role user cannot SELECT from invitation_codes (AI-08) (380ms)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöæ add access controls to secrets: https://dotenvx.com/ops
+  Γ£ô  470 [tablet] ΓÇ║ tests\rls-bypass.e2e.spec.ts:180:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ DB-RLS-001: Curriculum ΓÇö Admin A cannot see skills from Admin B (Isolation) (406ms)
+  Γ£ô  471 [tablet] ΓÇ║ tests\rls-bypass.e2e.spec.ts:194:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ DB-RLS-002: Curriculum ΓÇö Student cannot INSERT an artificial question (278ms)
+  Γ£ô  472 [tablet] ΓÇ║ tests\rls-bypass.e2e.spec.ts:210:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ DB-RLS-003: Tracking ΓÇö Student A cannot see Student B attempts (253ms)
+  Γ£ô  473 [tablet] ΓÇ║ tests\rls-bypass.e2e.spec.ts:223:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ DB-RLS-004: Mentor Hub ΓÇö Mentor cannot see another mentor groups (241ms)
+  Γ£ô  474 [tablet] ΓÇ║ tests\rls-bypass.e2e.spec.ts:236:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ DB-RLS-005: Mastery ΓÇö Student A cannot update Student B progress (476ms)
+  Γ£ÿ  475 [tablet] ΓÇ║ tests\rls-bypass.e2e.spec.ts:256:3 ΓÇ║ Security: RLS Bypass & Tenant Isolation ΓÇ║ DB-RLS-006: Super Admin can SELECT from all sensitive tables (344ms)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒôí add observability to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: Γ£à audit secrets and track compliance: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: Γ£à audit secrets and track compliance: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+  Γ£ÿ  476 [tablet] ΓÇ║ tests\row-height.spec.ts:37:5 ΓÇ║ Automated Row Height Test ΓÇ║ Table rows in Apps should be single-line (constant height) (8.7s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöæ add access controls to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ≡ƒöæ add access controls to secrets: https://dotenvx.com/ops
+  Γ£ÿ  477 [tablet] ΓÇ║ tests\row-height.spec.ts:37:5 ΓÇ║ Automated Row Height Test ΓÇ║ Table rows in Subjects should be single-line (constant height) (8.0s)
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+  Γ£ô  478 [tablet] ΓÇ║ tests\row-height.spec.ts:37:5 ΓÇ║ Automated Row Height Test ΓÇ║ Table rows in Domains should be single-line (constant height) (8.2s)
+  Γ£ô  479 [tablet] ΓÇ║ tests\row-height.spec.ts:37:5 ΓÇ║ Automated Row Height Test ΓÇ║ Table rows in Skills should be single-line (constant height) (9.9s)
+  Γ£ô  480 [tablet] ΓÇ║ tests\row-height.spec.ts:37:5 ΓÇ║ Automated Row Height Test ΓÇ║ Table rows in Questions should be single-line (constant height) (6.7s)

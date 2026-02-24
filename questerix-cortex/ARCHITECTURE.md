@@ -1,0 +1,51 @@
+# Questerix Cortex — Architecture (Final)
+
+> **North Star**: A Session Handover System. Cortex captures the project's state, runs the health suite, and prepares the agent for a productive session.
+
+## 1. Core Principles
+
+- **Lean Agent**: Cortex handles the heavy lifting (scanning, running tests, audits) so the AI agent stays fast and focused.
+- **Persistent Memory**: Tracks project health over time via historical snapshots.
+- **Risk-Awareness**: Prioritizes failures based on their impact (e.g., Supabase mutations are P0).
+
+## 2. Primary Outputs
+
+1. **`AGENT_CONTEXT.md`**: (Max 20KB) A compressed briefing file for the agent. Contains: Surface map delta, failing hooks/pages, current P0 risks.
+2. **`NEXT_TASK.md`**: Auto-generated task list for the user to review and paste. Priority: Failures (P0) → Coverage Gaps (P1) → Improvements (P2).
+3. **`HEALTH_REPORT.md`**: Premium human dashboard with health scores and coverage heatmaps.
+
+## 3. Modules
+
+### 🔍 Scanner (Semantic)
+
+- Uses `ts-morph` to map the `admin-panel/src` surface area.
+- Tracks: Pages, Hooks, Services, and their linked test coverage.
+
+### 🏃 Orchestrator (Runner)
+
+- Runs Vitest, Playwright (Desktop/Mobile/Tablet), ESLint, CSpell, Axe-core, and RLS Audits.
+- **UX**: Opens a **Live Browser Dashboard** at `http://localhost:5050` during the run.
+
+### 🧠 Analyst (Intelligence)
+
+- **Drift Detection**: Database types vs Live schema.
+- **Dead Code**: Unused exports.
+- **Migration Safety**: Integrity checks for new SQL moves.
+
+### 📈 Historian (Trends)
+
+- Keeps the last 30 runs in `HISTORY.json`.
+- Calculates health trajectory.
+
+## 4. Configuration (`cortex.config.json`)
+
+- Defines paths to `admin-panel`, `supabase`, and `test-results`.
+- Sets thresholds for "Healthy" coverage and build size.
+
+## 5. Usage
+
+```powershell
+npm run health
+```
+
+_(Runs the full suite and updates the three output files)_

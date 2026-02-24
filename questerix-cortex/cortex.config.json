@@ -1,0 +1,18 @@
+{
+  "projectRoot": "..",
+  "adminPanelPath": "../admin-panel",
+  "supabasePath": "../supabase",
+  "outputs": {
+    "healthReport": "outputs/HEALTH_REPORT.md",
+    "agentContext": "outputs/AGENT_CONTEXT.md",
+    "nextTask": "outputs/NEXT_TASK.md",
+    "history": "outputs/HISTORY.json",
+    "surfaceMap": "outputs/SURFACE_MAP.json"
+  },
+  "thresholds": {
+    "minCoverage": 80,
+    "maxAgentContextSizeKB": 20,
+    "maxHistoryRuns": 30
+  },
+  "dashboardPort": 5050
+}
