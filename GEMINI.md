@@ -10,13 +10,13 @@
 
 **MANDATORY** — read these files in order at the start of EVERY session before writing any code:
 
-1. `questerix-cortex/MACHINE_BRIEFING.md` — health snapshot, conventions, known gotchas
-2. `questerix-cortex/NEXT_TASK.md` — highest-priority action with anti-hallucination guardrails
-3. `questerix-cortex/FAILURE_DIGEST.md` — if failures > 0, understand them before touching code
-4. `questerix-cortex/LAST_CHANGED.md` — which files shifted in the last run
+1. `questerix-cortex/outputs/MACHINE_BRIEFING.md` — health snapshot, conventions, known gotchas
+2. `questerix-cortex/outputs/NEXT_TASK.md` — highest-priority action with anti-hallucination guardrails
+3. `questerix-cortex/outputs/FAILURE_DIGEST.md` — if failures > 0, understand them before touching code
+4. `questerix-cortex/outputs/LAST_CHANGED.md` — which files shifted in the last run
 5. `docs/LEARNING_LOG.md` — last 3 entries for recent lessons learned
-6. `questerix-cortex/API_MAP.json` — before calling any hook method
-7. `questerix-cortex/UTILITY_REGISTRY.md` — before writing any new helper
+6. `questerix-cortex/outputs/SKELETON_SUMMARY.md` — ALWAYS first orientation (replaces API_MAP.json)
+7. `questerix-cortex/outputs/UTILITY_REGISTRY.md` — before writing any new helper
 
 > Skip to step 6-7 only if you are 100% sure you are not modifying shared hooks or utilities.
 
@@ -123,15 +123,15 @@ This rule exists because missing policies cause silent data access failures that
 
 ## Key Files
 
-| What             | Where                                     |
-| ---------------- | ----------------------------------------- |
-| Task tracking    | `tasks.md`                                |
-| Learning log     | `docs/LEARNING_LOG.md`                    |
-| Changelog        | `CHANGELOG.md`                            |
-| DB types         | `admin-panel/src/types/database.types.ts` |
-| Supabase config  | `supabase/config.toml`                    |
-| Loki Mode skill  | `.agent/skills/loki-mode/SKILL.md`        |
-| Agent workflows  | `.agent/workflows/`                       |
-| API map          | `questerix-cortex/API_MAP.json`           |
-| Utility registry | `questerix-cortex/UTILITY_REGISTRY.md`    |
-| Machine briefing | `questerix-cortex/MACHINE_BRIEFING.md`    |
+| What             | Where                                          |
+| ---------------- | ---------------------------------------------- |
+| Task tracking    | `tasks.md`                                     |
+| Learning log     | `docs/LEARNING_LOG.md`                         |
+| Changelog        | `CHANGELOG.md`                                 |
+| DB types         | `admin-panel/src/types/database.types.ts`      |
+| Supabase config  | `supabase/config.toml`                         |
+| Loki Mode skill  | `.agent/skills/loki-mode/SKILL.md`             |
+| Agent workflows  | `.agent/workflows/`                            |
+| API map summary  | `questerix-cortex/outputs/SKELETON_SUMMARY.md` |
+| Utility registry | `questerix-cortex/outputs/UTILITY_REGISTRY.md` |
+| Machine briefing | `questerix-cortex/outputs/MACHINE_BRIEFING.md` |
