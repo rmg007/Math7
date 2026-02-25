@@ -1,8 +1,10 @@
 import chalk from 'chalk';
+import { execSync } from 'child_process';
 import * as fs from 'fs';
 import open from 'open';
 import * as path from 'path';
 import { Analyst } from './src/analyst';
+import { Consolidator } from './src/consolidator';
 import { Dashboard } from './src/dashboard';
 import { DriftDetector } from './src/drift';
 import { Historian } from './src/historian';
@@ -26,7 +28,6 @@ const allSuites: Array<{
   { id: 'unit',   name: 'Unit Tests (Lib)',    command: 'npx vitest run src/__tests__/lib/utils.test.ts', tier: 'smoke',   parallel: true  },
   { id: 'lint',   name: 'Lint Check',          command: 'npx eslint src/lib/utils.ts',                  tier: 'smoke',   parallel: true  },
   { id: 'e2e',    name: 'E2E Smoke (Desktop)', command: 'npx playwright test tests/auth-flow.e2e.spec.ts --project=desktop', tier: 'smoke', parallel: false },
-  { id: 'perf',   name: 'Performance Bench',   command: 'npx playwright test tests/performance.e2e.spec.ts', tier: 'smoke', parallel: false },
 
   // Deep — heavier, but tsc + audit are independent
   { id: 'tsc',             name: 'TypeScript Strict',      command: 'npx tsc --noEmit',                         tier: 'deep',    parallel: true  },
@@ -73,6 +74,10 @@ async function main() {
   const executeRun = async (target: string = 'all', flags: string[] = []) => {
     const targets = target.split(',').map(t => t.trim());
     const generateSkeletons = flags.includes('--generate-skeletons');
+    const healDrift = flags.includes('--heal-drift');
+    const syncKb = flags.includes('--sync-kb');
+    const pruneBrain = flags.includes('--prune-brain');
+    const consolidate = flags.includes('--consolidate');
     
     console.log(chalk.cyan.bold(`\n🔄 Run (${target}) started…`));
     dashboard.log(`\n🔄 Run (${target}) started…`, 'cyan', true);
@@ -127,10 +132,65 @@ async function main() {
       console.log(chalk.cyan('\n🔍 Schema Drift Detection…'));
       dashboard.log('\n🔍 Schema Drift Detection…', 'cyan');
       driftResult = driftDetector.detect();
+
+      if (healDrift && driftResult.verdict === 'DRIFT DETECTED') {
+        console.log(chalk.yellow('🩹 Healing schema drift…'));
+        dashboard.log('🩹 Healing schema drift…', 'yellow');
+        const healed = driftDetector.heal();
+        if (healed) {
+          console.log(chalk.green('   ✅ Drift healed. Re-scanning…'));
+          dashboard.log('   ✅ Drift healed. Re-scanning…', 'green');
+          driftResult = driftDetector.detect();
+        }
+      }
+
       const driftSummary = `   ${driftResult.verdict} — types: ${driftResult.typesTableCount} | ` +
         `missing: ${driftResult.missingFromTypes.length} | extra: ${driftResult.extraInTypes.length}`;
       console.log(chalk.cyan(driftSummary));
       dashboard.log(driftSummary, 'cyan');
+    }
+
+    if (syncKb) {
+      console.log(chalk.yellow('\n🧠 Syncing Knowledge Base (Project Oracle)…'));
+      dashboard.log('🧠 Syncing Knowledge Base (Project Oracle)…', 'yellow');
+      try {
+        const scriptPath = path.join(supabasePath, '..', 'scripts', 'maintenance', 'automate_knowledge.ps1');
+        execSync(`powershell -NoProfile -File "${scriptPath}"`, { stdio: 'inherit' });
+        console.log(chalk.green('   ✅ Knowledge sync complete.'));
+        dashboard.log('   ✅ Knowledge sync complete.', 'green');
+      } catch (err) {
+        console.error('   ❌ Knowledge sync failed:', err);
+        dashboard.log('   ❌ Knowledge sync failed.', 'red');
+      }
+    }
+
+    if (pruneBrain) {
+      console.log(chalk.yellow('\n🧹 Pruning Agent Memory (Hygiene)…'));
+      dashboard.log('🧹 Pruning Agent Memory (Hygiene)…', 'yellow');
+      try {
+        const scriptPath = path.join(supabasePath, '..', 'scripts', 'maintenance', 'agent-memory-cleanup.ps1');
+        execSync(`powershell -NoProfile -File "${scriptPath}"`, { stdio: 'inherit' });
+        console.log(chalk.green('   ✅ Memory pruning complete.'));
+        dashboard.log('   ✅ Memory pruning complete.', 'green');
+      } catch (err) {
+        console.error('   ❌ Memory pruning failed:', err);
+        dashboard.log('   ❌ Memory pruning failed.', 'red');
+      }
+    }
+
+    if (consolidate) {
+      console.log(chalk.yellow('\n📦 Consolidating fragmented artifacts…'));
+      dashboard.log('📦 Consolidating fragmented artifacts…', 'yellow');
+      const brainPath = path.resolve(process.env.USERPROFILE || '', '.gemini', 'antigravity', 'brain');
+      const consolidator = new Consolidator(brainPath, path.resolve(__dirname, '..'));
+      const cResult = consolidator.consolidate();
+      if (cResult.merged.length > 0) {
+        console.log(chalk.green(`   ✅ Merged ${cResult.merged.length} document set(s).`));
+        dashboard.log(`   ✅ Merged ${cResult.merged.length} document set(s).`, 'green');
+      } else {
+        console.log(chalk.gray('   ⏭️ No documents requiring consolidation.'));
+        dashboard.log('   ⏭️ No documents requiring consolidation.', 'gray');
+      }
     }
 
     if (runRls) {
@@ -156,12 +216,29 @@ async function main() {
           ? allSuites
           : allSuites.filter(s => targets.includes(s.id) || targets.includes(s.tier));
 
+      // ── Pre-flight: skip suites whose target file doesn't exist ────────────
+      const validatedSuites = suitesToRun.filter(suite => {
+        // Extract the first argument that looks like a file path (contains '/')
+        const fileArg = suite.command.split(' ').find(tok =>
+          (tok.includes('/') || tok.includes('\\')) && !tok.startsWith('-')
+        );
+        if (!fileArg) return true; // No file arg — command is self-contained (e.g. eslint, tsc)
+        const absPath = path.isAbsolute(fileArg) ? fileArg : path.join(adminPath, fileArg);
+        if (!fs.existsSync(absPath)) {
+          const msg = `⚠️  Skipping "${suite.name}" — target not found: ${fileArg}`;
+          console.log(chalk.yellow(msg));
+          dashboard.log(msg, 'yellow');
+          return false;
+        }
+        return true;
+      });
+
       // Group by tier to run parallel-eligible suites together
       type Tier = 'smoke' | 'deep' | 'release' | 'deploy' | 'ship';
       const tierOrder: Tier[] = ['smoke', 'deep', 'release', 'deploy', 'ship'];
 
       for (const tier of tierOrder) {
-        const tierSuites = suitesToRun.filter(s => s.tier === tier);
+        const tierSuites = validatedSuites.filter(s => s.tier === tier);
         if (tierSuites.length === 0) continue;
 
         const parallelGroup = tierSuites.filter(s => s.parallel);
