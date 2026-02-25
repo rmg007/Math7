@@ -2,6 +2,32 @@
 
 > Entries older than 30 days are in docs/archive/LEARNING_LOG_ARCHIVE.md
 
+## 2026-02-25: Phase 2/3 Deployment — Build Fix + Production Deploy [verified]
+
+### [2026-02-25-Deploy] Session Context
+
+- **Trigger**: Phase 1 gate OPEN (100/100, all suites green). Executed Phase 2 (Deploy) and Phase 3 (Push).
+- **Scope**: `admin-panel/src/features/auth/pages/LoginPage.test.tsx`, `scripts/deploy/deploy-all.ps1`, `tasks.md`
+
+### What was done
+
+1. **Build**: Ran `npm run build` — failed on TS2769 in `LoginPage.test.tsx`.
+2. **Fix**: Changed tuple destructuring `([payload]: [{ eventType: string }])` to explicit indexing `(args: unknown[]) => (args[0] as { eventType: string })?.eventType`. The `vi.fn().mock.calls` type is `any[][]` which doesn't narrow to destructured tuple patterns.
+3. **Rebuild**: `npm run build` → passed in 23.11s (bundle 7.4 MB).
+4. **Deploy Admin Panel**: `wrangler pages deploy` to Cloudflare. First 2 attempts got 503 (Cloudflare API instability). 3rd attempt succeeded after a 10s delay.
+5. **Deploy Edge Functions**: `supabase functions deploy` — all 10 functions deployed successfully.
+6. **Production Verification**: Browser subagent confirmed `admin.questerix.com` renders the login page with correct branding, form elements, and no console errors.
+7. **Push to GitHub**: Commit `2c0cdf6c` pushed to `main`. Lint-staged, typecheck, gitleaks — all passed.
+
+### Bugs found
+
+| Bug                                     | Root Cause                                                                                      | Fix                                                  | Prevention Rule                                                                           |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| TS2769 in `LoginPage.test.tsx` line 191 | Tuple destructuring `[{ eventType: string }]` doesn't satisfy `any[]` from `vi.fn().mock.calls` | Use `(args: unknown[]) => (args[0] as ...)` indexing | Always use explicit array indexing when filtering `mock.calls` — never destructure tuples |
+| Cloudflare 503 on deploy                | Transient Cloudflare API instability                                                            | Retry with delay                                     | Add retry logic (3 attempts, 10s backoff) to deploy scripts                               |
+
+---
+
 ## 2026-02-25: Authentication Hardening & UI Stabilization [verified]
 
 ### [2026-02-25-Stab] Session Context
