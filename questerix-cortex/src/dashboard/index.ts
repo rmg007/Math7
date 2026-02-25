@@ -23,8 +23,8 @@ export class Dashboard {
     // ── Pre-flight: Port Sniper (Self-Healing) ──
     try {
       if (process.platform === 'win32') {
-        const cmd = `$proc = Get-NetTCPConnection -LocalPort ${port} -ErrorAction SilentlyContinue; if ($proc) { Stop-Process -Id $proc.OwningProcess -Force }`;
-        execSync(`powershell -Command "${cmd}"`);
+        const cmd = `$proc = Get-NetTCPConnection -LocalPort ${port} -ErrorAction SilentlyContinue | Where-Object { $_.OwningProcess -ne 0 }; if ($proc) { Stop-Process -Id $proc.OwningProcess -Force }`;
+        execSync(`powershell -NoProfile -Command "${cmd}"`);
       } else {
         execSync(`lsof -t -i:${port} | xargs kill -9 2>/dev/null || true`);
       }
