@@ -20,9 +20,11 @@ export class Reporter {
     analystResults?: any,
     driftResult?: any,
     rlsResult?: any,
-    history?: any[]
+    history?: any[],
+    governanceResult?: { deadRefs: Array<{ file: string; ref: string }>; scannedFiles: number },
+    optimizeResult?: any
   ) {
-    this.generateHealthReport(results, analystResults, surfaceMap, rlsResult);
+    this.generateHealthReport(results, analystResults, surfaceMap, rlsResult, governanceResult);
     this.generateAgentContext(results, surfaceMap, analystResults);
     this.generateNextTask(results, analystResults, surfaceMap);
     this.generateMachineBriefing(results, analystResults, surfaceMap, driftResult, rlsResult, history);
@@ -84,7 +86,8 @@ export class Reporter {
     results: Record<string, TaskResult>,
     analystResults?: any,
     surfaceMap?: any,
-    rlsResult?: any
+    rlsResult?: any,
+    governanceResult?: { deadRefs: Array<{ file: string; ref: string }>; scannedFiles: number }
   ) {
     let md = '# 🩺 Questerix Health Report\n\n';
     md += `*Generated: ${new Date().toLocaleString()}*\n\n`;
@@ -150,6 +153,19 @@ export class Reporter {
         }
       } else {
         md += '✅ All tables have required RLS policies.\n';
+      }
+    }
+
+    if (governanceResult) {
+      md += '\n## 📜 Governance\n';
+      md += `**Scanned**: ${governanceResult.scannedFiles} files. **Dead references**: ${governanceResult.deadRefs.length}\n`;
+      if (governanceResult.deadRefs.length > 0) {
+        governanceResult.deadRefs.slice(0, 15).forEach((r: { file: string; ref: string }) => {
+          md += `- [ ] \`${r.file}\` → \`${r.ref}\`\n`;
+        });
+        if (governanceResult.deadRefs.length > 15) {
+          md += `*... and ${governanceResult.deadRefs.length - 15} more*\n`;
+        }
       }
     }
 
@@ -496,6 +512,7 @@ export class Reporter {
       const firstError = this.extractFirstError(f.output);
       entry += `### Suite: ${f.name}\n`;
       entry += `**First Error**: \`${firstError}\`\n`;
+      entry += `**Session**: Cortex Auto-Entry\n`;
       entry += `**Duration**: ${f.duration?.toFixed(1) ?? '?'}s\n`;
       entry += `**Root Cause**: *[Agent to fill in]*\n`;
       entry += `**Fix Applied**: *[Agent to fill in]*\n`;
@@ -508,6 +525,25 @@ export class Reporter {
     }
 
     fs.appendFileSync(logPath, entry, 'utf-8');
+
+    // Rotation: if file exceeds 200 entries, auto-archive oldest half (keep 100)
+    try {
+      const logContent = fs.readFileSync(logPath, 'utf-8');
+      const entryCount = (logContent.match(/\n---\n/g) || []).length;
+      if (entryCount > 200) {
+        const scriptPath = path.join(this.projectRoot, 'scripts', 'split-learning-log.cjs');
+        if (fs.existsSync(scriptPath)) {
+          execSync(`node "${scriptPath}"`, {
+            cwd: this.projectRoot,
+            env: { ...process.env, LEARNING_LOG_KEEP: '100' },
+            encoding: 'utf-8',
+            timeout: 10000,
+          });
+        }
+      }
+    } catch {
+      // Non-fatal: rotation is best-effort
+    }
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -540,20 +576,23 @@ export class Reporter {
       const logPath = path.join(this.projectRoot, 'docs', 'LEARNING_LOG.md');
       if (!fs.existsSync(logPath)) return '';
       const content = fs.readFileSync(logPath, 'utf-8');
+      const placeholderPattern = /\[Agent to fill in\]/i;
       // Split on section headers, take last n
       const entries = content.split(/\n---\n/).filter(e => e.includes('Prevention Rule'));
-      return entries
+      const lines = entries
         .slice(-n)
         .map(e => {
           const ruleMatch = e.match(/Prevention Rule\*\*: (.+)/);
           const suiteMatch = e.match(/### Suite: (.+)/);
-          if (ruleMatch && ruleMatch[1] !== '*[Agent to fill in]*') {
-            return `- **${suiteMatch?.[1] ?? 'Unknown'}**: ${ruleMatch[1]}`;
-          }
-          return '';
+          if (!ruleMatch || !suiteMatch) return '';
+          const ruleText = ruleMatch[1].trim();
+          if (placeholderPattern.test(ruleText)) return '';
+          if (ruleText === '*[Agent to fill in]*') return '';
+          return `- **${suiteMatch[1].trim()}**: ${ruleText}`;
         })
-        .filter(Boolean)
-        .join('\n');
+        .filter(Boolean);
+      // Strip any line that still contains the placeholder (e.g. in appended text)
+      return lines.filter(line => !placeholderPattern.test(line)).join('\n');
     } catch {
       return '';
     }

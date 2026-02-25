@@ -1,0 +1,27 @@
+---
+description: Questerix universal agent rules — read AGENTS.md for full text. Core rules and known gotchas inlined for fast context.
+globs: **/*
+---
+
+Always read **AGENTS.md** at project root for complete rules. Summary:
+
+## Core Rules (from AGENTS.md)
+1. No TODO/FIXME/HACK in code — use `tasks.md`.
+2. Document after every task — append to `docs/LEARNING_LOG.md`.
+3. Tasks only in `tasks.md`.
+4. DO NOT PUBLISH landing-pages.
+5. Admin Panel Feature Freeze — bug fixes and maintenance only; no new features.
+6. Use ColumnToggle and BulkActionBar for tables.
+7. Every bug fix requires a preventative test; log in LEARNING_LOG with `[test created]`.
+
+## Known Gotchas (from GEMINI.md)
+| Trap | Rule |
+|------|------|
+| PowerShell em-dashes | NEVER use `—` or smart quotes in `.ps1`. Use `-` only. |
+| Orchestrator timeouts | Tasks delegating to scripts need ≥15 min; `900_000ms` minimum for compound tasks. |
+| Supabase query builder | IMMUTABLE — chain `.eq()`, `.neq()`, `.filter()`. Never call on a stored variable without reassigning. |
+| Radix Select in E2E | Use keyboard navigation (`ArrowDown` + `Enter`), not mouse clicks. |
+| PowerShell -NoProfile | All automation scripts must use `-NoProfile`. |
+| Draft vs Live lifecycle | Publish tests require entities to START as `draft`. Creating as `live` bypasses transition logic. |
+
+For codebase discovery use `questerix-cortex/outputs/SKELETON_SUMMARY.md` and `npm run health -- skeleton:search "query"` from `questerix-cortex/`.

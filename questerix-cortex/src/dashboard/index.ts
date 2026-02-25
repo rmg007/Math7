@@ -6,6 +6,7 @@ import * as path from 'path';
 import { Server } from 'socket.io';
 import { DriftResult } from '../drift/index';
 import { HistoryRecord } from '../historian/index';
+import { OptimizeReport } from '../optimizer/index';
 import { TaskResult } from '../orchestrator/index';
 import { RlsAuditResult } from '../rls/index';
 import { SurfaceMap } from '../scanner/index';
@@ -61,19 +62,25 @@ export class Dashboard {
             h1 { color: #22d3ee; font-size: 1.6rem; white-space: nowrap; }
             .subtitle { color: #475569; font-size: 0.75rem; margin-top: 0.2rem; }
 
-            /* ── Controls — single compact row ── */
-            .controls { display: flex; align-items: center; gap: 0; background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 0.35rem 0.5rem; flex-wrap: wrap; }
-            .ctrl-divider { width: 1px; background: #1e293b; align-self: stretch; margin: 0 0.4rem; }
-            .btn { border: none; padding: 0.32rem 0.7rem; border-radius: 6px; font-weight: 600; font-size: 0.72rem; cursor: pointer; transition: all 0.15s; letter-spacing: 0.02em; }
+            /* ── Controls — 3 dropdowns + Run ── */
+            .controls { display: flex; align-items: center; gap: 0.5rem; background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 0.5rem 0.75rem; flex-wrap: wrap; }
+            .ctrl-divider { width: 1px; background: #1e293b; align-self: stretch; margin: 0 0.25rem; }
+            .ctrl-group { display: flex; align-items: center; gap: 0.35rem; }
+            .ctrl-label { font-size: 0.6rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+            .ctrl-select { background: #1e293b; border: 1px solid #334155; color: #e2e8f0; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.72rem; min-width: 140px; cursor: pointer; }
+            .ctrl-select:hover { border-color: #475569; }
+            .ctrl-select:focus { outline: none; border-color: #22d3ee; }
+            .btn { border: none; padding: 0.35rem 0.85rem; border-radius: 6px; font-weight: 600; font-size: 0.72rem; cursor: pointer; transition: all 0.15s; letter-spacing: 0.02em; }
             .btn:hover:not(:disabled) { filter: brightness(1.25); transform: translateY(-1px); }
             .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+            .btn-run { background: linear-gradient(135deg,#7c3aed,#c026d3); color: #fff; }
             .btn-smoke   { background: #334155; color: #e2e8f0; }
             .btn-deep    { background: #1e3a8a; color: #bfdbfe; }
             .btn-intel   { background: #4c1d95; color: #ddd6fe; }
             .btn-release { background: #134e4a; color: #99f6e4; }
             .btn-deploy  { background: #b45309; color: #fef3c7; }
             .btn-ship    { background: #0369a1; color: #e0f2fe; }
-            .btn-mega    { background: linear-gradient(135deg,#7c3aed,#c026d3); color: #fff; padding: 0.38rem 1rem; margin-left: 0.25rem; }
+            .btn-mega    { background: linear-gradient(135deg,#7c3aed,#c026d3); color: #fff; padding: 0.38rem 1rem; }
 
             /* ── Sparkline ── */
             .spark-section { margin-bottom: 1rem; }
@@ -157,43 +164,60 @@ export class Dashboard {
                 <h1>🩺 Questerix Cortex <small style="font-size: 0.6em; vertical-align: middle; opacity: 0.5;">LIVE</small></h1>
                 <div class="subtitle" id="lastRun">Waiting for first run…</div>
               </div>
-              <!-- Single-row control bar -->
+              <!-- 3 dropdowns + Run -->
               <div class="controls">
-                <!-- Smoke -->
-                <button onclick="trigger('unit')"  class="btn btn-smoke" title="Unit Tests">UNIT</button>
-                <button onclick="trigger('e2e')"   class="btn btn-smoke" title="E2E Smoke">E2E</button>
-                <button onclick="trigger('lint')"  class="btn btn-smoke" title="Lint Check">LINT</button>
- 
+                <div class="ctrl-group">
+                  <span class="ctrl-label">Preset</span>
+                  <select id="sel-preset" class="ctrl-select" title="Quick run preset">
+                    <option value="">—</option>
+                    <option value="full">Full run (all tiers)</option>
+                    <option value="all">Smoke only</option>
+                    <option value="intel">Intel only (drift + rls + skeleton + governance)</option>
+                  </select>
+                </div>
                 <div class="ctrl-divider"></div>
- 
-                <!-- Deep -->
-                <button onclick="trigger('tsc')"             class="btn btn-deep" title="TypeScript strict">TSC</button>
-                <button onclick="trigger('audit')"           class="btn btn-deep" title="npm audit high">AUDIT</button>
-                <button onclick="trigger('full-vitest')"     class="btn btn-deep" title="Vitest + Coverage">VITEST</button>
-                <button onclick="trigger('full-playwright')" class="btn btn-deep" title="All Playwright">E2E ALL</button>
- 
+                <div class="ctrl-group">
+                  <span class="ctrl-label">Tier / Suite</span>
+                  <select id="sel-tier" class="ctrl-select" title="Run a tier or single suite">
+                    <option value="">—</option>
+                    <optgroup label="Tiers">
+                      <option value="smoke">Smoke (unit + e2e + lint)</option>
+                      <option value="deep">Deep (tsc + audit + vitest + playwright)</option>
+                      <option value="release">Release (build + certify + hygiene + forensic)</option>
+                      <option value="deploy">Deploy (admin + edge functions)</option>
+                      <option value="ship">Ship (git push)</option>
+                    </optgroup>
+                    <optgroup label="Suites">
+                      <option value="unit">Unit (lib)</option>
+                      <option value="e2e">E2E Smoke</option>
+                      <option value="lint">Lint</option>
+                      <option value="tsc">TypeScript Strict</option>
+                      <option value="audit">Security Audit</option>
+                      <option value="full-vitest">Full Vitest + Coverage</option>
+                      <option value="full-playwright">Full Playwright</option>
+                      <option value="build">Production Build</option>
+                      <option value="certify">Certify Phase 0</option>
+                      <option value="hygiene">Code Hygiene Scan</option>
+                      <option value="forensic">Forensic Audit</option>
+                      <option value="deploy-admin">Deploy Admin Panel</option>
+                      <option value="deploy-fns">Deploy Edge Functions</option>
+                      <option value="git-ship">Git Ship (Push)</option>
+                    </optgroup>
+                  </select>
+                </div>
                 <div class="ctrl-divider"></div>
- 
-                <!-- Intel -->
-                <button onclick="trigger('drift')"    class="btn btn-intel" title="Schema Drift">DRIFT</button>
-                <button onclick="trigger('rls')"      class="btn btn-intel" title="RLS Policy Audit" id="btn-rls">RLS</button>
-                <button onclick="trigger('forensic')" class="btn btn-intel" title="Forensic Audit" id="btn-forensic">FORENSIC</button>
- 
-                <div class="ctrl-divider"></div>
- 
-                <!-- Release -->
-                <button onclick="trigger('build')"   class="btn btn-release" title="Production Build" id="btn-build">BUILD</button>
-                <button onclick="trigger('certify')" class="btn btn-release" title="Certify Phase 0" id="btn-certify">CERTIFY</button>
-                <button onclick="trigger('hygiene')" class="btn btn-release" title="Code Hygiene" id="btn-hygiene">HYGIENE</button>
- 
-                <div class="ctrl-divider"></div>
-
-                <!-- Deploy & Ship -->
-                <button onclick="trigger('deploy')" class="btn btn-deploy" title="Deploy Admin + Fns" id="btn-deploy">🚀 DEPLOY</button>
-                <button onclick="trigger('ship')"   class="btn btn-ship"   title="Git Push to Main"  id="btn-ship">📦 SHIP</button>
-
-                <!-- Primary CTA -->
-                <button onclick="trigger('full')" class="btn btn-mega" title="Run everything">⚡ ALL</button>
+                <div class="ctrl-group">
+                  <span class="ctrl-label">Intel / Audit</span>
+                  <select id="sel-intel" class="ctrl-select" title="Intel and governance tools">
+                    <option value="">—</option>
+                    <option value="drift">Schema Drift</option>
+                    <option value="rls">RLS Audit</option>
+                    <option value="optimize">Optimize (Performance)</option>
+                    <option value="skeleton">Skeleton (regenerate)</option>
+                    <option value="governance">Governance (dead refs)</option>
+                  </select>
+                </div>
+                <button id="btn-run" class="btn btn-run" title="Run selected action">Run</button>
               </div>
             </div>
  
@@ -224,15 +248,57 @@ export class Dashboard {
           <script>
             const socket   = io();
             const allBtns  = document.querySelectorAll('.btn');
+            const selPreset = document.getElementById('sel-preset');
+            const selTier  = document.getElementById('sel-tier');
+            const selIntel = document.getElementById('sel-intel');
+            const btnRun   = document.getElementById('btn-run');
             const colLeft  = document.getElementById('col-left');
             const colRight = document.getElementById('col-right');
             const term     = document.getElementById('terminal');
- 
+
+            const gatedTargets = ['build','certify','hygiene','deploy','ship','deploy-admin','deploy-fns','git-ship'];
+            let lastSmokePass = undefined;
+
+            function getSelectedTarget() {
+              const p = selPreset && selPreset.value;
+              const t = selTier && selTier.value;
+              const i = selIntel && selIntel.value;
+              return p || t || i || '';
+            }
+
+            function setControlsEnabled(running) {
+              const on = !running;
+              allBtns.forEach(b => { b.disabled = !on; });
+              if (selPreset) selPreset.disabled = !on;
+              if (selTier)  selTier.disabled = !on;
+              if (selIntel) selIntel.disabled = !on;
+            }
+
+            function applySmokeGate(smokePass) {
+              lastSmokePass = smokePass;
+              if (smokePass !== false) { if (btnRun) btnRun.disabled = false; return; }
+              const target = getSelectedTarget();
+              if (btnRun) btnRun.disabled = gatedTargets.indexOf(target) !== -1;
+            }
+
+            function onSelectChange() { applySmokeGate(lastSmokePass); }
+            if (selPreset) selPreset.addEventListener('change', onSelectChange);
+            if (selTier)  selTier.addEventListener('change', onSelectChange);
+            if (selIntel) selIntel.addEventListener('change', onSelectChange);
+
             function trigger(t) {
               term.innerHTML = '<div class="t-line t-gray">🔄 Run (' + t + ') starting...</div>';
               socket.emit('trigger', t);
-              allBtns.forEach(b => b.disabled = true);
+              setControlsEnabled(false);
             }
+
+            function runSelected() {
+              const t = getSelectedTarget();
+              if (!t) return;
+              trigger(t);
+            }
+
+            if (btnRun) btnRun.addEventListener('click', runSelected);
 
             socket.on('logs', (logs) => {
               term.innerHTML = '';
@@ -253,8 +319,6 @@ export class Dashboard {
               term.scrollTop = term.scrollHeight;
             });
  
-            function makePill(text, cls) {
-
             function makePill(text, cls) {
               return '<span class="pill ' + cls + '">' + text + '</span>';
             }
@@ -278,7 +342,7 @@ export class Dashboard {
               if (arrow) arrow.classList.toggle('open');
             });
 
-            socket.on('update', ({ results, surfaceMap, analystResults, history, smokePass, driftResult, rlsResult }) => {
+            socket.on('update', ({ results, surfaceMap, analystResults, history, smokePass, driftResult, rlsResult, optimizeResult }) => {
               const allR     = Object.values(results);
               const isRunning = allR.some(r => r.status === 'running');
 
@@ -455,6 +519,47 @@ export class Dashboard {
                 colRight.innerHTML += '<div class="audit-card">' + auditRow('dist/ size', '<span style="color:#a78bfa;font-weight:700">' + analystResults.bundleSize + ' KB</span>') + '</div>';
               }
 
+              // ── Performance Optimization ──
+              if (optimizeResult) {
+                const optBadge = optimizeResult.verdict === 'CLEAN' ? 'badge-ok' : 'badge-err';
+                colRight.innerHTML += buildSh('🚀 Optimization', optimizeResult.verdict, optBadge);
+                colRight.innerHTML += '<div class="audit-card">';
+                
+                if (optimizeResult.verdict === 'CLEAN') {
+                  colRight.innerHTML += '<div style="color:#4ade80">✅ Workspace is optimized.</div>';
+                } else {
+                  if (optimizeResult.zombies.length > 0) {
+                    colRight.innerHTML += '<div class="audit-section-title">Zombies (' + optimizeResult.zombies.length + '):</div>';
+                    optimizeResult.zombies.forEach(z => {
+                      colRight.innerHTML += '<div class="audit-sub">• ' + z.name + ' <span style="color:#64748b">(PID ' + z.pid + ')</span></div>';
+                    });
+                  }
+                  if (optimizeResult.watcherGaps.length > 0) {
+                    colRight.innerHTML += '<div class="audit-section-title">Watcher Gaps (' + optimizeResult.watcherGaps.length + '):</div>';
+                    optimizeResult.watcherGaps.forEach(g => {
+                      const color = g.severity === 'CRITICAL' ? '#f87171' : '#fde047';
+                      colRight.innerHTML += '<div class="audit-sub">• <span style="color:' + color + ';font-weight:700">[' + g.severity + ']</span> ' + g.path + '</div>';
+                    });
+                  }
+                  if (optimizeResult.largeFiles.length > 0) {
+                    colRight.innerHTML += '<div class="audit-section-title">Oversized Outputs (' + optimizeResult.largeFiles.length + '):</div>';
+                    optimizeResult.largeFiles.forEach(f => {
+                      colRight.innerHTML += '<div class="audit-sub">• ' + f.path + ' <span style="color:#f87171">(' + f.sizeMB + ' MB)</span></div>';
+                    });
+                  }
+                  if (optimizeResult.mcpDeadServers.length > 0) {
+                    colRight.innerHTML += '<div class="audit-section-title">Dead MCP Servers (' + optimizeResult.mcpDeadServers.length + '):</div>';
+                    optimizeResult.mcpDeadServers.forEach(m => {
+                      colRight.innerHTML += '<div class="audit-sub">• ' + m.name + '</div>';
+                    });
+                  }
+                  if (optimizeResult.shellIntegrationEnabled) {
+                    colRight.innerHTML += '<div class="audit-section-title">Shell Integration ON</div>';
+                  }
+                }
+                colRight.innerHTML += '</div>';
+              }
+
             });
           </script>
         </body>
@@ -495,7 +600,8 @@ export class Dashboard {
     history?: HistoryRecord[],
     smokePass?: boolean,
     driftResult?: DriftResult,
-    rlsResult?: RlsAuditResult
+    rlsResult?: RlsAuditResult,
+    optimizeResult?: OptimizeReport
   ) {
     this.io.emit('update', { 
       results, 
@@ -505,6 +611,7 @@ export class Dashboard {
       smokePass, 
       driftResult, 
       rlsResult,
+      optimizeResult,
       logs: this.logs
     });
   }

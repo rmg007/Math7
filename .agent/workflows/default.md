@@ -52,6 +52,8 @@ gh issue list --label "ci-repair" --state open --json number,title,body --limit 
 
 ## 🔧 Standard Process
 
+**Light Bootstrap:** For typo fixes, comment edits, or docs-only changes, use the shortcut in `GEMINI.md` (read SKELETON_SUMMARY + FAILURE_DIGEST only, then proceed). Full bootstrap is required for any code or schema change.
+
 By default, any new feature or fix should follow the **`/process`** workflow steps:
 
 1.  **Planning** (Interactive, No Coding)

@@ -47,7 +47,7 @@ Skills are reusable analysis frameworks the agent reads before acting.
 | Location                                    | Skill                  | Notes                          |
 | ------------------------------------------- | ---------------------- | ------------------------------ |
 | `.agent/skills/ironclad-architect/SKILL.md` | **ironclad-architect** | 17-pattern bug scanner         |
-| `.antigravity/skills/loki-mode/SKILL.md`    | **loki-mode**          | Canonical location (v2.x SSoT) |
+| `.antigravity/skills/loki-mode/SKILL.md`    | **loki-mode**          | Canonical location (v2.x SSoT). **Note:** `.antigravity/` is an IDE-specific folder used by Antigravity IDE and may not be accessible in Cursor/Windsurf; use ironclad-architect for RARV/bug patterns there. |
 
 | Skill                  | When It's Used                     | What It Does                                                                                                                 |
 | ---------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -160,13 +160,13 @@ Something stuck? → /blocked
 | Layer          | Tech                                            | Key Files                                         |
 | -------------- | ----------------------------------------------- | ------------------------------------------------- |
 | Admin Panel    | React 18, Vite 5, TanStack Query v5, TypeScript | `admin-panel/src/`                                |
-| Student App    | Flutter, Riverpod 2.6.1, Drift 2.24             | `student-app/lib/src/`                            |
+| Student App    | Flutter, Riverpod 2.6.1, Drift 2.24             | External repo: **questerix-student-app** (not in this repo) |
 | Backend        | Supabase (Postgres, Auth, Edge Functions)       | `supabase/`                                       |
 | Deployment     | Cloudflare Pages via `scripts/deploy-all.ps1`   | `scripts/`                                        |
-| DB Types       | Auto-generated                                  | `admin-panel/src/types/database.types.ts`         |
+| DB Types       | Auto-generated                                  | `admin-panel/src/lib/database.types.ts`           |
 | Env Config     | Admin Panel                                     | `admin-panel/src/config/env.ts`                   |
 | Error Tracking | Supabase-native, zero-cost                      | `admin-panel/src/lib/error-tracker.ts`            |
-| Sync State     | Outbox → Supabase RPC                           | `student-app/lib/src/core/sync/sync_service.dart` |
+| Sync State     | Outbox → Supabase RPC                           | In **questerix-student-app** repo                 |
 
 ---
 

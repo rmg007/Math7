@@ -15,6 +15,8 @@ description: Autonomous Developer Mode
 
 All Loki Mode resources are in **`.antigravity/skills/loki-mode/`** — this is the single source of truth.
 
+**Cursor/Windsurf agents:** If `.antigravity/` is not accessible in your environment, read `.agent/skills/ironclad-architect/SKILL.md` for the RARV cycle and 17-pattern bug scanner instead; use that for autonomous fix/forensics behavior.
+
 ```
 .antigravity/skills/loki-mode/
 ├── SKILL.md        ← Operational mandate (read first)

@@ -41,7 +41,7 @@ The project consists:
 
 ## 📂 Key Files
 
-- **`docs/strategy/AGENTS.md`**: The Constitution. Core rules and behavioral protocols.
+- **`AGENTS.md`** (root): The Constitution. Core rules, discovery, and behavioral protocols.
 - **`docs/strategy/QUICKSTART_AGENTS.md`**: The Session Startup Checklist.
 - **`docs/technical/CONTEXT_MAP.md`**: The Map. Use this to find technical documentation.
 - **`PHASE_STATE.json`**: The Live State. Tracks validation status and current phase.

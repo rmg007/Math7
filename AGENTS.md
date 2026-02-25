@@ -20,17 +20,27 @@
 6. **Use Premium UI Components.** If maintaining tables, use `ColumnToggle` (visibility) and `BulkActionBar` (multi-select actions) to ensure UI consistency.
 7. **Every bug/issue requires a preventative test.** Before closing any bug or issue, you MUST write a new test case that reproduces the failure. The test must fail before the fix and pass after. No exceptions. Log the test file path in `docs/LEARNING_LOG.md` tagged `[test created]`.
 
+## Discovery (How to Find What You Need)
+
+**Primary (Cortex — always available):**
+
+- **Codebase orientation**: Read `questerix-cortex/outputs/SKELETON_SUMMARY.md`.
+- **Symbol lookup**: From project root, run `npm run health -- skeleton:search "query"` in `questerix-cortex/`.
+- **Session start**: Read `questerix-cortex/outputs/MACHINE_BRIEFING.md` and `questerix-cortex/outputs/NEXT_TASK.md` before coding.
+
+**Workflows:** `.agent/workflows/process.md` (lifecycle), `.agent/workflows/help.md` (commands). **Coding standards:** `docs/standards/ORACLE_COGNITION.md` (supplementary). **Rule:** Never scan `node_modules`, `build`, or `dist`.
+
 ## File Placement
 
-| What                         | Where                     | NOT here          |
-| ---------------------------- | ------------------------- | ----------------- |
-| Tasks / backlog              | `tasks.md`                | —                 |
-| Agent rules & conventions    | `AGENTS.md` (this file)   | `tasks.md`        |
-| Session learnings            | `docs/LEARNING_LOG.md`    | `tasks.md`        |
-| Agent discovery / navigation | `AGENT_QUICKSTART.md`     | —                 |
-| Agent workflows              | `.agent/workflows/*.md`   | —                 |
-| Test account credentials     | `.agent/TEST_ACCOUNTS.md` | hardcoded in code |
-| Project documentation        | `docs/`                   | root directory    |
+| What                         | Where                               | NOT here          |
+| ---------------------------- | ----------------------------------- | ----------------- |
+| Tasks / backlog              | `tasks.md`                          | —                 |
+| Agent rules & conventions    | `AGENTS.md` (this file)             | `tasks.md`        |
+| Session learnings            | `docs/LEARNING_LOG.md`              | `tasks.md`        |
+| Agent discovery / navigation | AGENTS.md (Discovery section above) | —                 |
+| Agent workflows              | `.agent/workflows/*.md`             | —                 |
+| Test account credentials     | `.agent/TEST_ACCOUNTS.md`           | hardcoded in code |
+| Project documentation        | `docs/`                             | root directory    |
 
 ## Testing Strategy
 

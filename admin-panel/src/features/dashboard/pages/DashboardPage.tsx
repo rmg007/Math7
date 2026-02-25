@@ -15,7 +15,7 @@ import {
   Database,
   Layers,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -105,6 +105,16 @@ export function DashboardPage() {
     },
     enabled: Boolean(currentApp),
   });
+  const tooltipStyle = useMemo(
+    () => ({
+      borderRadius: '16px',
+      border: 'none',
+      boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+    }),
+    []
+  );
+
+  const tooltipItemStyle = useMemo(() => ({ color: '#1e293b' }), []);
 
   // STUB: activityData uses static placeholder values until error_logs exposes per-day bucketed counts.
   // Track: add a `get_activity_summary(days INT)` RPC that returns {day, import_count, error_count}[]
@@ -274,14 +284,7 @@ export function DashboardPage() {
                     tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }}
                     dx={-10}
                   />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: '16px',
-                      border: 'none',
-                      boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
-                    }}
-                    itemStyle={{ color: '#1e293b' }}
-                  />
+                  <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} />
                   <Area
                     type="monotone"
                     dataKey="imports"
@@ -330,14 +333,7 @@ export function DashboardPage() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: '16px',
-                      border: 'none',
-                      boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
-                    }}
-                    itemStyle={{ color: '#1e293b' }}
-                  />
+                  <Tooltip contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -346,8 +342,8 @@ export function DashboardPage() {
                 <div key={d.name} className="flex items-center gap-2">
                   {/* Inline style is required: backgroundColor is runtime-dynamic (COLORS[i]) and cannot be a static CSS class */}
                   <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: COLORS[i % COLORS.length] }} // required: dynamic color
+                    className="w-3 h-3 rounded-full dynamic-bg"
+                    style={{ '--dynamic-color': COLORS[i % COLORS.length] } as React.CSSProperties}
                   />
                   <span className="text-2xs font-black uppercase text-gray-700 truncate">
                     {d.name}

@@ -1,14 +1,19 @@
-import { TaskResult } from './orchestrator';
-import { SurfaceMap } from './scanner';
 import { DeltaResult } from './delta';
-import { RiskScore } from './risk-scorer';
 import { DriftResult } from './drift';
-import { RlsAuditResult } from './rls';
 import { HistoryRecord } from './historian';
+import { OptimizeReport } from './optimizer';
+import { TaskResult } from './orchestrator';
+import { RiskScore } from './risk-scorer';
+import { RlsAuditResult } from './rls';
+import { SurfaceMap } from './scanner';
+
 
 export interface AnalystResults {
   deadCode: string[];
   bundleSize: number | null;
+  perfGaps: string[];
+  migrationGaps: string[];
+  typeSafetyGaps: string[];
 }
 
 export interface CortexConfig {
@@ -49,6 +54,7 @@ export interface RunContext {
   riskScore: RiskScore;
   driftResult?: DriftResult;
   rlsResult?: RlsAuditResult;
+  optimizeResult?: OptimizeReport;
   history: HistoryRecord[];
   smokePass: boolean;
 }

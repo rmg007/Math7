@@ -20,6 +20,17 @@
 
 > Skip to step 6-7 only if you are 100% sure you are not modifying shared hooks or utilities.
 
+## Light Bootstrap (for trivial tasks)
+
+If the task is a **typo fix**, **comment edit**, or **documentation-only change**:
+
+1. Read `questerix-cortex/outputs/SKELETON_SUMMARY.md` (orientation).
+2. Read `questerix-cortex/outputs/FAILURE_DIGEST.md` (ensure no breakage).
+3. Skip the remaining 5 bootstrap files.
+4. Proceed directly.
+
+**Full bootstrap is mandatory** for any code change, schema change, or new feature.
+
 ## Project Context
 
 Questerix is an educational platform with:

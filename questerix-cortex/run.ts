@@ -8,13 +8,13 @@ import { Project } from 'ts-morph';
 import { Analyst } from './src/analyst';
 import { Consolidator } from './src/consolidator';
 import { Dashboard } from './src/dashboard';
-import { DriftDetector } from './src/drift';
+import { DriftDetector, DriftResult } from './src/drift';
 import { auditGovernance } from './src/governance';
 import { Historian } from './src/historian';
-import { OptimizeAuditor } from './src/optimizer';
+import { OptimizeAuditor, OptimizeReport } from './src/optimizer';
 import { Orchestrator } from './src/orchestrator';
 import { Reporter } from './src/reporter';
-import { RlsAuditor } from './src/rls';
+import { RlsAuditor, RlsAuditResult } from './src/rls';
 import { Scanner } from './src/scanner';
 import { SkeletonGenerator } from './src/skeleton';
 import { SkeletonSearch } from './src/skeleton/search';
@@ -41,6 +41,7 @@ const allSuites: Array<{
 
   { id: 'full-vitest',     name: 'Full Vitest + Coverage', command: 'npm run test -- --run --coverage',         tier: 'deep',    parallel: false },
   { id: 'full-playwright', name: 'Full Playwright Suite',  command: 'npx playwright test',                      tier: 'deep',    parallel: false },
+  { id: 'latency',         name: 'Latency Benchmark',      command: 'npm run test:benchmark',                   tier: 'deep',    parallel: false },
 
   // Release — sequential only (write to dist/, share port)
   { id: 'build',   name: 'Production Build',  command: 'npm run build',                                     tier: 'release', parallel: false },
@@ -57,7 +58,28 @@ const allSuites: Array<{
 ];
 
 async function main() {
-  console.log(chalk.cyan.bold('\n🚀 Questerix Cortex — Initializing...'));
+  // ── Early-exit targets (no dashboard / scanner needed) ────────────────────
+  const earlyTarget = process.argv.slice(2).find(a => !a.startsWith('--'));
+
+  if (earlyTarget === 'optimize') {
+    console.log(chalk.cyan.bold('\n\u{1F680} Questerix Cortex \u2014 Performance Optimization Audit'));
+    const optimizer = new OptimizeAuditor(path.resolve(__dirname, '..'));
+    const report = optimizer.audit();
+    const md = optimizer.generateMarkdownReport(report);
+
+    const outputsPath = path.join(__dirname, 'outputs');
+    if (!fs.existsSync(outputsPath)) fs.mkdirSync(outputsPath, { recursive: true });
+    const reportPath = path.join(outputsPath, 'OPTIMIZE_REPORT.md');
+    fs.writeFileSync(reportPath, md, 'utf-8');
+
+    const color = report.verdict === 'CLEAN' ? 'green' : 'red';
+    console.log(chalk[color](`\n${report.summary}`));
+    console.log(chalk.gray(`\n   Report written \u2192 ${reportPath}\n`));
+    console.log(md);
+    process.exit(0);
+  }
+
+  console.log(chalk.cyan.bold('\n\u{1F680} Questerix Cortex \u2014 Initializing...'));
 
   // Initialize AgentOps session if API key is present
   if (process.env.AGENTOPS_API_KEY) {
@@ -118,6 +140,9 @@ async function main() {
       dashboard.log(`\n${report.summary}`, color);
       console.log(chalk.gray(`   Report saved → ${reportPath}`));
       dashboard.log(`   Report saved → outputs/OPTIMIZE_REPORT.md`, 'gray');
+      
+      // Update dashboard state so results appear in the UI
+      dashboard.update({}, undefined, undefined, historian.getHistory(), undefined, undefined, undefined, report);
       return;
     }
 
@@ -125,6 +150,7 @@ async function main() {
     const runRls   = targets.includes('rls')   || targets.includes('full') || targets.includes('intel');
     const runSkeleton = targets.includes('skeleton') || targets.includes('all') || targets.includes('full') || targets.includes('intel');
     const runGovernance = targets.includes('governance') || targets.includes('intel');
+    const runOptimize = targets.includes('optimize') || targets.includes('all') || targets.includes('full') || targets.includes('intel');
     
     console.log(chalk.cyan.bold(`\n🔄 Run (${target}) started…`));
     dashboard.log(`\n🔄 Run (${target}) started…`, 'cyan', true);
@@ -202,8 +228,9 @@ async function main() {
     };
 
     // ── Intelligence checks (fast, no test runner) ──────────────────────────
-    let driftResult: any = null;
-    let rlsResult: any   = null;
+    let driftResult: DriftResult | undefined;
+    let rlsResult: RlsAuditResult | undefined;
+    let optimizeResult: OptimizeReport | undefined;
 
     if (runDrift) {
       console.log(chalk.cyan('\n🔍 Schema Drift Detection…'));
@@ -289,9 +316,24 @@ async function main() {
       dashboard.log(govSummary, 'cyan');
     }
 
+    // ── Performance Optimization Audit ──────────────────────────────────────
+    if (runOptimize && !targets.includes('optimize')) {
+      console.log(chalk.cyan('\n🚀 Performance Optimization Audit…'));
+      dashboard.log('\n🚀 Performance Optimization Audit…', 'cyan');
+      try {
+        const optimizer = new OptimizeAuditor(path.resolve(__dirname, '..'));
+        optimizeResult = optimizer.audit();
+        const optColor = optimizeResult.verdict === 'CLEAN' ? 'green' : 'red';
+        console.log(chalk[optColor](`   ${optimizeResult.summary}`));
+        dashboard.log(`   ${optimizeResult.summary}`, optColor);
+      } catch (err) {
+        console.warn(chalk.yellow('⚠️  Optimizer failed:', err));
+      }
+    }
+
     let history = historian.getHistory();
     const pushUpdate = () =>
-      dashboard.update(orchestrator.getResults(), surfaceMap, analystResults, history, undefined, driftResult, rlsResult);
+      dashboard.update(orchestrator.getResults(), surfaceMap, analystResults, history, undefined, driftResult, rlsResult, optimizeResult);
 
     pushUpdate();
 
@@ -379,9 +421,9 @@ async function main() {
       .every(r => r.status === 'passed');
 
     // Reports
-    reporter.generate(results, surfaceMap, analystResults, driftResult, rlsResult, updatedHistory, governanceResult);
+    reporter.generate(results, surfaceMap, analystResults, driftResult, rlsResult, updatedHistory, governanceResult, optimizeResult);
 
-    dashboard.update(results, surfaceMap, analystResults, updatedHistory, smokePass, driftResult, rlsResult);
+    dashboard.update(results, surfaceMap, analystResults, updatedHistory, smokePass, driftResult, rlsResult, optimizeResult);
 
     // Summary
     const driftLine = driftResult
@@ -393,11 +435,11 @@ async function main() {
         : chalk.red(`🔴 RLS: ${rlsResult.verdict}`)
       : '';
 
-    if (driftLine) {
+    if (driftResult && driftLine) {
       console.log('\n' + driftLine);
       dashboard.log('\n' + driftLine.replace(/\u001b\[\d+m/g, ''), driftResult.verdict === 'CLEAN' ? 'green' : 'red');
     }
-    if (rlsLine) {
+    if (rlsResult && rlsLine) {
       console.log(rlsLine);
       dashboard.log(rlsLine.replace(/\u001b\[\d+m/g, ''), rlsResult.verdict === 'PASS' ? 'green' : 'red');
     }

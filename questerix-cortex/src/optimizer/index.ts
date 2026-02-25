@@ -19,6 +19,13 @@ export interface GitignoreGap {
 export interface WatcherGap {
   path: string;
   reason: string;
+  severity: 'CRITICAL' | 'MEDIUM';
+}
+
+export interface LargeFile {
+  path: string;
+  sizeMB: number;
+  reason: string;
 }
 
 export interface McpDeadServer {
@@ -32,6 +39,7 @@ export interface OptimizeReport {
   zombies: ZombieProcess[];
   gitignoreGaps: GitignoreGap[];
   watcherGaps: WatcherGap[];
+  largeFiles: LargeFile[];
   mcpDeadServers: McpDeadServer[];
   shellIntegrationEnabled: boolean;
   verdict: 'CLEAN' | 'NEEDS_ATTENTION';
@@ -76,21 +84,26 @@ export class OptimizeAuditor {
     const zombies = this.detectZombies();
     const gitignoreGaps = this.detectGitignoreGaps();
     const watcherGaps = this.detectWatcherGaps();
+    const largeFiles = this.detectLargeFiles();
     const mcpDeadServers = this.detectMcpDeadServers();
     const shellIntegrationEnabled = this.checkShellIntegration();
 
-    const totalIssues = zombies.length + gitignoreGaps.length + watcherGaps.length + mcpDeadServers.length + (shellIntegrationEnabled ? 1 : 0);
+    const totalIssues = zombies.length + gitignoreGaps.length + watcherGaps.length + largeFiles.length + mcpDeadServers.length + (shellIntegrationEnabled ? 1 : 0);
     const verdict: 'CLEAN' | 'NEEDS_ATTENTION' = totalIssues === 0 ? 'CLEAN' : 'NEEDS_ATTENTION';
 
     const summary = totalIssues === 0
       ? '✅ Workspace is fully optimized. No performance issues detected.'
-      : `⚠️ Found ${totalIssues} issue(s): ${zombies.length} zombie(s), ${gitignoreGaps.length} gitignore gap(s), ${watcherGaps.length} watcher gap(s), ${mcpDeadServers.length} dead MCP server(s)${shellIntegrationEnabled ? ', shell integration ON' : ''}.`;
+      : `⚠️ Found ${totalIssues} optimization issue(s). ` +
+        (watcherGaps.some(g => g.severity === 'CRITICAL') || largeFiles.length > 0
+          ? '🔴 CRITICAL: Potential "Agent Loading" deadlock detected.'
+          : '🟡 Recommendation: Apply improvements for smoother IDE experience.');
 
     return {
       timestamp: new Date().toISOString(),
       zombies,
       gitignoreGaps,
       watcherGaps,
+      largeFiles,
       mcpDeadServers,
       shellIntegrationEnabled,
       verdict,
@@ -157,32 +170,48 @@ export class OptimizeAuditor {
     const gaps: WatcherGap[] = [];
     const vscodeSettingsPath = path.join(this.projectRoot, '.vscode', 'settings.json');
     if (!fs.existsSync(vscodeSettingsPath)) {
-      return [{ path: '.vscode/settings.json', reason: 'File missing — no watcher exclusions defined' }];
+      return [{ path: '.vscode/settings.json', reason: 'File missing — no watcher exclusions defined', severity: 'MEDIUM' }];
     }
 
     let settings: Record<string, unknown> = {};
     try {
-      // Strip comments from JSONC before parsing
       const raw = fs.readFileSync(vscodeSettingsPath, 'utf-8')
         .replace(/\/\/.*$/gm, '')
         .replace(/\/\*[\s\S]*?\*\//g, '');
       settings = JSON.parse(raw);
     } catch {
-      return [{ path: '.vscode/settings.json', reason: 'Could not parse settings.json' }];
+      return [{ path: '.vscode/settings.json', reason: 'Could not parse settings.json', severity: 'MEDIUM' }];
     }
 
     const exclude = (settings['files.exclude'] as Record<string, boolean>) ?? {};
     const watcherExclude = (settings['files.watcherExclude'] as Record<string, boolean>) ?? {};
 
-    // Every key in files.exclude should also appear in files.watcherExclude
+    // Normalize a glob key for comparison — strip trailing /** or /*
+    const normalize = (k: string) => k.replace(/\/\*\*$/, '').replace(/\/\*$/, '');
+
+    const watcherNormalized = Object.keys(watcherExclude).map(normalize);
+
+    // Every key in files.exclude should also appear (normalized) in files.watcherExclude
     for (const key of Object.keys(exclude)) {
-      const watcherKey = key.endsWith('/**') ? key : key.replace(/\/?$/, '/**');
-      const covered = Object.keys(watcherExclude).some(
-        wk => wk === key || wk === watcherKey || wk.startsWith(key)
-      );
+      const norm = normalize(key);
+      const covered = watcherNormalized.some(wk => wk === norm || wk.startsWith(norm));
       if (!covered) {
-        gaps.push({ path: key, reason: `In files.exclude but missing from files.watcherExclude — IDE still watches it` });
+        gaps.push({ 
+          path: key, 
+          reason: `Missing from files.watcherExclude. IDE still watches this excluded folder.`,
+          severity: key.includes('node_modules') ? 'CRITICAL' : 'MEDIUM'
+        });
       }
+    }
+
+    // Explicit check for node_modules in watcherExclude
+    const hasNodeEx = watcherNormalized.some(k => k.includes('node_modules'));
+    if (!hasNodeEx) {
+      gaps.push({
+        path: '**/node_modules',
+        reason: 'CRITICAL: node_modules must be in files.watcherExclude to prevent "Agent Loading" deadlocks.',
+        severity: 'CRITICAL'
+      });
     }
 
     return gaps;
@@ -227,6 +256,32 @@ export class OptimizeAuditor {
     }
   }
 
+  private detectLargeFiles(): LargeFile[] {
+    const issues: LargeFile[] = [];
+    const outputsPath = path.join(this.projectRoot, 'questerix-cortex', 'outputs');
+    if (!fs.existsSync(outputsPath)) return issues;
+
+    const files = fs.readdirSync(outputsPath);
+    for (const file of files) {
+      const fullPath = path.join(outputsPath, file);
+      try {
+        const stats = fs.statSync(fullPath);
+        if (stats.isDirectory()) continue;
+        const sizeMB = stats.size / (1024 * 1024);
+        if (sizeMB > 1.5) {
+          issues.push({
+            path: `outputs/${file}`,
+            sizeMB: parseFloat(sizeMB.toFixed(2)),
+            reason: 'Oversized output file. Massive text files in outputs/ can cause "Agent Loading" hangs during indexing.'
+          });
+        }
+      } catch {
+        // skip inaccessible
+      }
+    }
+    return issues;
+  }
+
   generateMarkdownReport(report: OptimizeReport): string {
     const lines: string[] = [
       `# 🚀 Optimize Report`,
@@ -269,7 +324,19 @@ export class OptimizeAuditor {
       lines.push(`_All excluded paths are also excluded from the file watcher._`);
     } else {
       for (const w of report.watcherGaps) {
-        lines.push(`- \`${w.path}\` — ${w.reason}`);
+        const severityStr = w.severity === 'CRITICAL' ? '🔴 **CRITICAL**' : '🟡 MEDIUM';
+        lines.push(`- ${severityStr}: \`${w.path}\` — ${w.reason}`);
+      }
+    }
+    lines.push(``);
+
+    // Large files
+    lines.push(`## 📦 Oversized Outputs`);
+    if (report.largeFiles.length === 0) {
+      lines.push(`_No oversized output files detected._`);
+    } else {
+      for (const f of report.largeFiles) {
+        lines.push(`- 🔴 **CRITICAL**: \`${f.path}\` — ${f.sizeMB} MB. ${f.reason}`);
       }
     }
     lines.push(``);

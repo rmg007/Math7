@@ -8,13 +8,16 @@
 
 ## 🚀 Phase 2: Deploy to Cloudflare Pages (Delegated to Cortex)
 
-> **Gate**: All Phase 1 tests must be green. This phase is now automated via `questerix-cortex/run.ts` (Deploy Tier).
+> **Gate**: All Phase 1 tests must be green. ✅ Gate OPEN.
+> Automated via `questerix-cortex/run.ts` (Release → Deploy Tiers).
 
-- [x] **Confirm `wrangler.toml`** scoping (Cortex check)
-- [ ] **Automated Release**: Run `npm run health` in `questerix-cortex/`
-  - [ ] **Build admin panel**: `npm run build` (Injected into Release Tier)
-  - [ ] **Deploy to Cloudflare Pages**: `npx wrangler pages deploy` (Injected into Deploy Tier)
-  - [ ] **Deploy edge functions**: `supabase functions deploy` (Injected into Deploy Tier)
+- [ ] **Commit uncommitted changes**: ~40 modified files pending (see LAST_CHANGED.md)
+- [ ] **Automated Release**: Run `npm run health -- release` in `questerix-cortex/`
+  - [ ] **Build admin panel**: `npm run build` (Release Tier)
+  - [ ] **Certify evidence**: `certify-evidence.ps1` (Release Tier)
+- [ ] **Deploy**: Run `npm run health -- deploy` in `questerix-cortex/`
+  - [ ] **Deploy to Cloudflare Pages**: `npx wrangler pages deploy` (Deploy Tier)
+  - [ ] **Deploy edge functions**: `supabase functions deploy` (Deploy Tier)
 - [ ] **Verify production deployment**: Post-deploy health check on live URL
 - [ ] **Verify CSP/RBAC live**: Cortex smoke verification against production endpoint
 
@@ -22,75 +25,35 @@
 
 ## 📦 Phase 3: Push to GitHub (Delegated to Cortex)
 
-> **Gate**: Cloudflare deployment verified before pushing. Automated via `questerix-cortex/run.ts` (Ship Tier).
+> **Gate**: Cloudflare deployment verified before pushing.
+> Automated via `questerix-cortex/run.ts` (Ship Tier).
 
-- [ ] **Automated Push**: Run `npm run health` in `questerix-cortex/`
-  - [ ] **Commit**: `git commit -m "feat: auto-ship via cortex"` (Injected into Ship Tier)
+- [ ] **Automated Push**: Run `npm run health -- ship` in `questerix-cortex/`
+  - [ ] **Commit**: `git commit -m "feat: auto-ship via cortex"` (Ship Tier)
   - [ ] **Confirm CI passes**: GitHub Actions `ci.yml` trigger on push
-  - [ ] **Tag release**: `git tag v<version>` + `git push --tags` (Conditional Ship sub-task)
+  - [ ] **Tag release**: `git tag v<version>` + `git push --tags` (Conditional)
 
 ---
 
-## 🔍 Phase 4: Codebase Intelligence System (Skeleton Search)
+## 🧠 Phase 4: Cortex v2 — Real-Time MCP Intelligence
 
-> **Objective**: Decouple codebase orientation from manual directory exploration. High-ROI intelligence layer.
+> **Gate**: Phase 2 deployed. See `plan.md` for full architecture.
+> **Status**: Planning complete. Ready for Session 1.
 
-- [x] **Phase 1: Skeleton Generator**
-  - [x] Extract signs/docs via `ts-morph` → `SKELETON_SUMMARY.md` (~10KB) + `SKELETON.md` (~50KB)
-  - [x] Auto-generation wired into `npm run health`
-- [x] **Phase 2a: Local Full-Text Search**
-  - [x] Persistent SQLite FTS5 index in `outputs/search.db`
-  - [x] CLI Search: `npm run health -- skeleton:search "query"`
-  - [x] Logic: Hybrid match (Exact Name P0 -> FTS Prefix P1)
-- [x] **Cleanup**: Update bootstrap protocols.
+- [ ] **Session 1**: SQLite schema (`cortex.db`) + Scanner writes `nodes`/`edges` to DB (~2h)
+- [ ] **Session 2**: MCP server with `cortex_impact` and `cortex_query` tools (~3h)
+- [ ] **Session 3**: `cortex_fragility` — Historian tracks file-level outcomes + attribution (~2h)
+- [ ] **Session 4**: `cortex_plan` + `cortex_verify` — targeted verification + compliance (~3h)
+- [ ] **Session 5**: Wire into agent rules (GEMINI.md, AGENTS.md) + compliance reporting (~1h)
 
 ---
 
-## Phase 5: Cortex Insight — Coverage & Technical Debt
+## Backlog (Deferred)
 
-> **P1 (High Priority)**: Address critical coverage gaps identified by the Cortex Analyst in the latest `HEALTH_REPORT.md` (Health Score: 0/100).
-
-- [x] **Hook Hardening**: Vitest unit tests exist or created for:
-  - `hooks/use-ai-generator.ts` ✅ (pre-existing)
-  - `hooks/use-app.ts` ✅ (pre-existing)
-  - `hooks/use-bulk-import.ts` ✅ (pre-existing)
-  - `hooks/use-studio-generator.ts` ✅ (created this session)
-- [x] **Core Page E2E**: Playwright smoke tests exist for:
-  - `features/ai-assistant/pages/GenerationPage.tsx` → `ai-generation.e2e.spec.ts` ✅
-  - `features/ai-content/pages/BulkImportPage.tsx` → `bulk-import.e2e.spec.ts` ✅
-  - `features/auth/pages/LoginPage.tsx` → `auth-flow.e2e.spec.ts` ✅
-- [x] **Curriculum Module**: Instrumented `useQuestions`, `usePublish`, and `VersionHistory` hooks for performance.
-- [x] **Cortex Scanner Fix**: 3-tier test detection added (sibling, `src/__tests__/`, Playwright `tests/`) — eliminates false-positive gap reports.
-- [ ] **Refactor History**: Commit remaining uncommitted changes from `LAST_CHANGED.md`.
-      65:
-      66: ---
-
----
-
-## Phase 5.1: Stabilization & Hardening (Post-Intel)
-
-> **Objective**: Close gaps surfaced by Phase 5 intel. Zero-any, Zero-drift, Zero-orphans.
-
-- [x] **Process Cleanup**: Purge hanging git/node orphans.
-- [x] **Type Parity**: Run `supabase gen types` to fix extra-in-types (Drift:Extra).
-- [x] **Type Hardening**: Address top 5 `deep` coverage gaps (used `castJson` across curriculum, monitoring, and mentorship).
-- [x] **Performance Baseline**: Instrumented core `useQuery` hooks + AI import telemetry.
-- [x] **Smoke Gate**: Passed `npm run health -- smoke` (Score: 100/100).
-- [x] **Analyst Refinement**: Fixed `useQueryClient` false-positive detection in Cortex.
-
----
-
-## 📋 Backlog (Deferred)
-
-- [ ] **Auth Flow Integrity**: Invitation code logic and profile creation verification
-  - [ ] E2E: valid invite code creates profile and redirects to dashboard
-  - [ ] E2E: profile row exists in DB after successful signup
-  - [ ] Unit: validate `invite_codes` RLS — used/expired codes rejected
-- [x] **Performance Audit**: Instrumented key `useQuery` hooks with `performance.mark` in dev
-- [ ] **Latency Benchmark**: Analyze P50/P95 load times for `/domains`, `/questions`, `/apps` via Cortex Telemetry.
-  - [ ] Set CI budget: warn if initial data fetch > 2s
+- [ ] **Latency CI Budget**: Set CI budget — warn if initial data fetch > 2s (requires `LATENCY_METRICS.json` baseline)
 - [ ] **Nightly Failure Reporting**: Auto-create GitHub Issue on nightly E2E regression failure
   - [ ] Add `on.schedule` cron job (`0 6 * * *`) to `.github/workflows/nightly.yml`
   - [ ] On failure: call `gh issue create` with test report, label `nightly-regression`
 - [ ] **Health Dashboard**: `/admin/maintenance` route surfacing `error_logs` + smoke statuses
 - [ ] **AI Multi-Model Fallback**: Auto-fallback to Llama 3 if DeepSeek R1 latency > 1s
+- [ ] **Type Safety Gaps**: Resolve 16 remaining type safety gaps flagged by Cortex Analyst

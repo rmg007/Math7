@@ -248,7 +248,7 @@ Before Phase 1, create `.agent/artifacts/TASK_STATE.json`:
 **Goal**: Secure and verified deployment.
 
 1.  **Prompt**: Ask the USER: _"Would you like to deploy? If so, which application (Admin Panel / Student App / Landing Pages)?"_
-2.  **Deploy**: Execute the specific deployment script for the chosen app.
+2.  **Deploy**: Execute the specific deployment script for the chosen app. **Note:** Student App and Landing Pages live in separate repos (**questerix-student-app**, **questerix-landing-pages**); deploy from those repositories.
 3.  **Verify**: Perform a post-deployment smoke test.
 
 **EXIT GATE**: Deployment successful or USER declined.

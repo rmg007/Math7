@@ -30,6 +30,8 @@ Before analysis, identify the platform from the code:
 Deno .ts    → EDGE FUNCTIONS (Supabase Edge Functions, Deno/TypeScript)
 ```
 
+**Note:** Flutter/Dart patterns apply to the **questerix-student-app** repo (separate repository). If you are working in **this** repo only, focus on Admin Panel (`.ts`/`.tsx`) and Database (`.sql`) patterns.
+
 ---
 
 ## PHASE 1: CONTRACT ANALYSIS

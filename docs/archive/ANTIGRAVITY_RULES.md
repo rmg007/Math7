@@ -1,4 +1,11 @@
+# Archived: Antigravity Coding Rules
+
+> **Archived.** Universal rules live in **AGENTS.md**; Antigravity-specific bootstrap and permissions in **GEMINI.md**. This file is kept for reference (e.g. Knowledge Base protocol for Questerix-Docs-Backup).
+
 ---
+
+---
+
 title: "Antigravity Coding Rules"
 app_scope: meta
 doc_type: prompt
@@ -7,12 +14,14 @@ priority: high
 status: active
 summary: "Core system instructions for AI agent coding behavior in Questerix projects."
 tags:
-  - agent-rules
-  - coding-standards
-  - workflow
-last_validated_by: human
-last_validated_at: 2026-02-03
-version: "1.0"
+
+- agent-rules
+- coding-standards
+- workflow
+  last_validated_by: human
+  last_validated_at: 2026-02-03
+  version: "1.0"
+
 ---
 
 # Antigravity Coding Rules
@@ -51,15 +60,18 @@ version: "1.0"
 ## Technology Stack Locks
 
 ### Platform
+
 - **Student App**: Flutter (tablet-first)
 - **Admin Panel**: React + Shadcn/UI (Tailwind CSS)
 - **Backend**: Supabase
 
 ### State Management
+
 - **Flutter**: Riverpod ONLY (no mixing with Provider/BLoC)
 - **React**: React Query v5 for server state + React Context for UI state
 
 ### Testing
+
 - Critical-path tests only (Auth, Sync, Data validation)
 - UI: Functional + accessibility requirements
 

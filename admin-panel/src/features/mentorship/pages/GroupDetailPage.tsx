@@ -832,7 +832,7 @@ export function GroupDetailPage() {
                                   .toUpperCase()}
                               </div>
                               <div className="space-y-0.5">
-                                <p className="text-sm font-black text-gray-900 tabular-nums">
+                                <p className="text-sm font-bold text-gray-900 tabular-nums">
                                   {member.nickname || member.profiles?.full_name || 'Anonymous'}
                                 </p>
                                 {member.profiles?.email && (

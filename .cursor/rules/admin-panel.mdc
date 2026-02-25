@@ -1,0 +1,10 @@
+---
+description: Admin panel scope — feature freeze and TypeScript conventions.
+globs: admin-panel/**
+---
+
+**Admin Panel Feature Freeze:** DO NOT add new features. Bug fixes and maintenance only. No new pages, components, hooks, routes, or UI elements.
+
+- TypeScript strict mode — zero `any` where avoidable. Use `as unknown as Type` only when bridging Supabase-generated types.
+- Stack: React + Vite + shadcn/ui + TanStack Query.
+- For file/symbol discovery use `questerix-cortex/outputs/SKELETON_SUMMARY.md` or `skeleton:search` from `questerix-cortex/`.

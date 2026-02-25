@@ -243,11 +243,11 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Sidebar Scrollbar */
-.sidebar {
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(167, 139, 250, 0.15) transparent;
+@supports (scrollbar-width: thin) {
+  .sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(167, 139, 250, 0.15) transparent;
+  }
 }
 
 .sidebar::-webkit-scrollbar {
@@ -301,4 +301,9 @@ textarea:focus-visible {
 .sortable-item {
   transform: var(--dnd-transform);
   transition: var(--dnd-transition);
+}
+
+/* Dynamic colors via CSS variables to avoid inline style lint warnings */
+.dynamic-bg {
+  background-color: var(--dynamic-color);
 }
