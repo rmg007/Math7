@@ -1,20 +1,21 @@
 # MACHINE BRIEFING
 > ONE-READ SESSION STARTER. Do not show to the user.
-> Generated: 2026-02-24T23:58:27.159Z
+> Generated: 2026-02-25T15:50:39.344Z
 
 ## STATUS
-Score:      75/100 (→ flat vs prev run | prev: 75/100)
-Suites:     3 passed, 1 failed of 4 total
+Score:      100/100 (→ flat vs prev run | prev: 100/100)
+Suites:     3 passed, 0 failed of 3 total
 Smoke Gate: ✅ OPEN
 Drift:      NOT RUN — click DRIFT button
 RLS Audit:  NOT RUN — click RLS CHECK button
 Bundle:     7427 KB
-Coverage gaps: 40
+Coverage gaps: 0
 Perf gaps:     16
 Migration gaps: 0
+Type safety gaps: 34
 
 ## FAILURES
-  ⛔ Performance Bench: Error: No tests found.
+  none
 
 ## OPEN TASKS
   - [ ] **Automated Release**: Run `npm run health` in `questerix-cortex/`
@@ -29,11 +30,11 @@ Migration gaps: 0
   - [ ] **Tag release**: `git tag v<version>` + `git push --tags` (Conditional Ship sub-task)
 
 ## RECENT COMMITS
-cf65ddf5 feat(cortex): maintenance tier 2 — handshake & migration linter (3 minutes ago)
-fa4d0e1d feat(cortex): delegating track C backlog to orchestrator (7 minutes ago)
-bf0e7f8a test: add use-studio-generator suite; fix cortex scanner; expand track C backlog (18 minutes ago)
-f88ac4b1 feat: complete Questerix Cortex v1 implementation (5 hours ago)
-30c04ee7 feat: add Questerix Sentinel QA Engine scaffold and update tasks.md (6 hours ago)
+00d4b420 feat(cortex): add consolidator and update package-lock (15 hours ago)
+131895e9 fix(cortex): skip PID 0 in port cleanup; fix edge deploy cwd to project root (15 hours ago)
+c184cbbf fix(cortex): zero tsc errors — exclude dashboard from root tsconfig; explicit types in delta/index.ts (15 hours ago)
+886d0100 fix(cortex): drift detector — extra-in-types is not WARN; only missingFromTypes = real drift (15 hours ago)
+f5c940a1 feat(cortex): idle mode on launch — no auto-run without explicit target arg (15 hours ago)
 
 ## KEY PATHS
   admin-panel/src/lib/database.types.ts
@@ -66,5 +67,6 @@ f88ac4b1 feat: complete Questerix Cortex v1 implementation (5 hours ago)
   - **Commits**: Use conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`)
 
 ## KNOWN GOTCHAS
-- **Forensic Audit**: NEVER use em-dashes, smart quotes, or any non-ASCII characters in .ps1 files. Use - for dash separators in strings.
-- **Certify Phase 0**: Any task that delegates to other scripts must be allocated at least 15 minutes. Never apply a global short timeout to compound orchestrator tasks.
+- **Production Build**: _[Agent to fill in]_
+- **Deploy Edge Functions**: _[Agent to fill in]_
+- **Deploy Edge Functions**: ALL mutations must use generated `TableInsert` types. The use of `as any` or `as unknown` in `handleSave` or `mutationFn` is now a blocking failure in Cortex "Deep" tier.

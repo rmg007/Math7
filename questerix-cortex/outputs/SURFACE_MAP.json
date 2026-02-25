@@ -48,7 +48,7 @@
     {
       "name": "useDebounce",
       "file": "hooks/use-debounce.ts",
-      "hasTest": false,
+      "hasTest": true,
       "functions": [
         "useDebounce"
       ],
@@ -144,7 +144,7 @@
     {
       "name": "useUnsavedChangesGuard",
       "file": "hooks/use-unsaved-changes-guard.ts",
-      "hasTest": false,
+      "hasTest": true,
       "functions": [
         "useUnsavedChangesGuard"
       ],
@@ -162,7 +162,7 @@
     {
       "name": "useUrlState",
       "file": "hooks/use-url-state.ts",
-      "hasTest": false,
+      "hasTest": true,
       "functions": [
         "useUrlState"
       ],
@@ -180,7 +180,7 @@
     {
       "name": "useDashboardStats",
       "file": "features/curriculum/hooks/use-dashboard.ts",
-      "hasTest": false,
+      "hasTest": true,
       "functions": [
         "useDashboardStats",
         "useRecentActivity"
@@ -501,7 +501,7 @@
     {
       "name": "useGroups",
       "file": "features/mentorship/hooks/use-groups.ts",
-      "hasTest": false,
+      "hasTest": true,
       "functions": [
         "useGroups",
         "Group"
@@ -579,7 +579,7 @@
     {
       "name": "useCreateKnownIssue",
       "file": "features/monitoring/hooks/use-known-issues-mutations.ts",
-      "hasTest": false,
+      "hasTest": true,
       "functions": [
         "useCreateKnownIssue",
         "useUpdateKnownIssue",
@@ -618,7 +618,7 @@
     {
       "name": "useKnownIssues",
       "file": "features/monitoring/hooks/use-known-issues.ts",
-      "hasTest": false,
+      "hasTest": true,
       "functions": [
         "useKnownIssues",
         "KnownIssue"
@@ -823,199 +823,199 @@
     {
       "name": "GenerationPage",
       "file": "features/ai-assistant/pages/GenerationPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "GovernancePage",
       "file": "features/ai-assistant/pages/GovernancePage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "SessionsPage",
       "file": "features/ai-assistant/pages/SessionsPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "BulkImportPage",
       "file": "features/ai-content/pages/BulkImportPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "AccountSettingsPage",
       "file": "features/auth/pages/AccountSettingsPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "AuthConfirmPage",
       "file": "features/auth/pages/AuthConfirmPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "InvitationCodesPage",
       "file": "features/auth/pages/InvitationCodesPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "LoginPage",
       "file": "features/auth/pages/LoginPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "UserManagementPage",
       "file": "features/auth/pages/UserManagementPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "ai-generator-page",
       "file": "features/curriculum/pages/ai-generator-page.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "dashboard-page",
       "file": "features/curriculum/pages/dashboard-page.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "domain-create-page",
       "file": "features/curriculum/pages/domain-create-page.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "domain-edit-page",
       "file": "features/curriculum/pages/domain-edit-page.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "domains-page",
       "file": "features/curriculum/pages/domains-page.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "publish-page",
       "file": "features/curriculum/pages/publish-page.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "question-create-page",
       "file": "features/curriculum/pages/question-create-page.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "question-edit-page",
       "file": "features/curriculum/pages/question-edit-page.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "question-studio-page",
       "file": "features/curriculum/pages/question-studio-page.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "questions-page",
       "file": "features/curriculum/pages/questions-page.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "skill-create-page",
       "file": "features/curriculum/pages/skill-create-page.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "skill-edit-page",
       "file": "features/curriculum/pages/skill-edit-page.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "skills-page",
       "file": "features/curriculum/pages/skills-page.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "version-history-page",
       "file": "features/curriculum/pages/version-history-page.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "DashboardPage",
       "file": "features/dashboard/pages/DashboardPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "AssignmentCreatePage",
       "file": "features/mentorship/pages/AssignmentCreatePage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "GroupCreatePage",
       "file": "features/mentorship/pages/GroupCreatePage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "GroupDetailPage",
       "file": "features/mentorship/pages/GroupDetailPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "GroupsPage",
       "file": "features/mentorship/pages/GroupsPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "ErrorLogsPage",
       "file": "features/monitoring/pages/ErrorLogsPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "KnownIssuesPage",
       "file": "features/monitoring/pages/KnownIssuesPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "AppsPage",
       "file": "features/platform/pages/AppsPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "LandingsPage",
       "file": "features/platform/pages/LandingsPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     },
     {
       "name": "SubjectsPage",
       "file": "features/platform/pages/SubjectsPage.tsx",
-      "hasTest": false,
+      "hasTest": true,
       "routes": []
     }
   ],
@@ -1546,6 +1546,7 @@
       "@/components/ui/textarea",
       "@/hooks/use-studio-generator",
       "@/hooks/use-toast",
+      "@/lib/database.types",
       "@/lib/utils",
       "../components/studio-question-card",
       "../hooks/use-questions",
@@ -1755,48 +1756,7 @@
       "../hooks/use-subjects"
     ]
   },
-  "gaps": [
-    "Missing test for hook: hooks/use-debounce.ts",
-    "Missing test for hook: hooks/use-unsaved-changes-guard.ts",
-    "Missing test for hook: hooks/use-url-state.ts",
-    "Missing E2E/Unit test for page: features/ai-assistant/pages/GenerationPage.tsx",
-    "Missing E2E/Unit test for page: features/ai-assistant/pages/GovernancePage.tsx",
-    "Missing E2E/Unit test for page: features/ai-assistant/pages/SessionsPage.tsx",
-    "Missing E2E/Unit test for page: features/ai-content/pages/BulkImportPage.tsx",
-    "Missing E2E/Unit test for page: features/auth/pages/AccountSettingsPage.tsx",
-    "Missing E2E/Unit test for page: features/auth/pages/AuthConfirmPage.tsx",
-    "Missing E2E/Unit test for page: features/auth/pages/InvitationCodesPage.tsx",
-    "Missing E2E/Unit test for page: features/auth/pages/LoginPage.tsx",
-    "Missing E2E/Unit test for page: features/auth/pages/UserManagementPage.tsx",
-    "Missing test for hook: features/curriculum/hooks/use-dashboard.ts",
-    "Missing E2E/Unit test for page: features/curriculum/pages/ai-generator-page.tsx",
-    "Missing E2E/Unit test for page: features/curriculum/pages/dashboard-page.tsx",
-    "Missing E2E/Unit test for page: features/curriculum/pages/domain-create-page.tsx",
-    "Missing E2E/Unit test for page: features/curriculum/pages/domain-edit-page.tsx",
-    "Missing E2E/Unit test for page: features/curriculum/pages/domains-page.tsx",
-    "Missing E2E/Unit test for page: features/curriculum/pages/publish-page.tsx",
-    "Missing E2E/Unit test for page: features/curriculum/pages/question-create-page.tsx",
-    "Missing E2E/Unit test for page: features/curriculum/pages/question-edit-page.tsx",
-    "Missing E2E/Unit test for page: features/curriculum/pages/question-studio-page.tsx",
-    "Missing E2E/Unit test for page: features/curriculum/pages/questions-page.tsx",
-    "Missing E2E/Unit test for page: features/curriculum/pages/skill-create-page.tsx",
-    "Missing E2E/Unit test for page: features/curriculum/pages/skill-edit-page.tsx",
-    "Missing E2E/Unit test for page: features/curriculum/pages/skills-page.tsx",
-    "Missing E2E/Unit test for page: features/curriculum/pages/version-history-page.tsx",
-    "Missing E2E/Unit test for page: features/dashboard/pages/DashboardPage.tsx",
-    "Missing test for hook: features/mentorship/hooks/use-groups.ts",
-    "Missing E2E/Unit test for page: features/mentorship/pages/AssignmentCreatePage.tsx",
-    "Missing E2E/Unit test for page: features/mentorship/pages/GroupCreatePage.tsx",
-    "Missing E2E/Unit test for page: features/mentorship/pages/GroupDetailPage.tsx",
-    "Missing E2E/Unit test for page: features/mentorship/pages/GroupsPage.tsx",
-    "Missing test for hook: features/monitoring/hooks/use-known-issues-mutations.ts",
-    "Missing test for hook: features/monitoring/hooks/use-known-issues.ts",
-    "Missing E2E/Unit test for page: features/monitoring/pages/ErrorLogsPage.tsx",
-    "Missing E2E/Unit test for page: features/monitoring/pages/KnownIssuesPage.tsx",
-    "Missing E2E/Unit test for page: features/platform/pages/AppsPage.tsx",
-    "Missing E2E/Unit test for page: features/platform/pages/LandingsPage.tsx",
-    "Missing E2E/Unit test for page: features/platform/pages/SubjectsPage.tsx"
-  ],
+  "gaps": [],
   "apiMap": {
     "App.tsx": [
       {

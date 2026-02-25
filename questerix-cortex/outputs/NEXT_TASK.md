@@ -2,18 +2,13 @@
 
 > Copy and paste to agent.
 
-### 🛠️ P0: Fix Regressions
-- [ ] Fix **Performance Bench** — see FAILURE_DIGEST.md for exact errors
-
-### 🧪 P1: Fill Coverage Gaps
-- [ ] Missing test for hook: hooks/use-debounce.ts
-- [ ] Missing test for hook: hooks/use-unsaved-changes-guard.ts
-- [ ] Missing test for hook: hooks/use-url-state.ts
-
+### 🚀 P2: Proceed with Backlog
+- [ ] Codebase stable. Ready for next feature.
 
 ---
 ## ⚠️ Anti-Hallucination Guardrails
 > Read before touching ANY code. These are proven project traps.
 
-- **Forensic Audit**: NEVER use em-dashes, smart quotes, or any non-ASCII characters in .ps1 files. Use - for dash separators in strings.
-- **Certify Phase 0**: Any task that delegates to other scripts must be allocated at least 15 minutes. Never apply a global short timeout to compound orchestrator tasks.
+- **Production Build**: _[Agent to fill in]_
+- **Deploy Edge Functions**: _[Agent to fill in]_
+- **Deploy Edge Functions**: ALL mutations must use generated `TableInsert` types. The use of `as any` or `as unknown` in `handleSave` or `mutationFn` is now a blocking failure in Cortex "Deep" tier.

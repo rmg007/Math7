@@ -10,14 +10,14 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import {
-    type Difficulty,
+    useStudioGenerator,
     type DifficultyMix,
     type Domain,
     type QuestionType,
-    type StudioConfig,
-    useStudioGenerator,
+    type StudioConfig
 } from '@/hooks/use-studio-generator';
 import { useToast } from '@/hooks/use-toast';
+import { Database, Json } from '@/lib/database.types';
 import { cn } from '@/lib/utils';
 import {
     AlertCircle,
@@ -38,7 +38,7 @@ import {
 import { useState } from 'react';
 import { useBlocker, useNavigate } from 'react-router-dom';
 import { StudioQuestionCard } from '../components/studio-question-card';
-import { useBulkCreateQuestions } from '../hooks/use-questions';
+import { useBulkCreateQuestions, type QuestionInsert } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 
 // ─────────────────────────────────────────────────────────
@@ -111,7 +111,6 @@ const QUESTION_TYPES: { key: QuestionType; label: string; desc: string }[] = [
   { key: 'boolean', label: 'True / False', desc: 'Binary choice' },
   { key: 'text_input', label: 'Short Answer', desc: 'Text response' },
   { key: 'reorder_steps', label: 'Reorder', desc: 'Sequence logic' },
-  { key: 'matching', label: 'Matching', desc: 'Pair terms' },
 ];
 
 const QUANTITY_PRESETS = [5, 10, 20, 30];
@@ -222,19 +221,67 @@ export function QuestionStudioPage() {
       return;
     }
 
-    const payload = keptQuestions.map((q) => ({
-      content: q.text,
-      type: q.question_type,
-      difficulty: q.difficulty as Difficulty,
-      skill_id: skillId,
-      status,
-      points: 1,
-      metadata: q.metadata,
-      explanation: q.metadata.explanation,
-    }));
+    const payload: QuestionInsert[] = keptQuestions.map((q) => {
+      let options: Json = null;
+      let solution: Json = null;
+
+      // Map question types to DB enum and format options/solution
+      const dbType = q.question_type === 'mcq' ? 'multiple_choice' : q.question_type;
+
+      if (q.question_type === 'mcq' || q.question_type === 'mcq_multi') {
+        const mappedOptions = (q.metadata.options || []).map((text, i) => ({
+          id: String.fromCharCode(97 + i), // a, b, c, d
+          text,
+        }));
+        options = { options: mappedOptions } as unknown as Json;
+
+        if (q.question_type === 'mcq') {
+          const correctText = q.metadata.correct_answer as string;
+          const correctIdx = q.metadata.options?.indexOf(correctText) ?? 0;
+          solution = { correct_option_id: String.fromCharCode(97 + Math.max(0, correctIdx)) } as unknown as Json;
+        } else {
+          const correctTexts = (q.metadata.correct_answer as string[]) || [];
+          const correctIds = correctTexts.map((text) => {
+            const idx = q.metadata.options?.indexOf(text) ?? -1;
+            return idx !== -1 ? String.fromCharCode(97 + idx) : null;
+          }).filter(Boolean);
+          solution = { correct_ids: correctIds } as unknown as Json;
+        }
+      } else if (q.question_type === 'boolean') {
+        options = { true_label: 'True', false_label: 'False' } as unknown as Json;
+        solution = { correct_value: q.metadata.correct_answer === 'True' } as unknown as Json;
+      } else if (q.question_type === 'text_input') {
+        options = { placeholder: '' } as unknown as Json;
+        solution = { exact_match: q.metadata.correct_answer } as unknown as Json;
+      } else if (q.question_type === 'reorder_steps') {
+        const steps = (q.metadata.options || []).map((text, i) => ({
+          id: String(i + 1),
+          text,
+        }));
+        options = { steps } as unknown as Json;
+        // correct_answer from AI is expected to be the correct sequence of strings
+        const correctTexts = (q.metadata.correct_answer as string[]) || [];
+        const correctOrder = correctTexts.map((text) => {
+          const idx = q.metadata.options?.indexOf(text) ?? -1;
+          return idx !== -1 ? String(idx + 1) : null;
+        }).filter(Boolean);
+        solution = { correct_order: correctOrder } as unknown as Json;
+      }
+
+      return {
+        content: q.text,
+        type: dbType as Database['public']['Enums']['question_type'],
+        skill_id: skillId,
+        status,
+        points: 1,
+        explanation: q.metadata.explanation || '',
+        options,
+        solution,
+      } as QuestionInsert;
+    });
 
     try {
-      await bulkCreate.mutateAsync(payload as unknown as Parameters<typeof bulkCreate.mutateAsync>[0]);
+      await bulkCreate.mutateAsync(payload);
       toast({
         title: `✓ ${keptQuestions.length} questions saved!`,
         description: `Added to ${skills?.find((s) => s.skill_id === skillId)?.title ?? 'skill'} as ${status}.`,

@@ -124,6 +124,13 @@ export class Reporter {
       analystResults.migrationGaps.forEach((g: string) => md += `- [ ] \`${g}\`\n`);
     }
 
+    if (analystResults?.typeSafetyGaps?.length > 0) {
+      md += '\n## 🧪 Type Safety Audit\n';
+      md += `**Unsafe Casts**: ${analystResults.typeSafetyGaps.length} detected (as any/unknown)\n`;
+      analystResults.typeSafetyGaps.slice(0, 10).forEach((g: string) => md += `- [ ] \`${g}\`\n`);
+      if (analystResults.typeSafetyGaps.length > 10) md += `*... and ${analystResults.typeSafetyGaps.length - 10} more*\n`;
+    }
+
     if (surfaceMap?.gaps?.length > 0) {
       md += '\n## 🚨 Coverage Gaps\n';
       surfaceMap.gaps.forEach((gap: string) => md += `- [ ] ${gap}\n`);
@@ -220,7 +227,8 @@ export class Reporter {
     md += `Bundle:     ${analystResults?.bundleSize ? analystResults.bundleSize + ' KB' : 'not built'}\n`;
     md += `Coverage gaps: ${surfaceMap?.gaps?.length ?? 0}\n`;
     md += `Perf gaps:     ${analystResults?.perfGaps?.length ?? 0}\n`;
-    md += `Migration gaps: ${analystResults?.migrationGaps?.length ?? 0}\n\n`;
+    md += `Migration gaps: ${analystResults?.migrationGaps?.length ?? 0}\n`;
+    md += `Type safety gaps: ${analystResults?.typeSafetyGaps?.length ?? 0}\n\n`;
 
     md += `## FAILURES\n${failureLines}\n\n`;
 
@@ -230,12 +238,17 @@ export class Reporter {
 
     md += `## KEY PATHS\n${keyPaths}\n\n`;
 
-    md += `## HOW TO START\n`;
-    md += `1. Read FAILURE_DIGEST.md if failures > 0\n`;
-    md += `2. Read LAST_CHANGED.md to see what files shifted\n`;
-    md += `3. Check NEXT_TASK.md for the highest-priority action\n`;
-    md += `4. If RLS = NOT RUN, trigger it before any schema work\n`;
-    md += `5. Check API_MAP.json before calling any hook method\n`;
+    md += `## CODEBASE SKELETON\n`;
+    md += `> Load SKELETON_SUMMARY.md at session start (< 10KB). Load SKELETON.md section on demand when editing a feature.\n`;
+    md += `  questerix-cortex/outputs/SKELETON_SUMMARY.md  ← always load first\n`;
+    md += `  questerix-cortex/outputs/SKELETON.md          ← load section for the feature you are editing\n`;
+    md += `  questerix-cortex/outputs/SKELETON.json        ← machine-readable, used by skeleton:search\n\n`;
+
+    md += `1. Read SKELETON_SUMMARY.md — always load first (replaces API_MAP.json)\n`;
+    md += `2. Read FAILURE_DIGEST.md if failures > 0\n`;
+    md += `3. Read LAST_CHANGED.md to see what files shifted\n`;
+    md += `4. Check NEXT_TASK.md for the highest-priority action\n`;
+    md += `5. If RLS = NOT RUN, trigger it before any schema work\n`;
     md += `6. Check UTILITY_REGISTRY.md before writing any new helper\n\n`;
 
     md += `## 🤝 MANDATORY HANDSHAKE\n`;

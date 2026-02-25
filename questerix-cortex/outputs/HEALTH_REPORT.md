@@ -1,15 +1,14 @@
 # 🩺 Questerix Health Report
 
-*Generated: 2/24/2026, 3:58:26 PM*
+*Generated: 2/25/2026, 7:50:39 AM*
 
-## Overall Health Score: 75/100
+## Overall Health Score: 100/100
 
 | Suite | Status | Duration |
 | :--- | :--- | :--- |
-| Unit Tests (Lib) | ✅ PASSED | 6.0s |
-| Lint Check | ✅ PASSED | 3.9s |
-| E2E Smoke (Desktop) | ✅ PASSED | 29.6s |
-| Performance Bench | ❌ FAILED | 5.7s |
+| Unit Tests (Lib) | ✅ PASSED | 18.6s |
+| Lint Check | ✅ PASSED | 4.9s |
+| E2E Smoke (Desktop) | ✅ PASSED | 68.7s |
 
 **Production Bundle**: 7427 KB
 
@@ -27,60 +26,22 @@
 - [ ] `features/mentorship/pages/GroupDetailPage.tsx`
 *... and 6 more*
 
-## 🚨 Coverage Gaps
-- [ ] Missing test for hook: hooks/use-debounce.ts
-- [ ] Missing test for hook: hooks/use-unsaved-changes-guard.ts
-- [ ] Missing test for hook: hooks/use-url-state.ts
-- [ ] Missing E2E/Unit test for page: features/ai-assistant/pages/GenerationPage.tsx
-- [ ] Missing E2E/Unit test for page: features/ai-assistant/pages/GovernancePage.tsx
-- [ ] Missing E2E/Unit test for page: features/ai-assistant/pages/SessionsPage.tsx
-- [ ] Missing E2E/Unit test for page: features/ai-content/pages/BulkImportPage.tsx
-- [ ] Missing E2E/Unit test for page: features/auth/pages/AccountSettingsPage.tsx
-- [ ] Missing E2E/Unit test for page: features/auth/pages/AuthConfirmPage.tsx
-- [ ] Missing E2E/Unit test for page: features/auth/pages/InvitationCodesPage.tsx
-- [ ] Missing E2E/Unit test for page: features/auth/pages/LoginPage.tsx
-- [ ] Missing E2E/Unit test for page: features/auth/pages/UserManagementPage.tsx
-- [ ] Missing test for hook: features/curriculum/hooks/use-dashboard.ts
-- [ ] Missing E2E/Unit test for page: features/curriculum/pages/ai-generator-page.tsx
-- [ ] Missing E2E/Unit test for page: features/curriculum/pages/dashboard-page.tsx
-- [ ] Missing E2E/Unit test for page: features/curriculum/pages/domain-create-page.tsx
-- [ ] Missing E2E/Unit test for page: features/curriculum/pages/domain-edit-page.tsx
-- [ ] Missing E2E/Unit test for page: features/curriculum/pages/domains-page.tsx
-- [ ] Missing E2E/Unit test for page: features/curriculum/pages/publish-page.tsx
-- [ ] Missing E2E/Unit test for page: features/curriculum/pages/question-create-page.tsx
-- [ ] Missing E2E/Unit test for page: features/curriculum/pages/question-edit-page.tsx
-- [ ] Missing E2E/Unit test for page: features/curriculum/pages/question-studio-page.tsx
-- [ ] Missing E2E/Unit test for page: features/curriculum/pages/questions-page.tsx
-- [ ] Missing E2E/Unit test for page: features/curriculum/pages/skill-create-page.tsx
-- [ ] Missing E2E/Unit test for page: features/curriculum/pages/skill-edit-page.tsx
-- [ ] Missing E2E/Unit test for page: features/curriculum/pages/skills-page.tsx
-- [ ] Missing E2E/Unit test for page: features/curriculum/pages/version-history-page.tsx
-- [ ] Missing E2E/Unit test for page: features/dashboard/pages/DashboardPage.tsx
-- [ ] Missing test for hook: features/mentorship/hooks/use-groups.ts
-- [ ] Missing E2E/Unit test for page: features/mentorship/pages/AssignmentCreatePage.tsx
-- [ ] Missing E2E/Unit test for page: features/mentorship/pages/GroupCreatePage.tsx
-- [ ] Missing E2E/Unit test for page: features/mentorship/pages/GroupDetailPage.tsx
-- [ ] Missing E2E/Unit test for page: features/mentorship/pages/GroupsPage.tsx
-- [ ] Missing test for hook: features/monitoring/hooks/use-known-issues-mutations.ts
-- [ ] Missing test for hook: features/monitoring/hooks/use-known-issues.ts
-- [ ] Missing E2E/Unit test for page: features/monitoring/pages/ErrorLogsPage.tsx
-- [ ] Missing E2E/Unit test for page: features/monitoring/pages/KnownIssuesPage.tsx
-- [ ] Missing E2E/Unit test for page: features/platform/pages/AppsPage.tsx
-- [ ] Missing E2E/Unit test for page: features/platform/pages/LandingsPage.tsx
-- [ ] Missing E2E/Unit test for page: features/platform/pages/SubjectsPage.tsx
+## 🧪 Type Safety Audit
+**Unsafe Casts**: 34 detected (as any/unknown)
+- [ ] `features/ai-assistant/pages/GovernancePage.tsx:64: Unsafe cast found ('as any' or 'as unknown')`
+- [ ] `features/auth/pages/LoginPage.tsx:196: Unsafe cast found ('as any' or 'as unknown')`
+- [ ] `features/curriculum/components/domain-list.tsx:704: Unsafe cast found ('as any' or 'as unknown')`
+- [ ] `features/curriculum/components/question-form.tsx:126: Unsafe cast found ('as any' or 'as unknown')`
+- [ ] `features/curriculum/components/question-form.tsx:149: Unsafe cast found ('as any' or 'as unknown')`
+- [ ] `features/curriculum/components/question-form.tsx:151: Unsafe cast found ('as any' or 'as unknown')`
+- [ ] `features/curriculum/components/question-form.tsx:153: Unsafe cast found ('as any' or 'as unknown')`
+- [ ] `features/curriculum/components/question-form.tsx:155: Unsafe cast found ('as any' or 'as unknown')`
+- [ ] `features/curriculum/components/question-form.tsx:157: Unsafe cast found ('as any' or 'as unknown')`
+- [ ] `features/curriculum/components/question-form.tsx:159: Unsafe cast found ('as any' or 'as unknown')`
+*... and 24 more*
 
 ---
 
 ## Failure Digest
 
-### Performance Bench
-```
-[dotenv@17.2.3] injecting env (10) from .env.test.local -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
-[dotenv@17.2.3] injecting env (0) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
-Error: No tests found.
-Make sure that arguments are regular expressions matching test files.
-You may need to escape symbols like "$" or "*" and quote the arguments.
-
-
-```
-
+✅ No failures. System stable.

@@ -100,3 +100,34 @@
 [2026-02-22 03:00:07] Space recovered: 298.15 MB
 [2026-02-22 03:00:07] Final size: 62.03 MB
 [2026-02-22 03:00:07] 
+[2026-02-24 16:05:39] 
+[2026-02-24 16:05:39] AGENT MEMORY CLEANUP STARTED
+[2026-02-24 16:05:39] Mode: LIVE
+[2026-02-24 16:05:39] Retain: 3 days / 15 sessions
+[2026-02-24 16:05:39] Before: 470.44 MB | 1907 files | 102 sessions
+[2026-02-24 16:05:39] 
+[2026-02-24 16:05:39] Phase 1: Stripping media artifacts...
+[2026-02-24 16:05:39]   Stripped .tempmediaStorage from 0e15a486-9add-4cc1-8e73-aeb70c932cc6 (14.10 MB)
+[2026-02-24 16:05:39]   Stripped .tempmediaStorage from 1e63b8c2-e8c7-4d0c-ba05-cf9997be1c45 (1.97 MB)
+[2026-02-24 16:05:39]   Stripped .tempmediaStorage from 23d82f2b-2177-4bcb-8a71-c6e894377e5f (1.30 MB)
+[2026-02-24 16:05:40]   Stripped .tempmediaStorage from 35776202-b660-4117-8eb8-59229838c532 (42.51 MB)
+[2026-02-24 16:05:40]   Stripped .tempmediaStorage from 4a0167c4-45f8-45d9-9673-edfd4be7bd52 (4.17 MB)
+[2026-02-24 16:05:40]   Stripped .tempmediaStorage from 5e8e4163-a1bb-4a15-8334-07f82580c912 (70.04 MB)
+[2026-02-24 16:05:41]   Stripped .tempmediaStorage from b97f5679-21ae-44ba-9b8a-bf8638889e2f (12.71 MB)
+[2026-02-24 16:05:41]   Stripped .tempmediaStorage from ff29f084-8a59-45a9-8b71-a4ccd4bbddc6 (1.99 MB)
+[2026-02-24 16:05:41] Phase 2: Pruning resolved state snapshots...
+[2026-02-24 16:05:41] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-02-24 16:05:42]   Deleting session 1591fc65-70a2-49fd-8d15-8183d6e72476 (0 B, last used: 02/21/2026 07:53:26)
+[2026-02-24 16:05:42]   Deleting session 0e33c59e-c2c3-4d2c-9278-085999b04691 (0 B, last used: 02/21/2026 07:34:35)
+[2026-02-24 16:05:42]   Deleting session 87eccb7e-6d9d-4702-8e70-ce3e47503db4 (0 B, last used: 02/21/2026 07:34:22)
+[2026-02-24 16:05:42]   Deleting session 24bef312-4ce1-4df6-919b-be7cd01d844a (0 B, last used: 02/20/2026 12:51:43)
+[2026-02-24 16:05:42]   Deleting session 5d2904fe-6ed6-4d80-af31-747617b21df0 (0 B, last used: 02/20/2026 12:34:06)
+[2026-02-24 16:05:42] Phase 4: Cleaning project root temp files...
+[2026-02-24 16:05:42] Phase 5: Pruning indexed artifacts...
+[2026-02-24 16:05:42] 
+[2026-02-24 16:05:42] CLEANUP COMPLETE
+[2026-02-24 16:05:42] Sessions: 102 -> 97 (-5)
+[2026-02-24 16:05:42] Files removed: 273
+[2026-02-24 16:05:42] Space recovered: 355.25 MB
+[2026-02-24 16:05:42] Final size: 115.19 MB
+[2026-02-24 16:05:42] 

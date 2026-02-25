@@ -5620,21 +5620,172 @@ The Subjects page is now a **production-ready admin interface**. Next phases:
 ## [2026-02-24] Cortex Auto-Entry
 
 ### Suite: Performance Bench
+
 **First Error**: `Error: No tests found.`
 **Duration**: 6.6s
-**Root Cause**: *[Agent to fill in]*
-**Fix Applied**: *[Agent to fill in]*
-**Prevention Rule**: *[Agent to fill in]*
-
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
 
 ---
 
 ## [2026-02-24] Cortex Auto-Entry
 
 ### Suite: Performance Bench
+
 **First Error**: `Error: No tests found.`
 **Duration**: 5.7s
-**Root Cause**: *[Agent to fill in]*
-**Fix Applied**: *[Agent to fill in]*
-**Prevention Rule**: *[Agent to fill in]*
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
 
+---
+
+## [2026-02-25] Cortex Auto-Entry
+
+### Suite: Deploy Edge Functions
+
+**First Error**: `Cannot find project ref. Have you run supabase link?`
+**Duration**: 0.3s
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
+
+---
+
+## [2026-02-25] Cortex Auto-Entry
+
+### Suite: Deploy Edge Functions
+
+**First Error**: `Cannot find project ref. Have you run supabase link?`
+**Duration**: 0.2s
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
+
+---
+
+## [2026-02-25] Cortex Auto-Entry
+
+### Suite: Performance Bench
+
+**First Error**: `Error: No tests found.`
+**Duration**: 7.1s
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
+
+---
+
+## [2026-02-25] Cortex Auto-Entry
+
+### Suite: Deploy Edge Functions
+
+**First Error**: `Cannot find project ref. Have you run supabase link?`
+**Duration**: 0.2s
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
+
+---
+
+## [2026-02-25] Cortex Auto-Entry
+
+### Suite: Deploy Edge Functions
+
+**First Error**: `Cannot find project ref. Have you run supabase link?`
+**Duration**: 0.2s
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
+
+---
+
+## [2026-02-25] Cortex Auto-Entry
+
+### Suite: Deploy Edge Functions
+
+**First Error**: `Cannot find project ref. Have you run supabase link?`
+**Duration**: 0.2s
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
+
+---
+
+## [2026-02-25] Cortex Auto-Entry
+
+### Suite: Deploy Edge Functions
+
+**First Error**: `Cannot find project ref. Have you run supabase link?`
+**Duration**: 2.5s
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
+
+---
+
+## [2026-02-25] Cortex Auto-Entry
+
+### Suite: Deploy Edge Functions
+
+**First Error**: `Cannot find project ref. Have you run supabase link?`
+**Duration**: 2.5s
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
+
+---
+
+## [2026-02-25] Cortex Auto-Entry
+
+### Suite: Deploy Edge Functions
+
+**First Error**: `Try rerunning the command with --debug to troubleshoot the error.`
+**Duration**: 1.6s
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
+
+---
+
+## [2026-02-25] Cortex Auto-Entry
+
+### Suite: Production Build
+
+**First Error**: `src/__tests__/features/curriculum/hooks/use-dashboard.test.ts(2,32): error TS6133: 'vi' is declared but its value is nev`
+**Duration**: 51.4s
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
+
+---
+
+## [2026-02-25] Cortex Auto-Entry
+
+### Suite: Deploy Edge Functions
+
+**First Error**: `Try rerunning the command with --debug to troubleshoot the error.`
+**Duration**: 1.6s
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
+
+---
+
+## [2026-02-25] Cortex Auto-Entry
+
+### Suite: Deploy Edge Functions
+
+**First Error**: `Try rerunning the command with --debug to troubleshoot the error.`
+**Session**: Resolving Question Studio 400 Save Error
+**Duration**: 1.5h
+**Root Cause**: Mismatch between AI-generated data structure (using `mcq` and flat metadata) and the strict Postgres schema (`multiple_choice` enum and `jsonb` wrappers). TypeScript was bypassed using `as unknown as any` in the mutation payload, leading to silent drift until runtime 400 errors.
+**Fix Applied**:
+
+1. Replaced all `any` casts with strict `QuestionInsert` types.
+2. Implemented a data transformer that maps AI fields to DB-standard JSONB structures (`options: { options: [...] }` and `solution: { correct_option_id: ... }`).
+3. Removed extraneous columns (`difficulty`, `metadata`) that do not exist in the physical schema.
+   **Prevention Rule**: ALL mutations must use generated `TableInsert` types. The use of `as any` or `as unknown` in `handleSave` or `mutationFn` is now a blocking failure in Cortex "Deep" tier.
+
+---

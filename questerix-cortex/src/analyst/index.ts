@@ -107,4 +107,44 @@ export class Analyst {
 
     return violations;
   }
+
+  /**
+   * Scans for 'as any' or 'as unknown' casts in production code (features/pages).
+   * Prevents 'Bypass Toxicity' where developers skip type checking for API payloads.
+   */
+  lintTypeSafety(): string[] {
+    const violations: string[] = [];
+    const sourceFiles = this.project.getSourceFiles();
+
+    for (const sourceFile of sourceFiles) {
+      const filePath = sourceFile.getFilePath().replace(/\\/g, '/');
+      
+      // Skip tests, nodes, and lib (lib often needs casts for low-level generics)
+      if (filePath.includes('__tests__') || filePath.includes('node_modules') || filePath.includes('/lib/')) {
+        continue;
+      }
+
+      // Target features and pages only where business logic lives
+      if (!filePath.includes('/features/') && !filePath.includes('/pages/')) {
+        continue;
+      }
+
+      const fullText = sourceFile.getFullText();
+      const relativePath = filePath.split('/admin-panel/src/')[1] || filePath;
+
+      // Check for 'as any' or 'as unknown as any' or 'as unknown as T'
+      // We allow 'as const' and 'as T' for safe casting, but 'any' is a red flag.
+      if (fullText.includes('as any') || fullText.includes('as unknown')) {
+        // Find line numbers for better reporting
+        const lines = fullText.split('\n');
+        lines.forEach((line, i) => {
+          if (line.includes('as any') || line.includes('as unknown')) {
+            violations.push(`${relativePath}:${i + 1}: Unsafe cast found ('as any' or 'as unknown')`);
+          }
+        });
+      }
+    }
+
+    return violations;
+  }
 }

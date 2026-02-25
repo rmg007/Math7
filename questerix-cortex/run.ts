@@ -1,3 +1,4 @@
+import { agentops } from 'agentops';
 import chalk from 'chalk';
 import { execSync } from 'child_process';
 import * as fs from 'fs';
@@ -12,6 +13,8 @@ import { Orchestrator } from './src/orchestrator';
 import { Reporter } from './src/reporter';
 import { RlsAuditor } from './src/rls';
 import { Scanner } from './src/scanner';
+import { SkeletonGenerator } from './src/skeleton';
+import { SkeletonSearch } from './src/skeleton/search';
 import { CortexConfig } from './src/types';
 
 const configPath = path.join(__dirname, 'cortex.config.json');
@@ -52,6 +55,17 @@ const allSuites: Array<{
 
 async function main() {
   console.log(chalk.cyan.bold('\n🚀 Questerix Cortex — Initializing...'));
+
+  // Initialize AgentOps session if API key is present
+  if (process.env.AGENTOPS_API_KEY) {
+    try {
+      await agentops.init({
+        apiKey: process.env.AGENTOPS_API_KEY,
+      });
+    } catch (err) {
+      console.warn(chalk.yellow('⚠️  Failed to initialize AgentOps:', err));
+    }
+  }
 
   const adminPath    = path.resolve(__dirname, config.adminPanelPath);
   const supabasePath = path.resolve(__dirname, config.supabasePath);
@@ -97,6 +111,31 @@ async function main() {
     );
     scanner.writeApiMap(surfaceMap, outputsPath);
 
+    // ── Skeleton generation ──────────────────────────────────────────────────
+    try {
+      console.log(chalk.cyan('\n🦴 Generating codebase skeleton…'));
+      dashboard.log('\n🦴 Generating codebase skeleton…', 'cyan');
+      const skeletonGen = new SkeletonGenerator(srcPath);
+      const skeletonReport = skeletonGen.generate();
+      skeletonGen.writeJson(skeletonReport, path.join(outputsPath, 'SKELETON.json'));
+      skeletonGen.writeMarkdownFull(skeletonReport, path.join(outputsPath, 'SKELETON.md'));
+      skeletonGen.writeMarkdownSummary(skeletonReport, path.join(outputsPath, 'SKELETON_SUMMARY.md'));
+      console.log(chalk.green(`   ✅ Skeleton: ${skeletonReport.totalFiles} files, ${skeletonReport.totalExports} exports`));
+      dashboard.log(`   ✅ Skeleton: ${skeletonReport.totalFiles} files, ${skeletonReport.totalExports} exports`, 'green');
+
+      // ── Index for search ──────────────────────────────────────────────────
+      const searchDbPath = path.join(outputsPath, 'search.db');
+      const searcher = new SkeletonSearch(searchDbPath);
+      searcher.index(skeletonReport);
+      searcher.close();
+      console.log(chalk.green('   ✅ Search index updated.'));
+      dashboard.log('   ✅ Search index updated.', 'green');
+
+    } catch (skeletonErr: any) {
+      console.warn(chalk.yellow('   ⚠️  Skeleton generation failed:', skeletonErr.message));
+      dashboard.log('   ⚠️  Skeleton generation failed', 'yellow');
+    }
+
     if (generateSkeletons) {
       console.log(chalk.yellow('\n🧪 Generating test skeletons for gaps…'));
       dashboard.log('\n🧪 Generating test skeletons for gaps…', 'yellow');
@@ -115,11 +154,13 @@ async function main() {
       bundleSize: number | null; 
       perfGaps: string[];
       migrationGaps: string[];
+      typeSafetyGaps: string[];
     } = {
       deadCode: [],
       bundleSize: analyst.getBundleSize(adminPath),
       perfGaps: analyst.checkPerformanceInstrumentation(),
       migrationGaps: analyst.lintMigrations(path.join(supabasePath, 'migrations')),
+      typeSafetyGaps: analyst.lintTypeSafety(),
     };
 
     // ── Intelligence checks (fast, no test runner) ──────────────────────────
@@ -328,6 +369,29 @@ async function main() {
   const args = process.argv.slice(2);
   const targetArg = args.find(a => !a.startsWith('--'));
   const flags = args.filter(a => a.startsWith('--'));
+
+  if (targetArg === 'skeleton:search') {
+    const query = flags.find(f => !f.startsWith('--')) || args[args.indexOf('skeleton:search') + 1];
+    if (!query) {
+      console.error(chalk.red('❌ Missing search query. Usage: npm run health -- skeleton:search "query"'));
+      return;
+    }
+    const searchDbPath = path.join(__dirname, config.outputs.surfaceMap, '../search.db');
+    if (!fs.existsSync(searchDbPath)) {
+      console.error(chalk.red('❌ Search index not found. Run a health check first.'));
+      return;
+    }
+    const searcher = new SkeletonSearch(searchDbPath);
+    const results = searcher.search(query);
+    console.log(chalk.cyan(`\n🔍 Search results for "${query}":`));
+    results.forEach(r => {
+      console.log(chalk.white(`  • `) + chalk.bold(r.name) + chalk.gray(` (${r.kind}) in `) + chalk.blue(r.file));
+      if (r.signature) console.log(chalk.gray(`    ${r.signature}`));
+      if (r.doc) console.log(chalk.italic.gray(`    ${r.doc}`));
+    });
+    searcher.close();
+    return;
+  }
 
   if (targetArg) {
     await executeRun(targetArg, flags);
