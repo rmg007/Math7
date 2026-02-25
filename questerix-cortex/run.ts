@@ -31,7 +31,8 @@ const allSuites: Array<{
 
   // Deep — heavier, but tsc + audit are independent
   { id: 'tsc',             name: 'TypeScript Strict',      command: 'npx tsc --noEmit',                         tier: 'deep',    parallel: true  },
-  { id: 'audit',           name: 'Dependency Audit',       command: 'npm audit --audit-level=high',             tier: 'deep',    parallel: true  },
+  { id: 'audit',           name: 'Security Audit',         command: 'npm audit --audit-level=high',             tier: 'deep',    parallel: true  },
+
   { id: 'full-vitest',     name: 'Full Vitest + Coverage', command: 'npm run test -- --run --coverage',         tier: 'deep',    parallel: false },
   { id: 'full-playwright', name: 'Full Playwright Suite',  command: 'npx playwright test',                      tier: 'deep',    parallel: false },
 
@@ -43,7 +44,7 @@ const allSuites: Array<{
 
   // Deploy — sequential only, runs after release certification
   { id: 'deploy-admin', name: 'Deploy Admin Panel',   command: 'powershell ..\\scripts\\deploy\\deploy-all.ps1 -ConfigFile ..\\master-config.json -Target admin-panel', tier: 'deploy', parallel: false },
-  { id: 'deploy-fns',   name: 'Deploy Edge Functions', command: 'supabase functions deploy',                tier: 'deploy',  parallel: false },
+  { id: 'deploy-fns',   name: 'Deploy Edge Functions', command: 'npx supabase functions deploy',           tier: 'deploy',  parallel: false },
 
   // Ship — final source control push, ONLY if all previous tiers pass
   { id: 'git-ship',     name: 'Git Ship (Push)',      command: 'powershell -Command "git add .; git commit -m \"feat: auto-ship via cortex\"; git push"', tier: 'ship', parallel: false },
@@ -264,6 +265,14 @@ async function main() {
     analystResults.deadCode = analyst.findDeadCode().slice(0, 10);
     analystResults.perfGaps = analyst.checkPerformanceInstrumentation();
     analystResults.migrationGaps = analyst.lintMigrations(path.join(supabasePath, 'migrations'));
+
+    // Bundle size regression guard
+    const bundleKB = analystResults.bundleSize;
+    if (bundleKB && bundleKB > 9000) {
+      const msg = `⚠️ Bundle size ${bundleKB} KB exceeds 9 MB threshold!`;
+      console.log(chalk.red(msg));
+      dashboard.log(msg, 'red');
+    }
 
     const results    = orchestrator.getResults();
     const allResults = Object.values(results);
