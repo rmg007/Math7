@@ -9,7 +9,9 @@ import { Analyst } from './src/analyst';
 import { Consolidator } from './src/consolidator';
 import { Dashboard } from './src/dashboard';
 import { DriftDetector } from './src/drift';
+import { auditGovernance } from './src/governance';
 import { Historian } from './src/historian';
+import { OptimizeAuditor } from './src/optimizer';
 import { Orchestrator } from './src/orchestrator';
 import { Reporter } from './src/reporter';
 import { RlsAuditor } from './src/rls';
@@ -98,9 +100,31 @@ async function main() {
     const pruneBrain = flags.includes('--prune-brain');
     const consolidate = flags.includes('--consolidate');
 
+    // ── Optimize target (standalone — exits early) ────────────────────────────
+    if (targets.includes('optimize')) {
+      console.log(chalk.cyan.bold('\n🚀 Running Performance Optimization Audit…'));
+      dashboard.log('\n🚀 Running Performance Optimization Audit…', 'cyan', true);
+      const optimizer = new OptimizeAuditor(path.resolve(__dirname, '..'));
+      const report = optimizer.audit();
+      const md = optimizer.generateMarkdownReport(report);
+
+      const outputsPath = path.resolve(__dirname, config.outputs ? path.dirname(config.outputs.surfaceMap ?? 'outputs/x') : 'outputs');
+      if (!fs.existsSync(outputsPath)) fs.mkdirSync(outputsPath, { recursive: true });
+      const reportPath = path.join(outputsPath, 'OPTIMIZE_REPORT.md');
+      fs.writeFileSync(reportPath, md, 'utf-8');
+
+      const color = report.verdict === 'CLEAN' ? 'green' : 'red';
+      console.log(chalk[color](`\n${report.summary}`));
+      dashboard.log(`\n${report.summary}`, color);
+      console.log(chalk.gray(`   Report saved → ${reportPath}`));
+      dashboard.log(`   Report saved → outputs/OPTIMIZE_REPORT.md`, 'gray');
+      return;
+    }
+
     const runDrift = targets.includes('drift') || targets.includes('all') || targets.includes('full') || targets.includes('intel');
     const runRls   = targets.includes('rls')   || targets.includes('full') || targets.includes('intel');
     const runSkeleton = targets.includes('skeleton') || targets.includes('all') || targets.includes('full') || targets.includes('intel');
+    const runGovernance = targets.includes('governance') || targets.includes('intel');
     
     console.log(chalk.cyan.bold(`\n🔄 Run (${target}) started…`));
     dashboard.log(`\n🔄 Run (${target}) started…`, 'cyan', true);
@@ -255,6 +279,16 @@ async function main() {
       dashboard.log(rlsSummary, 'cyan');
     }
 
+    let governanceResult: { deadRefs: Array<{ file: string; ref: string }>; scannedFiles: number } | undefined;
+    if (runGovernance) {
+      console.log(chalk.cyan('\n📜 Governance (dead refs)…'));
+      dashboard.log('\n📜 Governance…', 'cyan');
+      governanceResult = auditGovernance(path.resolve(__dirname, '..'));
+      const govSummary = `   Scanned ${governanceResult.scannedFiles} files, ${governanceResult.deadRefs.length} dead reference(s)`;
+      console.log(chalk.cyan(govSummary));
+      dashboard.log(govSummary, 'cyan');
+    }
+
     let history = historian.getHistory();
     const pushUpdate = () =>
       dashboard.update(orchestrator.getResults(), surfaceMap, analystResults, history, undefined, driftResult, rlsResult);
@@ -345,7 +379,7 @@ async function main() {
       .every(r => r.status === 'passed');
 
     // Reports
-    reporter.generate(results, surfaceMap, analystResults, driftResult, rlsResult, updatedHistory);
+    reporter.generate(results, surfaceMap, analystResults, driftResult, rlsResult, updatedHistory, governanceResult);
 
     dashboard.update(results, surfaceMap, analystResults, updatedHistory, smokePass, driftResult, rlsResult);
 
