@@ -193,12 +193,12 @@ export function LoginPage() {
     }
 
     // Step 3: Atomically validate AND consume invitation code (closes race window)
-    // Cast justified: DB function was renamed to validate_and_use_invitation_code
-    // but generated types still reference validate_invitation_code. Regenerate types to remove.
-    const rpcName = 'validate_and_use_invitation_code' as unknown as 'validate_invitation_code';
-    const { data: consumeResult, error: consumeError } = await supabase.rpc(rpcName, {
-      p_code: data.inviteCode,
-    });
+    const { data: consumeResult, error: consumeError } = await supabase.rpc(
+      'validate_and_use_invitation_code',
+      {
+        p_code: data.inviteCode,
+      }
+    );
 
     if (consumeError || !consumeResult) {
       setError('Failed to use invitation code. Please contact support.');

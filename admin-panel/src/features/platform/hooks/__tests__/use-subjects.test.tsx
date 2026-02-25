@@ -1,38 +1,61 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { TablesInsert, TablesUpdate } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import {
-    useBulkCreateSubjects,
-    useBulkDeleteSubjects,
-    useBulkUpdateSubjectsStatus,
-    useCheckSubjectSlug,
-    useCreateSubject,
-    useDeleteSubject,
-    useSubjects,
-    useUpdateSubject,
+  useBulkCreateSubjects,
+  useBulkDeleteSubjects,
+  useBulkUpdateSubjectsStatus,
+  useCheckSubjectSlug,
+  useCreateSubject,
+  useDeleteSubject,
+  useSubjects,
+  useUpdateSubject,
 } from '../use-subjects';
 
-// Helper to create a thenable mock chain
-const createMockChain = () => {
-  const chain: any = {
-    select: vi.fn(() => chain),
-    eq: vi.fn(() => chain),
-    in: vi.fn(() => chain),
-    order: vi.fn(() => chain),
-    single: vi.fn(() => chain),
-    insert: vi.fn(() => chain),
-    update: vi.fn(() => chain),
-    delete: vi.fn(() => chain),
-    neq: vi.fn(() => chain),
+interface MockSupabaseChain {
+  select: Mock;
+  eq: Mock;
+  in: Mock;
+  order: Mock;
+  single: Mock;
+  insert: Mock;
+  update: Mock;
+  delete: Mock;
+  neq: Mock;
+  then: Mock;
+}
 
-    then: vi.fn((onFulfilled: (value: any) => any) =>
+// Helper to create a thenable mock chain
+const createMockChain = (): MockSupabaseChain => {
+  const chain = {
+    select: vi.fn(),
+    eq: vi.fn(),
+    in: vi.fn(),
+    order: vi.fn(),
+    single: vi.fn(),
+    insert: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    neq: vi.fn(),
+    then: vi.fn((onFulfilled: (value: { data: unknown; error: unknown }) => unknown) =>
       Promise.resolve({ data: null, error: null }).then(onFulfilled)
     ),
   };
-  return chain;
+
+  chain.select.mockReturnValue(chain);
+  chain.eq.mockReturnValue(chain);
+  chain.in.mockReturnValue(chain);
+  chain.order.mockReturnValue(chain);
+  chain.single.mockReturnValue(chain);
+  chain.insert.mockReturnValue(chain);
+  chain.update.mockReturnValue(chain);
+  chain.delete.mockReturnValue(chain);
+  chain.neq.mockReturnValue(chain);
+
+  return chain as unknown as MockSupabaseChain;
 };
 
 // Mock dependencies
@@ -73,9 +96,11 @@ describe('useSubjects', () => {
 
   it('fetches subjects ordered by display_order', async () => {
     const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(mockChain as any);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockChain as unknown as ReturnType<typeof supabase.from>
+    );
 
-    mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+    mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
       Promise.resolve({ data: mockSubjects, error: null }).then(onFulfilled)
     );
 
@@ -95,16 +120,18 @@ describe('useCreateSubject', () => {
 
   it('inserts a new subject', async () => {
     const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(mockChain as any);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockChain as unknown as ReturnType<typeof supabase.from>
+    );
 
-    mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+    mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
       Promise.resolve({ data: mockSubjects[0], error: null }).then(onFulfilled)
     );
 
     const { result } = renderHook(() => useCreateSubject(), { wrapper });
 
-    const newSubject = { title: 'History', slug: 'history' };
-    await result.current.mutateAsync(newSubject as any);
+    const newSubject: TablesInsert<'subjects'> = { title: 'History', slug: 'history' };
+    await result.current.mutateAsync(newSubject);
 
     expect(mockChain.insert).toHaveBeenCalledWith(newSubject);
   });
@@ -116,9 +143,11 @@ describe('useUpdateSubject', () => {
 
   it('updates an existing subject', async () => {
     const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(mockChain as any);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockChain as unknown as ReturnType<typeof supabase.from>
+    );
 
-    mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+    mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
       Promise.resolve({ data: mockSubjects[0], error: null }).then(onFulfilled)
     );
 
@@ -132,17 +161,20 @@ describe('useUpdateSubject', () => {
 
   it('throws when subject not found', async () => {
     const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(mockChain as any);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockChain as unknown as ReturnType<typeof supabase.from>
+    );
 
-    mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+    mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
       Promise.resolve({ data: null, error: null }).then(onFulfilled)
     );
 
     const { result } = renderHook(() => useUpdateSubject(), { wrapper });
 
-    await expect(
-      result.current.mutateAsync({ id: VALID_UUID, title: 'X' })
-    ).rejects.toThrow(`Subject with ID ${VALID_UUID} not found for update.`);
+    const updatePayload: TablesUpdate<'subjects'> & { id: string } = { id: VALID_UUID, title: 'X' };
+    await expect(result.current.mutateAsync(updatePayload)).rejects.toThrow(
+      `Subject with ID ${VALID_UUID} not found for update.`
+    );
   });
 });
 
@@ -152,9 +184,11 @@ describe('useDeleteSubject', () => {
 
   it('deletes a subject', async () => {
     const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(mockChain as any);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockChain as unknown as ReturnType<typeof supabase.from>
+    );
 
-    mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+    mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
       Promise.resolve({ data: null, error: null }).then(onFulfilled)
     );
 
@@ -172,7 +206,9 @@ describe('useBulkUpdateSubjectsStatus', () => {
 
   it('updates status for multiple subjects', async () => {
     const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(mockChain as any);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockChain as unknown as ReturnType<typeof supabase.from>
+    );
 
     const { result } = renderHook(() => useBulkUpdateSubjectsStatus(), { wrapper });
     await result.current.mutateAsync({ ids: [VALID_UUID], status: 'live' });
@@ -188,7 +224,9 @@ describe('useBulkDeleteSubjects', () => {
 
   it('deletes multiple subjects', async () => {
     const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(mockChain as any);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockChain as unknown as ReturnType<typeof supabase.from>
+    );
 
     const { result } = renderHook(() => useBulkDeleteSubjects(), { wrapper });
     await result.current.mutateAsync([VALID_UUID, VALID_UUID_2]);
@@ -204,11 +242,16 @@ describe('useBulkCreateSubjects', () => {
 
   it('inserts multiple subjects', async () => {
     const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(mockChain as any);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockChain as unknown as ReturnType<typeof supabase.from>
+    );
 
     const { result } = renderHook(() => useBulkCreateSubjects(), { wrapper });
-    const payload = [{ title: 'S1', slug: 's1' }, { title: 'S2', slug: 's2' }];
-    await result.current.mutateAsync(payload as any);
+    const payload: TablesInsert<'subjects'>[] = [
+      { title: 'S1', slug: 's1' },
+      { title: 'S2', slug: 's2' },
+    ];
+    await result.current.mutateAsync(payload);
 
     expect(mockChain.insert).toHaveBeenCalledWith(payload);
   });
@@ -216,15 +259,19 @@ describe('useBulkCreateSubjects', () => {
 
 // ── useCheckSubjectSlug ───────────────────────────────────────────────────────
 describe('useCheckSubjectSlug', () => {
+  const { wrapper } = makeWrapper();
+
   it('returns true for available slug', async () => {
     const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(mockChain as any);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockChain as unknown as ReturnType<typeof supabase.from>
+    );
 
-    mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+    mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
       Promise.resolve({ count: 0, error: null }).then(onFulfilled)
     );
 
-    const { result } = renderHook(() => useCheckSubjectSlug());
+    const { result } = renderHook(() => useCheckSubjectSlug(), { wrapper });
     const isAvailable = await result.current.checkSlug('new-slug');
 
     expect(isAvailable).toBe(true);
@@ -233,13 +280,15 @@ describe('useCheckSubjectSlug', () => {
 
   it('returns false for taken slug', async () => {
     const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(mockChain as any);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockChain as unknown as ReturnType<typeof supabase.from>
+    );
 
-    mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+    mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
       Promise.resolve({ count: 1, error: null }).then(onFulfilled)
     );
 
-    const { result } = renderHook(() => useCheckSubjectSlug());
+    const { result } = renderHook(() => useCheckSubjectSlug(), { wrapper });
     const isAvailable = await result.current.checkSlug('taken-slug');
 
     expect(isAvailable).toBe(false);
@@ -247,16 +296,18 @@ describe('useCheckSubjectSlug', () => {
 
   it('excludes current subject from check', async () => {
     const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(mockChain as any);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockChain as unknown as ReturnType<typeof supabase.from>
+    );
 
-    const { result } = renderHook(() => useCheckSubjectSlug());
+    const { result } = renderHook(() => useCheckSubjectSlug(), { wrapper });
     await result.current.checkSlug('existing-slug', VALID_UUID);
 
     expect(mockChain.neq).toHaveBeenCalledWith('subject_id', VALID_UUID);
   });
 
   it('returns true for empty slug without calling API', async () => {
-    const { result } = renderHook(() => useCheckSubjectSlug());
+    const { result } = renderHook(() => useCheckSubjectSlug(), { wrapper });
     const isAvailable = await result.current.checkSlug('');
 
     expect(isAvailable).toBe(true);
