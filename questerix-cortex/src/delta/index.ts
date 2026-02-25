@@ -94,26 +94,26 @@ export class DeltaEngine {
         encoding: 'utf-8'
       });
 
-      const recentlyModifiedFiles = new Set(
+      const recentlyModifiedFiles = new Set<string>(
         gitOutput
           .split('\n')
-          .filter(line => line.trim())
-          .filter(file => file.match(/\.(ts|tsx)$/))
-          .filter(file => !file.includes('node_modules') && !file.includes('dist'))
-          .map(file => file.replace(/\\/g, '/'))
+          .filter((line: string) => line.trim())
+          .filter((file: string) => file.match(/\.(ts|tsx)$/))
+          .filter((file: string) => !file.includes('node_modules') && !file.includes('dist'))
+          .map((file: string) => file.replace(/\\/g, '/'))
       );
 
       // Intersect with untested files
       const untestedFiles = new Set(
-        surfaceMap.gaps.map(gap => {
+        surfaceMap.gaps.map((gap: string) => {
           // Extract file path from gap description
           const match = gap.match(/Missing test for (?:hook|page): (.+)$/);
           return match ? match[1] : null;
-        }).filter(Boolean)
+        }).filter((f): f is string => f !== null)
       );
 
-      const hotFiles = Array.from(recentlyModifiedFiles).filter(file => 
-        untestedFiles.has(file) || Array.from(untestedFiles).some(untested => 
+      const hotFiles = Array.from(recentlyModifiedFiles).filter((file: string) => 
+        untestedFiles.has(file) || Array.from(untestedFiles).some((untested: string) => 
           untested.includes(file) || file.includes(untested)
         )
       );
@@ -146,7 +146,7 @@ export class DeltaEngine {
         encoding: 'utf-8'
       });
 
-      const uncommittedChanges = statusOutput.split('\n').filter(line => line.trim()).length;
+      const uncommittedChanges = statusOutput.split('\n').filter((line: string) => line.trim()).length;
 
       return {
         lastCommitHash: hash.slice(0, 8),
