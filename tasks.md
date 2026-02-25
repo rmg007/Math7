@@ -31,6 +31,21 @@
 
 ---
 
+## 🔍 Phase 4: Codebase Intelligence System (Skeleton Search)
+
+> **Objective**: Decouple codebase orientation from manual directory exploration. High-ROI intelligence layer.
+
+- [x] **Phase 1: Skeleton Generator**
+  - [x] Extract signs/docs via `ts-morph` → `SKELETON_SUMMARY.md` (~10KB) + `SKELETON.md` (~50KB)
+  - [x] Auto-generation wired into `npm run health`
+- [x] **Phase 2a: Local Full-Text Search**
+  - [x] Persistent SQLite FTS5 index in `outputs/search.db`
+  - [x] CLI Search: `npm run health -- skeleton:search "query"`
+  - [x] Logic: Hybrid match (Exact Name P0 -> FTS Prefix P1)
+- [x] **Cleanup**: Purge legacy `API_MAP.json` and update bootstrap protocols.
+
+---
+
 ## Phase 5: Cortex Insight — Coverage & Technical Debt
 
 > **P1 (High Priority)**: Address critical coverage gaps identified by the Cortex Analyst in the latest `HEALTH_REPORT.md` (Health Score: 0/100).
