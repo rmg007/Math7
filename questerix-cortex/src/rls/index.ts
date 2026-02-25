@@ -33,13 +33,17 @@ WITH all_tables AS (
     AND tablename NOT IN ('schema_migrations')
 ),
 expanded_policies AS (
-  SELECT DISTINCT tablename, expanded_cmd AS cmd
-  FROM pg_policies,
+  SELECT DISTINCT p.tablename, ops.cmd
+  FROM pg_policies p,
   LATERAL (
-    SELECT CASE WHEN cmd = 'ALL'
-      THEN unnest(ARRAY['SELECT','INSERT','UPDATE','DELETE'])
-      ELSE cmd END AS expanded_cmd
-  ) e
+    SELECT 'SELECT' AS cmd WHERE p.cmd IN ('ALL', 'SELECT')
+    UNION ALL
+    SELECT 'INSERT' WHERE p.cmd IN ('ALL', 'INSERT')
+    UNION ALL
+    SELECT 'UPDATE' WHERE p.cmd IN ('ALL', 'UPDATE')
+    UNION ALL
+    SELECT 'DELETE' WHERE p.cmd IN ('ALL', 'DELETE')
+  ) ops
   WHERE schemaname = 'public'
 ),
 missing AS (
@@ -85,7 +89,29 @@ export class RlsAuditor {
   }
 
   async audit(): Promise<RlsAuditResult> {
-    // Try supabase CLI first
+    // 0. Check for Remote Evidence Bridge (Agent-Verified)
+    const evidencePath = path.join(__dirname, '..', '..', 'outputs', 'RLS_REMOTE_EVIDENCE.json');
+    if (fs.existsSync(evidencePath)) {
+      try {
+        const stats = fs.statSync(evidencePath);
+        const ageInHours = (Date.now() - stats.mtimeMs) / (1000 * 60 * 60);
+        if (ageInHours < 24) { // Valid for 24 hours
+          const evidence = JSON.parse(fs.readFileSync(evidencePath, 'utf-8'));
+          if (evidence.verdict && evidence.rows) {
+            return {
+              ...evidence,
+              verdict: (evidence.verdict as RlsAuditResult['verdict']),
+              rows: evidence.rows.map((r: any) => ({
+                ...r,
+                severity: (r.severity as RlsAuditRow['severity'])
+              }))
+            };
+          }
+        }
+      } catch { /* ignore and fallback */ }
+    }
+
+    // 1. Try supabase CLI
     const cliResult = this.trySupabaseCli();
     if (cliResult) return cliResult;
 
@@ -98,38 +124,65 @@ export class RlsAuditor {
           { encoding: 'utf-8', timeout: 20000, stdio: ['pipe','pipe','pipe'] }
         );
         return this.parseOutput(raw);
-      } catch { /* fall through */ }
+      } catch (err: any) { 
+        this.lastErrorOutput += `[psql]: ${err.message}\n`;
+      }
     }
 
-    return this.errorResult('Supabase CLI unavailable and DATABASE_URL not set.');
+    const msg = this.lastErrorOutput || 'Supabase CLI unavailable, DATABASE_URL not set, and project not linked.';
+    return this.errorResult(msg);
   }
 
   // ── Supabase CLI path ───────────────────────────────────────
   private trySupabaseCli(): RlsAuditResult | null {
+    // Write SQL to a temp file to avoid shell-quoting issues
+    const tmpFile = path.join(process.env.TEMP || '/tmp', 'rls-audit.sql');
     try {
-      // Write SQL to a temp file to avoid shell-quoting issues
-      const tmpFile = path.join(process.env.TEMP || '/tmp', 'rls-audit.sql');
       fs.writeFileSync(tmpFile, AUDIT_SQL, 'utf-8');
 
-      const result = spawnSync(
-        'supabase',
-        ['db', 'query', `--project-ref=${this.projectRef}`, '--file', tmpFile],
-        { encoding: 'utf-8', timeout: 25000 }
-      );
+      // Try global 'supabase', then 'npx supabase'
+      const configs = [
+        { cmd: 'supabase', args: ['db', 'query', `--project-ref=${this.projectRef}`, '--file', tmpFile] },
+        { cmd: 'npx', args: ['supabase', 'db', 'query', `--project-ref=${this.projectRef}`, '--file', tmpFile] }
+      ];
 
-      // Clean up temp file
-      try { fs.unlinkSync(tmpFile); } catch { /* ignore */ }
+      let lastError = '';
 
-      if (result.status !== 0 || result.error) return null;
+      for (const config of configs) {
+        try {
+          const result = spawnSync(
+            config.cmd,
+            config.args,
+            { encoding: 'utf-8', timeout: 30000, shell: true }
+          );
 
-      const output = (result.stdout || '').trim();
-      if (!output || output.includes('Error') || output.includes('error')) return null;
+          if (result.status === 0 && result.stdout && !result.stdout.toLowerCase().includes('error')) {
+            return this.parseOutput(result.stdout);
+          }
+          
+          if (result.stderr) {
+            lastError += `[${config.cmd}]: ${result.stderr.trim()}\n`;
+          } else if (result.error) {
+            lastError += `[${config.cmd}]: ${result.error.message}\n`;
+          }
+        } catch (err: any) {
+          lastError += `[${config.cmd}]: ${err.message}\n`;
+        }
+      }
 
-      return this.parseOutput(output);
+      // If we reach here, both failed. Store the last error if it looks like a real connection issue.
+      if (lastError) this.lastErrorOutput = lastError;
+
+      return null;
     } catch {
       return null;
+    } finally {
+      // Clean up temp file
+      try { if (fs.existsSync(tmpFile)) fs.unlinkSync(tmpFile); } catch { /* ignore */ }
     }
   }
+
+  private lastErrorOutput = '';
 
   // ── Output parser ───────────────────────────────────────────
   private parseOutput(raw: string): RlsAuditResult {

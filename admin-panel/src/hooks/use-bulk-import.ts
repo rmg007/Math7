@@ -86,10 +86,14 @@ export function useBulkImport() {
     setProgress(10); // Start progress
 
     try {
+      const markName = 'useBulkImport:process';
+      performance.mark(`${markName}:start`);
       const result = await CurriculumService.importQuestionsBulk(importQueue, {
         dryRun: isDryRun,
         batchSize: 50,
       });
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
 
       setProgress(100);
 

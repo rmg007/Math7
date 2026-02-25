@@ -3,6 +3,8 @@ import { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
+import { castJson } from '@/lib/type-utils';
+
 type CurriculumMeta = Database['public']['Tables']['curriculum_meta']['Row'];
 
 interface DashboardStats {
@@ -37,6 +39,8 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: ['dashboard-stats', currentApp?.app_id],
     queryFn: async (): Promise<DashboardStats> => {
+      const markName = 'useDashboardStats';
+      performance.mark(`${markName}:start`);
       if (!currentApp?.app_id) throw new Error('No app selected');
 
       const [
@@ -54,31 +58,98 @@ export function useDashboardStats() {
         draftQuestionsResult,
         metaResult,
       ] = await Promise.all([
-        supabase.from('domains').select('domain_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null),
-        supabase.from('domains').select('domain_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'live'),
-        supabase.from('domains').select('domain_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'published'),
-        supabase.from('domains').select('domain_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'draft'),
-        supabase.from('skills').select('skill_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null),
-        supabase.from('skills').select('skill_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'live'),
-        supabase.from('skills').select('skill_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'published'),
-        supabase.from('skills').select('skill_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'draft'),
-        supabase.from('questions').select('question_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null),
-        supabase.from('questions').select('question_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'live'),
-        supabase.from('questions').select('question_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'published'),
-        supabase.from('questions').select('question_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'draft'),
+        supabase
+          .from('domains')
+          .select('domain_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null),
+        supabase
+          .from('domains')
+          .select('domain_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'live'),
+        supabase
+          .from('domains')
+          .select('domain_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'published'),
+        supabase
+          .from('domains')
+          .select('domain_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'draft'),
+        supabase
+          .from('skills')
+          .select('skill_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null),
+        supabase
+          .from('skills')
+          .select('skill_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'live'),
+        supabase
+          .from('skills')
+          .select('skill_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'published'),
+        supabase
+          .from('skills')
+          .select('skill_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'draft'),
+        supabase
+          .from('questions')
+          .select('question_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null),
+        supabase
+          .from('questions')
+          .select('question_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'live'),
+        supabase
+          .from('questions')
+          .select('question_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'published'),
+        supabase
+          .from('questions')
+          .select('question_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'draft'),
         // Meta is per-app? Or global? Ideally per-app. For now assuming singleton is global, but lets verify.
         // If meta is global, we can't really version per app easily without changing schema.
-        // Current schema for curriculum_meta likely assumes one curriculum. 
+        // Current schema for curriculum_meta likely assumes one curriculum.
         // For now, let's just keep using the singleton as is, but acknowledged as a limitation.
-        supabase.from('curriculum_meta').select('version, last_published_at').eq('app_id', currentApp.app_id).maybeSingle(),
+        supabase
+          .from('curriculum_meta')
+          .select('version, last_published_at')
+          .eq('app_id', currentApp.app_id)
+          .maybeSingle(),
       ]);
 
       if (domainsResult.error) throw domainsResult.error;
       if (skillsResult.error) throw skillsResult.error;
       if (questionsResult.error) throw questionsResult.error;
 
-      const publishedCount = (publishedDomainsResult.count ?? 0) + (publishedSkillsResult.count ?? 0) + (publishedQuestionsResult.count ?? 0);
-      
+      const publishedCount =
+        (publishedDomainsResult.count ?? 0) +
+        (publishedSkillsResult.count ?? 0) +
+        (publishedQuestionsResult.count ?? 0);
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
       return {
         totalDomains: domainsResult.count ?? 0,
         totalSkills: skillsResult.count ?? 0,
@@ -92,8 +163,9 @@ export function useDashboardStats() {
         draftDomains: draftDomainsResult.count ?? 0,
         draftSkills: draftSkillsResult.count ?? 0,
         draftQuestions: draftQuestionsResult.count ?? 0,
-        currentVersion: (metaResult.data as CurriculumMeta | null)?.version ?? 0,
-        lastPublishedAt: (metaResult.data as CurriculumMeta | null)?.last_published_at ?? null,
+        currentVersion: castJson<CurriculumMeta | null>(metaResult.data)?.version ?? 0,
+        lastPublishedAt:
+          castJson<CurriculumMeta | null>(metaResult.data)?.last_published_at ?? null,
         readyToPublish: publishedCount,
       };
     },
@@ -108,6 +180,8 @@ export function useRecentActivity() {
   return useQuery({
     queryKey: ['recent-activity', currentApp?.app_id],
     queryFn: async (): Promise<RecentActivity[]> => {
+      const markName = 'useRecentActivity';
+      performance.mark(`${markName}:start`);
       if (!currentApp?.app_id) throw new Error('No app selected');
 
       const [domainsResult, skillsResult, questionsResult] = await Promise.all([
@@ -140,7 +214,7 @@ export function useRecentActivity() {
 
       const activities: RecentActivity[] = [];
 
-      (domainsResult.data)?.forEach((d) => {
+      domainsResult.data?.forEach((d) => {
         const isNew = d.created_at === d.updated_at;
         activities.push({
           id: d.domain_id,
@@ -151,7 +225,7 @@ export function useRecentActivity() {
         });
       });
 
-      (skillsResult.data)?.forEach((s) => {
+      skillsResult.data?.forEach((s) => {
         const isNew = s.created_at === s.updated_at;
         activities.push({
           id: s.skill_id,
@@ -162,7 +236,7 @@ export function useRecentActivity() {
         });
       });
 
-        (questionsResult.data)?.forEach((q) => {
+      questionsResult.data?.forEach((q) => {
         const isNew = q.created_at === q.updated_at;
         const contentStr = typeof q.content === 'string' ? q.content : JSON.stringify(q.content);
         activities.push({
@@ -173,6 +247,9 @@ export function useRecentActivity() {
           timestamp: q.updated_at,
         });
       });
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
 
       return activities
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())

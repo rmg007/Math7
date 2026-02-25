@@ -6,27 +6,27 @@ import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 import {
-    Activity,
-    AlertCircle,
-    ArrowDownRight,
-    ArrowUpRight,
-    BookOpen,
-    BrainCircuit,
-    Database,
-    Layers,
+  Activity,
+  AlertCircle,
+  ArrowDownRight,
+  ArrowUpRight,
+  BookOpen,
+  BrainCircuit,
+  Database,
+  Layers,
 } from 'lucide-react';
 import React, { useState } from 'react';
 import {
-    Area,
-    AreaChart,
-    CartesianGrid,
-    Cell,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts';
 
 const COLORS = ['#6366f1', '#a855f7', '#ec4899', '#f43f5e'];
@@ -39,6 +39,8 @@ export function DashboardPage() {
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard-stats', currentApp?.app_id, isSuperAdmin, viewMode],
     queryFn: async () => {
+      const markName = `DashboardPage:stats`;
+      performance.mark(`${markName}:start`);
       const shouldFilterByApp = !isSuperAdmin || viewMode === 'current';
 
       type CountableTable = 'domains' | 'skills' | 'questions';
@@ -89,6 +91,9 @@ export function DashboardPage() {
           value: count,
         }))
         .sort((a, b) => b.value - a.value);
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
 
       return {
         domains: results[0].count || 0,

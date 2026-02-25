@@ -147,13 +147,12 @@ export class SkeletonGenerator {
   private srcPath: string;
   private srcLabel: string; // e.g. 'admin-panel/src/'
 
-  constructor(srcPath: string) {
+  constructor(project: Project, srcPath: string) {
+    this.project = project;
     this.srcPath = srcPath;
     this.srcLabel = srcPath.replace(/\\/g, '/').split('/admin-panel/')[1]
       ? 'admin-panel/' + srcPath.replace(/\\/g, '/').split('/admin-panel/')[1].replace(/\/$/, '') + '/'
       : path.basename(srcPath) + '/';
-    this.project = new Project({ skipFileDependencyResolution: true });
-    this.project.addSourceFilesAtPaths(path.join(srcPath, '**/*.{ts,tsx}'));
   }
 
   generate(): SkeletonReport {

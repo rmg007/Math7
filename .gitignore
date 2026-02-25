@@ -138,6 +138,7 @@ tools/bin/
 .ruff_cache/
 __pycache__/
 *.pyc
+search.db
 
 # Wrangler deployment temp
 .wrangler/

@@ -1,0 +1,112 @@
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\lib\utils.test.ts
+  40:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\components\ui\rich-text-editor.tsx
+  149:5  error  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\hooks\use-questions.ts
+  108:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\AccountSettingsPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\AppsPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\AssignmentCreatePage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\AuthConfirmPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\BulkImportPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\DashboardPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\ErrorLogsPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\GenerationPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\GovernancePage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\GroupCreatePage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\GroupDetailPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\GroupsPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\InvitationCodesPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\KnownIssuesPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\LandingsPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\LoginPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\SessionsPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\SubjectsPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\UserManagementPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\ai-generator-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\dashboard-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\domain-create-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\domain-edit-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\domains-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\publish-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\question-create-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\question-edit-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\question-studio-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\questions-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\skill-create-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\skill-edit-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\skills-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\version-history-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+Γ£û 36 problems (36 errors, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

@@ -955,6 +955,24 @@ export type Database = {
           },
         ];
       };
+      platform_config: {
+        Row: {
+          key: string;
+          updated_at: string | null;
+          value: Json;
+        };
+        Insert: {
+          key: string;
+          updated_at?: string | null;
+          value: Json;
+        };
+        Update: {
+          key?: string;
+          updated_at?: string | null;
+          value?: Json;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           app_id: string | null;
@@ -1474,6 +1492,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      check_global_ai_quota: { Args: never; Returns: Json };
       consume_tenant_tokens: {
         Args: { p_app_id: string; p_operation?: string; p_tokens_used: number };
         Returns: Json;
@@ -1505,6 +1524,17 @@ export type Database = {
       jwt_is_mentor: { Args: never; Returns: boolean };
       jwt_is_super_admin: { Args: never; Returns: boolean };
       jwt_is_tenant_admin: { Args: never; Returns: boolean };
+      list_curriculum_snapshots: {
+        Args: { p_app_id: string };
+        Returns: {
+          domains_count: number;
+          published_at: string;
+          published_by: string;
+          questions_count: number;
+          skills_count: number;
+          version: number;
+        }[];
+      };
       log_error: {
         Args: {
           p_app_id?: string;
@@ -1541,6 +1571,10 @@ export type Database = {
       publish_curriculum: { Args: { p_app_id?: string }; Returns: Json };
       pull_changes: {
         Args: { last_sync_time?: string; table_name: string };
+        Returns: Json;
+      };
+      rollback_publish: {
+        Args: { p_app_id: string; p_target_version: number };
         Returns: Json;
       };
       submit_attempt_and_update_progress: {

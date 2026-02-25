@@ -10,7 +10,11 @@ export function useSubjects() {
   return useQuery({
     queryKey: ['subjects'],
     queryFn: async () => {
+      const markName = 'useSubjects';
+      performance.mark(`${markName}:start`);
       const { data, error } = await supabase.from('subjects').select('*').order('display_order');
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
       if (error) throw error;
       return data || [];
     },

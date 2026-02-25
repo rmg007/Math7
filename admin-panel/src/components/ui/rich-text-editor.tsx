@@ -7,21 +7,21 @@ import StarterKit from '@tiptap/starter-kit';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import {
-    Bold,
-    Code,
-    Heading2,
-    Italic,
-    List,
-    ListOrdered,
-    Quote,
-    Redo,
-    Sparkles,
-    Subscript,
-    Superscript,
-    Table as TableIcon,
-    Underline as UnderlineIcon,
-    Undo,
-    X,
+  Bold,
+  Code,
+  Heading2,
+  Italic,
+  List,
+  ListOrdered,
+  Quote,
+  Redo,
+  Sparkles,
+  Subscript,
+  Superscript,
+  Table as TableIcon,
+  Underline as UnderlineIcon,
+  Undo,
+  X,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BlockMath, InlineMath } from './math-extensions';
@@ -146,7 +146,6 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
     return () => {
       if (container) container.innerHTML = '';
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showMathInput]); // re-run when popover opens
 
   // Keep imperative event handlers current without re-running the effect
@@ -314,364 +313,388 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
     >
       {/* Background with blur - moved to separate layer to avoid clipping issues with fixed children */}
       <div className="absolute inset-0 bg-white/70 backdrop-blur-xl rounded-[1.5rem] -z-10 pointer-events-none" />
-      
+
       <div className="relative z-0 rounded-[1.5rem] overflow-visible">
-      <div className="flex flex-wrap items-center gap-1.5 p-3 border-b border-indigo-50 bg-white/40 backdrop-blur-md">
-        {/* --- Text formatting --- */}
-        <MenuButton
-          onClick={() => {
-            editor.chain().focus().toggleBold().run();
-          }}
-          isActive={editor.isActive('bold')}
-          title="Bold (Ctrl+B)"
-        >
-          <Bold className="h-4 w-4" />
-        </MenuButton>
-
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          isActive={editor.isActive('italic')}
-          title="Italic (Ctrl+I)"
-        >
-          <Italic className="h-4 w-4" />
-        </MenuButton>
-
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          isActive={editor.isActive('underline')}
-          title="Underline (Ctrl+U)"
-        >
-          <UnderlineIcon className="h-4 w-4" />
-        </MenuButton>
-
-        <div className="w-px h-6 bg-indigo-100 mx-1.5" />
-
-        {/* --- Block formatting --- */}
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          isActive={editor.isActive('heading', { level: 2 })}
-          title="Heading (Ctrl+Alt+2)"
-        >
-          <Heading2 className="h-4 w-4" />
-        </MenuButton>
-
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          isActive={editor.isActive('bulletList')}
-          title="Bullet List"
-        >
-          <List className="h-4 w-4" />
-        </MenuButton>
-
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          isActive={editor.isActive('orderedList')}
-          title="Numbered List"
-        >
-          <ListOrdered className="h-4 w-4" />
-        </MenuButton>
-
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          isActive={editor.isActive('blockquote')}
-          title="Blockquote"
-        >
-          <Quote className="h-4 w-4" />
-        </MenuButton>
-
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          isActive={editor.isActive('codeBlock')}
-          title="Code Block"
-        >
-          <Code className="h-4 w-4" />
-        </MenuButton>
-
-        <div className="w-px h-6 bg-indigo-100 mx-1.5" />
-
-        {/* --- Math shortcuts --- */}
-        {/* --- Table picker --- */}
-        <div className="relative">
+        <div className="flex flex-wrap items-center gap-1.5 p-3 border-b border-indigo-50 bg-white/40 backdrop-blur-md">
+          {/* --- Text formatting --- */}
           <MenuButton
             onClick={() => {
-              setShowTablePicker(!showTablePicker);
-              setTableHover({ rows: 0, cols: 0 });
+              editor.chain().focus().toggleBold().run();
             }}
-            isActive={showTablePicker}
-            title="Insert Table"
+            isActive={editor.isActive('bold')}
+            title="Bold (Ctrl+B)"
           >
-            <TableIcon className="h-4 w-4" />
+            <Bold className="h-4 w-4" />
           </MenuButton>
 
-          {showTablePicker && (
-            <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 pointer-events-none">
-              <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm pointer-events-auto" onClick={() => setShowTablePicker(false)} />
-              
-              <div className={cn(
-                "p-6 bg-white border border-indigo-100 shadow-2xl shadow-indigo-500/20 z-[1001] animate-in zoom-in-95 duration-200 pointer-events-auto",
-                "overflow-y-auto max-h-[80vh] translate-z-0 rounded-[2rem] w-full max-w-[300px] relative"
-              )}>
-                <button 
-                  type="button"
-                  onClick={() => setShowTablePicker(false)}
-                  className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
-                  title="Close"
-                >
-                  <X className="w-4 h-4 text-gray-400" />
-                </button>
-              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">
-                {tableHover.rows > 0 ? `${tableHover.rows} × ${tableHover.cols}` : 'Insert Table'}
-              </p>
-              <div className="grid grid-cols-6 gap-1">
-                {Array.from({ length: 36 }, (_, i) => {
-                  const row = Math.floor(i / 6) + 1;
-                  const col = (i % 6) + 1;
-                  const isHighlighted = row <= tableHover.rows && col <= tableHover.cols;
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      title={`Insert ${row}x${col} table`}
-                      onMouseEnter={() => setTableHover({ rows: row, cols: col })}
-                      onClick={() => {
-                        editor
-                          .chain()
-                          .focus()
-                          .insertTable({ rows: row, cols: col, withHeaderRow: true })
-                          .run();
-                        setShowTablePicker(false);
-                        setTableHover({ rows: 0, cols: 0 });
-                      }}
-                      className={cn(
-                        'w-5 h-5 rounded border transition-all',
-                        isHighlighted
-                          ? 'bg-indigo-500 border-indigo-400'
-                          : 'bg-gray-50 border-gray-200 hover:bg-indigo-100'
-                      )}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-        </div>
-
-        <div className="w-px h-6 bg-indigo-100 mx-1.5" />
-
-        <MenuButton onClick={insertSuperscript} title="Superscript (x²)">
-          <Superscript className="h-4 w-4" />
-        </MenuButton>
-
-        <MenuButton onClick={insertSubscript} title="Subscript (x₂)">
-          <Subscript className="h-4 w-4" />
-        </MenuButton>
-
-        <MenuButton onClick={insertFraction} title="Fraction (a/b) — inserts \frac{a}{b}">
-          <span className="text-xs font-black italic tracking-tighter">1/2</span>
-        </MenuButton>
-
-        <div className="w-px h-6 bg-indigo-100 mx-1.5" />
-
-        {/* --- Undo / Redo --- */}
-        <MenuButton
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().undo()}
-          title="Undo"
-        >
-          <Undo className="h-4 w-4" />
-        </MenuButton>
-
-        <MenuButton
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().redo()}
-          title="Redo"
-        >
-          <Redo className="h-4 w-4" />
-        </MenuButton>
-
-        <div className="w-px h-6 bg-indigo-100 mx-1.5" />
-
-        {/* --- Symbol Matrix / LaTeX Popover --- */}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setShowMathInput(!showMathInput)}
-            className={cn(
-              'px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 flex items-center gap-2 border shadow-sm',
-              showMathInput
-                ? 'bg-indigo-600 text-white border-indigo-400 rotate-1 scale-105'
-                : 'bg-white text-indigo-600 border-indigo-100 hover:bg-indigo-50'
-            )}
-            title="Insert Math — type $...$ inline or $$...$$ for display mode"
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            isActive={editor.isActive('italic')}
+            title="Italic (Ctrl+I)"
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            Symbol Matrix
-          </button>
+            <Italic className="h-4 w-4" />
+          </MenuButton>
 
-          {showMathInput && (
-            <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 pointer-events-none">
-              {/* Universal backdrop shadow */}
-              <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm pointer-events-auto" onClick={() => setShowMathInput(false)} />
-              
-              <div
-                data-testid="symbol-matrix-palette"
-                className={cn(
-                  "bg-white border border-indigo-100 shadow-2xl shadow-indigo-500/20 z-[1001] animate-in zoom-in-95 duration-200 pointer-events-auto",
-                  "overflow-y-auto max-h-[90vh] translate-z-0",
-                  "w-full max-w-[calc(100vw-32px)] sm:max-w-[400px] rounded-[2rem] p-6 relative"
-                )}
-              >
-                {/* Close button */}
-                <button 
-                  type="button"
-                  onClick={() => setShowMathInput(false)}
-                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  title="Close"
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            isActive={editor.isActive('underline')}
+            title="Underline (Ctrl+U)"
+          >
+            <UnderlineIcon className="h-4 w-4" />
+          </MenuButton>
+
+          <div className="w-px h-6 bg-indigo-100 mx-1.5" />
+
+          {/* --- Block formatting --- */}
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            isActive={editor.isActive('heading', { level: 2 })}
+            title="Heading (Ctrl+Alt+2)"
+          >
+            <Heading2 className="h-4 w-4" />
+          </MenuButton>
+
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            isActive={editor.isActive('bulletList')}
+            title="Bullet List"
+          >
+            <List className="h-4 w-4" />
+          </MenuButton>
+
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            isActive={editor.isActive('orderedList')}
+            title="Numbered List"
+          >
+            <ListOrdered className="h-4 w-4" />
+          </MenuButton>
+
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            isActive={editor.isActive('blockquote')}
+            title="Blockquote"
+          >
+            <Quote className="h-4 w-4" />
+          </MenuButton>
+
+          <MenuButton
+            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+            isActive={editor.isActive('codeBlock')}
+            title="Code Block"
+          >
+            <Code className="h-4 w-4" />
+          </MenuButton>
+
+          <div className="w-px h-6 bg-indigo-100 mx-1.5" />
+
+          {/* --- Math shortcuts --- */}
+          {/* --- Table picker --- */}
+          <div className="relative">
+            <MenuButton
+              onClick={() => {
+                setShowTablePicker(!showTablePicker);
+                setTableHover({ rows: 0, cols: 0 });
+              }}
+              isActive={showTablePicker}
+              title="Insert Table"
+            >
+              <TableIcon className="h-4 w-4" />
+            </MenuButton>
+
+            {showTablePicker && (
+              <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 pointer-events-none">
+                <div
+                  className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm pointer-events-auto"
+                  onClick={() => setShowTablePicker(false)}
+                />
+
+                <div
+                  className={cn(
+                    'p-6 bg-white border border-indigo-100 shadow-2xl shadow-indigo-500/20 z-[1001] animate-in zoom-in-95 duration-200 pointer-events-auto',
+                    'overflow-y-auto max-h-[80vh] translate-z-0 rounded-[2rem] w-full max-w-[300px] relative'
+                  )}
                 >
-                  <X className="w-5 h-5 text-gray-400" />
-                </button>
-              {/* Header */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center text-white scale-90">
-                  <Sparkles className="w-3 h-3" />
-                </div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                  Symbol Palette
-                </p>
-              </div>
-
-              {/* Symbol grid */}
-              <div className="grid grid-cols-5 gap-2 mb-6">
-                {['π', '√', '∑', '∞', '≠', '≤', '≥', '±', '×', '÷', '°', 'α', 'β', 'θ', 'Δ'].map(
-                  (symbol) => (
-                    <button
-                      key={symbol}
-                      type="button"
-                      onClick={() => {
-                        editor.chain().focus().insertContent(symbol).run();
-                        setShowMathInput(false);
-                      }}
-                      className="w-10 h-10 flex items-center justify-center border border-gray-100 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 text-lg transition-all active:scale-90"
-                      title={`Insert ${symbol}`}
-                    >
-                      {symbol}
-                    </button>
-                  )
-                )}
-              </div>
-
-              {/* LaTeX Engine */}
-              <div className="border-t border-gray-100 pt-6 space-y-4">
-                {/* Inline / Block mode toggle */}
-                <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={() => handleMathModeChange('inline')}
-                    className={cn(
-                      'flex-1 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg border transition-all',
-                      mathMode === 'inline'
-                        ? 'bg-indigo-600 text-white border-indigo-400'
-                        : 'text-gray-400 border-gray-100 hover:border-indigo-200'
-                    )}
-                    title="Inline Mode ($...$)"
+                    onClick={() => setShowTablePicker(false)}
+                    className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                    title="Close"
                   >
-                    Inline $…$
+                    <X className="w-4 h-4 text-gray-400" />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleMathModeChange('block')}
-                    className={cn(
-                      'flex-1 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg border transition-all',
-                      mathMode === 'block'
-                        ? 'bg-indigo-600 text-white border-indigo-400'
-                        : 'text-gray-400 border-gray-100 hover:border-indigo-200'
-                    )}
-                    title="Block Mode ($$...$$)"
-                  >
-                    Block $$…$$
-                  </button>
-                </div>
-
-                {/* Input row — MathLive WYSIWYG */}
-                <div>
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
-                    Visual Math Editor
-                  </label>
-                  <div className="flex gap-2 items-center">
-                    {/* MathLive mounts <math-field> imperatively into this container */}
-                    <div ref={mathFieldContainerRef} className="flex-1" />
-                    {/* Apply button */}
-                    <button
-                      type="button"
-                      onClick={insertMath}
-                      disabled={!mathExpression.trim() || Boolean(mathError)}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 disabled:opacity-20 transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
-                      title="Apply LaTeX"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-
-                {/* Live preview */}
-                {mathPreviewHtml && (
-                  <div className="p-4 bg-indigo-500/5 rounded-2xl border border-indigo-100/50 text-center animate-in fade-in duration-300">
-                    <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-2 italic">
-                      Preview
-                    </p>
-                    <div
-                      className="text-indigo-900"
-                      dangerouslySetInnerHTML={{ __html: mathPreviewHtml }}
-                    />
-                  </div>
-                )}
-
-                {mathError && (
-                  <p className="px-3 py-2 bg-red-50 text-red-500 text-[10px] font-bold rounded-xl border border-red-100 italic animate-pulse">
-                    {mathError}
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">
+                    {tableHover.rows > 0
+                      ? `${tableHover.rows} × ${tableHover.cols}`
+                      : 'Insert Table'}
                   </p>
-                )}
-
-                {/* Quick-insert snippets */}
-                <div className="grid grid-cols-2 gap-2 mt-4">
-                  {[
-                    { label: 'x²', tex: 'x^2' },
-                    { label: 'a/b', tex: '\\frac{a}{b}' },
-                    { label: '√x', tex: '\\sqrt{x}' },
-                    { label: 'Σ', tex: '\\sum_{i=1}^{n}' },
-                    { label: '∫', tex: '\\int_0^\\infty f(x)\\,dx' },
-                    { label: 'lim', tex: '\\lim_{x\\to\\infty}' },
-                  ].map(({ label, tex }) => (
-                    <button
-                      key={tex}
-                      type="button"
-                      onClick={() => insertSnippet(tex)}
-                      className="px-3 py-2 text-[10px] font-black border border-gray-100 rounded-xl hover:bg-indigo-50 hover:border-indigo-200 text-gray-500 transition-all active:scale-95"
-                      title={`Insert ${label} snippet`}
-                    >
-                      {label}
-                    </button>
-                  ))}
+                  <div className="grid grid-cols-6 gap-1">
+                    {Array.from({ length: 36 }, (_, i) => {
+                      const row = Math.floor(i / 6) + 1;
+                      const col = (i % 6) + 1;
+                      const isHighlighted = row <= tableHover.rows && col <= tableHover.cols;
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          title={`Insert ${row}x${col} table`}
+                          onMouseEnter={() => setTableHover({ rows: row, cols: col })}
+                          onClick={() => {
+                            editor
+                              .chain()
+                              .focus()
+                              .insertTable({ rows: row, cols: col, withHeaderRow: true })
+                              .run();
+                            setShowTablePicker(false);
+                            setTableHover({ rows: 0, cols: 0 });
+                          }}
+                          className={cn(
+                            'w-5 h-5 rounded border transition-all',
+                            isHighlighted
+                              ? 'bg-indigo-500 border-indigo-400'
+                              : 'bg-gray-50 border-gray-200 hover:bg-indigo-100'
+                          )}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
-
-                {/* Tip */}
-                <p className="text-[8px] text-gray-300 font-medium pt-1">
-                  Tip: type <span className="font-black text-indigo-300">$…$</span> inline or{' '}
-                  <span className="font-black text-indigo-300">$$…$$</span> anywhere to
-                  auto-convert.
-                </p>
               </div>
-            </div>
+            )}
           </div>
-        )}
-        </div>
-      </div>
 
-      <div className="p-2 min-h-[160px] relative">
-        <EditorContent editor={editor} className="prose-indigo prose-lg" />
+          <div className="w-px h-6 bg-indigo-100 mx-1.5" />
+
+          <MenuButton onClick={insertSuperscript} title="Superscript (x²)">
+            <Superscript className="h-4 w-4" />
+          </MenuButton>
+
+          <MenuButton onClick={insertSubscript} title="Subscript (x₂)">
+            <Subscript className="h-4 w-4" />
+          </MenuButton>
+
+          <MenuButton onClick={insertFraction} title="Fraction (a/b) — inserts \frac{a}{b}">
+            <span className="text-xs font-black italic tracking-tighter">1/2</span>
+          </MenuButton>
+
+          <div className="w-px h-6 bg-indigo-100 mx-1.5" />
+
+          {/* --- Undo / Redo --- */}
+          <MenuButton
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().undo()}
+            title="Undo"
+          >
+            <Undo className="h-4 w-4" />
+          </MenuButton>
+
+          <MenuButton
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().redo()}
+            title="Redo"
+          >
+            <Redo className="h-4 w-4" />
+          </MenuButton>
+
+          <div className="w-px h-6 bg-indigo-100 mx-1.5" />
+
+          {/* --- Symbol Matrix / LaTeX Popover --- */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowMathInput(!showMathInput)}
+              className={cn(
+                'px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 flex items-center gap-2 border shadow-sm',
+                showMathInput
+                  ? 'bg-indigo-600 text-white border-indigo-400 rotate-1 scale-105'
+                  : 'bg-white text-indigo-600 border-indigo-100 hover:bg-indigo-50'
+              )}
+              title="Insert Math — type $...$ inline or $$...$$ for display mode"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Symbol Matrix
+            </button>
+
+            {showMathInput && (
+              <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 pointer-events-none">
+                {/* Universal backdrop shadow */}
+                <div
+                  className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm pointer-events-auto"
+                  onClick={() => setShowMathInput(false)}
+                />
+
+                <div
+                  data-testid="symbol-matrix-palette"
+                  className={cn(
+                    'bg-white border border-indigo-100 shadow-2xl shadow-indigo-500/20 z-[1001] animate-in zoom-in-95 duration-200 pointer-events-auto',
+                    'overflow-y-auto max-h-[90vh] translate-z-0',
+                    'w-full max-w-[calc(100vw-32px)] sm:max-w-[400px] rounded-[2rem] p-6 relative'
+                  )}
+                >
+                  {/* Close button */}
+                  <button
+                    type="button"
+                    onClick={() => setShowMathInput(false)}
+                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    title="Close"
+                  >
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                  {/* Header */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center text-white scale-90">
+                      <Sparkles className="w-3 h-3" />
+                    </div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                      Symbol Palette
+                    </p>
+                  </div>
+
+                  {/* Symbol grid */}
+                  <div className="grid grid-cols-5 gap-2 mb-6">
+                    {[
+                      'π',
+                      '√',
+                      '∑',
+                      '∞',
+                      '≠',
+                      '≤',
+                      '≥',
+                      '±',
+                      '×',
+                      '÷',
+                      '°',
+                      'α',
+                      'β',
+                      'θ',
+                      'Δ',
+                    ].map((symbol) => (
+                      <button
+                        key={symbol}
+                        type="button"
+                        onClick={() => {
+                          editor.chain().focus().insertContent(symbol).run();
+                          setShowMathInput(false);
+                        }}
+                        className="w-10 h-10 flex items-center justify-center border border-gray-100 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 text-lg transition-all active:scale-90"
+                        title={`Insert ${symbol}`}
+                      >
+                        {symbol}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* LaTeX Engine */}
+                  <div className="border-t border-gray-100 pt-6 space-y-4">
+                    {/* Inline / Block mode toggle */}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleMathModeChange('inline')}
+                        className={cn(
+                          'flex-1 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg border transition-all',
+                          mathMode === 'inline'
+                            ? 'bg-indigo-600 text-white border-indigo-400'
+                            : 'text-gray-400 border-gray-100 hover:border-indigo-200'
+                        )}
+                        title="Inline Mode ($...$)"
+                      >
+                        Inline $…$
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMathModeChange('block')}
+                        className={cn(
+                          'flex-1 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg border transition-all',
+                          mathMode === 'block'
+                            ? 'bg-indigo-600 text-white border-indigo-400'
+                            : 'text-gray-400 border-gray-100 hover:border-indigo-200'
+                        )}
+                        title="Block Mode ($$...$$)"
+                      >
+                        Block $$…$$
+                      </button>
+                    </div>
+
+                    {/* Input row — MathLive WYSIWYG */}
+                    <div>
+                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
+                        Visual Math Editor
+                      </label>
+                      <div className="flex gap-2 items-center">
+                        {/* MathLive mounts <math-field> imperatively into this container */}
+                        <div ref={mathFieldContainerRef} className="flex-1" />
+                        {/* Apply button */}
+                        <button
+                          type="button"
+                          onClick={insertMath}
+                          disabled={!mathExpression.trim() || Boolean(mathError)}
+                          className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 disabled:opacity-20 transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
+                          title="Apply LaTeX"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Live preview */}
+                    {mathPreviewHtml && (
+                      <div className="p-4 bg-indigo-500/5 rounded-2xl border border-indigo-100/50 text-center animate-in fade-in duration-300">
+                        <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-2 italic">
+                          Preview
+                        </p>
+                        <div
+                          className="text-indigo-900"
+                          dangerouslySetInnerHTML={{ __html: mathPreviewHtml }}
+                        />
+                      </div>
+                    )}
+
+                    {mathError && (
+                      <p className="px-3 py-2 bg-red-50 text-red-500 text-[10px] font-bold rounded-xl border border-red-100 italic animate-pulse">
+                        {mathError}
+                      </p>
+                    )}
+
+                    {/* Quick-insert snippets */}
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                      {[
+                        { label: 'x²', tex: 'x^2' },
+                        { label: 'a/b', tex: '\\frac{a}{b}' },
+                        { label: '√x', tex: '\\sqrt{x}' },
+                        { label: 'Σ', tex: '\\sum_{i=1}^{n}' },
+                        { label: '∫', tex: '\\int_0^\\infty f(x)\\,dx' },
+                        { label: 'lim', tex: '\\lim_{x\\to\\infty}' },
+                      ].map(({ label, tex }) => (
+                        <button
+                          key={tex}
+                          type="button"
+                          onClick={() => insertSnippet(tex)}
+                          className="px-3 py-2 text-[10px] font-black border border-gray-100 rounded-xl hover:bg-indigo-50 hover:border-indigo-200 text-gray-500 transition-all active:scale-95"
+                          title={`Insert ${label} snippet`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Tip */}
+                    <p className="text-[8px] text-gray-300 font-medium pt-1">
+                      Tip: type <span className="font-black text-indigo-300">$…$</span> inline or{' '}
+                      <span className="font-black text-indigo-300">$$…$$</span> anywhere to
+                      auto-convert.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="p-2 min-h-[160px] relative">
+          <EditorContent editor={editor} className="prose-indigo prose-lg" />
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 }

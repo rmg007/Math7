@@ -3,6 +3,7 @@ import { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { castJson } from '@/lib/type-utils';
 import { isValidUUID } from '@/lib/utils';
 import { CurriculumStatus, PaginatedResponse, PaginationParams } from '../types';
 
@@ -25,6 +26,8 @@ export function useSkills(domainId?: string) {
   return useQuery({
     queryKey: ['skills', domainId, currentApp?.app_id],
     queryFn: async () => {
+      const markName = `useSkills:${domainId ?? 'all'}`;
+      performance.mark(`${markName}:start`);
       if (!currentApp?.app_id) throw new Error('No app selected');
 
       let query = supabase
@@ -47,8 +50,11 @@ export function useSkills(domainId?: string) {
 
       const { data, error } = await query;
 
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
       if (error) throw error;
-      return data as unknown as (Skill & { domains: { title: string } | null })[];
+      return castJson<(Skill & { domains: { title: string } | null })[]>(data);
     },
     enabled: Boolean(currentApp?.app_id),
   });
@@ -64,6 +70,8 @@ export function usePaginatedSkills(params: PaginationParams, appFilter?: string)
         Skill & { domains: { title: string } | null; apps: { display_name: string } | null }
       >
     > => {
+      const markName = `usePaginatedSkills:${params.page}:${params.domainId ?? 'all'}`;
+      performance.mark(`${markName}:start`);
       const {
         page,
         pageSize,
@@ -126,11 +134,16 @@ export function usePaginatedSkills(params: PaginationParams, appFilter?: string)
 
       if (error) throw error;
 
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
       return {
-        data: data as unknown as (Skill & {
-          domains: { title: string } | null;
-          apps: { display_name: string } | null;
-        })[],
+        data: castJson<
+          (Skill & {
+            domains: { title: string } | null;
+            apps: { display_name: string } | null;
+          })[]
+        >(data),
         totalCount: count ?? 0,
         page,
         pageSize,

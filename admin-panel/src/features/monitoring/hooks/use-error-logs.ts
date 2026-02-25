@@ -1,5 +1,6 @@
 import type { Tables } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
+import { castJson } from '@/lib/type-utils';
 import { isValidUUID } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -21,6 +22,8 @@ export function useErrorLogs({
   return useQuery({
     queryKey: ['error-logs', status, appId, page, pageSize, search],
     queryFn: async () => {
+      const markName = 'useErrorLogs';
+      performance.mark(`${markName}:start`);
       let query = supabase
         .from('error_logs')
         .select('*', { count: 'exact' })
@@ -47,8 +50,12 @@ export function useErrorLogs({
       const { data, error, count } = await query;
 
       if (error) throw error;
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
       return {
-        data: (data ?? []) as ErrorLog[],
+        data: castJson<ErrorLog[]>(data ?? []),
         count: count ?? 0,
       };
     },
@@ -59,6 +66,8 @@ export function useErrorLogStats() {
   return useQuery({
     queryKey: ['error-log-stats'],
     queryFn: async () => {
+      const markName = 'useErrorLogStats';
+      performance.mark(`${markName}:start`);
       // Use server-side counting with head:true to avoid fetching all rows
       const [totalResult, newResult, seenResult, ignoredResult, resolvedResult, promotedResult] =
         await Promise.all([
@@ -86,6 +95,9 @@ export function useErrorLogStats() {
         ]);
 
       if (totalResult.error) throw totalResult.error;
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
 
       return {
         total: totalResult.count ?? 0,

@@ -25,6 +25,8 @@ export function useDomains() {
   return useQuery({
     queryKey: ['domains', currentApp?.app_id],
     queryFn: async () => {
+      const markName = 'useDomains';
+      performance.mark(`${markName}:start`);
       if (!currentApp?.app_id) throw new Error('No app selected');
       if (!isValidUUID(currentApp.app_id)) {
         throw new Error(`Invalid app ID format: ${currentApp.app_id}`);
@@ -38,6 +40,10 @@ export function useDomains() {
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
       return data as Domain[];
     },
     enabled: Boolean(currentApp?.app_id) && isValidUUID(currentApp?.app_id),
@@ -52,6 +58,8 @@ export function usePaginatedDomains(params: PaginationParams, appId?: string) {
     queryFn: async (): Promise<
       PaginatedResponse<Domain & { apps: { display_name: string } | null }>
     > => {
+      const markName = `usePaginatedDomains:${params.page}`;
+      performance.mark(`${markName}:start`);
       const targetAppId = appId || currentApp?.app_id;
 
       if (!isSuperAdmin && !targetAppId) {
@@ -101,6 +109,9 @@ export function usePaginatedDomains(params: PaginationParams, appId?: string) {
       const { data, error, count } = await query;
 
       if (error) throw error;
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
 
       return {
         data: data as (Domain & { apps: { display_name: string } | null })[],
@@ -294,7 +305,7 @@ export function useUpdateDomainOrder() {
       });
 
       const results = await Promise.all(promises);
-      const errors = results.filter((r) => r.error);
+      const errors = results.filter((r: { error: unknown }) => r.error);
       if (errors.length > 0) {
         throw errors[0].error;
       }

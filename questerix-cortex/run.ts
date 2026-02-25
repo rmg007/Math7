@@ -4,6 +4,7 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import open from 'open';
 import * as path from 'path';
+import { Project } from 'ts-morph';
 import { Analyst } from './src/analyst';
 import { Consolidator } from './src/consolidator';
 import { Dashboard } from './src/dashboard';
@@ -71,11 +72,14 @@ async function main() {
   const supabasePath = path.resolve(__dirname, config.supabasePath);
   const srcPath      = path.join(adminPath, 'src');
 
-  const scanner      = new Scanner(srcPath);
+  const project = new Project({ skipFileDependencyResolution: true });
+  project.addSourceFilesAtPaths(path.join(srcPath, '**/*.{ts,tsx}'));
+
+  const scanner      = new Scanner(project, srcPath);
   const dashboard    = new Dashboard(config.dashboardPort);
   const orchestrator = new Orchestrator(adminPath, (text, color, bold) => dashboard.log(text, color, bold));
   const reporter     = new Reporter(__dirname, config.outputs, path.resolve(__dirname, '..'));
-  const analyst      = new Analyst(srcPath);
+  const analyst      = new Analyst(project);
   const historian    = new Historian(
     path.join(__dirname, config.outputs.history),
     config.thresholds.maxHistoryRuns
@@ -93,6 +97,10 @@ async function main() {
     const syncKb = flags.includes('--sync-kb');
     const pruneBrain = flags.includes('--prune-brain');
     const consolidate = flags.includes('--consolidate');
+
+    const runDrift = targets.includes('drift') || targets.includes('all') || targets.includes('full') || targets.includes('intel');
+    const runRls   = targets.includes('rls')   || targets.includes('full') || targets.includes('intel');
+    const runSkeleton = targets.includes('skeleton') || targets.includes('all') || targets.includes('full') || targets.includes('intel');
     
     console.log(chalk.cyan.bold(`\n🔄 Run (${target}) started…`));
     dashboard.log(`\n🔄 Run (${target}) started…`, 'cyan', true);
@@ -109,31 +117,32 @@ async function main() {
       path.join(__dirname, config.outputs.surfaceMap),
       JSON.stringify(surfaceMap, null, 2)
     );
-    scanner.writeApiMap(surfaceMap, outputsPath);
 
     // ── Skeleton generation ──────────────────────────────────────────────────
-    try {
-      console.log(chalk.cyan('\n🦴 Generating codebase skeleton…'));
-      dashboard.log('\n🦴 Generating codebase skeleton…', 'cyan');
-      const skeletonGen = new SkeletonGenerator(srcPath);
-      const skeletonReport = skeletonGen.generate();
-      skeletonGen.writeJson(skeletonReport, path.join(outputsPath, 'SKELETON.json'));
-      skeletonGen.writeMarkdownFull(skeletonReport, path.join(outputsPath, 'SKELETON.md'));
-      skeletonGen.writeMarkdownSummary(skeletonReport, path.join(outputsPath, 'SKELETON_SUMMARY.md'));
-      console.log(chalk.green(`   ✅ Skeleton: ${skeletonReport.totalFiles} files, ${skeletonReport.totalExports} exports`));
-      dashboard.log(`   ✅ Skeleton: ${skeletonReport.totalFiles} files, ${skeletonReport.totalExports} exports`, 'green');
+    if (runSkeleton) {
+      try {
+        console.log(chalk.cyan('\n🦴 Generating codebase skeleton…'));
+        dashboard.log('\n🦴 Generating codebase skeleton…', 'cyan');
+        const skeletonGen = new SkeletonGenerator(project, srcPath);
+        const skeletonReport = skeletonGen.generate();
+        skeletonGen.writeJson(skeletonReport, path.join(outputsPath, 'SKELETON.json'));
+        skeletonGen.writeMarkdownFull(skeletonReport, path.join(outputsPath, 'SKELETON.md'));
+        skeletonGen.writeMarkdownSummary(skeletonReport, path.join(outputsPath, 'SKELETON_SUMMARY.md'));
+        console.log(chalk.green(`   ✅ Skeleton: ${skeletonReport.totalFiles} files, ${skeletonReport.totalExports} exports`));
+        dashboard.log(`   ✅ Skeleton: ${skeletonReport.totalFiles} files, ${skeletonReport.totalExports} exports`, 'green');
 
-      // ── Index for search ──────────────────────────────────────────────────
-      const searchDbPath = path.join(outputsPath, 'search.db');
-      const searcher = new SkeletonSearch(searchDbPath);
-      searcher.index(skeletonReport);
-      searcher.close();
-      console.log(chalk.green('   ✅ Search index updated.'));
-      dashboard.log('   ✅ Search index updated.', 'green');
+        // ── Index for search ──────────────────────────────────────────────────
+        const searchDbPath = path.join(outputsPath, 'search.db');
+        const searcher = new SkeletonSearch(searchDbPath);
+        searcher.index(skeletonReport);
+        searcher.close();
+        console.log(chalk.green('   ✅ Search index updated.'));
+        dashboard.log('   ✅ Search index updated.', 'green');
 
-    } catch (skeletonErr: any) {
-      console.warn(chalk.yellow('   ⚠️  Skeleton generation failed:', skeletonErr.message));
-      dashboard.log('   ⚠️  Skeleton generation failed', 'yellow');
+      } catch (skeletonErr: any) {
+        console.warn(chalk.yellow('   ⚠️  Skeleton generation failed:', skeletonErr.message));
+        dashboard.log('   ⚠️  Skeleton generation failed', 'yellow');
+      }
     }
 
     if (generateSkeletons) {
@@ -147,6 +156,11 @@ async function main() {
         console.log(chalk.gray('   ⏭️ No new gaps requiring skeletons.'));
         dashboard.log('   ⏭️ No new gaps requiring skeletons.', 'gray');
       }
+    }
+
+    // Refresh source files to ensure analyst sees filesystem changes
+    for (const sf of project.getSourceFiles()) {
+      sf.refreshFromFileSystemSync();
     }
 
     let analystResults: { 
@@ -166,9 +180,6 @@ async function main() {
     // ── Intelligence checks (fast, no test runner) ──────────────────────────
     let driftResult: any = null;
     let rlsResult: any   = null;
-
-    const runDrift = targets.includes('drift') || targets.includes('all') || targets.includes('full') || targets.includes('intel');
-    const runRls   = targets.includes('rls')   || targets.includes('full') || targets.includes('intel');
 
     if (runDrift) {
       console.log(chalk.cyan('\n🔍 Schema Drift Detection…'));
@@ -376,7 +387,8 @@ async function main() {
       console.error(chalk.red('❌ Missing search query. Usage: npm run health -- skeleton:search "query"'));
       return;
     }
-    const searchDbPath = path.join(__dirname, config.outputs.surfaceMap, '../search.db');
+    const outputsPath = path.resolve(__dirname, 'outputs');
+    const searchDbPath = path.join(outputsPath, 'search.db');
     if (!fs.existsSync(searchDbPath)) {
       console.error(chalk.red('❌ Search index not found. Run a health check first.'));
       return;

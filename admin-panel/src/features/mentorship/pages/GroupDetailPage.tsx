@@ -4,12 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -17,23 +17,23 @@ import { supabase } from '@/lib/supabase';
 import { cn, isValidUUID } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-    ArrowLeft,
-    Check,
-    CheckCircle,
-    Circle,
-    ClipboardList,
-    Clock,
-    Copy,
-    Edit3,
-    Home,
-    Layers,
-    LayoutDashboard,
-    Plus,
-    School,
-    Settings,
-    Trash2,
-    UserPlus,
-    Users,
+  ArrowLeft,
+  Check,
+  CheckCircle,
+  Circle,
+  ClipboardList,
+  Clock,
+  Copy,
+  Edit3,
+  Home,
+  Layers,
+  LayoutDashboard,
+  Plus,
+  School,
+  Settings,
+  Trash2,
+  UserPlus,
+  Users,
 } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -259,11 +259,17 @@ export function GroupDetailPage() {
   const { data: group, isLoading: groupLoading } = useQuery({
     queryKey: ['group', id],
     queryFn: async () => {
+      const markName = 'GroupDetail:fetchGroup';
+      performance.mark(`${markName}:start`);
       if (!id) throw new Error('Group ID is required');
       if (!isValidUUID(id)) throw new Error(`Invalid group ID format: ${id}`);
       const { data, error } = await supabase.from('groups').select('*').eq('id', id).single();
 
       if (error) throw error;
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
       return data;
     },
     enabled: Boolean(id) && isValidUUID(id ?? ''),
@@ -273,6 +279,8 @@ export function GroupDetailPage() {
   const { data: members, isLoading: membersLoading } = useQuery({
     queryKey: ['group-members', id],
     queryFn: async () => {
+      const markName = 'GroupDetail:fetchMembers';
+      performance.mark(`${markName}:start`);
       if (!id) throw new Error('Group ID is required');
       if (!isValidUUID(id)) throw new Error(`Invalid group ID format: ${id}`);
       const { data, error } = await supabase
@@ -291,6 +299,10 @@ export function GroupDetailPage() {
         .order('joined_at', { ascending: false });
 
       if (error) throw error;
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
       return data as unknown as Member[];
     },
     enabled: Boolean(id),
@@ -331,6 +343,8 @@ export function GroupDetailPage() {
   const { data: assignments, isLoading: assignmentsLoading } = useQuery({
     queryKey: ['assignments', id],
     queryFn: async () => {
+      const markName = 'GroupDetail:fetchAssignments';
+      performance.mark(`${markName}:start`);
       if (!id) throw new Error('Group ID is required');
       if (!isValidUUID(id)) throw new Error(`Invalid group ID format: ${id}`);
       const { data, error } = await supabase
@@ -340,6 +354,10 @@ export function GroupDetailPage() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
       return data as unknown as Assignment[];
     },
     enabled: Boolean(id),
@@ -354,12 +372,19 @@ export function GroupDetailPage() {
   const { data: assignmentSkills } = useQuery({
     queryKey: ['skills-details', assignmentSkillIds],
     queryFn: async () => {
+      const markName = 'GroupDetail:fetchAssignmentSkills';
+      performance.mark(`${markName}:start`);
       if (assignmentSkillIds.length === 0) return [];
       const { data, error } = await supabase
         .from('skills')
         .select('skill_id, title')
+        // The database uses skill_id but our UI expects id
         .in('skill_id', assignmentSkillIds);
       if (error) throw error;
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
       return data;
     },
     enabled: assignmentSkillIds.length > 0,
@@ -496,7 +521,12 @@ export function GroupDetailPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in duration-700 p-4 md:p-8">
       <div className="space-y-4">
-        <Button variant="ghost" size="sm" asChild className="text-indigo-600 hover:bg-indigo-50 -ml-2 font-black text-[10px] uppercase tracking-widest gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="text-indigo-600 hover:bg-indigo-50 -ml-2 font-black text-[10px] uppercase tracking-widest gap-2"
+        >
           <Link to="/groups">
             <ArrowLeft className="h-4 w-4" />
             Back to Registry
@@ -557,8 +587,12 @@ export function GroupDetailPage() {
                     <Users className="w-5 h-5" />
                   </div>
                 </div>
-                <p className="text-3xl font-black text-gray-900 tabular-nums tracking-tight">{memberCount}</p>
-                <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Active Members</p>
+                <p className="text-3xl font-black text-gray-900 tabular-nums tracking-tight">
+                  {memberCount}
+                </p>
+                <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">
+                  Active Members
+                </p>
               </CardContent>
             </Card>
 
@@ -589,7 +623,9 @@ export function GroupDetailPage() {
                     )}
                   </Button>
                 </div>
-                <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Security Authorization</p>
+                <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">
+                  Security Authorization
+                </p>
               </CardContent>
             </Card>
 
@@ -599,20 +635,28 @@ export function GroupDetailPage() {
                   <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
                     Anonymous Entry
                   </span>
-                  <div className={cn(
-                    "p-2 rounded-xl",
-                    group.allow_anonymous_join ? "bg-emerald-500/10 text-emerald-600" : "bg-gray-100 text-gray-400"
-                  )}>
+                  <div
+                    className={cn(
+                      'p-2 rounded-xl',
+                      group.allow_anonymous_join
+                        ? 'bg-emerald-500/10 text-emerald-600'
+                        : 'bg-gray-100 text-gray-400'
+                    )}
+                  >
                     <UserPlus className="w-5 h-5" />
                   </div>
                 </div>
-                <p className={cn(
-                  'text-lg font-black uppercase tracking-tight',
-                  group.allow_anonymous_join ? 'text-emerald-600' : 'text-gray-400'
-                )}>
+                <p
+                  className={cn(
+                    'text-lg font-black uppercase tracking-tight',
+                    group.allow_anonymous_join ? 'text-emerald-600' : 'text-gray-400'
+                  )}
+                >
                   {group.allow_anonymous_join ? 'ACTIVE PROTOCOL' : 'RESTRICTED'}
                 </p>
-                <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Access Policy</p>
+                <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">
+                  Access Policy
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -622,8 +666,12 @@ export function GroupDetailPage() {
               <CardContent className="p-0">
                 <div className="px-6 py-4 border-b border-indigo-50/50 flex items-center justify-between bg-white/30">
                   <div>
-                    <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Members</h3>
-                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Enrolled Students</p>
+                    <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                      Members
+                    </h3>
+                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                      Enrolled Students
+                    </p>
                   </div>
                   <Button
                     size="sm"
@@ -671,8 +719,12 @@ export function GroupDetailPage() {
               <CardContent className="p-0">
                 <div className="px-6 py-4 border-b border-indigo-50/50 flex items-center justify-between bg-white/30">
                   <div>
-                    <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Assignments</h3>
-                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Active Tasks</p>
+                    <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                      Assignments
+                    </h3>
+                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                      Active Tasks
+                    </p>
                   </div>
                   <Link to={`/groups/${id}/assignments/new`}>
                     <Button
@@ -721,8 +773,12 @@ export function GroupDetailPage() {
           <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/5 overflow-hidden">
             <CardContent className="p-0">
               <div className="px-6 py-4 border-b border-indigo-50/50 bg-white/30">
-                <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Progress Matrix</h2>
-                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Mastery Tracking Intelligence</p>
+                <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                  Progress Matrix
+                </h2>
+                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                  Mastery Tracking Intelligence
+                </p>
               </div>
 
               {!members || members.length === 0 ? (
@@ -730,8 +786,12 @@ export function GroupDetailPage() {
                   <div className="p-4 bg-gray-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
                     <Users className="w-10 h-10 text-gray-200" />
                   </div>
-                  <h3 className="text-sm font-black text-gray-900 uppercase tracking-tight">No Students Registered</h3>
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Registry is currently empty</p>
+                  <h3 className="text-sm font-black text-gray-900 uppercase tracking-tight">
+                    No Students Registered
+                  </h3>
+                  <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">
+                    Registry is currently empty
+                  </p>
                 </div>
               ) : !assignmentSkillIds || assignmentSkillIds.length === 0 ? (
                 <EmptyState
@@ -767,14 +827,18 @@ export function GroupDetailPage() {
                           <TableCell className="pl-8 py-6 whitespace-nowrap">
                             <div className="flex items-center gap-4">
                               <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs font-black text-indigo-400 shadow-sm">
-                                {(member.nickname || member.profiles?.full_name || 'A').charAt(0).toUpperCase()}
+                                {(member.nickname || member.profiles?.full_name || 'A')
+                                  .charAt(0)
+                                  .toUpperCase()}
                               </div>
                               <div className="space-y-0.5">
                                 <p className="text-sm font-black text-gray-900 tabular-nums">
                                   {member.nickname || member.profiles?.full_name || 'Anonymous'}
                                 </p>
                                 {member.profiles?.email && (
-                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{member.profiles.email}</p>
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                    {member.profiles.email}
+                                  </p>
                                 )}
                               </div>
                             </div>
@@ -784,7 +848,9 @@ export function GroupDetailPage() {
                               <ProgressCell
                                 key={skillId}
                                 status={
-                                  member.user_id ? getStatus(member.user_id, skillId) : 'not_started'
+                                  member.user_id
+                                    ? getStatus(member.user_id, skillId)
+                                    : 'not_started'
                                 }
                               />
                             );
@@ -805,12 +871,18 @@ export function GroupDetailPage() {
               <div className="w-20 h-20 bg-indigo-50 rounded-[2rem] border border-indigo-100 flex items-center justify-center mx-auto mb-8 shadow-inner shadow-indigo-500/5">
                 <Settings className="w-10 h-10 text-indigo-300" />
               </div>
-              <h3 className="text-xl font-black text-gray-900 tracking-tight mb-2 uppercase">Configuration Core</h3>
+              <h3 className="text-xl font-black text-gray-900 tracking-tight mb-2 uppercase">
+                Configuration Core
+              </h3>
               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-10 max-w-sm mx-auto">
-                Advanced squad orchestration and data lifecycle management modules are in development.
+                Advanced squad orchestration and data lifecycle management modules are in
+                development.
               </p>
               <div className="flex items-center justify-center gap-4">
-                <Button variant="outline" className="h-12 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest border-indigo-100 text-indigo-400 opacity-50 cursor-not-allowed">
+                <Button
+                  variant="outline"
+                  className="h-12 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest border-indigo-100 text-indigo-400 opacity-50 cursor-not-allowed"
+                >
                   Edit Registry
                 </Button>
                 <Button

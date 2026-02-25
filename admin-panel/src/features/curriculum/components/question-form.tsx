@@ -3,40 +3,41 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useApp } from '@/hooks/use-app';
 import type { Json } from '@/lib/database.types';
 import { Database } from '@/lib/database.types';
 import { normalizeFormData } from '@/lib/normalization';
+import { castJson } from '@/lib/type-utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-    CheckCircle2,
-    FileText,
-    HelpCircle,
-    Layers,
-    Loader2,
-    Plus,
-    Settings,
-    Sparkles,
-    Trash,
-    Zap,
+  CheckCircle2,
+  FileText,
+  HelpCircle,
+  Layers,
+  Loader2,
+  Plus,
+  Settings,
+  Sparkles,
+  Trash,
+  Zap,
 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -45,12 +46,12 @@ import { z } from 'zod';
 import { useCreateQuestion, useUpdateQuestion } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 import {
-    BooleanSolution,
-    McqMultiSolution,
-    McqSolution,
-    QuestionOptions,
-    ReorderStepsSolution,
-    TextInputSolution,
+  BooleanSolution,
+  McqMultiSolution,
+  McqSolution,
+  QuestionOptions,
+  ReorderStepsSolution,
+  TextInputSolution,
 } from '../types';
 
 type Question = Database['public']['Tables']['questions']['Row'];
@@ -123,7 +124,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
           };
       }
     }
-    return data.options as unknown as QuestionOptions;
+    return castJson<QuestionOptions>(data.options);
   };
 
   const parseSolution = (data: Question | undefined, type: string) => {
@@ -143,20 +144,20 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
           return '';
       }
     }
-    const sol = data.solution as Record<string, unknown>;
+    const sol = castJson<Record<string, unknown>>(data.solution);
     switch (type) {
       case 'multiple_choice':
-        return (sol as unknown as McqSolution).correct_option_id || '';
+        return castJson<McqSolution>(sol).correct_option_id || '';
       case 'mcq_multi':
-        return (sol as unknown as McqMultiSolution).correct_ids || [];
+        return castJson<McqMultiSolution>(sol).correct_ids || [];
       case 'boolean':
-        return (sol as unknown as BooleanSolution).correct_value ?? null;
+        return castJson<BooleanSolution>(sol).correct_value ?? null;
       case 'text_input':
-        return (sol as unknown as TextInputSolution).exact_match || '';
+        return castJson<TextInputSolution>(sol).exact_match || '';
       case 'reorder_steps':
-        return (sol as unknown as ReorderStepsSolution).correct_order || [];
+        return castJson<ReorderStepsSolution>(sol).correct_order || [];
       default:
-        return (sol as unknown as McqSolution).correct_option_id || '';
+        return castJson<McqSolution>(sol).correct_option_id || '';
     }
   };
 
@@ -211,41 +212,41 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
           form.setError('solution', { message: 'Required' });
           return;
         }
-        submissionData.solution = {
+        submissionData.solution = castJson<Json>({
           correct_option_id: data.solution,
-        } as unknown as Json;
+        });
       } else if (data.type === 'mcq_multi') {
         if (!Array.isArray(data.solution) || data.solution.length === 0) {
           form.setError('solution', { message: 'Select at least one correct option' });
           return;
         }
-        submissionData.solution = {
+        submissionData.solution = castJson<Json>({
           correct_ids: data.solution,
-        } as unknown as Json;
+        });
       } else if (data.type === 'text_input') {
         if (!data.solution) {
           form.setError('solution', { message: 'Required' });
           return;
         }
-        submissionData.solution = {
+        submissionData.solution = castJson<Json>({
           exact_match: data.solution,
-        } as unknown as Json;
+        });
       } else if (data.type === 'boolean') {
         if (data.solution === null || data.solution === undefined) {
           form.setError('solution', { message: 'Specify truth value' });
           return;
         }
-        submissionData.solution = {
+        submissionData.solution = castJson<Json>({
           correct_value: data.solution,
-        } as unknown as Json;
+        });
       } else if (data.type === 'reorder_steps') {
         if (!Array.isArray(data.solution) || data.solution.length === 0) {
           form.setError('solution', { message: 'Order sequence required' });
           return;
         }
-        submissionData.solution = {
+        submissionData.solution = castJson<Json>({
           correct_order: data.solution,
-        } as unknown as Json;
+        });
       }
 
       if (initialData) {
@@ -275,7 +276,11 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
     <div className="max-w-7xl mx-auto space-y-10 pb-12">
       <AdminHeader
         title={initialData ? 'Question Architect' : 'Question Genesis'}
-        description={initialData ? 'Modifying existing pedagogical assessment artifact' : 'Synthesizing new assessment unit for the curriculum'}
+        description={
+          initialData
+            ? 'Modifying existing pedagogical assessment artifact'
+            : 'Synthesizing new assessment unit for the curriculum'
+        }
         icon={HelpCircle}
       />
 
@@ -727,7 +732,7 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                           Pedagogical Anchor
                         </h3>
                         <p className="text-[10px] font-black text-amber-600 uppercase tracking-[0.3em] font-mono italic">
-                           Cognitive Justification
+                          Cognitive Justification
                         </p>
                       </div>
                     </div>
@@ -761,7 +766,9 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                       <div className="p-3 rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
                         <Settings className="h-4 w-4" />
                       </div>
-                      <h3 className="text-xl font-black text-gray-900 tracking-tight leading-none pt-1">Protocol Matrix</h3>
+                      <h3 className="text-xl font-black text-gray-900 tracking-tight leading-none pt-1">
+                        Protocol Matrix
+                      </h3>
                     </div>
 
                     <FormField
@@ -865,7 +872,9 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                       <div className="p-3 rounded-xl bg-purple-600 text-white shadow-lg shadow-purple-600/20">
                         <Layers className="h-4 w-4" />
                       </div>
-                      <h3 className="text-xl font-black text-gray-900 tracking-tight leading-none pt-1">Ontology Link</h3>
+                      <h3 className="text-xl font-black text-gray-900 tracking-tight leading-none pt-1">
+                        Ontology Link
+                      </h3>
                     </div>
 
                     <FormField

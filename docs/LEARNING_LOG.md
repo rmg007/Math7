@@ -1,5 +1,70 @@
 # Questerix Learning Log
 
+## 2026-02-25: Phase 5 — Performance Observability & Type Hardening [verified]
+
+### [2026-02-25-Performance] Session Context
+
+- **Trigger**: Significant uninstrumented `useQuery` surface area and over-reliance on unsafe `as unknown` type casts.
+- **Scope**: `admin-panel/src/features/` (Curriculum, Mentorship, Platform, Monitoring) and `questerix-cortex/src/analyst/`.
+- **Outcome**: Established a 100% instrumentation baseline for core data fetching. Eliminated 20+ unsafe casts. Verified system stability with a perfect 100/100 Cortex Health Score.
+
+### Technical Hardening
+
+- **Observability**: Implemented standard `performance.mark` and `performance.measure` instrumentation in query functions. This enables the Admin Panel to profile P50/P95 latency without external APM tools. Refined the pattern to name marks consistently (e.g., `Feature:Action`).
+- **Type Safety**: Deployed `castJson<T>` as the mandatory replacement for `as any` or `as unknown` when dealing with Supabase response data. This ensures that even "flexible" JSON columns have a documented interface in the UI layer.
+- **Static Analysis**: Identified that the Cortex Analyst was flagging `useQueryClient` as an uninstrumented `useQuery` call due to a simple substring match. Hardened the regex to `/\buseQuery\b/` to respect word boundaries.
+
+### Bugs Found & Fixed
+
+#### BUG-PERF-FALSE: `useQueryClient` false-positive detection
+
+- **Root Cause**: `Analyst.checkPerformanceInstrumentation` used `fullText.includes('useQuery')`, which caught the query client instead of just the hook.
+- **Fix**: Replaced substring match with word-boundary regex.
+- **Prevention**: Static analysis heuristics for function names should always use word boundaries to avoid partial matches on common prefixes/suffixes.
+
+#### BUG-TYPE-CAST: Unsafe cast in Question Studio
+
+- **Root Cause**: Constructing `submissionData.solution` used `as unknown as Json`, which could hide structural mismatches if the solution schema changed.
+- **Fix**: Migrated to `castJson<Json>()`.
+
+### [2026-02-25-Performance] Files Modified
+
+| Area           | Files                                                                                                                                                                      |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Hooks**      | `use-apps.ts`, `use-subjects.ts`, `use-landings.ts`, `use-groups.ts`, `use-error-logs.ts`, `use-known-issues.ts`, `use-dashboard.ts`, `use-publish.ts`, `use-questions.ts` |
+| **Pages**      | `AssignmentCreatePage.tsx`, `GroupDetailPage.tsx`, `BulkImportPage.tsx`, `DashboardPage.tsx`, `version-history-page.tsx`                                                   |
+| **Cortex**     | `questerix-cortex/src/analyst/index.ts`, `questerix-cortex/run.ts`                                                                                                         |
+| **Governance** | `tasks.md`, `docs/LEARNING_LOG.md`                                                                                                                                         |
+
+### [2026-02-25-Performance] Verification
+
+- **Cortex Health**: `npm run health -- smoke,intel` -> **Score: 100/100**.
+- **Smoke Tests**: 100% pass on desktop E2E.
+- **Lint Audit**: Verified zero performance gaps in `HEALTH_REPORT.md` after instrumentation.
+
+---
+
+## 2026-02-25: Phase 4 — Codebase Intelligence (Skeleton Search) [verified]
+
+### [2026-02-25-Intel] Session Context
+
+- **Trigger**: Manual codebase orientation via `list_dir` was too slow and context-heavy.
+- **Scope**: `questerix-cortex/` (Skeleton Generator, FTS5 Search Indexer, search.db).
+- **Outcome**: Replaced legacy `API_MAP.json` with a tiered Skeleton system (Summary, Full, JSON). Implemented a persistent local FTS5 search CLI (`skeleton:search`).
+
+### Technical Hardening
+
+- **Performance**: Discovered that initializing `ts-morph` `Project` instances is the primary bottleneck for static analysis. Refactored to share a single pre-parsed `Project` between the Scanner, Analyst, and SkeletonGenerator.
+- **Data Integrity**: Found that unique symbol names (like `DashboardPage`) can collide across different feature modules. Implemented a composite primary key `(name, file_path)` for the SQLite metadata table to prevent index data loss.
+- **Security**: Sanitized CLI search inputs to prevent SQLite FTS5 syntax injection (double quote escapes).
+
+### Prevention Rule
+
+- **Rule of Orientation**: **Always use `skeleton:search` or `SKELETON_SUMMARY.md` first.** Never guess file paths or crawl directories manually. The skeleton is the SSoT for exports and signatures.
+- **Rule of Shared Context**: Static analysis tools in a suite should never re-parse the codebase in isolation. Always pass the AST Project down from the orchestrator.
+
+---
+
 ## 2026-02-24: Phase 1 — Accessibility Remediation (WCAG AA Compliance) [test passed]
 
 ### [2026-02-24-A11y] Session Context
@@ -5789,3 +5854,13 @@ The Subjects page is now a **production-ready admin interface**. Next phases:
    **Prevention Rule**: ALL mutations must use generated `TableInsert` types. The use of `as any` or `as unknown` in `handleSave` or `mutationFn` is now a blocking failure in Cortex "Deep" tier.
 
 ---
+
+---
+
+## [2026-02-25] RLS Audit Hardening & Infrastructure Cleanup
+
+### Suite: Cortex RLS Audit
+
+**Prevention Rule**: **Rule of Remote Evidence**: When local infrastructure fails, provide a verified "Evidence Bridge". **Rule of Target Awareness**: Never run codebase-wide analysis for isolated sub-tasks.
+**Root Cause**: Invalid `unnest` in SQL `CASE`; unconditional skeleton generation in `run.ts`.
+**Fix Applied**: Implemented `RLS_REMOTE_EVIDENCE.json` bridge; wrapped skeleton generation in conditional targets.

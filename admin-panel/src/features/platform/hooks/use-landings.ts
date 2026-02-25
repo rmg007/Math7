@@ -1,29 +1,40 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { Database } from '@/lib/database.types';
+import { supabase } from '@/lib/supabase';
+import { castJson } from '@/lib/type-utils';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export type LandingPage = Database['public']['Tables']['app_landing_pages']['Row'];
 export type LandingPageUpdate = Database['public']['Tables']['app_landing_pages']['Update'];
 
-export type LandingPageWithApp = LandingPage & { apps: { display_name: string; subdomain: string } | null };
+export type LandingPageWithApp = LandingPage & {
+  apps: { display_name: string; subdomain: string } | null;
+};
 
 export function useLandingPages() {
   return useQuery({
     queryKey: ['landing-pages'],
     queryFn: async () => {
+      const markName = 'useLandingPages';
+      performance.mark(`${markName}:start`);
       const { data, error } = await supabase
         .from('app_landing_pages')
-        .select(`
+        .select(
+          `
           *,
           apps (
             display_name,
             subdomain
           )
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
-      return data as LandingPageWithApp[];
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
+      return castJson<LandingPageWithApp[]>(data);
     },
   });
 }
@@ -32,14 +43,20 @@ export function useLandingPage(appId: string) {
   return useQuery({
     queryKey: ['landing-page', appId],
     queryFn: async () => {
+      const markName = 'useLandingPage';
+      performance.mark(`${markName}:start`);
       const { data, error } = await supabase
         .from('app_landing_pages')
         .select('*')
         .eq('app_id', appId)
         .single();
-      
+
       if (error) throw error;
-      return data as LandingPage;
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
+      return castJson<LandingPage>(data);
     },
     enabled: Boolean(appId),
   });
@@ -70,7 +87,9 @@ export function useCreateLandingPage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (landingPage: Database['public']['Tables']['app_landing_pages']['Insert']) => {
+    mutationFn: async (
+      landingPage: Database['public']['Tables']['app_landing_pages']['Insert']
+    ) => {
       const { data, error } = await supabase
         .from('app_landing_pages')
         .insert(landingPage)

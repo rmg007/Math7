@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { castJson } from '@/lib/type-utils';
 import { isValidUUID } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -10,6 +11,8 @@ export function useApps() {
   return useQuery({
     queryKey: ['apps-admin'],
     queryFn: async () => {
+      const markName = 'useApps';
+      performance.mark(`${markName}:start`);
       const { data, error } = await supabase
         .from('apps')
         .select(
@@ -23,7 +26,11 @@ export function useApps() {
         .order('display_name');
 
       if (error) throw error;
-      return (data || []) as CompiledApp[];
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
+      return castJson<CompiledApp[]>(data || []);
     },
   });
 }

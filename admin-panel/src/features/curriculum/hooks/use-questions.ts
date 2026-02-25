@@ -2,6 +2,7 @@ import { useApp } from '@/hooks/use-app';
 import { Database } from '@/lib/database.types';
 import { escapePostgrestSearch } from '@/lib/postgrest-utils';
 import { supabase } from '@/lib/supabase';
+import { castJson } from '@/lib/type-utils';
 import { isValidUUID } from '@/lib/utils';
 import type { QuestionListItem } from '@/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -9,6 +10,7 @@ import { PaginatedResponse, PaginationParams } from '../types';
 
 type Question = Database['public']['Tables']['questions']['Row'];
 export type QuestionInsert = Database['public']['Tables']['questions']['Insert'];
+export type QuestionUpdate = Database['public']['Tables']['questions']['Update'];
 
 function isNotNull<T>(value: T | null): value is T {
   return value !== null;
@@ -20,6 +22,8 @@ export function useQuestions(skillId?: string) {
   return useQuery({
     queryKey: ['questions', skillId, currentApp?.app_id],
     queryFn: async () => {
+      const markName = `useQuestions:${skillId ?? 'all'}`;
+      performance.mark(`${markName}:start`);
       if (!currentApp?.app_id) throw new Error('No app selected');
 
       let query = supabase
@@ -43,8 +47,11 @@ export function useQuestions(skillId?: string) {
 
       const { data, error } = await query;
 
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
       if (error) throw error;
-      return (data ?? []).filter(isNotNull) as unknown as QuestionListItem[];
+      return castJson<QuestionListItem[]>((data ?? []).filter(isNotNull));
     },
     enabled: Boolean(currentApp?.app_id),
   });
@@ -56,6 +63,8 @@ export function usePaginatedQuestions(params: PaginationParams, appFilter?: stri
   return useQuery({
     queryKey: ['questions-paginated', params, currentApp?.app_id, appFilter],
     queryFn: async (): Promise<PaginatedResponse<QuestionListItem>> => {
+      const markName = `usePaginatedQuestions:${params.page}:${params.skillId ?? 'all'}`;
+      performance.mark(`${markName}:start`);
       const {
         page,
         pageSize,
@@ -96,7 +105,7 @@ export function usePaginatedQuestions(params: PaginationParams, appFilter?: stri
       if (search) {
         const escapedSearch = escapePostgrestSearch(search);
         // Cast JSONB content to text for ilike comparison
-        query = query.ilike('content' as any, `%${escapedSearch}%`);
+        query = query.ilike(castJson<string>('content'), `%${escapedSearch}%`);
       }
 
       if (status && status !== 'all') {
@@ -119,8 +128,11 @@ export function usePaginatedQuestions(params: PaginationParams, appFilter?: stri
 
       if (error) throw error;
 
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
       return {
-        data: (data ?? []).filter(isNotNull) as unknown as QuestionListItem[],
+        data: castJson<QuestionListItem[]>((data ?? []).filter(isNotNull)),
         totalCount: count ?? 0,
         page,
         pageSize,
@@ -157,7 +169,7 @@ export function useQuestion(question_id: string) {
         .maybeSingle();
 
       if (error) throw error;
-      return data as unknown as
+      return castJson<
         | (Question & {
             skills: {
               title: string;
@@ -168,7 +180,8 @@ export function useQuestion(question_id: string) {
               } | null;
             } | null;
           })
-        | null;
+        | null
+      >(data);
     },
     enabled: Boolean(question_id) && isValidUUID(question_id),
   });
@@ -231,10 +244,7 @@ export function useUpdateQuestion() {
   const { currentApp, isSuperAdmin } = useApp();
 
   return useMutation({
-    mutationFn: async ({
-      question_id,
-      ...updates
-    }: { question_id: string } & Partial<Question>) => {
+    mutationFn: async ({ question_id, ...updates }: { question_id: string } & QuestionUpdate) => {
       if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
       if (!isValidUUID(question_id)) throw new Error(`Invalid question ID format: ${question_id}`);
 
@@ -413,7 +423,7 @@ export function useUpdateQuestionOrder() {
       });
 
       const results = await Promise.all(promises);
-      const errors = results.filter((r) => r.error);
+      const errors = results.filter((r: { error: unknown }) => r.error);
       if (errors.length > 0) {
         throw errors[0].error;
       }

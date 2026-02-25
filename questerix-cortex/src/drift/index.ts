@@ -79,8 +79,10 @@ export class DriftDetector {
     const content = fs.readFileSync(this.typesFilePath, 'utf-8');
 
     // Find the Tables: { block
-    const tablesMatch = content.match(/Tables:\s*\{([\s\S]*?)^\s*\};\s*Views:/m)
-      || content.match(/Tables:\s*\{([\s\S]*?)^\s*\};/m);
+    const tablesMatch = content.match(/Tables:\s*\{([\s\S]*?)^\s*\}\s*^(?:\s*Views|\s*Functions|\s*Enums):/m)
+      || content.match(/Tables:\s*\{([\s\S]*?)^\s*\};\s*Views:/m)
+      || content.match(/Tables:\s*\{([\s\S]*?)^\s*\};/m)
+      || content.match(/Tables:\s*\{([\s\S]*?)^\s*\}/m);
 
     if (!tablesMatch) return names;
 

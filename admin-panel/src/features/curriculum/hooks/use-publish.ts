@@ -1,7 +1,7 @@
- 
 import { useApp } from '@/hooks/use-app';
 import type { Tables } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
+import { castJson } from '@/lib/type-utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 type CurriculumMeta = Pick<Tables<'curriculum_meta'>, 'version' | 'last_published_at'>;
@@ -30,24 +30,30 @@ interface PublishPreview {
 
 export function useCurriculumMeta() {
   const { currentApp } = useApp();
-  
+
   // FIX M3: Query by app_id, not singleton
   return useQuery({
     queryKey: ['curriculum-meta', currentApp?.app_id],
     queryFn: async (): Promise<CurriculumMeta> => {
+      const markName = 'useCurriculumMeta';
+      performance.mark(`${markName}:start`);
       if (!currentApp?.app_id) throw new Error('No app selected');
-      
+
       const { data, error } = await supabase
         .from('curriculum_meta')
         .select('version, last_published_at')
-        .eq('app_id', currentApp.app_id)  // FIX: Tenant-scoped
+        .eq('app_id', currentApp.app_id) // FIX: Tenant-scoped
         .single();
-      
+
       if (error && error.code !== 'PGRST116') {
         console.warn('Error fetching curriculum meta:', error.message || error);
         throw error;
       }
-      return data as CurriculumMeta ?? { version: 0, last_published_at: null };
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
+      return castJson<CurriculumMeta>(data) ?? { version: 0, last_published_at: null };
     },
     enabled: Boolean(currentApp?.app_id),
   });
@@ -72,7 +78,9 @@ export function usePaginatedPublishHistory(params: {
 
       const { data, error, count } = await supabase
         .from('curriculum_snapshots')
-        .select('version, published_at, domains_count, skills_count, questions_count', { count: 'exact' })
+        .select('version, published_at, domains_count, skills_count, questions_count', {
+          count: 'exact',
+        })
         .eq('app_id', currentApp.app_id)
         .order(sortBy, { ascending: sortOrder === 'asc' })
         .range(from, to);
@@ -97,6 +105,8 @@ export function usePublishPreview() {
   return useQuery({
     queryKey: ['publish-preview', currentApp?.app_id],
     queryFn: async (): Promise<PublishPreview> => {
+      const markName = 'usePublishPreview';
+      performance.mark(`${markName}:start`);
       if (!currentApp?.app_id) throw new Error('No app selected');
 
       const validationIssues: ValidationIssue[] = [];
@@ -111,17 +121,54 @@ export function usePublishPreview() {
         draftQuestionsResult,
         liveQuestionsResult,
       ] = await Promise.all([
-        supabase.from('curriculum_meta').select('version, last_published_at').eq('app_id', currentApp.app_id).maybeSingle(),
-        supabase.from('domains').select('domain_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'draft'),
-        supabase.from('domains').select('domain_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'live'),
-        supabase.from('skills').select('skill_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'draft'),
-        supabase.from('skills').select('skill_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'live'),
-        supabase.from('questions').select('question_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'draft'),
-        supabase.from('questions').select('question_id', { count: 'exact', head: true }).eq('app_id', currentApp.app_id).is('deleted_at', null).eq('status', 'live'),
+        supabase
+          .from('curriculum_meta')
+          .select('version, last_published_at')
+          .eq('app_id', currentApp.app_id)
+          .maybeSingle(),
+        supabase
+          .from('domains')
+          .select('domain_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'draft'),
+        supabase
+          .from('domains')
+          .select('domain_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'live'),
+        supabase
+          .from('skills')
+          .select('skill_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'draft'),
+        supabase
+          .from('skills')
+          .select('skill_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'live'),
+        supabase
+          .from('questions')
+          .select('question_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'draft'),
+        supabase
+          .from('questions')
+          .select('question_id', { count: 'exact', head: true })
+          .eq('app_id', currentApp.app_id)
+          .is('deleted_at', null)
+          .eq('status', 'live'),
       ]);
 
       if (metaResult.error && metaResult.error.code !== 'PGRST116') {
-        console.warn('Error fetching curriculum meta preview:', metaResult.error.message || metaResult.error);
+        console.warn(
+          'Error fetching curriculum meta preview:',
+          metaResult.error.message || metaResult.error
+        );
         throw metaResult.error;
       }
 
@@ -140,7 +187,8 @@ export function usePublishPreview() {
       if (liveCount === 0) {
         validationIssues.push({
           type: 'warning',
-          message: 'No content is currently live. Mark content as "Live" to make it visible to students.',
+          message:
+            'No content is currently live. Mark content as "Live" to make it visible to students.',
         });
       }
 
@@ -167,15 +215,15 @@ export function usePublishPreview() {
 export function usePublishCurriculum() {
   const queryClient = useQueryClient();
   const { currentApp } = useApp();
-  
+
   return useMutation({
     mutationFn: async () => {
       if (!currentApp?.app_id) throw new Error('No app selected');
-      
+
       // FIX M4: Pass app_id to RPC
       // Note: Type cast needed until database.types.ts is regenerated
       const { data, error } = await supabase.rpc('publish_curriculum', {
-        p_app_id: currentApp.app_id
+        p_app_id: currentApp.app_id,
       });
       if (error) throw error;
       return data;

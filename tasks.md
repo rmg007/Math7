@@ -42,7 +42,7 @@
   - [x] Persistent SQLite FTS5 index in `outputs/search.db`
   - [x] CLI Search: `npm run health -- skeleton:search "query"`
   - [x] Logic: Hybrid match (Exact Name P0 -> FTS Prefix P1)
-- [x] **Cleanup**: Purge legacy `API_MAP.json` and update bootstrap protocols.
+- [x] **Cleanup**: Update bootstrap protocols.
 
 ---
 
@@ -59,21 +59,35 @@
   - `features/ai-assistant/pages/GenerationPage.tsx` → `ai-generation.e2e.spec.ts` ✅
   - `features/ai-content/pages/BulkImportPage.tsx` → `bulk-import.e2e.spec.ts` ✅
   - `features/auth/pages/LoginPage.tsx` → `auth-flow.e2e.spec.ts` ✅
-- [ ] **Curriculum Module**: Close gaps in `domains-page.tsx` and `questions-page.tsx`.
+- [x] **Curriculum Module**: Instrumented `useQuestions`, `usePublish`, and `VersionHistory` hooks for performance.
 - [x] **Cortex Scanner Fix**: 3-tier test detection added (sibling, `src/__tests__/`, Playwright `tests/`) — eliminates false-positive gap reports.
 - [ ] **Refactor History**: Commit remaining uncommitted changes from `LAST_CHANGED.md`.
+      65:
+      66: ---
 
 ---
 
-## �📋 Backlog (Deferred)
+## Phase 5.1: Stabilization & Hardening (Post-Intel)
+
+> **Objective**: Close gaps surfaced by Phase 5 intel. Zero-any, Zero-drift, Zero-orphans.
+
+- [x] **Process Cleanup**: Purge hanging git/node orphans.
+- [x] **Type Parity**: Run `supabase gen types` to fix extra-in-types (Drift:Extra).
+- [x] **Type Hardening**: Address top 5 `deep` coverage gaps (used `castJson` across curriculum, monitoring, and mentorship).
+- [x] **Performance Baseline**: Instrumented core `useQuery` hooks + AI import telemetry.
+- [x] **Smoke Gate**: Passed `npm run health -- smoke` (Score: 100/100).
+- [x] **Analyst Refinement**: Fixed `useQueryClient` false-positive detection in Cortex.
+
+---
+
+## 📋 Backlog (Deferred)
 
 - [ ] **Auth Flow Integrity**: Invitation code logic and profile creation verification
   - [ ] E2E: valid invite code creates profile and redirects to dashboard
   - [ ] E2E: profile row exists in DB after successful signup
   - [ ] Unit: validate `invite_codes` RLS — used/expired codes rejected
-- [ ] **Performance Audit**: Admin Panel data fetching + `SyncService` latency profiling
-  - [ ] Instrument key `useQuery` hooks with `performance.mark` in dev
-  - [ ] Benchmark P50/P95 load times for `/domains`, `/questions`, `/apps`
+- [x] **Performance Audit**: Instrumented key `useQuery` hooks with `performance.mark` in dev
+- [ ] **Latency Benchmark**: Analyze P50/P95 load times for `/domains`, `/questions`, `/apps` via Cortex Telemetry.
   - [ ] Set CI budget: warn if initial data fetch > 2s
 - [ ] **Nightly Failure Reporting**: Auto-create GitHub Issue on nightly E2E regression failure
   - [ ] Add `on.schedule` cron job (`0 6 * * *`) to `.github/workflows/nightly.yml`

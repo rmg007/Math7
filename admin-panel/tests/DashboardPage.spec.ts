@@ -10,7 +10,7 @@ test.describe('DashboardPage Page', () => {
     await expect(page.locator('h1')).toBeVisible();
   });
 
-  test('should pass accessibility check', async ({ page }) => {
+  test('should pass accessibility check', async ({ _page }) => {
     // TODO: Add axe-core check
   });
 });

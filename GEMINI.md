@@ -15,7 +15,7 @@
 3. `questerix-cortex/outputs/FAILURE_DIGEST.md` — if failures > 0, understand them before touching code
 4. `questerix-cortex/outputs/LAST_CHANGED.md` — which files shifted in the last run
 5. `docs/LEARNING_LOG.md` — last 3 entries for recent lessons learned
-6. `questerix-cortex/outputs/SKELETON_SUMMARY.md` — ALWAYS first orientation (replaces API_MAP.json)
+6. `questerix-cortex/outputs/SKELETON_SUMMARY.md` — ALWAYS first orientation
 7. `questerix-cortex/outputs/UTILITY_REGISTRY.md` — before writing any new helper
 
 > Skip to step 6-7 only if you are 100% sure you are not modifying shared hooks or utilities.
@@ -92,7 +92,7 @@ Project-specific traps that have caused real failures. Check before touching rel
 **CRITICAL RULE**: Any migration that creates a new table MUST include all applicable RLS policies.
 This rule exists because missing policies cause silent data access failures that are hard to debug in production.
 
-### For every new table, decide and document which operations apply:
+### For every new table, decide and document which operations apply
 
 | Operation | Add a policy if...                | Omit if...                                                   |
 | --------- | --------------------------------- | ------------------------------------------------------------ |
@@ -101,21 +101,21 @@ This rule exists because missing policies cause silent data access failures that
 | `UPDATE`  | Rows are mutable                  | Data is intentionally immutable (e.g., audit logs, attempts) |
 | `DELETE`  | Admins need to prune data         | Rows are permanent records (e.g., audit trails)              |
 
-### Required comment in migration for any OMITTED policy:
+### Required comment in migration for any OMITTED policy
 
 ```sql
 -- UPDATE intentionally omitted: curriculum_snapshots are immutable once published
 -- DELETE intentionally omitted: generation_audit_log is append-only
 ```
 
-### After any migration touching the schema, run the RLS audit:
+### After any migration touching the schema, run the RLS audit
 
 ```sql
 -- psql $DATABASE_URL -f supabase/scripts/audit-rls.sql
 -- Expect ZERO 🔴 rows in the output.
 ```
 
-### Admin-managed tables that MUST have SELECT + INSERT + UPDATE + DELETE policies:
+### Admin-managed tables that MUST have SELECT + INSERT + UPDATE + DELETE policies
 
 `known_issues`, `error_logs`, `source_documents`, `app_landing_pages`, `curriculum_meta`, `security_logs`
 
@@ -132,6 +132,6 @@ This rule exists because missing policies cause silent data access failures that
 | Supabase config  | `supabase/config.toml`                         |
 | Loki Mode skill  | `.agent/skills/loki-mode/SKILL.md`             |
 | Agent workflows  | `.agent/workflows/`                            |
-| API map summary  | `questerix-cortex/outputs/SKELETON_SUMMARY.md` |
+| Skeleton summary | `questerix-cortex/outputs/SKELETON_SUMMARY.md` |
 | Utility registry | `questerix-cortex/outputs/UTILITY_REGISTRY.md` |
 | Machine briefing | `questerix-cortex/outputs/MACHINE_BRIEFING.md` |

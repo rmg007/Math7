@@ -5,9 +5,8 @@ import { Project } from 'ts-morph';
 export class Analyst {
   private project: Project;
 
-  constructor(srcPath: string) {
-    this.project = new Project();
-    this.project.addSourceFilesAtPaths(path.join(srcPath, '**/*.{ts,tsx}'));
+  constructor(project: Project) {
+    this.project = project;
   }
 
   findDeadCode() {
@@ -42,8 +41,9 @@ export class Analyst {
     for (const sourceFile of sourceFiles) {
       const fullText = sourceFile.getFullText();
       
-      // Simple heuristic: if useQuery is used but performance.mark is missing
-      if (fullText.includes('useQuery') && !fullText.includes('performance.mark')) {
+      // Heuristic: if useQuery is used but performance.mark is missing
+      // Use word boundary to avoid matching useQueryClient
+      if (/\buseQuery\b/.test(fullText) && !fullText.includes('performance.mark')) {
         const filePath = sourceFile.getFilePath().replace(/\\/g, '/');
         const relativePath = filePath.split('/admin-panel/src/')[1] || filePath;
         uninstrumented.push(relativePath);

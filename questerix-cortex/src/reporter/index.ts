@@ -22,7 +22,7 @@ export class Reporter {
     rlsResult?: any,
     history?: any[]
   ) {
-    this.generateHealthReport(results, analystResults, surfaceMap);
+    this.generateHealthReport(results, analystResults, surfaceMap, rlsResult);
     this.generateAgentContext(results, surfaceMap, analystResults);
     this.generateNextTask(results, analystResults, surfaceMap);
     this.generateMachineBriefing(results, analystResults, surfaceMap, driftResult, rlsResult, history);
@@ -83,7 +83,8 @@ export class Reporter {
   private generateHealthReport(
     results: Record<string, TaskResult>,
     analystResults?: any,
-    surfaceMap?: any
+    surfaceMap?: any,
+    rlsResult?: any
   ) {
     let md = '# 🩺 Questerix Health Report\n\n';
     md += `*Generated: ${new Date().toLocaleString()}*\n\n`;
@@ -134,6 +135,22 @@ export class Reporter {
     if (surfaceMap?.gaps?.length > 0) {
       md += '\n## 🚨 Coverage Gaps\n';
       surfaceMap.gaps.forEach((gap: string) => md += `- [ ] ${gap}\n`);
+    }
+
+    if (rlsResult) {
+      md += '\n## 🔒 RLS Audit\n';
+      md += `**Verdict**: ${rlsResult.verdict}\n\n`;
+      if (rlsResult.verdict === 'ERROR') {
+        md += `> ❌ Audit failed to run: ${rlsResult.raw}\n`;
+      } else if (rlsResult.rows.length > 0) {
+        md += '| Table | Missing Policies | Verdict | Severity |\n';
+        md += '| :--- | :--- | :--- | :--- |\n';
+        for (const row of rlsResult.rows) {
+          md += `| \`${row.tablename}\` | ${row.missing_policies} | ${row.verdict} | ${row.severity} |\n`;
+        }
+      } else {
+        md += '✅ All tables have required RLS policies.\n';
+      }
     }
 
     md += '\n---\n\n## Failure Digest\n\n';
@@ -244,12 +261,16 @@ export class Reporter {
     md += `  questerix-cortex/outputs/SKELETON.md          ← load section for the feature you are editing\n`;
     md += `  questerix-cortex/outputs/SKELETON.json        ← machine-readable, used by skeleton:search\n\n`;
 
-    md += `1. Read SKELETON_SUMMARY.md — always load first (replaces API_MAP.json)\n`;
-    md += `2. Read FAILURE_DIGEST.md if failures > 0\n`;
-    md += `3. Read LAST_CHANGED.md to see what files shifted\n`;
-    md += `4. Check NEXT_TASK.md for the highest-priority action\n`;
-    md += `5. If RLS = NOT RUN, trigger it before any schema work\n`;
-    md += `6. Check UTILITY_REGISTRY.md before writing any new helper\n\n`;
+    md += `1. Read SKELETON_SUMMARY.md for codebase orientation.\n`;
+    md += `2. Use \`skeleton:search\` CLI if you need to find a specific symbol.\n`;
+    md += `3. Check UTILITY_REGISTRY.md before writing any new helper.\n\n`;
+
+    md += `## WORKFLOW\n\n`;
+    md += `1. Read FAILURE_DIGEST.md if failures > 0\n`;
+    md += `2. Read LAST_CHANGED.md to see what files shifted\n`;
+    md += `3. Check NEXT_TASK.md for the highest-priority action\n`;
+    md += `4. Continue with the next feature or sub-task in \`tasks.md\`.\n`;
+    md += `5. If modifying the database, run the RLS audit immediately.\n\n`;
 
     md += `## 🤝 MANDATORY HANDSHAKE\n`;
     md += `> AGENT: You must acknowledge this briefing. Before taking ANY action, summarize:\n`;

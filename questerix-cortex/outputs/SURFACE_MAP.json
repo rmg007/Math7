@@ -4,9 +4,7 @@
       "name": "useAIGenerator",
       "file": "hooks/use-ai-generator.ts",
       "hasTest": true,
-      "functions": [
-        "useAIGenerator"
-      ],
+      "functions": ["useAIGenerator"],
       "exports": [
         {
           "name": "useAIGenerator",
@@ -19,9 +17,7 @@
       "name": "useApp",
       "file": "hooks/use-app.ts",
       "hasTest": true,
-      "functions": [
-        "useApp"
-      ],
+      "functions": ["useApp"],
       "exports": [
         {
           "name": "useApp",
@@ -34,9 +30,7 @@
       "name": "useBulkImport",
       "file": "hooks/use-bulk-import.ts",
       "hasTest": true,
-      "functions": [
-        "useBulkImport"
-      ],
+      "functions": ["useBulkImport"],
       "exports": [
         {
           "name": "useBulkImport",
@@ -49,17 +43,12 @@
       "name": "useDebounce",
       "file": "hooks/use-debounce.ts",
       "hasTest": true,
-      "functions": [
-        "useDebounce"
-      ],
+      "functions": ["useDebounce"],
       "exports": [
         {
           "name": "useDebounce",
           "kind": "FunctionDeclaration",
-          "parameters": [
-            "value",
-            "delay"
-          ]
+          "parameters": ["value", "delay"]
         }
       ]
     },
@@ -117,11 +106,7 @@
       "name": "reducer",
       "file": "hooks/use-toast.ts",
       "hasTest": true,
-      "functions": [
-        "reducer",
-        "toast",
-        "useToast"
-      ],
+      "functions": ["reducer", "toast", "useToast"],
       "exports": [
         {
           "name": "reducer",
@@ -130,9 +115,7 @@
         {
           "name": "toast",
           "kind": "FunctionDeclaration",
-          "parameters": [
-            "{ ...props }"
-          ]
+          "parameters": ["{ ...props }"]
         },
         {
           "name": "useToast",
@@ -145,17 +128,12 @@
       "name": "useUnsavedChangesGuard",
       "file": "hooks/use-unsaved-changes-guard.ts",
       "hasTest": true,
-      "functions": [
-        "useUnsavedChangesGuard"
-      ],
+      "functions": ["useUnsavedChangesGuard"],
       "exports": [
         {
           "name": "useUnsavedChangesGuard",
           "kind": "FunctionDeclaration",
-          "parameters": [
-            "isDirty",
-            "message"
-          ]
+          "parameters": ["isDirty", "message"]
         }
       ]
     },
@@ -163,17 +141,12 @@
       "name": "useUrlState",
       "file": "hooks/use-url-state.ts",
       "hasTest": true,
-      "functions": [
-        "useUrlState"
-      ],
+      "functions": ["useUrlState"],
       "exports": [
         {
           "name": "useUrlState",
           "kind": "FunctionDeclaration",
-          "parameters": [
-            "key",
-            "defaultValue"
-          ]
+          "parameters": ["key", "defaultValue"]
         }
       ]
     },
@@ -181,10 +154,7 @@
       "name": "useDashboardStats",
       "file": "features/curriculum/hooks/use-dashboard.ts",
       "hasTest": true,
-      "functions": [
-        "useDashboardStats",
-        "useRecentActivity"
-      ],
+      "functions": ["useDashboardStats", "useRecentActivity"],
       "exports": [
         {
           "name": "useDashboardStats",
@@ -225,17 +195,12 @@
         {
           "name": "usePaginatedDomains",
           "kind": "FunctionDeclaration",
-          "parameters": [
-            "params",
-            "appId"
-          ]
+          "parameters": ["params", "appId"]
         },
         {
           "name": "useDomain",
           "kind": "FunctionDeclaration",
-          "parameters": [
-            "domainId"
-          ]
+          "parameters": ["domainId"]
         },
         {
           "name": "useCreateDomain",
@@ -302,9 +267,7 @@
         {
           "name": "usePaginatedPublishHistory",
           "kind": "FunctionDeclaration",
-          "parameters": [
-            "params"
-          ]
+          "parameters": ["params"]
         },
         {
           "name": "usePublishPreview",
@@ -334,30 +297,24 @@
         "useBulkUpdateQuestionsStatus",
         "useDuplicateQuestion",
         "useUpdateQuestionOrder",
-        "QuestionInsert"
+        "QuestionInsert",
+        "QuestionUpdate"
       ],
       "exports": [
         {
           "name": "useQuestions",
           "kind": "FunctionDeclaration",
-          "parameters": [
-            "skillId"
-          ]
+          "parameters": ["skillId"]
         },
         {
           "name": "usePaginatedQuestions",
           "kind": "FunctionDeclaration",
-          "parameters": [
-            "params",
-            "appFilter"
-          ]
+          "parameters": ["params", "appFilter"]
         },
         {
           "name": "useQuestion",
           "kind": "FunctionDeclaration",
-          "parameters": [
-            "question_id"
-          ]
+          "parameters": ["question_id"]
         },
         {
           "name": "useCreateQuestion",
@@ -402,6 +359,10 @@
         {
           "name": "QuestionInsert",
           "kind": "TypeAliasDeclaration"
+        },
+        {
+          "name": "QuestionUpdate",
+          "kind": "TypeAliasDeclaration"
         }
       ]
     },
@@ -428,24 +389,17 @@
         {
           "name": "useSkills",
           "kind": "FunctionDeclaration",
-          "parameters": [
-            "domainId"
-          ]
+          "parameters": ["domainId"]
         },
         {
           "name": "usePaginatedSkills",
           "kind": "FunctionDeclaration",
-          "parameters": [
-            "params",
-            "appFilter"
-          ]
+          "parameters": ["params", "appFilter"]
         },
         {
           "name": "useSkill",
           "kind": "FunctionDeclaration",
-          "parameters": [
-            "skill_id"
-          ]
+          "parameters": ["skill_id"]
         },
         {
           "name": "useCreateSkill",
@@ -502,10 +456,7 @@
       "name": "useGroups",
       "file": "features/mentorship/hooks/use-groups.ts",
       "hasTest": true,
-      "functions": [
-        "useGroups",
-        "Group"
-      ],
+      "functions": ["useGroups", "Group"],
       "exports": [
         {
           "name": "useGroups",
@@ -619,10 +570,7 @@
       "name": "useKnownIssues",
       "file": "features/monitoring/hooks/use-known-issues.ts",
       "hasTest": true,
-      "functions": [
-        "useKnownIssues",
-        "KnownIssue"
-      ],
+      "functions": ["useKnownIssues", "KnownIssue"],
       "exports": [
         {
           "name": "useKnownIssues",
@@ -718,9 +666,7 @@
         {
           "name": "useLandingPage",
           "kind": "FunctionDeclaration",
-          "parameters": [
-            "appId"
-          ]
+          "parameters": ["appId"]
         },
         {
           "name": "useUpdateLandingPage",
@@ -1049,16 +995,12 @@
       "@/services/SecurityLogger",
       "./AppContextDefinition"
     ],
-    "contexts/AppContextDefinition.ts": [
-      "@/features/platform/hooks/use-apps"
-    ],
+    "contexts/AppContextDefinition.ts": ["@/features/platform/hooks/use-apps"],
     "hooks/use-ai-generator.ts": [
       "@/features/ai-assistant/api/generateQuestions",
       "@/hooks/use-toast"
     ],
-    "hooks/use-app.ts": [
-      "@/contexts/AppContextDefinition"
-    ],
+    "hooks/use-app.ts": ["@/contexts/AppContextDefinition"],
     "hooks/use-bulk-import.ts": [
       "@/hooks/use-toast",
       "@/lib/validation/import-schema",
@@ -1068,35 +1010,18 @@
       "@/features/ai-assistant/api/generateQuestions",
       "@/hooks/use-toast"
     ],
-    "hooks/use-toast.ts": [
-      "@/components/ui/toast"
-    ],
-    "lib/error-tracker.ts": [
-      "./database.types",
-      "./supabase"
-    ],
-    "lib/supabase.ts": [
-      "@/config/env",
-      "./database.types"
-    ],
+    "hooks/use-toast.ts": ["@/components/ui/toast"],
+    "lib/error-tracker.ts": ["./database.types", "./supabase"],
+    "lib/supabase.ts": ["@/config/env", "./database.types"],
     "services/CurriculumService.ts": [
       "@/lib/database.types",
       "@/lib/supabase",
       "@/lib/validation/import-schema"
     ],
-    "services/OracleService.ts": [
-      "@/lib/supabase"
-    ],
-    "services/SecurityLogger.ts": [
-      "@/lib/supabase",
-      "@/lib/database.types"
-    ],
-    "types/index.ts": [
-      "@/lib/database.types"
-    ],
-    "types/platform.ts": [
-      "@/lib/database.types"
-    ],
+    "services/OracleService.ts": ["@/lib/supabase"],
+    "services/SecurityLogger.ts": ["@/lib/supabase", "@/lib/database.types"],
+    "types/index.ts": ["@/lib/database.types"],
+    "types/platform.ts": ["@/lib/database.types"],
     "components/layout/app-layout.tsx": [
       "@/components/ui/keyboard-shortcuts-dialog",
       "@/contexts/AppContext",
@@ -1109,127 +1034,53 @@
       "@/lib/supabase",
       "@/lib/utils"
     ],
-    "components/ui/admin-header.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/alert-dialog.tsx": [
-      "@/lib/utils",
-      "@/components/ui/button"
-    ],
-    "components/ui/avatar.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/badge.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/breadcrumbs.tsx": [
-      "@/lib/utils"
-    ],
+    "components/ui/admin-header.tsx": ["@/lib/utils"],
+    "components/ui/alert-dialog.tsx": ["@/lib/utils", "@/components/ui/button"],
+    "components/ui/avatar.tsx": ["@/lib/utils"],
+    "components/ui/badge.tsx": ["@/lib/utils"],
+    "components/ui/breadcrumbs.tsx": ["@/lib/utils"],
     "components/ui/bulk-action-bar.tsx": [
       "@/components/ui/button",
       "@/lib/utils"
     ],
-    "components/ui/button.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/card.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/checkbox.tsx": [
-      "@/lib/utils"
-    ],
+    "components/ui/button.tsx": ["@/lib/utils"],
+    "components/ui/card.tsx": ["@/lib/utils"],
+    "components/ui/checkbox.tsx": ["@/lib/utils"],
     "components/ui/column-toggle.tsx": [
       "@/components/ui/button",
       "@/components/ui/dropdown-menu"
     ],
-    "components/ui/data-toolbar.tsx": [
-      "@/lib/data-utils"
-    ],
-    "components/ui/dialog.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/dropdown-menu.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/empty-state.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/form-actions.tsx": [
-      "@/lib/utils",
-      "./button"
-    ],
-    "components/ui/form.tsx": [
-      "@/lib/utils",
-      "@/components/ui/label"
-    ],
-    "components/ui/input.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/label.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/page-skeleton.tsx": [
-      "@/lib/utils",
-      "./skeleton"
-    ],
-    "components/ui/progress.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/radio-group.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/rich-text-editor.tsx": [
-      "@/lib/utils",
-      "./math-extensions"
-    ],
-    "components/ui/select.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/separator.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/sheet.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/skeleton.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/status-badge.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/switch.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/table.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/tabs.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/textarea.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/toast.tsx": [
-      "@/lib/utils"
-    ],
-    "components/ui/toaster.tsx": [
-      "@/hooks/use-toast",
-      "@/components/ui/toast"
-    ],
-    "features/curriculum/types.ts": [
-      "@/lib/database.types"
-    ],
-    "features/ai-assistant/api/generateQuestions.ts": [
-      "@/lib/supabase"
-    ],
+    "components/ui/data-toolbar.tsx": ["@/lib/data-utils"],
+    "components/ui/dialog.tsx": ["@/lib/utils"],
+    "components/ui/dropdown-menu.tsx": ["@/lib/utils"],
+    "components/ui/empty-state.tsx": ["@/lib/utils"],
+    "components/ui/form-actions.tsx": ["@/lib/utils", "./button"],
+    "components/ui/form.tsx": ["@/lib/utils", "@/components/ui/label"],
+    "components/ui/input.tsx": ["@/lib/utils"],
+    "components/ui/label.tsx": ["@/lib/utils"],
+    "components/ui/page-skeleton.tsx": ["@/lib/utils", "./skeleton"],
+    "components/ui/progress.tsx": ["@/lib/utils"],
+    "components/ui/radio-group.tsx": ["@/lib/utils"],
+    "components/ui/rich-text-editor.tsx": ["@/lib/utils", "./math-extensions"],
+    "components/ui/select.tsx": ["@/lib/utils"],
+    "components/ui/separator.tsx": ["@/lib/utils"],
+    "components/ui/sheet.tsx": ["@/lib/utils"],
+    "components/ui/skeleton.tsx": ["@/lib/utils"],
+    "components/ui/status-badge.tsx": ["@/lib/utils"],
+    "components/ui/switch.tsx": ["@/lib/utils"],
+    "components/ui/table.tsx": ["@/lib/utils"],
+    "components/ui/tabs.tsx": ["@/lib/utils"],
+    "components/ui/textarea.tsx": ["@/lib/utils"],
+    "components/ui/toast.tsx": ["@/lib/utils"],
+    "components/ui/toaster.tsx": ["@/hooks/use-toast", "@/components/ui/toast"],
+    "features/curriculum/types.ts": ["@/lib/database.types"],
+    "features/ai-assistant/api/generateQuestions.ts": ["@/lib/supabase"],
     "features/ai-assistant/api/governedGeneration.ts": [
       "@/lib/supabase",
       "./generateQuestions",
       "./validateContent"
     ],
-    "features/ai-assistant/api/validateContent.ts": [
-      "@/lib/supabase"
-    ],
+    "features/ai-assistant/api/validateContent.ts": ["@/lib/supabase"],
     "features/ai-assistant/components/QuestionReviewGrid.tsx": [
       "@/components/ui/status-badge"
     ],
@@ -1279,15 +1130,9 @@
       "@/hooks/use-toast",
       "@/lib/supabase"
     ],
-    "features/auth/components/auth-guard.tsx": [
-      "@/lib/supabase"
-    ],
-    "features/auth/components/standard-admin-guard.tsx": [
-      "@/lib/supabase"
-    ],
-    "features/auth/components/super-admin-guard.tsx": [
-      "@/lib/supabase"
-    ],
+    "features/auth/components/auth-guard.tsx": ["@/lib/supabase"],
+    "features/auth/components/standard-admin-guard.tsx": ["@/lib/supabase"],
+    "features/auth/components/super-admin-guard.tsx": ["@/lib/supabase"],
     "features/auth/pages/AccountSettingsPage.tsx": [
       "@/components/ui/admin-header",
       "@/components/ui/button",
@@ -1296,9 +1141,7 @@
       "@/lib/supabase",
       "@/lib/utils"
     ],
-    "features/auth/pages/AuthConfirmPage.tsx": [
-      "@/lib/supabase"
-    ],
+    "features/auth/pages/AuthConfirmPage.tsx": ["@/lib/supabase"],
     "features/auth/pages/InvitationCodesPage.tsx": [
       "@/components/ui/admin-header",
       "@/components/ui/button",
@@ -1336,9 +1179,7 @@
       "@/lib/supabase",
       "@/lib/utils"
     ],
-    "features/curriculum/components/curriculum-filter-bar.tsx": [
-      "../types"
-    ],
+    "features/curriculum/components/curriculum-filter-bar.tsx": ["../types"],
     "features/curriculum/components/domain-form.tsx": [
       "@/components/ui/admin-header",
       "@/components/ui/card",
@@ -1391,6 +1232,7 @@
       "@/lib/database.types",
       "@/lib/database.types",
       "@/lib/normalization",
+      "@/lib/type-utils",
       "../hooks/use-questions",
       "../hooks/use-skills",
       "../types"
@@ -1464,7 +1306,8 @@
     "features/curriculum/hooks/use-dashboard.ts": [
       "@/hooks/use-app",
       "@/lib/database.types",
-      "@/lib/supabase"
+      "@/lib/supabase",
+      "@/lib/type-utils"
     ],
     "features/curriculum/hooks/use-domains.ts": [
       "@/hooks/use-app",
@@ -1477,13 +1320,15 @@
     "features/curriculum/hooks/use-publish.ts": [
       "@/hooks/use-app",
       "@/lib/database.types",
-      "@/lib/supabase"
+      "@/lib/supabase",
+      "@/lib/type-utils"
     ],
     "features/curriculum/hooks/use-questions.ts": [
       "@/hooks/use-app",
       "@/lib/database.types",
       "@/lib/postgrest-utils",
       "@/lib/supabase",
+      "@/lib/type-utils",
       "@/lib/utils",
       "@/types",
       "../types"
@@ -1492,6 +1337,7 @@
       "@/hooks/use-app",
       "@/lib/database.types",
       "@/lib/supabase",
+      "@/lib/type-utils",
       "@/lib/utils",
       "../types"
     ],
@@ -1519,9 +1365,7 @@
     "features/curriculum/pages/domain-edit-page.tsx": [
       "../components/domain-form"
     ],
-    "features/curriculum/pages/domains-page.tsx": [
-      "../components/domain-list"
-    ],
+    "features/curriculum/pages/domains-page.tsx": ["../components/domain-list"],
     "features/curriculum/pages/publish-page.tsx": [
       "@/components/ui/admin-header",
       "@/components/ui/alert-dialog",
@@ -1562,9 +1406,7 @@
       "../components/skill-form",
       "../hooks/use-skills"
     ],
-    "features/curriculum/pages/skills-page.tsx": [
-      "../components/skill-list"
-    ],
+    "features/curriculum/pages/skills-page.tsx": ["../components/skill-list"],
     "features/curriculum/pages/version-history-page.tsx": [
       "@/components/ui/dialog",
       "@/components/ui/pagination",
@@ -1582,9 +1424,9 @@
       "@/lib/supabase"
     ],
     "features/mentorship/hooks/use-groups.ts": [
-      "@/lib/supabase",
+      "@/hooks/use-app",
       "@/lib/database.types",
-      "@/hooks/use-app"
+      "@/lib/supabase"
     ],
     "features/mentorship/pages/AssignmentCreatePage.tsx": [
       "@/components/ui/admin-header",
@@ -1630,6 +1472,7 @@
     "features/monitoring/hooks/use-error-logs.ts": [
       "@/lib/database.types",
       "@/lib/supabase",
+      "@/lib/type-utils",
       "@/lib/utils"
     ],
     "features/monitoring/hooks/use-known-issues-mutations.ts": [
@@ -1682,12 +1525,14 @@
     ],
     "features/platform/hooks/use-apps.ts": [
       "@/lib/supabase",
+      "@/lib/type-utils",
       "@/lib/utils",
       "@/types/platform"
     ],
     "features/platform/hooks/use-landings.ts": [
+      "@/lib/database.types",
       "@/lib/supabase",
-      "@/lib/database.types"
+      "@/lib/type-utils"
     ],
     "features/platform/hooks/use-subjects.ts": [
       "@/lib/database.types",
@@ -1789,9 +1634,7 @@
       {
         "name": "AppProvider",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ children }"
-        ]
+        "parameters": ["{ children }"]
       },
       {
         "name": "useAppContext",
@@ -1833,10 +1676,7 @@
       {
         "name": "useDebounce",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "value",
-          "delay"
-        ]
+        "parameters": ["value", "delay"]
       }
     ],
     "hooks/use-studio-generator.ts": [
@@ -1882,9 +1722,7 @@
       {
         "name": "toast",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ ...props }"
-        ]
+        "parameters": ["{ ...props }"]
       },
       {
         "name": "useToast",
@@ -1896,77 +1734,51 @@
       {
         "name": "useUnsavedChangesGuard",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "isDirty",
-          "message"
-        ]
+        "parameters": ["isDirty", "message"]
       }
     ],
     "hooks/use-url-state.ts": [
       {
         "name": "useUrlState",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "key",
-          "defaultValue"
-        ]
+        "parameters": ["key", "defaultValue"]
       }
     ],
     "lib/data-utils.ts": [
       {
         "name": "exportToCSV",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "data",
-          "columns",
-          "filename"
-        ]
+        "parameters": ["data", "columns", "filename"]
       },
       {
         "name": "exportToJSON",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "data",
-          "filename"
-        ]
+        "parameters": ["data", "filename"]
       },
       {
         "name": "downloadTemplate",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "columns",
-          "filename"
-        ]
+        "parameters": ["columns", "filename"]
       },
       {
         "name": "parseCSV",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "csvText"
-        ]
+        "parameters": ["csvText"]
       },
       {
         "name": "parseJSON",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "jsonText"
-        ]
+        "parameters": ["jsonText"]
       },
       {
         "name": "readFileAsText",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "file"
-        ]
+        "parameters": ["file"]
       },
       {
         "name": "downloadFile",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "content",
-          "filename",
-          "mimeType"
-        ]
+        "parameters": ["content", "filename", "mimeType"]
       },
       {
         "name": "DataColumn",
@@ -2011,36 +1823,22 @@
       {
         "name": "addBreadcrumb",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "message",
-          "category",
-          "data"
-        ]
+        "parameters": ["message", "category", "data"]
       },
       {
         "name": "captureException",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "error",
-          "context"
-        ]
+        "parameters": ["error", "context"]
       },
       {
         "name": "captureMessage",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "message",
-          "level",
-          "context"
-        ]
+        "parameters": ["message", "level", "context"]
       },
       {
         "name": "setUser",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "_userId",
-          "_email"
-        ]
+        "parameters": ["_userId", "_email"]
       },
       {
         "name": "initErrorTracking",
@@ -2052,9 +1850,7 @@
       {
         "name": "parseFile",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "file"
-        ]
+        "parameters": ["file"]
       },
       {
         "name": "ParsedFile",
@@ -2091,50 +1887,36 @@
       {
         "name": "normalizeString",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "value"
-        ]
+        "parameters": ["value"]
       },
       {
         "name": "normalizeIdentifier",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "value"
-        ]
+        "parameters": ["value"]
       },
       {
         "name": "normalizeFormData",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "data",
-          "config"
-        ]
+        "parameters": ["data", "config"]
       }
     ],
     "lib/postgrest-utils.ts": [
       {
         "name": "escapePostgrestSearch",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "input"
-        ]
+        "parameters": ["input"]
       },
       {
         "name": "buildIlikeFilter",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "column",
-          "search"
-        ]
+        "parameters": ["column", "search"]
       }
     ],
     "lib/sanitize.ts": [
       {
         "name": "sanitizeHtml",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "html"
-        ]
+        "parameters": ["html"]
       }
     ],
     "lib/supabase.ts": [
@@ -2151,41 +1933,43 @@
         "kind": "VariableDeclaration"
       }
     ],
+    "lib/type-utils.ts": [
+      {
+        "name": "castJson",
+        "kind": "FunctionDeclaration",
+        "parameters": ["value"]
+      },
+      {
+        "name": "cleanPayload",
+        "kind": "FunctionDeclaration",
+        "parameters": ["obj"]
+      }
+    ],
     "lib/utils.ts": [
       {
         "name": "cn",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "inputs"
-        ]
+        "parameters": ["inputs"]
       },
       {
         "name": "normalizeIdentifier",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "text"
-        ]
+        "parameters": ["text"]
       },
       {
         "name": "formatIdentifier",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "text"
-        ]
+        "parameters": ["text"]
       },
       {
         "name": "sanitizeHtml",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "html"
-        ]
+        "parameters": ["html"]
       },
       {
         "name": "isValidUUID",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "uuid"
-        ]
+        "parameters": ["uuid"]
       },
       {
         "name": "delay",
@@ -2352,9 +2136,7 @@
       {
         "name": "Sidebar",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ isOpen = true, onClose, isMobile = false }"
-        ]
+        "parameters": ["{ isOpen = true, onClose, isMobile = false }"]
       }
     ],
     "components/ui/admin-header.tsx": [
@@ -2434,9 +2216,7 @@
       {
         "name": "Badge",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ className, variant, ...props }"
-        ]
+        "parameters": ["{ className, variant, ...props }"]
       },
       {
         "name": "badgeVariants",
@@ -2447,9 +2227,7 @@
       {
         "name": "Breadcrumbs",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ items, className }"
-        ]
+        "parameters": ["{ items, className }"]
       },
       {
         "name": "BreadcrumbItem",
@@ -2521,9 +2299,7 @@
       {
         "name": "ColumnToggle",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ columns, visibleColumns, onToggle }"
-        ]
+        "parameters": ["{ columns, visibleColumns, onToggle }"]
       }
     ],
     "components/ui/data-toolbar.tsx": [
@@ -2714,18 +2490,12 @@
       {
         "name": "createInlineMathNode",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "schema",
-          "latex"
-        ]
+        "parameters": ["schema", "latex"]
       },
       {
         "name": "createBlockMathNode",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "schema",
-          "latex"
-        ]
+        "parameters": ["schema", "latex"]
       },
       {
         "name": "InlineMath",
@@ -2740,9 +2510,7 @@
       {
         "name": "PageSkeleton",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ variant, rows = 5, className }"
-        ]
+        "parameters": ["{ variant, rows = 5, className }"]
       },
       {
         "name": "SkeletonFilterBar",
@@ -2789,9 +2557,7 @@
       {
         "name": "RichTextEditor",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ value, onChange, placeholder, className }"
-        ]
+        "parameters": ["{ value, onChange, placeholder, className }"]
       }
     ],
     "components/ui/select.tsx": [
@@ -2888,9 +2654,7 @@
       {
         "name": "Skeleton",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{\r\n  className,\r\n  ...props\r\n}"
-        ]
+        "parameters": ["{\r\n  className,\r\n  ...props\r\n}"]
       }
     ],
     "components/ui/sortable-header.tsx": [
@@ -2906,9 +2670,7 @@
       {
         "name": "StatusBadge",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ status, label, className, icon }"
-        ]
+        "parameters": ["{ status, label, className, icon }"]
       },
       {
         "name": "StatusType",
@@ -3042,16 +2804,12 @@
       {
         "name": "FileUploader",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ onFileParsed, onClear }"
-        ]
+        "parameters": ["{ onFileParsed, onClear }"]
       },
       {
         "name": "QuestionForm",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ initialData }"
-        ]
+        "parameters": ["{ initialData }"]
       },
       {
         "name": "QuestionList",
@@ -3061,9 +2819,7 @@
       {
         "name": "SkillForm",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ initialData }"
-        ]
+        "parameters": ["{ initialData }"]
       },
       {
         "name": "SkillList",
@@ -3088,17 +2844,12 @@
       {
         "name": "usePaginatedDomains",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "params",
-          "appId"
-        ]
+        "parameters": ["params", "appId"]
       },
       {
         "name": "useDomain",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "domainId"
-        ]
+        "parameters": ["domainId"]
       },
       {
         "name": "useCreateDomain",
@@ -3152,9 +2903,7 @@
       {
         "name": "usePaginatedPublishHistory",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "params"
-        ]
+        "parameters": ["params"]
       },
       {
         "name": "usePublishPreview",
@@ -3169,24 +2918,17 @@
       {
         "name": "useQuestions",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "skillId"
-        ]
+        "parameters": ["skillId"]
       },
       {
         "name": "usePaginatedQuestions",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "params",
-          "appFilter"
-        ]
+        "parameters": ["params", "appFilter"]
       },
       {
         "name": "useQuestion",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "question_id"
-        ]
+        "parameters": ["question_id"]
       },
       {
         "name": "useCreateQuestion",
@@ -3233,26 +2975,23 @@
         "kind": "TypeAliasDeclaration"
       },
       {
+        "name": "QuestionUpdate",
+        "kind": "TypeAliasDeclaration"
+      },
+      {
         "name": "useSkills",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "domainId"
-        ]
+        "parameters": ["domainId"]
       },
       {
         "name": "usePaginatedSkills",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "params",
-          "appFilter"
-        ]
+        "parameters": ["params", "appFilter"]
       },
       {
         "name": "useSkill",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "skill_id"
-        ]
+        "parameters": ["skill_id"]
       },
       {
         "name": "useCreateSkill",
@@ -3472,9 +3211,7 @@
       {
         "name": "generateQuestions",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "request"
-        ]
+        "parameters": ["request"]
       },
       {
         "name": "GenerateQuestionsRequest",
@@ -3489,10 +3226,7 @@
       {
         "name": "governedGenerateQuestions",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "appId",
-          "request"
-        ]
+        "parameters": ["appId", "request"]
       },
       {
         "name": "GovernedGenerationResponse",
@@ -3503,9 +3237,7 @@
       {
         "name": "validateContent",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "request"
-        ]
+        "parameters": ["request"]
       },
       {
         "name": "ValidationRule",
@@ -3569,27 +3301,21 @@
       {
         "name": "AuthGuard",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ children }"
-        ]
+        "parameters": ["{ children }"]
       }
     ],
     "features/auth/components/standard-admin-guard.tsx": [
       {
         "name": "StandardAdminGuard",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ children }"
-        ]
+        "parameters": ["{ children }"]
       }
     ],
     "features/auth/components/super-admin-guard.tsx": [
       {
         "name": "SuperAdminGuard",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ children }"
-        ]
+        "parameters": ["{ children }"]
       }
     ],
     "features/auth/pages/AccountSettingsPage.tsx": [
@@ -3654,18 +3380,14 @@
       {
         "name": "FileUploader",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ onFileParsed, onClear }"
-        ]
+        "parameters": ["{ onFileParsed, onClear }"]
       }
     ],
     "features/curriculum/components/question-form.tsx": [
       {
         "name": "QuestionForm",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ initialData }"
-        ]
+        "parameters": ["{ initialData }"]
       }
     ],
     "features/curriculum/components/question-list.tsx": [
@@ -3679,9 +3401,7 @@
       {
         "name": "SkillForm",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "{ initialData }"
-        ]
+        "parameters": ["{ initialData }"]
       }
     ],
     "features/curriculum/components/skill-list.tsx": [
@@ -3721,17 +3441,12 @@
       {
         "name": "usePaginatedDomains",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "params",
-          "appId"
-        ]
+        "parameters": ["params", "appId"]
       },
       {
         "name": "useDomain",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "domainId"
-        ]
+        "parameters": ["domainId"]
       },
       {
         "name": "useCreateDomain",
@@ -3787,9 +3502,7 @@
       {
         "name": "usePaginatedPublishHistory",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "params"
-        ]
+        "parameters": ["params"]
       },
       {
         "name": "usePublishPreview",
@@ -3806,24 +3519,17 @@
       {
         "name": "useQuestions",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "skillId"
-        ]
+        "parameters": ["skillId"]
       },
       {
         "name": "usePaginatedQuestions",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "params",
-          "appFilter"
-        ]
+        "parameters": ["params", "appFilter"]
       },
       {
         "name": "useQuestion",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "question_id"
-        ]
+        "parameters": ["question_id"]
       },
       {
         "name": "useCreateQuestion",
@@ -3868,30 +3574,27 @@
       {
         "name": "QuestionInsert",
         "kind": "TypeAliasDeclaration"
+      },
+      {
+        "name": "QuestionUpdate",
+        "kind": "TypeAliasDeclaration"
       }
     ],
     "features/curriculum/hooks/use-skills.ts": [
       {
         "name": "useSkills",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "domainId"
-        ]
+        "parameters": ["domainId"]
       },
       {
         "name": "usePaginatedSkills",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "params",
-          "appFilter"
-        ]
+        "parameters": ["params", "appFilter"]
       },
       {
         "name": "useSkill",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "skill_id"
-        ]
+        "parameters": ["skill_id"]
       },
       {
         "name": "useCreateSkill",
@@ -4233,9 +3936,7 @@
       {
         "name": "useLandingPage",
         "kind": "FunctionDeclaration",
-        "parameters": [
-          "appId"
-        ]
+        "parameters": ["appId"]
       },
       {
         "name": "useUpdateLandingPage",

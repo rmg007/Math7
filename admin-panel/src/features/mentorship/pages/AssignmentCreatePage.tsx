@@ -41,6 +41,8 @@ export function AssignmentCreatePage() {
   const { data: group } = useQuery({
     queryKey: ['group', groupId, currentApp?.app_id, isSuperAdmin],
     queryFn: async () => {
+      const markName = 'AssignmentCreate:fetchGroup';
+      performance.mark(`${markName}:start`);
       if (!groupId) throw new Error('Missing group ID');
       if (!isSuperAdmin && !currentApp?.app_id) throw new Error('Missing app context');
 
@@ -49,9 +51,13 @@ export function AssignmentCreatePage() {
       if (!isSuperAdmin && currentApp?.app_id) {
         query = query.eq('app_id', currentApp.app_id);
       }
-      
+
       const { data, error } = await query.single();
       if (error) throw error;
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
       return data;
     },
     enabled: Boolean(groupId) && (isSuperAdmin || Boolean(currentApp?.app_id)),
@@ -62,19 +68,22 @@ export function AssignmentCreatePage() {
 
   useEffect(() => {
     if (isContextSwitching) {
-      const targetApp = apps.find(a => a.app_id === group.app_id);
+      const targetApp = apps.find((a) => a.app_id === group.app_id);
       if (targetApp) {
-        console.log(`[AssignmentCreatePage] Switching context from ${currentApp?.display_name} to ${targetApp.display_name}`);
+        console.log(
+          `[AssignmentCreatePage] Switching context from ${currentApp?.display_name} to ${targetApp.display_name}`
+        );
         setCurrentApp(targetApp);
       }
     }
   }, [group, currentApp, apps, setCurrentApp, isContextSwitching]);
 
-
   // Fetch Skills for Selection
   const { data: skills } = useQuery<Skill[]>({
     queryKey: ['skills-search', searchTerm, currentApp?.app_id],
     queryFn: async () => {
+      const markName = 'AssignmentCreate:fetchSkills';
+      performance.mark(`${markName}:start`);
       if (!currentApp?.app_id) throw new Error('No app selected');
 
       let query = supabase
@@ -89,6 +98,9 @@ export function AssignmentCreatePage() {
 
       const { data, error } = await query;
       if (error) throw error;
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
 
       // The database uses skill_id but our UI expects id
       return (data as (Skill & { skill_id: string })[]).map((s) => ({
@@ -165,10 +177,12 @@ export function AssignmentCreatePage() {
               <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">
                 Protocol Selection
               </label>
-              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Select objective type</p>
+              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                Select objective type
+              </p>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <button
               onClick={() => setType('skill_mastery')}
@@ -251,7 +265,9 @@ export function AssignmentCreatePage() {
                 <label className="text-[10px] font-black text-emerald-600 uppercase tracking-widest block">
                   Objective Matrix
                 </label>
-                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Connect specific skill criteria</p>
+                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                  Connect specific skill criteria
+                </p>
               </div>
             </div>
             <div className="space-y-6">
@@ -272,22 +288,26 @@ export function AssignmentCreatePage() {
                     onClick={() => setTargetId(skill.id)}
                     className={cn(
                       'w-full px-8 py-5 text-left transition-all flex items-center justify-between group/row',
-                      targetId === skill.id 
-                        ? 'bg-indigo-600/90 text-white shadow-lg' 
+                      targetId === skill.id
+                        ? 'bg-indigo-600/90 text-white shadow-lg'
                         : 'hover:bg-indigo-50/50 text-gray-600'
                     )}
                   >
                     <div className="space-y-1">
-                      <div className={cn(
-                        "font-black text-base uppercase tracking-tight italic",
-                        targetId === skill.id ? "text-white" : "text-gray-900"
-                      )}>
+                      <div
+                        className={cn(
+                          'font-black text-base uppercase tracking-tight italic',
+                          targetId === skill.id ? 'text-white' : 'text-gray-900'
+                        )}
+                      >
                         {skill.title}
                       </div>
-                      <div className={cn(
-                        "text-[9px] font-bold uppercase tracking-widest",
-                        targetId === skill.id ? "text-indigo-100" : "text-gray-400"
-                      )}>
+                      <div
+                        className={cn(
+                          'text-[9px] font-bold uppercase tracking-widest',
+                          targetId === skill.id ? 'text-indigo-100' : 'text-gray-400'
+                        )}
+                      >
                         {skill.domains?.title}
                       </div>
                     </div>
@@ -315,7 +335,9 @@ export function AssignmentCreatePage() {
                 <label className="text-[10px] font-black text-amber-600 uppercase tracking-widest block">
                   Deadline Marker
                 </label>
-                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Protocol expiration date</p>
+                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                  Protocol expiration date
+                </p>
               </div>
             </div>
             <div className="relative group">
@@ -339,7 +361,9 @@ export function AssignmentCreatePage() {
                 <label className="text-[10px] font-black text-purple-600 uppercase tracking-widest block">
                   Protocol Scope
                 </label>
-                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Enforcement priority level</p>
+                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                  Enforcement priority level
+                </p>
               </div>
             </div>
             <div className="flex bg-indigo-50/50 backdrop-blur-md border border-indigo-100/30 p-2 rounded-[1.5rem] shadow-inner shadow-indigo-500/5">

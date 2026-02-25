@@ -37,7 +37,7 @@ describe('Utility Functions - Prevention Guards', () => {
 
     it('should handle empty input', () => {
       expect(sanitizeHtml('')).toBe('');
-      expect(sanitizeHtml(null as any)).toBe('');
+      expect(sanitizeHtml(null as unknown as string)).toBe('');
     });
   });
 

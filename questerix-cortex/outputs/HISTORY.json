@@ -1,95 +1,5 @@
 [
   {
-    "date": "2026-02-24T23:38:06.911Z",
-    "score": 100,
-    "coverage": 0,
-    "failures": 0
-  },
-  {
-    "date": "2026-02-24T23:40:04.823Z",
-    "score": 100,
-    "coverage": 0,
-    "failures": 0
-  },
-  {
-    "date": "2026-02-24T23:41:58.311Z",
-    "score": 100,
-    "coverage": 0,
-    "failures": 0
-  },
-  {
-    "date": "2026-02-24T23:42:11.061Z",
-    "score": 100,
-    "coverage": 0,
-    "failures": 0
-  },
-  {
-    "date": "2026-02-24T23:55:15.089Z",
-    "score": 75,
-    "coverage": 0,
-    "failures": 1
-  },
-  {
-    "date": "2026-02-24T23:58:26.957Z",
-    "score": 75,
-    "coverage": 0,
-    "failures": 1
-  },
-  {
-    "date": "2026-02-25T00:05:47.550Z",
-    "score": 0,
-    "coverage": 0,
-    "failures": 0
-  },
-  {
-    "date": "2026-02-25T00:07:12.453Z",
-    "score": 50,
-    "coverage": 0,
-    "failures": 1
-  },
-  {
-    "date": "2026-02-25T00:09:06.685Z",
-    "score": 50,
-    "coverage": 0,
-    "failures": 1
-  },
-  {
-    "date": "2026-02-25T00:09:21.220Z",
-    "score": 50,
-    "coverage": 0,
-    "failures": 2
-  },
-  {
-    "date": "2026-02-25T00:11:27.900Z",
-    "score": 100,
-    "coverage": 0,
-    "failures": 0
-  },
-  {
-    "date": "2026-02-25T00:14:18.399Z",
-    "score": 50,
-    "coverage": 0,
-    "failures": 1
-  },
-  {
-    "date": "2026-02-25T00:14:19.078Z",
-    "score": 67,
-    "coverage": 0,
-    "failures": 1
-  },
-  {
-    "date": "2026-02-25T00:20:04.410Z",
-    "score": 100,
-    "coverage": 0,
-    "failures": 0
-  },
-  {
-    "date": "2026-02-25T00:20:28.333Z",
-    "score": 50,
-    "coverage": 0,
-    "failures": 1
-  },
-  {
     "date": "2026-02-25T00:25:57.376Z",
     "score": 50,
     "coverage": 0,
@@ -175,6 +85,96 @@
   },
   {
     "date": "2026-02-25T15:50:39.215Z",
+    "score": 100,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T16:35:02.000Z",
+    "score": 0,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T16:37:49.323Z",
+    "score": 0,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T16:46:41.626Z",
+    "score": 0,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T16:52:31.053Z",
+    "score": 0,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T16:53:40.300Z",
+    "score": 0,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T16:57:18.083Z",
+    "score": 0,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T17:00:14.374Z",
+    "score": 0,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T17:04:04.941Z",
+    "score": 0,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T17:05:03.005Z",
+    "score": 0,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T17:11:14.267Z",
+    "score": 0,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T17:30:57.133Z",
+    "score": 0,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T17:35:22.507Z",
+    "score": 100,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T17:37:33.727Z",
+    "score": 100,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T17:42:29.714Z",
+    "score": 100,
+    "coverage": 0,
+    "failures": 0
+  },
+  {
+    "date": "2026-02-25T17:47:29.146Z",
     "score": 100,
     "coverage": 0,
     "failures": 0

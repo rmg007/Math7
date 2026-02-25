@@ -8,11 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -27,32 +27,41 @@ async function parseImportPrompt(
   prompt: string,
   skillId: string
 ): Promise<{ questions: unknown[] }> {
-  if (WORKERS_URL) {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
-    const response = await fetch(`${WORKERS_URL}/ai/parse-import-prompt`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ prompt, skillId }),
-      signal: AbortSignal.timeout(45_000),
-    });
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      throw new Error((body as { error?: string }).error || `Workers AI error: ${response.status}`);
+  const markName = 'BulkImport:parseAI';
+  performance.mark(`${markName}:start`);
+  try {
+    if (WORKERS_URL) {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+      const response = await fetch(`${WORKERS_URL}/ai/parse-import-prompt`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ prompt, skillId }),
+        signal: AbortSignal.timeout(45_000),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(
+          (body as { error?: string }).error || `Workers AI error: ${response.status}`
+        );
+      }
+      return response.json() as Promise<{ questions: unknown[] }>;
     }
-    return response.json() as Promise<{ questions: unknown[] }>;
+    // Fallback: Supabase Edge Function (Gemini)
+    const { data, error } = await supabase.functions.invoke('parse-import-prompt', {
+      body: { prompt, skillId },
+    });
+    if (error) throw error;
+    return data as { questions: unknown[] };
+  } finally {
+    performance.mark(`${markName}:end`);
+    performance.measure(markName, `${markName}:start`, `${markName}:end`);
   }
-  // Fallback: Supabase Edge Function (Gemini)
-  const { data, error } = await supabase.functions.invoke('parse-import-prompt', {
-    body: { prompt, skillId },
-  });
-  if (error) throw error;
-  return data as { questions: unknown[] };
 }
 
 export default function BulkImportPage() {
@@ -83,6 +92,8 @@ export default function BulkImportPage() {
 
     setIsAiParsing(true);
     try {
+      const markName = 'BulkImportPage:handleAiImport';
+      performance.mark(`${markName}:start`);
       const data = await parseImportPrompt(importPrompt, selectedSkillId);
 
       if (data?.questions) {
@@ -100,15 +111,18 @@ export default function BulkImportPage() {
         variant: 'destructive',
       });
     } finally {
+      performance.mark('BulkImportPage:handleAiImport:end');
+      performance.measure(
+        'BulkImportPage:handleAiImport',
+        'BulkImportPage:handleAiImport:start',
+        'BulkImportPage:handleAiImport:end'
+      );
       setIsAiParsing(false);
     }
   };
 
   return (
-    <div
-      className="max-w-7xl mx-auto space-y-10 pb-12"
-      data-testid="bulk-import-page"
-    >
+    <div className="max-w-7xl mx-auto space-y-10 pb-12" data-testid="bulk-import-page">
       <AdminHeader
         title="Curriculum Nexus"
         description="High-velocity content ingestion via CSV matrices or intelligent AI prompt synthesis."
@@ -122,7 +136,7 @@ export default function BulkImportPage() {
           >
             <Download className="w-4 h-4 text-indigo-600 transition-transform group-hover:-translate-y-0.5" />
             <span className="bg-gradient-to-r from-indigo-700 to-blue-700 bg-clip-text text-transparent font-black tracking-widest text-[11px] uppercase">
-               Download Template
+              Download Template
             </span>
           </Button>
         }
@@ -144,7 +158,9 @@ export default function BulkImportPage() {
                   Ingestion Core
                 </span>
               </div>
-              <CardTitle className="text-2xl font-black tracking-tight text-white relative">Import Source</CardTitle>
+              <CardTitle className="text-2xl font-black tracking-tight text-white relative">
+                Import Source
+              </CardTitle>
             </CardHeader>
             <CardContent className="relative p-8 space-y-10">
               <div className="space-y-4">
@@ -159,7 +175,10 @@ export default function BulkImportPage() {
                   >
                     <SelectValue placeholder="Select target skill..." />
                   </SelectTrigger>
-                  <SelectContent className="glass-card border-gray-800 bg-gray-900/95 text-white" data-testid="bulk-import-skill-options">
+                  <SelectContent
+                    className="glass-card border-gray-800 bg-gray-900/95 text-white"
+                    data-testid="bulk-import-skill-options"
+                  >
                     {skills?.map((skill) => (
                       <SelectItem
                         key={skill.skill_id}
@@ -205,7 +224,7 @@ export default function BulkImportPage() {
                     />
                     <div className="flex flex-col items-center justify-center text-center pointer-events-none">
                       <div className="w-16 h-16 rounded-3xl bg-white shadow-xl shadow-indigo-500/10 flex items-center justify-center mb-4 transition-transform group-hover:scale-110 group-hover:rotate-6 duration-500">
-                         <FileUp className="w-8 h-8 text-indigo-500" />
+                        <FileUp className="w-8 h-8 text-indigo-500" />
                       </div>
                       <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">
                         Drop CSV Artifact
@@ -281,10 +300,16 @@ export default function BulkImportPage() {
             <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/10 p-8 space-y-4 animate-in zoom-in-95 duration-500">
               <div className="flex justify-between items-end mb-1">
                 <div className="space-y-0.5">
-                  <h4 className="text-[11px] font-black text-indigo-600 uppercase tracking-widest">Processing Data</h4>
-                  <p className="text-xs font-bold text-gray-500 italic">Sequential byte migration...</p>
+                  <h4 className="text-[11px] font-black text-indigo-600 uppercase tracking-widest">
+                    Processing Data
+                  </h4>
+                  <p className="text-xs font-bold text-gray-500 italic">
+                    Sequential byte migration...
+                  </p>
                 </div>
-                <span className="text-xl font-black text-indigo-600 font-mono tracking-tighter">{progress}%</span>
+                <span className="text-xl font-black text-indigo-600 font-mono tracking-tighter">
+                  {progress}%
+                </span>
               </div>
               <Progress value={progress} className="h-3 bg-indigo-50 rounded-full" />
             </Card>
@@ -326,7 +351,8 @@ export default function BulkImportPage() {
                   <div className="space-y-2">
                     <h3 className="text-xl font-black text-gray-900">Logical Void Detected</h3>
                     <p className="text-xs font-medium text-gray-500 max-w-xs mx-auto">
-                      Initiate content stream via CSV matrix or AI synthesis to populate the nexus buffer.
+                      Initiate content stream via CSV matrix or AI synthesis to populate the nexus
+                      buffer.
                     </p>
                   </div>
                 </div>
@@ -353,12 +379,14 @@ export default function BulkImportPage() {
                               {item.content}
                             </h4>
                           </div>
-                          
+
                           <div className="flex flex-wrap items-center gap-x-10 gap-y-4">
                             <div className="flex items-center gap-3">
                               <div className="w-1 h-8 bg-indigo-100 rounded-full" />
                               <div className="space-y-0.5">
-                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-extra-wide">Skill ID</span>
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-extra-wide">
+                                  Skill ID
+                                </span>
                                 <p className="text-[11px] font-mono font-bold text-gray-700">
                                   {(item.skill_id as string)?.slice(0, 12)}...
                                 </p>
@@ -367,9 +395,14 @@ export default function BulkImportPage() {
                             <div className="flex items-center gap-3">
                               <div className="w-1 h-8 bg-gray-100 rounded-full" />
                               <div className="space-y-0.5">
-                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-extra-wide">Weight</span>
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-extra-wide">
+                                  Weight
+                                </span>
                                 <p className="text-[11px] font-black text-gray-900">
-                                  {item.points} <span className="text-[10px] text-gray-500 font-bold ml-1">pts</span>
+                                  {item.points}{' '}
+                                  <span className="text-[10px] text-gray-500 font-bold ml-1">
+                                    pts
+                                  </span>
                                 </p>
                               </div>
                             </div>

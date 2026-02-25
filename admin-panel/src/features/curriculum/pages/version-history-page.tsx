@@ -55,6 +55,8 @@ export function VersionHistoryPage() {
   const { data: currentMeta } = useQuery({
     queryKey: ['curriculum-meta', currentApp?.app_id],
     queryFn: async (): Promise<CurriculumMeta | null> => {
+      const markName = 'VersionHistory:fetchMeta';
+      performance.mark(`${markName}:start`);
       if (!currentApp?.app_id) return null;
 
       const { data, error } = await supabase
@@ -67,6 +69,10 @@ export function VersionHistoryPage() {
         console.warn('Error fetching curriculum meta:', error.message || error);
         return null;
       }
+
+      performance.mark(`${markName}:end`);
+      performance.measure(markName, `${markName}:start`, `${markName}:end`);
+
       return data as CurriculumMeta | null;
     },
     enabled: Boolean(currentApp?.app_id),
