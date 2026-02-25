@@ -188,7 +188,7 @@ describe('LoginPage — Login success', () => {
 
     await waitFor(() => expect(mockSecurityLogLogin).toHaveBeenCalled());
     const failedLoginCalls = mockSecurityLog.mock.calls.filter(
-      ([payload]: [{ eventType: string }]) => payload?.eventType === 'failed_login'
+      (args: unknown[]) => (args[0] as { eventType: string })?.eventType === 'failed_login'
     );
     expect(failedLoginCalls).toHaveLength(0);
   });
@@ -214,9 +214,7 @@ describe('LoginPage — Login failure & anti-enumeration', () => {
     fillLoginForm(VALID_EMAIL, 'WrongPass1!');
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
-    await waitFor(() =>
-      expect(screen.getByText(/invalid login credentials/i)).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText(/invalid login credentials/i)).toBeInTheDocument());
   });
 
   it('calls SecurityLogger.log with eventType=failed_login on auth failure', async () => {
@@ -244,9 +242,7 @@ describe('LoginPage — Login failure & anti-enumeration', () => {
     fillLoginForm(VALID_EMAIL, 'WrongPass1!');
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
-    await waitFor(() =>
-      expect(screen.getByText(/invalid login credentials/i)).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText(/invalid login credentials/i)).toBeInTheDocument());
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
@@ -255,9 +251,7 @@ describe('LoginPage — Login failure & anti-enumeration', () => {
     fillLoginForm(VALID_EMAIL, 'short');
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
-    await waitFor(() =>
-      expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument());
     expect(mockSignInWithPassword).not.toHaveBeenCalled();
   });
 
@@ -341,9 +335,7 @@ describe('LoginPage — Forgot password', () => {
     fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'unknown@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: /send reset link/i }));
 
-    await waitFor(() =>
-      expect(screen.getByText(/check your email/i)).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText(/check your email/i)).toBeInTheDocument());
     // Generic success — no indication whether email exists or not
     expect(screen.queryByText(/email not found/i)).not.toBeInTheDocument();
   });
@@ -354,9 +346,7 @@ describe('LoginPage — Forgot password', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /send reset link/i }));
 
-    await waitFor(() =>
-      expect(screen.getByText(/please enter your email/i)).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText(/please enter your email/i)).toBeInTheDocument());
     expect(mockResetPasswordForEmail).not.toHaveBeenCalled();
   });
 
@@ -368,9 +358,7 @@ describe('LoginPage — Forgot password', () => {
     fireEvent.change(screen.getByLabelText(/email/i), { target: { value: VALID_EMAIL } });
     fireEvent.click(screen.getByRole('button', { name: /send reset link/i }));
 
-    await waitFor(() =>
-      expect(screen.getByText(/rate limit exceeded/i)).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText(/rate limit exceeded/i)).toBeInTheDocument());
   });
 
   it('returns to login when "Back to Sign In" is clicked', async () => {
@@ -482,9 +470,7 @@ describe('LoginPage — Register with invitation code', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
 
-    await waitFor(() =>
-      expect(screen.getByText(/email already registered/i)).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText(/email already registered/i)).toBeInTheDocument());
     expect(mockSecurityLog).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: 'failed_register' })
     );
@@ -530,9 +516,7 @@ describe('LoginPage — Register with invitation code', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
 
-    await waitFor(() =>
-      expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument());
     expect(mockRpc).not.toHaveBeenCalled();
     expect(mockSignUp).not.toHaveBeenCalled();
   });
