@@ -44,7 +44,7 @@ const allSuites: Array<{
 
   // Deploy — sequential only, runs after release certification
   { id: 'deploy-admin', name: 'Deploy Admin Panel',   command: 'powershell ..\\scripts\\deploy\\deploy-all.ps1 -ConfigFile ..\\master-config.json -Target admin-panel', tier: 'deploy', parallel: false },
-  { id: 'deploy-fns',   name: 'Deploy Edge Functions', command: 'npx supabase functions deploy',           tier: 'deploy',  parallel: false },
+  { id: 'deploy-fns',   name: 'Deploy Edge Functions', command: 'npx supabase functions deploy --project-ref bkfhorslctqieetzqdtd', tier: 'deploy',  parallel: false },
 
   // Ship — final source control push, ONLY if all previous tiers pass
   { id: 'git-ship',     name: 'Git Ship (Push)',      command: 'powershell -Command "git add .; git commit -m \"feat: auto-ship via cortex\"; git push"', tier: 'ship', parallel: false },
