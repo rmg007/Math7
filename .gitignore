@@ -1,21 +1,29 @@
-# Ops Runner (may contain secrets in commands)
+# =============================================================================
+# OPS RUNNER (may contain secrets in commands)
+# =============================================================================
 tasks.json
 tasks.status.json
 
-# General
+# =============================================================================
+# GENERAL
+# =============================================================================
 .DS_Store
 Thumbs.db
-.vscode/
-.idea/
 *.log
 
-# Node.js (Admin Panel)
+# =============================================================================
+# NODE.JS / ADMIN PANEL
+# =============================================================================
 node_modules/
 dist/
 build/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# =============================================================================
+# PLAYWRIGHT / TEST ARTIFACTS
+# =============================================================================
 playwright-report/
 test-results/
 coverage/
@@ -23,27 +31,8 @@ __checks__/
 tests/__screenshots__/
 lighthouse-*.json
 
-# Flutter (Student App)
-.dart_tool/
-.packages
-.pub/
-ios/Flutter/App.framework
-ios/Flutter/Flutter.framework
-ios/Flutter/Generated.xcconfig
-ios/Flutter/app.flx
-ios/Flutter/app.zip
-ios/Flutter/db/
-ios/Flutter/flutter_assets/
-ios/ServiceDefinitions.json
-ios/Runner/GeneratedPluginRegistrant.*
-android/GradleWrapper/
-android/.gradle/
-android/app/src/main/assets/
-android/app/src/main/res/
-pubspec.lock
-
 # =============================================================================
-# ENVIRONMENT FILES
+# ENVIRONMENT FILES (secrets — never commit)
 # =============================================================================
 .env
 .env.local
@@ -61,21 +50,13 @@ admin-panel/.env.production.local
 # =============================================================================
 # DEPLOYMENT PIPELINE SECURITY
 # =============================================================================
-# Secrets files (CRITICAL - contains API tokens)
 .secrets*
 *.backup
 temp-secrets-*.json
 .mcp_config.json
-
-# Generated environment files (recreated each deploy)
 .flutter-defines.tmp
-
-# Deployment logs
 deploy-*.log
-
-# Build artifacts (regenerated each deploy)
 admin-panel/dist/
-student-app/build/
 
 # =============================================================================
 # AGENT & IDE CONFIGURATIONS
@@ -83,8 +64,9 @@ student-app/build/
 .agent/
 !.agent/workflows/
 .windsurf/
+.vscode/
 
-# Ignore vscode AI rules
+# Ignore Codacy AI instructions (generated, not source)
 .github/instructions/codacy.instructions.md
 
 # =============================================================================
@@ -107,20 +89,13 @@ deps-output.txt
 # =============================================================================
 # TEMPORARY / DIAGNOSTIC FILES
 # =============================================================================
-# Temporary Scrub Scripts (Local only)
 scrub.ps1
 scrub.js
 replacements.txt
-
-# Session management (local only)
 docs/HANDOVER.md
 .session/
 logs/
-
-# TypeScript error dumps
 tsc_errors*.txt
-
-# One-off audit/debug files
 git_status.txt
 *.tmp
 
@@ -128,31 +103,32 @@ git_status.txt
 _gh_failures/
 
 # =============================================================================
-# TOOLING
+# TOOLING & CACHES
 # =============================================================================
-# Tool binaries (install via package manager, never commit)
 tools/bin/
-
-# Python tool caches
 .pytest_cache/
 .ruff_cache/
 __pycache__/
 *.pyc
 search.db
-
-# Wrangler deployment temp
 .wrangler/
-
-# Supabase CLI local state (project-ref link — never commit)
 .supabase/
+
+# =============================================================================
+# QUESTERIX CORTEX — GENERATED OUTPUTS (local machine artifacts)
+# =============================================================================
+questerix-cortex/outputs/
+questerix-cortex/dist/
+questerix-cortex/node_modules/
 
 # =============================================================================
 # DEAD PROJECTS (DO NOT PUBLISH)
 # =============================================================================
 landing-pages/
+student-app/
 
 # =============================================================================
-# ANTIGRAVITY KNOWLEDGE (Synced from Supabase)
+# ANTIGRAVITY KNOWLEDGE (Synced from Supabase — local only)
 # =============================================================================
 .gemini/antigravity/knowledge/
 !.gemini/antigravity/knowledge/.keep

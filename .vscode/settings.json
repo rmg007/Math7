@@ -1,26 +1,17 @@
 {
+  // ── Editor ────────────────────────────────────────────────────────────────
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
     "source.organizeImports": "explicit"
   },
-  "files.exclude": {
-    "**/admin-panel/node_modules/workspace/questerix_domain": true,
-    "**/admin-panel/node_modules/workspace/student-app": true
-  },
-  "files.watcherExclude": {
-    "**/.git/objects/**": true,
-    "**/.git/subtree-cache/**": true,
-    "**/node_modules/*/**": true,
-    "**/student-app/build/**": true,
-    "**/admin-panel/dist/**": true,
-    "**/coverage/**": true
-  },
-  "dart.analysisExcludedFolders": [
-    "admin-panel/node_modules/workspace"
-  ],
+  "files.autoSave": "afterDelay",
+
+  // ── TypeScript ────────────────────────────────────────────────────────────
   "typescript.tsdk": "admin-panel/node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  // ── ESLint ────────────────────────────────────────────────────────────────
   "eslint.workingDirectories": ["admin-panel"],
   "eslint.validate": [
     "javascript",
@@ -28,5 +19,70 @@
     "typescript",
     "typescriptreact"
   ],
-  "files.autoSave": "afterDelay"
+
+  // ── File Explorer Exclusions (hidden from sidebar) ────────────────────────
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.git": true,
+    "**/.dart_tool": true,
+    "**/coverage": true,
+    "**/playwright-report": true,
+    "**/test-results": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/.ruff_cache": true,
+    "**/.wrangler": true,
+    "**/.supabase": true,
+    "**/questerix-cortex/dist": true,
+    "**/.session": true,
+    "**/_gh_failures": true
+  },
+
+  // ── Search Exclusions (not indexed for Ctrl+Shift+F) ─────────────────────
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.git": true,
+    "**/coverage": true,
+    "**/playwright-report": true,
+    "**/test-results": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/.ruff_cache": true,
+    "**/.wrangler": true,
+    "**/.supabase": true,
+    "**/questerix-cortex/dist": true,
+    "**/.gemini/antigravity/knowledge": true,
+    "**/*.min.js": true,
+    "**/*.map": true,
+    "**/questerix-cortex/outputs": true
+  },
+
+  // ── File Watcher Exclusions (reduces CPU/disk I/O dramatically) ───────────
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/coverage/**": true,
+    "**/playwright-report/**": true,
+    "**/test-results/**": true,
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true,
+    "**/.ruff_cache/**": true,
+    "**/.wrangler/**": true,
+    "**/.supabase/**": true,
+    "**/questerix-cortex/dist/**": true,
+    "**/questerix-cortex/outputs/**": true,
+    "**/.gemini/antigravity/knowledge/**": true,
+    "**/.session/**": true,
+    "**/_gh_failures/**": true
+  },
+
+  // ── Terminal ──────────────────────────────────────────────────────────────
+  "terminal.integrated.shellIntegration.enabled": false
 }
