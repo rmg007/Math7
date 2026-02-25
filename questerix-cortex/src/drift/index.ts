@@ -1,8 +1,9 @@
+import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
 export interface DriftResult {
-  verdict: 'CLEAN' | 'DRIFT DETECTED' | 'WARN (extra in types)';
+  verdict: 'CLEAN' | 'DRIFT DETECTED';
   typesTableCount: number;
   missingFromTypes: string[];   // tables in supabase schema not in types file
   extraInTypes: string[];       // tables in types file not backed by real supabase schema  
@@ -37,16 +38,34 @@ export class DriftDetector {
     const staleDays = this.getTypesStaleness();
 
     return {
-      verdict: missingFromTypes.length > 0
-        ? 'DRIFT DETECTED'
-        : extraInTypes.length > 0
-          ? 'WARN (extra in types)'
-          : 'CLEAN',
+      // CLEAN: types file matches or is a superset of migrations (normal state).
+      // DRIFT DETECTED: migrations reference tables absent from types — regenerate types.
+      // extraInTypes is informational only: the migration folder is intentionally
+      // incomplete (many tables were created via Supabase Studio and lack migration files).
+      // The types file is the authoritative source since it's generated from the live DB.
+      verdict: missingFromTypes.length > 0 ? 'DRIFT DETECTED' : 'CLEAN',
       typesTableCount: typesTableNames.size,
       missingFromTypes,
-      extraInTypes,
+      extraInTypes,   // informational — not actionable, only log if count is very high
       staleDays,
     };
+  }
+
+  /**
+   * Proactive Self-Healing: Executes scripts/gen_types.ps1 to reconcile types.
+   */
+  heal(): boolean {
+    const scriptPath = path.join(this.migrationsPath, '..', '..', 'scripts', 'gen_types.ps1');
+    if (!fs.existsSync(scriptPath)) return false;
+
+    try {
+      // Execute via PowerShell -NoProfile to bypass potential profile interference
+      execSync(`powershell -NoProfile -File "${scriptPath}"`, { stdio: 'inherit' });
+      return true;
+    } catch (err) {
+      console.error('   ❌ Drift self-healing failed:', err);
+      return false;
+    }
   }
 
   /**
