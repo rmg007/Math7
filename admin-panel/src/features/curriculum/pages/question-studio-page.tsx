@@ -2,38 +2,38 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import {
-    useStudioGenerator,
-    type DifficultyMix,
-    type Domain,
-    type QuestionType,
-    type StudioConfig
+  useStudioGenerator,
+  type DifficultyMix,
+  type Domain,
+  type QuestionType,
+  type StudioConfig,
 } from '@/hooks/use-studio-generator';
 import { useToast } from '@/hooks/use-toast';
 import { Database, Json } from '@/lib/database.types';
-import { cn } from '@/lib/utils';
+import { cn, toJson } from '@/lib/utils';
 import {
-    AlertCircle,
-    BookOpen,
-    Brain,
-    Calculator,
-    CheckSquare2,
-    Code2,
-    FlaskConical,
-    Globe,
-    Layers,
-    RefreshCw,
-    Save,
-    Sparkles,
-    Trash2,
-    X,
+  AlertCircle,
+  BookOpen,
+  Brain,
+  Calculator,
+  CheckSquare2,
+  Code2,
+  FlaskConical,
+  Globe,
+  Layers,
+  RefreshCw,
+  Save,
+  Sparkles,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useBlocker, useNavigate } from 'react-router-dom';
@@ -116,10 +116,38 @@ const QUESTION_TYPES: { key: QuestionType; label: string; desc: string }[] = [
 const QUANTITY_PRESETS = [5, 10, 20, 30];
 
 const DIFFICULTY_PRESETS: { label: string; mix: (count: number) => DifficultyMix }[] = [
-  { label: 'Balanced', mix: (n) => ({ easy: Math.floor(n / 3), medium: Math.floor(n / 3), hard: n - 2 * Math.floor(n / 3) }) },
-  { label: 'Beginner', mix: (n) => ({ easy: Math.round(n * 0.7), medium: Math.round(n * 0.2), hard: n - Math.round(n * 0.7) - Math.round(n * 0.2) }) },
-  { label: 'Challenge', mix: (n) => ({ easy: Math.round(n * 0.1), medium: Math.round(n * 0.3), hard: n - Math.round(n * 0.1) - Math.round(n * 0.3) }) },
-  { label: 'Exam Prep', mix: (n) => ({ easy: Math.round(n * 0.2), medium: Math.round(n * 0.4), hard: n - Math.round(n * 0.2) - Math.round(n * 0.4) }) },
+  {
+    label: 'Balanced',
+    mix: (n) => ({
+      easy: Math.floor(n / 3),
+      medium: Math.floor(n / 3),
+      hard: n - 2 * Math.floor(n / 3),
+    }),
+  },
+  {
+    label: 'Beginner',
+    mix: (n) => ({
+      easy: Math.round(n * 0.7),
+      medium: Math.round(n * 0.2),
+      hard: n - Math.round(n * 0.7) - Math.round(n * 0.2),
+    }),
+  },
+  {
+    label: 'Challenge',
+    mix: (n) => ({
+      easy: Math.round(n * 0.1),
+      medium: Math.round(n * 0.3),
+      hard: n - Math.round(n * 0.1) - Math.round(n * 0.3),
+    }),
+  },
+  {
+    label: 'Exam Prep',
+    mix: (n) => ({
+      easy: Math.round(n * 0.2),
+      medium: Math.round(n * 0.4),
+      hard: n - Math.round(n * 0.2) - Math.round(n * 0.4),
+    }),
+  },
 ];
 
 // ─────────────────────────────────────────────────────────
@@ -210,14 +238,22 @@ export function QuestionStudioPage() {
 
   const handleSave = async () => {
     if (!skillId) {
-      toast({ title: 'Select a skill', description: 'Questions must be linked to a skill.', variant: 'destructive' });
+      toast({
+        title: 'Select a skill',
+        description: 'Questions must be linked to a skill.',
+        variant: 'destructive',
+      });
       return;
     }
     if (!reviewed) return;
 
     const keptQuestions = studio.stagedQuestions.filter((q) => q.kept);
     if (keptQuestions.length === 0) {
-      toast({ title: 'No questions to save', description: 'Keep at least one question.', variant: 'destructive' });
+      toast({
+        title: 'No questions to save',
+        description: 'Keep at least one question.',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -233,39 +269,45 @@ export function QuestionStudioPage() {
           id: String.fromCharCode(97 + i), // a, b, c, d
           text,
         }));
-        options = { options: mappedOptions } as unknown as Json;
+        options = toJson({ options: mappedOptions });
 
         if (q.question_type === 'mcq') {
           const correctText = q.metadata.correct_answer as string;
           const correctIdx = q.metadata.options?.indexOf(correctText) ?? 0;
-          solution = { correct_option_id: String.fromCharCode(97 + Math.max(0, correctIdx)) } as unknown as Json;
+          solution = toJson({
+            correct_option_id: String.fromCharCode(97 + Math.max(0, correctIdx)),
+          });
         } else {
           const correctTexts = (q.metadata.correct_answer as string[]) || [];
-          const correctIds = correctTexts.map((text) => {
-            const idx = q.metadata.options?.indexOf(text) ?? -1;
-            return idx !== -1 ? String.fromCharCode(97 + idx) : null;
-          }).filter(Boolean);
-          solution = { correct_ids: correctIds } as unknown as Json;
+          const correctIds = correctTexts
+            .map((text) => {
+              const idx = q.metadata.options?.indexOf(text) ?? -1;
+              return idx !== -1 ? String.fromCharCode(97 + idx) : null;
+            })
+            .filter(Boolean);
+          solution = toJson({ correct_ids: correctIds });
         }
       } else if (q.question_type === 'boolean') {
-        options = { true_label: 'True', false_label: 'False' } as unknown as Json;
-        solution = { correct_value: q.metadata.correct_answer === 'True' } as unknown as Json;
+        options = toJson({ true_label: 'True', false_label: 'False' });
+        solution = toJson({ correct_value: q.metadata.correct_answer === 'True' });
       } else if (q.question_type === 'text_input') {
-        options = { placeholder: '' } as unknown as Json;
-        solution = { exact_match: q.metadata.correct_answer } as unknown as Json;
+        options = toJson({ placeholder: '' });
+        solution = toJson({ exact_match: q.metadata.correct_answer });
       } else if (q.question_type === 'reorder_steps') {
         const steps = (q.metadata.options || []).map((text, i) => ({
           id: String(i + 1),
           text,
         }));
-        options = { steps } as unknown as Json;
+        options = toJson({ steps });
         // correct_answer from AI is expected to be the correct sequence of strings
         const correctTexts = (q.metadata.correct_answer as string[]) || [];
-        const correctOrder = correctTexts.map((text) => {
-          const idx = q.metadata.options?.indexOf(text) ?? -1;
-          return idx !== -1 ? String(idx + 1) : null;
-        }).filter(Boolean);
-        solution = { correct_order: correctOrder } as unknown as Json;
+        const correctOrder = correctTexts
+          .map((text) => {
+            const idx = q.metadata.options?.indexOf(text) ?? -1;
+            return idx !== -1 ? String(idx + 1) : null;
+          })
+          .filter(Boolean);
+        solution = toJson({ correct_order: correctOrder });
       }
 
       return {
@@ -307,7 +349,8 @@ export function QuestionStudioPage() {
           </div>
           <h2 className="text-xl font-bold text-center text-gray-900 mb-2">Unsaved Questions</h2>
           <p className="text-center text-gray-500 text-sm mb-6">
-            You have {studio.keptCount} staged questions that haven't been saved. If you leave now, they'll be lost.
+            You have {studio.keptCount} staged questions that haven't been saved. If you leave now,
+            they'll be lost.
           </p>
           <div className="flex gap-3">
             <Button variant="outline" className="flex-1" onClick={() => blocker.reset()}>
@@ -354,15 +397,15 @@ export function QuestionStudioPage() {
 
       {/* Three-panel body */}
       <div className="flex flex-1 gap-0 overflow-hidden">
-
         {/* ────────────────────────────────────────────────── */}
         {/* LEFT PANEL — Configuration                        */}
         {/* ────────────────────────────────────────────────── */}
         <aside className="w-80 flex-shrink-0 border-r border-gray-100 bg-gray-50/70 overflow-y-auto p-5 space-y-5">
-
           {/* Domain selector */}
           <div className="space-y-2">
-            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Subject Domain</Label>
+            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              Subject Domain
+            </Label>
             <div className="grid grid-cols-2 gap-2">
               {DOMAINS.map((d) => {
                 const Icon = d.icon;
@@ -399,7 +442,9 @@ export function QuestionStudioPage() {
           {/* Topic input + chips */}
           {selectedDomain && (
             <div className="space-y-2 animate-in fade-in duration-200">
-              <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Topic</Label>
+              <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Topic
+              </Label>
               <Input
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
@@ -429,12 +474,17 @@ export function QuestionStudioPage() {
 
           {/* Quantity */}
           <div className="space-y-2">
-            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Number of Questions</Label>
+            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              Number of Questions
+            </Label>
             <div className="flex gap-1.5">
               {QUANTITY_PRESETS.map((n) => (
                 <button
                   key={n}
-                  onClick={() => { handleCountChange(n); setCustomCount(false); }}
+                  onClick={() => {
+                    handleCountChange(n);
+                    setCustomCount(false);
+                  }}
                   className={cn(
                     'flex-1 h-9 rounded-lg border text-sm font-semibold transition-colors',
                     !customCount && count === n
@@ -463,7 +513,9 @@ export function QuestionStudioPage() {
                 min={1}
                 max={50}
                 value={count}
-                onChange={(e) => handleCountChange(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
+                onChange={(e) =>
+                  handleCountChange(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))
+                }
                 className="text-sm"
                 placeholder="Enter number (1–50)"
               />
@@ -473,8 +525,17 @@ export function QuestionStudioPage() {
           {/* Difficulty Mixer */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Difficulty Mix</Label>
-              <span className={cn('text-[11px] font-semibold', (diffMix.easy + diffMix.medium + diffMix.hard) !== count ? 'text-rose-500' : 'text-gray-400')}>
+              <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Difficulty Mix
+              </Label>
+              <span
+                className={cn(
+                  'text-[11px] font-semibold',
+                  diffMix.easy + diffMix.medium + diffMix.hard !== count
+                    ? 'text-rose-500'
+                    : 'text-gray-400'
+                )}
+              >
                 Total: {diffMix.easy + diffMix.medium + diffMix.hard} / {count}
               </span>
             </div>
@@ -494,10 +555,16 @@ export function QuestionStudioPage() {
             <div className="grid grid-cols-3 gap-2">
               {(['easy', 'medium', 'hard'] as const).map((d) => (
                 <div key={d} className="space-y-1">
-                  <label className={cn(
-                    'text-[10px] font-bold uppercase tracking-wide block',
-                    d === 'easy' ? 'text-emerald-600' : d === 'medium' ? 'text-amber-600' : 'text-rose-600'
-                  )}>
+                  <label
+                    className={cn(
+                      'text-[10px] font-bold uppercase tracking-wide block',
+                      d === 'easy'
+                        ? 'text-emerald-600'
+                        : d === 'medium'
+                          ? 'text-amber-600'
+                          : 'text-rose-600'
+                    )}
+                  >
                     {d}
                   </label>
                   <Input
@@ -514,7 +581,9 @@ export function QuestionStudioPage() {
 
           {/* Question type chips */}
           <div className="space-y-2">
-            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Question Types</Label>
+            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              Question Types
+            </Label>
             <div className="grid grid-cols-2 gap-1.5">
               {QUESTION_TYPES.map(({ key, label, desc }) => {
                 const isActive = selectedTypes.includes(key);
@@ -530,7 +599,11 @@ export function QuestionStudioPage() {
                     )}
                   >
                     <span className="text-xs font-bold">{label}</span>
-                    <span className={cn('text-[10px]', isActive ? 'text-indigo-200' : 'text-gray-400')}>{desc}</span>
+                    <span
+                      className={cn('text-[10px]', isActive ? 'text-indigo-200' : 'text-gray-400')}
+                    >
+                      {desc}
+                    </span>
                   </button>
                 );
               })}
@@ -572,9 +645,13 @@ export function QuestionStudioPage() {
               className="w-full bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white shadow-md shadow-indigo-200 font-semibold gap-2"
             >
               {studio.status === 'generating' ? (
-                <><RefreshCw className="h-4 w-4 animate-spin" /> Generating...</>
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" /> Generating...
+                </>
               ) : (
-                <><Sparkles className="h-4 w-4" /> Generate {count} Questions</>
+                <>
+                  <Sparkles className="h-4 w-4" /> Generate {count} Questions
+                </>
               )}
             </Button>
           </div>
@@ -584,18 +661,32 @@ export function QuestionStudioPage() {
         {/* CENTER PANEL — Staging Canvas                     */}
         {/* ────────────────────────────────────────────────── */}
         <main className="flex-1 overflow-y-auto bg-gray-50/30 p-6 space-y-4">
-
           {/* Bulk actions bar */}
           {studio.stagedQuestions.length > 0 && (
             <div className="flex items-center justify-between bg-white rounded-xl border border-gray-100 px-4 py-2.5 shadow-sm sticky top-0 z-10">
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={studio.keepAll} className="h-7 text-xs gap-1 text-emerald-600 hover:bg-emerald-50">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={studio.keepAll}
+                  className="h-7 text-xs gap-1 text-emerald-600 hover:bg-emerald-50"
+                >
                   <CheckSquare2 className="h-3.5 w-3.5" /> Keep All
                 </Button>
-                <Button variant="ghost" size="sm" onClick={studio.removeAll} className="h-7 text-xs gap-1 text-rose-500 hover:bg-rose-50">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={studio.removeAll}
+                  className="h-7 text-xs gap-1 text-rose-500 hover:bg-rose-50"
+                >
                   <Trash2 className="h-3.5 w-3.5" /> Remove All
                 </Button>
-                <Button variant="ghost" size="sm" onClick={studio.resetBatch} className="h-7 text-xs gap-1 text-gray-400 hover:bg-gray-100">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={studio.resetBatch}
+                  className="h-7 text-xs gap-1 text-gray-400 hover:bg-gray-100"
+                >
                   <X className="h-3.5 w-3.5" /> Clear
                 </Button>
               </div>
@@ -619,12 +710,22 @@ export function QuestionStudioPage() {
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">AI Question Studio</h2>
                 <p className="text-gray-400 text-sm max-w-sm">
                   Choose a domain and topic on the left, then click{' '}
-                  <strong className="text-indigo-600">Generate</strong> to create your question batch.
+                  <strong className="text-indigo-600">Generate</strong> to create your question
+                  batch.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 justify-center max-w-sm">
-                {['Integer Negatives', 'First Conditional', 'The French Revolution', 'Python Loops', 'Vocabulary B2'].map((s) => (
-                  <span key={s} className="text-xs px-3 py-1.5 bg-white border border-gray-200 rounded-full text-gray-500 shadow-sm">
+                {[
+                  'Integer Negatives',
+                  'First Conditional',
+                  'The French Revolution',
+                  'Python Loops',
+                  'Vocabulary B2',
+                ].map((s) => (
+                  <span
+                    key={s}
+                    className="text-xs px-3 py-1.5 bg-white border border-gray-200 rounded-full text-gray-500 shadow-sm"
+                  >
                     {s}
                   </span>
                 ))}
@@ -667,7 +768,12 @@ export function QuestionStudioPage() {
                 <h3 className="font-semibold text-gray-800">Generation Failed</h3>
                 <p className="text-sm text-gray-500 mt-1">Check the configuration and try again.</p>
               </div>
-              <Button onClick={handleGenerate} disabled={!canGenerate} variant="outline" className="gap-2">
+              <Button
+                onClick={handleGenerate}
+                disabled={!canGenerate}
+                variant="outline"
+                className="gap-2"
+              >
                 <RefreshCw className="h-4 w-4" /> Retry Generation
               </Button>
             </div>
@@ -719,7 +825,9 @@ export function QuestionStudioPage() {
 
           {/* Skill selector */}
           <div className="space-y-2">
-            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Target Skill</Label>
+            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              Target Skill
+            </Label>
             <Select value={skillId} onValueChange={setSkillId}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a skill..." />
@@ -739,7 +847,9 @@ export function QuestionStudioPage() {
 
           {/* Status */}
           <div className="space-y-2">
-            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Initial Status</Label>
+            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              Initial Status
+            </Label>
             <div className="flex gap-2">
               {(['draft', 'published'] as const).map((s) => (
                 <button
@@ -761,7 +871,9 @@ export function QuestionStudioPage() {
           {/* Batch summary */}
           {studio.stagedQuestions.length > 0 && (
             <div className="bg-gray-50 rounded-xl border border-gray-100 p-3 space-y-1.5">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Batch Summary</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                Batch Summary
+              </p>
               <div className="flex justify-between text-xs">
                 <span className="text-gray-500">Kept</span>
                 <span className="font-bold text-emerald-700">{studio.keptCount}</span>
@@ -799,29 +911,35 @@ export function QuestionStudioPage() {
           {/* Save button */}
           <Button
             onClick={handleSave}
-            disabled={
-              studio.keptCount === 0 ||
-              !reviewed ||
-              !skillId ||
-              bulkCreate.isPending
-            }
+            disabled={studio.keptCount === 0 || !reviewed || !skillId || bulkCreate.isPending}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold gap-2 disabled:opacity-50"
           >
             {bulkCreate.isPending ? (
-              <><RefreshCw className="h-4 w-4 animate-spin" /> Saving...</>
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" /> Saving...
+              </>
             ) : (
-              <><Save className="h-4 w-4" /> Save {studio.keptCount > 0 ? studio.keptCount : ''} Questions</>
+              <>
+                <Save className="h-4 w-4" /> Save {studio.keptCount > 0 ? studio.keptCount : ''}{' '}
+                Questions
+              </>
             )}
           </Button>
 
           {studio.keptCount === 0 && studio.stagedQuestions.length > 0 && (
-            <p className="text-[11px] text-gray-400 text-center">Keep at least one question to save.</p>
+            <p className="text-[11px] text-gray-400 text-center">
+              Keep at least one question to save.
+            </p>
           )}
           {studio.keptCount > 0 && !reviewed && (
-            <p className="text-[11px] text-gray-400 text-center">Check the review box above to enable saving.</p>
+            <p className="text-[11px] text-gray-400 text-center">
+              Check the review box above to enable saving.
+            </p>
           )}
           {studio.keptCount > 0 && reviewed && !skillId && (
-            <p className="text-[11px] text-rose-400 text-center font-medium">Select a target skill.</p>
+            <p className="text-[11px] text-rose-400 text-center font-medium">
+              Select a target skill.
+            </p>
           )}
         </aside>
       </div>

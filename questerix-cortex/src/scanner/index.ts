@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Project } from 'ts-morph';
+import { CortexDB } from '../cortex-db';
+import { normalizePath } from '../utils/normalize-path';
 
 export interface HookEntry {
   name: string;
@@ -39,6 +41,26 @@ export interface SurfaceMap {
   apiMap: Record<string, ExportEntry[]>; // relativePath -> export list
 }
 
+export interface GraphNode {
+  id: string;
+  type: 'file' | 'symbol';
+  filePath?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface GraphEdge {
+  sourceId: string;
+  targetId: string;
+  relationship: 'imports' | 'tests' | 'renders';
+  metadata?: Record<string, unknown>;
+}
+
+export interface GraphScanResult {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  sourceFiles: string[];
+}
+
 export class Scanner {
   private project: Project;
   private srcPath: string;
@@ -65,9 +87,7 @@ export class Scanner {
 
     for (const sourceFile of sourceFiles) {
       const filePath = sourceFile.getFilePath();
-      const normalizedPath = filePath.replace(/\\/g, '/');
-      const normalizedSrcPath = this.srcPath.replace(/\\/g, '/');
-      const relativePath = normalizedPath.replace(normalizedSrcPath, '').replace(/^\//, '');
+      const relativePath = normalizePath(filePath);
 
       // Skip non-source files or test files themselves
       if (
@@ -189,6 +209,120 @@ export class Scanner {
     }
 
     return map;
+  }
+
+  async scanFiles(paths: string[]): Promise<GraphScanResult> {
+    const nodeMap = new Map<string, GraphNode>();
+    const edges: GraphEdge[] = [];
+    const sourceFiles: string[] = [];
+
+    for (const filePath of paths) {
+      let sourceFile = this.project.getSourceFile(filePath);
+      if (sourceFile) {
+        await sourceFile.refreshFromFileSystem();
+      } else {
+        sourceFile = this.project.addSourceFileAtPath(filePath);
+      }
+
+      if (!sourceFile) continue;
+
+      const normalizedFilePath = normalizePath(sourceFile.getFilePath());
+      sourceFiles.push(normalizedFilePath);
+
+      nodeMap.set(normalizedFilePath, {
+        id: normalizedFilePath,
+        type: 'file',
+        filePath: normalizedFilePath
+      });
+
+      const exportedDeclarations = sourceFile.getExportedDeclarations();
+      for (const [name, declarations] of exportedDeclarations) {
+        const firstDeclaration = declarations[0];
+        const kind = firstDeclaration?.getKindName?.();
+        const symbolId = `${normalizedFilePath}#${name}`;
+
+        nodeMap.set(symbolId, {
+          id: symbolId,
+          type: 'symbol',
+          filePath: normalizedFilePath,
+          metadata: {
+            name,
+            kind
+          }
+        });
+      }
+
+      const isTestFile = normalizedFilePath.includes('.test.') || normalizedFilePath.includes('.spec.');
+
+      for (const importDecl of sourceFile.getImportDeclarations()) {
+        const targetSourceFile = importDecl.getModuleSpecifierSourceFile();
+        if (!targetSourceFile) continue;
+
+        const resolvedPath = normalizePath(targetSourceFile.getFilePath());
+        edges.push({
+          sourceId: normalizedFilePath,
+          targetId: resolvedPath,
+          relationship: isTestFile ? 'tests' : 'imports'
+        });
+      }
+    }
+
+    return {
+      nodes: Array.from(nodeMap.values()),
+      edges,
+      sourceFiles
+    };
+  }
+
+  async writeGraph(cortexDb: CortexDB): Promise<void> {
+    const db = cortexDb.getDb();
+    const scanTimestamp = new Date().toISOString();
+    const filePaths = this.project.getSourceFiles().map(sourceFile => sourceFile.getFilePath());
+    const { nodes, edges, sourceFiles } = await this.scanFiles(filePaths);
+
+    const insertNode = db.prepare(`
+      INSERT OR REPLACE INTO nodes (id, type, file_path, metadata, updated_at)
+      VALUES (@id, @type, @filePath, @metadata, @updatedAt)
+    `);
+    const insertEdge = db.prepare(`
+      INSERT OR REPLACE INTO edges (source_id, target_id, relationship, metadata)
+      VALUES (@sourceId, @targetId, @relationship, @metadata)
+    `);
+    const deleteEdgesForSource = db.prepare('DELETE FROM edges WHERE source_id = ?');
+    const deleteStaleNodes = db.prepare('DELETE FROM nodes WHERE updated_at < ?');
+    const deleteOrphanEdges = db.prepare(
+      'DELETE FROM edges WHERE source_id NOT IN (SELECT id FROM nodes) OR target_id NOT IN (SELECT id FROM nodes)'
+    );
+
+    for (const node of nodes) {
+      insertNode.run({
+        id: node.id,
+        type: node.type,
+        filePath: node.filePath ?? null,
+        metadata: node.metadata ? JSON.stringify(node.metadata) : null,
+        updatedAt: scanTimestamp
+      });
+    }
+
+    const uniqueSources = Array.from(new Set(sourceFiles));
+    for (const sourceId of uniqueSources) {
+      deleteEdgesForSource.run(sourceId);
+    }
+
+    for (const edge of edges) {
+      insertEdge.run({
+        sourceId: edge.sourceId,
+        targetId: edge.targetId,
+        relationship: edge.relationship,
+        metadata: edge.metadata ? JSON.stringify(edge.metadata) : null
+      });
+    }
+
+    const prune = db.transaction((timestamp: string) => {
+      deleteStaleNodes.run(timestamp);
+      deleteOrphanEdges.run();
+    });
+    prune(scanTimestamp);
   }
 
   /**

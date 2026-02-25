@@ -1168,3 +1168,158 @@ The following work was also completed as part of the Phase 10 & 11 security spri
 
 - `npx tsc --noEmit` — 0 errors
 - `npm run lint` — 0 errors (warnings acceptable)
+
+### [2026-02-25-Cortex-Graph-Foundation]
+
+- **Work**: Added CortexDB schema, normalizePath utility, scanner graph writes with import resolution, and E2E test-to-page mapping into `cortex.db`.
+- **Learned**: `ts-morph` must use `admin-panel/tsconfig.json` (bundler) for `@/` resolution; graph writes need per-file edge refresh plus stale node pruning.
+
+---
+
+## 2026-02-25: Cortex MCP Server (Session 2) [no test needed]
+
+### [2026-02-25-Cortex-MCP] Session Context
+
+- **Trigger**: Session 2 implementation brief for MCP server + live query tools.
+- **Scope**: `questerix-cortex/src/mcp-server/`, `questerix-cortex/package.json`, `questerix-cortex/package-lock.json`.
+- **Outcome**: Stdio MCP server with `cortex_impact` + `cortex_query`, delta scan integration, and safe fallback responses.
+
+### What was done
+
+1. Added MCP server entry point and tool handlers with JSON-only responses.
+2. Implemented `cortex_impact` with path normalization, delta scanning, CTE impact query, test lookup, and fragility warnings.
+3. Implemented `cortex_query` with suffix matching, disambiguation, and file-node fallback.
+4. Installed `@modelcontextprotocol/sdk` and registered the CLI bin.
+
+### Notes
+
+- All git calls use `stdio: "pipe"` to protect the MCP protocol channel.
+- Delta scan is filtered to `admin-panel/src/` and prunes deleted files from the graph.
+
+### Verification
+
+- Not run (MCP server wiring only).
+
+---
+
+## 2026-02-25: Cortex Fragility Engine + Verify Core (Session 3) [no test needed]
+
+### [2026-02-25-Cortex-Fragility] Session Context
+
+- **Trigger**: Session 3 implementation brief (fragility + verify foundations).
+- **Scope**: `questerix-cortex/src/mcp-server/` (`tools/fragility.ts`, `fragility-engine.ts`, `change-logger.ts`, `verify-engine.ts`).
+- **Outcome**: Added fragility query tool, change-log writer, fragility attribution engine, and targeted verification runner.
+
+### What was done
+
+1. Implemented `cortex_fragility` tool logic to normalize paths, read `fragility`, and emit warnings above threshold.
+2. Added `attributeFragility` to increment `change_count`, attribute failures via dependency walk, recalc `fragility_index`, and set confidence tiers.
+3. Added `logChange` to write `change_log` entries with session metadata and failure details.
+4. Built `runVerification` to execute `tsc` in `admin-panel/` with `stdio: "pipe"` and to run targeted unit/E2E tests with JSON parsing.
+
+### Verification
+
+- Not run (engine wiring only).
+
+---
+
+## 2026-02-25: Cortex Plan/Verify Tooling (Session 4) [no test needed]
+
+### [2026-02-25-Cortex-Plan] Session Context
+
+- **Trigger**: Session 4 implementation brief for plan/verify MCP tools and compliance checks.
+- **Scope**: `questerix-cortex/src/mcp-server/server.ts`, `questerix-cortex/src/mcp-server/compliance.ts`.
+- **Outcome**: Added pre-edit tier classification + risk assessment tool, post-edit verification tool wiring, and compliance query helper.
+
+### What was done
+
+1. Added `cortex_plan` with normalized path handling, structural glob matching, fragility lookups, tier protocol selection, and RiskScorer integration.
+2. Added `cortex_verify` to run verification, log change history, attribute fragility, and emit structured test/tsc verdicts.
+3. Implemented `checkCompliance` to report plan/verify tool-call coverage per session.
+4. Logged tool calls to `tool_calls` for compliance tracking.
+
+### Verification
+
+- Not run (MCP server wiring only).
+
+---
+
+## 2026-02-25: Fixing Test Relationship Attribution [fix]
+
+### [2026-02-25-Scanner-Test-Edges] Session Context
+
+- **Trigger**: Review of Session 4 revealed that `cortex_verify` and `cortex_plan` could not find unit tests.
+- **Scope**: `questerix-cortex/src/scanner/index.ts`.
+- **Outcome**: Updated `scanFiles` to set `relationship: 'tests'` for files matching `.test.` or `.spec.`.
+
+### What was done
+
+1. Identified that `Scanner.ts` was hardcoding `relationship: 'imports'` for all edges.
+2. Added a check for `isTestFile` based on naming conventions.
+3. Switched relationship to `tests` if the source is a test file, enabling targeted verification to find corresponding source files.
+
+### Root Cause
+
+The scanner was treating all edges as generic imports, which broke the `resolveTestFiles` query in `server.ts` that specifically filtered for `relationship = 'tests'`.
+
+### Prevention Rule
+
+Always verify that relationship types in the graph matcher code that consumes the graph. Use specific relationship types for specialized connections like testing or rendering.
+
+### Verification
+
+- Verified by code inspection of `server.ts` queries which now correctly match the updated scanner output.
+
+---
+
+## 2026-02-25: Cortex v2 Integration + Compliance Wiring (Session 5) [no test needed]
+
+### [2026-02-25-Cortex-Compliance] Session Context
+
+- **Trigger**: Session 5 implementation brief for Cortex v2 protocol wiring + compliance reporting.
+- **Scope**: `GEMINI.md`, `questerix-cortex/src/reporter/index.ts`, `questerix-cortex/src/mcp-server/`, `questerix-cortex/SCOPE.md`.
+- **Outcome**: Added Cortex protocol instructions, health report compliance section, and hardened tool fallbacks.
+
+### What was done
+
+1. Added Cortex v2 protocol requirements and key file references to `GEMINI.md`.
+2. Implemented a Cortex compliance section in health reports with tool-call counts, fragility table, and graph stats.
+3. Hardened MCP tools for missing DB, empty graph, git-unavailable delta scans, and missing test/tsc scenarios.
+4. Documented Cortex v2 scope boundaries in `questerix-cortex/SCOPE.md`.
+
+### Learned
+
+- Health reporting should degrade gracefully when the graph is absent or empty to keep automation reliable.
+
+### Verification
+
+- Not run (reporting + tool guardrails only).
+
+---
+
+## 2026-02-25: Cortex v2 Integration & Hardening [feat]
+
+### [2026-02-25-Cortex-Integration] Session Context
+
+- **Trigger**: Session 5 implementation brief for hardening and reporting integration.
+- **Scope**: `questerix-cortex/src/mcp-server/server.ts`, `questerix-cortex/src/reporter/index.ts`, `GEMINI.md`.
+- **Outcome**: Unified the Surgical Architect protocol across all AI instructions and expanded health reporting with intelligence metrics.
+
+### What was done
+
+1. Hardened MCP tools against edge cases (missing DB, empty graph, git unavailable, missing tsc).
+2. Integrated Cortex compliance metrics into the core health reporter (tool-call tracking, fragility leaderboard).
+3. Formalized the `cortex_plan` and `cortex_verify` handshake in `GEMINI.md`.
+4. Documented scope boundaries in `questerix-cortex/SCOPE.md`.
+
+### Root Cause
+
+Cortex v2 was functional but lacked an enforcement layer and visibility within the standard health report. Hardening was necessary to ensure the agent doesn't crash if the graph isn't initialized.
+
+### Prevention Rule
+
+Always include 'Missing Initialization' warnings in tool outputs instead of throwing errors to allow for graceful degradation and guided recovery.
+
+### Verification
+
+- Verified by code inspection of `GEMINI.md` and `Reporter.ts` logic.

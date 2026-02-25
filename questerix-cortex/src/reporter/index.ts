@@ -1,7 +1,9 @@
-import { execSync } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
-import { TaskResult } from '../orchestrator';
+import Database from "better-sqlite3";
+import { execSync } from "child_process";
+import * as fs from "fs";
+import * as path from "path";
+import { checkCompliance } from "../mcp-server/compliance";
+import { TaskResult } from "../orchestrator";
 
 export class Reporter {
   private outputs: any;
@@ -169,6 +171,8 @@ export class Reporter {
       }
     }
 
+    md += this.renderCortexSection();
+
     md += '\n---\n\n## Failure Digest\n\n';
     const failures = allResults.filter(r => r.status === 'failed');
     if (failures.length === 0) {
@@ -180,6 +184,110 @@ export class Reporter {
     }
 
     fs.writeFileSync(path.join(this.root, this.outputs.healthReport), md);
+  }
+
+  private renderCortexSection(): string {
+    const dbPath = path.join(
+      this.projectRoot,
+      "questerix-cortex",
+      "outputs",
+      "cortex.db"
+    );
+
+    if (!fs.existsSync(dbPath)) {
+      return "\n## 🧠 Cortex v2 Intelligence\n\nCortex v2 not initialized.\n";
+    }
+
+    let db: Database.Database | null = null;
+    try {
+      db = new Database(dbPath, { readonly: true });
+      db.pragma("busy_timeout = 5000");
+    } catch {
+      return "\n## 🧠 Cortex v2 Intelligence\n\nCortex v2 not initialized.\n";
+    }
+
+    try {
+      let md = "\n## 🧠 Cortex v2 Intelligence\n\n";
+      const latestSession = db
+        .prepare("SELECT session_id FROM tool_calls ORDER BY timestamp DESC LIMIT 1")
+        .get() as { session_id?: string } | undefined;
+
+      if (!latestSession?.session_id) {
+        md += "No data yet.\n";
+        return md;
+      }
+
+      const sessionId = latestSession.session_id;
+      const compliance = checkCompliance(db, sessionId);
+      const changeRow = db
+        .prepare(
+          "SELECT COUNT(DISTINCT file_path) as count FROM change_log WHERE session_id = ?"
+        )
+        .get(sessionId) as { count: number };
+
+      md += `### Protocol Compliance (Session: ${sessionId})\n\n`;
+      md += `- \`cortex_plan\` called: ${compliance.plan_called ? "✅" : "❌"} ${compliance.plan_count} times\n`;
+      md += `- \`cortex_verify\` called: ${compliance.verify_called ? "✅" : "❌"} ${compliance.verify_count} times\n`;
+      md += `- Compliance: ${compliance.compliant ? "✅ COMPLIANT" : "❌ NON-COMPLIANT"}\n`;
+      md += `- Logged changes: ${changeRow?.count ?? 0} file(s)\n\n`;
+
+      const fragilityRows = db
+        .prepare(
+          `
+          SELECT file_path, fragility_index, confidence, last_failure
+          FROM fragility
+          ORDER BY fragility_index DESC
+          LIMIT 5
+        `
+        )
+        .all() as Array<{
+        file_path: string;
+        fragility_index: number;
+        confidence: string;
+        last_failure: string | null;
+      }>;
+
+      md += "### Top 5 Fragile Files\n\n";
+      if (fragilityRows.length === 0) {
+        md += "No data yet.\n\n";
+      } else {
+        md += "| File | Fragility Index | Confidence | Last Failure |\n";
+        md += "| --- | --- | --- | --- |\n";
+        fragilityRows.forEach(row => {
+          md += `| ${row.file_path} | ${row.fragility_index.toFixed(2)} | ${row.confidence} | ${row.last_failure ?? "—"} |\n`;
+        });
+        md += "\n";
+      }
+
+      const nodeCount = db
+        .prepare("SELECT COUNT(*) as count FROM nodes")
+        .get() as { count: number };
+      const edgeCount = db
+        .prepare("SELECT COUNT(*) as count FROM edges")
+        .get() as { count: number };
+      const lastScan = db
+        .prepare("SELECT MAX(updated_at) as last_scan FROM nodes")
+        .get() as { last_scan?: string | null };
+      const lastCommit = db
+        .prepare("SELECT value FROM scan_meta WHERE key = ?")
+        .get("last_scan_commit") as { value?: string } | undefined;
+
+      const commitLabel = lastCommit?.value
+        ? lastCommit.value.slice(0, 7)
+        : "unknown";
+      const scanLabel = lastScan?.last_scan ?? "unknown";
+
+      md += "### Graph Statistics\n\n";
+      md += `- Nodes: ${nodeCount.count}\n`;
+      md += `- Edges: ${edgeCount.count}\n`;
+      md += `- Last scan: ${scanLabel} (commit: ${commitLabel})\n`;
+
+      return md;
+    } catch {
+      return "\n## 🧠 Cortex v2 Intelligence\n\nNo data yet.\n";
+    } finally {
+      db?.close();
+    }
   }
 
   // ─────────────────────────────────────────────────────────────

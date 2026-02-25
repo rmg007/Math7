@@ -6,7 +6,11 @@
   "scripts": {
     "health": "ts-node run.ts"
   },
+  "bin": {
+    "cortex-mcp-server": "./dist/src/mcp-server/index.js"
+  },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "agentops": "^0.1.0",
     "better-sqlite3": "^12.6.2",
     "chalk": "^4.1.2",

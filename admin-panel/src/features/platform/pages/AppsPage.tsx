@@ -1,53 +1,53 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
 import { ColumnToggle } from '@/components/ui/column-toggle';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Switch } from '@/components/ui/switch';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
@@ -55,37 +55,37 @@ import { normalizeFormData } from '@/lib/normalization';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-    AlertTriangle,
-    CheckCircle2,
-    CheckSquare,
-    Circle,
-    ExternalLink,
-    Filter,
-    Layers,
-    Layout,
-    Loader2,
-    Pencil,
-    Plus,
-    Power,
-    Search,
-    Square,
-    Trash2,
-    X,
+  AlertTriangle,
+  CheckCircle2,
+  CheckSquare,
+  Circle,
+  ExternalLink,
+  Filter,
+  Layers,
+  Layout,
+  Loader2,
+  Pencil,
+  Plus,
+  Power,
+  Search,
+  Square,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
-    useApps,
-    useBulkCreateApps,
-    useBulkDeleteApps,
-    useBulkUpdateAppsStatus,
-    useCheckAppSubdomain,
-    useCreateApp,
-    useDeleteApp,
-    useUpdateApp,
-    type AppInsert,
-    type CompiledApp,
+  useApps,
+  useBulkCreateApps,
+  useBulkDeleteApps,
+  useBulkUpdateAppsStatus,
+  useCheckAppSubdomain,
+  useCreateApp,
+  useDeleteApp,
+  useUpdateApp,
+  type AppInsert,
+  type CompiledApp,
 } from '../hooks/use-apps';
 import { useSubjects } from '../hooks/use-subjects';
 
@@ -754,7 +754,7 @@ export function AppsPage() {
               <div className="w-px h-6 bg-gray-200 mx-1 hidden md:block" />
 
               <DataToolbar
-                data={apps as unknown as Record<string, unknown>[]}
+                data={apps ?? []}
                 columns={APP_COLUMNS}
                 entityName="Applications"
                 onImport={handleImport}
@@ -1074,7 +1074,10 @@ export function AppsPage() {
                                   disabled={Boolean(editingApp)}
                                   onChange={(e) =>
                                     field.onChange(
-                                      e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 63)
+                                      e.target.value
+                                        .toLowerCase()
+                                        .replace(/[^a-z0-9-]/g, '')
+                                        .slice(0, 63)
                                     )
                                   }
                                   data-testid="app-subdomain"

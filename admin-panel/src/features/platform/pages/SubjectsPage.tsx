@@ -1,51 +1,51 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
 import { ColumnToggle } from '@/components/ui/column-toggle';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
@@ -53,32 +53,32 @@ import { normalizeFormData } from '@/lib/normalization';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-    Boxes,
-    CheckCircle2,
-    CheckSquare,
-    Filter,
-    Loader2,
-    Pencil,
-    Plus,
-    Search,
-    Square,
-    Trash2,
-    X,
+  Boxes,
+  CheckCircle2,
+  CheckSquare,
+  Filter,
+  Loader2,
+  Pencil,
+  Plus,
+  Search,
+  Square,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
-    useBulkCreateSubjects,
-    useBulkDeleteSubjects,
-    useBulkUpdateSubjectsStatus,
-    useCheckSubjectSlug,
-    useCreateSubject,
-    useDeleteSubject,
-    useSubjects,
-    useUpdateSubject,
-    type Subject,
-    type SubjectInsert,
+  useBulkCreateSubjects,
+  useBulkDeleteSubjects,
+  useBulkUpdateSubjectsStatus,
+  useCheckSubjectSlug,
+  useCreateSubject,
+  useDeleteSubject,
+  useSubjects,
+  useUpdateSubject,
+  type Subject,
+  type SubjectInsert,
 } from '../hooks/use-subjects';
 
 interface SubjectRowProps {
@@ -757,7 +757,7 @@ export function SubjectsPage() {
               <div className="w-px h-6 bg-gray-200 mx-1 hidden md:block" />
 
               <DataToolbar
-                data={subjects as unknown as Record<string, unknown>[]}
+                data={subjects ?? []}
                 columns={SUBJECT_COLUMNS}
                 entityName="Subjects"
                 onImport={handleImport}

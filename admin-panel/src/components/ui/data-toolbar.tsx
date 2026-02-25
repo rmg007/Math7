@@ -1,25 +1,25 @@
-import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Download, FileText, Upload } from 'lucide-react';
 import {
+  downloadTemplate,
   exportToCSV,
   exportToJSON,
-  downloadTemplate,
   parseCSV,
   parseJSON,
   readFileAsText,
   type DataColumn,
 } from '@/lib/data-utils';
+import { ChevronDown, Download, FileText, Upload } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
-interface DataToolbarProps<T extends Record<string, unknown>> {
+interface DataToolbarProps<T extends object> {
   data: T[];
   columns: DataColumn[];
   entityName: string;
-  onImport?: (data: Record<string, string>[] | T[]) => Promise<void>;
+  onImport?: (data: Record<string, unknown>[]) => Promise<void>;
   importDisabled?: boolean;
   importDisabledMessage?: string;
 }
 
-export function DataToolbar<T extends Record<string, unknown>>({
+export function DataToolbar<T extends object>({
   data,
   columns,
   entityName,
@@ -45,7 +45,11 @@ export function DataToolbar<T extends Record<string, unknown>>({
   }, [isOpen]);
 
   const handleExportCSV = () => {
-    exportToCSV(data, columns, entityName.toLowerCase().replace(/\s+/g, '_'));
+    exportToCSV(
+      data as unknown as Record<string, unknown>[],
+      columns,
+      entityName.toLowerCase().replace(/\s+/g, '_')
+    );
     setIsOpen(false);
   };
 
@@ -75,12 +79,12 @@ export function DataToolbar<T extends Record<string, unknown>>({
     setImporting(true);
     try {
       const content = await readFileAsText(file);
-      let parsedData: Record<string, string>[] | T[];
+      let parsedData: Record<string, unknown>[];
 
       if (file.name.endsWith('.csv')) {
         parsedData = parseCSV(content);
       } else if (file.name.endsWith('.json')) {
-        parsedData = parseJSON<T>(content);
+        parsedData = parseJSON<Record<string, unknown>>(content);
       } else {
         throw new Error('Unsupported file format. Please use CSV or JSON.');
       }

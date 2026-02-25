@@ -175,9 +175,8 @@ export class OptimizeAuditor {
 
     let settings: Record<string, unknown> = {};
     try {
-      const raw = fs.readFileSync(vscodeSettingsPath, 'utf-8')
-        .replace(/\/\/.*$/gm, '')
-        .replace(/\/\*[\s\S]*?\*\//g, '');
+      const raw = fs.readFileSync(vscodeSettingsPath, "utf-8")
+        .replace(/^\s*\/\/.*$/gm, ""); // Strip line comments at start of line
       settings = JSON.parse(raw);
     } catch {
       return [{ path: '.vscode/settings.json', reason: 'Could not parse settings.json', severity: 'MEDIUM' }];

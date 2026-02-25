@@ -80,6 +80,7 @@
     "**/questerix-cortex/outputs/**": true,
     "**/.gemini/antigravity/knowledge/**": true,
     "**/.session/**": true,
+    "**/.dart_tool/**": true,
     "**/_gh_failures/**": true
   },
 

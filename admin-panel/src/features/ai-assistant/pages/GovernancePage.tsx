@@ -61,6 +61,8 @@ export const GovernancePage: React.FC = () => {
       if (error) throw error;
 
       const aggMap = new Map<string, TenantUsage>();
+      // Cast justified: Supabase select with nested joins returns a generic type
+      // that doesn't match our AIGenerationSession shape (which includes created_by_profile join)
       const sessions = data as unknown as AIGenerationSession[];
 
       sessions.forEach((session) => {

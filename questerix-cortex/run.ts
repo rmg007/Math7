@@ -7,6 +7,7 @@ import * as path from 'path';
 import { Project } from 'ts-morph';
 import { Analyst } from './src/analyst';
 import { Consolidator } from './src/consolidator';
+import { CortexDB } from './src/cortex-db';
 import { Dashboard } from './src/dashboard';
 import { DriftDetector, DriftResult } from './src/drift';
 import { auditGovernance } from './src/governance';
@@ -19,6 +20,7 @@ import { Scanner } from './src/scanner';
 import { SkeletonGenerator } from './src/skeleton';
 import { SkeletonSearch } from './src/skeleton/search';
 import { CortexConfig } from './src/types';
+import { normalizePath } from './src/utils/normalize-path';
 
 const configPath = path.join(__dirname, 'cortex.config.json');
 const config: CortexConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
@@ -56,6 +58,96 @@ const allSuites: Array<{
   // Ship — final source control push, ONLY if all previous tiers pass
   { id: 'git-ship',     name: 'Git Ship (Push)',      command: 'powershell -Command "git add .; git commit -m \"feat: auto-ship via cortex\"; git push"', tier: 'ship', parallel: false },
 ];
+
+function listFilesRecursively(dir: string, predicate: (filePath: string) => boolean): string[] {
+  if (!fs.existsSync(dir)) return [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  const results: string[] = [];
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...listFilesRecursively(fullPath, predicate));
+      continue;
+    }
+    if (entry.isFile() && predicate(fullPath)) {
+      results.push(fullPath);
+    }
+  }
+
+  return results;
+}
+
+function toComparableName(name: string): string {
+  const cleaned = name.replace(/\.spec\.ts$/i, '');
+  const parts = cleaned.split(/[-_ ]+/).filter(Boolean);
+  const pascal = parts.map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('');
+  return pascal.toLowerCase();
+}
+
+
+
+function mapE2ETestsToPages(cortexDb: CortexDB, adminPath: string): void {
+  const testDir = path.join(adminPath, 'tests');
+  const pageDir = path.join(adminPath, 'src', 'features');
+  const testFiles = listFilesRecursively(testDir, filePath => filePath.endsWith('.spec.ts'));
+  const pageFiles = listFilesRecursively(
+    pageDir,
+    filePath => filePath.replace(/\\/g, '/').includes('/pages/') && filePath.endsWith('.tsx')
+  );
+
+  const pageMap = new Map<string, string>();
+  for (const pageFile of pageFiles) {
+    const baseName = path.basename(pageFile, '.tsx');
+    pageMap.set(baseName.toLowerCase(), pageFile);
+  }
+
+  const db = cortexDb.getDb();
+  const timestamp = new Date().toISOString();
+  const insertNode = db.prepare(`
+    INSERT OR REPLACE INTO nodes (id, type, file_path, metadata, updated_at)
+    VALUES (@id, @type, @filePath, @metadata, @updatedAt)
+  `);
+  const insertEdge = db.prepare(`
+    INSERT OR REPLACE INTO edges (source_id, target_id, relationship, metadata)
+    VALUES (@sourceId, @targetId, @relationship, @metadata)
+  `);
+  const deleteEdgesForSource = db.prepare('DELETE FROM edges WHERE source_id = ?');
+
+  for (const testFile of testFiles) {
+    const testBase = path.basename(testFile, '.spec.ts');
+    const testKey = toComparableName(testBase);
+    const pageFile = pageMap.get(testKey);
+    const testId = normalizePath(testFile);
+
+    deleteEdgesForSource.run(testId);
+
+    if (!pageFile) continue;
+
+    const pageId = normalizePath(pageFile);
+
+    insertNode.run({
+      id: testId,
+      type: 'file',
+      filePath: testId,
+      metadata: null,
+      updatedAt: timestamp
+    });
+    insertNode.run({
+      id: pageId,
+      type: 'file',
+      filePath: pageId,
+      metadata: null,
+      updatedAt: timestamp
+    });
+    insertEdge.run({
+      sourceId: testId,
+      targetId: pageId,
+      relationship: 'tests',
+      metadata: null
+    });
+  }
+}
 
 async function main() {
   // ── Early-exit targets (no dashboard / scanner needed) ────────────────────
@@ -96,8 +188,9 @@ async function main() {
   const supabasePath = path.resolve(__dirname, config.supabasePath);
   const srcPath      = path.join(adminPath, 'src');
 
-  const project = new Project({ skipFileDependencyResolution: true });
-  project.addSourceFilesAtPaths(path.join(srcPath, '**/*.{ts,tsx}'));
+  const project = new Project({
+    tsConfigFilePath: path.resolve(__dirname, '..', 'admin-panel', 'tsconfig.json')
+  });
 
   const scanner      = new Scanner(project, srcPath);
   const dashboard    = new Dashboard(config.dashboardPort);
@@ -167,6 +260,14 @@ async function main() {
       path.join(__dirname, config.outputs.surfaceMap),
       JSON.stringify(surfaceMap, null, 2)
     );
+
+    const cortexDb = new CortexDB(path.join(__dirname, 'outputs', 'cortex.db'));
+    try {
+      await scanner.writeGraph(cortexDb);
+      mapE2ETestsToPages(cortexDb, adminPath);
+    } finally {
+      cortexDb.close();
+    }
 
     // ── Skeleton generation ──────────────────────────────────────────────────
     if (runSkeleton) {

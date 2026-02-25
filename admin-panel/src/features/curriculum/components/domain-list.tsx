@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
@@ -18,12 +18,12 @@ import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
@@ -31,52 +31,52 @@ import type { DataColumn } from '@/lib/data-utils';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import {
-    Book,
-    CheckSquare,
-    Filter,
-    GripVertical,
-    Loader2,
-    Pencil,
-    Plus,
-    Square,
-    Trash2,
+  Book,
+  CheckSquare,
+  Filter,
+  GripVertical,
+  Loader2,
+  Pencil,
+  Plus,
+  Square,
+  Trash2,
 } from 'lucide-react';
 import {
-    useCallback,
-    useEffect,
-    useLayoutEffect,
-    useMemo,
-    useRef,
-    useState,
-    type MutableRefObject,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MutableRefObject,
 } from 'react';
 import { Link } from 'react-router-dom';
 import {
-    useBulkCreateDomains,
-    useBulkDeleteDomains,
-    useBulkUpdateDomainsStatus,
-    useDeleteDomain,
-    usePaginatedDomains,
-    useUpdateDomainOrder,
+  useBulkCreateDomains,
+  useBulkDeleteDomains,
+  useBulkUpdateDomainsStatus,
+  useDeleteDomain,
+  usePaginatedDomains,
+  useUpdateDomainOrder,
 } from '../hooks/use-domains';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 import {
-    closestCenter,
-    DndContext,
-    DragEndEvent,
-    KeyboardSensor,
-    PointerSensor,
-    TouchSensor,
-    useSensor,
-    useSensors,
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
 import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -215,7 +215,9 @@ function SortableRow({
         </TableCell>
       )}
       {visibleColumns.has('status') && (
-        <TableCell className="whitespace-nowrap">{renderStatusBadge(domain.status || 'draft')}</TableCell>
+        <TableCell className="whitespace-nowrap">
+          {renderStatusBadge(domain.status || 'draft')}
+        </TableCell>
       )}
       <TableCell className="px-4 text-right border-l border-gray-100">
         <div className="flex items-center justify-end gap-0.5">
@@ -701,7 +703,7 @@ export function DomainList() {
         actions={
           <div className="flex items-center gap-2">
             <DataToolbar
-              data={domains as unknown as Record<string, unknown>[]}
+              data={domains}
               columns={DOMAIN_COLUMNS}
               entityName="Domains"
               onImport={handleImport}

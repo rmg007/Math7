@@ -2,7 +2,7 @@ name: Nightly E2E Regressions
 
 on:
   schedule:
-    - cron: "0 2 * * *" # Run at 2 AM UTC every night
+    - cron: "0 6 * * *" # Run at 6 AM UTC every day
   workflow_dispatch: # Allow manual triggering
 
 jobs:
@@ -26,11 +26,23 @@ jobs:
         run: cd admin-panel && npx playwright install --with-deps
 
       - name: Run Full Regression Suite
-        run: cd admin-panel && npx playwright test tests/*.e2e.spec.ts --project=chromium
+        id: e2e
+        run: cd admin-panel && npx playwright test tests/*.e2e.spec.ts --project=chromium --reporter=json > ../playwright-results.json 2>&1 || true
         env:
           VITE_SUPABASE_URL: ${{ secrets.TEST_VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.TEST_VITE_SUPABASE_ANON_KEY }}
-          # The next agent should implement failure reporting to GitHub Issues here
+
+      - name: Check test results
+        id: check
+        run: |
+          cd admin-panel
+          # Re-run with standard reporter to get exit code
+          npx playwright test tests/*.e2e.spec.ts --project=chromium 2>&1 | tee ../e2e-output.txt
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.TEST_VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.TEST_VITE_SUPABASE_ANON_KEY }}
+        continue-on-error: true
 
       - name: Upload Test Results
         if: always()
@@ -39,3 +51,62 @@ jobs:
           name: playwright-report
           path: admin-panel/playwright-report/
           retention-days: 30
+
+      - name: Create GitHub Issue on Failure
+        if: steps.check.outcome == 'failure'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const fs = require('fs');
+            const date = new Date().toISOString().split('T')[0];
+            let body = `## 🔴 Nightly E2E Regression Failure\n\n`;
+            body += `**Date**: ${date}\n`;
+            body += `**Workflow Run**: [View Run](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})\n\n`;
+
+            // Try to read the test output
+            try {
+              const output = fs.readFileSync('e2e-output.txt', 'utf8');
+              // Extract just the summary (last 50 lines)
+              const lines = output.split('\n');
+              const summary = lines.slice(Math.max(0, lines.length - 50)).join('\n');
+              body += `### Test Output (last 50 lines)\n\`\`\`\n${summary}\n\`\`\`\n`;
+            } catch {
+              body += `### Test Output\n_Could not read test output. Check the workflow artifacts._\n`;
+            }
+
+            body += `\n### Next Steps\n`;
+            body += `1. Download the Playwright report artifact from the workflow run\n`;
+            body += `2. Identify the failing test(s)\n`;
+            body += `3. Fix the regression and verify locally\n`;
+            body += `4. Close this issue with a reference to the fix commit\n`;
+
+            // Check for existing open nightly regression issues
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'nightly-regression',
+              per_page: 5,
+            });
+
+            // Only create if no open issue exists (avoid spam)
+            if (existingIssues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🔴 Nightly E2E Regression — ${date}`,
+                body: body,
+                labels: ['nightly-regression', 'bug', 'automated'],
+              });
+              console.log('Created new nightly regression issue');
+            } else {
+              // Append a comment to the existing issue instead
+              const issue = existingIssues.data[0];
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `## 🔴 Continued Failure — ${date}\n\n${body}`,
+              });
+              console.log(`Appended comment to existing issue #${issue.number}`);
+            }

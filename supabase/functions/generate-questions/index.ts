@@ -110,13 +110,19 @@ export const generateQuestionsHandler = withErrorSanitization(
     }
 
     const genAI = (deps?.genAI as any) || new GoogleGenerativeAI(apiKey!);
-    const geminiModel = genAI.getGenerativeModel({ 
-      model: sanitizedRequest.model, // ✅ FIX P1: Use sanitized model variable
-      generationConfig: {
-        responseMimeType: "application/json", // ✅ FIX R1: Force JSON output
-        temperature: 0.1,
-      },
-    });
+
+    // ========================================
+    // MULTI-MODEL FALLBACK CONFIGURATION
+    // ========================================
+    const PRIMARY_MODEL = sanitizedRequest.model || 'gemini-1.5-flash';
+    const FALLBACK_MODEL = Deno.env.get('FALLBACK_AI_MODEL') || 'gemini-1.5-pro';
+    const PRIMARY_TIMEOUT_MS = 15000; // 15s for primary (tight budget)
+    const FALLBACK_TIMEOUT_MS = 30000; // 30s for fallback (more generous)
+
+    const generationConfig = {
+      responseMimeType: "application/json",
+      temperature: 0.1,
+    };
 
     // Build prompt with sanitized inputs
     const prompt = buildPrompt(
@@ -125,32 +131,69 @@ export const generateQuestionsHandler = withErrorSanitization(
       sanitizedRequest.custom_instructions
     );
 
-    // Call AI with timeout protection
-    const startTime = Date.now();
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
-    
-    let result: any;
-    try {
-      result = await geminiModel.generateContent(prompt, {
-        signal: controller.signal
-      });
-    } catch (err: unknown) {
-      clearTimeout(timeoutId);
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        return createSanitizedErrorResponse('SERVICE_UNAVAILABLE', 'AI request timed out');
+    // ========================================
+    // AI CALL WITH AUTOMATIC FALLBACK
+    // ========================================
+    let aiResponse: any;
+    let generatedText: string;
+    let generationTime: number;
+    let modelUsed = PRIMARY_MODEL;
+    let fallbackTriggered = false;
+    let primaryError: string | null = null;
+
+    const callModel = async (modelName: string, timeoutMs: number) => {
+      const model = genAI.getGenerativeModel({ model: modelName, generationConfig });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+      try {
+        const result = await model.generateContent(prompt, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        return result;
+      } catch (err: unknown) {
+        clearTimeout(timeoutId);
+        throw err;
       }
-      throw err;
+    };
+
+    const startTime = Date.now();
+
+    // Attempt 1: Primary model
+    try {
+      const result = await callModel(PRIMARY_MODEL, PRIMARY_TIMEOUT_MS);
+      aiResponse = await result.response;
+      generatedText = aiResponse.text();
+      generationTime = Date.now() - startTime;
+    } catch (primaryErr: unknown) {
+      const isTimeout = primaryErr instanceof DOMException && primaryErr.name === 'AbortError';
+      primaryError = isTimeout ? 'timeout' : (primaryErr instanceof Error ? primaryErr.message : 'unknown');
+      console.warn(`Primary model (${PRIMARY_MODEL}) failed: ${primaryError}. Falling back to ${FALLBACK_MODEL}...`);
+
+      // Attempt 2: Fallback model
+      try {
+        const fallbackStart = Date.now();
+        const result = await callModel(FALLBACK_MODEL, FALLBACK_TIMEOUT_MS);
+        aiResponse = await result.response;
+        generatedText = aiResponse.text();
+        generationTime = Date.now() - fallbackStart;
+        modelUsed = FALLBACK_MODEL;
+        fallbackTriggered = true;
+      } catch (fallbackErr: unknown) {
+        const isFallbackTimeout = fallbackErr instanceof DOMException && fallbackErr.name === 'AbortError';
+        if (isFallbackTimeout) {
+          return createSanitizedErrorResponse('SERVICE_UNAVAILABLE', 'AI request timed out on all models');
+        }
+        throw fallbackErr;
+      }
     }
-    clearTimeout(timeoutId);
-    
-    const aiResponse = await result.response;
-    const generatedText = aiResponse.text();
-    const generationTime = Date.now() - startTime;
+
+    // Log latency warning if primary was slow (>1s) even if it succeeded
+    if (!fallbackTriggered && generationTime > 1000) {
+      console.warn(`Latency warning: ${modelUsed} took ${generationTime}ms (>1000ms threshold)`);
+    }
 
     // FIX T5: Use actual usage metadata from Gemini API instead of heuristic
-    const usageMetadata = (aiResponse as any).usageMetadata;
+    const usageMetadata = aiResponse.usageMetadata;
     const actualTokenCount = usageMetadata?.totalTokenCount ?? 
       Math.ceil((prompt.length + generatedText.length) / 4); // Fallback to estimate
 
@@ -193,9 +236,12 @@ export const generateQuestionsHandler = withErrorSanitization(
       JSON.stringify({
         questions,
         metadata: {
-          model: sanitizedRequest.model, // ✅ FIX P1: Return actual model used
+          model: modelUsed,
+          requested_model: PRIMARY_MODEL,
+          fallback_triggered: fallbackTriggered,
+          fallback_reason: primaryError,
           generation_time_ms: generationTime,
-          token_count: actualTokenCount, // FIX T5: Use actual count
+          token_count: actualTokenCount,
           prompt_tokens: usageMetadata?.promptTokenCount,
           completion_tokens: usageMetadata?.candidatesTokenCount,
           questions_generated: questions.length,

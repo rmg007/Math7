@@ -2,7 +2,7 @@
 
 > **Vision**: Turn Cortex from a batch report generator into a **queryable intelligence layer** that any AI coding agent can consult mid-session. One system. One database. Five tools. Universal across IDEs.
 >
-> **Revision**: v7 (2026-02-25). Final delta review: 4 remaining implementation-detail issues resolved (tsconfig path context, tsc baseline masking caveat, cortex_verify cwd, new test file discovery). All prior 24 issues confirmed addressed.
+> **Revision**: v8 (2026-02-25). Codebase-revalidated: file count corrected (184, not 136), tsc errors now 0 (baseline strategy removed — direct pass/fail), export count updated (~343), E2E test count added (64 files). All prior 28 issues confirmed addressed.
 
 ---
 
@@ -204,7 +204,7 @@ CREATE TABLE tool_calls (
 | Recursive CTEs                  | **Supported**                   | Supported                             |
 | Maintenance cost                | **Zero** (embedded)             | Connection pooling, auth, schema sync |
 
-> **Scale context**: The codebase has **~136 source files** with ~489 exports. At this scale, even an in-memory adjacency list would work. SQLite is chosen for persistence across sessions (fragility history, change_log, compliance logs) — not for query performance at scale.
+> **Scale context**: The codebase has **~184 source files** (139 source + 44 unit test + 1 env.d.ts) with ~343 export statements. At this scale, even an in-memory adjacency list would work. SQLite is chosen for persistence across sessions (fragility history, change_log, compliance logs) — not for query performance at scale.
 
 ---
 
@@ -235,13 +235,13 @@ The Scanner initializes ts-morph with `skipFileDependencyResolution: true` (in `
 
 |                        | With `skipFileDependencyResolution: true` | Without (our choice)                |
 | ---------------------- | ----------------------------------------- | ----------------------------------- |
-| Scan speed (136 files) | ~1-2 seconds                              | ~3-5 seconds                        |
+| Scan speed (184 files) | ~1-2 seconds                              | ~3-5 seconds                        |
 | Import resolution      | ❌ Manual reimplementation needed         | ✅ Native ts-morph                  |
 | Alias handling (`@/`)  | ❌ Must parse tsconfig manually           | ✅ Automatic via tsconfig           |
 | Extension probing      | ❌ Must implement file system probes      | ✅ Automatic                        |
 | Correctness            | Fragile custom logic                      | Battle-tested TypeScript resolution |
 
-For 136 files, the 2-3 second speed penalty is irrelevant. Building custom resolution logic would take 4-6 hours and be fragile. The flag removal is ~1 line change.
+For 184 files, the 2-3 second speed penalty is irrelevant. Building custom resolution logic would take 4-6 hours and be fragile. The flag removal is ~1 line change.
 
 **Implementation**:
 
@@ -352,7 +352,7 @@ Implemented once in a shared `normalizePath()` utility, called at the entry poin
 4. Deleted files trigger graph pruning: `DELETE FROM nodes WHERE file_path = ?` + cascade-delete related edges.
 5. The recursive CTE then runs on the **current** graph.
 
-> **Latency**: For a typical 3-file change mid-session, the delta adds **~1-2 seconds** on Windows with OneDrive sync. This includes ts-morph reparse + import resolution + ~45 file-system probes for extension matching. On a local SSD without sync, expect ~500ms. Both are well within the 60-second success criterion but the delta itself is not sub-second on all setups.
+> **Latency**: For a typical 3-file change mid-session, the delta adds **~1-2 seconds** on Windows with OneDrive sync. This includes ts-morph reparse + import resolution + file-system probes for extension matching across 184 source files. On a local SSD without sync, expect ~500ms. Both are well within the 60-second success criterion but the delta itself is not sub-second on all setups.
 
 **Server architecture implication**: The MCP server must hold a reference to the Scanner instance and call it incrementally — not spawn a new process.
 
@@ -371,13 +371,15 @@ Persist page-to-test associations as `tests` edges using filename stem matching:
 | `tests/LoginPage.spec.ts`     | `features/auth/pages/LoginPage.tsx`        | Direct stem match |
 | `tests/settings-page.spec.ts` | `features/platform/pages/SettingsPage.tsx` | Kebab-to-Pascal   |
 
-**Realistic coverage expectation**: Convention-based mapping will cover **~40-50%** of E2E tests. Many tests have no clean page-name correspondence:
+**Realistic coverage expectation**: There are **64 E2E test files** in `admin-panel/tests/`. Convention-based mapping will cover **~40-50%** of them (~26-32 tests). Many tests have no clean page-name correspondence:
 
 - `question-studio-save-regression.spec.ts` — regression test, no single page
 - `super-admin-cross-app.spec.ts` — cross-feature flow, no single page
 - `version-history-page.spec.ts` — may not map to a page with that exact name
+- `latency-benchmark.e2e.spec.ts` — infrastructure test, no page component
+- `rbac-guards.e2e.spec.ts` — cross-feature security test
 
-**Impact**: For the ~50% of E2E tests that don't map via convention, `cortex_verify` won't include them in targeted runs. This means targeted verification catches **most** page-specific regressions but may miss cross-feature and regression-specific E2E tests. The full suite remains the fallback for Tier C changes.
+**Impact**: For the ~50% of E2E tests (~32-38 files) that don't map via convention, `cortex_verify` won't include them in targeted runs. This means targeted verification catches **most** page-specific regressions but may miss cross-feature and regression-specific E2E tests. The full suite remains the fallback for Tier C changes.
 
 ### Phase 2: Route-Based Mapping (Deferred)
 
@@ -510,7 +512,7 @@ Post-session, the Reporter (during `npm run health`) queries `tool_calls` joined
 
 ### `cortex_verify` is both a Read AND Write operation:
 
-1. **Read**: Queries the `edges` table to find the minimal **test** set for the changed files. Runs `tsc --noEmit --incremental` (project-wide, baseline-aware, **`cwd: adminPath`**) + only the mapped tests.
+1. **Read**: Queries the `edges` table to find the minimal **test** set for the changed files. Runs `tsc --noEmit --incremental` (project-wide, direct pass/fail, **`cwd: adminPath`**) + only the mapped tests.
 
 > **Working directory**: The MCP server runs from the cortex directory (or wherever the IDE launches it). All `tsc` and test runner commands must use `execSync('npx tsc --noEmit --incremental', { cwd: adminPath, encoding: 'utf-8' })` where `adminPath` resolves to `admin-panel/`. Without explicit `cwd`, tsc picks up the wrong tsconfig (cortex's, not admin-panel's) — same class of issue as the `tsConfigFilePath` requirement for Scanner.
 
@@ -527,21 +529,13 @@ Post-session, the Reporter (during `npm run health`) queries `tool_calls` joined
    - Update `fragility.confidence` based on total `change_count`.
 4. **Log**: Write a `tool_calls` entry for compliance tracking.
 
-### Handling Pre-Existing TypeScript Errors
+### TypeScript Error Handling: Direct Pass/Fail
 
-> **v6 Addition**: The codebase has **~380 pre-existing TypeScript errors** (primarily from stale `database.types.ts`). If `cortex_verify` treats any non-zero `tsc` exit code as failure, it will always report failure regardless of the agent's changes.
+> **v8 Update**: As of 2026-02-25, the codebase has **0 pre-existing TypeScript errors** — the ~380 errors from stale `database.types.ts` were resolved in recent quality improvement sessions. The baseline strategy from v6-v7 is no longer needed.
 >
-> **Strategy: Error Count Baseline**
+> **Strategy: Direct pass/fail**. `cortex_verify` runs `tsc --noEmit --incremental` with `cwd: adminPath`. If exit code is non-zero, it fails and reports the errors. No baseline, no masking trade-offs.
 >
-> 1. On first `cortex_verify` run (or when `scan_meta` has no `tsc_error_baseline` key), run `tsc --noEmit --incremental` (with `cwd: adminPath`) and record the error count as the baseline in `scan_meta`.
-> 2. On subsequent runs, compare current error count to baseline:
->    - **Current ≤ baseline** → tsc passes (no new errors introduced).
->    - **Current > baseline** → tsc fails (new errors introduced). Report only the delta errors.
-> 3. If the baseline decreases (someone fixed pre-existing errors), auto-update the baseline downward.
->
-> This is the pragmatic approach — it doesn't require fixing all 380 errors before launching Cortex v2, but it accurately catches new regressions.
->
-> **Known weakness (accepted)**: If an agent fixes 10 pre-existing errors AND introduces 5 new ones, the net count drops (375 < 380) and passes — masking the 5 new regressions. This is unlikely for typical single-file changes but plausible for larger Tier B/C refactors. We accept this trade-off because: (a) the baseline is pragmatic and net-negative is still a win, (b) the real fix is resolving the 380 pre-existing errors (which is the actual tech debt), and (c) adding per-file error attribution would require parsing tsc output for file locations — complexity that doesn't justify the edge case. If this proves to be a real problem in practice, upgrade to per-file error parsing in a future session.
+> **Future-proofing**: If pre-existing errors accumulate again (e.g., from a large `database.types.ts` regeneration), reintroduce the baseline strategy documented in the v7 revision. The `scan_meta` table already supports a `tsc_error_baseline` key for this purpose. But for now, direct pass/fail is simpler and more correct.
 
 > **Performance note**: `tsc --noEmit --incremental` is always project-wide — TypeScript doesn't support single-file checking in project mode. With `--incremental`, cached rechecks take ~3-5 seconds. The real time savings come from running **fewer tests** (targeted via graph), not from tsc. Total for a typical 3-file change: `tsc --incremental` (~5s) + targeted tests (~10-15s) = **~20-25 seconds** vs. full suite (~5 minutes).
 
@@ -604,9 +598,9 @@ The Scanner scans `admin-panel/src/`. The following directories are **outside th
 
 **Rationale**: The admin panel is where 80%+ of agent work happens. Extending the graph to Supabase functions and scripts is a v3 consideration.
 
-### E2E Test Convention Coverage: ~40-50%
+### E2E Test Convention Coverage: ~40-50% (of 64 test files)
 
-Convention-based filename matching maps approximately half of E2E tests to page components. Cross-feature tests, regression tests, and tests without clean page-name correspondence are not mapped. For Tier C changes, the full test suite is recommended as a fallback.
+Convention-based filename matching maps approximately **26-32 of 64** E2E test files to page components. Cross-feature tests (e.g., `rbac-guards.e2e.spec.ts`), regression tests (e.g., `question-studio-save-regression.spec.ts`), and infrastructure tests (e.g., `latency-benchmark.e2e.spec.ts`) are not mapped. For Tier C changes, the full test suite is recommended as a fallback.
 
 ### New Test Files Require Full Scan
 
@@ -662,36 +656,37 @@ The incremental delta scan (via `git diff`) only re-scans modified files inside 
 
 ## Execution Roadmap: 5 Sessions, Each Standalone
 
-| Session | Deliverable                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Depends On     | Estimated Effort | Key Decisions                                                                                                                                                                                                                                                                                  |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1**   | SQLite schema (`cortex.db` with WAL, all 6 tables) + **Remove `skipFileDependencyResolution: true`** + **`tsConfigFilePath: admin-panel/tsconfig.json`** (NOT cortex tsconfig) + **Smoke test `bundler` resolution in first 15 min** + Import Specifier Resolution via ts-morph native `getModuleSpecifierSourceFile()` + `Scanner.scanFiles(paths)` incremental method + Scanner writes resolved file-qualified `nodes`/`edges` using upsert + per-file edge refresh + stale pruning + convention-based E2E test mapping (~40-50% coverage) + `normalizePath()` utility (including `@/` alias) + edge direction convention (source=actor, target=acted-upon) | Nothing        | **~4.5 hours**   | ts-morph initialized with admin-panel tsconfig (has `@/*` paths + bundler resolution). Smoke test validates `getModuleSpecifierSourceFile()` returns non-null for `@/` imports before building anything. Upsert pattern for concurrent safety. File-level edges only. ~136 files, ~489 exports |
-| **2**   | MCP server (`@modelcontextprotocol/sdk`, stdio) with `cortex_impact` and `cortex_query` (suffix match + disambiguation) + incremental delta scan (`--diff-filter=d` for modified, `--diff-filter=D` for deleted) + session UUID + `scan_meta` advancement via `git rev-parse HEAD` + graceful degradation + **all child processes use `stdio: 'pipe'`** + GitOracle read-only (never `ship()`)                                                                                                                                                                                                                                                                | Session 1      | ~3.5 hours       | stdio safety rule enforced. Delta ~1-2s on Windows/OneDrive. `cortex_query` suffix-matches bare symbols                                                                                                                                                                                        |
-| **3**   | `cortex_fragility` tool + `cortex_verify` writes to `change_log` + fragility attribution logic + rolling window decay (last 20 changes) + `fragility_index` as cached column recalculated by `cortex_verify` + **tsc error baseline strategy** (~380 pre-existing errors, net-count comparison, known masking weakness accepted) + **`tsc` runs with `cwd: adminPath`**                                                                                                                                                                                                                                                                                       | Session 1      | ~3 hours         | Cache column, not computed on read. Historian unchanged. tsc baseline in `scan_meta`. tsc and test runner use `cwd: adminPath`. Baseline masking of net-negative errors accepted as trade-off                                                                                                  |
-| **4**   | `cortex_plan` (universal entry point: triage decision tree with **glob matching** for STRUCTURAL_JSON_LIST + RiskScorer integration for risk assessment) + `cortex_verify` (full read+write: `tsc --incremental` baseline-aware + targeted tests + change_log + fragility + `tool_calls` logging) + compliance checking                                                                                                                                                                                                                                                                                                                                       | Sessions 2 & 3 | ~3 hours         | `cortex_plan` classifies tier internally + calls RiskScorer for risk level. `tsc` is project-wide with `--incremental`. `tool_calls` table enables persistent compliance                                                                                                                       |
-| **5**   | Wire into agent rules (GEMINI.md, AGENTS.md) + compliance reporting in Reporter (joins `tool_calls` + `change_log` by session_id) + graceful degradation for all edge cases + document scope boundaries (admin-panel only, ~40-50% E2E coverage)                                                                                                                                                                                                                                                                                                                                                                                                              | Session 4      | ~1.5 hours       | Every tool returns valid response in all states. Protocol violations flagged in health report. Graph scope = admin-panel only                                                                                                                                                                  |
+| Session | Deliverable                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Depends On     | Estimated Effort | Key Decisions                                                                                                                                                                                                                                                                                  |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1**   | SQLite schema (`cortex.db` with WAL, all 6 tables) + **Remove `skipFileDependencyResolution: true`** + **`tsConfigFilePath: admin-panel/tsconfig.json`** (NOT cortex tsconfig) + **Smoke test `bundler` resolution in first 15 min** + Import Specifier Resolution via ts-morph native `getModuleSpecifierSourceFile()` + `Scanner.scanFiles(paths)` incremental method + Scanner writes resolved file-qualified `nodes`/`edges` using upsert + per-file edge refresh + stale pruning + convention-based E2E test mapping (~40-50% of 64 test files) + `normalizePath()` utility (including `@/` alias) + edge direction convention (source=actor, target=acted-upon) | Nothing        | **~4.5 hours**   | ts-morph initialized with admin-panel tsconfig (has `@/*` paths + bundler resolution). Smoke test validates `getModuleSpecifierSourceFile()` returns non-null for `@/` imports before building anything. Upsert pattern for concurrent safety. File-level edges only. ~184 files, ~343 exports |
+| **2**   | MCP server (`@modelcontextprotocol/sdk`, stdio) with `cortex_impact` and `cortex_query` (suffix match + disambiguation) + incremental delta scan (`--diff-filter=d` for modified, `--diff-filter=D` for deleted) + session UUID + `scan_meta` advancement via `git rev-parse HEAD` + graceful degradation + **all child processes use `stdio: 'pipe'`** + GitOracle read-only (never `ship()`)                                                                                                                                                                                                                                                                        | Session 1      | ~3.5 hours       | stdio safety rule enforced. Delta ~1-2s on Windows/OneDrive. `cortex_query` suffix-matches bare symbols                                                                                                                                                                                        |
+| **3**   | `cortex_fragility` tool + `cortex_verify` writes to `change_log` + fragility attribution logic + rolling window decay (last 20 changes) + `fragility_index` as cached column recalculated by `cortex_verify` + **tsc direct pass/fail** (0 pre-existing errors as of v8) + **`tsc` runs with `cwd: adminPath`**                                                                                                                                                                                                                                                                                                                                                       | Session 1      | **~2.5 hours**   | Cache column, not computed on read. Historian unchanged. tsc direct pass/fail (no baseline needed — 0 pre-existing errors). tsc and test runner use `cwd: adminPath`. Baseline strategy documented in v7 as fallback if errors re-accumulate                                                   |
+| **4**   | `cortex_plan` (universal entry point: triage decision tree with **glob matching** for STRUCTURAL_JSON_LIST + RiskScorer integration for risk assessment) + `cortex_verify` (full read+write: `tsc --incremental` direct pass/fail + targeted tests + change_log + fragility + `tool_calls` logging) + compliance checking                                                                                                                                                                                                                                                                                                                                             | Sessions 2 & 3 | ~3 hours         | `cortex_plan` classifies tier internally + calls RiskScorer for risk level. `tsc` is project-wide with `--incremental`. `tool_calls` table enables persistent compliance                                                                                                                       |
+| **5**   | Wire into agent rules (GEMINI.md, AGENTS.md) + compliance reporting in Reporter (joins `tool_calls` + `change_log` by session_id) + graceful degradation for all edge cases + document scope boundaries (admin-panel only, ~40-50% of 64 E2E tests)                                                                                                                                                                                                                                                                                                                                                                                                                   | Session 4      | ~1.5 hours       | Every tool returns valid response in all states. Protocol violations flagged in health report. Graph scope = admin-panel only                                                                                                                                                                  |
 
 > **Sessions 2 and 3 are independent** — they can run in parallel. Every session delivers usable value on its own. No big-bang migration.
 >
-> **Total estimated effort**: ~15.5 hours across 5 sessions.
+> **Total estimated effort**: ~15 hours across 5 sessions (reduced from 15.5h — Session 3 simplified by removing tsc baseline logic).
 
 ---
 
 ## What We Decided NOT to Build (and Why)
 
-| Rejected Idea                                   | Why                                                                                                         |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Remote Supabase graph**                       | Network latency (500ms vs 5ms), offline breakage, "canonical truth" ambiguity                               |
-| **Neo4j**                                       | Overkill for ~136 source files. SQLite CTEs handle 5-hop traversals in <10ms                                |
-| **Surgical Sandbox** (`/tmp` workspace)         | Breaks TypeScript import resolution, path aliases, test infrastructure                                      |
-| **Symbol-level edges** (v2)                     | Exponential edge count. Start file-level; add symbol-level for hooks/utilities in v3                        |
-| **Full human gate for all changes**             | Kills velocity for trivial fixes. Triage tiers (A/B/C) balance safety with speed                            |
-| **Dashboard Graph Explorer** (v2)               | Nice-to-have visualization, not required for core intelligence loop. Deferred                               |
-| **Merging cortex.db into search.db**            | Different access patterns. Separation prevents contention                                                   |
-| **Agent self-classification into tiers**        | Chicken-and-egg: can't determine tier without graph data. `cortex_plan` classifies internally               |
-| **Extending Historian for file-level tracking** | Historian is aggregate run-history. File-level tracking lives in `cortex.db` via `cortex_verify`            |
-| **Per-file tsc**                                | TypeScript doesn't support single-file project-mode checking. Use `--incremental` caching                   |
-| **Graph coverage beyond admin-panel** (v2)      | 80%+ of agent work is frontend. Backend coverage is a v3 consideration                                      |
-| **Custom import resolution logic**              | ts-morph handles resolution natively when `skipFileDependencyResolution` is removed. No need to reimplement |
+| Rejected Idea                                   | Why                                                                                                                                      |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Remote Supabase graph**                       | Network latency (500ms vs 5ms), offline breakage, "canonical truth" ambiguity                                                            |
+| **Neo4j**                                       | Overkill for ~136 source files. SQLite CTEs handle 5-hop traversals in <10ms                                                             |
+| **Surgical Sandbox** (`/tmp` workspace)         | Breaks TypeScript import resolution, path aliases, test infrastructure                                                                   |
+| **Symbol-level edges** (v2)                     | Exponential edge count. Start file-level; add symbol-level for hooks/utilities in v3                                                     |
+| **Full human gate for all changes**             | Kills velocity for trivial fixes. Triage tiers (A/B/C) balance safety with speed                                                         |
+| **Dashboard Graph Explorer** (v2)               | Nice-to-have visualization, not required for core intelligence loop. Deferred                                                            |
+| **Merging cortex.db into search.db**            | Different access patterns. Separation prevents contention                                                                                |
+| **Agent self-classification into tiers**        | Chicken-and-egg: can't determine tier without graph data. `cortex_plan` classifies internally                                            |
+| **Extending Historian for file-level tracking** | Historian is aggregate run-history. File-level tracking lives in `cortex.db` via `cortex_verify`                                         |
+| **Per-file tsc**                                | TypeScript doesn't support single-file project-mode checking. Use `--incremental` caching                                                |
+| **tsc error baseline** (v6-v7)                  | No longer needed — 0 pre-existing errors as of 2026-02-25. Baseline strategy preserved in v7 history as fallback if errors re-accumulate |
+| **Graph coverage beyond admin-panel** (v2)      | 80%+ of agent work is frontend. Backend coverage is a v3 consideration                                                                   |
+| **Custom import resolution logic**              | ts-morph handles resolution natively when `skipFileDependencyResolution` is removed. No need to reimplement                              |
 
 ---
 
@@ -706,6 +701,7 @@ The incremental delta scan (via `git diff`) only re-scans modified files inside 
 | v5      | 2026-02-25 | 12 fixes: stdio safety, deleted file handling, concurrent write safety, Scanner.scanFiles(), edge direction, cortex_query suffix matching, fragility_index as cache, Historian unchanged, tsc is project-wide, graph scope = admin-panel, scan_meta advancement, tool_calls table                                                                                                                                                                                                                                                                                                                                                                                               |
 | v6      | 2026-02-25 | Codebase-validated: (1) Import specifier resolution strategy — remove skipFileDependencyResolution, use ts-morph native resolution, (2) ~136 files not ~500, (3) E2E convention mapping ~40-50% not 80%+, (4) delta scan latency ~1-2s on Windows/OneDrive not 300ms, (5) @/ alias in normalizePath(), (6) tsc error baseline for ~380 pre-existing errors, (7) per-file edge refresh on re-scan, (8) date correction 2025→2026, (9) GitOracle read-only from MCP server, (10) glob matching for STRUCTURAL_JSON_LIST, (11) RiskScorer integrated into cortex_plan as risk assessment (complementary to tier classification), (12) Session 1 estimate revised from ~3h to ~4.5h |
 | v7      | 2026-02-25 | Delta review: (1) `tsConfigFilePath` must explicitly point to `admin-panel/tsconfig.json` — cortex tsconfig has no `@/*` paths, would silently produce empty graph. Added exact code + auto-include note + bundler resolution smoke test for first 15 min of Session 1, (2) tsc baseline masking weakness documented and accepted — net-negative count can hide new regressions, per-file error parsing deferred, (3) `cortex_verify` tsc + test runner must use `cwd: adminPath` — MCP server runs from cortex directory, (4) new E2E test files require full `npm run health` scan to be mapped — incremental scan has no visibility into `tests/` directory                  |
+| v8      | 2026-02-25 | Codebase re-validation: (1) File count corrected from ~136 to **~184** (139 source + 44 unit test + 1 env.d.ts) — scan time estimates adjusted, (2) **tsc errors now 0** — the ~380 pre-existing errors were fixed in recent quality sessions. tsc baseline strategy removed entirely; `cortex_verify` uses direct pass/fail. Baseline approach preserved in v7 history as documented fallback, (3) Export count updated from ~489 to ~343 export statements, (4) E2E test count added: 64 test files in `admin-panel/tests/`, convention coverage ~26-32 files, (5) Session 3 estimate reduced from ~3h to ~2.5h (no baseline logic needed), total effort reduced to ~15h      |
 
 ---
 
@@ -722,8 +718,8 @@ When this is complete, the following should be true:
 7. **Day-zero safe** — every tool returns a valid, actionable response even before the first health run.
 8. **Path-agnostic** — agents can pass absolute, workspace-relative, `@/`-prefixed, or src-relative paths; normalization handles all cases.
 9. **stdio-safe** — no child process output corrupts the MCP protocol channel.
-10. **Pre-existing errors tolerated** — `cortex_verify` baselines the ~380 pre-existing tsc errors and only flags new regressions.
+10. **Clean type checking** — `cortex_verify` uses direct tsc pass/fail (0 pre-existing errors). If errors re-accumulate, baseline strategy is documented as a fallback (see v7 revision history).
 
 ---
 
-> **Status**: ✅ Planning Complete (v7 — Final). All 24+ review findings addressed across 6 review rounds. Zero known ambiguities. Ready for Session 1 implementation on approval.
+> **Status**: ✅ Planning Complete (v8 — Final). All 28+ review findings addressed across 7 review rounds, including codebase re-validation of file counts, error counts, and export counts. Zero known ambiguities. Ready for Session 1 implementation on approval.

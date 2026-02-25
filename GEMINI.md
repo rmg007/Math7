@@ -98,6 +98,36 @@ Project-specific traps that have caused real failures. Check before touching rel
 - **Tests**: Co-locate unit tests, use `--bail` flag, focus on behavior not implementation
 - **Commits**: Use conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`)
 
+## Cortex v2 — Required Protocol
+
+### Pre-Edit: Always call `cortex_plan`
+
+Before modifying any source file in `admin-panel/src/`, call the `cortex_plan` MCP tool:
+
+```
+cortex_plan({ files: ["features/auth/hooks/use-auth.ts", ...] })
+```
+
+This returns a tier classification (A/B/C) and protocol:
+
+- **Tier A** (auto-approve): Proceed, then verify
+- **Tier B** (auto-plan): Outline your changes, then proceed and verify
+- **Tier C** (human gate): Get user approval before editing
+
+### Post-Edit: Always call `cortex_verify`
+
+After completing edits, call `cortex_verify`:
+
+```
+cortex_verify({ files: ["features/auth/hooks/use-auth.ts", ...] })
+```
+
+This runs targeted tsc + tests and updates fragility data.
+
+### Compliance
+
+Both calls are logged to `cortex.db`. Skipping either is flagged in the health report.
+
 ## 🔐 MANDATORY: RLS Checklist for Every Migration
 
 **CRITICAL RULE**: Any migration that creates a new table MUST include all applicable RLS policies.
@@ -146,3 +176,6 @@ This rule exists because missing policies cause silent data access failures that
 | Skeleton summary | `questerix-cortex/outputs/SKELETON_SUMMARY.md` |
 | Utility registry | `questerix-cortex/outputs/UTILITY_REGISTRY.md` |
 | Machine briefing | `questerix-cortex/outputs/MACHINE_BRIEFING.md` |
+| Cortex v2 DB     | `questerix-cortex/outputs/cortex.db`           |
+| MCP Server       | `questerix-cortex/src/mcp-server/server.ts`    |
+| Session briefs   | `questerix-cortex/briefs/`                     |

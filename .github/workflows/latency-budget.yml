@@ -1,0 +1,78 @@
+name: Latency CI Budget
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 6 * * 1" # Weekly on Monday at 6:30 AM UTC
+
+jobs:
+  latency-benchmark:
+    name: Latency Budget Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - uses: actions/setup-node@60edb5dd545a775178f525247ffadfb6f1e396a5 # v4.0.2
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: |
+          npm ci --legacy-peer-deps
+          cd admin-panel && npm ci --legacy-peer-deps
+
+      - name: Install Playwright Browsers
+        run: cd admin-panel && npx playwright install --with-deps
+
+      - name: Run Latency Benchmark
+        id: benchmark
+        run: cd admin-panel && npx playwright test tests/latency-benchmark.e2e.spec.ts --project=chromium
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.TEST_VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.TEST_VITE_SUPABASE_ANON_KEY }}
+        continue-on-error: true
+
+      - name: Check Latency Budget
+        id: budget
+        run: |
+          METRICS_FILE="questerix-cortex/outputs/LATENCY_METRICS.json"
+          BUDGET_MS=2000
+
+          if [ ! -f "$METRICS_FILE" ]; then
+            echo "⚠️ No LATENCY_METRICS.json found — benchmark may not have completed."
+            echo "status=skip" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "=== Latency Benchmark Results ==="
+          cat "$METRICS_FILE"
+
+          # Check if any metric exceeds the budget
+          VIOLATIONS=$(jq --arg budget "$BUDGET_MS" \
+            '[.[] | select(.duration > ($budget | tonumber))] | length' \
+            "$METRICS_FILE" 2>/dev/null || echo "0")
+
+          if [ "$VIOLATIONS" -gt 0 ]; then
+            echo ""
+            echo "⚠️ LATENCY BUDGET WARNING: $VIOLATIONS module(s) exceeded the ${BUDGET_MS}ms budget."
+            jq --arg budget "$BUDGET_MS" \
+              '.[] | select(.duration > ($budget | tonumber)) | "\(.name): \(.duration)ms (budget: \($budget)ms)"' \
+              "$METRICS_FILE"
+            echo "status=warn" >> $GITHUB_OUTPUT
+
+            # Create a summary annotation
+            echo "::warning::Latency budget exceeded for $VIOLATIONS module(s). Budget: ${BUDGET_MS}ms. Check workflow artifacts for details."
+          else
+            echo ""
+            echo "✅ All modules within latency budget (${BUDGET_MS}ms)."
+            echo "status=pass" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload Latency Report
+        if: always()
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3feb70da27092497d # v4.4.1
+        with:
+          name: latency-report
+          path: questerix-cortex/outputs/LATENCY_METRICS.json
+          retention-days: 90

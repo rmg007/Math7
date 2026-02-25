@@ -303,6 +303,7 @@ export function GroupDetailPage() {
       performance.mark(`${markName}:end`);
       performance.measure(markName, `${markName}:start`, `${markName}:end`);
 
+      // Cast justified: Supabase select with profiles join returns generic type
       return data as unknown as Member[];
     },
     enabled: Boolean(id),
@@ -358,6 +359,7 @@ export function GroupDetailPage() {
       performance.mark(`${markName}:end`);
       performance.measure(markName, `${markName}:start`, `${markName}:end`);
 
+      // Cast justified: Supabase select returns generic type; Assignment is locally defined
       return data as unknown as Assignment[];
     },
     enabled: Boolean(id),

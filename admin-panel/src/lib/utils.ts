@@ -90,3 +90,12 @@ export function isValidUUID(uuid: string | undefined | null): uuid is string {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   return uuidRegex.test(uuid);
 }
+
+/**
+ * Type-safe conversion to Supabase's Json type.
+ * Roundtrips through JSON serialization to strip non-serializable properties
+ * and satisfy TypeScript's structural type check without `as unknown as Json`.
+ */
+export function toJson<T>(value: T): import('@/lib/database.types').Json {
+  return JSON.parse(JSON.stringify(value));
+}
