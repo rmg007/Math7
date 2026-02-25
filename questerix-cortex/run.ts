@@ -323,12 +323,18 @@ async function main() {
     await executeRun(target);
   });
 
-  // Initial run
+  // Auto-run only if an explicit target was passed as a CLI arg.
+  // With no args, Cortex opens the dashboard and waits for a button click.
   const args = process.argv.slice(2);
-  const targetArg = args.find(a => !a.startsWith('--')) || 'all';
+  const targetArg = args.find(a => !a.startsWith('--'));
   const flags = args.filter(a => a.startsWith('--'));
 
-  await executeRun(targetArg, flags);
+  if (targetArg) {
+    await executeRun(targetArg, flags);
+  } else {
+    console.log(chalk.yellow('  ⏸  No target specified — dashboard open, waiting for trigger.'));
+    dashboard.log('⏸  Ready. Click a button to start a run.', 'yellow');
+  }
 }
 
 main().catch(err => {
