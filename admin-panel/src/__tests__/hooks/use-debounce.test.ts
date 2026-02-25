@@ -1,11 +1,15 @@
+import { useDebounce } from '@/hooks/use-debounce';
 import { renderHook } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import { useDebounce } from '@/admin-panel/src/hooks/use-debounce';
+import { describe, expect, it } from 'vitest';
 
 describe('useDebounce', () => {
-  it('should initialize correctly', () => {
-    const { result } = renderHook(() => useDebounce());
-    expect(result.current).toBeDefined();
+  it('should return the initial value immediately', () => {
+    const { result } = renderHook(() => useDebounce('test', 300));
+    expect(result.current).toBe('test');
   });
 
+  it('should return debounced value for numbers', () => {
+    const { result } = renderHook(() => useDebounce(42, 500));
+    expect(result.current).toBeDefined();
+  });
 });

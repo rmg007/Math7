@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import { useCreateKnownIssue } from '@/admin-panel/src/features/monitoring/hooks/use-known-issues-mutations';
+import { describe, it, expect } from 'vitest';
+import { useCreateKnownIssue } from '@/features/monitoring/hooks/use-known-issues-mutations';
 
 describe('useCreateKnownIssue', () => {
   it('should initialize correctly', () => {
@@ -23,5 +23,4 @@ describe('useCreateKnownIssue', () => {
   it('should handle useBulkDeleteKnownIssues correctly', () => {
     // TODO: Implement test for useBulkDeleteKnownIssues
   });
-
 });

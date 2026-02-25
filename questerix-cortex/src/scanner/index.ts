@@ -289,8 +289,8 @@ export class Scanner {
       if (!fs.existsSync(testDir)) fs.mkdirSync(testDir, { recursive: true });
 
       let content = `import { renderHook } from '@testing-library/react';\n`;
-      content += `import { describe, it, expect, vi } from 'vitest';\n`;
-      content += `import { ${hook.name} } from '@/admin-panel/src/${hook.file.replace('.ts', '')}';\n\n`;
+      content += `import { describe, it, expect } from 'vitest';\n`;
+      content += `import { ${hook.name} } from '@/${hook.file.replace('.ts', '')}';\n\n`;
       content += `describe('${hook.name}', () => {\n`;
       content += `  it('should initialize correctly', () => {\n`;
       content += `    const { result } = renderHook(() => ${hook.name}());\n`;

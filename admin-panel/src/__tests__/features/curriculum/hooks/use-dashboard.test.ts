@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import { useDashboardStats } from '@/admin-panel/src/features/curriculum/hooks/use-dashboard';
+import { describe, it, expect } from 'vitest';
+import { useDashboardStats } from '@/features/curriculum/hooks/use-dashboard';
 
 describe('useDashboardStats', () => {
   it('should initialize correctly', () => {
@@ -11,5 +11,4 @@ describe('useDashboardStats', () => {
   it('should handle useRecentActivity correctly', () => {
     // TODO: Implement test for useRecentActivity
   });
-
 });
