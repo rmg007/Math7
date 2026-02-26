@@ -11,7 +11,39 @@
     "surfaceMap": "outputs/SURFACE_MAP.json",
     "machineBriefing": "outputs/MACHINE_BRIEFING.md",
     "failureDigest": "outputs/FAILURE_DIGEST.md",
-    "lastChanged": "outputs/LAST_CHANGED.md"
+    "lastChanged": "outputs/LAST_CHANGED.md",
+    "featureMap": "outputs/FEATURE_MAP.md",
+    "fragilityMatrix": "outputs/FRAGILITY_MATRIX.md",
+    "guardReport": "outputs/ARCH_GUARD.md"
+  },
+  "guard": {
+    "rules": [
+      {
+        "feature": "auth",
+        "forbidden": ["*"],
+        "reason": "Auth domain must remain strictly isolated as a leaf dependency."
+      },
+      {
+        "feature": "ai-content",
+        "forbidden": ["mentorship", "monitoring", "platform"],
+        "reason": "Specialized content tools should not leak into platform management."
+      },
+      {
+        "feature": "curriculum-core",
+        "forbidden": ["ai-assistant", "ai-content"],
+        "reason": "Shared curriculum types must be strictly isolated from generator inputs."
+      },
+      {
+        "feature": "curriculum-domains",
+        "forbidden": ["curriculum-questions", "ai-assistant", "ai-content"],
+        "reason": "Domain definitions are foundation nodes and should not depend on leaf curriculum modules."
+      },
+      {
+        "feature": "curriculum-governance",
+        "forbidden": ["ai-assistant", "ai-content"],
+        "reason": "Governance and publishing state must remain independent of specific generator implementations."
+      }
+    ]
   },
   "thresholds": {
     "minCoverage": 80,

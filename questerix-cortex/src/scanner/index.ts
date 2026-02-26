@@ -73,6 +73,37 @@ export class Scanner {
     this.projectRoot = path.resolve(srcPath, '..');
   }
 
+  private testFileCache: Set<string> | null = null;
+
+  /**
+   * Pre-loads all test filenames into a set for O(1) matching during the scan loop.
+   */
+  private prepareTestCache() {
+    this.testFileCache = new Set();
+    const testDirs = [
+      path.join(this.projectRoot, 'src', '__tests__'),
+      path.join(this.projectRoot, 'tests')
+    ];
+
+    for (const dir of testDirs) {
+      if (!fs.existsSync(dir)) continue;
+      this.collectFileNames(dir, this.testFileCache);
+    }
+  }
+
+  private collectFileNames(dir: string, set: Set<string>) {
+    try {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          this.collectFileNames(path.join(dir, entry.name), set);
+        } else {
+          set.add(entry.name);
+        }
+      }
+    } catch { /* skip unreadable */ }
+  }
+
   scan(): SurfaceMap {
     const map: SurfaceMap = {
       hooks: [],
@@ -82,6 +113,9 @@ export class Scanner {
       gaps: [],
       apiMap: {}
     };
+
+    // Optimization: Pre-scan test directories once
+    this.prepareTestCache();
 
     const sourceFiles = this.project.getSourceFiles();
 
@@ -93,29 +127,25 @@ export class Scanner {
       if (
         relativePath.includes('node_modules') ||
         relativePath.includes('__tests__') ||
-        relativePath.includes('.test.')
+        relativePath.includes('.test.') ||
+        relativePath.includes('.spec.')
       ) continue;
 
       const baseName = path.basename(filePath, path.extname(filePath));
       const dirName = path.dirname(filePath);
 
-      // Tier 1: sibling __tests__/ folder (legacy / co-located tests)
+      // Tier 1: sibling __tests__/ folder
       const siblingTestTsx = path.join(dirName, '__tests__', `${baseName}.test.tsx`);
       const siblingTestTs  = path.join(dirName, '__tests__', `${baseName}.test.ts`);
 
-      // Tier 2: centralised src/__tests__/**/<baseName>.test.{tsx,ts} (Vitest)
-      const centralTestDir = path.join(this.projectRoot, 'src', '__tests__');
-      const hasCentralTest = this.fileExistsInDirTree(centralTestDir, baseName, ['.test.tsx', '.test.ts']);
-
-      // Tier 3: Playwright tests/**/*<baseName>*.spec.ts
-      const playwrightDir = path.join(this.projectRoot, 'tests');
-      const hasE2ETest = this.fileExistsInDirTree(playwrightDir, baseName, ['.e2e.spec.ts', '.spec.ts']);
+      // Tiers 2 & 3: Match from cache for speed
+      const suffixes = ['.test.tsx', '.test.ts', '.e2e.spec.ts', '.spec.ts'];
+      const hasCachedTest = suffixes.some(s => this.testFileCache?.has(`${baseName}${s}`));
 
       const hasTest =
         fs.existsSync(siblingTestTsx) ||
         fs.existsSync(siblingTestTs) ||
-        hasCentralTest ||
-        hasE2ETest;
+        hasCachedTest;
 
       // Build export entries using ts-morph
       const exportedDeclarations = sourceFile.getExportedDeclarations();
@@ -126,23 +156,20 @@ export class Scanner {
           const kind = decl.getKindName();
           const entry: ExportEntry = { name, kind };
 
-          // For functions, capture parameter names
           if (kind === 'FunctionDeclaration' || kind === 'ArrowFunction') {
             try {
               const params = (decl as any).getParameters?.() ?? [];
               entry.parameters = params.map((p: any) => p.getName?.() ?? '?');
-            } catch { /* skip param extraction on error */ }
+            } catch { /* skip */ }
           }
 
           exportEntries.push(entry);
-          break; // only first declaration per name
+          break;
         }
       }
 
-      // Track in API map
       map.apiMap[relativePath] = exportEntries;
 
-      // ── Hooks ─────────────────────────────────────────────────
       if (relativePath.includes('/hooks/') || relativePath.startsWith('hooks/')) {
         const hookNames = Array.from(exportedDeclarations.keys());
         map.hooks.push({
@@ -152,11 +179,9 @@ export class Scanner {
           functions: hookNames,
           exports: exportEntries
         });
-
         if (!hasTest) map.gaps.push(`Missing test for hook: ${relativePath}`);
       }
 
-      // ── Pages ─────────────────────────────────────────────────
       if (relativePath.includes('/pages/') || relativePath.startsWith('pages/')) {
         map.pages.push({
           name: baseName,
@@ -164,11 +189,9 @@ export class Scanner {
           hasTest,
           routes: []
         });
-
         if (!hasTest) map.gaps.push(`Missing E2E/Unit test for page: ${relativePath}`);
       }
 
-      // ── Utilities ─────────────────────────────────────────────
       const isUtility =
         relativePath.includes('/lib/') ||
         relativePath.includes('/utils/') ||
@@ -176,7 +199,6 @@ export class Scanner {
         relativePath.includes('/services/');
 
       if (isUtility && exportEntries.length > 0) {
-        // Categorize by directory
         let category = 'general';
         if (relativePath.includes('/lib/')) category = 'lib';
         if (relativePath.includes('/utils/')) category = 'utils';
@@ -191,13 +213,11 @@ export class Scanner {
         });
       }
 
-      // ── Dependency Map ─────────────────────────────────────────
       try {
         const imports = sourceFile.getImportDeclarations();
         const importedFrom: string[] = [];
         for (const imp of imports) {
           const mod = imp.getModuleSpecifierValue();
-          // Only track internal imports
           if (mod.startsWith('.') || mod.startsWith('@/')) {
             importedFrom.push(mod);
           }
@@ -205,7 +225,7 @@ export class Scanner {
         if (importedFrom.length > 0) {
           map.dependencies[relativePath] = importedFrom;
         }
-      } catch { /* skip on error */ }
+      } catch { /* skip */ }
     }
 
     return map;
@@ -218,7 +238,9 @@ export class Scanner {
 
     for (const filePath of paths) {
       let sourceFile = this.project.getSourceFile(filePath);
+      // Only refresh if the file is likely changed
       if (sourceFile) {
+        // Option here: check mtime before refresh to save IO
         await sourceFile.refreshFromFileSystem();
       } else {
         sourceFile = this.project.addSourceFileAtPath(filePath);
@@ -237,18 +259,12 @@ export class Scanner {
 
       const exportedDeclarations = sourceFile.getExportedDeclarations();
       for (const [name, declarations] of exportedDeclarations) {
-        const firstDeclaration = declarations[0];
-        const kind = firstDeclaration?.getKindName?.();
         const symbolId = `${normalizedFilePath}#${name}`;
-
         nodeMap.set(symbolId, {
           id: symbolId,
           type: 'symbol',
           filePath: normalizedFilePath,
-          metadata: {
-            name,
-            kind
-          }
+          metadata: { name, kind: declarations[0]?.getKindName?.() }
         });
       }
 
@@ -267,11 +283,7 @@ export class Scanner {
       }
     }
 
-    return {
-      nodes: Array.from(nodeMap.values()),
-      edges,
-      sourceFiles
-    };
+    return { nodes: Array.from(nodeMap.values()), edges, sourceFiles };
   }
 
   async writeGraph(cortexDb: CortexDB): Promise<void> {
@@ -325,33 +337,9 @@ export class Scanner {
     prune(scanTimestamp);
   }
 
-  /**
-   * Recursively searches `dir` for any file whose name equals `baseName + suffix`
-   * for any suffix in the `suffixes` list. Returns true if found.
-   */
-  private fileExistsInDirTree(dir: string, baseName: string, suffixes: string[]): boolean {
-    if (!fs.existsSync(dir)) return false;
-    try {
-      const entries = fs.readdirSync(dir, { withFileTypes: true });
-      for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name);
-        if (entry.isDirectory()) {
-          if (this.fileExistsInDirTree(fullPath, baseName, suffixes)) return true;
-        } else if (entry.isFile()) {
-          for (const suffix of suffixes) {
-            if (entry.name === `${baseName}${suffix}`) return true;
-          }
-        }
-      }
-    } catch { /* skip unreadable dirs */ }
-    return false;
-  }
-
-
   generateSkeletons(map: SurfaceMap): string[] {
     const generated: string[] = [];
 
-    // ── Hooks (Vitest) ──────────────────────────────────────────
     for (const hook of map.hooks) {
       if (hook.hasTest) continue;
 
@@ -359,7 +347,6 @@ export class Scanner {
       const testFile = path.join(testDir, `${path.basename(hook.file, path.extname(hook.file))}.test.ts`);
 
       if (fs.existsSync(testFile)) continue;
-
       if (!fs.existsSync(testDir)) fs.mkdirSync(testDir, { recursive: true });
 
       let content = `import { renderHook } from '@testing-library/react';\n`;
@@ -381,12 +368,10 @@ export class Scanner {
       });
 
       content += `});\n`;
-
       fs.writeFileSync(testFile, content, 'utf-8');
       generated.push(testFile);
     }
 
-    // ── Pages (Playwright) ──────────────────────────────────────
     for (const page of map.pages) {
       if (page.hasTest) continue;
 
@@ -398,7 +383,6 @@ export class Scanner {
       let content = `import { test, expect } from '@playwright/test';\n\n`;
       content += `test.describe('${page.name} Page', () => {\n`;
       content += `  test.beforeEach(async ({ page }) => {\n`;
-      content += `    // TODO: Update with actual route\n`;
       content += `    await page.goto('/${page.name.toLowerCase()}');\n`;
       content += `  });\n\n`;
       content += `  test('should render basic elements', async ({ page }) => {\n`;
@@ -410,7 +394,6 @@ export class Scanner {
       content += `});\n`;
 
       fs.writeFileSync(testFile, content, 'utf-8');
-      generated.push(testFile);
     }
 
     return generated;

@@ -10,7 +10,9 @@ import { Consolidator } from './src/consolidator';
 import { CortexDB } from './src/cortex-db';
 import { Dashboard } from './src/dashboard';
 import { DriftDetector, DriftResult } from './src/drift';
+import { FragilityMetrics, FragilityScorer } from './src/fragility';
 import { auditGovernance } from './src/governance';
+import { Guard } from './src/guard';
 import { Historian } from './src/historian';
 import { OptimizeAuditor, OptimizeReport } from './src/optimizer';
 import { Orchestrator } from './src/orchestrator';
@@ -21,6 +23,8 @@ import { SkeletonGenerator } from './src/skeleton';
 import { SkeletonSearch } from './src/skeleton/search';
 import { CortexConfig } from './src/types';
 import { normalizePath } from './src/utils/normalize-path';
+import { ZombieHunter } from './src/utils/process-cleaner';
+import { FeatureVisualizer } from './src/visualizer';
 
 const configPath = path.join(__dirname, 'cortex.config.json');
 const config: CortexConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
@@ -173,6 +177,9 @@ async function main() {
 
   console.log(chalk.cyan.bold('\n\u{1F680} Questerix Cortex \u2014 Initializing...'));
 
+  // Pre-flight: Kill any existing zombies/port locks
+  ZombieHunter.clean(config.dashboardPort);
+
   // Initialize AgentOps session if API key is present
   if (process.env.AGENTOPS_API_KEY) {
     try {
@@ -189,8 +196,26 @@ async function main() {
   const srcPath      = path.join(adminPath, 'src');
 
   const project = new Project({
-    tsConfigFilePath: path.resolve(__dirname, '..', 'admin-panel', 'tsconfig.json')
+    tsConfigFilePath: path.resolve(__dirname, '..', 'admin-panel', 'tsconfig.json'),
+    skipAddingFilesFromTsConfig: true // Lazy loading: only add what we need
   });
+
+  // Explicitly add core source files to reduce memory footprint
+  project.addSourceFilesAtPaths([
+    path.join(srcPath, 'features/**/*.{ts,tsx}'),
+    path.join(srcPath, 'lib/**/*.{ts,tsx}'),
+    path.join(srcPath, 'hooks/**/*.{ts,tsx}'),
+    path.join(srcPath, 'services/**/*.{ts,tsx}')
+  ]);
+
+  // Handle graceful exits to release resources
+  const cleanup = () => {
+    console.log(chalk.gray('\n  👋 Shutting down Cortex...'));
+    process.exit(0);
+  };
+
+  process.on('SIGINT', cleanup);
+  process.on('SIGTERM', cleanup);
 
   const scanner      = new Scanner(project, srcPath);
   const dashboard    = new Dashboard(config.dashboardPort);
@@ -279,6 +304,7 @@ async function main() {
         skeletonGen.writeJson(skeletonReport, path.join(outputsPath, 'SKELETON.json'));
         skeletonGen.writeMarkdownFull(skeletonReport, path.join(outputsPath, 'SKELETON.md'));
         skeletonGen.writeMarkdownSummary(skeletonReport, path.join(outputsPath, 'SKELETON_SUMMARY.md'));
+        skeletonGen.writeUtilityRegistry(skeletonReport, path.join(outputsPath, 'UTILITY_REGISTRY.md'));
         console.log(chalk.green(`   ✅ Skeleton: ${skeletonReport.totalFiles} files, ${skeletonReport.totalExports} exports`));
         dashboard.log(`   ✅ Skeleton: ${skeletonReport.totalFiles} files, ${skeletonReport.totalExports} exports`, 'green');
 
@@ -415,6 +441,66 @@ async function main() {
       const govSummary = `   Scanned ${governanceResult.scannedFiles} files, ${governanceResult.deadRefs.length} dead reference(s)`;
       console.log(chalk.cyan(govSummary));
       dashboard.log(govSummary, 'cyan');
+
+      // ── Feature Mapping ──
+      console.log(chalk.cyan('\n🗺️  Mapping feature isolation…'));
+      dashboard.log('🗺️  Mapping feature isolation…', 'cyan');
+      try {
+        const visualizer = new FeatureVisualizer(srcPath);
+        const deps = visualizer.analyze();
+        const featureMd = visualizer.generateMarkdownReport(deps);
+        const fMapPath = path.join(__dirname, config.outputs.featureMap);
+        fs.writeFileSync(fMapPath, featureMd, 'utf-8');
+        console.log(chalk.green(`   ✅ Feature map: ${deps.length} cross-dependencies found → ${fMapPath}`));
+        dashboard.log(`   ✅ Feature map generated: ${deps.length} cross-dependencies`, 'green');
+      } catch (err: any) {
+        console.warn(chalk.yellow('   ⚠️  Feature mapping failed:', err.message));
+        dashboard.log('   ⚠️  Feature mapping failed', 'yellow');
+      }
+
+      // ── Fragility Analysis ──
+      console.log(chalk.cyan('\n🏗️  Analyzing feature fragility…'));
+      dashboard.log('🏗️  Analyzing feature fragility…', 'cyan');
+      try {
+        const visualizer = new FeatureVisualizer(srcPath);
+        const deps = visualizer.analyze();
+        const scorer = new FragilityScorer(srcPath);
+        const metrics: FragilityMetrics[] = scorer.analyze(deps);
+        const fragilityMd = scorer.generateMarkdownReport(metrics);
+        const fMatrixPath = path.join(__dirname, config.outputs.fragilityMatrix);
+        fs.writeFileSync(fMatrixPath, fragilityMd, 'utf-8');
+        
+        const fragileCount = metrics.filter((m: FragilityMetrics) => m.verdict === 'FRAGILE' || m.verdict === 'STIFF').length;
+        console.log(chalk.green(`   ✅ Fragility matrix: ${fragileCount} high-risk features found → ${fMatrixPath}`));
+        dashboard.log(`   ✅ Fragility matrix generated: ${fragileCount} high-risk features`, fragileCount > 0 ? 'yellow' : 'green');
+      } catch (err: any) {
+        console.warn(chalk.yellow('   ⚠️  Fragility analysis failed:', err.message));
+        dashboard.log('   ⚠️  Fragility analysis failed', 'yellow');
+      }
+
+      // ── Architecture Guard ──
+      console.log(chalk.cyan('\n🛡️  Enforcing architecture guard…'));
+      dashboard.log('🛡️  Enforcing architecture guard…', 'cyan');
+      try {
+        const visualizer = new FeatureVisualizer(srcPath);
+        const deps = visualizer.analyze();
+        const guard = new Guard(config.guard.rules);
+        const violations = guard.check(deps);
+        const guardMd = guard.generateReport(violations);
+        const gPath = path.join(__dirname, config.outputs.guardReport);
+        fs.writeFileSync(gPath, guardMd, 'utf-8');
+
+        if (violations.length > 0) {
+          console.log(chalk.red(`   ❌ Guard breach: ${violations.length} violations detected → ${gPath}`));
+          dashboard.log(`   ❌ Guard breach: ${violations.length} violations`, 'red');
+        } else {
+          console.log(chalk.green(`   ✅ Guard: PASS → ${gPath}`));
+          dashboard.log('   ✅ Guard: PASS', 'green');
+        }
+      } catch (err: any) {
+        console.warn(chalk.yellow('   ⚠️  Guard check failed:', err.message));
+        dashboard.log('   ⚠️  Guard check failed', 'yellow');
+      }
     }
 
     // ── Performance Optimization Audit ──────────────────────────────────────
@@ -423,10 +509,12 @@ async function main() {
       dashboard.log('\n🚀 Performance Optimization Audit…', 'cyan');
       try {
         const optimizer = new OptimizeAuditor(path.resolve(__dirname, '..'));
-        optimizeResult = optimizer.audit();
-        const optColor = optimizeResult.verdict === 'CLEAN' ? 'green' : 'red';
-        console.log(chalk[optColor](`   ${optimizeResult.summary}`));
-        dashboard.log(`   ${optimizeResult.summary}`, optColor);
+        const optReport = optimizer.audit();
+        const md = optimizer.generateMarkdownReport(optReport);
+        optimizeResult = { ...optReport, markdown: md };
+        const optColor = optReport.verdict === 'CLEAN' ? 'green' : 'red';
+        console.log(chalk[optColor](`   ${optReport.summary}`));
+        dashboard.log(`   ${optReport.summary}`, optColor);
       } catch (err) {
         console.warn(chalk.yellow('⚠️  Optimizer failed:', err));
       }

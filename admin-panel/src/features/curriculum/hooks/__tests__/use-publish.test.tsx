@@ -64,7 +64,7 @@ describe('usePublish', () => {
       refreshApps: vi.fn(),
       isSidebarCollapsed: false,
       toggleSidebar: vi.fn(),
-    } as any);
+    } );
   });
 
   describe('useCurriculumMeta', () => {
@@ -72,7 +72,7 @@ describe('usePublish', () => {
       const mockData = { version: 1, last_published_at: new Date().toISOString() };
 
       vi.mocked(supabase.from).mockImplementationOnce(() => {
-        const chain = (supabase.from as any).getMockImplementation()(); // Need a better way
+        const chain = (supabase.from ).getMockImplementation()(); // Need a better way
         return {
           ...chain,
           select: vi.fn().mockReturnThis(),
@@ -81,7 +81,7 @@ describe('usePublish', () => {
           then: vi.fn((onFulfilled) =>
             Promise.resolve({ data: mockData, error: null }).then(onFulfilled)
           ),
-        } as any;
+        } ;
       });
 
       const { result } = renderHook(() => useCurriculumMeta(), { wrapper });
@@ -116,7 +116,7 @@ describe('usePublish', () => {
           is: vi.fn().mockReturnThis(),
           maybeSingle: vi.fn().mockReturnThis(),
           then: vi.fn((onFulfilled) => Promise.resolve(mockResponses[index]).then(onFulfilled)),
-        } as any;
+        } ;
       });
 
       const { result } = renderHook(() => usePublishPreview(), { wrapper });
@@ -135,7 +135,7 @@ describe('usePublish', () => {
       vi.mocked(supabase.rpc).mockResolvedValueOnce({
         data: { success: true, version: 2 },
         error: null,
-      } as any);
+      } );
 
       const { result } = renderHook(() => usePublishCurriculum(), { wrapper });
 
@@ -147,3 +147,4 @@ describe('usePublish', () => {
     });
   });
 });
+

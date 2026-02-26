@@ -6,42 +6,42 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Pagination } from '@/components/ui/pagination';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { normalizeFormData } from '@/lib/normalization';
 import {
-  ChevronLeft,
-  Globe,
-  LayoutPanelTop,
-  Pencil,
-  Plus,
-  Save,
-  Search,
-  X,
+    ChevronLeft,
+    Globe,
+    LayoutPanelTop,
+    Pencil,
+    Plus,
+    Save,
+    Search,
+    X,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApps } from '../hooks/use-apps';
 import {
-  useCreateLandingPage,
-  useLandingPages,
-  useUpdateLandingPage,
-  type LandingPageWithApp,
+    useCreateLandingPage,
+    useLandingPages,
+    useUpdateLandingPage,
+    type LandingPageWithApp,
 } from '../hooks/use-landings';
 
 export function LandingsPage() {
@@ -88,7 +88,7 @@ export function LandingsPage() {
       });
       toast({ title: 'Success', description: 'Landing page updated' });
       setEditingLanding(null);
-    } catch (error) {
+    } catch (_error) {
       toast({ title: 'Error', description: 'Failed to update landing page', variant: 'destructive' });
     }
   };
@@ -118,7 +118,7 @@ export function LandingsPage() {
       toast({ title: 'Success', description: 'Landing page created' });
       setIsCreateDialogOpen(false);
       handleEdit(newLanding as LandingPageWithApp);
-    } catch (error) {
+    } catch (_error) {
       toast({ title: 'Error', description: 'Failed to create landing page', variant: 'destructive' });
     }
   };
@@ -380,7 +380,7 @@ export function LandingsPage() {
                   </TableCell>
                   <TableCell>
                     <StatusBadge
-                      status={l.is_published ? 'published' : 'draft'}
+                      status={(l.status as StatusType) || 'draft'}
                     />
                   </TableCell>
                   <TableCell className="px-4 text-right border-l border-gray-100">

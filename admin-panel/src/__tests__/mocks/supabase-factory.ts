@@ -34,6 +34,11 @@ export interface MockQueryBuilder {
   single: ReturnType<typeof vi.fn>;
   maybeSingle: ReturnType<typeof vi.fn>;
   range: ReturnType<typeof vi.fn>;
+  is: ReturnType<typeof vi.fn>;
+  or: ReturnType<typeof vi.fn>;
+  filter: ReturnType<typeof vi.fn>;
+  then: ReturnType<typeof vi.fn>;
+  throwOnError: ReturnType<typeof vi.fn>;
 }
 
 export interface MockSupabase {
@@ -89,10 +94,10 @@ export function createMockSupabase(): MockSupabase {
   // Chainable query builder — every method returns `this` so chains work
   const queryBuilder: MockQueryBuilder = {
     select: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockResolvedValue(defaultResponse),
+    insert: vi.fn().mockReturnThis(),
     update: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),
-    upsert: vi.fn().mockResolvedValue(defaultResponse),
+    upsert: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     neq: vi.fn().mockReturnThis(),
     in: vi.fn().mockReturnThis(),
@@ -100,13 +105,15 @@ export function createMockSupabase(): MockSupabase {
     ilike: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     limit: vi.fn().mockReturnThis(),
-    single: vi.fn().mockResolvedValue(defaultResponse),
-    maybeSingle: vi.fn().mockResolvedValue(defaultResponse),
+    single: vi.fn().mockReturnThis(),
+    maybeSingle: vi.fn().mockReturnThis(),
     range: vi.fn().mockReturnThis(),
+    is: vi.fn().mockReturnThis(),
+    or: vi.fn().mockReturnThis(),
+    filter: vi.fn().mockReturnThis(),
+    then: vi.fn((onFulfilled) => Promise.resolve(defaultResponse).then(onFulfilled)),
+    throwOnError: vi.fn().mockReturnThis(),
   };
-
-  // Make `.select()` resolve by default so `await supabase.from().select()` works
-  queryBuilder.select.mockResolvedValue(defaultResponse);
 
   const mockFrom = vi.fn().mockReturnValue(queryBuilder);
   const mockRpc = vi.fn().mockResolvedValue(defaultResponse);

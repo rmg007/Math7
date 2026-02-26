@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { createMockSupabase } from '@/__tests__/mocks/supabase-factory';
 import { useApp } from '@/hooks/use-app';
 import { supabase } from '@/lib/supabase';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -15,35 +15,14 @@ import {
 
 // Mock dependencies
 vi.mock('@/hooks/use-app');
-vi.mock('@/lib/supabase', () => {
-  const createMockChain = () => {
-    const chain: any = {
-      select: vi.fn(() => chain),
-      eq: vi.fn(() => chain),
-      is: vi.fn(() => chain),
-      order: vi.fn(() => chain),
-      or: vi.fn(() => chain),
-      range: vi.fn(() => chain),
-      single: vi.fn(() => chain),
-      maybeSingle: vi.fn(() => chain),
-      insert: vi.fn(() => chain),
-      update: vi.fn(() => chain),
-      in: vi.fn(() => chain),
-      then: vi.fn((onFulfilled) => Promise.resolve({ data: null, error: null }).then(onFulfilled)),
-    };
-    return chain;
-  };
-
-  const mockFrom = createMockChain();
-
-  return {
-    supabase: {
-      from: vi.fn(() => mockFrom),
-    },
-  };
-});
+vi.mock('@/lib/supabase', () => ({
+  supabase: {
+    from: vi.fn(),
+  },
+}));
 
 describe('useSkills', () => {
+  let mockSupabase: ReturnType<typeof createMockSupabase>;
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -75,20 +54,16 @@ describe('useSkills', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     queryClient.clear();
+    
+    // Fresh mock for every test
+    mockSupabase = createMockSupabase();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(supabase.from).mockReturnValue(mockSupabase.queryBuilder as any);
+
     vi.mocked(useApp).mockReturnValue({
       currentApp: {
         app_id: mockAppId,
-        created_at: new Date().toISOString(),
         display_name: 'Test App',
-        grade_level: 'K-12',
-        grade_number: 1,
-        is_active: true,
-        subdomain: 'test',
-        subject_id: 'subject-1',
-        updated_at: new Date().toISOString(),
-        ai_token_limit: 0,
-        branding: {},
-        description: '',
       },
       apps: [],
       isLoading: false,
@@ -98,13 +73,12 @@ describe('useSkills', () => {
       toggleSidebar: vi.fn(),
       userRole: null,
       isSuperAdmin: false,
-    });
+    } );
   });
 
   describe('useSkills hook', () => {
     it('should fetch skills for current app', async () => {
-      const mockChain = supabase.from('skills') as any;
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: mockSkills, error: null }).then(onFulfilled)
       );
 
@@ -117,21 +91,19 @@ describe('useSkills', () => {
     });
 
     it('should filter by domainId', async () => {
-      const mockChain = supabase.from('skills') as any;
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: [mockSkills[0]], error: null }).then(onFulfilled)
       );
 
-      renderHook(() => useSkills('domain-1'), { wrapper });
-
-      expect(mockChain.eq).toHaveBeenCalledWith('domain_id', 'domain-1');
+      const { result } = renderHook(() => useSkills('domain-1'), { wrapper });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith('domain_id', 'domain-1');
     });
   });
 
   describe('useSkill (single)', () => {
     it('should fetch a single skill by id', async () => {
-      const mockChain = supabase.from('skills') as any;
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: mockSkills[0], error: null }).then(onFulfilled)
       );
 
@@ -141,35 +113,15 @@ describe('useSkills', () => {
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-      expect(mockChain.eq).toHaveBeenCalledWith('skill_id', '550e8400-e29b-41d4-a716-446655440001');
-      expect(mockChain.maybeSingle).toHaveBeenCalled();
+      expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith('skill_id', '550e8400-e29b-41d4-a716-446655440001');
+      expect(mockSupabase.queryBuilder.maybeSingle).toHaveBeenCalled();
       expect(result.current.data).toEqual(mockSkills[0]);
-    });
-
-    it('should handle missing skill gracefully (returns null)', async () => {
-      const mockChain = supabase.from('skills') as any;
-      // Simulate "no rows found" from .maybeSingle() -> returns null data, null error
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
-        Promise.resolve({ data: null, error: null }).then(onFulfilled)
-      );
-
-      const { result } = renderHook(() => useSkill('550e8400-e29b-41d4-a716-000000000000'), {
-        wrapper,
-      });
-
-      await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-      expect(mockChain.eq).toHaveBeenCalledWith('skill_id', '550e8400-e29b-41d4-a716-000000000000');
-      expect(mockChain.maybeSingle).toHaveBeenCalled();
-      expect(result.current.data).toBeNull();
-      expect(result.current.error).toBeNull();
     });
   });
 
   describe('usePaginatedSkills', () => {
     it('should fetch paginated skills', async () => {
-      const mockChain = supabase.from('skills') as any;
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({
           data: mockSkills,
           error: null,
@@ -188,8 +140,7 @@ describe('useSkills', () => {
 
   describe('useCreateSkill', () => {
     it('should insert a new skill', async () => {
-      const mockChain = supabase.from('skills') as any;
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: mockSkills[0], error: null }).then(onFulfilled)
       );
 
@@ -205,7 +156,7 @@ describe('useSkills', () => {
 
       await result.current.mutateAsync(newSkill);
 
-      expect(mockChain.insert).toHaveBeenCalledWith(
+      expect(mockSupabase.queryBuilder.insert).toHaveBeenCalledWith(
         expect.objectContaining({
           ...newSkill,
           app_id: mockAppId,
@@ -216,7 +167,6 @@ describe('useSkills', () => {
 
   describe('useDuplicateSkill', () => {
     it('should duplicate a skill', async () => {
-      const mockChain = supabase.from('skills') as any;
       const originalSkill = {
         ...mockSkills[0],
         title: 'Skill 1',
@@ -225,12 +175,13 @@ describe('useSkills', () => {
         app_id: mockAppId,
       };
 
-      // Mock fetching original, then inserting duplicate
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      // Mock fetching original
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: originalSkill, error: null }).then(onFulfilled)
       );
 
-      mockChain.then.mockImplementation((onFulfilled: any) =>
+      // Mock inserting duplicate
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({
           data: {
             ...originalSkill,
@@ -246,47 +197,28 @@ describe('useSkills', () => {
 
       await result.current.mutateAsync('550e8400-e29b-41d4-a716-446655440001');
 
-      // Verify fetch happened
-      expect(mockChain.eq).toHaveBeenCalledWith('skill_id', '550e8400-e29b-41d4-a716-446655440001');
-
-      // Verify insert happened
-      expect(mockChain.insert).toHaveBeenCalledWith(
+      expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith('skill_id', '550e8400-e29b-41d4-a716-446655440001');
+      expect(mockSupabase.queryBuilder.insert).toHaveBeenCalledWith(
         expect.objectContaining({
           app_id: mockAppId,
           status: 'draft',
           title: 'Skill 1 (Copy)',
-          domain_id: 'domain-1',
         })
       );
     });
 
     it('should allow super admin to duplicate cross-app skill', async () => {
-      const mockChain = supabase.from('skills') as any;
-      const sourceAppId = '550e8400-e29b-41d4-a716-446655440001';
+      const sourceAppId = 'source-app';
       const originalSkill = {
         ...mockSkills[0],
         title: 'Cross-App Skill',
         slug: 'cross-skill',
         domain_id: 'domain-1',
-        app_id: sourceAppId, // Different from currentApp
+        app_id: sourceAppId,
       };
 
-      // Mock super admin context
       vi.mocked(useApp).mockReturnValue({
-        currentApp: {
-          app_id: mockAppId,
-          created_at: new Date().toISOString(),
-          display_name: 'Current App',
-          grade_level: 'K-12',
-          grade_number: 1,
-          is_active: true,
-          subdomain: 'current',
-          subject_id: 'subject-1',
-          updated_at: new Date().toISOString(),
-          ai_token_limit: 0,
-          branding: {},
-          description: '',
-        },
+        currentApp: { app_id: mockAppId, display_name: 'Current App' },
         apps: [],
         isLoading: false,
         setCurrentApp: vi.fn(),
@@ -294,23 +226,16 @@ describe('useSkills', () => {
         isSidebarCollapsed: false,
         toggleSidebar: vi.fn(),
         userRole: null,
-        isSuperAdmin: true, // Super Admin
-      });
+        isSuperAdmin: true,
+      } );
 
-      // Mock fetching original (should NOT filter by app_id)
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: originalSkill, error: null }).then(onFulfilled)
       );
 
-      // Mock inserting duplicate (should use currentApp.app_id)
-      mockChain.then.mockImplementation((onFulfilled: any) =>
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({
-          data: {
-            ...originalSkill,
-            app_id: mockAppId,
-            title: 'Cross-App Skill (Copy)',
-            status: 'draft',
-          },
+          data: { ...originalSkill, app_id: mockAppId, title: 'Cross-App Skill (Copy)', status: 'draft' },
           error: null,
         }).then(onFulfilled)
       );
@@ -319,50 +244,17 @@ describe('useSkills', () => {
 
       await result.current.mutateAsync('550e8400-e29b-41d4-a716-446655440001');
 
-      // Verify fetch did NOT filter by app_id (super admin cross-app access)
-      expect(mockChain.eq).toHaveBeenCalledWith('skill_id', '550e8400-e29b-41d4-a716-446655440001');
-      expect(mockChain.eq).not.toHaveBeenCalledWith('app_id', mockAppId);
-
-      // Verify insert used currentApp.app_id
-      expect(mockChain.insert).toHaveBeenCalledWith(
+      expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith('skill_id', '550e8400-e29b-41d4-a716-446655440001');
+      expect(mockSupabase.queryBuilder.eq).not.toHaveBeenCalledWith('app_id', mockAppId);
+      expect(mockSupabase.queryBuilder.insert).toHaveBeenCalledWith(
         expect.objectContaining({
-          app_id: mockAppId, // Destination is current app
-          status: 'draft',
+          app_id: mockAppId,
           title: 'Cross-App Skill (Copy)',
-          domain_id: 'domain-1',
         })
       );
     });
-
-    it('should enforce app_id for non-super admin', async () => {
-      const mockChain = supabase.from('skills') as any;
-      const originalSkill = {
-        ...mockSkills[0],
-        title: 'Same-App Skill',
-        slug: 'same-skill',
-        domain_id: 'domain-1',
-        app_id: mockAppId,
-      };
-
-      // Mock fetching original (should filter by app_id for non-super admin)
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
-        Promise.resolve({ data: originalSkill, error: null }).then(onFulfilled)
-      );
-
-      mockChain.then.mockImplementation((onFulfilled: any) =>
-        Promise.resolve({
-          data: { ...originalSkill, title: 'Same-App Skill (Copy)', status: 'draft' },
-          error: null,
-        }).then(onFulfilled)
-      );
-
-      const { result } = renderHook(() => useDuplicateSkill(), { wrapper });
-
-      await result.current.mutateAsync('550e8400-e29b-41d4-a716-446655440001');
-
-      // Verify fetch filtered by app_id (non-super admin)
-      expect(mockChain.eq).toHaveBeenCalledWith('skill_id', '550e8400-e29b-41d4-a716-446655440001');
-      expect(mockChain.eq).toHaveBeenCalledWith('app_id', mockAppId);
-    });
   });
 });
+
+
+

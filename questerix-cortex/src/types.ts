@@ -29,6 +29,16 @@ export interface CortexConfig {
     machineBriefing: string;
     failureDigest: string;
     lastChanged: string;
+    featureMap: string;
+    fragilityMatrix: string;
+    guardReport: string;
+  };
+  guard: {
+    rules: {
+      feature: string;
+      forbidden: string[];
+      reason?: string;
+    }[];
   };
   thresholds: {
     minCoverage: number;

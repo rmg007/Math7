@@ -44,6 +44,7 @@ export interface OptimizeReport {
   shellIntegrationEnabled: boolean;
   verdict: 'CLEAN' | 'NEEDS_ATTENTION';
   summary: string;
+  markdown?: string;
 }
 
 // Processes that should never be running in this project (pure TS/React workspace)

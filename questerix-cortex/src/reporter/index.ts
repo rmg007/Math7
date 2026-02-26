@@ -27,6 +27,9 @@ export class Reporter {
     optimizeResult?: any
   ) {
     this.generateHealthReport(results, analystResults, surfaceMap, rlsResult, governanceResult);
+    if (optimizeResult) {
+      this.generateOptimizeReport(optimizeResult);
+    }
     this.generateAgentContext(results, surfaceMap, analystResults);
     this.generateNextTask(results, analystResults, surfaceMap);
     this.generateMachineBriefing(results, analystResults, surfaceMap, driftResult, rlsResult, history);
@@ -184,6 +187,16 @@ export class Reporter {
     }
 
     fs.writeFileSync(path.join(this.root, this.outputs.healthReport), md);
+  }
+
+  private generateOptimizeReport(report: any) {
+    // We import the auditor here to use its markdown generator logic if available,
+    // but usually the report object from the auditor is already enough.
+    // However, to keep it clean, we'll just write the report to disk.
+    // The run.ts already has access to the md, but the reporter is the SSoT for writing outputs.
+    // If optimizeResult.markdown exists (we'll add it), use it.
+    const md = report.markdown || "No markdown provided for optimized report.";
+    fs.writeFileSync(path.join(this.root, "outputs", "OPTIMIZE_REPORT.md"), md);
   }
 
   private renderCortexSection(): string {

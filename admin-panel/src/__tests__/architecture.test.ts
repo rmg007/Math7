@@ -1,10 +1,12 @@
 import { projectFiles } from 'archunit';
 import { extendVitestMatchers } from 'archunit/dist/src/testing/vitest/vitest-adapter';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 // Extend Vitest with ArchUnit matchers
 beforeAll(() => {
   extendVitestMatchers();
+  // Increase global timeout for architecture tests as they are slow
+  vi.setConfig({ testTimeout: 60000 });
 });
 
 /**
@@ -23,7 +25,7 @@ describe('Architecture Rules', () => {
         .inFolder('src/components/**');
 
       await expect(rule).toPassAsync();
-    });
+    }, 60000);
 
     it('lib utilities should not depend on features', async () => {
       const rule = projectFiles()

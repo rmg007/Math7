@@ -245,6 +245,22 @@ CREATE TABLE IF NOT EXISTS public.ai_token_usage (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- APP LANDING PAGES
+CREATE TABLE IF NOT EXISTS public.app_landing_pages (
+  landing_page_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  app_id UUID NOT NULL UNIQUE REFERENCES public.apps(app_id) ON DELETE CASCADE,
+  hero_headline TEXT,
+  hero_subheadline TEXT,
+  meta_title TEXT,
+  meta_description TEXT,
+  cta_text TEXT,
+  sections JSONB DEFAULT '[]'::JSONB,
+  features JSONB DEFAULT '[]'::JSONB,
+  status curriculum_status DEFAULT 'draft',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- ┌─────────────────────────────────────────────────────────────────────────────┐
 -- │ SECTION 3: HELPER FUNCTIONS (Security & Logic)                              │
 -- └─────────────────────────────────────────────────────────────────────────────┘

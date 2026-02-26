@@ -6,12 +6,12 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  useCreateQuestion,
-  useDeleteQuestion,
-  useDuplicateQuestion,
-  usePaginatedQuestions,
-  useQuestion,
-  useQuestions,
+    useCreateQuestion,
+    useDeleteQuestion,
+    useDuplicateQuestion,
+    usePaginatedQuestions,
+    useQuestion,
+    useQuestions,
 } from '../use-questions';
 
 // Mock dependencies
@@ -95,8 +95,8 @@ describe('useQuestions', () => {
 
   describe('useQuestions hook', () => {
     it('should fetch questions for current app and skill', async () => {
-      const mockChain = supabase.from('questions') as any;
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      const mockChain = supabase.from('questions') ;
+      mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: mockQuestions, error: null }).then(onFulfilled)
       );
 
@@ -112,8 +112,8 @@ describe('useQuestions', () => {
 
   describe('usePaginatedQuestions', () => {
     it('should fetch paginated questions with filters', async () => {
-      const mockChain = supabase.from('questions') as any;
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      const mockChain = supabase.from('questions') ;
+      mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({
           data: mockQuestions,
           error: null,
@@ -134,8 +134,8 @@ describe('useQuestions', () => {
 
   describe('useQuestion', () => {
     it('should fetch a single question by id without invalid subjects relation', async () => {
-      const mockChain = supabase.from('questions') as any;
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      const mockChain = supabase.from('questions') ;
+      mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: mockQuestions[0], error: null }).then(onFulfilled)
       );
 
@@ -167,9 +167,9 @@ describe('useQuestions', () => {
     });
 
     it('should handle missing question gracefully (returns null)', async () => {
-      const mockChain = supabase.from('questions') as any;
+      const mockChain = supabase.from('questions') ;
       // Simulate "no rows found"
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: null, error: null }).then(onFulfilled)
       );
 
@@ -190,8 +190,8 @@ describe('useQuestions', () => {
 
   describe('useCreateQuestion', () => {
     it('should insert a new question', async () => {
-      const mockChain = supabase.from('questions') as any;
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      const mockChain = supabase.from('questions') ;
+      mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: mockQuestions[0], error: null }).then(onFulfilled)
       );
 
@@ -206,7 +206,7 @@ describe('useQuestions', () => {
         solution: '',
       };
 
-      await result.current.mutateAsync(newQuestion as any);
+      await result.current.mutateAsync(newQuestion );
 
       expect(mockChain.insert).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -219,8 +219,8 @@ describe('useQuestions', () => {
 
   describe('useDeleteQuestion', () => {
     it('should soft-delete a question', async () => {
-      const mockChain = supabase.from('questions') as any;
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      const mockChain = supabase.from('questions') ;
+      mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: null, error: null }).then(onFulfilled)
       );
 
@@ -238,7 +238,7 @@ describe('useQuestions', () => {
   });
   describe('useDuplicateQuestion', () => {
     it('should duplicate a question', async () => {
-      const mockChain = supabase.from('questions') as any;
+      const mockChain = supabase.from('questions') ;
       const originalQuestion = {
         ...mockQuestions[0],
         content: 'Question 1',
@@ -247,11 +247,11 @@ describe('useQuestions', () => {
       };
 
       // Mock fetching original, then inserting duplicate
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: originalQuestion, error: null }).then(onFulfilled)
       );
 
-      mockChain.then.mockImplementation((onFulfilled: any) =>
+      mockChain.then.mockImplementation((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({
           data: { ...originalQuestion, content: 'Question 1', status: 'draft' },
           error: null,
@@ -276,7 +276,7 @@ describe('useQuestions', () => {
     });
 
     it('should allow super admin to duplicate cross-app question', async () => {
-      const mockChain = supabase.from('questions') as any;
+      const mockChain = supabase.from('questions') ;
       const sourceAppId = '550e8400-e29b-41d4-a716-446655440001';
       const originalQuestion = {
         ...mockQuestions[0],
@@ -312,12 +312,12 @@ describe('useQuestions', () => {
       });
 
       // Mock fetching original (should NOT filter by app_id)
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: originalQuestion, error: null }).then(onFulfilled)
       );
 
       // Mock inserting duplicate (should use currentApp.app_id)
-      mockChain.then.mockImplementation((onFulfilled: any) =>
+      mockChain.then.mockImplementation((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({
           data: { ...originalQuestion, app_id: mockAppId, status: 'draft' },
           error: null,
@@ -343,7 +343,7 @@ describe('useQuestions', () => {
     });
 
     it('should enforce app_id for non-super admin', async () => {
-      const mockChain = supabase.from('questions') as any;
+      const mockChain = supabase.from('questions') ;
       const originalQuestion = {
         ...mockQuestions[0],
         content: 'Same-App Question',
@@ -352,11 +352,11 @@ describe('useQuestions', () => {
       };
 
       // Mock fetching original (should filter by app_id for non-super admin)
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: originalQuestion, error: null }).then(onFulfilled)
       );
 
-      mockChain.then.mockImplementation((onFulfilled: any) =>
+      mockChain.then.mockImplementation((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({
           data: { ...originalQuestion, status: 'draft' },
           error: null,
@@ -373,3 +373,5 @@ describe('useQuestions', () => {
     });
   });
 });
+
+

@@ -2,7 +2,20 @@ import { useUnsavedChangesGuard } from '@/hooks/use-unsaved-changes-guard';
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+// Mock react-router-dom's useBlocker
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useBlocker: vi.fn().mockReturnValue({
+      state: 'unblocked',
+      proceed: vi.fn(),
+      reset: vi.fn(),
+    }),
+  };
+});
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(MemoryRouter, null, children);

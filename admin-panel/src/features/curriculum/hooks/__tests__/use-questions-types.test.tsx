@@ -38,7 +38,7 @@ vi.mock('@/lib/supabase', () => {
       maybeSingle: vi.fn(() => chain),
       insert: vi.fn(() => chain),
       update: vi.fn(() => chain),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: null, error: null }).then(onFulfilled)
       ),
     };
@@ -90,16 +90,16 @@ function mockApp(overrides: Partial<ReturnType<typeof useApp>> = {}) {
     userRole: null,
     isSuperAdmin: false,
     ...overrides,
-  } as any);
+  } );
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function getMockChain() {
-  return supabase.from('questions') as any;
+function getMockChain(): any {
+  return supabase.from('questions');
 }
 
 function resolveOnce(data: unknown) {
-  getMockChain().then.mockImplementationOnce((onFulfilled: any) =>
+  getMockChain().then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
     Promise.resolve({ data, error: null }).then(onFulfilled)
   );
 }
@@ -130,7 +130,7 @@ describe('useCreateQuestion — all 5 question types', () => {
     resolveOnce({ ...mcqQuestion, question_id: MOCK_QUESTION_ID, app_id: MOCK_APP_ID });
 
     const { result } = renderHook(() => useCreateQuestion(), { wrapper });
-    await result.current.mutateAsync(mcqQuestion as any);
+    await result.current.mutateAsync(mcqQuestion );
 
     const [insertPayload] = getMockChain().insert.mock.calls[0];
     expect(insertPayload).toMatchObject({
@@ -162,7 +162,7 @@ describe('useCreateQuestion — all 5 question types', () => {
     resolveOnce({ ...mcqMultiQuestion, question_id: MOCK_QUESTION_ID, app_id: MOCK_APP_ID });
 
     const { result } = renderHook(() => useCreateQuestion(), { wrapper });
-    await result.current.mutateAsync(mcqMultiQuestion as any);
+    await result.current.mutateAsync(mcqMultiQuestion );
 
     const [insertPayload] = getMockChain().insert.mock.calls[0];
     expect(insertPayload).toMatchObject({
@@ -194,7 +194,7 @@ describe('useCreateQuestion — all 5 question types', () => {
     resolveOnce({ ...textInputQuestion, question_id: MOCK_QUESTION_ID, app_id: MOCK_APP_ID });
 
     const { result } = renderHook(() => useCreateQuestion(), { wrapper });
-    await result.current.mutateAsync(textInputQuestion as any);
+    await result.current.mutateAsync(textInputQuestion );
 
     const [insertPayload] = getMockChain().insert.mock.calls[0];
     expect(insertPayload).toMatchObject({
@@ -224,7 +224,7 @@ describe('useCreateQuestion — all 5 question types', () => {
     resolveOnce({ ...booleanQuestion, question_id: MOCK_QUESTION_ID, app_id: MOCK_APP_ID });
 
     const { result } = renderHook(() => useCreateQuestion(), { wrapper });
-    await result.current.mutateAsync(booleanQuestion as any);
+    await result.current.mutateAsync(booleanQuestion );
 
     const [insertPayload] = getMockChain().insert.mock.calls[0];
     expect(insertPayload).toMatchObject({
@@ -255,7 +255,7 @@ describe('useCreateQuestion — all 5 question types', () => {
     resolveOnce({ ...reorderQuestion, question_id: MOCK_QUESTION_ID, app_id: MOCK_APP_ID });
 
     const { result } = renderHook(() => useCreateQuestion(), { wrapper });
-    await result.current.mutateAsync(reorderQuestion as any);
+    await result.current.mutateAsync(reorderQuestion );
 
     const [insertPayload] = getMockChain().insert.mock.calls[0];
     expect(insertPayload).toMatchObject({
@@ -279,18 +279,18 @@ describe('useCreateQuestion — error handling', () => {
   });
 
   it('throws when no app is selected', async () => {
-    mockApp({ currentApp: null } as any);
+    mockApp({ currentApp: null } );
     const { wrapper } = makeWrapper();
 
     const { result } = renderHook(() => useCreateQuestion(), { wrapper });
     await expect(
-      result.current.mutateAsync({ content: 'Q', skill_id: 's', type: 'boolean' } as any)
+      result.current.mutateAsync({ content: 'Q', skill_id: 's', type: 'boolean' } )
     ).rejects.toThrow('No app selected');
   });
 
   it('surfaces Supabase error from insert', async () => {
     const { wrapper } = makeWrapper();
-    getMockChain().then.mockImplementationOnce((onFulfilled: any) =>
+    getMockChain().then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
       Promise.resolve({ data: null, error: { message: 'insert failed', code: '23505' } }).then(
         onFulfilled
       )
@@ -302,7 +302,7 @@ describe('useCreateQuestion — error handling', () => {
         content: 'Q',
         skill_id: MOCK_SKILL_ID,
         type: 'mcq',
-      } as any)
+      } )
     ).rejects.toMatchObject({ message: 'insert failed' });
   });
 
@@ -320,7 +320,7 @@ describe('useCreateQuestion — error handling', () => {
         skill_id: MOCK_SKILL_ID,
         type,
         status: 'draft',
-      } as any);
+      } );
 
       const [insertPayload] = getMockChain().insert.mock.calls[0];
       expect(insertPayload.app_id).toBe(MOCK_APP_ID);
@@ -342,7 +342,7 @@ describe('useUpdateQuestion — update mutation', () => {
       eq: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
       single: vi.fn().mockReturnThis(),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: { question_id: MOCK_QUESTION_ID }, error: null }).then(onFulfilled)
       ),
     };
@@ -354,7 +354,7 @@ describe('useUpdateQuestion — update mutation', () => {
       question_id: MOCK_QUESTION_ID,
       content: 'Updated question text',
       status: 'live',
-    } as any);
+    } );
 
     expect(mockChain.update).toHaveBeenCalledWith(
       expect.objectContaining({ content: 'Updated question text', status: 'live' })
@@ -369,7 +369,7 @@ describe('useUpdateQuestion — update mutation', () => {
       eq: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
       single: vi.fn().mockReturnThis(),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: { question_id: MOCK_QUESTION_ID }, error: null }).then(onFulfilled)
       ),
     };
@@ -379,7 +379,7 @@ describe('useUpdateQuestion — update mutation', () => {
     await result.current.mutateAsync({
       question_id: MOCK_QUESTION_ID,
       status: 'live',
-    } as any);
+    } );
 
     // Must filter by app_id (prevents cross-tenant mutation)
     const eqCalls = updateChain.eq.mock.calls as [string, string][];
@@ -395,7 +395,7 @@ describe('useUpdateQuestion — update mutation', () => {
       eq: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
       single: vi.fn().mockReturnThis(),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: null, error: { message: 'update failed', code: 'PGRST301' } }).then(
           onFulfilled
         )
@@ -408,19 +408,19 @@ describe('useUpdateQuestion — update mutation', () => {
       result.current.mutateAsync({
         question_id: MOCK_QUESTION_ID,
         status: 'live',
-      } as any)
+      } )
     ).rejects.toMatchObject({ message: 'update failed' });
   });
 
   it('super admin update does not require app_id filter (RLS handles it)', async () => {
-    mockApp({ isSuperAdmin: true } as any);
+    mockApp({ isSuperAdmin: true } );
     const { wrapper } = makeWrapper();
     const mockChain = getMockChain();
     const updateChain = {
       eq: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
       single: vi.fn().mockReturnThis(),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: { question_id: MOCK_QUESTION_ID }, error: null }).then(onFulfilled)
       ),
     };
@@ -432,7 +432,9 @@ describe('useUpdateQuestion — update mutation', () => {
       result.current.mutateAsync({
         question_id: MOCK_QUESTION_ID,
         status: 'live',
-      } as any)
+      } )
     ).resolves.toBeDefined();
   });
 });
+
+

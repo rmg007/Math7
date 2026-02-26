@@ -1,4 +1,3 @@
-import { execSync } from 'child_process';
 import express from 'express';
 import * as fs from 'fs';
 import { createServer } from 'http';
@@ -21,17 +20,7 @@ export class Dashboard {
   constructor(port: number) {
     this.port = port;
 
-    // ── Pre-flight: Port Sniper (Self-Healing) ──
-    try {
-      if (process.platform === 'win32') {
-        const cmd = `$proc = Get-NetTCPConnection -LocalPort ${port} -ErrorAction SilentlyContinue | Where-Object { $_.OwningProcess -ne 0 }; if ($proc) { Stop-Process -Id $proc.OwningProcess -Force }`;
-        execSync(`powershell -NoProfile -Command "${cmd}"`);
-      } else {
-        execSync(`lsof -t -i:${port} | xargs kill -9 2>/dev/null || true`);
-      }
-    } catch (e) {
-      // Ignore errors if port wasn't in use
-    }
+    // Dashboard initializes assuming the port is already cleared by ZombieHunter
     const app = express();
     const server = createServer(app);
     this.io = new Server(server);

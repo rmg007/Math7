@@ -36,10 +36,25 @@ export interface SkeletonReport {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function getDocComment(node: { getJsDocs?: () => Array<{ getDescription: () => string }> }): string {
+function getDocComment(node: any): string {
   try {
     const docs = node.getJsDocs?.() ?? [];
-    return docs.map(d => d.getDescription().trim()).filter(Boolean).join(' ');
+    const jsDocText = docs.map((d: any) => d.getDescription().trim()).filter(Boolean).join(' ');
+    if (jsDocText) return jsDocText;
+
+    // Fallback: Check leading comments if no formal JSDoc
+    const fullText = node.getSourceFile().getFullText();
+    const commentRanges = node.getLeadingCommentRanges();
+    if (commentRanges && commentRanges.length > 0) {
+      return commentRanges
+        .map((r: any) => {
+          const text = fullText.slice(r.getPos(), r.getEnd()).trim();
+          return text.replace(/^\/\/\s*/, '').replace(/^\/\*+\s*/, '').replace(/\*+\/$/, '').trim();
+        })
+        .filter((t: string) => !t.startsWith('@') && t.length > 3)
+        .join(' ');
+    }
+    return '';
   } catch {
     return '';
   }
@@ -234,20 +249,68 @@ export class SkeletonGenerator {
    * Compact summary — always loaded at session start. Target < 10KB.
    * One line per file listing its top 3 exports.
    */
-  writeMarkdownSummary(report: SkeletonReport, outputPath: string): void {
+  writeMarkdownSummary(report: SkeletonReport, outputPath: string) {
     const lines: string[] = [
-      `# Codebase Skeleton — Summary`,
+      `# 📝 Codebase Skeleton Summary`,
       `> Generated: ${report.generatedAt} | ${report.totalFiles} files | ${report.totalExports} exports`,
-      `> Always load this first. For full signatures, load \`SKELETON.md\` section for the area you're editing.`,
       '',
-      '| File | Key Exports |',
-      '|------|-------------|',
+      '| Feature / Directory | File | Top Exports |',
+      '| :--- | :--- | :--- |',
     ];
 
+    // Better organization: group by directory
+    const groups: Record<string, SkeletonFile[]> = {};
     for (const file of report.files) {
-      const top = file.exports.slice(0, 3).map(e => `\`${e.name}\``).join(', ');
-      const more = file.exports.length > 3 ? ` +${file.exports.length - 3}` : '';
-      lines.push(`| \`${file.file}\` | ${top}${more} |`);
+      const parts = file.file.split('/');
+      const dir = parts.length > 1 ? parts[0] + '/' + (parts[1] === 'hooks' || parts[1] === 'lib' || parts[1] === 'components' ? parts[1] : '') : 'root';
+      if (!groups[dir]) groups[dir] = [];
+      groups[dir].push(file);
+    }
+
+    const sortedDirs = Object.keys(groups).sort();
+
+    for (const dir of sortedDirs) {
+      const filesInDir = groups[dir].sort((a, b) => a.file.localeCompare(b.file));
+      for (let i = 0; i < filesInDir.length; i++) {
+        const file = filesInDir[i];
+        const topExports = file.exports
+          .slice(0, 5)
+          .map(e => `\`${e.name}\``)
+          .join(', ');
+        const more = file.exports.length > 5 ? ` (+${file.exports.length - 5} more)` : '';
+        
+        lines.push(`| ${i === 0 ? `**${dir}**` : ''} | \`${file.file}\` | ${topExports}${more} |`);
+      }
+    }
+
+    fs.writeFileSync(outputPath, lines.join('\n'), 'utf-8');
+  }
+
+  /**
+   * Utility Registry — specifically for shared helpers in hooks/ and lib/.
+   * Helps avoid redundant implementation of common patterns.
+   */
+  writeUtilityRegistry(report: SkeletonReport, outputPath: string): void {
+    const utilityFiles = report.files.filter(f => 
+      f.file.startsWith('hooks/') || f.file.startsWith('lib/') || f.file.includes('/hooks/')
+    );
+
+    const lines: string[] = [
+      `# 🛠️ Utility & Hook Registry`,
+      `> Generated: ${report.generatedAt} | ${utilityFiles.length} files | ${utilityFiles.reduce((s, f) => s + f.exports.length, 0)} utilities`,
+      `> **Search before you build.** This registry lists all shared logic to prevent redundancy.`,
+      '',
+      '| Utility / Hook | Kind | File | Signature | Description |',
+      '| :--- | :--- | :--- | :--- | :--- |',
+    ];
+
+    for (const file of utilityFiles) {
+      for (const exp of file.exports) {
+        if (exp.kind === 'interface' || exp.kind === 'type') continue;
+        const cleanSig = exp.signature.replace(/\|/g, '\\|');
+        const cleanDoc = exp.doc.replace(/\|/g, '\\|').replace(/\n/g, ' ');
+        lines.push(`| **${exp.name}** | \`${exp.kind}\` | \`${file.file}\` | \`${cleanSig}\` | ${cleanDoc} |`);
+      }
     }
 
     fs.writeFileSync(outputPath, lines.join('\n'), 'utf-8');

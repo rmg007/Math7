@@ -1,12 +1,12 @@
 import {
-  downloadFile,
-  downloadTemplate,
-  exportToCSV,
-  exportToJSON,
-  parseCSV,
-  parseJSON,
-  readFileAsText,
-  type DataColumn,
+    downloadFile,
+    downloadTemplate,
+    exportToCSV,
+    exportToJSON,
+    parseCSV,
+    parseJSON,
+    readFileAsText,
+    type DataColumn,
 } from '@/lib/data-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -293,25 +293,25 @@ describe('data-utils', () => {
       const file = new File([''], 'test.txt');
 
       // Mock FileReader to simulate error
-      const mockFileReader = {
-        onload: null as ((this: FileReader, ev: ProgressEvent<FileReader>) => void) | null,
-        onerror: null as ((this: FileReader, ev: ProgressEvent<FileReader>) => void) | null,
-        readAsText: vi.fn().mockImplementation(() => {
+      // Mock FileReader as a class constructor
+      class MockFileReader {
+        onload: ((this: FileReader, ev: ProgressEvent<FileReader>) => void) | null = null;
+        onerror: ((this: FileReader, ev: ProgressEvent<FileReader>) => void) | null = null;
+        result = '';
+        
+        readAsText = vi.fn().mockImplementation(function(this: any) {
           setTimeout(() => {
-            if (mockFileReader.onerror) {
-              // Invoke with a generic error event and proper this context
-              mockFileReader.onerror.call(
-                mockFileReader as unknown as FileReader,
+            if (this.onerror) {
+              this.onerror.call(
+                this as unknown as FileReader,
                 new Event('error') as unknown as ProgressEvent<FileReader>
               );
             }
           }, 0);
-        }),
-      };
+        });
+      }
 
-      global.FileReader = vi
-        .fn()
-        .mockImplementation(() => mockFileReader) as unknown as typeof FileReader;
+      global.FileReader = MockFileReader as any;
 
       await expect(readFileAsText(file)).rejects.toThrow('Failed to read file');
     });

@@ -38,7 +38,7 @@ vi.mock('@/lib/supabase', () => {
       insert: vi.fn(() => chain),
       update: vi.fn(() => chain),
       single: vi.fn(() => chain),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: null, error: null }).then(onFulfilled)
       ),
     };
@@ -92,11 +92,11 @@ function mockApp(overrides: Record<string, unknown> = {}) {
     userRole: null,
     isSuperAdmin: false,
     ...overrides,
-  } as any);
+  } );
 }
 
-function getMockChain() {
-  return supabase.from('domains') as any;
+function getMockChain(): any {
+  return supabase.from('domains');
 }
 
 // ── useUpdateDomain (single) ──────────────────────────────────────────────────
@@ -113,7 +113,7 @@ describe('useUpdateDomain — AP-CURR-010', () => {
       eq: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
       single: vi.fn().mockReturnThis(),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: { domain_id: DOMAIN_IDS[0] }, error: null }).then(onFulfilled)
       ),
     };
@@ -124,7 +124,7 @@ describe('useUpdateDomain — AP-CURR-010', () => {
       domain_id: DOMAIN_IDS[0],
       title: 'Updated Domain Title',
       status: 'live',
-    } as any);
+    } );
 
     expect(mockChain.update).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Updated Domain Title', status: 'live' })
@@ -148,7 +148,7 @@ describe('useBulkDeleteDomains — AP-CURR-011', () => {
     const updateChain = {
       in: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: null, error: null }).then(onFulfilled)
       ),
     };
@@ -172,7 +172,7 @@ describe('useBulkDeleteDomains — AP-CURR-011', () => {
     const updateChain = {
       in: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: null, error: null }).then(onFulfilled)
       ),
     };
@@ -208,7 +208,7 @@ describe('useBulkUpdateDomainsStatus — AP-CURR-012', () => {
     const updateChain = {
       in: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: null, error: null }).then(onFulfilled)
       ),
     };
@@ -227,7 +227,7 @@ describe('useBulkUpdateDomainsStatus — AP-CURR-012', () => {
     const updateChain = {
       in: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: null, error: null }).then(onFulfilled)
       ),
     };
@@ -245,7 +245,7 @@ describe('useBulkUpdateDomainsStatus — AP-CURR-012', () => {
     const updateChain = {
       in: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: null, error: null }).then(onFulfilled)
       ),
     };
@@ -275,7 +275,7 @@ describe('useUpdateDomainOrder — AP-CURR-013', () => {
     mockChain.update.mockImplementation(() => {
       const updateChain = {
         eq: vi.fn().mockReturnThis(),
-        then: vi.fn((onFulfilled: any) =>
+        then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
           Promise.resolve({ data: null, error: null }).then(onFulfilled)
         ),
       };
@@ -305,7 +305,7 @@ describe('useUpdateDomainOrder — AP-CURR-013', () => {
 
     const updateChain = {
       eq: vi.fn().mockReturnThis(),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: null, error: null }).then(onFulfilled)
       ),
     };
@@ -328,7 +328,7 @@ describe('useUpdateDomainOrder — AP-CURR-013', () => {
       const err = callCount === 2 ? { message: 'constraint violation' } : null;
       return {
         eq: vi.fn().mockReturnThis(),
-        then: vi.fn((onFulfilled: any) =>
+        then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
           Promise.resolve({ data: null, error: err }).then(onFulfilled)
         ),
       };
@@ -356,7 +356,7 @@ describe('useBulkCreateDomains — AP-CURR-014', () => {
     const mockChain = getMockChain();
     const insertChain = {
       select: vi.fn().mockReturnThis(),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({
           data: [
             { domain_id: DOMAIN_IDS[0], title: 'Domain A', app_id: MOCK_APP_ID },
@@ -400,7 +400,7 @@ describe('useBulkCreateDomains — AP-CURR-014', () => {
     const mockChain = getMockChain();
     const insertChain = {
       select: vi.fn().mockReturnThis(),
-      then: vi.fn((onFulfilled: any) =>
+      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({
           data: null,
           error: { message: 'duplicate key', code: '23505' },
@@ -415,3 +415,5 @@ describe('useBulkCreateDomains — AP-CURR-014', () => {
     ).rejects.toMatchObject({ message: 'duplicate key' });
   });
 });
+
+

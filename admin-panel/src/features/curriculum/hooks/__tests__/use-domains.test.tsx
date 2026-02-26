@@ -96,8 +96,8 @@ describe('useDomains', () => {
 
   describe('useDomains hook', () => {
     it('should fetch domains for current app', async () => {
-      const mockChain = supabase.from('domains') as any;
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      const mockChain = supabase.from('domains') ;
+      mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: mockDomains, error: null }).then(onFulfilled)
       );
 
@@ -112,7 +112,7 @@ describe('useDomains', () => {
     it('should throw error when no app is selected', async () => {
       vi.mocked(useApp).mockReturnValue({
         currentApp: null,
-      } as any);
+      } );
 
       const { result } = renderHook(() => useDomains(), { wrapper });
 
@@ -122,8 +122,8 @@ describe('useDomains', () => {
 
   describe('usePaginatedDomains', () => {
     it('should fetch paginated domains', async () => {
-      const mockChain = supabase.from('domains') as any;
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      const mockChain = supabase.from('domains') ;
+      mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({
           data: mockDomains,
           error: null,
@@ -144,8 +144,8 @@ describe('useDomains', () => {
 
   describe('useDomain', () => {
     it('should fetch a single domain', async () => {
-      const mockChain = supabase.from('domains') as any;
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      const mockChain = supabase.from('domains') ;
+      mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: mockDomains[0], error: null }).then(onFulfilled)
       );
 
@@ -159,8 +159,8 @@ describe('useDomains', () => {
 
   describe('useCreateDomain', () => {
     it('should create a new domain', async () => {
-      const mockChain = supabase.from('domains') as any;
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      const mockChain = supabase.from('domains') ;
+      mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: mockDomains[0], error: null }).then(onFulfilled)
       );
 
@@ -186,15 +186,15 @@ describe('useDomains', () => {
 
   describe('useDeleteDomain', () => {
     it('should mark a domain as deleted', async () => {
-      const mockChain = supabase.from('domains') as any;
+      const mockChain = supabase.from('domains') ;
       const updateChain = {
         eq: vi.fn().mockReturnThis(),
-        then: vi.fn((onFulfilled: any) =>
+        then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
           Promise.resolve({ data: null, error: null }).then(onFulfilled)
         ),
       };
       mockChain.update.mockReturnValue(updateChain);
-      mockChain.then.mockImplementationOnce((onFulfilled: any) =>
+      mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: null, error: null }).then(onFulfilled)
       );
 
@@ -212,3 +212,5 @@ describe('useDomains', () => {
     });
   });
 });
+
+

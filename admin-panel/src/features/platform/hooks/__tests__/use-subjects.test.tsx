@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   useBulkCreateSubjects,
   useBulkDeleteSubjects,
@@ -15,57 +15,13 @@ import {
   useUpdateSubject,
 } from '../use-subjects';
 
-interface MockSupabaseChain {
-  select: Mock;
-  eq: Mock;
-  in: Mock;
-  order: Mock;
-  single: Mock;
-  insert: Mock;
-  update: Mock;
-  delete: Mock;
-  neq: Mock;
-  then: Mock;
-}
+import { createMockSupabase } from '@/__tests__/mocks/supabase-factory';
 
-// Helper to create a thenable mock chain
-const createMockChain = (): MockSupabaseChain => {
-  const chain = {
-    select: vi.fn(),
-    eq: vi.fn(),
-    in: vi.fn(),
-    order: vi.fn(),
-    single: vi.fn(),
-    insert: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
-    neq: vi.fn(),
-    then: vi.fn((onFulfilled: (value: { data: unknown; error: unknown }) => unknown) =>
-      Promise.resolve({ data: null, error: null }).then(onFulfilled)
-    ),
-  };
-
-  chain.select.mockReturnValue(chain);
-  chain.eq.mockReturnValue(chain);
-  chain.in.mockReturnValue(chain);
-  chain.order.mockReturnValue(chain);
-  chain.single.mockReturnValue(chain);
-  chain.insert.mockReturnValue(chain);
-  chain.update.mockReturnValue(chain);
-  chain.delete.mockReturnValue(chain);
-  chain.neq.mockReturnValue(chain);
-
-  return chain as unknown as MockSupabaseChain;
-};
-
-// Mock dependencies
-vi.mock('@/lib/supabase', () => {
-  return {
-    supabase: {
-      from: vi.fn(),
-    },
-  };
-});
+vi.mock('@/lib/supabase', () => ({
+  supabase: {
+    from: vi.fn(),
+  },
+}));
 
 // ── Shared fixtures ───────────────────────────────────────────────────────────
 const VALID_UUID = '550e8400-e29b-41d4-a716-446655440001';
@@ -86,231 +42,169 @@ function makeWrapper() {
   };
 }
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
-// ── useSubjects ───────────────────────────────────────────────────────────────
-describe('useSubjects', () => {
+describe('useSubjects hooks', () => {
+  let mockSupabase: ReturnType<typeof createMockSupabase>;
   const { wrapper } = makeWrapper();
 
-  it('fetches subjects ordered by display_order', async () => {
-    const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(
-      mockChain as unknown as ReturnType<typeof supabase.from>
-    );
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-    mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-      Promise.resolve({ data: mockSubjects, error: null }).then(onFulfilled)
-    );
-
-    const { result } = renderHook(() => useSubjects(), { wrapper });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(supabase.from).toHaveBeenCalledWith('subjects');
-    expect(mockChain.order).toHaveBeenCalledWith('display_order');
-    expect(result.current.data).toEqual(mockSubjects);
-  });
-});
-
-// ── useCreateSubject ──────────────────────────────────────────────────────────
-describe('useCreateSubject', () => {
-  const { wrapper } = makeWrapper();
-
-  it('inserts a new subject', async () => {
-    const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(
-      mockChain as unknown as ReturnType<typeof supabase.from>
-    );
-
-    mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-      Promise.resolve({ data: mockSubjects[0], error: null }).then(onFulfilled)
-    );
-
-    const { result } = renderHook(() => useCreateSubject(), { wrapper });
-
-    const newSubject: TablesInsert<'subjects'> = { title: 'History', slug: 'history' };
-    await result.current.mutateAsync(newSubject);
-
-    expect(mockChain.insert).toHaveBeenCalledWith(newSubject);
-  });
-});
-
-// ── useUpdateSubject ──────────────────────────────────────────────────────────
-describe('useUpdateSubject', () => {
-  const { wrapper } = makeWrapper();
-
-  it('updates an existing subject', async () => {
-    const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(
-      mockChain as unknown as ReturnType<typeof supabase.from>
-    );
-
-    mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-      Promise.resolve({ data: mockSubjects[0], error: null }).then(onFulfilled)
-    );
-
-    const { result } = renderHook(() => useUpdateSubject(), { wrapper });
-
-    await result.current.mutateAsync({ id: VALID_UUID, title: 'Math Updated' });
-
-    expect(mockChain.update).toHaveBeenCalledWith({ title: 'Math Updated' });
-    expect(mockChain.eq).toHaveBeenCalledWith('subject_id', VALID_UUID);
+    // Fresh mock for every test
+    mockSupabase = createMockSupabase();
+    vi.mocked(supabase.from).mockReturnValue(mockSupabase.queryBuilder);
   });
 
-  it('throws when subject not found', async () => {
-    const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(
-      mockChain as unknown as ReturnType<typeof supabase.from>
-    );
+  // ── useSubjects ───────────────────────────────────────────────────────────────
+  describe('useSubjects', () => {
+    it('fetches subjects ordered by display_order', async () => {
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
+        Promise.resolve({ data: mockSubjects, error: null }).then(onFulfilled)
+      );
 
-    mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-      Promise.resolve({ data: null, error: null }).then(onFulfilled)
-    );
+      const { result } = renderHook(() => useSubjects(), { wrapper });
 
-    const { result } = renderHook(() => useUpdateSubject(), { wrapper });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    const updatePayload: TablesUpdate<'subjects'> & { id: string } = { id: VALID_UUID, title: 'X' };
-    await expect(result.current.mutateAsync(updatePayload)).rejects.toThrow(
-      `Subject with ID ${VALID_UUID} not found for update.`
-    );
-  });
-});
-
-// ── useDeleteSubject ──────────────────────────────────────────────────────────
-describe('useDeleteSubject', () => {
-  const { wrapper } = makeWrapper();
-
-  it('deletes a subject', async () => {
-    const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(
-      mockChain as unknown as ReturnType<typeof supabase.from>
-    );
-
-    mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-      Promise.resolve({ data: null, error: null }).then(onFulfilled)
-    );
-
-    const { result } = renderHook(() => useDeleteSubject(), { wrapper });
-    await result.current.mutateAsync(VALID_UUID);
-
-    expect(mockChain.delete).toHaveBeenCalled();
-    expect(mockChain.eq).toHaveBeenCalledWith('subject_id', VALID_UUID);
-  });
-});
-
-// ── useBulkUpdateSubjectsStatus ───────────────────────────────────────────────
-describe('useBulkUpdateSubjectsStatus', () => {
-  const { wrapper } = makeWrapper();
-
-  it('updates status for multiple subjects', async () => {
-    const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(
-      mockChain as unknown as ReturnType<typeof supabase.from>
-    );
-
-    const { result } = renderHook(() => useBulkUpdateSubjectsStatus(), { wrapper });
-    await result.current.mutateAsync({ ids: [VALID_UUID], status: 'live' });
-
-    expect(mockChain.update).toHaveBeenCalledWith({ status: 'live' });
-    expect(mockChain.in).toHaveBeenCalledWith('subject_id', [VALID_UUID]);
-  });
-});
-
-// ── useBulkDeleteSubjects ─────────────────────────────────────────────────────
-describe('useBulkDeleteSubjects', () => {
-  const { wrapper } = makeWrapper();
-
-  it('deletes multiple subjects', async () => {
-    const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(
-      mockChain as unknown as ReturnType<typeof supabase.from>
-    );
-
-    const { result } = renderHook(() => useBulkDeleteSubjects(), { wrapper });
-    await result.current.mutateAsync([VALID_UUID, VALID_UUID_2]);
-
-    expect(mockChain.delete).toHaveBeenCalled();
-    expect(mockChain.in).toHaveBeenCalledWith('subject_id', [VALID_UUID, VALID_UUID_2]);
-  });
-});
-
-// ── useBulkCreateSubjects ────────────────────────────────────────────────────
-describe('useBulkCreateSubjects', () => {
-  const { wrapper } = makeWrapper();
-
-  it('inserts multiple subjects', async () => {
-    const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(
-      mockChain as unknown as ReturnType<typeof supabase.from>
-    );
-
-    const { result } = renderHook(() => useBulkCreateSubjects(), { wrapper });
-    const payload: TablesInsert<'subjects'>[] = [
-      { title: 'S1', slug: 's1' },
-      { title: 'S2', slug: 's2' },
-    ];
-    await result.current.mutateAsync(payload);
-
-    expect(mockChain.insert).toHaveBeenCalledWith(payload);
-  });
-});
-
-// ── useCheckSubjectSlug ───────────────────────────────────────────────────────
-describe('useCheckSubjectSlug', () => {
-  const { wrapper } = makeWrapper();
-
-  it('returns true for available slug', async () => {
-    const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(
-      mockChain as unknown as ReturnType<typeof supabase.from>
-    );
-
-    mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-      Promise.resolve({ count: 0, error: null }).then(onFulfilled)
-    );
-
-    const { result } = renderHook(() => useCheckSubjectSlug(), { wrapper });
-    const isAvailable = await result.current.checkSlug('new-slug');
-
-    expect(isAvailable).toBe(true);
-    expect(mockChain.eq).toHaveBeenCalledWith('slug', 'new-slug');
+      expect(supabase.from).toHaveBeenCalledWith('subjects');
+      expect(mockSupabase.queryBuilder.order).toHaveBeenCalledWith('display_order');
+      expect(result.current.data).toEqual(mockSubjects);
+    });
   });
 
-  it('returns false for taken slug', async () => {
-    const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(
-      mockChain as unknown as ReturnType<typeof supabase.from>
-    );
+  // ── useCreateSubject ──────────────────────────────────────────────────────────
+  describe('useCreateSubject', () => {
+    it('inserts a new subject', async () => {
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
+        Promise.resolve({ data: mockSubjects[0], error: null }).then(onFulfilled)
+      );
 
-    mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-      Promise.resolve({ count: 1, error: null }).then(onFulfilled)
-    );
+      const { result } = renderHook(() => useCreateSubject(), { wrapper });
 
-    const { result } = renderHook(() => useCheckSubjectSlug(), { wrapper });
-    const isAvailable = await result.current.checkSlug('taken-slug');
+      const newSubject: TablesInsert<'subjects'> = { title: 'History', slug: 'history' };
+      await result.current.mutateAsync(newSubject);
 
-    expect(isAvailable).toBe(false);
+      expect(mockSupabase.queryBuilder.insert).toHaveBeenCalledWith(newSubject);
+    });
   });
 
-  it('excludes current subject from check', async () => {
-    const mockChain = createMockChain();
-    vi.mocked(supabase.from).mockReturnValue(
-      mockChain as unknown as ReturnType<typeof supabase.from>
-    );
+  // ── useUpdateSubject ──────────────────────────────────────────────────────────
+  describe('useUpdateSubject', () => {
+    it('updates an existing subject', async () => {
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
+        Promise.resolve({ data: mockSubjects[0], error: null }).then(onFulfilled)
+      );
 
-    const { result } = renderHook(() => useCheckSubjectSlug(), { wrapper });
-    await result.current.checkSlug('existing-slug', VALID_UUID);
+      const { result } = renderHook(() => useUpdateSubject(), { wrapper });
 
-    expect(mockChain.neq).toHaveBeenCalledWith('subject_id', VALID_UUID);
+      await result.current.mutateAsync({ id: VALID_UUID, title: 'Math Updated' });
+
+      expect(mockSupabase.queryBuilder.update).toHaveBeenCalledWith({ title: 'Math Updated' });
+      expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith('subject_id', VALID_UUID);
+    });
+
+    it('throws when subject not found', async () => {
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
+        Promise.resolve({ data: null, error: null }).then(onFulfilled)
+      );
+
+      const { result } = renderHook(() => useUpdateSubject(), { wrapper });
+
+      const updatePayload: TablesUpdate<'subjects'> & { id: string } = { id: VALID_UUID, title: 'X' };
+      await expect(result.current.mutateAsync(updatePayload)).rejects.toThrow(
+        `Subject with ID ${VALID_UUID} not found for update.`
+      );
+    });
   });
 
-  it('returns true for empty slug without calling API', async () => {
-    const { result } = renderHook(() => useCheckSubjectSlug(), { wrapper });
-    const isAvailable = await result.current.checkSlug('');
+  // ── useDeleteSubject ──────────────────────────────────────────────────────────
+  describe('useDeleteSubject', () => {
+    it('deletes a subject', async () => {
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
+        Promise.resolve({ data: null, error: null }).then(onFulfilled)
+      );
 
-    expect(isAvailable).toBe(true);
-    expect(supabase.from).not.toHaveBeenCalled();
+      const { result } = renderHook(() => useDeleteSubject(), { wrapper });
+      await result.current.mutateAsync(VALID_UUID);
+
+      expect(mockSupabase.queryBuilder.delete).toHaveBeenCalled();
+      expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith('subject_id', VALID_UUID);
+    });
+  });
+
+  // ── useBulkUpdateSubjectsStatus ───────────────────────────────────────────────
+  describe('useBulkUpdateSubjectsStatus', () => {
+    it('updates status for multiple subjects', async () => {
+      const { result } = renderHook(() => useBulkUpdateSubjectsStatus(), { wrapper });
+      await result.current.mutateAsync({ ids: [VALID_UUID], status: 'live' });
+
+      expect(mockSupabase.queryBuilder.update).toHaveBeenCalledWith({ status: 'live' });
+      expect(mockSupabase.queryBuilder.in).toHaveBeenCalledWith('subject_id', [VALID_UUID]);
+    });
+  });
+
+  // ── useBulkDeleteSubjects ─────────────────────────────────────────────────────
+  describe('useBulkDeleteSubjects', () => {
+    it('deletes multiple subjects', async () => {
+      const { result } = renderHook(() => useBulkDeleteSubjects(), { wrapper });
+      await result.current.mutateAsync([VALID_UUID, VALID_UUID_2]);
+
+      expect(mockSupabase.queryBuilder.delete).toHaveBeenCalled();
+      expect(mockSupabase.queryBuilder.in).toHaveBeenCalledWith('subject_id', [VALID_UUID, VALID_UUID_2]);
+    });
+  });
+
+  // ── useBulkCreateSubjects ────────────────────────────────────────────────────
+  describe('useBulkCreateSubjects', () => {
+    it('inserts multiple subjects', async () => {
+      const { result } = renderHook(() => useBulkCreateSubjects(), { wrapper });
+      const payload: TablesInsert<'subjects'>[] = [
+        { title: 'S1', slug: 's1' },
+        { title: 'S2', slug: 's2' },
+      ];
+      await result.current.mutateAsync(payload);
+
+      expect(mockSupabase.queryBuilder.insert).toHaveBeenCalledWith(payload);
+    });
+  });
+
+  // ── useCheckSubjectSlug ───────────────────────────────────────────────────────
+  describe('useCheckSubjectSlug', () => {
+    it('returns true for available slug', async () => {
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
+        Promise.resolve({ count: 0, error: null }).then(onFulfilled)
+      );
+
+      const { result } = renderHook(() => useCheckSubjectSlug(), { wrapper });
+      const isAvailable = await result.current.checkSlug('new-slug');
+
+      expect(isAvailable).toBe(true);
+      expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith('slug', 'new-slug');
+    });
+
+    it('returns false for taken slug', async () => {
+      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
+        Promise.resolve({ count: 1, error: null }).then(onFulfilled)
+      );
+
+      const { result } = renderHook(() => useCheckSubjectSlug(), { wrapper });
+      const isAvailable = await result.current.checkSlug('taken-slug');
+
+      expect(isAvailable).toBe(false);
+    });
+
+    it('excludes current subject from check', async () => {
+      const { result } = renderHook(() => useCheckSubjectSlug(), { wrapper });
+      await result.current.checkSlug('existing-slug', VALID_UUID);
+
+      expect(mockSupabase.queryBuilder.neq).toHaveBeenCalledWith('subject_id', VALID_UUID);
+    });
+
+    it('returns true for empty slug without calling API', async () => {
+      const { result } = renderHook(() => useCheckSubjectSlug(), { wrapper });
+      const isAvailable = await result.current.checkSlug('');
+
+      expect(isAvailable).toBe(true);
+      expect(supabase.from).not.toHaveBeenCalled();
+    });
   });
 });

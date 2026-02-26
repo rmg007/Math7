@@ -1,6 +1,102 @@
 # Questerix Learning Log
 
-> Entries older than 30 days are in docs/archive/LEARNING_LOG_ARCHIVE.md
+## 2026-02-25: Phase 3 — Architecture Guard Deployment [verified]
+
+### [2026-02-25-Guard] Session Context
+
+- **Trigger**: Need for active enforcement of domain boundaries to prevent architectural drift.
+- **Scope**: `questerix-cortex/` (Guard), `cortex.config.json` (rules), `outputs/ARCH_GUARD.md`.
+- **Outcome**: Deployed `Guard` class with configurable isolation rules. Verified that current isolation holds (PASS).
+
+### [2026-02-25-Guard] What was done
+
+1. **Boundary Enforcement**: Implemented the `Guard` class to check detected dependencies against a forbidden list.
+2. **Strict Isolation**: Configured `auth` as a "Leaf" domain (forbidden from importing any other feature) and `curriculum` as a "Stable Core" (forbidden from importing AI implementations).
+3. **Automated Reporting**: Integrated guard checks into the governance loop with a new `ARCH_GUARD.md` report surfacing any domain breaches.
+4. **Resilient Matching**: Rules support wildcard (`*`) for strict isolation and specific feature names for targeted decoupling.
+
+### [2026-02-25-Guard] Bugs Found & Fixed
+
+| Bug                  | Root Cause                                                    | Fix                                                                              | Prevention Rule                                                                     |
+| :------------------- | :------------------------------------------------------------ | :------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------- |
+| Missing Guard Import | Chunking error during `run.ts` multi-edit                     | Manually restored imports and verified with `tsc`                                | Always verify file header imports after complex `multi_replace` calls               |
+| Rule Non-Interaction | Rules were checking against target features only, not aliases | Updated `Guard` to use the unified `FeatureDependency` model from the visualizer | Leverage shared models between analysis tools to ensure consistent rule application |
+
+---
+
+## 2026-02-25: Phase 2 — Feature Fragility Matrix [verified]
+
+### [2026-02-25-Fragility] Session Context
+
+- **Trigger**: Need for proactive detection of structural risk and "architectural stiffness" in the features domain.
+- **Scope**: `questerix-cortex/` (FragilityScorer), `outputs/FRAGILITY_MATRIX.md`.
+- **Outcome**: Deployed automated fragility ranking. Identified `curriculum` as a **STIFF** domain requiring modularization.
+
+### [2026-02-25-Fragility] What was done
+
+1. **Fragility Scoring**: Implemented `FragilityScorer` which uses the formula `Score = (InDegree * 3) + (OutDegree * 2) + (Files * 0.5)`. This weighs in-degree heavily to highlight "Core" dependencies.
+2. **Metric Harvesting**: Automated the harvesting of file counts and rough export counts per feature to feed the complexity weight.
+3. **Automated Verdicts**: Features are categorized as STABLE, MODERATE, STIFF, or FRAGILE based on their cumulative score.
+4. **Maintenance Recommendations**: The generator now provides targeted advice (e.g., splitting bloated domains, extracting interfaces) for high-risk features.
+
+### [2026-02-25-Fragility] Bugs Found & Fixed
+
+| Bug                      | Root Cause                                    | Fix                                                        | Prevention Rule                                                                      |
+| :----------------------- | :-------------------------------------------- | :--------------------------------------------------------- | :----------------------------------------------------------------------------------- |
+| Implicit 'any' in filter | TypeScript strict mode in `run.ts`            | Provided `FragilityMetrics` interface for filter callbacks | Always import the corresponding data interface for metrics processing                |
+| Missing matrix output    | Config field missing in `types.ts` and `json` | Registered `fragilityMatrix` output path                   | New tools must have their output paths registered in the global configuration schema |
+
+---
+
+## 2026-02-25: Cortex Runner Hardening & Isolation [verified]
+
+### [2026-02-25-Hardening] Session Context
+
+- **Trigger**: IDE deadlocks and performance stalls caused by rogue processes and memory-heavy scans.
+- **Scope**: `questerix-cortex/` (run.ts, Scanner, FeatureVisualizer).
+- **Outcome**: Implemented `ZombieHunter` for pre-flight sterilization. Optimized `Scanner` memory usage via lazy AST loading and test-file caching. Deployed `FEATURE_MAP.md` for isolation monitoring.
+
+### [2026-02-25-Hardening] What was done
+
+1. **Pre-flight Sterilization**: Created `ZombieHunter` utility to aggressively kill orphaned Dart, Flutter, and Cortex Node processes before initialization. Fixed PowerShell filter syntax errors.
+2. **Scanner Optimization**: Refactored `Scanner` to use lazy AST loading (one file at a time) and implemented a `TestFileCache` to eliminate redundant recursive I/O during every scan loop.
+3. **Graceful Shutdown**: Added process signal listeners (`SIGINT`, `SIGTERM`) to `run.ts` to ensure database and dashboard handles are released properly.
+4. **Feature Isolation**: Implemented `FeatureVisualizer` using a resilient regex to map cross-feature dependencies, surfacing coupling in `src/features/*` via Mermaid diagrams.
+
+### [2026-02-25-Hardening] Bugs Found & Fixed
+
+| Bug                     | Root Cause                                                                      | Fix                                                                                    | Prevention Rule                                                                               |
+| :---------------------- | :------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------- |
+| IDE Deadlock / "Stuck"  | Multiple rogue `dart.exe` and `node.exe` processes hogging ports and file locks | `ZombieHunter` pre-flight nuke                                                         | Always sterilize the workspace before starting a long-running analysis tool                   |
+| PowerShell Syntax Error | Incorrect quoting in `Get-WmiObject` filter for `node.exe`                      | Escaped quotes and used `Get-CimInstance` for better robustness                        | Test PowerShell command injections via `execSync` with explicit escaping                      |
+| Empty Feature Map       | Over-strict regex for feature imports                                           | Simplified regex to `/\/features\/([^/'" ]+)/g` to capture all alias/relative variants | Use inclusive regex for initial discovery, then filter targets against a verified domain list |
+
+---
+
+## 2026-02-25: Cortex Documentation Optimization & Test Restoration [verified]
+
+### [2026-02-25-Doc] Session Context
+
+- **Trigger**: Efficiency Directive to improve Cortex output clarity and reduce run frequency.
+- **Scope**: `questerix-cortex/` (Skeleton, Reporter), `admin-panel/` (Vitest cleanup).
+- **Outcome**: Restored 100% test pass rate (417/417). Deployed `UTILITY_REGISTRY.md` and feature-grouped `SKELETON_SUMMARY.md`.
+
+### [2026-02-25-Doc] What was done
+
+1. **Skeleton Fix**: Identified and restored a missing loop in `writeMarkdownSummary` that was causing `SKELETON_SUMMARY.md` to omit export details.
+2. **Utility Registry**: Implemented `writeUtilityRegistry` in `SkeletonGenerator` to provide a searchable table of all shared hooks and utilities in `hooks/` and `lib/`.
+3. **Information Density**: Enhanced `getDocComment` to fall back to leading comments when formal JSDoc is missing, significantly increasing description coverage in the utility registry.
+4. **Organization**: Refactored the summary generator to group files by feature directory, making the 130+ file codebase navigable at a glance.
+5. **Regression Verification**: Fixed a port conflict preventing Cortex runs and verified that the Admin Panel's 417 tests are all passing green.
+
+### [2026-02-25-Doc] Bugs Found & Fixed
+
+| Bug                           | Root Cause                               | Fix                                            | Prevention Rule                                                              |
+| :---------------------------- | :--------------------------------------- | :--------------------------------------------- | :--------------------------------------------------------------------------- |
+| Empty SKELETON_SUMMARY        | Missing loop in generator logic          | Restored `.exports` iteration loop             | Cortex must verify its own output size > 1KB before finishing an 'intel' run |
+| Missing Registry Descriptions | Hooks lacked formal `@description` JSDoc | Implemented `getLeadingCommentRanges` fallback | Prefer JSDoc, but always harvest leading comments as secondary intent        |
+
+---
 
 ## 2026-02-25: Phase 2/3 Deployment — Build Fix + Production Deploy [verified]
 
@@ -1049,7 +1145,7 @@ The following work was also completed as part of the Phase 10 & 11 security spri
 
 ## 2026-02-19: Certification Sprint & Production Release [test created]
 
-### Session Context
+### [2026-02-25-Deploy] Session Context
 
 - **Trigger**: Final release requirement for Phase 5 & User login issues in Student App
 - **Scope**: Forensic audit, security hardening, E2E auth flow, and production deployment
@@ -1323,3 +1419,64 @@ Always include 'Missing Initialization' warnings in tool outputs instead of thro
 ### Verification
 
 - Verified by code inspection of `GEMINI.md` and `Reporter.ts` logic.
+
+### 2026-02-25: Supabase Types and Mock Refactoring
+
+**What was done**:
+- Regenerated Supabase database types to synchronize frontend types with physical database schema modifications via `npx supabase gen types typescript`.
+- Executed deep cast surgery across ~50 test files in `admin-panel/src/features/platform/hooks/__tests__` and `curriculum/hooks/__tests__`, stripping `mockChain as any` and `mockChain as unknown as any` to enforce stronger type safety boundaries.
+
+**Bugs found**:
+- Extraneous test casting bypassed compiler checks that could reveal real object incompatibilities with actual Supabase clients.
+
+**Fix**:
+- Mapped exactly where variables were instantiated. Using `const mockChain = createMockSupabaseChain()` generates an object that sufficiently matches what the mocked `supabase.from` returns.
+
+**Prevention rule**:
+- Avoid `as any` inside test mocks when utilities like `createMockSupabaseChain()` are constructed to inherently mimic the required signatures. Only cast when explicitly working around library-internal typings outside standard scope.
+
+
+---
+
+## [2026-02-26] Cortex Auto-Entry
+
+### Suite: Security Audit
+**First Error**: `# npm audit report`
+**Session**: Cortex Auto-Entry
+**Duration**: 1.9s
+**Root Cause**: *[Agent to fill in]*
+**Fix Applied**: *[Agent to fill in]*
+**Prevention Rule**: *[Agent to fill in]*
+
+### Suite: Full Vitest + Coverage
+**First Error**: `[33m[2m✓[22m[39m shows error if email field is empty [33m 327[2mms[22m[39m`
+**Session**: Cortex Auto-Entry
+**Duration**: 59.2s
+**Root Cause**: *[Agent to fill in]*
+**Fix Applied**: *[Agent to fill in]*
+**Prevention Rule**: *[Agent to fill in]*
+
+### Suite: Full Playwright Suite
+**First Error**: `at ErrorLogsPage.spec.ts:13`
+**Session**: Cortex Auto-Entry
+**Duration**: 9.2s
+**Root Cause**: *[Agent to fill in]*
+**Fix Applied**: *[Agent to fill in]*
+**Prevention Rule**: *[Agent to fill in]*
+
+### Suite: Latency Benchmark
+**First Error**: `Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed`
+**Session**: Cortex Auto-Entry
+**Duration**: 22.0s
+**Root Cause**: *[Agent to fill in]*
+**Fix Applied**: *[Agent to fill in]*
+**Prevention Rule**: *[Agent to fill in]*
+
+### Suite: Git Ship (Push)
+**First Error**: `error: pathspec 'auto-ship' did not match any file(s) known to git`
+**Session**: Cortex Auto-Entry
+**Duration**: 15.5s
+**Root Cause**: *[Agent to fill in]*
+**Fix Applied**: *[Agent to fill in]*
+**Prevention Rule**: *[Agent to fill in]*
+

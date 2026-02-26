@@ -85,5 +85,8 @@
   },
 
   // ── Terminal ──────────────────────────────────────────────────────────────
-  "terminal.integrated.shellIntegration.enabled": false
+  "terminal.integrated.shellIntegration.enabled": false,
+
+  // ── Python ────────────────────────────────────────────────────────────────
+  "python.defaultInterpreterPath": "C:\\Python313\\python.exe"
 }

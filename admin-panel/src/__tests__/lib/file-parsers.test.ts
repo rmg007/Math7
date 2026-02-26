@@ -211,16 +211,17 @@ describe('file-parsers', () => {
       // Save original FileReader before mocking
       const OriginalFileReader = global.FileReader;
 
-      // Mock FileReader to simulate error
-      const mockFileReader = {
-        readAsText: vi.fn().mockImplementation(() => {
+      // Mock FileReader as a class constructor
+      class MockFileReader {
+        readAsText = vi.fn().mockImplementation(() => {
           throw new Error('File reading failed');
-        }),
-      };
+        });
+        onload = null;
+        onerror = null;
+        result = '';
+      }
 
-      global.FileReader = vi
-        .fn()
-        .mockImplementation(() => mockFileReader) as unknown as typeof FileReader;
+      global.FileReader = MockFileReader as any;
 
       const file = new File(['content'], 'broken.txt', { type: 'text/plain' });
 

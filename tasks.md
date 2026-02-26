@@ -13,8 +13,25 @@
 > **Orientation Protocol**: MANDATORY — read `questerix-cortex/outputs/SKELETON_SUMMARY.md` first before any research or edits.
 >
 > **Autonomous Mode**: All commands are pre-authorized (Turbo Mode ON). Set `SafeToAutoRun: true` and use the `ops_runner.py` workaround if gated by the IDE.
+>
+> **Efficiency Directive**: Ensure Cortex outputs are detailed and clear enough to reduce redundant runs. Focus on `UTILITY_REGISTRY.md` and `SKELETON_SUMMARY.md`.
 
 ---
+
+## 🚀 Efficiency & Documentation Optimization
+
+- [x] **Restore SKELETON_SUMMARY.md**: Fix loop bug preventing export listing.
+- [x] **Implement UTILITY_REGISTRY.md**: Automated searchable index of 160+ shared hooks/utils.
+- [x] **Grouped Summaries**: SKELETON_SUMMARY organized by feature directory.
+- [x] **Intelligent Doc Extraction**: Fallback to leading comments for registry descriptions.
+- [x] **Regression Safety**: Restored 417/417 passing tests in Admin Panel.
+- [x] **Runner Hardening & Isolation**:
+  - [x] Implement `ZombieHunter` to sterilize rogue PIDs/Ports.
+  - [x] **Isolation Monitor**: Map cross-feature dependencies (Diagram output).
+  - [x] **Fragility Scorer**: Rank features by structural risk (STIFFNESS audit).
+- [x] **Phase 3: Dependency Cruising & Enforcement**
+  - [x] Implement ArchUnit-style rules (e.g., restricted domain imports).
+  - [x] Add automated build failure/warning for domain breaches.
 
 ## 🧠 Cortex v2 Implementation (Two-Agent Workflow)
 
@@ -38,5 +55,6 @@
 
 - [ ] **Health Dashboard**: `/admin/maintenance` route surfacing `error_logs` + smoke statuses
   - ⚠️ Blocked by Admin Panel feature freeze (no new routes/pages allowed)
-- [ ] **Regenerate Supabase Types**: Run `supabase gen types typescript` to fix the `validate_and_use_invitation_code` RPC cast in `LoginPage.tsx`
-- [ ] **Test files `as any` cleanup**: ~50 `as any` casts in test files (`use-subjects.test.tsx`, `use-apps.test.tsx`, `use-landings.test.tsx`, `use-error-logs.test.tsx`, `use-skills.test.tsx`) — acceptable for Supabase mock chains but could be improved with typed test helpers
+- [x] **Regenerate Supabase Types**: Run `supabase gen types typescript` to fix the `validate_and_use_invitation_code` RPC cast in `LoginPage.tsx`
+- [x] **Test files `as any` cleanup**: Refactored `use-skills.test.tsx`. Remaining: `use-subjects.test.tsx`, `use-apps.test.tsx`, `use-landings.test.tsx`, `use-error-logs.test.tsx`.
+- [x] **Enhanced Supabase Mocking**: Added `.then()` and `.throwOnError()` support to `supabase-factory.ts`.

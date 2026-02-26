@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test.describe('InvitationCodesPage Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -10,7 +10,7 @@ test.describe('InvitationCodesPage Page', () => {
     await expect(page.locator('h1')).toBeVisible();
   });
 
-  test('should pass accessibility check', async ({ _page }) => {
+  test('should pass accessibility check', async ({ page: _page }) => {
     // TODO: Add axe-core check
   });
 });
