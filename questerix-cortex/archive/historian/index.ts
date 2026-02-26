@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from "fs";
 
 export interface HistoryRecord {
   date: string;
@@ -27,7 +27,7 @@ export class Historian {
   getHistory(): HistoryRecord[] {
     if (!fs.existsSync(this.historyPath)) return [];
     try {
-      return JSON.parse(fs.readFileSync(this.historyPath, 'utf-8'));
+      return JSON.parse(fs.readFileSync(this.historyPath, "utf-8"));
     } catch {
       return [];
     }

@@ -12,14 +12,14 @@ interface TscBaseline {
 }
 
 function getTscBaselinePath(adminPath: string): string {
-  return path.join(adminPath, '.cortex', 'tsc-baseline.json');
+  return path.join(adminPath, ".cortex", "tsc-baseline.json");
 }
 
 function loadTscBaseline(adminPath: string): TscBaseline | null {
   const baselinePath = getTscBaselinePath(adminPath);
   if (!fs.existsSync(baselinePath)) return null;
   try {
-    const content = fs.readFileSync(baselinePath, 'utf-8');
+    const content = fs.readFileSync(baselinePath, "utf-8");
     return JSON.parse(content) as TscBaseline;
   } catch {
     return null;
@@ -34,9 +34,9 @@ function saveTscBaseline(adminPath: string, errorCount: number): void {
   }
   const baseline: TscBaseline = {
     errorCount,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
-  fs.writeFileSync(baselinePath, JSON.stringify(baseline, null, 2), 'utf-8');
+  fs.writeFileSync(baselinePath, JSON.stringify(baseline, null, 2), "utf-8");
 }
 
 export interface TestFailureDetail {
@@ -45,7 +45,13 @@ export interface TestFailureDetail {
 }
 
 export interface VerificationResult {
-  tsc: { passed: boolean; output: string; errorCount: number; baselineErrorCount?: number; unavailable?: boolean };
+  tsc: {
+    passed: boolean;
+    output: string;
+    errorCount: number;
+    baselineErrorCount?: number;
+    unavailable?: boolean;
+  };
   unitTests: { passed: number; failed: number; details: TestFailureDetail[] };
   e2eTests: { passed: number; failed: number; details: TestFailureDetail[] };
   changedFiles: string[];
@@ -75,9 +81,18 @@ function parseJsonOutput(output: string): unknown | null {
   return null;
 }
 
-function runCommand(command: string, cwd: string, timeoutMs?: number): { passed: boolean; output: string } {
+function runCommand(
+  command: string,
+  cwd: string,
+  timeoutMs?: number,
+): { passed: boolean; output: string } {
   try {
-    const output = execSync(command, { cwd, encoding: "utf-8", stdio: "pipe", timeout: timeoutMs });
+    const output = execSync(command, {
+      cwd,
+      encoding: "utf-8",
+      stdio: "pipe",
+      timeout: timeoutMs,
+    });
     return { passed: true, output };
   } catch (err: any) {
     const stdout = err?.stdout ?? "";
@@ -97,7 +112,11 @@ function countTscErrors(output: string): number {
   return matches ? matches.length : 0;
 }
 
-function summarizeVitest(output: string): { passed: number; failed: number; details: TestFailureDetail[] } {
+function summarizeVitest(output: string): {
+  passed: number;
+  failed: number;
+  details: TestFailureDetail[];
+} {
   const parsed = parseJsonOutput(output);
   const details: TestFailureDetail[] = [];
   let passed = 0;
@@ -136,7 +155,7 @@ function summarizeVitest(output: string): { passed: number; failed: number; deta
 function walkPlaywrightSuites(
   suites: any[],
   details: TestFailureDetail[],
-  counts: { passed: number; failed: number }
+  counts: { passed: number; failed: number },
 ): void {
   for (const suite of suites) {
     if (Array.isArray(suite.tests)) {
@@ -162,7 +181,11 @@ function walkPlaywrightSuites(
   }
 }
 
-function summarizePlaywright(output: string): { passed: number; failed: number; details: TestFailureDetail[] } {
+function summarizePlaywright(output: string): {
+  passed: number;
+  failed: number;
+  details: TestFailureDetail[];
+} {
   const parsed = parseJsonOutput(output);
   const details: TestFailureDetail[] = [];
   let passed = 0;
@@ -177,7 +200,8 @@ function summarizePlaywright(output: string): { passed: number; failed: number; 
       failed = counts.failed;
     } else if (data.stats) {
       if (typeof data.stats.expected === "number") passed = data.stats.expected;
-      if (typeof data.stats.unexpected === "number") failed = data.stats.unexpected;
+      if (typeof data.stats.unexpected === "number")
+        failed = data.stats.unexpected;
     }
   }
 
@@ -193,10 +217,10 @@ function resolveTestFiles(db: Database.Database, filePath: string): string[] {
       FROM edges e1
       JOIN edges e2 ON e1.source_id = e2.target_id
       WHERE e1.target_id = ? AND e1.relationship = 'imports' AND e2.relationship = 'tests'
-    `
+    `,
   );
   const rows = query.all(filePath) as Array<{ source_id: string }>;
-  return rows.map(row => row.source_id);
+  return rows.map((row) => row.source_id);
 }
 
 function isE2ETest(testPath: string): boolean {
@@ -211,9 +235,9 @@ export function runVerification(
   db: Database.Database,
   changedFiles: string[],
   adminPath: string,
-  _sessionId: string
+  _sessionId: string,
 ): VerificationResult {
-  const normalizedFiles = changedFiles.map(file => normalizePath(file));
+  const normalizedFiles = changedFiles.map((file) => normalizePath(file));
 
   let tscPassed = true;
   let tscOutput = "";
@@ -223,7 +247,7 @@ export function runVerification(
       cwd: adminPath,
       encoding: "utf-8",
       stdio: "pipe",
-      timeout: VERIFICATION_TIMEOUT_MS
+      timeout: VERIFICATION_TIMEOUT_MS,
     });
   } catch (err: any) {
     tscPassed = false;
@@ -253,28 +277,30 @@ export function runVerification(
     }
   }
 
-  const unitTests = Array.from(testFiles).filter(file => !isE2ETest(file));
+  const unitTests = Array.from(testFiles).filter((file) => !isE2ETest(file));
   const e2eTests = Array.from(testFiles).filter(isE2ETest);
 
-  const unitSummary = unitTests.length === 0
-    ? { passed: 0, failed: 0, details: [] as TestFailureDetail[] }
-    : summarizeVitest(
-        runCommand(
-          `npx vitest run --reporter=json ${unitTests.map(t => `"${resolveAbsoluteTestPath(adminPath, t)}"`).join(" ")}`,
-          adminPath,
-          VERIFICATION_TIMEOUT_MS
-        ).output
-      );
+  const unitSummary =
+    unitTests.length === 0
+      ? { passed: 0, failed: 0, details: [] as TestFailureDetail[] }
+      : summarizeVitest(
+          runCommand(
+            `npx vitest run --reporter=json ${unitTests.map((t) => `"${resolveAbsoluteTestPath(adminPath, t)}"`).join(" ")}`,
+            adminPath,
+            VERIFICATION_TIMEOUT_MS,
+          ).output,
+        );
 
-  const e2eSummary = e2eTests.length === 0
-    ? { passed: 0, failed: 0, details: [] as TestFailureDetail[] }
-    : summarizePlaywright(
-        runCommand(
-          `npx playwright test ${e2eTests.map(t => `"${resolveAbsoluteTestPath(adminPath, t)}"`).join(" ")} --reporter=json`,
-          adminPath,
-          VERIFICATION_TIMEOUT_MS
-        ).output
-      );
+  const e2eSummary =
+    e2eTests.length === 0
+      ? { passed: 0, failed: 0, details: [] as TestFailureDetail[] }
+      : summarizePlaywright(
+          runCommand(
+            `npx playwright test ${e2eTests.map((t) => `"${resolveAbsoluteTestPath(adminPath, t)}"`).join(" ")} --reporter=json`,
+            adminPath,
+            VERIFICATION_TIMEOUT_MS,
+          ).output,
+        );
 
   return {
     tsc: {
@@ -282,11 +308,11 @@ export function runVerification(
       output: tscOutput,
       errorCount: tscErrorCount,
       baselineErrorCount,
-      unavailable: tscUnavailable ? true : undefined
+      unavailable: tscUnavailable ? true : undefined,
     },
     unitTests: unitSummary,
     e2eTests: e2eSummary,
     changedFiles: normalizedFiles,
-    targetedTests: testFiles.size
+    targetedTests: testFiles.size,
   };
 }

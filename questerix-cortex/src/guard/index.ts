@@ -1,4 +1,4 @@
-import { FeatureDependency } from '../visualizer';
+import { FeatureDependency } from "../visualizer";
 
 export interface IsolationRule {
   feature: string;
@@ -32,16 +32,16 @@ export class Guard {
 
     for (const rule of this.config) {
       // Find dependencies that originate from the restricted feature
-      const relevantDeps = deps.filter(d => d.from === rule.feature);
+      const relevantDeps = deps.filter((d) => d.from === rule.feature);
 
       for (const dep of relevantDeps) {
-        if (rule.forbidden.includes(dep.to) || rule.forbidden.includes('*')) {
+        if (rule.forbidden.includes(dep.to) || rule.forbidden.includes("*")) {
           // If the target is forbidden (or everything is forbidden except shared/lib)
           violations.push({
             from: dep.from,
             to: dep.to,
             files: dep.files,
-            rule: rule
+            rule: rule,
           });
         }
       }
@@ -59,12 +59,12 @@ export class Guard {
     md += `🔴 **${violations.length} violations detected.** These imports breach our domain-isolation standards.\n\n`;
 
     md += `## 🚩 Violations\n\n`;
-    violations.forEach(v => {
+    violations.forEach((v) => {
       md += `### ${v.from} ➔ ${v.to}\n`;
       md += `**Rule**: \`${v.from}\` is forbidden from importing \`${v.to}\`\n`;
       if (v.rule.reason) md += `**Reason**: ${v.rule.reason}\n`;
       md += `**Files**:\n`;
-      v.files.forEach(f => md += `- \`${f}\`\n`);
+      v.files.forEach((f) => (md += `- \`${f}\`\n`));
       md += `\n`;
     });
 

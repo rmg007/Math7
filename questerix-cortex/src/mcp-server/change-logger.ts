@@ -18,19 +18,19 @@ export function logChange(
   sessionId: string,
   testsPassed: number,
   testsFailed: number,
-  failureDetails: ChangeLogDetails
+  failureDetails: ChangeLogDetails,
 ): void {
   db.prepare(
     `
     INSERT INTO change_log (file_path, timestamp, session_id, tests_passed, tests_failed, failure_details)
     VALUES (?, ?, ?, ?, ?, ?)
-  `
+  `,
   ).run(
     normalizePath(filePath),
     new Date().toISOString(),
     sessionId,
     testsPassed,
     testsFailed,
-    JSON.stringify(failureDetails)
+    JSON.stringify(failureDetails),
   );
 }

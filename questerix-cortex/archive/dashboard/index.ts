@@ -1,15 +1,15 @@
-import express from 'express';
-import * as fs from 'fs';
-import { createServer } from 'http';
-import * as path from 'path';
-import { Server } from 'socket.io';
-import { DriftResult } from '../drift/index';
-import { HistoryRecord } from '../historian/index';
-import { OptimizeReport } from '../optimizer/index';
-import { TaskResult } from '../orchestrator/index';
-import { RlsAuditResult } from '../rls/index';
-import { SurfaceMap } from '../scanner/index';
-import { AnalystResults } from '../types';
+import express from "express";
+import * as fs from "fs";
+import { createServer } from "http";
+import * as path from "path";
+import { Server } from "socket.io";
+import { DriftResult } from "../drift/index";
+import { HistoryRecord } from "../historian/index";
+import { OptimizeReport } from "../optimizer/index";
+import { TaskResult } from "../orchestrator/index";
+import { RlsAuditResult } from "../rls/index";
+import { SurfaceMap } from "../scanner/index";
+import { AnalystResults } from "../types";
 
 export class Dashboard {
   private io: Server;
@@ -25,8 +25,14 @@ export class Dashboard {
     const server = createServer(app);
     this.io = new Server(server);
 
-    const dashboardDistPath = path.resolve(__dirname, '..', '..', 'dashboard', 'dist');
-    const dashboardIndexPath = path.join(dashboardDistPath, 'index.html');
+    const dashboardDistPath = path.resolve(
+      __dirname,
+      "..",
+      "..",
+      "dashboard",
+      "dist",
+    );
+    const dashboardIndexPath = path.join(dashboardDistPath, "index.html");
 
     if (fs.existsSync(dashboardIndexPath)) {
       app.use(express.static(dashboardDistPath));
@@ -34,7 +40,7 @@ export class Dashboard {
         res.sendFile(dashboardIndexPath);
       });
     } else {
-      app.get('/', (_req, res) => {
+      app.get("/", (_req, res) => {
         res.send(`
         <!DOCTYPE html>
         <html lang="en">
@@ -557,11 +563,11 @@ export class Dashboard {
       });
     }
 
-    this.io.on('connection', (socket) => {
+    this.io.on("connection", (socket) => {
       // Send current state and historical logs to new connection
-      socket.emit('logs', this.logs);
-      
-      socket.on('trigger', (target: string) => {
+      socket.emit("logs", this.logs);
+
+      socket.on("trigger", (target: string) => {
         if (this.onTriggerCallback) this.onTriggerCallback(target);
       });
     });
@@ -571,11 +577,15 @@ export class Dashboard {
     });
   }
 
-  log(text: string, color?: 'cyan' | 'green' | 'red' | 'gray' | 'yellow', bold: boolean = false) {
+  log(
+    text: string,
+    color?: "cyan" | "green" | "red" | "gray" | "yellow",
+    bold: boolean = false,
+  ) {
     const logItem = { text, color, bold };
     this.logs.push(logItem);
     if (this.logs.length > 100) this.logs.shift(); // Keep last 100 lines
-    this.io.emit('log', logItem);
+    this.io.emit("log", logItem);
   }
 
   onTrigger(callback: (target: string) => void) {
@@ -590,18 +600,18 @@ export class Dashboard {
     smokePass?: boolean,
     driftResult?: DriftResult,
     rlsResult?: RlsAuditResult,
-    optimizeResult?: OptimizeReport
+    optimizeResult?: OptimizeReport,
   ) {
-    this.io.emit('update', { 
-      results, 
-      surfaceMap, 
-      analystResults, 
-      history, 
-      smokePass, 
-      driftResult, 
+    this.io.emit("update", {
+      results,
+      surfaceMap,
+      analystResults,
+      history,
+      smokePass,
+      driftResult,
       rlsResult,
       optimizeResult,
-      logs: this.logs
+      logs: this.logs,
     });
   }
 }

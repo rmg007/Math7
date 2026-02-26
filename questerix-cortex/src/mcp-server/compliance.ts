@@ -2,7 +2,7 @@ import type Database from "better-sqlite3";
 
 export function checkCompliance(
   db: Database.Database,
-  sessionId: string
+  sessionId: string,
 ): {
   plan_called: boolean;
   verify_called: boolean;
@@ -12,13 +12,13 @@ export function checkCompliance(
 } {
   const planCalls = db
     .prepare(
-      "SELECT COUNT(*) as count FROM tool_calls WHERE session_id = ? AND tool_name = ?"
+      "SELECT COUNT(*) as count FROM tool_calls WHERE session_id = ? AND tool_name = ?",
     )
     .get(sessionId, "cortex_plan") as { count: number };
 
   const verifyCalls = db
     .prepare(
-      "SELECT COUNT(*) as count FROM tool_calls WHERE session_id = ? AND tool_name = ?"
+      "SELECT COUNT(*) as count FROM tool_calls WHERE session_id = ? AND tool_name = ?",
     )
     .get(sessionId, "cortex_verify") as { count: number };
 
@@ -27,6 +27,6 @@ export function checkCompliance(
     verify_called: verifyCalls.count > 0,
     compliant: planCalls.count > 0 && verifyCalls.count > 0,
     plan_count: planCalls.count,
-    verify_count: verifyCalls.count
+    verify_count: verifyCalls.count,
   };
 }

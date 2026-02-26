@@ -1,8 +1,8 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
-    CallToolRequestSchema,
-    ListToolsRequestSchema
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import type Database from "better-sqlite3";
 import { execSync } from "child_process";
@@ -91,11 +91,11 @@ const STRUCTURAL_JSON_LIST = [
   "supabase/migrations/**",
   "admin-panel/src/App.tsx",
   "admin-panel/src/main.tsx",
-  "admin-panel/src/types/database.types.ts"
+  "admin-panel/src/types/database.types.ts",
 ];
 
 let scanner: Scanner | null = null;
-const structuralMatchers = STRUCTURAL_JSON_LIST.map(pattern => {
+const structuralMatchers = STRUCTURAL_JSON_LIST.map((pattern) => {
   const normalized = normalizePath(pattern);
   const escaped = normalized.replace(/[.+^${}()|[\]\\]/g, "\\$&");
   const withDoubleStar = escaped.replace(/\*\*/g, "__DOUBLE_STAR__");
@@ -107,7 +107,7 @@ const structuralMatchers = STRUCTURAL_JSON_LIST.map(pattern => {
 function getScanner(): Scanner {
   if (scanner) return scanner;
   const project = new Project({
-    tsConfigFilePath: path.join(adminPanelPath, "tsconfig.json")
+    tsConfigFilePath: path.join(adminPanelPath, "tsconfig.json"),
   });
   scanner = new Scanner(project, adminSrcPath);
   return scanner;
@@ -118,7 +118,7 @@ function runGit(command: string): string | null {
     return execSync(command, {
       cwd: repoRoot,
       encoding: "utf-8",
-      stdio: "pipe"
+      stdio: "pipe",
     });
   } catch {
     return null;
@@ -130,39 +130,39 @@ function toJsonContent(payload: unknown) {
     content: [
       {
         type: "text",
-        text: JSON.stringify(payload)
-      }
-    ]
+        text: JSON.stringify(payload),
+      },
+    ],
   };
 }
 
 function normalizeFileList(files: string[]): string[] {
   const normalized = files
-    .map(file => normalizePath(file))
-    .map(file => file.trim())
+    .map((file) => normalizePath(file))
+    .map((file) => file.trim())
     .filter(Boolean);
   return Array.from(new Set(normalized));
 }
 
 function getStructuralFiles(files: string[]): string[] {
-  return files.filter(file =>
-    structuralMatchers.some(matcher => matcher.regex.test(file))
+  return files.filter((file) =>
+    structuralMatchers.some((matcher) => matcher.regex.test(file)),
   );
 }
 
 function loadFragilitySummaries(
   db: Database.Database,
-  files: string[]
+  files: string[],
 ): FragilitySummary[] {
   const selectFragility = db.prepare(
     `
       SELECT file_path, fragility_index, change_count, failure_count, confidence
       FROM fragility
       WHERE file_path = ?
-    `
+    `,
   );
 
-  return files.map(file => {
+  return files.map((file) => {
     const row = selectFragility.get(file) as
       | {
           file_path: string;
@@ -172,9 +172,7 @@ function loadFragilitySummaries(
           confidence: string;
         }
       | undefined;
-    const nodeExists = db
-      .prepare("SELECT 1 FROM nodes WHERE id = ?")
-      .get(file);
+    const nodeExists = db.prepare("SELECT 1 FROM nodes WHERE id = ?").get(file);
     const missing = !nodeExists;
     return {
       file,
@@ -182,7 +180,7 @@ function loadFragilitySummaries(
       change_count: row?.change_count ?? 0,
       failure_count: row?.failure_count ?? 0,
       confidence: row?.confidence ?? "LOW",
-      missing
+      missing,
     };
   });
 }
@@ -196,16 +194,13 @@ function resolveTestFiles(db: Database.Database, filePath: string): string[] {
       FROM edges e1
       JOIN edges e2 ON e1.source_id = e2.target_id
       WHERE e1.target_id = ? AND e1.relationship = 'imports' AND e2.relationship = 'tests'
-    `
+    `,
   );
   const rows = query.all(filePath, filePath) as Array<{ source_id: string }>;
-  return rows.map(row => row.source_id);
+  return rows.map((row) => row.source_id);
 }
 
-function getSuggestedTests(
-  db: Database.Database,
-  files: string[]
-): string[] {
+function getSuggestedTests(db: Database.Database, files: string[]): string[] {
   const testFiles = new Set<string>();
   for (const file of files) {
     for (const testFile of resolveTestFiles(db, file)) {
@@ -218,14 +213,14 @@ function getSuggestedTests(
 function classifyTier(
   fileCount: number,
   maxFragility: number,
-  structuralFiles: string[]
+  structuralFiles: string[],
 ): { tier: TierValue; label: TierLabel; protocol: string; reason: string } {
   if (structuralFiles.length > 0) {
     return {
       tier: "C",
       label: "Human gate",
       protocol: "High risk. Agent MUST get user approval before editing.",
-      reason: `Structural file change (${structuralFiles.length} match${structuralFiles.length === 1 ? "" : "es"}).`
+      reason: `Structural file change (${structuralFiles.length} match${structuralFiles.length === 1 ? "" : "es"}).`,
     };
   }
 
@@ -234,7 +229,7 @@ function classifyTier(
       tier: "C",
       label: "Human gate",
       protocol: "High risk. Agent MUST get user approval before editing.",
-      reason: `Large scope: ${fileCount} files.`
+      reason: `Large scope: ${fileCount} files.`,
     };
   }
 
@@ -243,7 +238,7 @@ function classifyTier(
       tier: "C",
       label: "Human gate",
       protocol: "High risk. Agent MUST get user approval before editing.",
-      reason: `High fragility detected (${maxFragility.toFixed(2)}).`
+      reason: `High fragility detected (${maxFragility.toFixed(2)}).`,
     };
   }
 
@@ -251,8 +246,9 @@ function classifyTier(
     return {
       tier: "B",
       label: "Auto-plan",
-      protocol: "Outline your changes before proceeding. Run cortex_verify after.",
-      reason: `Medium scope or fragility (files: ${fileCount}, max fragility: ${maxFragility.toFixed(2)}).`
+      protocol:
+        "Outline your changes before proceeding. Run cortex_verify after.",
+      reason: `Medium scope or fragility (files: ${fileCount}, max fragility: ${maxFragility.toFixed(2)}).`,
     };
   }
 
@@ -260,7 +256,7 @@ function classifyTier(
     tier: "A",
     label: "Auto-approve",
     protocol: "Low risk. Agent proceeds, runs cortex_verify after.",
-    reason: `Small scope and low fragility (files: ${fileCount}).`
+    reason: `Small scope and low fragility (files: ${fileCount}).`,
   };
 }
 
@@ -269,7 +265,7 @@ function openDatabase():
   | { warning: string } {
   if (!fs.existsSync(dbPath)) {
     return {
-      warning: MISSING_GRAPH_WARNING
+      warning: MISSING_GRAPH_WARNING,
     };
   }
   try {
@@ -281,7 +277,9 @@ function openDatabase():
     } catch {
       // best-effort cleanup
     }
-    return { warning: "Graph database corrupted. Run 'npm run health' to rebuild." };
+    return {
+      warning: "Graph database corrupted. Run 'npm run health' to rebuild.",
+    };
   }
 }
 
@@ -293,9 +291,10 @@ function isGraphEmpty(db: Database.Database): boolean {
 }
 
 function upsertScanMeta(db: Database.Database, commit: string) {
-  db.prepare(
-    "INSERT OR REPLACE INTO scan_meta (key, value) VALUES (?, ?)"
-  ).run("last_scan_commit", commit);
+  db.prepare("INSERT OR REPLACE INTO scan_meta (key, value) VALUES (?, ?)").run(
+    "last_scan_commit",
+    commit,
+  );
 }
 
 async function applyDeltaScan(db: Database.Database): Promise<string> {
@@ -331,15 +330,15 @@ async function applyDeltaScan(db: Database.Database): Promise<string> {
 
   const modifiedPaths = modified
     .split(/\r?\n/)
-    .map(line => line.trim())
-    .filter(line => line.length > 0 && line.startsWith("admin-panel/src/"))
-    .map(line => path.join(repoRoot, line))
-    .filter(fullPath => fs.existsSync(fullPath));
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && line.startsWith("admin-panel/src/"))
+    .map((line) => path.join(repoRoot, line))
+    .filter((fullPath) => fs.existsSync(fullPath));
 
   const deletedPaths = deleted
     .split(/\r?\n/)
-    .map(line => line.trim())
-    .filter(line => line.length > 0 && line.startsWith("admin-panel/src/"));
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && line.startsWith("admin-panel/src/"));
 
   if (modifiedPaths.length > 0) {
     const scanResult = await getScanner().scanFiles(modifiedPaths);
@@ -353,7 +352,7 @@ async function applyDeltaScan(db: Database.Database): Promise<string> {
       VALUES (@sourceId, @targetId, @relationship, @metadata)
     `);
     const deleteEdgesForSource = db.prepare(
-      "DELETE FROM edges WHERE source_id = ?"
+      "DELETE FROM edges WHERE source_id = ?",
     );
 
     const upsert = db.transaction(() => {
@@ -363,7 +362,7 @@ async function applyDeltaScan(db: Database.Database): Promise<string> {
           type: node.type,
           filePath: node.filePath ?? null,
           metadata: node.metadata ? JSON.stringify(node.metadata) : null,
-          updatedAt: scanTimestamp
+          updatedAt: scanTimestamp,
         });
       }
 
@@ -377,7 +376,7 @@ async function applyDeltaScan(db: Database.Database): Promise<string> {
           sourceId: edge.sourceId,
           targetId: edge.targetId,
           relationship: edge.relationship,
-          metadata: edge.metadata ? JSON.stringify(edge.metadata) : null
+          metadata: edge.metadata ? JSON.stringify(edge.metadata) : null,
         });
       }
     });
@@ -388,7 +387,7 @@ async function applyDeltaScan(db: Database.Database): Promise<string> {
   if (deletedPaths.length > 0) {
     const deleteNodes = db.prepare("DELETE FROM nodes WHERE file_path = ?");
     const deleteEdges = db.prepare(
-      "DELETE FROM edges WHERE source_id = ? OR target_id = ?"
+      "DELETE FROM edges WHERE source_id = ? OR target_id = ?",
     );
 
     const prune = db.transaction(() => {
@@ -408,7 +407,7 @@ async function applyDeltaScan(db: Database.Database): Promise<string> {
 
 function resolveFileNode(
   db: Database.Database,
-  rawPath: string
+  rawPath: string,
 ): { id: string; warning?: string } | null {
   const normalized = normalizePath(rawPath);
   if (!normalized) {
@@ -422,15 +421,13 @@ function resolveFileNode(
   if (exact?.id) return { id: exact.id };
 
   const fallback = db
-    .prepare(
-      "SELECT id FROM nodes WHERE type = 'file' AND id LIKE ? LIMIT 2"
-    )
+    .prepare("SELECT id FROM nodes WHERE type = 'file' AND id LIKE ? LIMIT 2")
     .all(`%${normalized}`) as Array<{ id: string }>;
 
   if (fallback.length === 1) {
     return {
       id: fallback[0].id,
-      warning: `Path normalization fallback used for ${rawPath}.`
+      warning: `Path normalization fallback used for ${rawPath}.`,
     };
   }
 
@@ -466,7 +463,7 @@ function handlePlan(files: string[]) {
       // Calculate tier info while we have fragility data
       const maxFragility = fragilityRecords.reduce(
         (max, record) => Math.max(max, record.fragility_index),
-        0
+        0,
       );
       tierInfo = classifyTier(fileCount, maxFragility, structuralFiles);
 
@@ -475,12 +472,12 @@ function handlePlan(files: string[]) {
         `
         INSERT INTO tool_calls (timestamp, session_id, tool_name, parameters, result_tier)
         VALUES (?, ?, 'cortex_plan', ?, ?)
-      `
+      `,
       ).run(
         new Date().toISOString(),
         sessionId,
         JSON.stringify({ files }),
-        tierInfo.tier
+        tierInfo.tier,
       );
     }
   } finally {
@@ -489,16 +486,16 @@ function handlePlan(files: string[]) {
   // Note: RiskScorer removed - tier classification provides sufficient guidance
 
   const missingWarnings = fragilityRecords
-    .filter(record => record.missing)
-    .map(record => `${record.file} not found in graph.`);
+    .filter((record) => record.missing)
+    .map((record) => `${record.file} not found in graph.`);
   const fragilityWarnings = [
     ...missingWarnings,
     ...fragilityRecords
-      .filter(record => record.fragility_index > 0.3)
+      .filter((record) => record.fragility_index > 0.3)
       .map(
-        record =>
-          `${record.file}: fragility ${record.fragility_index.toFixed(2)}, confidence ${record.confidence}`
-      )
+        (record) =>
+          `${record.file}: fragility ${record.fragility_index.toFixed(2)}, confidence ${record.confidence}`,
+      ),
   ];
 
   const response = {
@@ -508,7 +505,7 @@ function handlePlan(files: string[]) {
     protocol: tierInfo.protocol,
     fragility_warnings: fragilityWarnings,
     structural_files: structuralFiles,
-    suggested_tests: suggestedTests
+    suggested_tests: suggestedTests,
   };
 
   return warning ? { warning, ...response } : response;
@@ -531,58 +528,68 @@ function handleVerify(files: string[]) {
       db,
       normalizedFiles,
       adminPanelPath,
-      sessionId
+      sessionId,
     );
 
-    const testsPassedCount = verification.unitTests.passed + verification.e2eTests.passed;
-    const testsFailedCount = verification.unitTests.failed + verification.e2eTests.failed;
+    const testsPassedCount =
+      verification.unitTests.passed + verification.e2eTests.passed;
+    const testsFailedCount =
+      verification.unitTests.failed + verification.e2eTests.failed;
     const failureDetails = [
       ...verification.unitTests.details,
-      ...verification.e2eTests.details
+      ...verification.e2eTests.details,
     ];
 
     for (const file of verification.changedFiles) {
       logChange(db, file, sessionId, testsPassedCount, testsFailedCount, {
         failures: failureDetails,
-        tsc: { passed: verification.tsc.passed, errorCount: verification.tsc.errorCount }
+        tsc: {
+          passed: verification.tsc.passed,
+          errorCount: verification.tsc.errorCount,
+        },
       });
     }
 
     attributeFragility(db, verification.changedFiles, verification, sessionId);
 
     const fragilityUpdates = verification.changedFiles
-      .map(file => {
+      .map((file) => {
         const row = db
           .prepare(
-            "SELECT fragility_index, confidence FROM fragility WHERE file_path = ?"
+            "SELECT fragility_index, confidence FROM fragility WHERE file_path = ?",
           )
-          .get(file) as { fragility_index?: number; confidence?: string } | undefined;
+          .get(file) as
+          | { fragility_index?: number; confidence?: string }
+          | undefined;
         if (!row) return null;
         return {
           file,
           new_index: row.fragility_index ?? 0,
-          confidence: row.confidence ?? "LOW"
+          confidence: row.confidence ?? "LOW",
         };
       })
       .filter(
-        (update): update is { file: string; new_index: number; confidence: string } =>
-          update !== null
+        (
+          update,
+        ): update is { file: string; new_index: number; confidence: string } =>
+          update !== null,
       );
 
     const tscPassed = verification.tsc.passed;
-    const testsPassed = verification.unitTests.failed === 0 && verification.e2eTests.failed === 0;
+    const testsPassed =
+      verification.unitTests.failed === 0 && verification.e2eTests.failed === 0;
     const verdict = tscPassed && testsPassed ? "PASS" : "FAIL";
 
     db.prepare(
       `
       INSERT INTO tool_calls (timestamp, session_id, tool_name, parameters, result_tier)
       VALUES (?, ?, 'cortex_verify', ?, ?)
-    `
+    `,
     ).run(
       new Date().toISOString(),
       sessionId,
       JSON.stringify({ files }),
-      verdict
+      verdict,
     );
 
     const warnings: string[] = [];
@@ -598,15 +605,15 @@ function handleVerify(files: string[]) {
       tests: {
         unit: {
           passed: verification.unitTests.passed,
-          failed: verification.unitTests.failed
+          failed: verification.unitTests.failed,
         },
         e2e: {
           passed: verification.e2eTests.passed,
-          failed: verification.e2eTests.failed
-        }
+          failed: verification.e2eTests.failed,
+        },
       },
       fragility_updates: fragilityUpdates,
-      duration_ms: Date.now() - startedAt
+      duration_ms: Date.now() - startedAt,
     };
   } finally {
     cortexDb.close();
@@ -642,8 +649,9 @@ async function handleImpact(files: string[]): Promise<ImpactResponse> {
 
     if (matched.length === 0) {
       return {
-        warning: "File not in graph — may be new, outside scope, or path mismatch.",
-        affected_files: []
+        warning:
+          "File not in graph — may be new, outside scope, or path mismatch.",
+        affected_files: [],
       };
     }
 
@@ -664,7 +672,10 @@ async function handleImpact(files: string[]): Promise<ImpactResponse> {
     const impactedMap = new Map<string, number>();
     for (const fileId of matched) {
       impactedMap.set(fileId, 0);
-      const rows = impactedStmt.all(fileId) as Array<{ id: string; depth: number }>;
+      const rows = impactedStmt.all(fileId) as Array<{
+        id: string;
+        depth: number;
+      }>;
       for (const row of rows) {
         const existing = impactedMap.get(row.id);
         if (existing === undefined || row.depth < existing) {
@@ -682,19 +693,17 @@ async function handleImpact(files: string[]): Promise<ImpactResponse> {
       const placeholders = affectedFiles.map(() => "?").join(", ");
       const testRows = db
         .prepare(
-          `SELECT DISTINCT source_id FROM edges WHERE relationship = 'tests' AND target_id IN (${placeholders})`
+          `SELECT DISTINCT source_id FROM edges WHERE relationship = 'tests' AND target_id IN (${placeholders})`,
         )
         .all(...affectedFiles) as Array<{ source_id: string }>;
-      testFiles = testRows.map(row => row.source_id).sort();
+      testFiles = testRows.map((row) => row.source_id).sort();
     }
 
     let fragilityWarnings: Array<Record<string, unknown>> = [];
     if (affectedFiles.length > 0) {
       const placeholders = affectedFiles.map(() => "?").join(", ");
       fragilityWarnings = db
-        .prepare(
-          `SELECT * FROM fragility WHERE file_path IN (${placeholders})`
-        )
+        .prepare(`SELECT * FROM fragility WHERE file_path IN (${placeholders})`)
         .all(...affectedFiles) as Array<Record<string, unknown>>;
     }
 
@@ -703,7 +712,7 @@ async function handleImpact(files: string[]): Promise<ImpactResponse> {
       test_files: testFiles,
       fragility_warnings: fragilityWarnings,
       graph_freshness: graphFreshness,
-      warning: warnings.length > 0 ? warnings.join(" ") : undefined
+      warning: warnings.length > 0 ? warnings.join(" ") : undefined,
     };
   } catch (error) {
     try {
@@ -711,7 +720,10 @@ async function handleImpact(files: string[]): Promise<ImpactResponse> {
     } catch {
       // best-effort cleanup
     }
-    return { warning: "Graph database corrupted. Run 'npm run health' to rebuild.", data: null };
+    return {
+      warning: "Graph database corrupted. Run 'npm run health' to rebuild.",
+      data: null,
+    };
   } finally {
     cortexDb.close();
   }
@@ -736,11 +748,15 @@ function handleQuery(symbol: string): QueryResponse {
 
     const edgesIn = (id: string) =>
       db
-        .prepare("SELECT source_id, relationship FROM edges WHERE target_id = ?")
+        .prepare(
+          "SELECT source_id, relationship FROM edges WHERE target_id = ?",
+        )
         .all(id) as Array<Record<string, unknown>>;
     const edgesOut = (id: string) =>
       db
-        .prepare("SELECT target_id, relationship FROM edges WHERE source_id = ?")
+        .prepare(
+          "SELECT target_id, relationship FROM edges WHERE source_id = ?",
+        )
         .all(id) as Array<Record<string, unknown>>;
 
     if (trimmed.includes("#")) {
@@ -754,16 +770,18 @@ function handleQuery(symbol: string): QueryResponse {
         match: {
           id: match.id,
           file: match.file_path ?? match.id.split("#")[0],
-          type: match.id.includes("#") ? "symbol" : "file"
+          type: match.id.includes("#") ? "symbol" : "file",
         },
         edges_in: edgesIn(match.id),
-        edges_out: edgesOut(match.id)
+        edges_out: edgesOut(match.id),
       };
     }
 
     const likePattern = `%#${trimmed}`;
     const matches = db
-      .prepare("SELECT id, file_path FROM nodes WHERE id LIKE ? AND type = 'symbol'")
+      .prepare(
+        "SELECT id, file_path FROM nodes WHERE id LIKE ? AND type = 'symbol'",
+      )
       .all(likePattern) as Array<{ id: string; file_path?: string }>;
 
     if (matches.length === 1) {
@@ -772,20 +790,20 @@ function handleQuery(symbol: string): QueryResponse {
         match: {
           id: match.id,
           file: match.file_path ?? match.id.split("#")[0],
-          type: "symbol"
+          type: "symbol",
         },
         edges_in: edgesIn(match.id),
-        edges_out: edgesOut(match.id)
+        edges_out: edgesOut(match.id),
       };
     }
 
     if (matches.length > 1) {
       return {
-        matches: matches.map(item => ({
+        matches: matches.map((item) => ({
           id: item.id,
-          file: item.file_path ?? item.id.split("#")[0]
+          file: item.file_path ?? item.id.split("#")[0],
         })),
-        note: `Multiple symbols named '${trimmed}'. Specify the file-qualified ID.`
+        note: `Multiple symbols named '${trimmed}'. Specify the file-qualified ID.`,
       };
     }
 
@@ -798,16 +816,16 @@ function handleQuery(symbol: string): QueryResponse {
         match: {
           id: fileMatch.id,
           file: fileMatch.file_path ?? fileMatch.id,
-          type: "file"
+          type: "file",
         },
         edges_in: edgesIn(fileMatch.id),
-        edges_out: edgesOut(fileMatch.id)
+        edges_out: edgesOut(fileMatch.id),
       };
     }
 
     return {
       matches: [],
-      note: `No symbol found for '${trimmed}'. Provide a file-qualified ID like "path/to/file.ts#symbol".`
+      note: `No symbol found for '${trimmed}'. Provide a file-qualified ID like "path/to/file.ts#symbol".`,
     };
   } catch (error) {
     try {
@@ -815,7 +833,10 @@ function handleQuery(symbol: string): QueryResponse {
     } catch {
       // best-effort cleanup
     }
-    return { matches: [], note: "Graph database corrupted. Run 'npm run health' to rebuild." };
+    return {
+      matches: [],
+      note: "Graph database corrupted. Run 'npm run health' to rebuild.",
+    };
   } finally {
     cortexDb.close();
   }
@@ -827,7 +848,7 @@ function handleBriefing(): { text: string; warning?: string } {
   if (!fs.existsSync(agentContextPath)) {
     return {
       text: "",
-      warning: "AGENT_CONTEXT.md not found. Run 'npm run health' first."
+      warning: "AGENT_CONTEXT.md not found. Run 'npm run health' first.",
     };
   }
 
@@ -841,11 +862,12 @@ function handleBriefing(): { text: string; warning?: string } {
     if (generatedMatch) {
       const generatedDate = new Date(generatedMatch[1]);
       const now = new Date();
-      const hoursOld = (now.getTime() - generatedDate.getTime()) / (1000 * 60 * 60);
+      const hoursOld =
+        (now.getTime() - generatedDate.getTime()) / (1000 * 60 * 60);
 
       if (hoursOld > 24) {
         const daysOld = Math.floor(hoursOld / 24);
-        warning = `⚠️ Context is ${daysOld} day${daysOld > 1 ? 's' : ''} old — run 'npm run health' to refresh.`;
+        warning = `⚠️ Context is ${daysOld} day${daysOld > 1 ? "s" : ""} old — run 'npm run health' to refresh.`;
       }
     }
 
@@ -853,7 +875,7 @@ function handleBriefing(): { text: string; warning?: string } {
   } catch (error) {
     return {
       text: "",
-      warning: `Failed to read AGENT_CONTEXT.md: ${error}`
+      warning: `Failed to read AGENT_CONTEXT.md: ${error}`,
     };
   }
 }
@@ -866,13 +888,16 @@ interface SearchResult {
   doc?: string;
 }
 
-function handleSearch(query: string, limit: number): { results: SearchResult[]; warning?: string } {
+function handleSearch(
+  query: string,
+  limit: number,
+): { results: SearchResult[]; warning?: string } {
   const searchDbPath = path.join(cortexRoot, "outputs", "search.db");
 
   if (!fs.existsSync(searchDbPath)) {
     return {
       results: [],
-      warning: "Search index not built. Run 'npm run health' first."
+      warning: "Search index not built. Run 'npm run health' first.",
     };
   }
 
@@ -887,7 +912,7 @@ function handleSearch(query: string, limit: number): { results: SearchResult[]; 
   } catch (error) {
     return {
       results: [],
-      warning: `Search failed: ${error}`
+      warning: `Search failed: ${error}`,
     };
   }
 }
@@ -895,7 +920,7 @@ function handleSearch(query: string, limit: number): { results: SearchResult[]; 
 export async function startServer(): Promise<void> {
   const server = new Server(
     { name: "cortex-mcp-server", version: "2.0.0" },
-    { capabilities: { tools: {} } }
+    { capabilities: { tools: {} } },
   );
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -908,11 +933,11 @@ export async function startServer(): Promise<void> {
           properties: {
             files: {
               type: "array",
-              items: { type: "string" }
-            }
+              items: { type: "string" },
+            },
           },
-          required: ["files"]
-        }
+          required: ["files"],
+        },
       },
       {
         name: "cortex_query",
@@ -920,24 +945,25 @@ export async function startServer(): Promise<void> {
         inputSchema: {
           type: "object",
           properties: {
-            symbol: { type: "string" }
+            symbol: { type: "string" },
           },
-          required: ["symbol"]
-        }
+          required: ["symbol"],
+        },
       },
       {
         name: "cortex_fragility",
-        description: "Check fragility index and change history for specific files.",
+        description:
+          "Check fragility index and change history for specific files.",
         inputSchema: {
           type: "object",
           properties: {
             files: {
               type: "array",
-              items: { type: "string" }
-            }
+              items: { type: "string" },
+            },
           },
-          required: ["files"]
-        }
+          required: ["files"],
+        },
       },
       {
         name: "cortex_plan",
@@ -947,53 +973,58 @@ export async function startServer(): Promise<void> {
           properties: {
             files: {
               type: "array",
-              items: { type: "string" }
-            }
+              items: { type: "string" },
+            },
           },
-          required: ["files"]
-        }
+          required: ["files"],
+        },
       },
       {
         name: "cortex_verify",
-        description: "Run verification, log changes, and update fragility after edits.",
+        description:
+          "Run verification, log changes, and update fragility after edits.",
         inputSchema: {
           type: "object",
           properties: {
             files: {
               type: "array",
-              items: { type: "string" }
-            }
+              items: { type: "string" },
+            },
           },
-          required: ["files"]
-        }
+          required: ["files"],
+        },
       },
       {
         name: "cortex_briefing",
-        description: "Read AGENT_CONTEXT.md for session context. Includes staleness warning if >24h old.",
+        description:
+          "Read AGENT_CONTEXT.md for session context. Includes staleness warning if >24h old.",
         inputSchema: {
           type: "object",
           properties: {},
-          required: []
-        }
+          required: [],
+        },
       },
       {
         name: "cortex_search",
-        description: "Search code symbols using SQLite FTS5 index. Returns exact + prefix matches.",
+        description:
+          "Search code symbols using SQLite FTS5 index. Returns exact + prefix matches.",
         inputSchema: {
           type: "object",
           properties: {
             query: { type: "string" },
-            limit: { type: "number" }
+            limit: { type: "number" },
           },
-          required: ["query"]
-        }
-      }
-    ]
+          required: ["query"],
+        },
+      },
+    ],
   }));
 
-  server.setRequestHandler(CallToolRequestSchema, async request => {
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const name = request.params.name;
-    const args = request.params.arguments as Record<string, unknown> | undefined;
+    const args = request.params.arguments as
+      | Record<string, unknown>
+      | undefined;
 
     if (name === "cortex_impact") {
       const files = Array.isArray(args?.files)

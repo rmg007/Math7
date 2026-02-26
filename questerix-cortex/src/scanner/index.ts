@@ -1,8 +1,8 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { Project } from 'ts-morph';
-import { CortexDB } from '../cortex-db';
-import { normalizePath } from '../utils/normalize-path';
+import * as fs from "fs";
+import * as path from "path";
+import { Project } from "ts-morph";
+import { CortexDB } from "../cortex-db";
+import { normalizePath } from "../utils/normalize-path";
 
 export interface HookEntry {
   name: string;
@@ -43,7 +43,7 @@ export interface SurfaceMap {
 
 export interface GraphNode {
   id: string;
-  type: 'file' | 'symbol';
+  type: "file" | "symbol";
   filePath?: string;
   metadata?: Record<string, unknown>;
 }
@@ -51,7 +51,7 @@ export interface GraphNode {
 export interface GraphEdge {
   sourceId: string;
   targetId: string;
-  relationship: 'imports' | 'tests' | 'renders';
+  relationship: "imports" | "tests" | "renders";
   metadata?: Record<string, unknown>;
 }
 
@@ -70,7 +70,7 @@ export class Scanner {
   constructor(project: Project, srcPath: string) {
     this.project = project;
     this.srcPath = srcPath;
-    this.projectRoot = path.resolve(srcPath, '..');
+    this.projectRoot = path.resolve(srcPath, "..");
   }
 
   private testFileCache: Set<string> | null = null;
@@ -81,8 +81,8 @@ export class Scanner {
   private prepareTestCache() {
     this.testFileCache = new Set();
     const testDirs = [
-      path.join(this.projectRoot, 'src', '__tests__'),
-      path.join(this.projectRoot, 'tests')
+      path.join(this.projectRoot, "src", "__tests__"),
+      path.join(this.projectRoot, "tests"),
     ];
 
     for (const dir of testDirs) {
@@ -101,7 +101,9 @@ export class Scanner {
           set.add(entry.name);
         }
       }
-    } catch { /* skip unreadable */ }
+    } catch {
+      /* skip unreadable */
+    }
   }
 
   scan(): SurfaceMap {
@@ -111,7 +113,7 @@ export class Scanner {
       utilities: [],
       dependencies: {},
       gaps: [],
-      apiMap: {}
+      apiMap: {},
     };
 
     // Optimization: Pre-scan test directories once
@@ -125,22 +127,33 @@ export class Scanner {
 
       // Skip non-source files or test files themselves
       if (
-        relativePath.includes('node_modules') ||
-        relativePath.includes('__tests__') ||
-        relativePath.includes('.test.') ||
-        relativePath.includes('.spec.')
-      ) continue;
+        relativePath.includes("node_modules") ||
+        relativePath.includes("__tests__") ||
+        relativePath.includes(".test.") ||
+        relativePath.includes(".spec.")
+      )
+        continue;
 
       const baseName = path.basename(filePath, path.extname(filePath));
       const dirName = path.dirname(filePath);
 
       // Tier 1: sibling __tests__/ folder
-      const siblingTestTsx = path.join(dirName, '__tests__', `${baseName}.test.tsx`);
-      const siblingTestTs  = path.join(dirName, '__tests__', `${baseName}.test.ts`);
+      const siblingTestTsx = path.join(
+        dirName,
+        "__tests__",
+        `${baseName}.test.tsx`,
+      );
+      const siblingTestTs = path.join(
+        dirName,
+        "__tests__",
+        `${baseName}.test.ts`,
+      );
 
       // Tiers 2 & 3: Match from cache for speed
-      const suffixes = ['.test.tsx', '.test.ts', '.e2e.spec.ts', '.spec.ts'];
-      const hasCachedTest = suffixes.some(s => this.testFileCache?.has(`${baseName}${s}`));
+      const suffixes = [".test.tsx", ".test.ts", ".e2e.spec.ts", ".spec.ts"];
+      const hasCachedTest = suffixes.some((s) =>
+        this.testFileCache?.has(`${baseName}${s}`),
+      );
 
       const hasTest =
         fs.existsSync(siblingTestTsx) ||
@@ -156,11 +169,13 @@ export class Scanner {
           const kind = decl.getKindName();
           const entry: ExportEntry = { name, kind };
 
-          if (kind === 'FunctionDeclaration' || kind === 'ArrowFunction') {
+          if (kind === "FunctionDeclaration" || kind === "ArrowFunction") {
             try {
               const params = (decl as any).getParameters?.() ?? [];
-              entry.parameters = params.map((p: any) => p.getName?.() ?? '?');
-            } catch { /* skip */ }
+              entry.parameters = params.map((p: any) => p.getName?.() ?? "?");
+            } catch {
+              /* skip */
+            }
           }
 
           exportEntries.push(entry);
@@ -170,46 +185,53 @@ export class Scanner {
 
       map.apiMap[relativePath] = exportEntries;
 
-      if (relativePath.includes('/hooks/') || relativePath.startsWith('hooks/')) {
+      if (
+        relativePath.includes("/hooks/") ||
+        relativePath.startsWith("hooks/")
+      ) {
         const hookNames = Array.from(exportedDeclarations.keys());
         map.hooks.push({
           name: hookNames[0] || baseName,
           file: relativePath,
           hasTest,
           functions: hookNames,
-          exports: exportEntries
+          exports: exportEntries,
         });
         if (!hasTest) map.gaps.push(`Missing test for hook: ${relativePath}`);
       }
 
-      if (relativePath.includes('/pages/') || relativePath.startsWith('pages/')) {
+      if (
+        relativePath.includes("/pages/") ||
+        relativePath.startsWith("pages/")
+      ) {
         map.pages.push({
           name: baseName,
           file: relativePath,
           hasTest,
-          routes: []
+          routes: [],
         });
-        if (!hasTest) map.gaps.push(`Missing E2E/Unit test for page: ${relativePath}`);
+        if (!hasTest)
+          map.gaps.push(`Missing E2E/Unit test for page: ${relativePath}`);
       }
 
       const isUtility =
-        relativePath.includes('/lib/') ||
-        relativePath.includes('/utils/') ||
-        relativePath.includes('/helpers/') ||
-        relativePath.includes('/services/');
+        relativePath.includes("/lib/") ||
+        relativePath.includes("/utils/") ||
+        relativePath.includes("/helpers/") ||
+        relativePath.includes("/services/");
 
       if (isUtility && exportEntries.length > 0) {
-        let category = 'general';
-        if (relativePath.includes('/lib/')) category = 'lib';
-        if (relativePath.includes('/utils/')) category = 'utils';
-        if (relativePath.includes('/helpers/')) category = 'helpers';
-        if (relativePath.includes('/services/')) category = 'services';
+        let category = "general";
+        if (relativePath.includes("/lib/")) category = "lib";
+        if (relativePath.includes("/utils/")) category = "utils";
+        if (relativePath.includes("/helpers/")) category = "helpers";
+        if (relativePath.includes("/services/")) category = "services";
 
         map.utilities.push({
           name: baseName,
           file: relativePath,
           category,
-          exports: exportEntries
+          exports: exportEntries,
         });
       }
 
@@ -218,14 +240,16 @@ export class Scanner {
         const importedFrom: string[] = [];
         for (const imp of imports) {
           const mod = imp.getModuleSpecifierValue();
-          if (mod.startsWith('.') || mod.startsWith('@/')) {
+          if (mod.startsWith(".") || mod.startsWith("@/")) {
             importedFrom.push(mod);
           }
         }
         if (importedFrom.length > 0) {
           map.dependencies[relativePath] = importedFrom;
         }
-      } catch { /* skip */ }
+      } catch {
+        /* skip */
+      }
     }
 
     return map;
@@ -253,8 +277,8 @@ export class Scanner {
 
       nodeMap.set(normalizedFilePath, {
         id: normalizedFilePath,
-        type: 'file',
-        filePath: normalizedFilePath
+        type: "file",
+        filePath: normalizedFilePath,
       });
 
       const exportedDeclarations = sourceFile.getExportedDeclarations();
@@ -262,13 +286,15 @@ export class Scanner {
         const symbolId = `${normalizedFilePath}#${name}`;
         nodeMap.set(symbolId, {
           id: symbolId,
-          type: 'symbol',
+          type: "symbol",
           filePath: normalizedFilePath,
-          metadata: { name, kind: declarations[0]?.getKindName?.() }
+          metadata: { name, kind: declarations[0]?.getKindName?.() },
         });
       }
 
-      const isTestFile = normalizedFilePath.includes('.test.') || normalizedFilePath.includes('.spec.');
+      const isTestFile =
+        normalizedFilePath.includes(".test.") ||
+        normalizedFilePath.includes(".spec.");
 
       for (const importDecl of sourceFile.getImportDeclarations()) {
         const targetSourceFile = importDecl.getModuleSpecifierSourceFile();
@@ -278,7 +304,7 @@ export class Scanner {
         edges.push({
           sourceId: normalizedFilePath,
           targetId: resolvedPath,
-          relationship: isTestFile ? 'tests' : 'imports'
+          relationship: isTestFile ? "tests" : "imports",
         });
       }
     }
@@ -289,7 +315,9 @@ export class Scanner {
   async writeGraph(cortexDb: CortexDB): Promise<void> {
     const db = cortexDb.getDb();
     const scanTimestamp = new Date().toISOString();
-    const filePaths = this.project.getSourceFiles().map(sourceFile => sourceFile.getFilePath());
+    const filePaths = this.project
+      .getSourceFiles()
+      .map((sourceFile) => sourceFile.getFilePath());
     const { nodes, edges, sourceFiles } = await this.scanFiles(filePaths);
 
     const insertNode = db.prepare(`
@@ -300,10 +328,14 @@ export class Scanner {
       INSERT OR REPLACE INTO edges (source_id, target_id, relationship, metadata)
       VALUES (@sourceId, @targetId, @relationship, @metadata)
     `);
-    const deleteEdgesForSource = db.prepare('DELETE FROM edges WHERE source_id = ?');
-    const deleteStaleNodes = db.prepare('DELETE FROM nodes WHERE updated_at < ?');
+    const deleteEdgesForSource = db.prepare(
+      "DELETE FROM edges WHERE source_id = ?",
+    );
+    const deleteStaleNodes = db.prepare(
+      "DELETE FROM nodes WHERE updated_at < ?",
+    );
     const deleteOrphanEdges = db.prepare(
-      'DELETE FROM edges WHERE source_id NOT IN (SELECT id FROM nodes) OR target_id NOT IN (SELECT id FROM nodes)'
+      "DELETE FROM edges WHERE source_id NOT IN (SELECT id FROM nodes) OR target_id NOT IN (SELECT id FROM nodes)",
     );
 
     for (const node of nodes) {
@@ -312,7 +344,7 @@ export class Scanner {
         type: node.type,
         filePath: node.filePath ?? null,
         metadata: node.metadata ? JSON.stringify(node.metadata) : null,
-        updatedAt: scanTimestamp
+        updatedAt: scanTimestamp,
       });
     }
 
@@ -326,7 +358,7 @@ export class Scanner {
         sourceId: edge.sourceId,
         targetId: edge.targetId,
         relationship: edge.relationship,
-        metadata: edge.metadata ? JSON.stringify(edge.metadata) : null
+        metadata: edge.metadata ? JSON.stringify(edge.metadata) : null,
       });
     }
 
@@ -343,23 +375,34 @@ export class Scanner {
     for (const hook of map.hooks) {
       if (hook.hasTest) continue;
 
-      const testDir = path.join(this.projectRoot, 'src', '__tests__', path.dirname(hook.file));
-      const testFile = path.join(testDir, `${path.basename(hook.file, path.extname(hook.file))}.test.ts`);
+      const testDir = path.join(
+        this.projectRoot,
+        "src",
+        "__tests__",
+        path.dirname(hook.file),
+      );
+      const testFile = path.join(
+        testDir,
+        `${path.basename(hook.file, path.extname(hook.file))}.test.ts`,
+      );
 
       if (fs.existsSync(testFile)) continue;
       if (!fs.existsSync(testDir)) fs.mkdirSync(testDir, { recursive: true });
 
       let content = `import { renderHook } from '@testing-library/react';\n`;
       content += `import { describe, it, expect } from 'vitest';\n`;
-      content += `import { ${hook.name} } from '@/${hook.file.replace('.ts', '')}';\n\n`;
+      content += `import { ${hook.name} } from '@/${hook.file.replace(".ts", "")}';\n\n`;
       content += `describe('${hook.name}', () => {\n`;
       content += `  it('should initialize correctly', () => {\n`;
       content += `    const { result } = renderHook(() => ${hook.name}());\n`;
       content += `    expect(result.current).toBeDefined();\n`;
       content += `  });\n\n`;
 
-      hook.exports.forEach(exp => {
-        if (exp.kind === 'FunctionDeclaration' || exp.kind === 'ArrowFunction') {
+      hook.exports.forEach((exp) => {
+        if (
+          exp.kind === "FunctionDeclaration" ||
+          exp.kind === "ArrowFunction"
+        ) {
           if (exp.name === hook.name) return;
           content += `  it('should handle ${exp.name} correctly', () => {\n`;
           content += `    // TODO: Implement test for ${exp.name}\n`;
@@ -368,14 +411,14 @@ export class Scanner {
       });
 
       content += `});\n`;
-      fs.writeFileSync(testFile, content, 'utf-8');
+      fs.writeFileSync(testFile, content, "utf-8");
       generated.push(testFile);
     }
 
     for (const page of map.pages) {
       if (page.hasTest) continue;
 
-      const testDir = path.join(this.projectRoot, 'tests');
+      const testDir = path.join(this.projectRoot, "tests");
       const testFile = path.join(testDir, `${page.name}.spec.ts`);
 
       if (fs.existsSync(testFile)) continue;
@@ -393,7 +436,7 @@ export class Scanner {
       content += `  });\n`;
       content += `});\n`;
 
-      fs.writeFileSync(testFile, content, 'utf-8');
+      fs.writeFileSync(testFile, content, "utf-8");
     }
 
     return generated;

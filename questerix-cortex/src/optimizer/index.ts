@@ -1,7 +1,7 @@
-import { execSync } from 'child_process';
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
+import { execSync } from "child_process";
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 
 export interface ZombieProcess {
   name: string;
@@ -19,7 +19,7 @@ export interface GitignoreGap {
 export interface WatcherGap {
   path: string;
   reason: string;
-  severity: 'CRITICAL' | 'MEDIUM';
+  severity: "CRITICAL" | "MEDIUM";
 }
 
 export interface LargeFile {
@@ -42,36 +42,46 @@ export interface OptimizeReport {
   largeFiles: LargeFile[];
   mcpDeadServers: McpDeadServer[];
   shellIntegrationEnabled: boolean;
-  verdict: 'CLEAN' | 'NEEDS_ATTENTION';
+  verdict: "CLEAN" | "NEEDS_ATTENTION";
   summary: string;
   markdown?: string;
 }
 
 // Processes that should never be running in this project (pure TS/React workspace)
 const ZOMBIE_SUSPECTS = [
-  { pattern: 'dart.exe', reason: 'Flutter/Dart SDK process — not used in this project (pure TS/React)' },
-  { pattern: 'flutter.exe', reason: 'Flutter CLI — not used in this project' },
+  {
+    pattern: "dart.exe",
+    reason:
+      "Flutter/Dart SDK process — not used in this project (pure TS/React)",
+  },
+  { pattern: "flutter.exe", reason: "Flutter CLI — not used in this project" },
 ];
 
 // Directories that if present on disk should always be in .gitignore and watcherExclude
 const EXPECTED_IGNORED = [
-  { rel: 'admin-panel/node_modules', label: 'Admin Panel node_modules' },
-  { rel: 'questerix-cortex/node_modules', label: 'Cortex node_modules' },
-  { rel: 'admin-panel/dist', label: 'Admin Panel dist' },
-  { rel: 'questerix-cortex/dist', label: 'Cortex dist' },
-  { rel: 'questerix-cortex/outputs', label: 'Cortex generated outputs' },
-  { rel: 'admin-panel/coverage', label: 'Coverage output' },
-  { rel: 'admin-panel/playwright-report', label: 'Playwright report' },
-  { rel: 'admin-panel/test-results', label: 'Test results' },
-  { rel: '.wrangler', label: 'Wrangler cache' },
-  { rel: '.supabase', label: 'Supabase CLI state' },
-  { rel: '__pycache__', label: 'Python cache' },
+  { rel: "admin-panel/node_modules", label: "Admin Panel node_modules" },
+  { rel: "questerix-cortex/node_modules", label: "Cortex node_modules" },
+  { rel: "admin-panel/dist", label: "Admin Panel dist" },
+  { rel: "questerix-cortex/dist", label: "Cortex dist" },
+  { rel: "questerix-cortex/outputs", label: "Cortex generated outputs" },
+  { rel: "admin-panel/coverage", label: "Coverage output" },
+  { rel: "admin-panel/playwright-report", label: "Playwright report" },
+  { rel: "admin-panel/test-results", label: "Test results" },
+  { rel: ".wrangler", label: "Wrangler cache" },
+  { rel: ".supabase", label: "Supabase CLI state" },
+  { rel: "__pycache__", label: "Python cache" },
 ];
 
 // MCP server commands that indicate dead/unused runtimes for this project
 const DEAD_MCP_COMMANDS = [
-  { command: 'dart', reason: 'Dart SDK not used — this is a pure TypeScript/React project' },
-  { command: 'flutter', reason: 'Flutter not used — this is a pure TypeScript/React project' },
+  {
+    command: "dart",
+    reason: "Dart SDK not used — this is a pure TypeScript/React project",
+  },
+  {
+    command: "flutter",
+    reason: "Flutter not used — this is a pure TypeScript/React project",
+  },
 ];
 
 export class OptimizeAuditor {
@@ -89,15 +99,24 @@ export class OptimizeAuditor {
     const mcpDeadServers = this.detectMcpDeadServers();
     const shellIntegrationEnabled = this.checkShellIntegration();
 
-    const totalIssues = zombies.length + gitignoreGaps.length + watcherGaps.length + largeFiles.length + mcpDeadServers.length + (shellIntegrationEnabled ? 1 : 0);
-    const verdict: 'CLEAN' | 'NEEDS_ATTENTION' = totalIssues === 0 ? 'CLEAN' : 'NEEDS_ATTENTION';
+    const totalIssues =
+      zombies.length +
+      gitignoreGaps.length +
+      watcherGaps.length +
+      largeFiles.length +
+      mcpDeadServers.length +
+      (shellIntegrationEnabled ? 1 : 0);
+    const verdict: "CLEAN" | "NEEDS_ATTENTION" =
+      totalIssues === 0 ? "CLEAN" : "NEEDS_ATTENTION";
 
-    const summary = totalIssues === 0
-      ? '✅ Workspace is fully optimized. No performance issues detected.'
-      : `⚠️ Found ${totalIssues} optimization issue(s). ` +
-        (watcherGaps.some(g => g.severity === 'CRITICAL') || largeFiles.length > 0
-          ? '🔴 CRITICAL: Potential "Agent Loading" deadlock detected.'
-          : '🟡 Recommendation: Apply improvements for smoother IDE experience.');
+    const summary =
+      totalIssues === 0
+        ? "✅ Workspace is fully optimized. No performance issues detected."
+        : `⚠️ Found ${totalIssues} optimization issue(s). ` +
+          (watcherGaps.some((g) => g.severity === "CRITICAL") ||
+          largeFiles.length > 0
+            ? '🔴 CRITICAL: Potential "Agent Loading" deadlock detected.'
+            : "🟡 Recommendation: Apply improvements for smoother IDE experience.");
 
     return {
       timestamp: new Date().toISOString(),
@@ -117,14 +136,23 @@ export class OptimizeAuditor {
     try {
       const raw = execSync(
         `powershell -NoProfile -Command "Get-Process | Select-Object Name, Id, CPU, WorkingSet | ConvertTo-Json"`,
-        { stdio: ['pipe', 'pipe', 'ignore'] }
+        { stdio: ["pipe", "pipe", "ignore"] },
       ).toString();
 
-      const processes: Array<{ Name: string; Id: number; CPU: number; WorkingSet: number }> = JSON.parse(raw);
+      const processes: Array<{
+        Name: string;
+        Id: number;
+        CPU: number;
+        WorkingSet: number;
+      }> = JSON.parse(raw);
 
       for (const proc of processes) {
         for (const suspect of ZOMBIE_SUSPECTS) {
-          if (proc.Name.toLowerCase().includes(suspect.pattern.replace('.exe', ''))) {
+          if (
+            proc.Name.toLowerCase().includes(
+              suspect.pattern.replace(".exe", ""),
+            )
+          ) {
             found.push({
               name: proc.Name,
               pid: proc.Id,
@@ -143,25 +171,29 @@ export class OptimizeAuditor {
 
   private detectGitignoreGaps(): GitignoreGap[] {
     const gaps: GitignoreGap[] = [];
-    const gitignorePath = path.join(this.projectRoot, '.gitignore');
+    const gitignorePath = path.join(this.projectRoot, ".gitignore");
     if (!fs.existsSync(gitignorePath)) return gaps;
 
-    const gitignoreContent = fs.readFileSync(gitignorePath, 'utf-8');
+    const gitignoreContent = fs.readFileSync(gitignorePath, "utf-8");
 
     for (const candidate of EXPECTED_IGNORED) {
       const fullPath = path.join(this.projectRoot, candidate.rel);
       if (!fs.existsSync(fullPath)) continue; // doesn't exist on disk — no issue
 
       // Check if anything in .gitignore would cover this path
-      const relativized = candidate.rel.replace(/\\/g, '/');
+      const relativized = candidate.rel.replace(/\\/g, "/");
       const basename = path.basename(candidate.rel);
-      const covered = gitignoreContent.includes(relativized) ||
-        gitignoreContent.includes(basename + '/') ||
-        gitignoreContent.includes('**/' + basename) ||
+      const covered =
+        gitignoreContent.includes(relativized) ||
+        gitignoreContent.includes(basename + "/") ||
+        gitignoreContent.includes("**/" + basename) ||
         gitignoreContent.includes(basename);
 
       if (!covered) {
-        gaps.push({ path: candidate.rel, reason: `${candidate.label} exists on disk but is not in .gitignore` });
+        gaps.push({
+          path: candidate.rel,
+          reason: `${candidate.label} exists on disk but is not in .gitignore`,
+        });
       }
     }
     return gaps;
@@ -169,48 +201,71 @@ export class OptimizeAuditor {
 
   private detectWatcherGaps(): WatcherGap[] {
     const gaps: WatcherGap[] = [];
-    const vscodeSettingsPath = path.join(this.projectRoot, '.vscode', 'settings.json');
+    const vscodeSettingsPath = path.join(
+      this.projectRoot,
+      ".vscode",
+      "settings.json",
+    );
     if (!fs.existsSync(vscodeSettingsPath)) {
-      return [{ path: '.vscode/settings.json', reason: 'File missing — no watcher exclusions defined', severity: 'MEDIUM' }];
+      return [
+        {
+          path: ".vscode/settings.json",
+          reason: "File missing — no watcher exclusions defined",
+          severity: "MEDIUM",
+        },
+      ];
     }
 
     let settings: Record<string, unknown> = {};
     try {
-      const raw = fs.readFileSync(vscodeSettingsPath, "utf-8")
+      const raw = fs
+        .readFileSync(vscodeSettingsPath, "utf-8")
         .replace(/^\s*\/\/.*$/gm, ""); // Strip line comments at start of line
       settings = JSON.parse(raw);
     } catch {
-      return [{ path: '.vscode/settings.json', reason: 'Could not parse settings.json', severity: 'MEDIUM' }];
+      return [
+        {
+          path: ".vscode/settings.json",
+          reason: "Could not parse settings.json",
+          severity: "MEDIUM",
+        },
+      ];
     }
 
-    const exclude = (settings['files.exclude'] as Record<string, boolean>) ?? {};
-    const watcherExclude = (settings['files.watcherExclude'] as Record<string, boolean>) ?? {};
+    const exclude =
+      (settings["files.exclude"] as Record<string, boolean>) ?? {};
+    const watcherExclude =
+      (settings["files.watcherExclude"] as Record<string, boolean>) ?? {};
 
     // Normalize a glob key for comparison — strip trailing /** or /*
-    const normalize = (k: string) => k.replace(/\/\*\*$/, '').replace(/\/\*$/, '');
+    const normalize = (k: string) =>
+      k.replace(/\/\*\*$/, "").replace(/\/\*$/, "");
 
     const watcherNormalized = Object.keys(watcherExclude).map(normalize);
 
     // Every key in files.exclude should also appear (normalized) in files.watcherExclude
     for (const key of Object.keys(exclude)) {
       const norm = normalize(key);
-      const covered = watcherNormalized.some(wk => wk === norm || wk.startsWith(norm));
+      const covered = watcherNormalized.some(
+        (wk) => wk === norm || wk.startsWith(norm),
+      );
       if (!covered) {
-        gaps.push({ 
-          path: key, 
+        gaps.push({
+          path: key,
           reason: `Missing from files.watcherExclude. IDE still watches this excluded folder.`,
-          severity: key.includes('node_modules') ? 'CRITICAL' : 'MEDIUM'
+          severity: key.includes("node_modules") ? "CRITICAL" : "MEDIUM",
         });
       }
     }
 
     // Explicit check for node_modules in watcherExclude
-    const hasNodeEx = watcherNormalized.some(k => k.includes('node_modules'));
+    const hasNodeEx = watcherNormalized.some((k) => k.includes("node_modules"));
     if (!hasNodeEx) {
       gaps.push({
-        path: '**/node_modules',
-        reason: 'CRITICAL: node_modules must be in files.watcherExclude to prevent "Agent Loading" deadlocks.',
-        severity: 'CRITICAL'
+        path: "**/node_modules",
+        reason:
+          'CRITICAL: node_modules must be in files.watcherExclude to prevent "Agent Loading" deadlocks.',
+        severity: "CRITICAL",
       });
     }
 
@@ -219,12 +274,12 @@ export class OptimizeAuditor {
 
   private detectMcpDeadServers(): McpDeadServer[] {
     const found: McpDeadServer[] = [];
-    const mcpPath = path.join(os.homedir(), '.cursor', 'mcp.json');
+    const mcpPath = path.join(os.homedir(), ".cursor", "mcp.json");
     if (!fs.existsSync(mcpPath)) return found;
 
     let config: { mcpServers?: Record<string, { command?: string }> } = {};
     try {
-      config = JSON.parse(fs.readFileSync(mcpPath, 'utf-8'));
+      config = JSON.parse(fs.readFileSync(mcpPath, "utf-8"));
     } catch {
       return found;
     }
@@ -242,15 +297,20 @@ export class OptimizeAuditor {
   }
 
   private checkShellIntegration(): boolean {
-    const vscodeSettingsPath = path.join(this.projectRoot, '.vscode', 'settings.json');
+    const vscodeSettingsPath = path.join(
+      this.projectRoot,
+      ".vscode",
+      "settings.json",
+    );
     if (!fs.existsSync(vscodeSettingsPath)) return true; // assume on if no settings
 
     try {
-      const raw = fs.readFileSync(vscodeSettingsPath, 'utf-8')
-        .replace(/\/\/.*$/gm, '')
-        .replace(/\/\*[\s\S]*?\*\//g, '');
+      const raw = fs
+        .readFileSync(vscodeSettingsPath, "utf-8")
+        .replace(/\/\/.*$/gm, "")
+        .replace(/\/\*[\s\S]*?\*\//g, "");
       const settings = JSON.parse(raw);
-      return settings['terminal.integrated.shellIntegration.enabled'] !== false;
+      return settings["terminal.integrated.shellIntegration.enabled"] !== false;
     } catch {
       return true;
     }
@@ -258,7 +318,11 @@ export class OptimizeAuditor {
 
   private detectLargeFiles(): LargeFile[] {
     const issues: LargeFile[] = [];
-    const outputsPath = path.join(this.projectRoot, 'questerix-cortex', 'outputs');
+    const outputsPath = path.join(
+      this.projectRoot,
+      "questerix-cortex",
+      "outputs",
+    );
     if (!fs.existsSync(outputsPath)) return issues;
 
     const files = fs.readdirSync(outputsPath);
@@ -272,7 +336,8 @@ export class OptimizeAuditor {
           issues.push({
             path: `outputs/${file}`,
             sizeMB: parseFloat(sizeMB.toFixed(2)),
-            reason: 'Oversized output file. Massive text files in outputs/ can cause "Agent Loading" hangs during indexing.'
+            reason:
+              'Oversized output file. Massive text files in outputs/ can cause "Agent Loading" hangs during indexing.',
           });
         }
       } catch {
@@ -286,7 +351,7 @@ export class OptimizeAuditor {
     const lines: string[] = [
       `# 🚀 Optimize Report`,
       `**Generated:** ${new Date(report.timestamp).toLocaleString()}`,
-      `**Verdict:** ${report.verdict === 'CLEAN' ? '✅ CLEAN' : '⚠️ NEEDS ATTENTION'}`,
+      `**Verdict:** ${report.verdict === "CLEAN" ? "✅ CLEAN" : "⚠️ NEEDS ATTENTION"}`,
       ``,
       `> ${report.summary}`,
       ``,
@@ -300,10 +365,14 @@ export class OptimizeAuditor {
       lines.push(`| Process | PID | CPU (s) | RAM (MB) | Reason |`);
       lines.push(`|---|---|---|---|---|`);
       for (const z of report.zombies) {
-        lines.push(`| \`${z.name}\` | ${z.pid} | ${z.cpuSeconds} | ${z.memoryMB} | ${z.reason} |`);
+        lines.push(
+          `| \`${z.name}\` | ${z.pid} | ${z.cpuSeconds} | ${z.memoryMB} | ${z.reason} |`,
+        );
       }
       lines.push(``);
-      lines.push(`**Fix:** Run \`Stop-Process -Id <PID> -Force\` for each, or re-run \`/optimize\`.`);
+      lines.push(
+        `**Fix:** Run \`Stop-Process -Id <PID> -Force\` for each, or re-run \`/optimize\`.`,
+      );
     }
     lines.push(``);
 
@@ -321,10 +390,13 @@ export class OptimizeAuditor {
     // Watcher gaps
     lines.push(`## 👁 Watcher Gaps`);
     if (report.watcherGaps.length === 0) {
-      lines.push(`_All excluded paths are also excluded from the file watcher._`);
+      lines.push(
+        `_All excluded paths are also excluded from the file watcher._`,
+      );
     } else {
       for (const w of report.watcherGaps) {
-        const severityStr = w.severity === 'CRITICAL' ? '🔴 **CRITICAL**' : '🟡 MEDIUM';
+        const severityStr =
+          w.severity === "CRITICAL" ? "🔴 **CRITICAL**" : "🟡 MEDIUM";
         lines.push(`- ${severityStr}: \`${w.path}\` — ${w.reason}`);
       }
     }
@@ -336,7 +408,9 @@ export class OptimizeAuditor {
       lines.push(`_No oversized output files detected._`);
     } else {
       for (const f of report.largeFiles) {
-        lines.push(`- 🔴 **CRITICAL**: \`${f.path}\` — ${f.sizeMB} MB. ${f.reason}`);
+        lines.push(
+          `- 🔴 **CRITICAL**: \`${f.path}\` — ${f.sizeMB} MB. ${f.reason}`,
+        );
       }
     }
     lines.push(``);
@@ -350,19 +424,25 @@ export class OptimizeAuditor {
         lines.push(`- **${m.name}** (\`${m.command}\`) — ${m.reason}`);
       }
       lines.push(``);
-      lines.push(`**Fix:** Remove the listed entries from \`~/.cursor/mcp.json\`.`);
+      lines.push(
+        `**Fix:** Remove the listed entries from \`~/.cursor/mcp.json\`.`,
+      );
     }
     lines.push(``);
 
     // Shell integration
     lines.push(`## 🖥 Shell Integration`);
     if (report.shellIntegrationEnabled) {
-      lines.push(`⚠️ \`terminal.integrated.shellIntegration.enabled\` is **ON** — this adds UI thread overhead.`);
-      lines.push(`**Fix:** Set \`"terminal.integrated.shellIntegration.enabled": false\` in \`.vscode/settings.json\`.`);
+      lines.push(
+        `⚠️ \`terminal.integrated.shellIntegration.enabled\` is **ON** — this adds UI thread overhead.`,
+      );
+      lines.push(
+        `**Fix:** Set \`"terminal.integrated.shellIntegration.enabled": false\` in \`.vscode/settings.json\`.`,
+      );
     } else {
       lines.push(`✅ Shell integration is disabled.`);
     }
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 }

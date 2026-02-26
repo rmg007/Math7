@@ -15,11 +15,14 @@ export interface VerificationSummary {
   changedFiles: string[];
 }
 
-function getDependencyClosure(db: Database.Database, startFile: string): Set<string> {
+function getDependencyClosure(
+  db: Database.Database,
+  startFile: string,
+): Set<string> {
   const visited = new Set<string>();
   const queue = [startFile];
   const edgeQuery = db.prepare(
-    "SELECT target_id FROM edges WHERE source_id = ? AND relationship IN ('imports', 'tests')"
+    "SELECT target_id FROM edges WHERE source_id = ? AND relationship IN ('imports', 'tests')",
   );
 
   while (queue.length > 0) {
@@ -37,19 +40,24 @@ function getDependencyClosure(db: Database.Database, startFile: string): Set<str
   return visited;
 }
 
-function computeFragilityIndex(db: Database.Database, filePath: string): number {
-  const rows = db.prepare(
-    `
+function computeFragilityIndex(
+  db: Database.Database,
+  filePath: string,
+): number {
+  const rows = db
+    .prepare(
+      `
       SELECT tests_failed
       FROM change_log
       WHERE file_path = ?
       ORDER BY timestamp DESC
       LIMIT 20
-    `
-  ).all(filePath) as Array<{ tests_failed: number | null }>;
+    `,
+    )
+    .all(filePath) as Array<{ tests_failed: number | null }>;
 
   if (rows.length === 0) return 0;
-  const failures = rows.filter(row => (row.tests_failed ?? 0) > 0).length;
+  const failures = rows.filter((row) => (row.tests_failed ?? 0) > 0).length;
   return failures / rows.length;
 }
 
@@ -63,13 +71,16 @@ export function attributeFragility(
   db: Database.Database,
   changedFiles: string[],
   testResults: VerificationSummary,
-  _sessionId: string
+  _sessionId: string,
 ): void {
-  const normalizedChanges = Array.from(new Set(changedFiles.map(file => normalizePath(file))));
-  const anyFailures = testResults.unitTests.failed > 0 || testResults.e2eTests.failed > 0;
+  const normalizedChanges = Array.from(
+    new Set(changedFiles.map((file) => normalizePath(file))),
+  );
+  const anyFailures =
+    testResults.unitTests.failed > 0 || testResults.e2eTests.failed > 0;
   const failureDetails = [
     ...testResults.unitTests.details,
-    ...testResults.e2eTests.details
+    ...testResults.e2eTests.details,
   ];
 
   const dependencyMap = new Map<string, Set<string>>();
@@ -81,7 +92,7 @@ export function attributeFragility(
   }
 
   const selectFragility = db.prepare(
-    "SELECT change_count, failure_count, last_failure, common_failure_pattern FROM fragility WHERE file_path = ?"
+    "SELECT change_count, failure_count, last_failure, common_failure_pattern FROM fragility WHERE file_path = ?",
   );
   const upsertFragility = db.prepare(
     `
@@ -102,17 +113,23 @@ export function attributeFragility(
         last_failure = excluded.last_failure,
         common_failure_pattern = excluded.common_failure_pattern,
         confidence = excluded.confidence
-    `
+    `,
   );
 
   const now = new Date().toISOString();
-  const latestFailureMessage = failureDetails.length > 0
-    ? failureDetails[failureDetails.length - 1].message
-    : undefined;
+  const latestFailureMessage =
+    failureDetails.length > 0
+      ? failureDetails[failureDetails.length - 1].message
+      : undefined;
 
   for (const file of normalizedChanges) {
     const existing = selectFragility.get(file) as
-      | { change_count: number; failure_count: number; last_failure: string | null; common_failure_pattern: string | null }
+      | {
+          change_count: number;
+          failure_count: number;
+          last_failure: string | null;
+          common_failure_pattern: string | null;
+        }
       | undefined;
 
     const currentChangeCount = (existing?.change_count ?? 0) + 1;
@@ -141,7 +158,7 @@ export function attributeFragility(
       fragilityIndex,
       lastFailure,
       commonPattern,
-      confidence
+      confidence,
     );
   }
 }

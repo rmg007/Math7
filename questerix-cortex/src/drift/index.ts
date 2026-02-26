@@ -1,19 +1,19 @@
-import { execSync } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
+import { execSync } from "child_process";
+import * as fs from "fs";
+import * as path from "path";
 
 export interface DriftResult {
-  verdict: 'CLEAN' | 'DRIFT DETECTED';
+  verdict: "CLEAN" | "DRIFT DETECTED";
   typesTableCount: number;
-  missingFromTypes: string[];   // tables in supabase schema not in types file
-  extraInTypes: string[];       // tables in types file not backed by real supabase schema  
-  staleDays: number | null;     // how many days since types were regenerated
+  missingFromTypes: string[]; // tables in supabase schema not in types file
+  extraInTypes: string[]; // tables in types file not backed by real supabase schema
+  staleDays: number | null; // how many days since types were regenerated
 }
 
 /**
  * DriftDetector — parses database.types.ts to extract table names and
  * compares against migration files to surface schema drift.
- * 
+ *
  * This is a static, offline check — no live DB connection required.
  * It reads:
  *   1. database.types.ts  → ground truth for what the TS code believes
@@ -24,16 +24,25 @@ export class DriftDetector {
   private migrationsPath: string;
 
   constructor(adminPanelPath: string, supabasePath: string) {
-    this.typesFilePath = path.join(adminPanelPath, 'src', 'lib', 'database.types.ts');
-    this.migrationsPath = path.join(supabasePath, 'migrations');
+    this.typesFilePath = path.join(
+      adminPanelPath,
+      "src",
+      "lib",
+      "database.types.ts",
+    );
+    this.migrationsPath = path.join(supabasePath, "migrations");
   }
 
   detect(): DriftResult {
     const typesTableNames = this.extractTypesTableNames();
     const migrationTableNames = this.extractMigrationTableNames();
 
-    const missingFromTypes = [...migrationTableNames].filter(t => !typesTableNames.has(t));
-    const extraInTypes = [...typesTableNames].filter(t => !migrationTableNames.has(t));
+    const missingFromTypes = [...migrationTableNames].filter(
+      (t) => !typesTableNames.has(t),
+    );
+    const extraInTypes = [...typesTableNames].filter(
+      (t) => !migrationTableNames.has(t),
+    );
 
     const staleDays = this.getTypesStaleness();
 
@@ -43,10 +52,10 @@ export class DriftDetector {
       // extraInTypes is informational only: the migration folder is intentionally
       // incomplete (many tables were created via Supabase Studio and lack migration files).
       // The types file is the authoritative source since it's generated from the live DB.
-      verdict: missingFromTypes.length > 0 ? 'DRIFT DETECTED' : 'CLEAN',
+      verdict: missingFromTypes.length > 0 ? "DRIFT DETECTED" : "CLEAN",
       typesTableCount: typesTableNames.size,
       missingFromTypes,
-      extraInTypes,   // informational — not actionable, only log if count is very high
+      extraInTypes, // informational — not actionable, only log if count is very high
       staleDays,
     };
   }
@@ -55,15 +64,23 @@ export class DriftDetector {
    * Proactive Self-Healing: Executes scripts/gen_types.ps1 to reconcile types.
    */
   heal(): boolean {
-    const scriptPath = path.join(this.migrationsPath, '..', '..', 'scripts', 'gen_types.ps1');
+    const scriptPath = path.join(
+      this.migrationsPath,
+      "..",
+      "..",
+      "scripts",
+      "gen_types.ps1",
+    );
     if (!fs.existsSync(scriptPath)) return false;
 
     try {
       // Execute via PowerShell -NoProfile to bypass potential profile interference
-      execSync(`powershell -NoProfile -File "${scriptPath}"`, { stdio: 'inherit' });
+      execSync(`powershell -NoProfile -File "${scriptPath}"`, {
+        stdio: "inherit",
+      });
       return true;
     } catch (err) {
-      console.error('   ❌ Drift self-healing failed:', err);
+      console.error("   ❌ Drift self-healing failed:", err);
       return false;
     }
   }
@@ -76,13 +93,16 @@ export class DriftDetector {
     const names = new Set<string>();
     if (!fs.existsSync(this.typesFilePath)) return names;
 
-    const content = fs.readFileSync(this.typesFilePath, 'utf-8');
+    const content = fs.readFileSync(this.typesFilePath, "utf-8");
 
     // Find the Tables: { block
-    const tablesMatch = content.match(/Tables:\s*\{([\s\S]*?)^\s*\}\s*^(?:\s*Views|\s*Functions|\s*Enums):/m)
-      || content.match(/Tables:\s*\{([\s\S]*?)^\s*\};\s*Views:/m)
-      || content.match(/Tables:\s*\{([\s\S]*?)^\s*\};/m)
-      || content.match(/Tables:\s*\{([\s\S]*?)^\s*\}/m);
+    const tablesMatch =
+      content.match(
+        /Tables:\s*\{([\s\S]*?)^\s*\}\s*^(?:\s*Views|\s*Functions|\s*Enums):/m,
+      ) ||
+      content.match(/Tables:\s*\{([\s\S]*?)^\s*\};\s*Views:/m) ||
+      content.match(/Tables:\s*\{([\s\S]*?)^\s*\};/m) ||
+      content.match(/Tables:\s*\{([\s\S]*?)^\s*\}/m);
 
     if (!tablesMatch) return names;
 
@@ -104,18 +124,20 @@ export class DriftDetector {
     const names = new Set<string>();
     if (!fs.existsSync(this.migrationsPath)) return names;
 
-    const sqlFiles = fs.readdirSync(this.migrationsPath)
-      .filter(f => f.endsWith('.sql'))
-      .map(f => path.join(this.migrationsPath, f));
+    const sqlFiles = fs
+      .readdirSync(this.migrationsPath)
+      .filter((f) => f.endsWith(".sql"))
+      .map((f) => path.join(this.migrationsPath, f));
 
     // Track CREATE and DROP to detect intentionally deleted tables
     const dropped = new Set<string>();
 
     for (const file of sqlFiles) {
-      const content = fs.readFileSync(file, 'utf-8');
+      const content = fs.readFileSync(file, "utf-8");
 
       // CREATE TABLE [IF NOT EXISTS] schema.tablename or tablename
-      const createRe = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:public\.)?(\w+)/gi;
+      const createRe =
+        /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:public\.)?(\w+)/gi;
       let m;
       while ((m = createRe.exec(content)) !== null) {
         names.add(m[1].toLowerCase());
@@ -133,8 +155,12 @@ export class DriftDetector {
 
     // Exclude Supabase internals
     const internals = new Set([
-      'schema_migrations', 'supabase_migrations', 'pg_stat_statements',
-      'buckets', 'objects', 'migrations'
+      "schema_migrations",
+      "supabase_migrations",
+      "pg_stat_statements",
+      "buckets",
+      "objects",
+      "migrations",
     ]);
     for (const i of internals) names.delete(i);
 

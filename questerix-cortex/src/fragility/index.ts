@@ -1,6 +1,6 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { FeatureDependency } from '../visualizer';
+import * as fs from "fs";
+import * as path from "path";
+import { FeatureDependency } from "../visualizer";
 
 export interface FragilityMetrics {
   featureName: string;
@@ -9,7 +9,7 @@ export interface FragilityMetrics {
   fileCount: number;
   totalExports: number;
   fragilityScore: number;
-  verdict: 'STABLE' | 'MODERATE' | 'STIFF' | 'FRAGILE';
+  verdict: "STABLE" | "MODERATE" | "STIFF" | "FRAGILE";
 }
 
 /**
@@ -24,40 +24,46 @@ export class FragilityScorer {
   }
 
   public analyze(deps: FeatureDependency[]): FragilityMetrics[] {
-    const featuresPath = path.join(this.srcPath, 'features');
+    const featuresPath = path.join(this.srcPath, "features");
     if (!fs.existsSync(featuresPath)) return [];
 
-    const features = fs.readdirSync(featuresPath, { withFileTypes: true })
-      .filter(dirent => dirent.isDirectory())
-      .map(dirent => dirent.name);
+    const features = fs
+      .readdirSync(featuresPath, { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name);
 
-    const metrics: FragilityMetrics[] = features.map(f => {
-      const inDegree = deps.filter(d => d.to === f).length;
-      const outDegree = deps.filter(d => d.from === f).length;
-      
+    const metrics: FragilityMetrics[] = features.map((f) => {
+      const inDegree = deps.filter((d) => d.to === f).length;
+      const outDegree = deps.filter((d) => d.from === f).length;
+
       const featureDir = path.join(featuresPath, f);
-      const files = this.listFilesRecursively(featureDir, (file) => file.endsWith('.ts') || file.endsWith('.tsx'));
-      
-      // Simple complexity heuristic: File count 
+      const files = this.listFilesRecursively(
+        featureDir,
+        (file) => file.endsWith(".ts") || file.endsWith(".tsx"),
+      );
+
+      // Simple complexity heuristic: File count
       const fileCount = files.length;
-      
+
       // Rough export count (for further weighting)
       let totalExports = 0;
-      files.forEach(file => {
-        const content = fs.readFileSync(file, 'utf-8');
-        const exportMatch = content.match(/export\s+(const|function|class|type|interface|enum|default)/g);
+      files.forEach((file) => {
+        const content = fs.readFileSync(file, "utf-8");
+        const exportMatch = content.match(
+          /export\s+(const|function|class|type|interface|enum|default)/g,
+        );
         if (exportMatch) totalExports += exportMatch.length;
       });
 
       // Fragility Score Algorithm:
       // (Coupling + Complexity Factor)
       // We weigh in-degree heavily because changing a high in-degree feature risks breaking many others.
-      const fragilityScore = (inDegree * 3) + (outDegree * 2) + (fileCount * 0.5);
+      const fragilityScore = inDegree * 3 + outDegree * 2 + fileCount * 0.5;
 
-      let verdict: FragilityMetrics['verdict'] = 'STABLE';
-      if (fragilityScore > 30) verdict = 'FRAGILE';
-      else if (fragilityScore > 15) verdict = 'STIFF';
-      else if (fragilityScore > 5) verdict = 'MODERATE';
+      let verdict: FragilityMetrics["verdict"] = "STABLE";
+      if (fragilityScore > 30) verdict = "FRAGILE";
+      else if (fragilityScore > 15) verdict = "STIFF";
+      else if (fragilityScore > 5) verdict = "MODERATE";
 
       return {
         featureName: f,
@@ -66,7 +72,7 @@ export class FragilityScorer {
         fileCount,
         totalExports,
         fragilityScore: Math.round(fragilityScore * 10) / 10,
-        verdict
+        verdict,
       };
     });
 
@@ -83,24 +89,26 @@ export class FragilityScorer {
     md += `| Feature | Score | Verdict | In/Out | Files | Exports |\n`;
     md += `|---|---|---|---|---|---|\n`;
 
-    metrics.forEach(m => {
+    metrics.forEach((m) => {
       const verdictEmoji = {
-        'STABLE': '✅',
-        'MODERATE': '🟡',
-        'STIFF': '🟠',
-        'FRAGILE': '🔴'
+        STABLE: "✅",
+        MODERATE: "🟡",
+        STIFF: "🟠",
+        FRAGILE: "🔴",
       }[m.verdict];
-      
+
       md += `| **${m.featureName}** | ${m.fragilityScore} | ${verdictEmoji} ${m.verdict} | ${m.inDegree}/${m.outDegree} | ${m.fileCount} | ${m.totalExports} |\n`;
     });
 
     md += `\n\n## 🛠️ Maintenance Recommendations\n\n`;
-    
-    const fragile = metrics.filter(m => m.verdict === 'FRAGILE' || m.verdict === 'STIFF');
+
+    const fragile = metrics.filter(
+      (m) => m.verdict === "FRAGILE" || m.verdict === "STIFF",
+    );
     if (fragile.length === 0) {
       md += `✅ All features are within healthy modularity limits. \n`;
     } else {
-      fragile.forEach(f => {
+      fragile.forEach((f) => {
         md += `### ⚠️ ${f.featureName} (${f.verdict})\n`;
         if (f.inDegree > 2) {
           md += `- **High In-Degree**: This feature is a "Core" dependency. Any API changes here require a full workspace audit. Consider extracting interfaces to a separate \`types\` folder.\n`;
@@ -118,7 +126,10 @@ export class FragilityScorer {
     return md;
   }
 
-  private listFilesRecursively(dir: string, filter: (f: string) => boolean): string[] {
+  private listFilesRecursively(
+    dir: string,
+    filter: (f: string) => boolean,
+  ): string[] {
     let results: string[] = [];
     if (!fs.existsSync(dir)) return [];
     const list = fs.readdirSync(dir);

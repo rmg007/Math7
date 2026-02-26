@@ -1,11 +1,10 @@
-import { DeltaResult } from './delta';
-import { DriftResult } from './drift';
-import { OptimizeReport } from './optimizer';
-import { TaskResult } from './orchestrator';
-import { RiskScore } from './risk-scorer';
-import { RlsAuditResult } from './rls';
-import { SurfaceMap } from './scanner';
-
+import { DeltaResult } from "./delta";
+import { DriftResult } from "./drift";
+import { OptimizeReport } from "./optimizer";
+import { TaskResult } from "./orchestrator";
+import { RiskScore } from "./risk-scorer";
+import { RlsAuditResult } from "./rls";
+import { SurfaceMap } from "./scanner";
 
 export interface AnalystResults {
   deadCode: string[];
@@ -50,7 +49,7 @@ export interface SuiteDefinition {
   id: string;
   name: string;
   command: string;
-  tier: 'smoke' | 'deep' | 'release';
+  tier: "smoke" | "deep" | "release";
   parallel: boolean;
 }
 

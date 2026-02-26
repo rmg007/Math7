@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
 export interface FeatureDependency {
   from: string;
@@ -22,12 +22,13 @@ export class FeatureVisualizer {
    * Scans the features directory for cross-feature imports.
    */
   public analyze(): FeatureDependency[] {
-    const featuresPath = path.join(this.srcPath, 'features');
+    const featuresPath = path.join(this.srcPath, "features");
     if (!fs.existsSync(featuresPath)) return [];
 
-    const features = fs.readdirSync(featuresPath, { withFileTypes: true })
-      .filter(dirent => dirent.isDirectory())
-      .map(dirent => dirent.name);
+    const features = fs
+      .readdirSync(featuresPath, { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name);
 
     const allDetectedFeatures: string[] = [...features];
     const detailedDeps: FeatureDependency[] = [];
@@ -36,10 +37,13 @@ export class FeatureVisualizer {
 
     for (const feature of features) {
       const featureDir = path.join(featuresPath, feature);
-      const files = this.listFilesRecursively(featureDir, (f) => f.endsWith('.ts') || f.endsWith('.tsx'));
+      const files = this.listFilesRecursively(
+        featureDir,
+        (f) => f.endsWith(".ts") || f.endsWith(".tsx"),
+      );
 
       for (const file of files) {
-        const content = fs.readFileSync(file, 'utf-8');
+        const content = fs.readFileSync(file, "utf-8");
         // Even simpler regex: just look for /features/ followed by a name
         const importRegex = /\/features\/([^/'" ]+)/g;
         let match;
@@ -50,9 +54,11 @@ export class FeatureVisualizer {
             const key = `${feature}->${targetFeature}`;
             if (!dependencies[feature]) dependencies[feature] = new Set();
             dependencies[feature].add(targetFeature);
-            
+
             if (!fileSourceMap[key]) fileSourceMap[key] = [];
-            const relPath = path.relative(this.srcPath, file).replace(/\\/g, '/');
+            const relPath = path
+              .relative(this.srcPath, file)
+              .replace(/\\/g, "/");
             if (!fileSourceMap[key].includes(relPath)) {
               fileSourceMap[key].push(relPath);
             }
@@ -67,7 +73,7 @@ export class FeatureVisualizer {
         detailedDeps.push({
           from,
           to,
-          files: fileSourceMap[`${from}->${to}`] || []
+          files: fileSourceMap[`${from}->${to}`] || [],
         });
       }
     }
@@ -79,11 +85,12 @@ export class FeatureVisualizer {
    * Generates a Mermaid-enhanced Markdown report.
    */
   public generateMarkdownReport(deps: FeatureDependency[]): string {
-    const featuresPath = path.join(this.srcPath, 'features');
-    const allFeatures = fs.existsSync(featuresPath) 
-      ? fs.readdirSync(featuresPath, { withFileTypes: true })
-          .filter(dirent => dirent.isDirectory())
-          .map(dirent => dirent.name)
+    const featuresPath = path.join(this.srcPath, "features");
+    const allFeatures = fs.existsSync(featuresPath)
+      ? fs
+          .readdirSync(featuresPath, { withFileTypes: true })
+          .filter((dirent) => dirent.isDirectory())
+          .map((dirent) => dirent.name)
       : [];
 
     let md = `# 🗺️ Feature Isolation Map\n`;
@@ -93,17 +100,17 @@ export class FeatureVisualizer {
 
     md += `## 📊 Dependency Graph\n\n`;
     md += `\`\`\`mermaid\ngraph TD\n`;
-    
+
     // Nodes
-    allFeatures.forEach(f => {
-      const hasOutgoing = deps.some(d => d.from === f);
-      const hasIncoming = deps.some(d => d.to === f);
-      const style = hasOutgoing ? ':::coupled' : ':::isolated';
+    allFeatures.forEach((f) => {
+      const hasOutgoing = deps.some((d) => d.from === f);
+      const hasIncoming = deps.some((d) => d.to === f);
+      const style = hasOutgoing ? ":::coupled" : ":::isolated";
       md += `  ${f}[${f}]${style}\n`;
     });
 
     // Edges
-    deps.forEach(d => {
+    deps.forEach((d) => {
       md += `  ${d.from} --> ${d.to}\n`;
     });
 
@@ -117,15 +124,18 @@ export class FeatureVisualizer {
     } else {
       md += `| Source Feature | Target (Imported) | Coupling Count | Sample Files |\n`;
       md += `|---|---|---|---|\n`;
-      deps.forEach(d => {
-        const samples = d.files.slice(0, 2).map(f => `\`${path.basename(f)}\``).join(', ');
-        md += `| **${d.from}** | ${d.to} | ${d.files.length} | ${samples}${d.files.length > 2 ? '...' : ''} |\n`;
+      deps.forEach((d) => {
+        const samples = d.files
+          .slice(0, 2)
+          .map((f) => `\`${path.basename(f)}\``)
+          .join(", ");
+        md += `| **${d.from}** | ${d.to} | ${d.files.length} | ${samples}${d.files.length > 2 ? "..." : ""} |\n`;
       });
-      
+
       md += `\n\n### 🧬 Full File Trace\n\n`;
-      deps.forEach(d => {
+      deps.forEach((d) => {
         md += `#### 🔴 ${d.from} → ${d.to} (${d.files.length} links)\n`;
-        d.files.forEach(f => md += `- \`${f}\`\n`);
+        d.files.forEach((f) => (md += `- \`${f}\`\n`));
         md += `\n`;
       });
     }
@@ -133,7 +143,10 @@ export class FeatureVisualizer {
     return md;
   }
 
-  private listFilesRecursively(dir: string, filter: (f: string) => boolean): string[] {
+  private listFilesRecursively(
+    dir: string,
+    filter: (f: string) => boolean,
+  ): string[] {
     let results: string[] = [];
     const list = fs.readdirSync(dir);
     for (let file of list) {

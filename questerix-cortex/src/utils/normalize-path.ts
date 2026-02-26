@@ -4,7 +4,9 @@ const KNOWN_PREFIXES = ["admin-panel/src/", "admin-panel/", "src/"];
 
 export function normalizePath(filePath: string): string {
   const normalized = filePath.replace(/\\/g, "/");
-  const projectRoot = path.resolve(__dirname, "..", "..", "..").replace(/\\/g, "/");
+  const projectRoot = path
+    .resolve(__dirname, "..", "..", "..")
+    .replace(/\\/g, "/");
   let withRootStripped = normalized.startsWith(projectRoot)
     ? normalized.slice(projectRoot.length + 1)
     : normalized;

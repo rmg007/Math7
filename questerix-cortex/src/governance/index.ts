@@ -1,12 +1,17 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
 export interface GovernanceResult {
   deadRefs: Array<{ file: string; ref: string; line?: number }>;
   scannedFiles: number;
 }
 
-const GOVERNANCE_DIRS = ['.agent', '.cursor', 'docs/strategy', 'docs/standards'];
+const GOVERNANCE_DIRS = [
+  ".agent",
+  ".cursor",
+  "docs/strategy",
+  "docs/standards",
+];
 
 /**
  * Collect .md files under projectRoot that match the governance surface.
@@ -19,10 +24,10 @@ function collectMarkdownFiles(projectRoot: string): string[] {
     if (!fs.existsSync(fullDir)) return;
     const entries = fs.readdirSync(fullDir, { withFileTypes: true });
     for (const e of entries) {
-      const rel = path.join(relDir, e.name).replace(/\\/g, '/');
+      const rel = path.join(relDir, e.name).replace(/\\/g, "/");
       if (e.isDirectory()) {
         walk(rel);
-      } else if (e.name.endsWith('.md')) {
+      } else if (e.name.endsWith(".md")) {
         out.push(rel);
       }
     }
@@ -31,7 +36,7 @@ function collectMarkdownFiles(projectRoot: string): string[] {
   try {
     const rootFiles = fs.readdirSync(projectRoot);
     for (const f of rootFiles) {
-      if (f.endsWith('.md')) out.push(f);
+      if (f.endsWith(".md")) out.push(f);
     }
   } catch {
     // ignore
@@ -56,8 +61,12 @@ function extractRefs(content: string): string[] {
   let m: RegExpExecArray | null;
   while ((m = linkRe.exec(content)) !== null) {
     const raw = m[1].trim();
-    const filePath = raw.split('#')[0].trim();
-    if (filePath && !filePath.startsWith('http') && !filePath.startsWith('mailto:')) {
+    const filePath = raw.split("#")[0].trim();
+    if (
+      filePath &&
+      !filePath.startsWith("http") &&
+      !filePath.startsWith("mailto:")
+    ) {
       refs.push(filePath);
     }
   }
@@ -66,7 +75,7 @@ function extractRefs(content: string): string[] {
   const backtickRe = /`([^`]+)`/g;
   while ((m = backtickRe.exec(content)) !== null) {
     const p = m[1].trim();
-    if (p.endsWith('.md') || (p.includes('/') && !p.includes(' '))) {
+    if (p.endsWith(".md") || (p.includes("/") && !p.includes(" "))) {
       refs.push(p);
     }
   }
@@ -83,14 +92,18 @@ function extractRefs(content: string): string[] {
 /**
  * Resolve a reference from the file that contains it to an absolute path and check existence.
  */
-function resolveRef(projectRoot: string, fromFile: string, ref: string): string | null {
+function resolveRef(
+  projectRoot: string,
+  fromFile: string,
+  ref: string,
+): string | null {
   // Normalize ref: no leading ./
-  let p = ref.replace(/^\.\//, '');
-  if (p.startsWith('/')) return null;
+  let p = ref.replace(/^\.\//, "");
+  if (p.startsWith("/")) return null;
   const fromDir = path.dirname(path.join(projectRoot, fromFile));
   const resolved = path.normalize(path.join(fromDir, p));
   const rel = path.relative(projectRoot, resolved);
-  if (rel.startsWith('..')) return null; // outside repo
+  if (rel.startsWith("..")) return null; // outside repo
   return path.join(projectRoot, rel);
 }
 
@@ -102,7 +115,7 @@ export function auditGovernance(projectRoot: string): GovernanceResult {
     const absPath = path.join(projectRoot, file);
     let content: string;
     try {
-      content = fs.readFileSync(absPath, 'utf-8');
+      content = fs.readFileSync(absPath, "utf-8");
     } catch {
       continue;
     }

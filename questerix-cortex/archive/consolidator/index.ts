@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
 export interface ConsolidationResult {
   merged: string[];
@@ -24,28 +24,40 @@ export class Consolidator {
    * Scans sessions in the brain directory and performs consolidation.
    */
   consolidate(): ConsolidationResult {
-    const result: ConsolidationResult = { merged: [], archived: [], deleted: [] };
+    const result: ConsolidationResult = {
+      merged: [],
+      archived: [],
+      deleted: [],
+    };
     if (!fs.existsSync(this.brainPath)) return result;
 
-    const sessions = fs.readdirSync(this.brainPath).filter(f => 
-      fs.statSync(path.join(this.brainPath, f)).isDirectory()
-    );
+    const sessions = fs
+      .readdirSync(this.brainPath)
+      .filter((f) => fs.statSync(path.join(this.brainPath, f)).isDirectory());
 
     for (const session of sessions) {
       const sessionPath = path.join(this.brainPath, session);
       const files = fs.readdirSync(sessionPath);
 
       // 1. Consolidate Implementation Plans
-      const plans = files.filter(f => f.startsWith('implementation_plan') && f.endsWith('.md'));
+      const plans = files.filter(
+        (f) => f.startsWith("implementation_plan") && f.endsWith(".md"),
+      );
       if (plans.length > 1) {
-        this.mergeFiles(sessionPath, plans, 'CONSOLIDATED_PLAN.md');
+        this.mergeFiles(sessionPath, plans, "CONSOLIDATED_PLAN.md");
         result.merged.push(`${session}/CONSOLIDATED_PLAN.md`);
       }
 
       // 2. Consolidate Walkthroughs
-      const walkthroughs = files.filter(f => f.startsWith('walkthrough') && f.endsWith('.md'));
+      const walkthroughs = files.filter(
+        (f) => f.startsWith("walkthrough") && f.endsWith(".md"),
+      );
       if (walkthroughs.length > 1) {
-        this.mergeFiles(sessionPath, walkthroughs, 'CONSOLIDATED_WALKTHROUGH.md');
+        this.mergeFiles(
+          sessionPath,
+          walkthroughs,
+          "CONSOLIDATED_WALKTHROUGH.md",
+        );
         result.merged.push(`${session}/CONSOLIDATED_WALKTHROUGH.md`);
       }
 
@@ -60,11 +72,11 @@ export class Consolidator {
   private mergeFiles(dir: string, files: string[], targetName: string) {
     let combined = `# Consolidated Artifacts (${new Date().toLocaleDateString()})\n\n`;
     for (const file of files) {
-      const content = fs.readFileSync(path.join(dir, file), 'utf-8');
+      const content = fs.readFileSync(path.join(dir, file), "utf-8");
       combined += `## Source: ${file}\n\n${content}\n\n---\n\n`;
     }
-    fs.writeFileSync(path.join(dir, targetName), combined, 'utf-8');
-    
+    fs.writeFileSync(path.join(dir, targetName), combined, "utf-8");
+
     // Cleanup originals
     for (const file of files) {
       fs.unlinkSync(path.join(dir, file));
