@@ -1,5 +1,28 @@
 # Questerix Learning Log
 
+## 2026-02-26: Database and Auth Synchronization & Testing [verified]
+
+### [2026-02-26-Sync] Session Context
+
+- **Trigger**: Tasks resolution involving removing old modules running behind the scenes, tracking down powershell gen type failures, and updating tests that were throwing typings errors.
+- **Scope**: `questerix-cortex/`, `admin-panel/src`, `scripts/`
+- **Outcome**: Restored clean compile loops locally out of `questerix-cortex`, resolved strict mock object properties causing compilation failures out of `admin-panel` testing layer.
+
+### [2026-02-26-Sync] Technical Implementation
+
+- **Obsolete Module Archiving**: Safely extracted and eliminated Historian, Consolidator, and isolated visualizer outputs in `questerix-cortex/archive`. Updated TSConfig exclusions for proper compiler runtime ignoring the artifacts.
+- **Mock Type Integrity**: Ensured proper usage of `as any` casting alongside mocked vi implementations against `supabase-js`, bypassing strictly limited query chains when creating robust test implementations inside `.test.tsx` files.
+- **Tool Automation**: Recommended isolation of local `.env.local` to securely persist required database variables for utility `script/gen_types.ps1` tasks that were halting CI operations under non-standard powershell environments.
+
+### [2026-02-26-Sync] Bugs Found & Fixed
+
+| Bug                         | Root Cause                                                                                            | Fix                                                                                                     | Prevention Rule                                                                                                                         |
+| :-------------------------- | :---------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| **Strict Type Constraints** | Typescript flagged `.then` chain methods not natively existing on `PostgrestQueryBuilder` structures. | Implemented `as any` bypass around `.then()` injections used for mock responses                         | Mock chains testing async Supabase calls must be cast with `as any` when forcing a `.then()` resolution to bypass strict return typing  |
+| **Gated Environment Execs** | PowerShell execution flagged unset `SUPABASE_DB_PASSWORD`.                                            | Need explicit loading of `dotenv` or equivalent local profile settings locally for `gen_types.ps1` runs | Ensure `.env.local` variables are sourced or passed directly when background processes or pipeline commands leverage database endpoints |
+
+---
+
 ## 2026-02-26: Cortex v3 MCP Implementation [verified]
 
 ### [2026-02-26-Cortex] Session Context
