@@ -7,7 +7,9 @@
     "health": "ts-node run.ts",
     "build": "tsc",
     "cortex:selftest": "node dist/scripts/selftest.js",
-    "cortex:setup": "node dist/scripts/setup.js"
+    "cortex:setup": "node dist/scripts/setup.js",
+    "lint": "eslint . --ext ts",
+    "format": "prettier --write \"**/*.ts\""
   },
   "bin": {
     "cortex-mcp-server": "./dist/src/mcp-server/index.js"
@@ -28,6 +30,8 @@
     "@types/express": "^4.17.21",
     "@types/glob": "^8.1.0",
     "@types/node": "^22.13.5",
+    "eslint": "^10.0.2",
+    "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   }
