@@ -20,11 +20,11 @@
 
 ## 🧹 Phase: Cortex Hygiene & Maintenance
 
-- [ ] **Ghost Module Archiving**: Move `Historian`, `Consolidator`, and unused visualizer logic to `questerix-cortex/archive/`.
-- [ ] **Heal Schema Drift**: Execute `npm run health -- drift --heal-drift` to prune 7 stale definitions from `database.types.ts`.
 - [ ] **Document Evidence Bridge**: Add a note to `AGENTS.md` about the `RLS_REMOTE_EVIDENCE.json` pattern to avoid future CLI false positives.
+- [ ] **Cortex Formatting Pipeline**: Add `lint` and `format` scripts to the `questerix-cortex/package.json` to leverage ESLint and Prettier for output formatting automatically.
 
 ## 🛡️ Phase: Security & Reliability
 
 - [ ] **RLS verification**: Verify `AGENT_CONTEXT.md` reports `PASS` on a fresh `intel` run using the new evidence bridge.
 - [ ] **Fragility Sweep**: Review the top 5 fragile files reported in `AGENT_CONTEXT.md` and propose a "Hardening Plan."
+- [ ] **Script Environment Isolation**: Ensure `gen_types.ps1` and utility automated scripts source `.env.local` to prevent `SUPABASE_DB_PASSWORD` or related config execution context failures.
