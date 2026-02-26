@@ -1,6 +1,5 @@
 import { DeltaResult } from './delta';
 import { DriftResult } from './drift';
-import { HistoryRecord } from './historian';
 import { OptimizeReport } from './optimizer';
 import { TaskResult } from './orchestrator';
 import { RiskScore } from './risk-scorer';
@@ -64,6 +63,5 @@ export interface RunContext {
   driftResult?: DriftResult;
   rlsResult?: RlsAuditResult;
   optimizeResult?: OptimizeReport;
-  history: HistoryRecord[];
   smokePass: boolean;
 }

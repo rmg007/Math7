@@ -2,18 +2,15 @@ import { agentops } from 'agentops';
 import chalk from 'chalk';
 import { execSync } from 'child_process';
 import * as fs from 'fs';
-import open from 'open';
 import * as path from 'path';
 import { Project } from 'ts-morph';
 import { Analyst } from './src/analyst';
-import { Consolidator } from './src/consolidator';
-import { CortexDB } from './src/cortex-db';
-import { Dashboard } from './src/dashboard';
+
 import { DriftDetector, DriftResult } from './src/drift';
 import { FragilityMetrics, FragilityScorer } from './src/fragility';
 import { auditGovernance } from './src/governance';
 import { Guard } from './src/guard';
-import { Historian } from './src/historian';
+
 import { OptimizeAuditor, OptimizeReport } from './src/optimizer';
 import { Orchestrator } from './src/orchestrator';
 import { Reporter } from './src/reporter';
@@ -23,7 +20,6 @@ import { SkeletonGenerator } from './src/skeleton';
 import { SkeletonSearch } from './src/skeleton/search';
 import { CortexConfig } from './src/types';
 import { normalizePath } from './src/utils/normalize-path';
-import { ZombieHunter } from './src/utils/process-cleaner';
 import { FeatureVisualizer } from './src/visualizer';
 
 const configPath = path.join(__dirname, 'cortex.config.json');
@@ -90,7 +86,7 @@ function toComparableName(name: string): string {
 
 
 
-function mapE2ETestsToPages(cortexDb: CortexDB, adminPath: string): void {
+function mapE2ETestsToPages(cortexDbPath: string, adminPath: string): void {
   const testDir = path.join(adminPath, 'tests');
   const pageDir = path.join(adminPath, 'src', 'features');
   const testFiles = listFilesRecursively(testDir, filePath => filePath.endsWith('.spec.ts'));
@@ -105,7 +101,8 @@ function mapE2ETestsToPages(cortexDb: CortexDB, adminPath: string): void {
     pageMap.set(baseName.toLowerCase(), pageFile);
   }
 
-  const db = cortexDb.getDb();
+  const Database = require('better-sqlite3');
+  const db = new Database(cortexDbPath);
   const timestamp = new Date().toISOString();
   const insertNode = db.prepare(`
     INSERT OR REPLACE INTO nodes (id, type, file_path, metadata, updated_at)
@@ -150,16 +147,18 @@ function mapE2ETestsToPages(cortexDb: CortexDB, adminPath: string): void {
       metadata: null
     });
   }
+
+  db.close();
 }
 
 async function main() {
-  // Check for CI mode (skip dashboard/browser)
+  // Check for CI mode
   const args = process.argv.slice(2);
-  const isCI = args.includes('--ci') || args.includes('--no-dashboard');
+  const isCI = args.includes('--ci');
   const targetArg = args.find(a => !a.startsWith('--'));
   const flags = args.filter(a => a.startsWith('--'));
 
-  // ── Early-exit targets (no dashboard / scanner needed) ────────────────────
+  // ── Early-exit targets (no scanner needed) ────────────────────
   const earlyTarget = targetArg;
 
   if (earlyTarget === 'optimize') {
@@ -181,9 +180,6 @@ async function main() {
   }
 
   console.log(chalk.cyan.bold('\n🚀 Questerix Cortex — Initializing...'));
-
-  // Pre-flight: Kill any existing zombies/port locks
-  ZombieHunter.clean(config.dashboardPort);
 
   // Initialize AgentOps session if API key is present
   if (process.env.AGENTOPS_API_KEY) {
@@ -225,28 +221,15 @@ async function main() {
   const scanner = new Scanner(project, srcPath);
   const reporter = new Reporter(__dirname, config.outputs, path.resolve(__dirname, '..'));
   const analyst = new Analyst(project);
-  const historian = new Historian(
-    path.join(__dirname, config.outputs.history),
-    config.thresholds.maxHistoryRuns
-  );
+
   const driftDetector = new DriftDetector(adminPath, supabasePath);
   const rlsAuditor = new RlsAuditor(config.supabaseProjectRef);
 
-  // CI mode: skip dashboard and browser
-  let dashboard: Dashboard | undefined;
-  let orchestrator: Orchestrator;
-
-  if (!isCI) {
-    dashboard = new Dashboard(config.dashboardPort);
-    orchestrator = new Orchestrator(adminPath, (text, color, bold) => dashboard!.log(text, color, bold));
-    await open(`http://localhost:${config.dashboardPort}`);
-  } else {
-    // In CI mode, use console logging instead of dashboard
-    orchestrator = new Orchestrator(adminPath, (text, color, bold) => {
-      const colorFn = color ? (chalk as any)[color] || chalk.gray : chalk.gray;
-      console.log(bold ? colorFn.bold(text) : colorFn(text));
-    });
-  }
+  // Initialize orchestrator
+  const orchestrator = new Orchestrator(adminPath, (text, color, bold) => {
+    const colorFn = color ? (chalk as any)[color] || chalk.gray : chalk.gray;
+    console.log(bold ? colorFn.bold(text) : colorFn(text));
+  });
 
   // ── Core run function ─────────────────────────────────────────────────────
   const executeRun = async (target: string = 'all', flags: string[] = []) => {
@@ -255,12 +238,10 @@ async function main() {
     const healDrift = flags.includes('--heal-drift');
     const syncKb = flags.includes('--sync-kb');
     const pruneBrain = flags.includes('--prune-brain');
-    const consolidate = flags.includes('--consolidate');
 
     // ── Optimize target (standalone — exits early) ────────────────────────────
     if (targets.includes('optimize')) {
       console.log(chalk.cyan.bold('\n🚀 Running Performance Optimization Audit…'));
-      dashboard?.log('\n🚀 Running Performance Optimization Audit…', 'cyan', true);
       const optimizer = new OptimizeAuditor(path.resolve(__dirname, '..'));
       const report = optimizer.audit();
       const md = optimizer.generateMarkdownReport(report);
@@ -272,12 +253,8 @@ async function main() {
 
       const color = report.verdict === 'CLEAN' ? 'green' : 'red';
       console.log(chalk[color](`\n${report.summary}`));
-      dashboard?.log(`\n${report.summary}`, color);
       console.log(chalk.gray(`   Report saved → ${reportPath}`));
-      dashboard?.log(`   Report saved → outputs/OPTIMIZE_REPORT.md`, 'gray');
       
-      // Update dashboard state so results appear in the UI
-      dashboard?.update({}, undefined, undefined, historian.getHistory(), undefined, undefined, undefined, report);
       return;
     }
 
@@ -288,7 +265,6 @@ async function main() {
     const runOptimize = targets.includes('optimize') || targets.includes('all') || targets.includes('full') || targets.includes('intel');
     
     console.log(chalk.cyan.bold(`\n🔄 Run (${target}) started…`));
-    dashboard?.log(`\n🔄 Run (${target}) started…`, 'cyan', true);
 
     // Clear previous results to prevent stale data
     orchestrator.clearResults();
@@ -303,19 +279,12 @@ async function main() {
       JSON.stringify(surfaceMap, null, 2)
     );
 
-    const cortexDb = new CortexDB(path.join(__dirname, 'outputs', 'cortex.db'));
-    try {
-      await scanner.writeGraph(cortexDb);
-      mapE2ETestsToPages(cortexDb, adminPath);
-    } finally {
-      cortexDb.close();
-    }
+
 
     // ── Skeleton generation ──────────────────────────────────────────────────
     if (runSkeleton) {
       try {
         console.log(chalk.cyan('\n🦴 Generating codebase skeleton…'));
-        dashboard?.log('\n🦴 Generating codebase skeleton…', 'cyan');
         const skeletonGen = new SkeletonGenerator(project, srcPath);
         const skeletonReport = skeletonGen.generate();
         skeletonGen.writeJson(skeletonReport, path.join(outputsPath, 'SKELETON.json'));
@@ -323,7 +292,6 @@ async function main() {
         skeletonGen.writeMarkdownSummary(skeletonReport, path.join(outputsPath, 'SKELETON_SUMMARY.md'));
         skeletonGen.writeUtilityRegistry(skeletonReport, path.join(outputsPath, 'UTILITY_REGISTRY.md'));
         console.log(chalk.green(`   ✅ Skeleton: ${skeletonReport.totalFiles} files, ${skeletonReport.totalExports} exports`));
-        dashboard?.log(`   ✅ Skeleton: ${skeletonReport.totalFiles} files, ${skeletonReport.totalExports} exports`, 'green');
 
         // ── Index for search ──────────────────────────────────────────────────
         const searchDbPath = path.join(outputsPath, 'search.db');
@@ -331,24 +299,19 @@ async function main() {
         searcher.index(skeletonReport);
         searcher.close();
         console.log(chalk.green('   ✅ Search index updated.'));
-        dashboard?.log('   ✅ Search index updated.', 'green');
 
       } catch (skeletonErr: any) {
         console.warn(chalk.yellow('   ⚠️  Skeleton generation failed:', skeletonErr.message));
-        dashboard?.log('   ⚠️  Skeleton generation failed', 'yellow');
       }
     }
 
     if (generateSkeletons) {
       console.log(chalk.yellow('\n🧪 Generating test skeletons for gaps…'));
-      dashboard?.log('\n🧪 Generating test skeletons for gaps…', 'yellow');
       const skels = scanner.generateSkeletons(surfaceMap);
       if (skels.length > 0) {
         console.log(chalk.green(`   ✅ Generated ${skels.length} skeletons.`));
-        dashboard?.log(`   ✅ Generated ${skels.length} skeletons.`, 'green');
       } else {
         console.log(chalk.gray('   ⏭️ No new gaps requiring skeletons.'));
-        dashboard?.log('   ⏭️ No new gaps requiring skeletons.', 'gray');
       }
     }
 
@@ -378,16 +341,13 @@ async function main() {
 
     if (runDrift) {
       console.log(chalk.cyan('\n🔍 Schema Drift Detection…'));
-      dashboard?.log('\n🔍 Schema Drift Detection…', 'cyan');
       driftResult = driftDetector.detect();
 
       if (healDrift && driftResult.verdict === 'DRIFT DETECTED') {
         console.log(chalk.yellow('🩹 Healing schema drift…'));
-        dashboard?.log('🩹 Healing schema drift…', 'yellow');
         const healed = driftDetector.heal();
         if (healed) {
           console.log(chalk.green('   ✅ Drift healed. Re-scanning…'));
-          dashboard?.log('   ✅ Drift healed. Re-scanning…', 'green');
           driftResult = driftDetector.detect();
         }
       }
@@ -395,69 +355,45 @@ async function main() {
       const driftSummary = `   ${driftResult.verdict} — types: ${driftResult.typesTableCount} | ` +
         `missing: ${driftResult.missingFromTypes.length} | extra: ${driftResult.extraInTypes.length}`;
       console.log(chalk.cyan(driftSummary));
-      dashboard?.log(driftSummary, 'cyan');
     }
 
     if (syncKb) {
       console.log(chalk.yellow('\n🧠 Syncing Knowledge Base (Project Oracle)…'));
-      dashboard?.log('🧠 Syncing Knowledge Base (Project Oracle)…', 'yellow');
       try {
         const scriptPath = path.join(supabasePath, '..', 'scripts', 'maintenance', 'automate_knowledge.ps1');
         execSync(`powershell -NoProfile -File "${scriptPath}"`, { stdio: 'inherit' });
         console.log(chalk.green('   ✅ Knowledge sync complete.'));
-        dashboard?.log('   ✅ Knowledge sync complete.', 'green');
       } catch (err) {
         console.error('   ❌ Knowledge sync failed:', err);
-        dashboard?.log('   ❌ Knowledge sync failed.', 'red');
       }
     }
 
     if (pruneBrain) {
       console.log(chalk.yellow('\n🧹 Pruning Agent Memory (Hygiene)…'));
-      dashboard?.log('🧹 Pruning Agent Memory (Hygiene)…', 'yellow');
       try {
         const scriptPath = path.join(supabasePath, '..', 'scripts', 'maintenance', 'agent-memory-cleanup.ps1');
         execSync(`powershell -NoProfile -File "${scriptPath}"`, { stdio: 'inherit' });
         console.log(chalk.green('   ✅ Memory pruning complete.'));
-        dashboard?.log('   ✅ Memory pruning complete.', 'green');
       } catch (err) {
         console.error('   ❌ Memory pruning failed:', err);
-        dashboard?.log('   ❌ Memory pruning failed.', 'red');
       }
     }
 
-    if (consolidate) {
-      console.log(chalk.yellow('\n📦 Consolidating fragmented artifacts…'));
-      dashboard?.log('📦 Consolidating fragmented artifacts…', 'yellow');
-      const brainPath = path.resolve(process.env.USERPROFILE || '', '.gemini', 'antigravity', 'brain');
-      const consolidator = new Consolidator(brainPath, path.resolve(__dirname, '..'));
-      const cResult = consolidator.consolidate();
-      if (cResult.merged.length > 0) {
-        console.log(chalk.green(`   ✅ Merged ${cResult.merged.length} document set(s).`));
-        dashboard?.log(`   ✅ Merged ${cResult.merged.length} document set(s).`, 'green');
-      } else {
-        console.log(chalk.gray('   ⏭️ No documents requiring consolidation.'));
-        dashboard?.log('   ⏭️ No documents requiring consolidation.', 'gray');
-      }
-    }
+
 
     if (runRls) {
       console.log(chalk.cyan('\n🔒 RLS Audit…'));
-      dashboard?.log('\n🔒 RLS Audit…', 'cyan');
       rlsResult = await rlsAuditor.audit();
       const rlsSummary = `   ${rlsResult.verdict} — critical: ${rlsResult.criticalCount}`;
       console.log(chalk.cyan(rlsSummary));
-      dashboard?.log(rlsSummary, 'cyan');
     }
 
     let governanceResult: { deadRefs: Array<{ file: string; ref: string }>; scannedFiles: number } | undefined;
     if (runGovernance) {
       console.log(chalk.cyan('\n📜 Governance (dead refs)…'));
-      dashboard?.log('\n📜 Governance…', 'cyan');
       governanceResult = auditGovernance(path.resolve(__dirname, '..'));
       const govSummary = `   Scanned ${governanceResult.scannedFiles} files, ${governanceResult.deadRefs.length} dead reference(s)`;
       console.log(chalk.cyan(govSummary));
-      dashboard?.log(govSummary, 'cyan');
 
       // Run FeatureVisualizer once and reuse result
       let deps: any[] | undefined;
@@ -472,21 +408,17 @@ async function main() {
       if (deps && visualizer) {
         // ── Feature Mapping ──
         console.log(chalk.cyan('\n🗺️  Mapping feature isolation…'));
-        dashboard?.log('🗺️  Mapping feature isolation…', 'cyan');
         try {
           const featureMd = visualizer.generateMarkdownReport(deps);
           const fMapPath = path.join(__dirname, config.outputs.featureMap);
           fs.writeFileSync(fMapPath, featureMd, 'utf-8');
           console.log(chalk.green(`   ✅ Feature map: ${deps.length} cross-dependencies found → ${fMapPath}`));
-          dashboard?.log(`   ✅ Feature map generated: ${deps.length} cross-dependencies`, 'green');
         } catch (err: any) {
           console.warn(chalk.yellow('   ⚠️  Feature mapping failed:', err.message));
-          dashboard?.log('   ⚠️  Feature mapping failed', 'yellow');
         }
 
         // ── Fragility Analysis ──
         console.log(chalk.cyan('\n🏗️  Analyzing feature fragility…'));
-        dashboard?.log('🏗️  Analyzing feature fragility…', 'cyan');
         try {
           const scorer = new FragilityScorer(srcPath);
           const metrics: FragilityMetrics[] = scorer.analyze(deps);
@@ -496,15 +428,12 @@ async function main() {
           
           const fragileCount = metrics.filter((m: FragilityMetrics) => m.verdict === 'FRAGILE' || m.verdict === 'STIFF').length;
           console.log(chalk.green(`   ✅ Fragility matrix: ${fragileCount} high-risk features found → ${fMatrixPath}`));
-          dashboard?.log(`   ✅ Fragility matrix generated: ${fragileCount} high-risk features`, fragileCount > 0 ? 'yellow' : 'green');
         } catch (err: any) {
           console.warn(chalk.yellow('   ⚠️  Fragility analysis failed:', err.message));
-          dashboard?.log('   ⚠️  Fragility analysis failed', 'yellow');
         }
 
         // ── Architecture Guard ──
         console.log(chalk.cyan('\n🛡️  Enforcing architecture guard…'));
-        dashboard?.log('🛡️  Enforcing architecture guard…', 'cyan');
         try {
           const guard = new Guard(config.guard.rules);
           const violations = guard.check(deps);
@@ -514,14 +443,11 @@ async function main() {
 
         if (violations.length > 0) {
           console.log(chalk.red(`   ❌ Guard breach: ${violations.length} violations detected → ${gPath}`));
-          dashboard?.log(`   ❌ Guard breach: ${violations.length} violations`, 'red');
         } else {
           console.log(chalk.green(`   ✅ Guard: PASS → ${gPath}`));
-          dashboard?.log('   ✅ Guard: PASS', 'green');
         }
       } catch (err: any) {
         console.warn(chalk.yellow('   ⚠️  Guard check failed:', err.message));
-        dashboard?.log('   ⚠️  Guard check failed', 'yellow');
       }
     }
   } // Added missing closing brace here
@@ -529,7 +455,6 @@ async function main() {
     // ── Performance Optimization Audit ──────────────────────────────────────
     if (runOptimize && !targets.includes('optimize')) {
       console.log(chalk.cyan('\n🚀 Performance Optimization Audit…'));
-      dashboard?.log('\n🚀 Performance Optimization Audit…', 'cyan');
       try {
         const optimizer = new OptimizeAuditor(path.resolve(__dirname, '..'));
         const optReport = optimizer.audit();
@@ -537,17 +462,10 @@ async function main() {
         optimizeResult = { ...optReport, markdown: md };
         const optColor = optReport.verdict === 'CLEAN' ? 'green' : 'red';
         console.log(chalk[optColor](`   ${optReport.summary}`));
-        dashboard?.log(`   ${optReport.summary}`, optColor);
       } catch (err) {
         console.warn(chalk.yellow('⚠️  Optimizer failed:', err));
       }
     }
-
-    let history = historian.getHistory();
-    const pushUpdate = () =>
-      dashboard?.update(orchestrator.getResults(), surfaceMap, analystResults, history, undefined, driftResult, rlsResult, optimizeResult);
-
-    pushUpdate();
 
     // ── Suite execution ───────────────────────────────────────────────────────
     if (targets.some(t => !['drift', 'rls', 'intel'].includes(t))) {
@@ -568,7 +486,6 @@ async function main() {
         if (!fs.existsSync(absPath)) {
           const msg = `⚠️  Skipping "${suite.name}" — target not found: ${fileArg}`;
           console.log(chalk.yellow(msg));
-          dashboard?.log(msg, 'yellow');
           return false;
         }
         return true;
@@ -587,16 +504,13 @@ async function main() {
 
         // Run parallel-safe suites concurrently, then sequential ones in order
         if (parallelGroup.length > 0) {
-          await orchestrator.runSuitesConcurrent(parallelGroup, pushUpdate);
+          await orchestrator.runSuitesConcurrent(parallelGroup);
           analystResults.bundleSize = analyst.getBundleSize(adminPath);
-          pushUpdate();
         }
 
         for (const suite of sequentialGroup) {
-          pushUpdate();
           await orchestrator.runSuite(suite.name, suite.command);
           analystResults.bundleSize = analyst.getBundleSize(adminPath);
-          pushUpdate();
         }
       }
     }
@@ -611,20 +525,12 @@ async function main() {
     if (bundleKB && bundleKB > 9000) {
       const msg = `⚠️ Bundle size ${bundleKB} KB exceeds 9 MB threshold!`;
       console.log(chalk.red(msg));
-      dashboard?.log(msg, 'red');
     }
 
     const results    = orchestrator.getResults();
     const allResults = Object.values(results);
     const passed     = allResults.filter(r => r.status === 'passed').length;
     const total      = allResults.length;
-
-    const updatedHistory = historian.record({
-      date:     new Date().toISOString(),
-      score:    total > 0 ? Math.round((passed / total) * 100) : 0,
-      coverage: 0,
-      failures: total - passed,
-    });
 
     // Smoke gate
     const smokeNames = ['unit tests (lib)', 'e2e smoke (desktop)', 'lint check'];
@@ -633,9 +539,7 @@ async function main() {
       .every(r => r.status === 'passed');
 
     // Reports
-    reporter.generate(results, surfaceMap, analystResults, driftResult, rlsResult, updatedHistory, governanceResult, optimizeResult);
-
-    dashboard?.update(results, surfaceMap, analystResults, updatedHistory, smokePass, driftResult, rlsResult, optimizeResult);
+    reporter.generate(results, surfaceMap, analystResults, driftResult, rlsResult, [], governanceResult, optimizeResult);
 
     // Summary
     const driftLine = driftResult
@@ -649,22 +553,14 @@ async function main() {
 
     if (driftResult && driftLine) {
       console.log('\n' + driftLine);
-      dashboard?.log('\n' + driftLine.replace(/\u001b\[\d+m/g, ''), driftResult.verdict === 'CLEAN' ? 'green' : 'red');
     }
     if (rlsResult && rlsLine) {
       console.log(rlsLine);
-      dashboard?.log(rlsLine.replace(/\u001b\[\d+m/g, ''), rlsResult.verdict === 'PASS' ? 'green' : 'red');
     }
     console.log(chalk.green(`\n✅ Run complete. Reports in outputs/`));
-    dashboard?.log(`\n✅ Run complete. Reports in outputs/`, 'green', true);
   };
 
-  dashboard?.onTrigger(async (target: string) => {
-    await executeRun(target);
-  });
-
   // Auto-run only if an explicit target was passed as a CLI arg.
-  // With no args, Cortex opens the dashboard and waits for a button click.
   // CI mode: skip dashboard and auto-run if target provided
 
   if (targetArg && isCI) {
@@ -699,8 +595,8 @@ async function main() {
   if (targetArg) {
     await executeRun(targetArg, flags);
   } else {
-    console.log(chalk.yellow('  ⏸  No target specified — dashboard open, waiting for trigger.'));
-    dashboard?.log('⏸  Ready. Click a button to start a run.', 'yellow');
+    console.log(chalk.yellow('  ⚙️  No target provided. Auto-running `intel`.'));
+    await executeRun('intel', flags);
   }
 }
 
