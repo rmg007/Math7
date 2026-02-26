@@ -162,35 +162,4 @@ export class GitOracle {
   private normalizePath(filePath: string): string {
     return filePath.replace(/\\/g, '/');
   }
-
-  /**
-   * Stage all changes, commit with message, and push with tags.
-   * ONLY called if health suite passes.
-   */
-  async ship(message: string, version?: string): Promise<{ success: boolean; output: string }> {
-    try {
-      let output = "";
-      
-      // Stage
-      output += execSync('git add .', { cwd: this.projectRoot, encoding: 'utf-8' });
-      
-      // Commit
-      output += execSync(`git commit -m "${message}"`, { cwd: this.projectRoot, encoding: 'utf-8' });
-      
-      // Tag
-      if (version) {
-        output += execSync(`git tag v${version}`, { cwd: this.projectRoot, encoding: 'utf-8' });
-      }
-      
-      // Push
-      output += execSync('git push', { cwd: this.projectRoot, encoding: 'utf-8' });
-      if (version) {
-        output += execSync('git push --tags', { cwd: this.projectRoot, encoding: 'utf-8' });
-      }
-      
-      return { success: true, output };
-    } catch (error: any) {
-      return { success: false, output: error.stdout + error.stderr + (error.message || "") };
-    }
-  }
 }

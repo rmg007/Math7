@@ -1,0 +1,154 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mC:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel[39m
+
+ [31m❯[39m src/features/curriculum/hooks/__tests__/use-questions.test.tsx [2m([22m[2m9 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[33m 1342[2mms[22m[39m
+       [32m✓[39m should fetch questions for current app and skill[32m 117[2mms[22m[39m
+       [32m✓[39m should fetch paginated questions with filters[32m 86[2mms[22m[39m
+[31m       [31m×[31m should fetch a single question by id[39m[33m 1034[2mms[22m[39m
+       [32m✓[39m should handle missing question gracefully (returns null)[32m 69[2mms[22m[39m
+       [32m✓[39m should create a new question[32m 8[2mms[22m[39m
+[31m       [31m×[31m should update a question[39m[32m 7[2mms[22m[39m
+[31m       [31m×[31m should soft-delete a question[39m[32m 8[2mms[22m[39m
+[31m       [31m×[31m should update status for multiple questions[39m[32m 4[2mms[22m[39m
+[31m       [31m×[31m should soft-delete multiple questions[39m[32m 6[2mms[22m[39m
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/curriculum/hooks/__tests__/use-questions.test.tsx > useQuestions > useQuestion hook > should fetch a single question by id
+AssertionError: expected false to be true // Object.is equality
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div />
+  </body>
+</html>
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/features/curriculum/hooks/__tests__/use-questions.test.tsx:114:60
+    112|       const { result } = renderHook(() => useQuestion(mockQuestion.id)…
+    113| 
+    114|       await waitFor(() => expect(result.current.isSuccess).toBe(true));
+       |                                                            ^
+    115| 
+    116|       expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith('id', …
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/features/curriculum/hooks/__tests__/use-questions.test.tsx > useQuestions > useUpdateQuestion > should update a question
+Error: Invalid question ID format: 1
+ ❯ Object.mutationFn src/features/curriculum/hooks/use-questions.ts:249:44
+    247|     mutationFn: async ({ question_id, ...updates }: { question_id: str…
+    248|       if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No ap…
+    249|       if (!isValidUUID(question_id)) throw new Error(`Invalid question…
+       |                                            ^
+    250| 
+    251|       let query = supabase.from('questions').update(updates).eq('quest…
+ ❯ Object.fn ../../../Important%20Projects/Questerix/admin-panel/node_modules/@tanstack/query-core/build/modern/mutation.js:74:29
+ ❯ run ../../../Important%20Projects/Questerix/admin-panel/node_modules/@tanstack/query-core/build/modern/retryer.js:77:49
+ ❯ Object.start ../../../Important%20Projects/Questerix/admin-panel/node_modules/@tanstack/query-core/build/modern/retryer.js:119:9
+ ❯ Mutation.execute ../../../Important%20Projects/Questerix/admin-panel/node_modules/@tanstack/query-core/build/modern/mutation.js:115:40
+ ❯ src/features/curriculum/hooks/__tests__/use-questions.test.tsx:166:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/features/curriculum/hooks/__tests__/use-questions.test.tsx > useQuestions > useDeleteQuestion > should soft-delete a question
+AssertionError: expected "vi.fn()" to be called with arguments: [ { status: 'deleted', …(1) } ]
+
+Received: 
+
+  1st vi.fn() call:
+
+  [
+    {
+-     "deleted_at": Any<String>,
+-     "status": "deleted",
++     "deleted_at": "2026-02-26T17:30:43.888Z",
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/features/curriculum/hooks/__tests__/use-questions.test.tsx:183:48
+    181|       await result.current.mutateAsync('1');
+    182| 
+    183|       expect(mockSupabase.queryBuilder.update).toHaveBeenCalledWith({
+       |                                                ^
+    184|         status: 'deleted',
+    185|         deleted_at: expect.any(String),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/features/curriculum/hooks/__tests__/use-questions.test.tsx > useQuestions > useBulkUpdateQuestionStatus > should update status for multiple questions
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'id', [ '1', '2' ] ]
+
+Received: 
+
+  1st vi.fn() call:
+
+  [
+-   "id",
++   "question_id",
+    [
+      "1",
+      "2",
+    ],
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/features/curriculum/hooks/__tests__/use-questions.test.tsx:202:44
+    200| 
+    201|       expect(mockSupabase.queryBuilder.update).toHaveBeenCalledWith({ …
+    202|       expect(mockSupabase.queryBuilder.in).toHaveBeenCalledWith('id', …
+       |                                            ^
+    203|     });
+    204|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/features/curriculum/hooks/__tests__/use-questions.test.tsx > useQuestions > useBulkDeleteQuestions > should soft-delete multiple questions
+AssertionError: expected "vi.fn()" to be called with arguments: [ { status: 'deleted', …(1) } ]
+
+Received: 
+
+  1st vi.fn() call:
+
+  [
+    {
+-     "deleted_at": Any<String>,
+-     "status": "deleted",
++     "deleted_at": "2026-02-26T17:30:43.902Z",
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/features/curriculum/hooks/__tests__/use-questions.test.tsx:216:48
+    214|       await result.current.mutateAsync(['1', '2']);
+    215| 
+    216|       expect(mockSupabase.queryBuilder.update).toHaveBeenCalledWith({
+       |                                                ^
+    217|         status: 'deleted',
+    218|         deleted_at: expect.any(String),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (9)[39m
+[2m   Start at [22m 09:30:38
+[2m   Duration [22m 5.09s[2m (transform 287ms, setup 434ms, import 591ms, tests 1.34s, environment 2.37s)[22m
+

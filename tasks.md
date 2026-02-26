@@ -18,43 +18,13 @@
 
 ---
 
-## 🚀 Efficiency & Documentation Optimization
+## 🧹 Phase: Cortex Hygiene & Maintenance
 
-- [x] **Restore SKELETON_SUMMARY.md**: Fix loop bug preventing export listing.
-- [x] **Implement UTILITY_REGISTRY.md**: Automated searchable index of 160+ shared hooks/utils.
-- [x] **Grouped Summaries**: SKELETON_SUMMARY organized by feature directory.
-- [x] **Intelligent Doc Extraction**: Fallback to leading comments for registry descriptions.
-- [x] **Regression Safety**: Restored 417/417 passing tests in Admin Panel.
-- [x] **Runner Hardening & Isolation**:
-  - [x] Implement `ZombieHunter` to sterilize rogue PIDs/Ports.
-  - [x] **Isolation Monitor**: Map cross-feature dependencies (Diagram output).
-  - [x] **Fragility Scorer**: Rank features by structural risk (STIFFNESS audit).
-- [x] **Phase 3: Dependency Cruising & Enforcement**
-  - [x] Implement ArchUnit-style rules (e.g., restricted domain imports).
-  - [x] Add automated build failure/warning for domain breaches.
+- [ ] **Ghost Module Archiving**: Move `Historian`, `Consolidator`, and unused visualizer logic to `questerix-cortex/archive/`.
+- [ ] **Heal Schema Drift**: Execute `npm run health -- drift --heal-drift` to prune 7 stale definitions from `database.types.ts`.
+- [ ] **Document Evidence Bridge**: Add a note to `AGENTS.md` about the `RLS_REMOTE_EVIDENCE.json` pattern to avoid future CLI false positives.
 
-## 🧠 Cortex v2 Implementation (Two-Agent Workflow)
+## 🛡️ Phase: Security & Reliability
 
-> **Plan**: `plan.md` (v8 — final)
-> **Briefs**: `questerix-cortex/briefs/` (5 session briefs + review checklists)
-> **Protocol**: Cursor implements → Antigravity reviews
-
-| Session                  | Status       | Branch                | Brief                | Effort |
-| ------------------------ | ------------ | --------------------- | -------------------- | ------ |
-| **1** Graph Foundation   | ✅ Completed | `cortex-v2/session-1` | `SESSION_1_BRIEF.md` | ~4.5h  |
-| **2** MCP Server         | ✅ Completed | `cortex-v2/session-2` | `SESSION_2_BRIEF.md` | ~3.5h  |
-| **3** Fragility Engine   | ✅ Completed | `cortex-v2/session-3` | `SESSION_3_BRIEF.md` | ~2.5h  |
-| **4** Surgical Architect | ✅ Completed | `cortex-v2/session-4` | `SESSION_4_BRIEF.md` | ~3h    |
-| **5** Integration        | ✅ Completed | `cortex-v2/session-5` | `SESSION_5_BRIEF.md` | ~1.5h  |
-
-**Dependencies**: Session 1 → Sessions 2 & 3 (parallel) → Session 4 → Session 5
-
----
-
-## Backlog (Deferred)
-
-- [ ] **Health Dashboard**: `/admin/maintenance` route surfacing `error_logs` + smoke statuses
-  - ⚠️ Blocked by Admin Panel feature freeze (no new routes/pages allowed)
-- [x] **Regenerate Supabase Types**: Run `supabase gen types typescript` to fix the `validate_and_use_invitation_code` RPC cast in `LoginPage.tsx`
-- [x] **Test files `as any` cleanup**: Refactored `use-skills.test.tsx`. Remaining: `use-subjects.test.tsx`, `use-apps.test.tsx`, `use-landings.test.tsx`, `use-error-logs.test.tsx`.
-- [x] **Enhanced Supabase Mocking**: Added `.then()` and `.throwOnError()` support to `supabase-factory.ts`.
+- [ ] **RLS verification**: Verify `AGENT_CONTEXT.md` reports `PASS` on a fresh `intel` run using the new evidence bridge.
+- [ ] **Fragility Sweep**: Review the top 5 fragile files reported in `AGENT_CONTEXT.md` and propose a "Hardening Plan."

@@ -1,0 +1,69 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mC:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel[39m
+
+ [31m❯[39m src/features/curriculum/hooks/__tests__/use-questions.test.tsx [2m([22m[2m9 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 1382[2mms[22m[39m
+       [32m✓[39m should fetch questions for current app and skill[32m 123[2mms[22m[39m
+       [32m✓[39m should fetch paginated questions with filters[32m 80[2mms[22m[39m
+[31m       [31m×[31m should fetch a single question by id[39m[33m 1045[2mms[22m[39m
+       [32m✓[39m should handle missing question gracefully (returns null)[32m 79[2mms[22m[39m
+       [32m✓[39m should create a new question[32m 14[2mms[22m[39m
+[31m       [31m×[31m should update a question[39m[32m 11[2mms[22m[39m
+       [32m✓[39m should soft-delete a question[32m 9[2mms[22m[39m
+       [32m✓[39m should update status for multiple questions[32m 7[2mms[22m[39m
+       [32m✓[39m should soft-delete multiple questions[32m 8[2mms[22m[39m
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/curriculum/hooks/__tests__/use-questions.test.tsx > useQuestions > useQuestion hook > should fetch a single question by id
+AssertionError: expected false to be true // Object.is equality
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div />
+  </body>
+</html>
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/features/curriculum/hooks/__tests__/use-questions.test.tsx:114:60
+    112|       const { result } = renderHook(() => useQuestion(mockQuestion.id)…
+    113| 
+    114|       await waitFor(() => expect(result.current.isSuccess).toBe(true));
+       |                                                            ^
+    115| 
+    116|       expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith('id', …
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/features/curriculum/hooks/__tests__/use-questions.test.tsx > useQuestions > useUpdateQuestion > should update a question
+Error: Invalid question ID format: 1
+ ❯ Object.mutationFn src/features/curriculum/hooks/use-questions.ts:249:44
+    247|     mutationFn: async ({ question_id, ...updates }: { question_id: str…
+    248|       if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No ap…
+    249|       if (!isValidUUID(question_id)) throw new Error(`Invalid question…
+       |                                            ^
+    250| 
+    251|       let query = supabase.from('questions').update(updates).eq('quest…
+ ❯ Object.fn ../../../Important%20Projects/Questerix/admin-panel/node_modules/@tanstack/query-core/build/modern/mutation.js:74:29
+ ❯ run ../../../Important%20Projects/Questerix/admin-panel/node_modules/@tanstack/query-core/build/modern/retryer.js:77:49
+ ❯ Object.start ../../../Important%20Projects/Questerix/admin-panel/node_modules/@tanstack/query-core/build/modern/retryer.js:119:9
+ ❯ Mutation.execute ../../../Important%20Projects/Questerix/admin-panel/node_modules/@tanstack/query-core/build/modern/mutation.js:115:40
+ ❯ src/features/curriculum/hooks/__tests__/use-questions.test.tsx:166:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m7 passed[39m[22m[90m (9)[39m
+[2m   Start at [22m 09:31:43
+[2m   Duration [22m 5.12s[2m (transform 279ms, setup 462ms, import 614ms, tests 1.38s, environment 2.26s)[22m
+

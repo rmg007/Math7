@@ -3,6 +3,7 @@ import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import { useToast } from '@/hooks/use-toast';
 import { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
+import { castJson } from '@/lib/type-utils';
 import { Activity, Search, Shield, X, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -61,9 +62,8 @@ export const GovernancePage: React.FC = () => {
       if (error) throw error;
 
       const aggMap = new Map<string, TenantUsage>();
-      // Cast justified: Supabase select with nested joins returns a generic type
-      // that doesn't match our AIGenerationSession shape (which includes created_by_profile join)
-      const sessions = data as unknown as AIGenerationSession[];
+      // Supabase nested joins return complex types that require manual alignment
+      const sessions = castJson<AIGenerationSession[]>(data || []);
 
       sessions.forEach((session) => {
         const profile = session.created_by_profile;

@@ -1,7 +1,43 @@
 import Database from "better-sqlite3";
 import { execSync } from "child_process";
+import * as fs from "fs";
 import * as path from "path";
 import { normalizePath } from "../utils/normalize-path";
+
+const VERIFICATION_TIMEOUT_MS = 120000; // 120 seconds
+
+interface TscBaseline {
+  errorCount: number;
+  timestamp: string;
+}
+
+function getTscBaselinePath(adminPath: string): string {
+  return path.join(adminPath, '.cortex', 'tsc-baseline.json');
+}
+
+function loadTscBaseline(adminPath: string): TscBaseline | null {
+  const baselinePath = getTscBaselinePath(adminPath);
+  if (!fs.existsSync(baselinePath)) return null;
+  try {
+    const content = fs.readFileSync(baselinePath, 'utf-8');
+    return JSON.parse(content) as TscBaseline;
+  } catch {
+    return null;
+  }
+}
+
+function saveTscBaseline(adminPath: string, errorCount: number): void {
+  const baselinePath = getTscBaselinePath(adminPath);
+  const baselineDir = path.dirname(baselinePath);
+  if (!fs.existsSync(baselineDir)) {
+    fs.mkdirSync(baselineDir, { recursive: true });
+  }
+  const baseline: TscBaseline = {
+    errorCount,
+    timestamp: new Date().toISOString()
+  };
+  fs.writeFileSync(baselinePath, JSON.stringify(baseline, null, 2), 'utf-8');
+}
 
 export interface TestFailureDetail {
   file: string;
@@ -9,7 +45,7 @@ export interface TestFailureDetail {
 }
 
 export interface VerificationResult {
-  tsc: { passed: boolean; output: string; errorCount: number; unavailable?: boolean };
+  tsc: { passed: boolean; output: string; errorCount: number; baselineErrorCount?: number; unavailable?: boolean };
   unitTests: { passed: number; failed: number; details: TestFailureDetail[] };
   e2eTests: { passed: number; failed: number; details: TestFailureDetail[] };
   changedFiles: string[];
@@ -39,9 +75,9 @@ function parseJsonOutput(output: string): unknown | null {
   return null;
 }
 
-function runCommand(command: string, cwd: string): { passed: boolean; output: string } {
+function runCommand(command: string, cwd: string, timeoutMs?: number): { passed: boolean; output: string } {
   try {
-    const output = execSync(command, { cwd, encoding: "utf-8", stdio: "pipe" });
+    const output = execSync(command, { cwd, encoding: "utf-8", stdio: "pipe", timeout: timeoutMs });
     return { passed: true, output };
   } catch (err: any) {
     const stdout = err?.stdout ?? "";
@@ -186,7 +222,8 @@ export function runVerification(
     tscOutput = execSync("npx tsc --noEmit --incremental", {
       cwd: adminPath,
       encoding: "utf-8",
-      stdio: "pipe"
+      stdio: "pipe",
+      timeout: VERIFICATION_TIMEOUT_MS
     });
   } catch (err: any) {
     tscPassed = false;
@@ -195,6 +232,19 @@ export function runVerification(
   }
 
   const tscErrorCount = tscPassed ? 0 : countTscErrors(tscOutput);
+
+  // TSC Baseline comparison: only fail if errors increased
+  const baseline = loadTscBaseline(adminPath);
+  const baselineErrorCount = baseline?.errorCount ?? 0;
+  const tscRegressed = tscErrorCount > baselineErrorCount;
+
+  // Save new baseline if this run had fewer errors
+  if (tscErrorCount <= baselineErrorCount) {
+    saveTscBaseline(adminPath, tscErrorCount);
+  }
+
+  // Use baseline-aware pass status: pass if no regression
+  const tscPassedBaseline = !tscRegressed;
 
   const testFiles = new Set<string>();
   for (const file of normalizedFiles) {
@@ -211,7 +261,8 @@ export function runVerification(
     : summarizeVitest(
         runCommand(
           `npx vitest run --reporter=json ${unitTests.map(t => `"${resolveAbsoluteTestPath(adminPath, t)}"`).join(" ")}`,
-          adminPath
+          adminPath,
+          VERIFICATION_TIMEOUT_MS
         ).output
       );
 
@@ -220,15 +271,17 @@ export function runVerification(
     : summarizePlaywright(
         runCommand(
           `npx playwright test ${e2eTests.map(t => `"${resolveAbsoluteTestPath(adminPath, t)}"`).join(" ")} --reporter=json`,
-          adminPath
+          adminPath,
+          VERIFICATION_TIMEOUT_MS
         ).output
       );
 
   return {
     tsc: {
-      passed: tscPassed,
+      passed: tscPassedBaseline,
       output: tscOutput,
       errorCount: tscErrorCount,
+      baselineErrorCount,
       unavailable: tscUnavailable ? true : undefined
     },
     unitTests: unitSummary,

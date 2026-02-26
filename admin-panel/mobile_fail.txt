@@ -1,0 +1,49 @@
+[dotenv@17.2.3] injecting env (10) from .env.test.local -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+Running 1 test using 1 worker
+
+[dotenv@17.2.3] injecting env (0) from .env.test.local -- tip: ⚙️  enable debug logging with { debug: true }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+Benchmarking /apps...
+Benchmarking /domains...
+  x  1 [mobile] › tests\latency-benchmark.e2e.spec.ts:11:3 › Latency Benchmark (Cortex Telemetry) › Analyze P50/P95 load times for core modules (19.1s)
+
+
+  1) [mobile] › tests\latency-benchmark.e2e.spec.ts:11:3 › Latency Benchmark (Cortex Telemetry) › Analyze P50/P95 load times for core modules 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator:  getByText(/Domains/i).first()
+    Expected: visible
+    Received: hidden
+    Timeout:  10000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for getByText(/Domains/i).first()[22m
+    [2m    12 × locator resolved to <span class="flex-1 text-sm">Domains</span>[22m
+    [2m       - unexpected value "hidden"[22m
+
+
+      37 |     console.log('Benchmarking /domains...');
+      38 |     await page.goto('/domains');
+    > 39 |     await expect(page.getByText(/Domains/i).first()).toBeVisible();
+         |                                                      ^
+      40 |     await page.waitForTimeout(2000);
+      41 |     await collectMetrics('usePaginatedDomains:1');
+      42 |     await collectMetrics('useDomains');
+        at C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\latency-benchmark.e2e.spec.ts:39:54
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\latency-benchmark.e2e-Late-ca029-load-times-for-core-modules-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results\latency-benchmark.e2e-Late-ca029-load-times-for-core-modules-mobile\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\latency-benchmark.e2e-Late-ca029-load-times-for-core-modules-mobile\error-context.md
+
+  1 failed
+    [mobile] › tests\latency-benchmark.e2e.spec.ts:11:3 › Latency Benchmark (Cortex Telemetry) › Analyze P50/P95 load times for core modules 

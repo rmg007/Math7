@@ -4,7 +4,10 @@
   "description": "Session Handover and QA Intelligence System for Questerix",
   "main": "run.ts",
   "scripts": {
-    "health": "ts-node run.ts"
+    "health": "ts-node run.ts",
+    "build": "tsc",
+    "cortex:selftest": "node dist/scripts/selftest.js",
+    "cortex:setup": "node dist/scripts/setup.js"
   },
   "bin": {
     "cortex-mcp-server": "./dist/src/mcp-server/index.js"

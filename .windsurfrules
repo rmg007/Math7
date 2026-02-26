@@ -1,6 +1,20 @@
 # 🤖 Questerix Agent Entry Point
+# SOURCE: .windsurfrules — generated from AGENTS.md Discovery rules (2026-02-26)
 
 You are working on the Questerix project. To ensure consistency and avoid architectural drift:
 1. **READ `AGENTS.md`** (at project root) immediately.
-2. Follow the **Core Rules and Conventions** defined therein.
-3. Use the repository as your Single Source of Truth (SSoT).
+2. **READ `questerix-cortex/outputs/AGENT_CONTEXT.md`** for session context.
+3. Use **Cortex MCP tools**: `cortex_briefing` for context, `cortex_search` for code lookup.
+4. Follow the **Core Rules and Conventions** defined in AGENTS.md.
+5. Use the repository as your Single Source of Truth (SSoT).
+
+## Quick Commands
+- `npm run health` — Run Cortex health check
+- `npm run cortex:selftest` — Validate MCP server
+- `cortex_search <query>` — Search code symbols
+- `cortex_briefing` — Get session context
+
+## Pre-Commit Checklist
+- [ ] Run `npm run health` passes
+- [ ] AGENTS.md Discovery section reviewed
+- [ ] No TODO/FIXME/HACK in code (use tasks.md)

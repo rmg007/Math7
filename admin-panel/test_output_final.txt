@@ -1,0 +1,22 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mC:/Users/mhali/OneDrive/Desktop/Important Projects/Questerix/admin-panel[39m
+
+ [32m✓[39m src/features/monitoring/hooks/__tests__/use-known-issues-mutations.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 467[2mms[22m[39m
+ [32m✓[39m src/features/monitoring/hooks/__tests__/use-error-logs.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 302[2mms[22m[39m
+ [32m✓[39m src/features/mentorship/hooks/__tests__/use-groups.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 532[2mms[22m[39m
+stderr | src/features/platform/hooks/__tests__/use-apps.test.tsx > useApps hooks > useCreateApp > still resolves when landing page insert fails (non-fatal)
+Failed to create landing page for new app: { message: 'FK violation' }
+
+ [32m✓[39m src/features/platform/hooks/__tests__/use-subjects.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[33m 529[2mms[22m[39m
+ [32m✓[39m src/features/monitoring/hooks/__tests__/use-known-issues.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 623[2mms[22m[39m
+stderr | src/features/platform/hooks/__tests__/use-apps.test.tsx > useApps hooks > useBulkCreateApps > still resolves when landing page bulk insert fails (non-fatal)
+Failed to create bulk landing pages: { message: 'lp error' }
+
+ [32m✓[39m src/features/platform/hooks/__tests__/use-apps.test.tsx [2m([22m[2m21 tests[22m[2m)[22m[33m 625[2mms[22m[39m
+ [32m✓[39m src/features/curriculum/hooks/__tests__/use-questions.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 632[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m      Tests [22m [1m[32m64 passed[39m[22m[90m (64)[39m
+[2m   Start at [22m 09:38:20
+[2m   Duration [22m 38.67s[2m (transform 10.81s, setup 40.87s, import 63.99s, tests 3.71s, environment 150.28s)[22m
+

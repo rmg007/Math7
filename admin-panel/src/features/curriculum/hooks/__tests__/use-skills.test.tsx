@@ -6,11 +6,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  useCreateSkill,
-  useDuplicateSkill,
-  usePaginatedSkills,
-  useSkill,
-  useSkills,
+    useCreateSkill,
+    useDuplicateSkill,
+    usePaginatedSkills,
+    useSkill,
+    useSkills,
 } from '../use-skills';
 
 // Mock dependencies
@@ -57,13 +57,22 @@ describe('useSkills', () => {
     
     // Fresh mock for every test
     mockSupabase = createMockSupabase();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(supabase.from).mockReturnValue(mockSupabase.queryBuilder as any);
+    vi.mocked(supabase.from).mockReturnValue(mockSupabase.queryBuilder as unknown as ReturnType<typeof supabase.from>);
 
     vi.mocked(useApp).mockReturnValue({
       currentApp: {
         app_id: mockAppId,
         display_name: 'Test App',
+        ai_token_limit: 0,
+        branding: {},
+        created_at: new Date().toISOString(),
+        description: '',
+        grade_level: 'K-12',
+        grade_number: 1,
+        is_active: true,
+        subdomain: 'test',
+        subject_id: null,
+        updated_at: new Date().toISOString(),
       },
       apps: [],
       isLoading: false,
@@ -73,7 +82,7 @@ describe('useSkills', () => {
       toggleSidebar: vi.fn(),
       userRole: null,
       isSuperAdmin: false,
-    } );
+    });
   });
 
   describe('useSkills hook', () => {
@@ -218,7 +227,20 @@ describe('useSkills', () => {
       };
 
       vi.mocked(useApp).mockReturnValue({
-        currentApp: { app_id: mockAppId, display_name: 'Current App' },
+        currentApp: {
+          app_id: mockAppId,
+          display_name: 'Current App',
+          ai_token_limit: 0,
+          branding: {},
+          created_at: new Date().toISOString(),
+          description: '',
+          grade_level: 'K-12',
+          grade_number: 1,
+          is_active: true,
+          subdomain: 'current',
+          subject_id: null,
+          updated_at: new Date().toISOString(),
+        },
         apps: [],
         isLoading: false,
         setCurrentApp: vi.fn(),
@@ -227,7 +249,7 @@ describe('useSkills', () => {
         toggleSidebar: vi.fn(),
         userRole: null,
         isSuperAdmin: true,
-      } );
+      });
 
       mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: originalSkill, error: null }).then(onFulfilled)

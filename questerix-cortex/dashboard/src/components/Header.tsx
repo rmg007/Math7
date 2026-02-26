@@ -30,7 +30,6 @@ const OPTIONS: Option[] = [
   { id: 'certify', label: 'Certify Phase 0', category: 'Lifecycle' },
   { id: 'hygiene', label: 'Code Hygiene', category: 'Lifecycle' },
   { id: 'deploy', label: 'Deploy to Prod', category: 'Lifecycle' },
-  { id: 'ship', label: 'Ship to Git', category: 'Lifecycle' },
 ]
 
 export function Header({ isConnected, onTrigger, smokePass }: HeaderProps) {

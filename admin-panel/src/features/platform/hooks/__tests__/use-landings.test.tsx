@@ -44,7 +44,7 @@ describe('useLandings hooks', () => {
 
     // Fresh mock for every test
     mockSupabase = createMockSupabase();
-    vi.mocked(supabase.from).mockImplementation(() => mockSupabase.queryBuilder);
+    vi.mocked(supabase.from).mockReturnValue(mockSupabase.queryBuilder as unknown as ReturnType<typeof supabase.from>);
   });
 
   describe('useLandingPages', () => {

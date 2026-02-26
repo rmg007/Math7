@@ -9,7 +9,6 @@
     "nextTask": "outputs/NEXT_TASK.md",
     "history": "outputs/HISTORY.json",
     "surfaceMap": "outputs/SURFACE_MAP.json",
-    "machineBriefing": "outputs/MACHINE_BRIEFING.md",
     "failureDigest": "outputs/FAILURE_DIGEST.md",
     "lastChanged": "outputs/LAST_CHANGED.md",
     "featureMap": "outputs/FEATURE_MAP.md",

@@ -58,8 +58,7 @@ describe('useApps hooks', () => {
 
     // Fresh mock for every test
     mockSupabase = createMockSupabase();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(supabase.from).mockReturnValue(mockSupabase.queryBuilder as any);
+    vi.mocked(supabase.from).mockReturnValue(mockSupabase.queryBuilder as unknown as ReturnType<typeof supabase.from>);
   });
 
   // ── useApps ───────────────────────────────────────────────────────────────────

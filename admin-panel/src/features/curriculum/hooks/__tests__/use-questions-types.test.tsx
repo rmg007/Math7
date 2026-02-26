@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* Tests: All 5 question types × useCreateQuestion, useUpdateQuestion */
 /**
  * use-questions-types.test.tsx
  *
@@ -29,19 +29,14 @@ import { useCreateQuestion, useUpdateQuestion } from '../use-questions';
 vi.mock('@/hooks/use-app');
 vi.mock('@/lib/supabase', () => {
   const createMockChain = () => {
-    const chain: any = {
-      select: vi.fn(() => chain),
-      eq: vi.fn(() => chain),
-      is: vi.fn(() => chain),
-      order: vi.fn(() => chain),
-      single: vi.fn(() => chain),
-      maybeSingle: vi.fn(() => chain),
-      insert: vi.fn(() => chain),
-      update: vi.fn(() => chain),
-      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: null }).then(onFulfilled)
-      ),
-    };
+    const chain: Record<string, ReturnType<typeof vi.fn>> = {};
+    const methods = ['select', 'eq', 'is', 'order', 'single', 'maybeSingle', 'insert', 'update'];
+    methods.forEach((m) => {
+      chain[m] = vi.fn(() => chain);
+    });
+    chain.then = vi.fn((onFulfilled: (value: unknown) => unknown) =>
+      Promise.resolve({ data: null, error: null }).then(onFulfilled)
+    );
     return chain;
   };
   const mockFrom = createMockChain();
@@ -94,8 +89,8 @@ function mockApp(overrides: Partial<ReturnType<typeof useApp>> = {}) {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function getMockChain(): any {
-  return supabase.from('questions');
+function getMockChain(): Record<string, ReturnType<typeof vi.fn>> {
+  return supabase.from('questions') as unknown as Record<string, ReturnType<typeof vi.fn>>;
 }
 
 function resolveOnce(data: unknown) {
@@ -111,12 +106,13 @@ describe('useCreateQuestion — all 5 question types', () => {
     mockApp();
   });
 
-  // ── AP-CURR-005: mcq ────────────────────────────────────────────────────────
-  it('AP-CURR-005: creates mcq question with options and correct_answer', async () => {
+  // ── AP-CURR-005: multiple_choice ────────────────────────────────────────────────────────
+  it('AP-CURR-005: creates multiple_choice question with options and correct_answer', async () => {
     const { wrapper } = makeWrapper();
     const mcqQuestion = {
+      app_id: MOCK_APP_ID,
       skill_id: MOCK_SKILL_ID,
-      type: 'mcq' as const,
+      type: 'multiple_choice' as const,
       content: 'What is H₂O?',
       status: 'draft' as const,
       solution: 'Water',
@@ -127,14 +123,14 @@ describe('useCreateQuestion — all 5 question types', () => {
       },
     };
 
-    resolveOnce({ ...mcqQuestion, question_id: MOCK_QUESTION_ID, app_id: MOCK_APP_ID });
+    resolveOnce({ ...mcqQuestion, question_id: MOCK_QUESTION_ID });
 
     const { result } = renderHook(() => useCreateQuestion(), { wrapper });
-    await result.current.mutateAsync(mcqQuestion );
+    await result.current.mutateAsync(mcqQuestion);
 
     const [insertPayload] = getMockChain().insert.mock.calls[0];
     expect(insertPayload).toMatchObject({
-      type: 'mcq',
+      type: 'multiple_choice',
       app_id: MOCK_APP_ID,
       metadata: expect.objectContaining({
         options: expect.arrayContaining(['Water', 'Oxygen', 'Hydrogen', 'Carbon']),
@@ -147,6 +143,7 @@ describe('useCreateQuestion — all 5 question types', () => {
   it('AP-CURR-006: creates mcq_multi question with multiple correct answers', async () => {
     const { wrapper } = makeWrapper();
     const mcqMultiQuestion = {
+      app_id: MOCK_APP_ID,
       skill_id: MOCK_SKILL_ID,
       type: 'mcq_multi' as const,
       content: 'Which are primary colours?',
@@ -159,10 +156,10 @@ describe('useCreateQuestion — all 5 question types', () => {
       },
     };
 
-    resolveOnce({ ...mcqMultiQuestion, question_id: MOCK_QUESTION_ID, app_id: MOCK_APP_ID });
+    resolveOnce({ ...mcqMultiQuestion, question_id: MOCK_QUESTION_ID });
 
     const { result } = renderHook(() => useCreateQuestion(), { wrapper });
-    await result.current.mutateAsync(mcqMultiQuestion );
+    await result.current.mutateAsync(mcqMultiQuestion);
 
     const [insertPayload] = getMockChain().insert.mock.calls[0];
     expect(insertPayload).toMatchObject({
@@ -180,6 +177,7 @@ describe('useCreateQuestion — all 5 question types', () => {
   it('AP-CURR-007: creates text_input question with key-phrase solution', async () => {
     const { wrapper } = makeWrapper();
     const textInputQuestion = {
+      app_id: MOCK_APP_ID,
       skill_id: MOCK_SKILL_ID,
       type: 'text_input' as const,
       content: 'What is the speed of light in a vacuum?',
@@ -191,10 +189,10 @@ describe('useCreateQuestion — all 5 question types', () => {
       },
     };
 
-    resolveOnce({ ...textInputQuestion, question_id: MOCK_QUESTION_ID, app_id: MOCK_APP_ID });
+    resolveOnce({ ...textInputQuestion, question_id: MOCK_QUESTION_ID });
 
     const { result } = renderHook(() => useCreateQuestion(), { wrapper });
-    await result.current.mutateAsync(textInputQuestion );
+    await result.current.mutateAsync(textInputQuestion);
 
     const [insertPayload] = getMockChain().insert.mock.calls[0];
     expect(insertPayload).toMatchObject({
@@ -210,6 +208,7 @@ describe('useCreateQuestion — all 5 question types', () => {
   it('AP-CURR-008: creates boolean question with true/false answer', async () => {
     const { wrapper } = makeWrapper();
     const booleanQuestion = {
+      app_id: MOCK_APP_ID,
       skill_id: MOCK_SKILL_ID,
       type: 'boolean' as const,
       content: 'The Earth is flat.',
@@ -221,10 +220,10 @@ describe('useCreateQuestion — all 5 question types', () => {
       },
     };
 
-    resolveOnce({ ...booleanQuestion, question_id: MOCK_QUESTION_ID, app_id: MOCK_APP_ID });
+    resolveOnce({ ...booleanQuestion, question_id: MOCK_QUESTION_ID });
 
     const { result } = renderHook(() => useCreateQuestion(), { wrapper });
-    await result.current.mutateAsync(booleanQuestion );
+    await result.current.mutateAsync(booleanQuestion);
 
     const [insertPayload] = getMockChain().insert.mock.calls[0];
     expect(insertPayload).toMatchObject({
@@ -240,6 +239,7 @@ describe('useCreateQuestion — all 5 question types', () => {
   it('AP-CURR-009: creates reorder_steps question with ordered sequence', async () => {
     const { wrapper } = makeWrapper();
     const reorderQuestion = {
+      app_id: MOCK_APP_ID,
       skill_id: MOCK_SKILL_ID,
       type: 'reorder_steps' as const,
       content: 'Order the steps of photosynthesis:',
@@ -252,10 +252,10 @@ describe('useCreateQuestion — all 5 question types', () => {
       },
     };
 
-    resolveOnce({ ...reorderQuestion, question_id: MOCK_QUESTION_ID, app_id: MOCK_APP_ID });
+    resolveOnce({ ...reorderQuestion, question_id: MOCK_QUESTION_ID });
 
     const { result } = renderHook(() => useCreateQuestion(), { wrapper });
-    await result.current.mutateAsync(reorderQuestion );
+    await result.current.mutateAsync(reorderQuestion);
 
     const [insertPayload] = getMockChain().insert.mock.calls[0];
     expect(insertPayload).toMatchObject({
@@ -279,12 +279,18 @@ describe('useCreateQuestion — error handling', () => {
   });
 
   it('throws when no app is selected', async () => {
-    mockApp({ currentApp: null } );
+    mockApp({ currentApp: null });
     const { wrapper } = makeWrapper();
 
     const { result } = renderHook(() => useCreateQuestion(), { wrapper });
     await expect(
-      result.current.mutateAsync({ content: 'Q', skill_id: 's', type: 'boolean' } )
+      result.current.mutateAsync({
+        app_id: MOCK_APP_ID,
+        content: 'Q',
+        skill_id: 's',
+        type: 'boolean',
+        solution: '',
+      })
     ).rejects.toThrow('No app selected');
   });
 
@@ -299,28 +305,33 @@ describe('useCreateQuestion — error handling', () => {
     const { result } = renderHook(() => useCreateQuestion(), { wrapper });
     await expect(
       result.current.mutateAsync({
+        app_id: MOCK_APP_ID,
         content: 'Q',
         skill_id: MOCK_SKILL_ID,
-        type: 'mcq',
-      } )
+        type: 'multiple_choice',
+        solution: '',
+      })
     ).rejects.toMatchObject({ message: 'insert failed' });
   });
 
   it('always stamps app_id regardless of question type', async () => {
     const { wrapper } = makeWrapper();
 
-    const types = ['mcq', 'mcq_multi', 'text_input', 'boolean', 'reorder_steps'] as const;
+    // Note: 'multiple_choice' is the canonical type (not 'mcq')
+    const types = ['multiple_choice', 'mcq_multi', 'text_input', 'boolean', 'reorder_steps'] as const;
     for (const type of types) {
       vi.clearAllMocks();
       resolveOnce({ question_id: MOCK_QUESTION_ID, type, app_id: MOCK_APP_ID });
 
       const { result } = renderHook(() => useCreateQuestion(), { wrapper });
       await result.current.mutateAsync({
+        app_id: MOCK_APP_ID,
         content: `Test question for ${type}`,
         skill_id: MOCK_SKILL_ID,
         type,
         status: 'draft',
-      } );
+        solution: '',
+      });
 
       const [insertPayload] = getMockChain().insert.mock.calls[0];
       expect(insertPayload.app_id).toBe(MOCK_APP_ID);

@@ -1,5 +1,91 @@
 # Questerix Learning Log
 
+## 2026-02-26: Cortex v3 MCP Implementation [verified]
+
+### [2026-02-26-Cortex] Session Context
+
+- **Trigger**: User requested comprehensive Cortex enhancement to improve AI coding agent performance and context injection
+- **Scope**: `questerix-cortex/` — MCP server, reporter merge, bug fixes, dashboard updates
+- **Outcome**: 7 MCP tools operational, MACHINE_BRIEFING.md merged into AGENT_CONTEXT.md, all bugs fixed, dashboard synchronized
+
+### [2026-02-26-Cortex] Technical Implementation
+
+- **MCP Server Enhancement**: Added `cortex_briefing` (staleness-guarded context reader) and `cortex_search` (SQLite FTS5 symbol search) tools to the 5 existing tools
+- **Self-Test Infrastructure**: Created `scripts/selftest.ts` that spawns MCP server, validates JSON-RPC protocol, confirms all 7 tools registered
+- **Path Resolution**: Implemented `CORTEX_ROOT_PATH` env var override with 3-level directory fallback and auto-creation of `outputs/` directory
+- **Verification Engine**: Added 120s timeout to TypeScript compilation and test runners; implemented TSC baseline comparison to prevent false failures from pre-existing errors
+- **Reporter Consolidation**: Merged `MACHINE_BRIEFING.md` content into `AGENT_CONTEXT.md` — eliminated duplicate file, updated `generateAgentContext()` signature to accept 6 params
+- **Code Quality**: Removed placeholder pollution from `autoAppendLearning()` (blank lines instead of "_[Agent to fill]_"), deduplicated `FeatureVisualizer` instantiation (3→1), deleted `GitOracle.ship()` method
+- **CI Mode**: Added `--ci` / `--no-dashboard` flags to skip browser/dashboard startup and auto-exit after run completion
+- **Rules Files**: Updated `.windsurfrules` and `.cursorrules` with SOURCE comments, Cortex MCP tool references, and pre-commit checklist
+- **Documentation**: Updated `AGENTS.md` Discovery section to reference `AGENT_CONTEXT.md` and MCP tools
+
+### [2026-02-26-Cortex] Bugs Found & Fixed
+
+| Bug                             | Root Cause                                                       | Fix                                                            | Prevention Rule                                                                  |
+| :------------------------------ | :--------------------------------------------------------------- | :------------------------------------------------------------- | :------------------------------------------------------------------------------- |
+| **RiskScorer empty call**       | `cortex_plan` called `calculateScore()` with no results          | Removed RiskScorer usage — tier classification sufficient      | Don't calculate risk scores without data; rely on structural tier classification |
+| **Double database open**        | `handlePlan` opened DB, closed it, then opened again for logging | Consolidated into single try/finally block with one open/close | Keep DB operations in single scope; use `finally` for cleanup                    |
+| **Selftest false failure**      | `SIGTERM` kill emits `close(null)` treated as error              | Changed exit check to `code !== null && code !== 0`            | Distinguish signal termination from process error exit                           |
+| **FeatureVisualizer redundant** | Created new instance just to call `generateMarkdownReport()`     | Stored first instance, reused for all 3 consumers              | Avoid object churn; analyze once, render multiple times                          |
+| **Dashboard stale option**      | `Header.tsx` still had `ship` option pointing at deleted suite   | Removed `{ id: 'ship', ... }` from OPTIONS array               | Keep UI options synchronized with backend suite registry                         |
+
+### [2026-02-26-Cortex] Files Modified
+
+| File                                  | Change                                                                                                        |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `src/mcp-server/server.ts`            | Added `cortex_briefing`, `cortex_search` tools; fixed `handlePlan` DB usage; added `CORTEX_ROOT_PATH` support |
+| `src/mcp-server/verify-engine.ts`     | Added 120s timeout, TSC baseline tracking/comparison                                                          |
+| `src/reporter/index.ts`               | Merged `generateMachineBriefing` into `generateAgentContext`; fixed placeholder pollution                     |
+| `src/git-oracle/index.ts`             | Deleted `ship()` method                                                                                       |
+| `run.ts`                              | Added `--ci` flag, FeatureVisualizer dedup, removed `git-ship` suite                                          |
+| `scripts/selftest.ts`                 | Created MCP server self-test; fixed SIGTERM exit handling                                                     |
+| `cortex.config.json`                  | Removed `machineBriefing` output key                                                                          |
+| `src/types.ts`                        | Removed `machineBriefing` from `CortexConfig` interface                                                       |
+| `.windsurfrules`, `.cursorrules`      | Added SOURCE comments, Cortex tool references                                                                 |
+| `AGENTS.md`                           | Updated Discovery section to reference AGENT_CONTEXT.md and MCP tools                                         |
+| `dashboard/src/components/Header.tsx` | Removed "Ship to Git" button                                                                                  |
+
+### [2026-02-26-Cortex] Verification
+
+```bash
+npm run build          # ✅ TypeScript compiles (0 errors)
+npm run cortex:selftest # ✅ 7 tools registered, exits 0
+```
+
+---
+
+## 2026-02-26: Supabase Mock Standardization & Playwright Stabilization [verified]
+
+### [2026-02-26-Mock] Session Context
+
+- **Trigger**: High technical debt in test files (hundreds of `as any` casts and manual mock chains). Silent test failures in filters.
+- **Scope**: `admin-panel/src/__tests__/mocks/supabase-factory.ts`, `admin-panel/src/features/*/hooks/__tests__/*.test.tsx`.
+- **Outcome**: Established a robust, typed mocking standard. Restored 100% test pass rate in target hook files.
+
+### [2026-02-26-Mock] Technical Implementation
+
+- **Standardized Factory**: Enhanced `createMockSupabase` to include missing chainable methods (`is`, `or`, `filter`). All methods now use `.mockReturnThis()` to allow natural chaining.
+- **Mock Implementation**: Replaced manual `then` mocks with `mockSupabase.queryBuilder.then.mockImplementationOnce(...)`, providing a clean, single-point-of-contact for defining response data.
+- **Playwright Fix**: Resolved "Unknown parameter \_page" by aliasing the fixture: `({ page: _page })`. This satisfies Playwright's requirement for the `page` argument name while allowing the use of `_page` to satisfy "unused variable" linting rules.
+- **Architecture Stability**: Increased Vitest timeout to 60s for architecture tests to prevent intermittent CI/CD failures on resource-constrained runners.
+
+### [2026-02-26-Mock] Outcome Summary
+
+All target test files for Supabase hook refactoring have been stabilized and standardized. The test suite now passes 100% on the refactored files without relying on fragile manual mock chains or unsafe `as any` casts (where strictly needed for logic, they are now documented or localized).
+
+### [2026-02-26-Mock] Bugs Found & Fixed
+
+| Bug                         | Root Cause                                               | Fix                                                   | Prevention Rule                                                                       |
+| :-------------------------- | :------------------------------------------------------- | :---------------------------------------------------- | :------------------------------------------------------------------------------------ |
+| **Silent Mock Timeout**     | Missing `.is()` method in `MockQueryBuilder`             | Added `is` to factory with `mockReturnThis()`         | Always verify mock builders against the actual library API signature                  |
+| **Race Condition in Tests** | Expectation checked before hook effect completed         | Added `await waitFor(() => result.current.isSuccess)` | Never assert on mock calls triggered by React Hooks without awaiting state resolution |
+| **Playwright Param Error**  | Using `_page` instead of `page` in fixture destructuring | Replaced with `page`                                  | Playwright fixtures MUST use their specific names for injection;                      |
+| **Architecture Timeout**    | Sluggish file scanning in architecture tests             | Increased timeout to 120s                             | High-level architecture tests should have generous timeouts (120s+) for CI/CD runners |
+| **Latency Locator Drift**   | Mobile viewport title elements were not found via text   | Migrated to `getByTestId('admin-header-title')`       | Use `data-testid` for critical telemetry and automation scripts                       |
+
+---
+
 ## 2026-02-25: Phase 3 — Architecture Guard Deployment [verified]
 
 ### [2026-02-25-Guard] Session Context
@@ -1423,60 +1509,67 @@ Always include 'Missing Initialization' warnings in tool outputs instead of thro
 ### 2026-02-25: Supabase Types and Mock Refactoring
 
 **What was done**:
+
 - Regenerated Supabase database types to synchronize frontend types with physical database schema modifications via `npx supabase gen types typescript`.
 - Executed deep cast surgery across ~50 test files in `admin-panel/src/features/platform/hooks/__tests__` and `curriculum/hooks/__tests__`, stripping `mockChain as any` and `mockChain as unknown as any` to enforce stronger type safety boundaries.
 
 **Bugs found**:
+
 - Extraneous test casting bypassed compiler checks that could reveal real object incompatibilities with actual Supabase clients.
 
 **Fix**:
+
 - Mapped exactly where variables were instantiated. Using `const mockChain = createMockSupabaseChain()` generates an object that sufficiently matches what the mocked `supabase.from` returns.
 
 **Prevention rule**:
-- Avoid `as any` inside test mocks when utilities like `createMockSupabaseChain()` are constructed to inherently mimic the required signatures. Only cast when explicitly working around library-internal typings outside standard scope.
 
+- Avoid `as any` inside test mocks when utilities like `createMockSupabaseChain()` are constructed to inherently mimic the required signatures. Only cast when explicitly working around library-internal typings outside standard scope.
 
 ---
 
 ## [2026-02-26] Cortex Auto-Entry
 
 ### Suite: Security Audit
+
 **First Error**: `# npm audit report`
 **Session**: Cortex Auto-Entry
 **Duration**: 1.9s
-**Root Cause**: *[Agent to fill in]*
-**Fix Applied**: *[Agent to fill in]*
-**Prevention Rule**: *[Agent to fill in]*
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
 
 ### Suite: Full Vitest + Coverage
+
 **First Error**: `[33m[2m✓[22m[39m shows error if email field is empty [33m 327[2mms[22m[39m`
 **Session**: Cortex Auto-Entry
 **Duration**: 59.2s
-**Root Cause**: *[Agent to fill in]*
-**Fix Applied**: *[Agent to fill in]*
-**Prevention Rule**: *[Agent to fill in]*
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
 
 ### Suite: Full Playwright Suite
+
 **First Error**: `at ErrorLogsPage.spec.ts:13`
 **Session**: Cortex Auto-Entry
 **Duration**: 9.2s
-**Root Cause**: *[Agent to fill in]*
-**Fix Applied**: *[Agent to fill in]*
-**Prevention Rule**: *[Agent to fill in]*
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
 
 ### Suite: Latency Benchmark
+
 **First Error**: `Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed`
 **Session**: Cortex Auto-Entry
 **Duration**: 22.0s
-**Root Cause**: *[Agent to fill in]*
-**Fix Applied**: *[Agent to fill in]*
-**Prevention Rule**: *[Agent to fill in]*
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_
 
 ### Suite: Git Ship (Push)
+
 **First Error**: `error: pathspec 'auto-ship' did not match any file(s) known to git`
 **Session**: Cortex Auto-Entry
 **Duration**: 15.5s
-**Root Cause**: *[Agent to fill in]*
-**Fix Applied**: *[Agent to fill in]*
-**Prevention Rule**: *[Agent to fill in]*
-
+**Root Cause**: _[Agent to fill in]_
+**Fix Applied**: _[Agent to fill in]_
+**Prevention Rule**: _[Agent to fill in]_

@@ -4,36 +4,37 @@ import { Card, CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import { castJson } from '@/lib/type-utils';
 import { cn, isValidUUID } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowLeft,
-  Check,
-  CheckCircle,
-  Circle,
-  ClipboardList,
-  Clock,
-  Copy,
-  Edit3,
-  Home,
-  Layers,
-  LayoutDashboard,
-  Plus,
-  School,
-  Settings,
-  Trash2,
-  UserPlus,
-  Users,
+    ArrowLeft,
+    Check,
+    CheckCircle,
+    Circle,
+    ClipboardList,
+    Clock,
+    Copy,
+    Edit3,
+    Home,
+    Layers,
+    LayoutDashboard,
+    Plus,
+    School,
+    Settings,
+    Trash2,
+    UserPlus,
+    Users,
 } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -303,8 +304,7 @@ export function GroupDetailPage() {
       performance.mark(`${markName}:end`);
       performance.measure(markName, `${markName}:start`, `${markName}:end`);
 
-      // Cast justified: Supabase select with profiles join returns generic type
-      return data as unknown as Member[];
+      return castJson<Member[]>(data || []);
     },
     enabled: Boolean(id),
   });
@@ -359,8 +359,8 @@ export function GroupDetailPage() {
       performance.mark(`${markName}:end`);
       performance.measure(markName, `${markName}:start`, `${markName}:end`);
 
-      // Cast justified: Supabase select returns generic type; Assignment is locally defined
-      return data as unknown as Assignment[];
+      // Supabase select returns generic type
+      return castJson<Assignment[]>(data || []);
     },
     enabled: Boolean(id),
   });

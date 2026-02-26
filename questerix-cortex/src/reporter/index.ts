@@ -30,9 +30,9 @@ export class Reporter {
     if (optimizeResult) {
       this.generateOptimizeReport(optimizeResult);
     }
-    this.generateAgentContext(results, surfaceMap, analystResults);
+    this.generateAgentContext(results, surfaceMap, analystResults, driftResult, rlsResult, history);
     this.generateNextTask(results, analystResults, surfaceMap);
-    this.generateMachineBriefing(results, analystResults, surfaceMap, driftResult, rlsResult, history);
+    // generateMachineBriefing removed - content merged into AGENT_CONTEXT.md
     this.generateFailureDigest(results);
     this.generateLastChanged();
     this.autoAppendLearning(results);
@@ -541,29 +541,95 @@ export class Reporter {
   private generateAgentContext(
     results: Record<string, TaskResult>,
     surfaceMap?: any,
-    analystResults?: any
+    analystResults?: any,
+    driftResult?: any,
+    rlsResult?: any,
+    history?: any[]
   ) {
-    let md = '# 🧠 Agent Briefing\n\n';
-    md += '> For detailed machine context read MACHINE_BRIEFING.md first.\n\n';
+    const allResults = Object.values(results);
+    const passed  = allResults.filter(r => r.status === 'passed').length;
+    const failed  = allResults.filter(r => r.status === 'failed').length;
+    const total   = allResults.length;
+    const score   = total > 0 ? Math.round((passed / total) * 100) : 0;
+
+    const smokeNames = ['unit tests (lib)', 'e2e smoke (desktop)', 'lint check'];
+    const smokeResults = allResults.filter(r => smokeNames.includes(r.name.toLowerCase()));
+    const smokeGate = smokeResults.length > 0 && smokeResults.every(r => r.status === 'passed')
+      ? '✅ OPEN'
+      : smokeResults.length === 0 ? '— NOT RUN' : '🔴 LOCKED';
+
+    const driftStr = driftResult
+      ? `${driftResult.verdict} (missing: ${driftResult.missingFromTypes.length}, extra: ${driftResult.extraInTypes.length})`
+      : 'NOT RUN';
+
+    const rlsStr = rlsResult
+      ? `${rlsResult.verdict} (critical: ${rlsResult.criticalCount})`
+      : 'NOT RUN';
+
+    const lastScore = history?.length ? history[history.length - 1].score : score;
+    const trend = history && history.length >= 2
+      ? (history[history.length - 1].score - history[history.length - 2].score)
+      : 0;
+    const trendStr = trend > 0 ? `↑ +${trend}` : trend < 0 ? `↓ ${trend}` : '→ flat';
+
+    const recentCommits = this.safeExec('git log -5 --pretty=format:"%h %s (%ar)" 2>&1', this.projectRoot);
+    const openTasks = this.parseOpenTasks();
+
+    const failures = allResults.filter(r => r.status === 'failed');
+    const failureLines = failures.length > 0
+      ? failures.map(f => `  ⛔ ${f.name}: ${this.extractFirstError(f.output)}`).join('\n')
+      : '  none';
+
+    const keyPaths = [
+      `admin-panel/src/lib/database.types.ts`,
+      `supabase/migrations/ (${this.countMigrations()} files)`,
+      `admin-panel/tests/`,
+      `supabase/functions/`,
+      `questerix-cortex/outputs/FAILURE_DIGEST.md`,
+      `questerix-cortex/outputs/LAST_CHANGED.md`,
+    ].map(p => `  ${p}`).join('\n');
+
+    let md = `# AGENT CONTEXT\n`;
+    md += `> ONE-READ SESSION STARTER\n`;
+    md += `> Generated: ${new Date().toISOString()}\n\n`;
+
+    md += `## STATUS\n`;
+    md += `Score: ${score}/100 (${trendStr} vs prev | prev: ${lastScore}/100)\n`;
+    md += `Suites: ${passed} passed, ${failed} failed of ${total} total\n`;
+    md += `Smoke Gate: ${smokeGate}\n`;
+    md += `Drift: ${driftStr}\n`;
+    md += `RLS: ${rlsStr}\n\n`;
 
     if (surfaceMap) {
-      md += `## Surface\n- Hooks: ${surfaceMap.hooks.length}\n- Pages: ${surfaceMap.pages.length}\n`;
+      md += `## Surface\n`;
+      md += `- Hooks: ${surfaceMap.hooks.length}, Pages: ${surfaceMap.pages.length}\n`;
       if (surfaceMap.gaps?.length > 0) {
         md += `- Coverage gaps: ${surfaceMap.gaps.length}\n`;
         surfaceMap.gaps.slice(0, 5).forEach((g: string) => md += `  - ${g}\n`);
       }
+      md += `\n`;
     }
 
-    const failures = Object.values(results).filter(r => r.status === 'failed');
-    if (failures.length > 0) {
-      md += '\n## 🚨 Failures\n';
-      failures.forEach(f => md += `- **${f.name}**: failing — see FAILURE_DIGEST.md\n`);
-    } else {
-      md += '\n## ✅ All Green\n';
-    }
+    md += `## FAILURES\n${failureLines}\n\n`;
+    md += `## OPEN TASKS\n${openTasks || '  (none)'}\n\n`;
+    md += `## RECENT COMMITS\n${recentCommits || '  (git unavailable)'}\n\n`;
+    md += `## KEY PATHS\n${keyPaths}\n\n`;
 
     if (analystResults?.deadCode?.length > 0) {
-      md += `\n## Maintenance\n- Dead code: ${analystResults.deadCode.length} symbols\n`;
+      md += `## Maintenance\n- Dead code: ${analystResults.deadCode.length} symbols\n\n`;
+    }
+
+    md += `## SKELETON\n`;
+    md += `> Always load: questerix-cortex/outputs/SKELETON_SUMMARY.md\n\n`;
+
+    const conventions = this.extractConventions();
+    if (conventions) {
+      md += `## CONVENTIONS\n${conventions}\n\n`;
+    }
+
+    const gotchas = this.extractRecentGotchas(3);
+    if (gotchas) {
+      md += `## KNOWN GOTCHAS\n${gotchas}\n`;
     }
 
     if (md.length > 20000) md = md.slice(0, 19900) + '\n... [TRUNCATED]';
@@ -635,9 +701,9 @@ export class Reporter {
       entry += `**First Error**: \`${firstError}\`\n`;
       entry += `**Session**: Cortex Auto-Entry\n`;
       entry += `**Duration**: ${f.duration?.toFixed(1) ?? '?'}s\n`;
-      entry += `**Root Cause**: *[Agent to fill in]*\n`;
-      entry += `**Fix Applied**: *[Agent to fill in]*\n`;
-      entry += `**Prevention Rule**: *[Agent to fill in]*\n\n`;
+      entry += `**Root Cause**: \n\n`;
+      entry += `**Fix Applied**: \n\n`;
+      entry += `**Prevention Rule**: \n\n`;
     }
 
     // Initialize file if it doesn't exist

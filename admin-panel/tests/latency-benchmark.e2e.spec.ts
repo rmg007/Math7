@@ -28,7 +28,7 @@ test.describe('Latency Benchmark (Cortex Telemetry)', () => {
     // 2. Benchmark /apps
     console.log('Benchmarking /apps...');
     await page.goto('/apps');
-    await expect(page.getByText(/App Management/i).first()).toBeVisible();
+    await expect(page.getByTestId('admin-header-title')).toContainText(/Applications/i);
     // Wait for the query to finish (marks are created in useApps)
     await page.waitForTimeout(2000);
     await collectMetrics('useApps');
@@ -36,7 +36,7 @@ test.describe('Latency Benchmark (Cortex Telemetry)', () => {
     // 3. Benchmark /domains
     console.log('Benchmarking /domains...');
     await page.goto('/domains');
-    await expect(page.getByText(/Curriculum Domains/i).first()).toBeVisible();
+    await expect(page.getByTestId('admin-header-title')).toContainText(/Domains/i);
     await page.waitForTimeout(2000);
     await collectMetrics('usePaginatedDomains:1');
     await collectMetrics('useDomains');
@@ -44,7 +44,7 @@ test.describe('Latency Benchmark (Cortex Telemetry)', () => {
     // 4. Benchmark /questions
     console.log('Benchmarking /questions...');
     await page.goto('/questions');
-    await expect(page.getByText(/Questions/i).first()).toBeVisible();
+    await expect(page.getByTestId('admin-header-title')).toContainText(/Question Bank/i);
     await page.waitForTimeout(2000);
     await collectMetrics('usePaginatedQuestions:1:all');
 

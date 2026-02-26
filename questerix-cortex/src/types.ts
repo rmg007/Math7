@@ -26,7 +26,6 @@ export interface CortexConfig {
     nextTask: string;
     history: string;
     surfaceMap: string;
-    machineBriefing: string;
     failureDigest: string;
     lastChanged: string;
     featureMap: string;

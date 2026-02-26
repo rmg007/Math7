@@ -25,8 +25,16 @@
 **Primary (Cortex — always available):**
 
 - **Codebase orientation**: Read `questerix-cortex/outputs/SKELETON_SUMMARY.md`.
-- **Symbol lookup**: From project root, run `npm run health -- skeleton:search "query"` in `questerix-cortex/`.
-- **Session start**: Read `questerix-cortex/outputs/MACHINE_BRIEFING.md` and `questerix-cortex/outputs/NEXT_TASK.md` before coding.
+- **Symbol lookup**: Use `cortex_search <query>` MCP tool or run `npm run health -- skeleton:search "query"` in `questerix-cortex/`.
+- **Session start**: Read `questerix-cortex/outputs/AGENT_CONTEXT.md` and `questerix-cortex/outputs/NEXT_TASK.md` before coding.
+- **Session context**: Use `cortex_briefing` MCP tool to get current session context with staleness warning.
+
+**Quick Commands:**
+
+- `npm run health` — Run Cortex health check
+- `npm run cortex:selftest` — Validate MCP server
+- `cortex_search <query>` — Search code symbols via MCP
+- `cortex_briefing` — Get session context via MCP
 
 **Workflows:** `.agent/workflows/process.md` (lifecycle), `.agent/workflows/help.md` (commands). **Coding standards:** `docs/standards/ORACLE_COGNITION.md` (supplementary). **Rule:** Never scan `node_modules`, `build`, or `dist`.
 

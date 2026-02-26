@@ -11,7 +11,6 @@ import * as fs from "fs";
 import * as path from "path";
 import { Project } from "ts-morph";
 import { CortexDB } from "../cortex-db";
-import { RiskScorer } from "../risk-scorer";
 import { Scanner } from "../scanner";
 import { normalizePath } from "../utils/normalize-path";
 import { logChange } from "./change-logger";
@@ -56,11 +55,26 @@ interface FragilitySummary {
 }
 
 const sessionId = randomUUID();
-const cortexRoot = fs.existsSync(path.resolve(__dirname, "..", "outputs")) 
-  ? path.resolve(__dirname, "..") // src/mcp-server -> src -> cortexRoot
-  : fs.existsSync(path.resolve(__dirname, "..", "..", "outputs"))
-    ? path.resolve(__dirname, "..", "..") // src/mcp-server -> src -> root (standard dev)
-    : path.resolve(__dirname, "..", "..", ".."); // dist/src/mcp-server -> dist/src -> dist -> root
+// Support CORTEX_ROOT_PATH env var override for non-standard setups
+const cortexRoot = process.env.CORTEX_ROOT_PATH
+  ? path.resolve(process.env.CORTEX_ROOT_PATH)
+  : fs.existsSync(path.resolve(__dirname, "..", "outputs"))
+    ? path.resolve(__dirname, "..") // src/mcp-server -> src -> cortexRoot
+    : fs.existsSync(path.resolve(__dirname, "..", "..", "outputs"))
+      ? path.resolve(__dirname, "..", "..") // src/mcp-server -> src -> root (standard dev)
+      : path.resolve(__dirname, "..", "..", ".."); // dist/src/mcp-server -> dist/src -> dist -> root
+
+// Validate cortexRoot - if outputs doesn't exist, create it and warn
+const outputsPath = path.join(cortexRoot, "outputs");
+if (!fs.existsSync(outputsPath)) {
+  try {
+    fs.mkdirSync(outputsPath, { recursive: true });
+    console.error(`⚠️  Created outputs directory at ${outputsPath}`);
+    console.error("   Run 'npm run health' to populate Cortex data");
+  } catch (err) {
+    console.error(`❌ Failed to create outputs directory: ${err}`);
+  }
+}
 const repoRoot = path.resolve(cortexRoot, "..");
 const adminPanelPath = path.join(repoRoot, "admin-panel");
 const adminSrcPath = path.join(adminPanelPath, "src");
@@ -436,27 +450,43 @@ function handlePlan(files: string[]) {
 
   if ("warning" in opened) {
     return { warning: opened.warning, data: null };
-  } else {
-    const { db, cortexDb } = opened;
-    try {
-      if (isGraphEmpty(db)) {
-        return { warning: EMPTY_GRAPH_WARNING, data: null };
-      }
-      fragilityRecords = loadFragilitySummaries(db, normalizedFiles);
-      suggestedTests = getSuggestedTests(db, normalizedFiles);
-    } finally {
-      cortexDb.close();
-    }
   }
 
-  const maxFragility = fragilityRecords.reduce(
-    (max, record) => Math.max(max, record.fragility_index),
-    0
-  );
+  const { db, cortexDb } = opened;
+  let tierInfo: ReturnType<typeof classifyTier>;
+  try {
+    if (isGraphEmpty(db)) {
+      warning = EMPTY_GRAPH_WARNING;
+      // Calculate tier with default values when graph is empty
+      tierInfo = classifyTier(fileCount, 0, structuralFiles);
+    } else {
+      fragilityRecords = loadFragilitySummaries(db, normalizedFiles);
+      suggestedTests = getSuggestedTests(db, normalizedFiles);
 
-  const tierInfo = classifyTier(fileCount, maxFragility, structuralFiles);
-  const riskScorer = new RiskScorer();
-  const riskAssessment = riskScorer.calculateScore({});
+      // Calculate tier info while we have fragility data
+      const maxFragility = fragilityRecords.reduce(
+        (max, record) => Math.max(max, record.fragility_index),
+        0
+      );
+      tierInfo = classifyTier(fileCount, maxFragility, structuralFiles);
+
+      // Log the tool call while we have the DB open
+      db.prepare(
+        `
+        INSERT INTO tool_calls (timestamp, session_id, tool_name, parameters, result_tier)
+        VALUES (?, ?, 'cortex_plan', ?, ?)
+      `
+      ).run(
+        new Date().toISOString(),
+        sessionId,
+        JSON.stringify({ files }),
+        tierInfo.tier
+      );
+    }
+  } finally {
+    cortexDb.close();
+  }
+  // Note: RiskScorer removed - tier classification provides sufficient guidance
 
   const missingWarnings = fragilityRecords
     .filter(record => record.missing)
@@ -471,37 +501,11 @@ function handlePlan(files: string[]) {
       )
   ];
 
-  if (!warning) {
-    const opened = openDatabase();
-    if (!("warning" in opened)) {
-      const { db, cortexDb } = opened;
-      try {
-        if (isGraphEmpty(db)) {
-          return { warning: EMPTY_GRAPH_WARNING, data: null };
-        }
-        db.prepare(
-          `
-          INSERT INTO tool_calls (timestamp, session_id, tool_name, parameters, result_tier)
-          VALUES (?, ?, 'cortex_plan', ?, ?)
-        `
-        ).run(
-          new Date().toISOString(),
-          sessionId,
-          JSON.stringify({ files }),
-          tierInfo.tier
-        );
-      } finally {
-        cortexDb.close();
-      }
-    }
-  }
-
   const response = {
     tier: tierInfo.tier,
     label: tierInfo.label,
     reason: tierInfo.reason,
     protocol: tierInfo.protocol,
-    risk_assessment: riskAssessment,
     fragility_warnings: fragilityWarnings,
     structural_files: structuralFiles,
     suggested_tests: suggestedTests
@@ -817,6 +821,77 @@ function handleQuery(symbol: string): QueryResponse {
   }
 }
 
+function handleBriefing(): { text: string; warning?: string } {
+  const agentContextPath = path.join(cortexRoot, "outputs", "AGENT_CONTEXT.md");
+
+  if (!fs.existsSync(agentContextPath)) {
+    return {
+      text: "",
+      warning: "AGENT_CONTEXT.md not found. Run 'npm run health' first."
+    };
+  }
+
+  try {
+    const content = fs.readFileSync(agentContextPath, "utf-8");
+
+    // Check staleness - look for "Generated:" timestamp
+    const generatedMatch = content.match(/Generated:\s*(.+)/);
+    let warning: string | undefined;
+
+    if (generatedMatch) {
+      const generatedDate = new Date(generatedMatch[1]);
+      const now = new Date();
+      const hoursOld = (now.getTime() - generatedDate.getTime()) / (1000 * 60 * 60);
+
+      if (hoursOld > 24) {
+        const daysOld = Math.floor(hoursOld / 24);
+        warning = `⚠️ Context is ${daysOld} day${daysOld > 1 ? 's' : ''} old — run 'npm run health' to refresh.`;
+      }
+    }
+
+    return { text: content, warning };
+  } catch (error) {
+    return {
+      text: "",
+      warning: `Failed to read AGENT_CONTEXT.md: ${error}`
+    };
+  }
+}
+
+interface SearchResult {
+  name: string;
+  file: string;
+  kind: string;
+  signature?: string;
+  doc?: string;
+}
+
+function handleSearch(query: string, limit: number): { results: SearchResult[]; warning?: string } {
+  const searchDbPath = path.join(cortexRoot, "outputs", "search.db");
+
+  if (!fs.existsSync(searchDbPath)) {
+    return {
+      results: [],
+      warning: "Search index not built. Run 'npm run health' first."
+    };
+  }
+
+  try {
+    // Use the existing SkeletonSearch class
+    const { SkeletonSearch } = require("../scanner/skeleton-search");
+    const searcher = new SkeletonSearch(searchDbPath);
+    const results = searcher.search(query, limit);
+    searcher.close();
+
+    return { results };
+  } catch (error) {
+    return {
+      results: [],
+      warning: `Search failed: ${error}`
+    };
+  }
+}
+
 export async function startServer(): Promise<void> {
   const server = new Server(
     { name: "cortex-mcp-server", version: "2.0.0" },
@@ -891,6 +966,27 @@ export async function startServer(): Promise<void> {
           },
           required: ["files"]
         }
+      },
+      {
+        name: "cortex_briefing",
+        description: "Read AGENT_CONTEXT.md for session context. Includes staleness warning if >24h old.",
+        inputSchema: {
+          type: "object",
+          properties: {},
+          required: []
+        }
+      },
+      {
+        name: "cortex_search",
+        description: "Search code symbols using SQLite FTS5 index. Returns exact + prefix matches.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            query: { type: "string" },
+            limit: { type: "number" }
+          },
+          required: ["query"]
+        }
       }
     ]
   }));
@@ -946,6 +1042,18 @@ export async function startServer(): Promise<void> {
         ? (args?.files as string[]).filter(Boolean)
         : [];
       const result = handleVerify(files);
+      return toJsonContent(result);
+    }
+
+    if (name === "cortex_briefing") {
+      const result = handleBriefing();
+      return toJsonContent(result);
+    }
+
+    if (name === "cortex_search") {
+      const query = typeof args?.query === "string" ? args.query : "";
+      const limit = typeof args?.limit === "number" ? args.limit : 10;
+      const result = handleSearch(query, limit);
       return toJsonContent(result);
     }
 

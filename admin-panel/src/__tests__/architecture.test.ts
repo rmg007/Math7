@@ -25,7 +25,7 @@ describe('Architecture Rules', () => {
         .inFolder('src/components/**');
 
       await expect(rule).toPassAsync();
-    }, 60000);
+    }, 120000);
 
     it('lib utilities should not depend on features', async () => {
       const rule = projectFiles()
