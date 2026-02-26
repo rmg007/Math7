@@ -16,7 +16,7 @@ describe('useDashboardStats', () => {
       apps: [],
       isLoading: false,
       setCurrentApp: vi.fn(),
-    } );
+    } as any);
   });
 
   it('should initialize correctly', () => {
@@ -26,4 +26,3 @@ describe('useDashboardStats', () => {
     expect(result.current.isLoading).toBe(true);
   });
 });
-

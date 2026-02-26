@@ -22,13 +22,12 @@ const mockFrom = vi.fn();
 vi.mock('@/lib/supabase', () => ({
   supabase: {
     auth: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       getUser: (...args: any[]) => mockGetUser(...args),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       onAuthStateChange: (...args: any[]) => mockOnAuthStateChange(...args),
       signOut: vi.fn(),
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     from: (...args: any[]) => mockFrom(...args),
   },
 }));
@@ -44,7 +43,6 @@ const mockUseApp = {
   isSuperAdmin: true,
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 vi.spyOn(AppHooks, 'useApp').mockReturnValue(mockUseApp as any);
 
 describe('UI Resilience & Prevention', () => {

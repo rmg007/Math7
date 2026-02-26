@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useApp } from '@/hooks/use-app';
 import { supabase } from '@/lib/supabase';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -68,7 +67,7 @@ describe('Hook Regression: Single Entity Fetch Independence', () => {
   const validId = '550e8400-e29b-41d4-a716-446655440000';
 
   it('useDomain should fetch data even when currentApp is null', async () => {
-    const mockChain = supabase.from('domains') ;
+    const mockChain = supabase.from('domains') as any;
     mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
       Promise.resolve({ data: { domain_id: validId }, error: null }).then(onFulfilled)
     );
@@ -82,7 +81,7 @@ describe('Hook Regression: Single Entity Fetch Independence', () => {
   });
 
   it('useSkill should fetch data even when currentApp is null', async () => {
-    const mockChain = supabase.from('skills') ;
+    const mockChain = supabase.from('skills') as any;
     mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
       Promise.resolve({ data: { skill_id: validId }, error: null }).then(onFulfilled)
     );
@@ -95,7 +94,7 @@ describe('Hook Regression: Single Entity Fetch Independence', () => {
   });
 
   it('useQuestion should fetch data even when currentApp is null', async () => {
-    const mockChain = supabase.from('questions') ;
+    const mockChain = supabase.from('questions') as any;
     mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
       Promise.resolve({ data: { question_id: validId }, error: null }).then(onFulfilled)
     );
@@ -133,5 +132,3 @@ describe('Hook Regression: Single Entity Fetch Independence', () => {
     expect(questionQuery?.queryKey).toEqual(['question', validId]);
   });
 });
-
-

@@ -201,7 +201,7 @@ test.describe('Security: RLS Bypass & Tenant Isolation', () => {
       type: 'multiple_choice',
       content: { text: 'RLS HACK' },
       solution: { correct: 'X' },
-    } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+    } as any);
 
     // Expecting 42501 (Insufficient Privilege)
     expect(error?.code).toBe('42501');

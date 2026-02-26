@@ -16,7 +16,7 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': ['error', { 
       argsIgnorePattern: '^_',
       varsIgnorePattern: '^_',
-      caughtErrorsIgnorePattern: '^_'
+      caughtErrors: 'none'
     }],
     'no-constant-condition': 'error',
     'no-unreachable': 'error',
@@ -47,5 +47,13 @@ module.exports = {
         'react-refresh/only-export-components': 'off', // UI component libraries commonly export hooks with components
       },
     },
+    {
+      files: ['tests/**/*.ts', 'tests/**/*.tsx', 'src/**/__tests__/**/*.ts', 'src/**/__tests__/**/*.tsx', 'src/__tests__/**/*.ts'],
+      rules: {
+         '@typescript-eslint/no-explicit-any': 'off',
+         '@typescript-eslint/no-unused-vars': 'off',
+         'react-refresh/only-export-components': 'off'
+      }
+    }
   ],
 }

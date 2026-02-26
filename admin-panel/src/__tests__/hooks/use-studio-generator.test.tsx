@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { generateQuestions } from '@/features/ai-assistant/api/generateQuestions';
 import type { StudioConfig } from '@/hooks/use-studio-generator';
 import { useStudioGenerator } from '@/hooks/use-studio-generator';

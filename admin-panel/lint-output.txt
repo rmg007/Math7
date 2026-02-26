@@ -1,0 +1,147 @@
+
+> admin-panel@0.0.0 lint
+> eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix
+
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\lib\data-utils.test.ts
+  302:64  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  314:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\lib\file-parsers.test.ts
+  224:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\__tests__\utils\test-utils.tsx
+  34:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  34:54  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  34:80  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  50:47  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  50:59  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  50:85  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\components\ui\textarea.tsx
+  4:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\auth\pages\UserManagementPage.tsx
+  278:16  error  'err' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  301:16  error  'err' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  337:16  error  'err' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\curriculum\hooks\__tests__\use-questions.test.tsx
+   53:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   66:10  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  150:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\mentorship\hooks\__tests__\use-groups.test.tsx
+   72:10  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  105:10  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:73  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  147:10  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  150:73  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  174:10  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  212:10  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\monitoring\hooks\__tests__\use-known-issues-mutations.test.tsx
+   66:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   87:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  115:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  160:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  176:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  202:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  219:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  242:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  258:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\monitoring\pages\ErrorLogsPage.tsx
+  156:14  error  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  243:14  error  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  254:14  error  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\monitoring\pages\KnownIssuesPage.tsx
+  187:14  error  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  264:14  error  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  275:14  error  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\platform\pages\AppsPage.tsx
+  453:14  error  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  472:14  error  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  624:14  error  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\features\platform\pages\SubjectsPage.tsx
+  544:14  error  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  559:14  error  'error' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\src\hooks\use-toast.ts
+  18:7  error  'actionTypes' is assigned a value but only used as a type. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\AssignmentCreatePage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\AuthConfirmPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\ErrorLogsPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\GenerationPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\GovernancePage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\GroupCreatePage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\GroupDetailPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\GroupsPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\InvitationCodesPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\KnownIssuesPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\LandingsPage.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\admin-panel.e2e.spec.ts
+   60:16  error  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  155:18  error  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\ai-generator-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\auth-flow.e2e.spec.ts
+  14:12  error  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\curriculum-lifecycle.e2e.spec.ts
+  78:14  error  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\dashboard-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\domain-create-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\domain-edit-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\domains-page.spec.ts
+  13:52  error  'page' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\pages\QuestionFormPage.ts
+   83:14  error  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  101:14  error  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  123:14  error  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\pages\VersionHistoryPage.ts
+  19:14  error  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\verify-icon-removal.spec.ts
+  46:16  error  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+✖ 70 problems (69 errors, 1 warning)
+

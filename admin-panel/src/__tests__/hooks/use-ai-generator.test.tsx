@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { generateQuestions } from '@/features/ai-assistant/api/generateQuestions';
 import { useAIGenerator } from '@/hooks/use-ai-generator';
 import { useToast } from '@/hooks/use-toast';

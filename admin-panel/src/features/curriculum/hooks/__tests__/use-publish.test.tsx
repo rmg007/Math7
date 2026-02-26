@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useApp } from '@/hooks/use-app';
 import { supabase } from '@/lib/supabase';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -57,14 +56,14 @@ describe('usePublish', () => {
       currentApp: {
         app_id: mockAppId,
         display_name: 'Test App',
-      },
+      } as any,
       apps: [],
       isLoading: false,
       setCurrentApp: vi.fn(),
       refreshApps: vi.fn(),
       isSidebarCollapsed: false,
       toggleSidebar: vi.fn(),
-    } );
+    } as any);
   });
 
   describe('useCurriculumMeta', () => {
@@ -72,16 +71,14 @@ describe('usePublish', () => {
       const mockData = { version: 1, last_published_at: new Date().toISOString() };
 
       vi.mocked(supabase.from).mockImplementationOnce(() => {
-        const chain = (supabase.from ).getMockImplementation()(); // Need a better way
         return {
-          ...chain,
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
           single: vi.fn().mockReturnThis(),
           then: vi.fn((onFulfilled) =>
             Promise.resolve({ data: mockData, error: null }).then(onFulfilled)
           ),
-        } ;
+        } as any;
       });
 
       const { result } = renderHook(() => useCurriculumMeta(), { wrapper });
@@ -116,7 +113,7 @@ describe('usePublish', () => {
           is: vi.fn().mockReturnThis(),
           maybeSingle: vi.fn().mockReturnThis(),
           then: vi.fn((onFulfilled) => Promise.resolve(mockResponses[index]).then(onFulfilled)),
-        } ;
+        };
       });
 
       const { result } = renderHook(() => usePublishPreview(), { wrapper });
@@ -135,7 +132,7 @@ describe('usePublish', () => {
       vi.mocked(supabase.rpc).mockResolvedValueOnce({
         data: { success: true, version: 2 },
         error: null,
-      } );
+      } as any);
 
       const { result } = renderHook(() => usePublishCurriculum(), { wrapper });
 
@@ -147,4 +144,3 @@ describe('usePublish', () => {
     });
   });
 });
-

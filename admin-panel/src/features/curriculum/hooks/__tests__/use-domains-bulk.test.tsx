@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * use-domains-bulk.test.tsx
  *
@@ -19,11 +18,11 @@ import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-    useBulkCreateDomains,
-    useBulkDeleteDomains,
-    useBulkUpdateDomainsStatus,
-    useUpdateDomain,
-    useUpdateDomainOrder,
+  useBulkCreateDomains,
+  useBulkDeleteDomains,
+  useBulkUpdateDomainsStatus,
+  useUpdateDomain,
+  useUpdateDomainOrder,
 } from '../use-domains';
 
 // ── Module mocks ──────────────────────────────────────────────────────────────
@@ -52,10 +51,7 @@ vi.mock('@/lib/supabase', () => {
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 const MOCK_APP_ID = '550e8400-e29b-41d4-a716-446655440000';
-const DOMAIN_IDS = [
-  '550e8400-e29b-41d4-a716-446655440001',
-  '550e8400-e29b-41d4-a716-446655440002',
-];
+const DOMAIN_IDS = ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002'];
 
 function makeWrapper() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -92,7 +88,7 @@ function mockApp(overrides: Record<string, unknown> = {}) {
     userRole: null,
     isSuperAdmin: false,
     ...overrides,
-  } );
+  });
 }
 
 function getMockChain(): any {
@@ -124,7 +120,7 @@ describe('useUpdateDomain — AP-CURR-010', () => {
       domain_id: DOMAIN_IDS[0],
       title: 'Updated Domain Title',
       status: 'live',
-    } );
+    });
 
     expect(mockChain.update).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Updated Domain Title', status: 'live' })
@@ -415,5 +411,3 @@ describe('useBulkCreateDomains — AP-CURR-014', () => {
     ).rejects.toMatchObject({ message: 'duplicate key' });
   });
 });
-
-

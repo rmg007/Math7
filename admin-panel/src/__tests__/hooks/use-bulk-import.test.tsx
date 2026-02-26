@@ -21,7 +21,7 @@ vi.mock('papaparse', () => ({
 describe('useBulkImport', () => {
   const mockToast = vi.fn();
   type CsvRow = Record<string, string>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   type ParseConfigForFile = any;
   type ParseFn = (file: File, options: ParseConfigForFile) => void;
 

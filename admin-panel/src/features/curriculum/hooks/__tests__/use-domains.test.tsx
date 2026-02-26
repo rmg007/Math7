@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useApp } from '@/hooks/use-app';
 import { supabase } from '@/lib/supabase';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -6,11 +5,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-    useCreateDomain,
-    useDeleteDomain,
-    useDomain,
-    useDomains,
-    usePaginatedDomains,
+  useCreateDomain,
+  useDeleteDomain,
+  useDomain,
+  useDomains,
+  usePaginatedDomains,
 } from '../use-domains';
 
 // Mock dependencies
@@ -61,8 +60,18 @@ describe('useDomains', () => {
 
   const mockAppId = '550e8400-e29b-41d4-a716-446655440000';
   const mockDomains = [
-    { domain_id: '550e8400-e29b-41d4-a716-446655440001', title: 'Domain 1', slug: 'domain-1', sort_order: 1 },
-    { domain_id: '550e8400-e29b-41d4-a716-446655440002', title: 'Domain 2', slug: 'domain-2', sort_order: 2 },
+    {
+      domain_id: '550e8400-e29b-41d4-a716-446655440001',
+      title: 'Domain 1',
+      slug: 'domain-1',
+      sort_order: 1,
+    },
+    {
+      domain_id: '550e8400-e29b-41d4-a716-446655440002',
+      title: 'Domain 2',
+      slug: 'domain-2',
+      sort_order: 2,
+    },
   ];
 
   beforeEach(() => {
@@ -96,7 +105,7 @@ describe('useDomains', () => {
 
   describe('useDomains hook', () => {
     it('should fetch domains for current app', async () => {
-      const mockChain = supabase.from('domains') ;
+      const mockChain = supabase.from('domains') as any;
       mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: mockDomains, error: null }).then(onFulfilled)
       );
@@ -112,7 +121,7 @@ describe('useDomains', () => {
     it('should throw error when no app is selected', async () => {
       vi.mocked(useApp).mockReturnValue({
         currentApp: null,
-      } );
+      } as any);
 
       const { result } = renderHook(() => useDomains(), { wrapper });
 
@@ -122,7 +131,7 @@ describe('useDomains', () => {
 
   describe('usePaginatedDomains', () => {
     it('should fetch paginated domains', async () => {
-      const mockChain = supabase.from('domains') ;
+      const mockChain = supabase.from('domains') as any;
       mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({
           data: mockDomains,
@@ -144,7 +153,7 @@ describe('useDomains', () => {
 
   describe('useDomain', () => {
     it('should fetch a single domain', async () => {
-      const mockChain = supabase.from('domains') ;
+      const mockChain = supabase.from('domains') as any;
       mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: mockDomains[0], error: null }).then(onFulfilled)
       );
@@ -159,7 +168,7 @@ describe('useDomains', () => {
 
   describe('useCreateDomain', () => {
     it('should create a new domain', async () => {
-      const mockChain = supabase.from('domains') ;
+      const mockChain = supabase.from('domains') as any;
       mockChain.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
         Promise.resolve({ data: mockDomains[0], error: null }).then(onFulfilled)
       );
@@ -186,7 +195,7 @@ describe('useDomains', () => {
 
   describe('useDeleteDomain', () => {
     it('should mark a domain as deleted', async () => {
-      const mockChain = supabase.from('domains') ;
+      const mockChain = supabase.from('domains') as any;
       const updateChain = {
         eq: vi.fn().mockReturnThis(),
         then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
@@ -212,5 +221,3 @@ describe('useDomains', () => {
     });
   });
 });
-
-
