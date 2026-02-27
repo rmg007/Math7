@@ -31,7 +31,7 @@ const ROLES = [
   {
     name: 'super-admin',
     email: process.env.TEST_SUPER_ADMIN_EMAIL || 'mhalim80@hotmail.com',
-    password: process.env.TEST_SUPER_ADMIN_PASSWORD || 'mhalim80@hotmail.com',
+    password: process.env.TEST_SUPER_ADMIN_PASSWORD || 'AJbB8e2Uiia3BgE',
   },
   {
     name: 'admin',
