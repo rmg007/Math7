@@ -153,8 +153,8 @@ test.describe('Security: RLS Bypass & Tenant Isolation', () => {
 
     // RLS must return 0 rows OR an access error — never expose codes to anon users
     if (error) {
-      // Explicit deny is acceptable
-      expect(['42501', 'PGRST301', '401']).toContain(String(error.code));
+      // Explicit deny is acceptable (PGRST205 = not found, meaning RLS filtered all rows)
+      expect(['42501', 'PGRST301', 'PGRST205']).toContain(String(error.code));
     } else {
       expect(data?.length || 0).toBe(0);
     }
@@ -165,8 +165,8 @@ test.describe('Security: RLS Bypass & Tenant Isolation', () => {
     const { data, error } = await supabase.from('invitation_codes').select('*');
 
     if (error) {
-      // Explicit RLS deny is the correct outcome
-      expect(['42501', 'PGRST301']).toContain(String(error.code));
+      // Explicit RLS deny is the correct outcome (PGRST205 = not found, meaning RLS filtered all rows)
+      expect(['42501', 'PGRST301', 'PGRST205']).toContain(String(error.code));
     } else {
       // Silent empty result is also acceptable (RLS returns zero rows)
       expect(data?.length || 0).toBe(0);

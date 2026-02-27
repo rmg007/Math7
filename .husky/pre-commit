@@ -31,3 +31,21 @@ if [ -n "$STAGED_FILES" ]; then
   fi
 fi
 echo "✅ Secret check passed."
+
+# Layer 2: Governance check on staged markdown files (prevents doc rot)
+STAGED_MD_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.md$' || true)
+if [ -n "$STAGED_MD_FILES" ]; then
+  echo "Running governance check on staged markdown files..."
+  cd questerix-cortex && npm run governance:check
+  GOVERNANCE_EXIT=$?
+  cd ..
+  if [ $GOVERNANCE_EXIT -ne 0 ]; then
+    echo ""
+    echo "❌ GOVERNANCE CHECK FAILED: Dead documentation references detected."
+    echo "   Run: cd questerix-cortex && npx ts-node src/governance/cli.ts --fix"
+    echo "   Or:  npm run governance:check -- --fix (from questerix-cortex/)"
+    echo ""
+    exit 1
+  fi
+  echo "✅ Governance check passed."
+fi

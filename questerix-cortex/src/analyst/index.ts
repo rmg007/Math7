@@ -1,6 +1,26 @@
+import type Database from "better-sqlite3";
 import * as fs from "fs";
 import * as path from "path";
 import { Project } from "ts-morph";
+
+// Known entry points that should be excluded from dead code detection
+const ENTRY_POINT_PATTERNS = [
+  /App\.[tj]sx?$/,
+  /main\.[tj]sx?$/,
+  /index\.[tj]sx?$/,
+  /\/pages\//,
+  /route\.[tj]sx?$/,
+  /\.config\.[tj]s$/,
+  /vite\.config/,
+  /vitest\.config/,
+];
+
+/**
+ * Checks if a file path matches known entry point patterns
+ */
+function isEntryPoint(filePath: string): boolean {
+  return ENTRY_POINT_PATTERNS.some((pattern) => pattern.test(filePath));
+}
 
 export class Analyst {
   private project: Project;
@@ -9,22 +29,43 @@ export class Analyst {
     this.project = project;
   }
 
-  findDeadCode() {
-    const deadCode: string[] = [];
-    const sourceFiles = this.project.getSourceFiles();
+  /**
+   * Finds dead code by querying the graph DB for symbol nodes with zero incoming imports.
+   * Excludes known entry points and caps results at 20.
+   */
+  findDeadCode(db: Database.Database, limit: number = 20): Array<{ symbol: string; file: string }> {
+    // Query for symbol nodes with no incoming imports edges
+    const query = db.prepare(`
+      SELECT n.id, n.file_path
+      FROM nodes n
+      LEFT JOIN edges e ON n.id = e.target_id AND e.relationship = 'imports'
+      WHERE n.type = 'symbol'
+      GROUP BY n.id
+      HAVING COUNT(e.source_id) = 0
+      ORDER BY n.file_path
+      LIMIT ?
+    `);
 
-    for (const sourceFile of sourceFiles) {
-      const exports = sourceFile.getExportedDeclarations();
+    const rows = query.all(limit) as Array<{ id: string; file_path: string }>;
 
-      for (const [name, declarations] of exports) {
-        for (const decl of declarations) {
-          // TODO: findReferences is very slow. Optimize later.
-          // const referencedSymbols = (decl as any).findReferences?.();
-          // if (referencedSymbols && referencedSymbols.length === 0) {
-          //   deadCode.push(name);
-          // }
-        }
+    // Filter out entry points and format results
+    const deadCode: Array<{ symbol: string; file: string }> = [];
+
+    for (const row of rows) {
+      const filePath = row.file_path || row.id.split("#")[0];
+
+      // Skip entry point files
+      if (isEntryPoint(filePath)) {
+        continue;
       }
+
+      // Extract symbol name from id (format: filePath#symbolName)
+      const symbolName = row.id.includes("#") ? row.id.split("#").pop() || row.id : row.id;
+
+      deadCode.push({
+        symbol: symbolName,
+        file: filePath,
+      });
     }
 
     return deadCode;

@@ -11,10 +11,3 @@
 export function castJson<T>(value: unknown): T {
   return value as T;
 }
-
-/**
- * Deeply preserves type while removing undefined (useful for Supabase payloads)
- */
-export function cleanPayload<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj));
-}

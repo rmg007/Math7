@@ -15,8 +15,10 @@ const GOVERNANCE_DIRS = [
 
 /**
  * Collect .md files under projectRoot that match the governance surface.
+ * If dirsToScan is provided, only those directories are scanned (for testing).
+ * Otherwise, uses the default GOVERNANCE_DIRS.
  */
-function collectMarkdownFiles(projectRoot: string): string[] {
+function collectMarkdownFiles(projectRoot: string, dirsToScan?: string[]): string[] {
   const out: string[] = [];
 
   function walk(relDir: string) {
@@ -42,7 +44,8 @@ function collectMarkdownFiles(projectRoot: string): string[] {
     // ignore
   }
 
-  for (const dir of GOVERNANCE_DIRS) {
+  const dirs = dirsToScan ?? GOVERNANCE_DIRS;
+  for (const dir of dirs) {
     walk(dir);
   }
 
@@ -107,9 +110,9 @@ function resolveRef(
   return path.join(projectRoot, rel);
 }
 
-export function auditGovernance(projectRoot: string): GovernanceResult {
+export function auditGovernance(projectRoot: string, dirsToScan?: string[]): GovernanceResult {
   const deadRefs: Array<{ file: string; ref: string; line?: number }> = [];
-  const files = collectMarkdownFiles(projectRoot);
+  const files = collectMarkdownFiles(projectRoot, dirsToScan);
 
   for (const file of files) {
     const absPath = path.join(projectRoot, file);

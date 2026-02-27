@@ -6,10 +6,13 @@
   "scripts": {
     "health": "ts-node run.ts",
     "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "cortex:selftest": "node dist/scripts/selftest.js",
     "cortex:setup": "node dist/scripts/setup.js",
     "lint": "eslint . --ext ts",
-    "format": "prettier --write \"**/*.ts\""
+    "format": "prettier --write \"**/*.ts\"",
+    "governance:check": "ts-node src/governance/cli.ts --check"
   },
   "bin": {
     "cortex-mcp-server": "./dist/src/mcp-server/index.js"
@@ -30,9 +33,11 @@
     "@types/express": "^4.17.21",
     "@types/glob": "^8.1.0",
     "@types/node": "^22.13.5",
+    "@vitest/coverage-v8": "^3.0.0",
     "eslint": "^10.0.2",
     "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.0"
   }
 }

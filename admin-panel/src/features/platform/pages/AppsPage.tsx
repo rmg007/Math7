@@ -103,6 +103,7 @@ const AppRow = memo(
     return (
       <TableRow
         key={app.app_id}
+        data-testid="app-row"
         className={cn('group/row even:bg-gray-50/40', isSelected && 'bg-teal-50/50')}
       >
         <TableCell className="w-8 px-2">
@@ -120,17 +121,17 @@ const AppRow = memo(
           </button>
         </TableCell>
         {visibleColumns.has('display_name') && (
-          <TableCell className="px-4">
+          <TableCell className="px-4 whitespace-nowrap">
             <span className="font-medium text-gray-900 text-xs truncate">{app.display_name}</span>
           </TableCell>
         )}
         {visibleColumns.has('subject') && (
-          <TableCell>
+          <TableCell className="whitespace-nowrap">
             <span className="text-xs text-gray-600 truncate">{app.subjects?.title ?? '—'}</span>
           </TableCell>
         )}
         {visibleColumns.has('subdomain') && (
-          <TableCell>
+          <TableCell className="whitespace-nowrap">
             <a
               href={`http://${app.subdomain}.questerix.com`}
               target="_blank"
@@ -149,7 +150,7 @@ const AppRow = memo(
           </TableCell>
         )}
         {visibleColumns.has('is_active') && (
-          <TableCell>
+          <TableCell className="whitespace-nowrap">
             <StatusBadge status={app.is_active ? 'active' : 'inactive'} />
           </TableCell>
         )}
@@ -665,7 +666,11 @@ export function AppsPage() {
         ]}
       />
 
-      <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6" data-testid="apps-page">
+      <div
+        className="max-w-7xl mx-auto space-y-4 p-4 md:p-6"
+        data-testid="apps-page"
+        data-hydration-complete={!appsLoading}
+      >
         <AdminHeader
           title="Applications"
           description="Manage educational apps and their customized instances."

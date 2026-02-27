@@ -577,6 +577,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
                           setShowMathInput(false);
                         }}
                         className="w-10 h-10 flex items-center justify-center border border-gray-100 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 text-lg transition-all active:scale-90"
+                        aria-label={`Insert ${symbol}`}
                         title={`Insert ${symbol}`}
                       >
                         {symbol}

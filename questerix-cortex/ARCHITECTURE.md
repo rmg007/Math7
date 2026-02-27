@@ -41,20 +41,57 @@
 ### 🧠 Analyst (Intelligence)
 
 - **Drift Detection**: Database types vs Live schema.
-- **Dead Code**: Unused exports.
+- **Dead Code**: Unused exports via graph DB query.
 - **Migration Safety**: Integrity checks for new SQL moves.
+- **Risk Scoring**: Composite health scoring via `RiskScorer`.
 
-### 📈 Historian (Trends)
+### � DeltaEngine (Active)
+
+- **Surface Map Deltas**: Tracks changes between scans.
+- **Hot Files Detection**: Identifies frequently modified code.
+
+### 📊 GitOracle (Active)
+
+- **Gap Analysis**: Correlates graph gaps with git history.
+- **Change Attribution**: Links code changes to commit metadata.
+
+### 🧟 ZombieHunter (Active)
+
+- **Process Sterilization**: Pre-flight cleanup of orphaned processes.
+- **Port Conflict Prevention**: Kills rogue Dart, Flutter, and Node processes.
+
+### 🖥️ DashboardServer
+
+- **Live Dashboard**: Express + socket.io server for real-time monitoring.
+- **Static File Serving**: Serves dashboard React app at `localhost:5050`.
+- **Bi-directional Events**: Emits logs/updates, listens for trigger events.
+
+### � Historian (Trends)
 
 - Keeps the last 30 runs in `HISTORY.json`.
-- Calculates health trajectory.
+- Calculates health trajectory with coverage metrics.
 
-## 4. Configuration (`cortex.config.json`)
+## 4. MCP Tools (10 total)
+
+| Tool                | Purpose                                           |
+| ------------------- | ------------------------------------------------- |
+| `cortex_plan`       | Classify change tier (A/B/C) and suggest protocol |
+| `cortex_impact`     | Dependency blast radius for file changes          |
+| `cortex_verify`     | Run verification and update fragility after edits |
+| `cortex_query`      | Symbol lookup with suffix matching                |
+| `cortex_fragility`  | Check fragility index for files                   |
+| `cortex_briefing`   | Read AGENT_CONTEXT.md with staleness warning      |
+| `cortex_search`     | SQLite FTS5 symbol search                         |
+| `cortex_diff`       | Structured diff since last session/24h/commit     |
+| `cortex_insights`   | Graph intelligence: hotspots, orphans, cycles     |
+| `cortex_governance` | Dead doc reference detection                      |
+
+## 5. Configuration (`cortex.config.json`)
 
 - Defines paths to `admin-panel`, `supabase`, and `test-results`.
 - Sets thresholds for "Healthy" coverage and build size.
 
-## 5. Usage
+## 6. Usage
 
 ```powershell
 npm run health

@@ -4,6 +4,28 @@ import * as fs from "fs";
 import * as path from "path";
 import { checkCompliance } from "../mcp-server/compliance";
 import { TaskResult } from "../orchestrator";
+import type { CortexConfig } from "../types";
+
+// Helper interfaces for graph queries
+interface RiskyFile {
+  file_path: string;
+  fanin: number;
+  fragility_index: number | null;
+}
+
+interface FeatureHealth {
+  feature: string;
+  verdict: string;
+  coverage: number;
+  coupling: number;
+}
+
+interface SessionSummary {
+  session_id: string;
+  tool_calls: string[];
+  files_changed: number;
+  timestamp: string;
+}
 
 export class Reporter {
   private outputs: any;
@@ -28,6 +50,8 @@ export class Reporter {
       scannedFiles: number;
     },
     optimizeResult?: any,
+    deltaResult?: any,
+    riskScore?: any,
   ) {
     this.generateHealthReport(
       results,
@@ -600,7 +624,7 @@ export class Reporter {
   }
 
   // ─────────────────────────────────────────────────────────────
-  // AGENT CONTEXT (preserved, slightly tightened)
+  // AGENT CONTEXT (Phase 7 Enhanced — Graph Intelligence)
   // ─────────────────────────────────────────────────────────────
   private generateAgentContext(
     results: Record<string, TaskResult>,
@@ -686,6 +710,33 @@ export class Reporter {
     md += `Drift: ${driftStr}\n`;
     md += `RLS: ${rlsStr}\n\n`;
 
+    // ── Phase 7: Data Freshness Warnings ─────────────────────
+    const dbPath = path.join(this.root, "outputs", "cortex.db");
+    let freshnessWarnings: string[] = [];
+    let riskyFiles: RiskyFile[] = [];
+    let lastSession: SessionSummary | null = null;
+
+    if (fs.existsSync(dbPath)) {
+      let db: Database.Database | null = null;
+      try {
+        db = new Database(dbPath, { readonly: true });
+        db.pragma("busy_timeout = 5000");
+        freshnessWarnings = this.checkDataFreshness(db);
+        riskyFiles = this.queryRiskiestFiles(db, 5);
+        lastSession = this.queryLastSession(db);
+      } catch {
+        // Non-fatal: graph queries are best-effort
+      } finally {
+        db?.close();
+      }
+    }
+
+    if (freshnessWarnings.length > 0) {
+      md += `## ⚠️ DATA FRESHNESS WARNINGS\n`;
+      freshnessWarnings.forEach((w) => (md += `- 🟡 ${w}\n`));
+      md += `\n`;
+    }
+
     if (surfaceMap) {
       md += `## Surface\n`;
       md += `- Hooks: ${surfaceMap.hooks.length}, Pages: ${surfaceMap.pages.length}\n`;
@@ -696,6 +747,64 @@ export class Reporter {
           .forEach((g: string) => (md += `  - ${g}\n`));
       }
       md += `\n`;
+    }
+
+    // ── Phase 7: Top 5 Riskiest Files ────────────────────────
+    if (riskyFiles.length > 0) {
+      md += `## 🔥 Top 5 Riskiest Files\n`;
+      md += `| File | Fan-in | Fragility |\n`;
+      md += `| --- | --- | --- |\n`;
+      riskyFiles.forEach((f) => {
+        const fragilityStr = f.fragility_index
+          ? f.fragility_index.toFixed(2)
+          : "—";
+        md += `| ${f.file_path} | ${f.fanin} | ${fragilityStr} |\n`;
+      });
+      md += `\n`;
+    }
+
+    // ── Phase 7: Feature Health Matrix ───────────────────────
+    const featureHealth = this.loadFeatureHealth();
+    if (featureHealth.length > 0) {
+      md += `## 🏥 Feature Health Matrix\n`;
+      md += `| Feature | Verdict | Coverage | Coupling |\n`;
+      md += `| --- | --- | --- | --- |\n`;
+      featureHealth.forEach((f) => {
+        const verdictIcon =
+          f.verdict === "HEALTHY"
+            ? "✅"
+            : f.verdict === "FRAGILE"
+              ? "🔴"
+              : f.verdict === "STIFF"
+                ? "⚠️"
+                : "⚪";
+        md += `| ${f.feature} | ${verdictIcon} ${f.verdict} | ${f.coverage}% | ${f.coupling.toFixed(2)} |\n`;
+      });
+      md += `\n`;
+    }
+
+    // ── Phase 7: Architecture Violations ───────────────────
+    const violations = this.loadArchitectureViolations();
+    if (violations.length > 0) {
+      md += `## 🚫 Architecture Violations\n`;
+      md += `| Feature | Forbidden | Actual |\n`;
+      md += `| --- | --- | --- |\n`;
+      violations.slice(0, 5).forEach((v) => {
+        md += `| ${v.feature} | ${v.forbidden} | ${v.actual} |\n`;
+      });
+      if (violations.length > 5) {
+        md += `*... and ${violations.length - 5} more*\n`;
+      }
+      md += `\n`;
+    }
+
+    // ── Phase 7: Last Agent Session Summary ──────────────────
+    if (lastSession) {
+      md += `## 👤 Last Agent Session\n`;
+      md += `- Session ID: \`${lastSession.session_id.slice(0, 8)}\`\n`;
+      md += `- Tools used: ${lastSession.tool_calls.length} (${lastSession.tool_calls.slice(0, 5).join(", ")}${lastSession.tool_calls.length > 5 ? "..." : ""})\n`;
+      md += `- Files changed: ${lastSession.files_changed}\n`;
+      md += `- Time: ${new Date(lastSession.timestamp).toLocaleString()}\n\n`;
     }
 
     md += `## FAILURES\n${failureLines}\n\n`;
@@ -720,7 +829,26 @@ export class Reporter {
       md += `## KNOWN GOTCHAS\n${gotchas}\n`;
     }
 
-    if (md.length > 20000) md = md.slice(0, 19900) + "\n... [TRUNCATED]";
+    // ── Phase 7: Enforce maxAgentContextSizeKB threshold ───
+    const configPath = path.join(this.root, "cortex.config.json");
+    let maxSizeKB = 20; // default
+    try {
+      const config: CortexConfig = JSON.parse(
+        fs.readFileSync(configPath, "utf-8"),
+      );
+      maxSizeKB = config.thresholds?.maxAgentContextSizeKB ?? 20;
+    } catch {
+      // Use default if config can't be read
+    }
+
+    const maxBytes = maxSizeKB * 1024;
+    if (md.length > maxBytes) {
+      md = md.slice(0, maxBytes - 100) + "\n\n... [TRUNCATED: exceeded maxAgentContextSizeKB]";
+      console.warn(
+        `⚠️  AGENT_CONTEXT.md exceeded ${maxSizeKB}KB threshold and was truncated`,
+      );
+    }
+
     fs.writeFileSync(path.join(this.root, this.outputs.agentContext), md);
   }
 
@@ -943,6 +1071,219 @@ export class Reporter {
         .length;
     } catch {
       return 0;
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // PHASE 7 HELPERS — Graph Intelligence for AGENT_CONTEXT
+  // ─────────────────────────────────────────────────────────────
+
+  /** Query graph for top N riskiest files (highest fanin + fragility) */
+  private queryRiskiestFiles(db: Database.Database, limit = 5): RiskyFile[] {
+    try {
+      const rows = db
+        .prepare(
+          `
+          SELECT 
+            e.target_id as file_path,
+            COUNT(*) as fanin,
+            f.fragility_index
+          FROM edges e
+          LEFT JOIN fragility f ON e.target_id = f.file_path
+          WHERE e.relationship = 'imports'
+          GROUP BY e.target_id
+          ORDER BY fanin DESC, f.fragility_index DESC
+          LIMIT @limit
+        `,
+        )
+        .all({ limit }) as Array<{
+        file_path: string;
+        fanin: number;
+        fragility_index: number | null;
+      }>;
+      return rows;
+    } catch {
+      return [];
+    }
+  }
+
+  /** Query for last agent session summary */
+  private queryLastSession(db: Database.Database): SessionSummary | null {
+    try {
+      const latestSession = db
+        .prepare(
+          `
+          SELECT session_id, MAX(timestamp) as timestamp
+          FROM tool_calls
+          WHERE timestamp < (SELECT MAX(timestamp) FROM tool_calls)
+          GROUP BY session_id
+          ORDER BY timestamp DESC
+          LIMIT 1
+        `,
+        )
+        .get() as { session_id: string; timestamp: string } | undefined;
+
+      if (!latestSession) return null;
+
+      const toolCalls = db
+        .prepare(
+          `
+          SELECT tool_name FROM tool_calls
+          WHERE session_id = @sessionId
+          ORDER BY timestamp
+        `,
+        )
+        .all({ sessionId: latestSession.session_id }) as Array<{
+        tool_name: string;
+      }>;
+
+      const filesChanged = db
+        .prepare(
+          `
+          SELECT COUNT(DISTINCT file_path) as count
+          FROM change_log
+          WHERE session_id = @sessionId
+        `,
+        )
+        .get({ sessionId: latestSession.session_id }) as {
+        count: number;
+      };
+
+      return {
+        session_id: latestSession.session_id,
+        tool_calls: toolCalls.map((t) => t.tool_name),
+        files_changed: filesChanged?.count ?? 0,
+        timestamp: latestSession.timestamp,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /** Check data freshness and return warnings */
+  private checkDataFreshness(db: Database.Database): string[] {
+    const warnings: string[] = [];
+    try {
+      // Check skeleton age (> 48h)
+      const lastScan = db
+        .prepare("SELECT MAX(updated_at) as last_scan FROM nodes")
+        .get() as { last_scan?: string | null };
+      if (lastScan?.last_scan) {
+        const scanDate = new Date(lastScan.last_scan);
+        const hoursSinceScan =
+          (Date.now() - scanDate.getTime()) / (1000 * 60 * 60);
+        if (hoursSinceScan > 48) {
+          warnings.push(
+            `Skeleton is ${Math.round(hoursSinceScan)}h old (> 48h)`,
+          );
+        }
+      } else {
+        warnings.push("No skeleton scan data available");
+      }
+
+      // Check fragility table has data
+      const fragilityCount = db
+        .prepare("SELECT COUNT(*) as count FROM fragility")
+        .get() as { count: number };
+      if (fragilityCount.count === 0) {
+        warnings.push("Fragility table is empty (run with --intel flag)");
+      }
+
+      // Check last scan commit matches current HEAD
+      const lastCommit = db
+        .prepare("SELECT value FROM scan_meta WHERE key = 'last_scan_commit'")
+        .get() as { value?: string } | undefined;
+      const currentHead = this.safeExec(
+        'git rev-parse HEAD 2>&1',
+        this.projectRoot,
+      );
+      if (lastCommit?.value && currentHead) {
+        const currentHeadShort = currentHead.trim().slice(0, 7);
+        const lastCommitShort = lastCommit.value.slice(0, 7);
+        if (lastCommitShort !== currentHeadShort) {
+          warnings.push(
+            `Scan commit (${lastCommitShort}) differs from HEAD (${currentHeadShort})`,
+          );
+        }
+      }
+    } catch {
+      // Non-fatal: freshness checks are best-effort
+    }
+    return warnings;
+  }
+
+  /** Load architecture violations from guard report */
+  private loadArchitectureViolations(): Array<{
+    feature: string;
+    forbidden: string;
+    actual: string;
+  }> {
+    try {
+      const guardPath = path.join(
+        this.root,
+        this.outputs.guardReport || "outputs/ARCH_GUARD.md",
+      );
+      if (!fs.existsSync(guardPath)) return [];
+
+      const content = fs.readFileSync(guardPath, "utf-8");
+      const violations: Array<{ feature: string; forbidden: string; actual: string }> = [];
+
+      // Parse markdown table rows for violations
+      const lines = content.split("\n");
+      for (const line of lines) {
+        if (line.includes("|") && line.includes("VIOLATION")) {
+          const parts = line.split("|").map((p) => p.trim());
+          if (parts.length >= 4) {
+            violations.push({
+              feature: parts[1] || "unknown",
+              forbidden: parts[2] || "unknown",
+              actual: parts[3] || "unknown",
+            });
+          }
+        }
+      }
+      return violations;
+    } catch {
+      return [];
+    }
+  }
+
+  /** Load feature health data from fragility matrix */
+  private loadFeatureHealth(): FeatureHealth[] {
+    try {
+      const matrixPath = path.join(
+        this.root,
+        this.outputs.fragilityMatrix || "outputs/FRAGILITY_MATRIX.md",
+      );
+      if (!fs.existsSync(matrixPath)) return [];
+
+      const content = fs.readFileSync(matrixPath, "utf-8");
+      const features: FeatureHealth[] = [];
+
+      // Parse markdown table rows
+      const lines = content.split("\n");
+      let inTable = false;
+      for (const line of lines) {
+        if (line.startsWith("| Feature")) {
+          inTable = true;
+          continue;
+        }
+        if (inTable && line.startsWith("|")) {
+          const parts = line.split("|").map((p) => p.trim());
+          if (parts.length >= 6 && parts[1] && parts[1] !== "Feature") {
+            const coverageMatch = parts[4]?.match(/(\d+)%/);
+            features.push({
+              feature: parts[1],
+              verdict: parts[3] || "UNKNOWN",
+              coverage: coverageMatch ? parseInt(coverageMatch[1]) : 0,
+              coupling: parseFloat(parts[5]) || 0,
+            });
+          }
+        }
+      }
+      return features.slice(0, 10); // Limit to top 10
+    } catch {
+      return [];
     }
   }
 }

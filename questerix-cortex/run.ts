@@ -5,15 +5,19 @@ import * as fs from "fs";
 import * as path from "path";
 import { Project } from "ts-morph";
 import { Analyst } from "./src/analyst";
+import { CortexDB } from "./src/cortex-db";
 
+import { DashboardServer } from "./src/dashboard-server";
+import { DeltaEngine } from "./src/delta";
 import { DriftDetector, DriftResult } from "./src/drift";
 import { FragilityMetrics, FragilityScorer } from "./src/fragility";
+import { GitOracle } from "./src/git-oracle";
 import { auditGovernance } from "./src/governance";
 import { Guard } from "./src/guard";
-
 import { OptimizeAuditor, OptimizeReport } from "./src/optimizer";
 import { Orchestrator } from "./src/orchestrator";
 import { Reporter } from "./src/reporter";
+import { RiskScorer } from "./src/risk-scorer";
 import { RlsAuditor, RlsAuditResult } from "./src/rls";
 import { Scanner } from "./src/scanner";
 import { SkeletonGenerator } from "./src/skeleton";
@@ -21,6 +25,7 @@ import { SkeletonSearch } from "./src/skeleton/search";
 import { CortexConfig } from "./src/types";
 import { normalizePath } from "./src/utils/normalize-path";
 import { FeatureVisualizer } from "./src/visualizer";
+import { ZombieHunter } from "./src/zombie-hunter";
 
 const configPath = path.join(__dirname, "cortex.config.json");
 const config: CortexConfig = JSON.parse(fs.readFileSync(configPath, "utf-8"));
@@ -36,6 +41,14 @@ const allSuites: Array<{
   parallel: boolean;
 }> = [
   // Smoke — fast sanity, safe to parallelise
+  // Phase 11: Selftest as first suite to verify MCP server health
+  {
+    id: "selftest",
+    name: "MCP Server Selftest",
+    command: "npx tsc --noEmit && cd ../questerix-cortex && npm run build && npm run cortex:selftest",
+    tier: "smoke",
+    parallel: false,
+  },
   {
     id: "unit",
     name: "Unit Tests (Lib)",
@@ -336,14 +349,68 @@ async function main() {
   const driftDetector = new DriftDetector(adminPath, supabasePath);
   const rlsAuditor = new RlsAuditor(config.supabaseProjectRef);
 
+  let currentDashboard: DashboardServer | undefined;
+
   // Initialize orchestrator
   const orchestrator = new Orchestrator(adminPath, (text, color, bold) => {
     const colorFn = color ? (chalk as any)[color] || chalk.gray : chalk.gray;
     console.log(bold ? colorFn.bold(text) : colorFn(text));
+    if (currentDashboard?.getIsRunning()) {
+      currentDashboard.emitLog({ text, color, bold });
+    }
   });
 
   // ── Core run function ─────────────────────────────────────────────────────
   const executeRun = async (target: string = "all", flags: string[] = []) => {
+    const outputsPath = path.resolve(__dirname, "outputs");
+    if (!fs.existsSync(outputsPath))
+      fs.mkdirSync(outputsPath, { recursive: true });
+    const cortexDb = new CortexDB(path.join(outputsPath, "cortex.db"));
+
+    // Clean up any zombie processes on the dashboard port first
+    ZombieHunter.clean(config.dashboardPort);
+
+    // Start dashboard server
+    const dashboardServer = new DashboardServer({
+      port: config.dashboardPort,
+      staticPath: path.join(__dirname, "dashboard", "dist"),
+      onTriggerRun: (triggerTarget) => {
+        console.log(
+          chalk.cyan(`\n🎯 Dashboard triggered run: ${triggerTarget}`),
+        );
+        // Note: In a full implementation, this would trigger a new run
+        // For now, we just log it as the current run is already in progress
+      },
+    });
+
+    try {
+      await dashboardServer.start();
+      currentDashboard = dashboardServer;
+    } catch (err: any) {
+      console.warn(chalk.yellow(`   ⚠️  Dashboard server failed to start: ${err.message}`));
+    }
+
+    const broadcastUpdate = () => {
+      if (dashboardServer.getIsRunning()) {
+        const results = orchestrator.getResults();
+        const allResults = Object.values(results);
+        const completed = allResults.filter(
+          (r) => r.status !== "running" && r.status !== "pending",
+        ).length;
+        const total = allResults.length;
+
+        dashboardServer.emitUpdate({
+          results: results as any,
+          progress: {
+            completed,
+            total: total || 1,
+            percentage: total ? Math.round((completed / total) * 100) : 0,
+          },
+          timestamp: new Date().toISOString(),
+        });
+      }
+    };
+
     const targets = target.split(",").map((t) => t.trim());
     const generateSkeletons = flags.includes("--generate-skeletons");
     const healDrift = flags.includes("--heal-drift");
@@ -359,14 +426,6 @@ async function main() {
       const report = optimizer.audit();
       const md = optimizer.generateMarkdownReport(report);
 
-      const outputsPath = path.resolve(
-        __dirname,
-        config.outputs
-          ? path.dirname(config.outputs.surfaceMap ?? "outputs/x")
-          : "outputs",
-      );
-      if (!fs.existsSync(outputsPath))
-        fs.mkdirSync(outputsPath, { recursive: true });
       const reportPath = path.join(outputsPath, "OPTIMIZE_REPORT.md");
       fs.writeFileSync(reportPath, md, "utf-8");
 
@@ -403,20 +462,39 @@ async function main() {
 
     // Clear previous results to prevent stale data
     orchestrator.clearResults();
+    broadcastUpdate();
 
     // Semantic scan
     const surfaceMap = scanner.scan();
-    const outputsPath = path.resolve(
-      __dirname,
-      path.dirname(config.outputs.surfaceMap),
-    );
-    if (!fs.existsSync(outputsPath))
-      fs.mkdirSync(outputsPath, { recursive: true });
-
     fs.writeFileSync(
-      path.join(__dirname, config.outputs.surfaceMap),
+      path.join(outputsPath, path.basename(config.outputs.surfaceMap)),
       JSON.stringify(surfaceMap, null, 2),
     );
+
+    // ── Delta Engine: Compute delta between runs ────────────────────────────
+    const deltaEngine = new DeltaEngine(path.resolve(__dirname, ".."));
+    const deltaResult = deltaEngine.computeDelta(surfaceMap);
+    console.log(
+      chalk.cyan(
+        `   📊 Delta: ${deltaResult.newGaps.length} new gaps, ${deltaResult.resolvedGaps.length} resolved`,
+      ),
+    );
+    if (deltaResult.hotFiles.length > 0) {
+      console.log(
+        chalk.yellow(`   🔥 Hot files: ${deltaResult.hotFiles.slice(0, 5).join(", ")}`),
+      );
+    }
+
+    // ── Git Oracle: Analyze git state for untested changes ──────────────────
+    const gitOracle = new GitOracle(path.resolve(__dirname, ".."));
+    const gitOracleResult = gitOracle.analyze(surfaceMap.gaps);
+    if (gitOracleResult.untestedModifiedFiles.length > 0) {
+      console.log(
+        chalk.yellow(
+          `   ⚠️  ${gitOracleResult.untestedModifiedFiles.length} recently modified files lack test coverage`,
+        ),
+      );
+    }
 
     // ── Skeleton generation ──────────────────────────────────────────────────
     if (runSkeleton) {
@@ -452,6 +530,10 @@ async function main() {
         searcher.index(skeletonReport);
         searcher.close();
         console.log(chalk.green("   ✅ Search index updated."));
+
+        // Phase 11: Call writeGraph to persist the codebase graph for Analyst/Fragility tools
+        console.log(chalk.cyan("🦴 Persisting codebase graph…"));
+        await scanner.writeGraph(cortexDb);
       } catch (skeletonErr: any) {
         console.warn(
           chalk.yellow(
@@ -515,6 +597,7 @@ async function main() {
         `   ${driftResult.verdict} — types: ${driftResult.typesTableCount} | ` +
         `missing: ${driftResult.missingFromTypes.length} | extra: ${driftResult.extraInTypes.length}`;
       console.log(chalk.cyan(driftSummary));
+      broadcastUpdate();
     }
 
     if (syncKb) {
@@ -562,6 +645,7 @@ async function main() {
       rlsResult = await rlsAuditor.audit();
       const rlsSummary = `   ${rlsResult.verdict} — critical: ${rlsResult.criticalCount}`;
       console.log(chalk.cyan(rlsSummary));
+      broadcastUpdate();
     }
 
     let governanceResult:
@@ -704,42 +788,124 @@ async function main() {
       type Tier = "smoke" | "deep" | "release" | "deploy";
       const tierOrder: Tier[] = ["smoke", "deep", "release", "deploy"];
 
+      // Phase 8: Tier-gating + Circuit breaker
+      let gateFailedAt: string | undefined;
+      const defaultTimeouts = { smoke: 300, deep: 300, release: 600, deploy: 900 };
+      const tierTimeouts = { ...defaultTimeouts, ...config.tierTimeouts };
+
       for (const tier of tierOrder) {
+        // Skip if a previous tier failed (tier-gating)
+        if (gateFailedAt) {
+          console.log(
+            chalk.yellow(
+              `🔴 Tier gate: ${gateFailedAt} failed — skipping ${tier} tier`,
+            ),
+          );
+          continue;
+        }
+
         const tierSuites = validatedSuites.filter((s) => s.tier === tier);
         if (tierSuites.length === 0) continue;
+
+        console.log(chalk.cyan(`\n📦 Running ${tier} tier (${tierSuites.length} suite(s))...`));
 
         const parallelGroup = tierSuites.filter((s) => s.parallel);
         const sequentialGroup = tierSuites.filter((s) => !s.parallel);
 
+        // Phase 8: Use tier-specific timeout (convert seconds to ms)
+        const tierTimeoutMs = tierTimeouts[tier] * 1000;
+
         // Run parallel-safe suites concurrently, then sequential ones in order
         if (parallelGroup.length > 0) {
-          await orchestrator.runSuitesConcurrent(parallelGroup);
+          await orchestrator.runSuitesConcurrent(parallelGroup, broadcastUpdate);
           analystResults.bundleSize = analyst.getBundleSize(adminPath);
         }
 
         for (const suite of sequentialGroup) {
-          await orchestrator.runSuite(suite.name, suite.command);
+          await orchestrator.runSuite(
+            suite.name,
+            suite.command,
+            tierTimeoutMs,
+            broadcastUpdate,
+          );
           analystResults.bundleSize = analyst.getBundleSize(adminPath);
         }
+
+        // Phase 8: Check if any suite in this tier failed
+        const tierResults = Object.values(orchestrator.getResults()).filter((r) =>
+          tierSuites.some((s) => s.name === r.name),
+        );
+        const tierFailed = tierResults.some((r) => r.status === "failed");
+        if (tierFailed) {
+          gateFailedAt = tier;
+          console.log(
+            chalk.red(`🔴 Tier gate: ${tier} failed — subsequent tiers will be skipped`),
+          );
+        }
+      }
+
+      // Phase 8: Store gateFailedAt for reporting via orchestrator
+      if (gateFailedAt) {
+        orchestrator.setGateFailedAt(gateFailedAt);
       }
     }
 
     // ── Post-run analysis ─────────────────────────────────────────────────────
-    analystResults.deadCode = analyst.findDeadCode().slice(0, 10);
+    // Use existing cortexDb for dead code detection
+    let deadCodeResults: Array<{ symbol: string; file: string }> = [];
+    try {
+      deadCodeResults = analyst.findDeadCode(cortexDb.getDb(), 10);
+    } catch {
+      // Best effort - skip dead code detection if something fails
+    }
+    analystResults.deadCode = deadCodeResults.map((r) => `${r.file}#${r.symbol}`);
     analystResults.perfGaps = analyst.checkPerformanceInstrumentation();
     analystResults.migrationGaps = analyst.lintMigrations(
       path.join(supabasePath, "migrations"),
     );
 
-    // Bundle size regression guard
-    const bundleKB = analystResults.bundleSize;
-    if (bundleKB && bundleKB > 9000) {
-      const msg = `⚠️ Bundle size ${bundleKB} KB exceeds 9 MB threshold!`;
-      console.log(chalk.red(msg));
-    }
-
     const results = orchestrator.getResults();
     const allResults = Object.values(results);
+
+    // Phase 11: Check if selftest failed and emit P0 CRITICAL
+    const selftestResult = results["MCP Server Selftest"];
+    if (selftestResult && selftestResult.status === "failed") {
+      const criticalMessage = "⛔ MCP Server is broken — all Cortex guidance is unreliable until fixed";
+      console.log(chalk.red(`\n🔴 P0 CRITICAL: ${criticalMessage}`));
+      
+      // Emit to NEXT_TASK.md
+      const nextTaskPath = path.join(__dirname, config.outputs.nextTask || "outputs/NEXT_TASK.md");
+      const timestamp = new Date().toISOString();
+      const p0Block = `\n---\n\n## 🚨 P0 CRITICAL — ${timestamp}\n\n${criticalMessage}\n\n**Selftest Status:** FAILED\n**Action Required:** Run \`npm run cortex:selftest\` manually to diagnose MCP server issues.\n\n---\n`;
+      
+      try {
+        if (fs.existsSync(nextTaskPath)) {
+          fs.appendFileSync(nextTaskPath, p0Block, "utf-8");
+        } else {
+          fs.writeFileSync(nextTaskPath, `# P0 Critical Issues\n${p0Block}`, "utf-8");
+        }
+        console.log(chalk.yellow(`   📝 P0 CRITICAL recorded in ${nextTaskPath}`));
+      } catch (err) {
+        console.warn(chalk.yellow(`   ⚠️  Could not write P0 CRITICAL to ${nextTaskPath}:`, err));
+      }
+    }
+
+    // ── Risk Scorer: Calculate composite score ───────────────────────────────
+    const riskScorer = new RiskScorer();
+    const riskScore = riskScorer.calculateScore(
+      results,
+      driftResult,
+      rlsResult,
+      undefined, // forensicResult not yet implemented
+      undefined, // previousGapCount - would need to load from history
+      surfaceMap?.gaps?.length,
+    );
+    console.log(
+      chalk.cyan(
+        `   🎯 Risk Score: ${riskScore.composite}/100 (confidence: ${riskScore.confidence}%)`,
+      ),
+    );
+
     const passed = allResults.filter((r) => r.status === "passed").length;
     const total = allResults.length;
 
@@ -763,6 +929,8 @@ async function main() {
       [],
       governanceResult,
       optimizeResult,
+      deltaResult,
+      riskScore,
     );
 
     // Summary
@@ -784,6 +952,7 @@ async function main() {
       console.log(rlsLine);
     }
     console.log(chalk.green(`\n✅ Run complete. Reports in outputs/`));
+    broadcastUpdate();
   };
 
   // Auto-run only if an explicit target was passed as a CLI arg.

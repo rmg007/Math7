@@ -1,13 +1,13 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
@@ -19,12 +19,12 @@ import { Pagination } from '@/components/ui/pagination';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
@@ -33,56 +33,56 @@ import { sanitizeHtml } from '@/lib/sanitize';
 import { cn, formatIdentifier } from '@/lib/utils';
 import type { QuestionListItem } from '@/types';
 import {
-    closestCenter,
-    DndContext,
-    DragEndEvent,
-    KeyboardSensor,
-    PointerSensor,
-    TouchSensor,
-    useSensor,
-    useSensors,
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
 import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-    CheckSquare,
-    Copy,
-    FileText,
-    Filter,
-    GripVertical,
-    Loader2,
-    Pencil,
-    Plus,
-    Sparkles,
-    Square,
-    Trash2,
+  CheckSquare,
+  Copy,
+  FileText,
+  Filter,
+  GripVertical,
+  Loader2,
+  Pencil,
+  Plus,
+  Sparkles,
+  Square,
+  Trash2,
 } from 'lucide-react';
 import {
-    memo,
-    useCallback,
-    useEffect,
-    useLayoutEffect,
-    useMemo,
-    useRef,
-    useState,
-    type MutableRefObject,
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MutableRefObject,
 } from 'react';
 import { Link } from 'react-router-dom';
 import {
-    QuestionInsert,
-    useBulkCreateQuestions,
-    useBulkDeleteQuestions,
-    useBulkUpdateQuestionsStatus,
-    useDeleteQuestion,
-    useDuplicateQuestion,
-    usePaginatedQuestions,
-    useUpdateQuestionOrder,
+  QuestionInsert,
+  useBulkCreateQuestions,
+  useBulkDeleteQuestions,
+  useBulkUpdateQuestionsStatus,
+  useDeleteQuestion,
+  useDuplicateQuestion,
+  usePaginatedQuestions,
+  useUpdateQuestionOrder,
 } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
@@ -145,6 +145,7 @@ const SortableRow = memo(
 
     return (
       <TableRow
+        data-testid="question-row"
         ref={(node) => {
           setNodeRef(node);
           if (rowRef.current !== node) {
@@ -204,14 +205,14 @@ const SortableRow = memo(
           </div>
         </TableCell>
         {visibleColumns.has('type') && (
-          <TableCell>
+          <TableCell className="whitespace-nowrap">
             <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[11px] font-medium border border-gray-200/50">
               {formatIdentifier(question.type)}
             </span>
           </TableCell>
         )}
         {visibleColumns.has('skill') && (
-          <TableCell>
+          <TableCell className="whitespace-nowrap">
             <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[11px] font-medium border border-gray-200/50">
               {question.skills?.title || 'No Skill'}
             </span>
@@ -765,7 +766,11 @@ export function QuestionList() {
   }
 
   return (
-    <div data-testid="questions-list" className="max-w-7xl mx-auto space-y-10 pb-12">
+    <div
+      data-testid="questions-list"
+      data-hydration-complete={!isLoading}
+      className="max-w-7xl mx-auto space-y-10 pb-12"
+    >
       <AdminHeader
         title="Question Bank"
         description="Registry of all pedagogical assessment units"
@@ -905,191 +910,190 @@ export function QuestionList() {
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
             >
-
-          {/* Desktop Table View */}
-          <div className="hidden md:block">
-            <Table className="w-full">
-              <TableHeader>
-                <TableRow className="bg-gray-50">
-                  <TableHead className="w-8 px-2">
-                    <GripVertical className="h-3.5 w-3.5 text-gray-300" />
-                  </TableHead>
-                  <TableHead className="w-8 px-2">
-                    <button
-                      onClick={handleSelectAll}
-                      aria-label={isAllSelected ? 'Deselect all' : 'Select all'}
-                      className="text-gray-300 hover:text-gray-500"
-                    >
-                      {isAllSelected && questions.length > 0 ? (
-                        <CheckSquare className="h-4 w-4 text-teal-600" />
-                      ) : (
-                        <Square className="h-4 w-4" />
-                      )}
-                    </button>
-                  </TableHead>
-                  <TableHead className="px-4">
-                    <SortableHeader
-                      label="Question"
-                      column="content"
-                      currentSortBy={sortBy}
-                      currentSortOrder={sortOrder}
-                      onSort={handleSort}
-                    />
-                  </TableHead>
-                  {visibleColumns.has('type') && (
-                    <TableHead>
-                      <SortableHeader
-                        label="Type"
-                        column="type"
-                        currentSortBy={sortBy}
-                        currentSortOrder={sortOrder}
-                        onSort={handleSort}
-                      />
-                    </TableHead>
-                  )}
-                  {visibleColumns.has('skill') && (
-                    <TableHead>
-                      <SortableHeader
-                        label="Skill"
-                        column="skill_id"
-                        currentSortBy={sortBy}
-                        currentSortOrder={sortOrder}
-                        onSort={handleSort}
-                      />
-                    </TableHead>
-                  )}
-                  {visibleColumns.has('points') && (
-                    <TableHead className="text-center w-20">
-                      <SortableHeader
-                        label="Points"
-                        column="points"
-                        currentSortBy={sortBy}
-                        currentSortOrder={sortOrder}
-                        onSort={handleSort}
-                      />
-                    </TableHead>
-                  )}
-                  {visibleColumns.has('status') && (
-                    <TableHead>
-                      <SortableHeader
-                        label="Status"
-                        column="status"
-                        currentSortBy={sortBy}
-                        currentSortOrder={sortOrder}
-                        onSort={handleSort}
-                      />
-                    </TableHead>
-                  )}
-                  <TableHead className="text-right px-4 border-l border-gray-100">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>
-                <TableBody>
-                  {!questions.length ? (
-                    <TableRow>
-                      <TableCell colSpan={visibleColumns.size + 3} className="py-20">
-                        <EmptyState
-                          icon={FileText}
-                          title={hasActiveFilters ? 'No matches found' : 'No questions yet'}
-                          description={
-                            hasActiveFilters
-                              ? 'Try adjusting your search or filters.'
-                              : 'Create your first question or use AI to generate them.'
-                          }
-                          action={
-                            hasActiveFilters ? (
-                              <Button
-                                onClick={clearFilters}
-                                className="bg-teal-700 hover:bg-teal-800 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
-                              >
-                                Clear Filters
-                              </Button>
-                            ) : (
-                              <Link to="/questions/new">
-                                <Button className="bg-teal-700 hover:bg-teal-800 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
-                                  New Question
-                                </Button>
-                              </Link>
-                            )
-                          }
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    questions.map((question: QuestionListItem) => (
-                      <SortableRow
-                        key={question.question_id}
-                        question={question}
-                        isSelected={selectedIds.has(question.question_id)}
-                        onSelect={handleSelectOne}
-                        onDelete={handleDelete}
-                        onDuplicate={handleDuplicate}
-                        isDragDisabled={isDragDisabled}
-                        isDuplicating={duplicateQuestion.isPending}
-                        visibleColumns={visibleColumns}
-                      />
-                    ))
-                  )}
-                </TableBody>
-              </SortableContext>
-            </Table>
-          </div>
-
-          {/* Mobile Card View */}
-          <div className="md:hidden p-3">
-            <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>
-              {!questions.length ? (
-                <div className="py-12">
-                  <EmptyState
-                    icon={FileText}
-                    title={hasActiveFilters ? 'No matches found' : 'No questions yet'}
-                    description={
-                      hasActiveFilters
-                        ? 'Try adjusting your search or filters.'
-                        : 'Create your first question to get started.'
-                    }
-                    action={
-                      hasActiveFilters ? (
-                        <Button
-                          onClick={clearFilters}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+              {/* Desktop Table View */}
+              <div className="hidden md:block">
+                <Table className="w-full">
+                  <TableHeader>
+                    <TableRow className="bg-gray-50">
+                      <TableHead className="w-8 px-2">
+                        <GripVertical className="h-3.5 w-3.5 text-gray-300" />
+                      </TableHead>
+                      <TableHead className="w-8 px-2">
+                        <button
+                          onClick={handleSelectAll}
+                          aria-label={isAllSelected ? 'Deselect all' : 'Select all'}
+                          className="text-gray-300 hover:text-gray-500"
                         >
-                          Clear Filters
-                        </Button>
+                          {isAllSelected && questions.length > 0 ? (
+                            <CheckSquare className="h-4 w-4 text-teal-600" />
+                          ) : (
+                            <Square className="h-4 w-4" />
+                          )}
+                        </button>
+                      </TableHead>
+                      <TableHead className="px-4">
+                        <SortableHeader
+                          label="Question"
+                          column="content"
+                          currentSortBy={sortBy}
+                          currentSortOrder={sortOrder}
+                          onSort={handleSort}
+                        />
+                      </TableHead>
+                      {visibleColumns.has('type') && (
+                        <TableHead>
+                          <SortableHeader
+                            label="Type"
+                            column="type"
+                            currentSortBy={sortBy}
+                            currentSortOrder={sortOrder}
+                            onSort={handleSort}
+                          />
+                        </TableHead>
+                      )}
+                      {visibleColumns.has('skill') && (
+                        <TableHead>
+                          <SortableHeader
+                            label="Skill"
+                            column="skill_id"
+                            currentSortBy={sortBy}
+                            currentSortOrder={sortOrder}
+                            onSort={handleSort}
+                          />
+                        </TableHead>
+                      )}
+                      {visibleColumns.has('points') && (
+                        <TableHead className="text-center w-20">
+                          <SortableHeader
+                            label="Points"
+                            column="points"
+                            currentSortBy={sortBy}
+                            currentSortOrder={sortOrder}
+                            onSort={handleSort}
+                          />
+                        </TableHead>
+                      )}
+                      {visibleColumns.has('status') && (
+                        <TableHead>
+                          <SortableHeader
+                            label="Status"
+                            column="status"
+                            currentSortBy={sortBy}
+                            currentSortOrder={sortOrder}
+                            onSort={handleSort}
+                          />
+                        </TableHead>
+                      )}
+                      <TableHead className="text-right px-4 border-l border-gray-100">
+                        Actions
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>
+                    <TableBody>
+                      {!questions.length ? (
+                        <TableRow>
+                          <TableCell colSpan={visibleColumns.size + 3} className="py-20">
+                            <EmptyState
+                              icon={FileText}
+                              title={hasActiveFilters ? 'No matches found' : 'No questions yet'}
+                              description={
+                                hasActiveFilters
+                                  ? 'Try adjusting your search or filters.'
+                                  : 'Create your first question or use AI to generate them.'
+                              }
+                              action={
+                                hasActiveFilters ? (
+                                  <Button
+                                    onClick={clearFilters}
+                                    className="bg-teal-700 hover:bg-teal-800 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                                  >
+                                    Clear Filters
+                                  </Button>
+                                ) : (
+                                  <Link to="/questions/new">
+                                    <Button className="bg-teal-700 hover:bg-teal-800 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
+                                      New Question
+                                    </Button>
+                                  </Link>
+                                )
+                              }
+                            />
+                          </TableCell>
+                        </TableRow>
                       ) : (
-                        <Link to="/questions/new">
-                          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
-                            New Question
-                          </Button>
-                        </Link>
-                      )
-                    }
-                  />
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {questions.map((question: QuestionListItem) => (
-                    <SortableCard
-                      key={question.question_id}
-                      question={question}
-                      isSelected={selectedIds.has(question.question_id)}
-                      onSelect={handleSelectOne}
-                      onDelete={handleDelete}
-                      onDuplicate={handleDuplicate}
-                      isDragDisabled={isDragDisabled}
-                      isDuplicating={duplicateQuestion.isPending}
-                      visibleColumns={visibleColumns}
-                    />
-                  ))}
-                </div>
-              )}
-            </SortableContext>
-          </div>
-        </DndContext>
-      </CardContent>
-    </Card>
+                        questions.map((question: QuestionListItem) => (
+                          <SortableRow
+                            key={question.question_id}
+                            question={question}
+                            isSelected={selectedIds.has(question.question_id)}
+                            onSelect={handleSelectOne}
+                            onDelete={handleDelete}
+                            onDuplicate={handleDuplicate}
+                            isDragDisabled={isDragDisabled}
+                            isDuplicating={duplicateQuestion.isPending}
+                            visibleColumns={visibleColumns}
+                          />
+                        ))
+                      )}
+                    </TableBody>
+                  </SortableContext>
+                </Table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden p-3">
+                <SortableContext items={questionIds} strategy={verticalListSortingStrategy}>
+                  {!questions.length ? (
+                    <div className="py-12">
+                      <EmptyState
+                        icon={FileText}
+                        title={hasActiveFilters ? 'No matches found' : 'No questions yet'}
+                        description={
+                          hasActiveFilters
+                            ? 'Try adjusting your search or filters.'
+                            : 'Create your first question to get started.'
+                        }
+                        action={
+                          hasActiveFilters ? (
+                            <Button
+                              onClick={clearFilters}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                            >
+                              Clear Filters
+                            </Button>
+                          ) : (
+                            <Link to="/questions/new">
+                              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm">
+                                New Question
+                              </Button>
+                            </Link>
+                          )
+                        }
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {questions.map((question: QuestionListItem) => (
+                        <SortableCard
+                          key={question.question_id}
+                          question={question}
+                          isSelected={selectedIds.has(question.question_id)}
+                          onSelect={handleSelectOne}
+                          onDelete={handleDelete}
+                          onDuplicate={handleDuplicate}
+                          isDragDisabled={isDragDisabled}
+                          isDuplicating={duplicateQuestion.isPending}
+                          visibleColumns={visibleColumns}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </SortableContext>
+              </div>
+            </DndContext>
+          </CardContent>
+        </Card>
 
         {totalCount > 0 && (
           <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">

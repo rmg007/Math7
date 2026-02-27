@@ -297,7 +297,24 @@ export class Scanner {
         normalizedFilePath.includes(".spec.");
 
       for (const importDecl of sourceFile.getImportDeclarations()) {
-        const targetSourceFile = importDecl.getModuleSpecifierSourceFile();
+        const specifier = importDecl.getModuleSpecifierValue();
+        let targetSourceFile = importDecl.getModuleSpecifierSourceFile();
+
+        // Fallback resolution for '@/aliases if ts-morph fails to resolve them
+        if (!targetSourceFile && specifier.startsWith("@/")) {
+          const relativePath = specifier.substring(2);
+          const potentialPath = path.join(this.srcPath, relativePath);
+          const extensions = [".ts", ".tsx", "/index.ts", "/index.tsx"];
+          
+          for (const ext of extensions) {
+            const fullPath = potentialPath.endsWith(ext) ? potentialPath : potentialPath + ext;
+            if (fs.existsSync(fullPath)) {
+              targetSourceFile = this.project.getSourceFile(fullPath) || this.project.addSourceFileAtPath(fullPath);
+              break;
+            }
+          }
+        }
+
         if (!targetSourceFile) continue;
 
         const resolvedPath = normalizePath(targetSourceFile.getFilePath());

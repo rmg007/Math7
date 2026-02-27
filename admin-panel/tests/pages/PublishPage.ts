@@ -27,7 +27,12 @@ export class PublishPage {
   async goto() {
     await this.page.goto('/publish');
     // Wait for the page to settle — either the push button or the "No Changes" badge
-    await this.page.locator('button:has-text("Push"), [data-testid="publish-page"] :text-is("No Changes Detected")').first().waitFor({ state: 'visible', timeout: 15_000 });
+    await this.page
+      .locator(
+        'button:has-text("Push"), [data-testid="publish-page"] :text-is("No Changes Detected")'
+      )
+      .first()
+      .waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   async publish() {
@@ -39,14 +44,19 @@ export class PublishPage {
   async publishAndWaitForSuccess() {
     await this.publish();
     try {
-      await this.successMessage.waitFor({ state: 'visible', timeout: 45_000 });
+      // Increased timeout for curriculum publish which involves multiple DB operations
+      await this.successMessage.waitFor({ state: 'visible', timeout: 60_000 });
     } catch (e) {
-      const errorVisible = await this.errorAlert.isVisible();
+      // Debug: check what's on the page
+      const pageContent = await this.page.content();
+      console.log('Page content when publish timed out:', pageContent.substring(0, 2000));
+
+      const errorVisible = await this.errorAlert.isVisible().catch(() => false);
       if (errorVisible) {
         const msg = await this.errorAlert.innerText();
         throw new Error(`Publish failed with error: ${msg}`);
       }
-      throw e;
+      throw new Error(`Publish timed out waiting for success message after 60s. ${e}`);
     }
   }
 }

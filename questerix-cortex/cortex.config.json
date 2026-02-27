@@ -47,7 +47,14 @@
   "thresholds": {
     "minCoverage": 80,
     "maxAgentContextSizeKB": 20,
-    "maxHistoryRuns": 30
+    "maxHistoryRuns": 30,
+    "governanceThreshold": 5
+  },
+  "tierTimeouts": {
+    "smoke": 120,
+    "deep": 300,
+    "release": 600,
+    "deploy": 900
   },
   "dashboardPort": 5050
 }

@@ -144,6 +144,7 @@ function SortableRow({
 
   return (
     <TableRow
+      data-testid="domain-row"
       ref={(node) => {
         setNodeRef(node);
         if (rowRef.current !== node) {
@@ -193,7 +194,7 @@ function SortableRow({
           </span>
         </TableCell>
       )}
-      <TableCell className="px-4">
+      <TableCell className="px-4 whitespace-nowrap">
         <div className="flex flex-col">
           <span className="font-medium text-gray-900 text-xs">{domain.title}</span>
           {domain.apps?.display_name && (
@@ -202,7 +203,7 @@ function SortableRow({
         </div>
       </TableCell>
       {visibleColumns.has('updated_at') && (
-        <TableCell className="hidden lg:table-cell">
+        <TableCell className="hidden lg:table-cell whitespace-nowrap">
           <span className="text-xs text-gray-500">
             {new Date(domain.updated_at).toLocaleDateString()}{' '}
             <span className="text-gray-500">
@@ -694,7 +695,11 @@ export function DomainList() {
   }
 
   return (
-    <div data-testid="domains-list" className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
+    <div
+      data-testid="domains-list"
+      data-hydration-complete={!isLoading}
+      className="max-w-7xl mx-auto space-y-4 p-4 md:p-6"
+    >
       <AdminHeader
         title="Domains"
         description="Organize domain categories."

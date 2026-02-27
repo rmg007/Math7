@@ -30,6 +30,8 @@ coverage/
 __checks__/
 tests/__screenshots__/
 lighthouse-*.json
+# Playwright pre-authenticated session state — contains cookies, never commit
+.auth/
 
 # =============================================================================
 # ENVIRONMENT FILES (secrets — never commit)
@@ -98,6 +100,8 @@ logs/
 tsc_errors*.txt
 git_status.txt
 *.tmp
+tmp/
+unused-exports.txt
 
 # CI Failure Audit (local forensic data)
 _gh_failures/

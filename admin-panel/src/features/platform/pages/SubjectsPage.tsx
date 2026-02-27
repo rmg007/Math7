@@ -118,6 +118,7 @@ const SubjectRow = memo(
     return (
       <TableRow
         key={subject.subject_id}
+        data-testid="subject-row"
         className={cn('group/row even:bg-gray-50/40', isSelected && 'bg-teal-50/50')}
       >
         <TableCell className="w-8 px-2">
@@ -137,7 +138,7 @@ const SubjectRow = memo(
           </button>
         </TableCell>
         {visibleColumns.has('title') && (
-          <TableCell className="px-4">
+          <TableCell className="px-4 whitespace-nowrap">
             <div className="flex items-center gap-2">
               {subject.color_hex && (
                 <span
@@ -156,7 +157,7 @@ const SubjectRow = memo(
           </TableCell>
         )}
         {visibleColumns.has('slug') && (
-          <TableCell className="hidden md:table-cell">
+          <TableCell className="hidden md:table-cell whitespace-nowrap">
             <code className="text-xs text-gray-500 font-mono">{subject.slug}</code>
           </TableCell>
         )}
@@ -172,7 +173,7 @@ const SubjectRow = memo(
           </TableCell>
         )}
         {visibleColumns.has('status') && (
-          <TableCell>
+          <TableCell className="whitespace-nowrap">
             <span
               className={cn(
                 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium',
@@ -186,7 +187,7 @@ const SubjectRow = memo(
           </TableCell>
         )}
         {visibleColumns.has('display_order') && (
-          <TableCell className="hidden lg:table-cell text-center">
+          <TableCell className="hidden lg:table-cell text-center whitespace-nowrap">
             <span className="text-xs text-gray-500 tabular-nums">{subject.display_order ?? 0}</span>
           </TableCell>
         )}
@@ -674,7 +675,7 @@ export function SubjectsPage() {
         ]}
       />
 
-      <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6" data-hydration-complete={!isLoading}>
         <AdminHeader
           title="Subjects"
           description="Manage subjects."

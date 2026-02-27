@@ -1,8 +1,8 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
+    CallToolRequestSchema,
+    ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import type Database from "better-sqlite3";
 import { execSync } from "child_process";
@@ -11,11 +11,14 @@ import * as fs from "fs";
 import * as path from "path";
 import { Project } from "ts-morph";
 import { CortexDB } from "../cortex-db";
+import { auditGovernance } from "../governance";
 import { Scanner } from "../scanner";
 import { normalizePath } from "../utils/normalize-path";
 import { logChange } from "./change-logger";
 import { attributeFragility } from "./fragility-engine";
+import { handleDiff } from "./tools/diff";
 import { getFragilityReport } from "./tools/fragility";
+import { handleInsights } from "./tools/insights";
 import { runVerification } from "./verify-engine";
 
 type ImpactResponse =
@@ -1005,6 +1008,21 @@ export async function startServer(): Promise<void> {
         },
       },
       {
+        name: "cortex_governance",
+        description:
+          "Check for dead documentation references in markdown files. Returns structured dead refs so agents can check doc changes before committing.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            threshold: {
+              type: "number",
+              description: "Optional threshold for dead refs (default: uses cortex.config.json governanceThreshold)",
+            },
+          },
+          required: [],
+        },
+      },
+      {
         name: "cortex_search",
         description:
           "Search code symbols using SQLite FTS5 index. Returns exact + prefix matches.",
@@ -1015,6 +1033,32 @@ export async function startServer(): Promise<void> {
             limit: { type: "number" },
           },
           required: ["query"],
+        },
+      },
+      {
+        name: "cortex_diff",
+        description:
+          "Get structured diff since last session, 24h, or specific commit. Returns added/modified/deleted files with tier classification and fragility index.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            since: {
+              type: "string",
+              description: '"last_session", "24h", or a specific commit hash',
+              default: "last_session",
+            },
+          },
+          required: [],
+        },
+      },
+      {
+        name: "cortex_insights",
+        description:
+          "Get graph intelligence: hotspots, orphans, high blast radius files, circular dependencies, and feature coupling scores.",
+        inputSchema: {
+          type: "object",
+          properties: {},
+          required: [],
         },
       },
     ],
@@ -1086,6 +1130,63 @@ export async function startServer(): Promise<void> {
       const limit = typeof args?.limit === "number" ? args.limit : 10;
       const result = handleSearch(query, limit);
       return toJsonContent(result);
+    }
+
+    if (name === "cortex_governance") {
+      const threshold = typeof args?.threshold === "number" ? args.threshold : undefined;
+      const result = auditGovernance(repoRoot);
+      const effectiveThreshold = threshold ?? 5;
+      return toJsonContent({
+        dead_refs: result.deadRefs,
+        scanned_files: result.scannedFiles,
+        count: result.deadRefs.length,
+        threshold: effectiveThreshold,
+        passed: result.deadRefs.length <= effectiveThreshold,
+      });
+    }
+
+    if (name === "cortex_diff") {
+      const since = typeof args?.since === "string" ? args.since : "last_session";
+      const opened = openDatabase();
+      if ("warning" in opened) {
+        return toJsonContent({ warning: opened.warning, data: null });
+      }
+      const { db, cortexDb } = opened;
+      try {
+        if (isGraphEmpty(db)) {
+          return toJsonContent({ warning: EMPTY_GRAPH_WARNING, data: null });
+        }
+        const result = handleDiff(
+          since as "last_session" | "24h" | string,
+          repoRoot,
+          db,
+        );
+        return toJsonContent(result);
+      } catch (error) {
+        return toJsonContent({
+          warning: `Failed to compute diff: ${error}`,
+          data: null,
+        });
+      } finally {
+        cortexDb.close();
+      }
+    }
+
+    if (name === "cortex_insights") {
+      const opened = openDatabase();
+      if ("warning" in opened) {
+        return toJsonContent({ warning: opened.warning, data: null });
+      }
+      const { db, cortexDb } = opened;
+      try {
+        if (isGraphEmpty(db)) {
+          return toJsonContent({ warning: EMPTY_GRAPH_WARNING, data: null });
+        }
+        const result = handleInsights(db);
+        return toJsonContent(result);
+      } finally {
+        cortexDb.close();
+      }
     }
 
     return toJsonContent({ warning: `Unknown tool: ${name}` });

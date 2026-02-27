@@ -11,12 +11,12 @@ import { memo, useCallback, useEffect, useState } from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 
 type InvitationCode = Tables<'invitation_codes'>;
@@ -60,12 +60,9 @@ const InvitationCodeRow = memo(
           : 'Active';
 
     return (
-      <TableRow className="even:bg-gray-50/40">
+      <TableRow data-testid="invitation-row" className="even:bg-gray-50/40">
         <TableCell className="px-3 w-8">
-          <button
-            onClick={() => onSelect(code.id)}
-            className="text-gray-300 hover:text-gray-500"
-          >
+          <button onClick={() => onSelect(code.id)} className="text-gray-300 hover:text-gray-500">
             {isSelected ? (
               <CheckSquare className="h-4 w-4 text-teal-600" />
             ) : (
@@ -87,14 +84,10 @@ const InvitationCodeRow = memo(
           </span>
         </TableCell>
         <TableCell className="hidden md:table-cell">
-          <span className="text-xs text-gray-500">
-            {formatDate(code.expires_at)}
-          </span>
+          <span className="text-xs text-gray-500">{formatDate(code.expires_at)}</span>
         </TableCell>
         <TableCell className="hidden lg:table-cell">
-          <span className="text-xs text-gray-500">
-            {formatDate(code.created_at)}
-          </span>
+          <span className="text-xs text-gray-500">{formatDate(code.created_at)}</span>
         </TableCell>
         <TableCell className="px-4 text-right border-l border-gray-100">
           <div className="flex items-center justify-end gap-0.5">
@@ -286,7 +279,7 @@ export function InvitationCodesPage() {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
+    <div data-hydration-complete={!loading} className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
         title="Invitation Codes"
         description="Manage access codes."
@@ -298,7 +291,11 @@ export function InvitationCodesPage() {
         <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
           <X className="h-4 w-4 text-red-500 shrink-0" />
           <p className="text-xs text-red-700">{error}</p>
-          <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600">
+          <button
+            onClick={() => setError(null)}
+            className="ml-auto text-red-400 hover:text-red-600"
+            title="Dismiss"
+          >
             <X className="h-3 w-3" />
           </button>
         </div>
@@ -308,7 +305,11 @@ export function InvitationCodesPage() {
         <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-center gap-2">
           <CheckSquare className="h-4 w-4 text-emerald-500 shrink-0" />
           <p className="text-xs text-emerald-700">{success}</p>
-          <button onClick={() => setSuccess(null)} className="ml-auto text-emerald-400 hover:text-emerald-600">
+          <button
+            onClick={() => setSuccess(null)}
+            className="ml-auto text-emerald-400 hover:text-emerald-600"
+            title="Dismiss"
+          >
             <X className="h-3 w-3" />
           </button>
         </div>
@@ -322,7 +323,9 @@ export function InvitationCodesPage() {
           </div>
           <div>
             <h2 className="text-sm font-semibold text-gray-900">Generate Code</h2>
-            <p className="text-[11px] text-gray-500">Create a new invitation code for user onboarding</p>
+            <p className="text-[11px] text-gray-500">
+              Create a new invitation code for user onboarding
+            </p>
           </div>
         </div>
 
@@ -491,9 +494,7 @@ export function InvitationCodesPage() {
                   onSort={handleSort}
                 />
               </TableHead>
-              <TableHead className="text-right px-4 border-l border-gray-100">
-                Actions
-              </TableHead>
+              <TableHead className="text-right px-4 border-l border-gray-100">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

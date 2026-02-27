@@ -61,6 +61,21 @@ export function Hero({ testResults, surfaceMap, analystResults, smokePass }: Her
           color={smokePass ? 'text-emerald-400' : 'text-red-400'}
         />
       </div>
+
+      {total > 0 && (allResults.some(r => r.status === 'running')) && (
+        <div className="space-y-1.5">
+          <div className="flex justify-between text-[10px] text-slate-500 uppercase tracking-widest font-bold">
+            <span>Executing Suites...</span>
+            <span>{Math.round((passed + failed) / total * 100)}%</span>
+          </div>
+          <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-800">
+            <div 
+              className="h-full bg-cyan-500 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(34,211,238,0.5)]"
+              style={{ width: `${Math.round((passed + failed) / total * 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

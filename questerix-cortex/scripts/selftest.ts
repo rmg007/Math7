@@ -146,6 +146,9 @@ async function runSelfTest(): Promise<void> {
       "cortex_verify",
       "cortex_briefing",
       "cortex_search",
+      "cortex_governance",
+      "cortex_diff",
+      "cortex_insights",
     ];
 
     const missing = expectedTools.filter(

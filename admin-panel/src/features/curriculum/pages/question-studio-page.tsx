@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { useApp } from '@/hooks/use-app';
 import {
   useStudioGenerator,
   type DifficultyMix,
@@ -170,11 +171,12 @@ export function QuestionStudioPage() {
 
   // Deployment state
   const [skillId, setSkillId] = useState('');
-  const [status, setStatusV] = useState<'draft' | 'published'>('draft');
+  const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [reviewed, setReviewed] = useState(false);
   const [savingIdx, setSavingIdx] = useState<number | null>(null);
 
   // Hooks
+  const { currentApp } = useApp();
   const studio = useStudioGenerator();
   const { data: skills } = useSkills();
   const bulkCreate = useBulkCreateQuestions();
@@ -314,7 +316,8 @@ export function QuestionStudioPage() {
         content: q.text,
         type: dbType as Database['public']['Enums']['question_type'],
         skill_id: skillId,
-        status,
+        app_id: currentApp?.app_id as string, // Explicit app_id
+        status: status as Database['public']['Enums']['curriculum_status'],
         points: 1,
         explanation: q.metadata.explanation || '',
         options,
@@ -854,7 +857,7 @@ export function QuestionStudioPage() {
               {(['draft', 'published'] as const).map((s) => (
                 <button
                   key={s}
-                  onClick={() => setStatusV(s)}
+                  onClick={() => setStatus(s)}
                   className={cn(
                     'flex-1 h-9 rounded-lg border text-sm font-semibold capitalize transition-colors',
                     status === s

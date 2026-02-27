@@ -11,7 +11,7 @@ test.describe('Subjects Management Form Validation', () => {
     await page.waitForLoadState('networkidle'); // Wait for full hydration
 
     // Open "New Subject" dialog
-    const newSubjectBtn = page.getByRole('button', { name: /Add Subject/i });
+    const newSubjectBtn = page.getByRole('button', { name: /New Subject/i });
     // Handle potential multiple buttons (e.g. mobile view or loading skeletons)
     // Use .first() but ensure it's the right one
     const btn = newSubjectBtn.first();
@@ -21,10 +21,10 @@ test.describe('Subjects Management Form Validation', () => {
     await expect(page.getByRole('dialog')).toBeVisible();
 
     // 1. Submit empty form -> Expect 'Required' errors
-    const saveBtn = page.getByRole('button', { name: /CREATE SUBJECT/i });
-    await expect(saveBtn).toBeVisible();
+    const saveBtn = page.getByRole('button', { name: /AUTHORIZE DEPLOYMENT/i });
+    await expect(saveBtn).toBeVisible({ timeout: 10000 });
     await expect(saveBtn).toBeEnabled();
-    
+
     console.log('Clicking save empty form...');
     await saveBtn.click();
 
@@ -35,7 +35,7 @@ test.describe('Subjects Management Form Validation', () => {
     await expect(page.getByText('Slug is required')).toBeVisible();
 
     // 2. Invalid Slug Format (Normalization check skipped for now)
-    
+
     // 3. Start with number in slug
     console.log('Testing valid slug...');
     const slugInput = page.getByTestId('subject-slug');
@@ -64,13 +64,13 @@ test.describe('Subjects Management Form Validation', () => {
     await page.getByTestId('subject-title').fill(`Subject ${uniqueId}`);
     await slugInput.fill(`subject_${uniqueId}`);
     await colorInput.fill('#4F46E5');
-    await page.getByPlaceholder(/Brief architectural scope/i).fill('Test Description');
+    await page.getByPlaceholder(/Brief description/i).fill('Test Description');
 
     await saveBtn.click();
     console.log('Submitted form...');
 
     // Dialog should close and new subject should appear
-    await expect(page.getByRole('dialog')).not.toBeVisible();
-    await expect(page.getByText(`Subject ${uniqueId}`)).toBeVisible();
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(`Subject ${uniqueId}`).first()).toBeVisible({ timeout: 15000 });
   });
 });

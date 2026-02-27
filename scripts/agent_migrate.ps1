@@ -1,10 +1,21 @@
 $ErrorActionPreference = "Stop"
 
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+Import-Module (Join-Path $ScriptDir "_shared\Import-EnvFile.psm1") -Force
+
+# Load environment variables from .secrets or .env.test.local
+$envFiles = @(
+    (Join-Path $ScriptDir "..\.secrets"),
+    (Join-Path $ScriptDir "..\.env.test.local")
+)
+Import-EnvFile -FilePaths $envFiles
+
 function Test-Command ($command) {
     try {
         $null = Get-Command $command -ErrorAction Stop
         return $true
-    } catch {
+    }
+    catch {
         return $false
     }
 }
@@ -15,10 +26,12 @@ Write-Host "Starting agent migration script..." -ForegroundColor Cyan
 if (Test-Command "supabase") {
     Write-Host "Found 'supabase' in PATH." -ForegroundColor Green
     $cmd = "supabase"
-} elseif (Test-Command "npx") {
+}
+elseif (Test-Command "npx") {
     Write-Host "'supabase' not found. Falling back to 'npx supabase'." -ForegroundColor Yellow
     $cmd = "npx -y supabase"
-} else {
+}
+else {
     Write-Error "Neither 'supabase' nor 'npx' found. Cannot run migrations."
     exit 1
 }
@@ -26,7 +39,7 @@ if (Test-Command "supabase") {
 # Set database credentials
 $dbPassword = $env:SUPABASE_DB_PASSWORD
 if (-not $dbPassword) {
-    Write-Error "SUPABASE_DB_PASSWORD environment variable is not set."
+    Write-Error "SUPABASE_DB_PASSWORD environment variable is not set. Please add it to .secrets or set it in your environment."
     exit 1
 }
 $projectRef = "qvslbiceoonrgjxzkotb"
@@ -52,7 +65,8 @@ $exitCode = $LASTEXITCODE
 
 if ($exitCode -eq 0) {
     Write-Host "Migration successful!" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "Migration failed." -ForegroundColor Red
     exit $exitCode
 }

@@ -202,21 +202,3 @@ export const BlockMath = Node.create({
     ];
   },
 });
-
-// ---------------------------------------------------------------------------
-// Helper: create an InlineMath node programmatically
-// Used by the Symbol Matrix "Apply" button
-// ---------------------------------------------------------------------------
-export function createInlineMathNode(
-  schema: { nodes: { inlineMath: { create: (attrs: { latex: string }) => unknown } } },
-  latex: string
-) {
-  return schema.nodes.inlineMath.create({ latex });
-}
-
-export function createBlockMathNode(
-  schema: { nodes: { blockMath: { create: (attrs: { latex: string }) => unknown } } },
-  latex: string
-) {
-  return schema.nodes.blockMath.create({ latex });
-}

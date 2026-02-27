@@ -70,7 +70,10 @@ const UserRow = memo(
     apps,
   }: UserRowProps) => {
     return (
-      <TableRow className={cn('even:bg-gray-50/40', user.deleted_at && 'opacity-40')}>
+      <TableRow
+        data-testid="user-row"
+        className={cn('even:bg-gray-50/40', user.deleted_at && 'opacity-40')}
+      >
         <TableCell className="px-3 w-8">
           <button
             onClick={() => onSelect(user.id)}
@@ -413,7 +416,7 @@ export function UserManagementPage() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
+    <div data-hydration-complete={!loading} className="max-w-7xl mx-auto space-y-4 p-4 md:p-6">
       <AdminHeader
         title="Users"
         description="Manage system access."

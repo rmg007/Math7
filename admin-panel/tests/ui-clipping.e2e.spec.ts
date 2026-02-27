@@ -11,13 +11,15 @@ test.describe('UI Clipping and Interaction Verification', () => {
     await page.waitForURL('**/dashboard');
   });
 
-  test('Symbol Matrix palette should not be clipped and should be fully visible on mobile', async ({ page }) => {
+  test('Symbol Matrix palette should not be clipped and should be fully visible on mobile', async ({
+    page,
+  }) => {
     // Set viewport to mobile width
     await page.setViewportSize({ width: 375, height: 812 });
 
     // Navigate to new question page
     await page.goto('/questions/new');
-    
+
     // Wait for the editor to load
     const editor = page.locator('.ProseMirror').first();
     await expect(editor).toBeVisible({ timeout: 15000 });
@@ -54,31 +56,38 @@ test.describe('UI Clipping and Interaction Verification', () => {
 
   test('RichTextEditor toolbar should be fully functional and visible', async ({ page }) => {
     await page.goto('/questions/new');
-    
+
     const editor = page.locator('.ProseMirror').first();
     await expect(editor).toBeVisible({ timeout: 15000 });
 
     // Verify common toolbar buttons (scoped to first toolbar)
-    const toolbar = page.locator('.flex.flex-wrap.items-center.gap-1.5').first();
+    const toolbar = page.locator('.flex.flex-wrap.items-center.gap-1\\.5').first();
     await expect(toolbar.getByRole('button', { name: /Bold/i }).first()).toBeVisible();
     await expect(toolbar.getByRole('button', { name: /Italic/i }).first()).toBeVisible();
     await expect(toolbar.getByRole('button', { name: /Underline/i }).first()).toBeVisible();
     await expect(toolbar.getByRole('button', { name: /Insert Table/i }).first()).toBeVisible();
 
     // Open Table Picker
-    await toolbar.getByRole('button', { name: /Insert Table/i }).first().click();
+    await toolbar
+      .getByRole('button', { name: /Insert Table/i })
+      .first()
+      .click();
     const tablePicker = page.locator('button[title*="Insert 3x3 table"]').first();
     // In our implementation, Table Picker is also in a fixed overlay
     await expect(tablePicker).toBeVisible();
 
     // Close by clicking backdrop (simulated by clicking close or escape)
     await page.keyboard.press('Escape');
-    await expect(tablePicker).not.toBeVisible({ timeout: 5000 }).catch(() => {
+    await expect(tablePicker)
+      .not.toBeVisible({ timeout: 5000 })
+      .catch(() => {
         // Fallback: click backdrop if visible
         return page.evaluate(() => {
-            const backdrops = Array.from(document.querySelectorAll('div')).filter(d => d.className.includes('backdrop-blur'));
-            (backdrops[0] as HTMLElement)?.click();
+          const backdrops = Array.from(document.querySelectorAll('div')).filter((d) =>
+            d.className.includes('backdrop-blur')
+          );
+          (backdrops[0] as HTMLElement)?.click();
         });
-    });
+      });
   });
 });

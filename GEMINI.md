@@ -1,5 +1,17 @@
 # Questerix — AI Agent Instructions
 
+## 🛑 MANDATORY: Work Discipline & Tasks.md
+
+> **CRITICAL**: BEFORE performing ANY work (reading files, writing code, running tests), you MUST read `tasks.md`.
+>
+> 1. **No Unrecorded Work**: NEVER work on anything unless it is recorded in `tasks.md`.
+> 2. **Task State Discipline**:
+>    - Mark the task you are currently working on with `[/]` (Active).
+>    - Mark finished tasks with `[x]` (Completed).
+>    - Add new discoveries or sub-tasks to the queue immediately.
+> 3. **Session Start**: Your first action in every session is to read `tasks.md` and acknowledge the active task.
+> 4. **No Gaps**: If a request comes in that isn't in `tasks.md`, add it to `tasks.md` FIRST before proceeding.
+
 ## 🚫 HARD RULE — Admin Panel Feature Freeze
 
 > **DO NOT add any new features to `admin-panel/`.**

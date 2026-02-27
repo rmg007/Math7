@@ -1,12 +1,25 @@
+import { execSync } from "child_process";
 import * as path from "path";
 
-const KNOWN_PREFIXES = ["admin-panel/src/", "admin-panel/", "src/"];
+const KNOWN_PREFIXES: string[] = [];
+
+function resolveProjectRoot(): string {
+  try {
+    const gitRoot = execSync("git rev-parse --show-toplevel", {
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "ignore"],
+    }).trim();
+    return gitRoot.replace(/\\/g, "/");
+  } catch {
+    return path.resolve(__dirname, "..", "..", "..").replace(/\\/g, "/");
+  }
+}
+
+const projectRoot = resolveProjectRoot();
 
 export function normalizePath(filePath: string): string {
   const normalized = filePath.replace(/\\/g, "/");
-  const projectRoot = path
-    .resolve(__dirname, "..", "..", "..")
-    .replace(/\\/g, "/");
+
   let withRootStripped = normalized.startsWith(projectRoot)
     ? normalized.slice(projectRoot.length + 1)
     : normalized;
@@ -15,13 +28,19 @@ export function normalizePath(filePath: string): string {
     withRootStripped = withRootStripped.slice(1);
   }
 
-  const withoutPrefixes = KNOWN_PREFIXES.reduce((value, prefix) => {
-    return value.startsWith(prefix) ? value.slice(prefix.length) : value;
-  }, withRootStripped);
-
-  if (withoutPrefixes.startsWith("@/")) {
-    return withoutPrefixes.slice(2);
+  if (withRootStripped.startsWith("@/")) {
+    return withRootStripped.slice(2);
   }
 
-  return withoutPrefixes;
+  return withRootStripped;
+}
+
+/**
+ * Validates that a path round-trips through normalizePath to the same value.
+ * This ensures path normalization is idempotent.
+ */
+export function validatePathIdentity(filePath: string): boolean {
+  const normalized = normalizePath(filePath);
+  const doubleNormalized = normalizePath(normalized);
+  return normalized === doubleNormalized;
 }

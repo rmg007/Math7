@@ -11,6 +11,6 @@
     "rootDir": "./",
     "resolveJsonModule": true
   },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules", "dashboard", "archive"]
+  "include": ["**/*.ts", "src/__tests__/**/*.ts"],
+  "exclude": ["node_modules", "dashboard", "archive", "dist"]
 }

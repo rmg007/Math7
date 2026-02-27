@@ -19,22 +19,42 @@
 5. **Admin Panel Feature Freeze.** DO NOT add any new features to `admin-panel/`. Bug fixes and maintenance only. No new pages, components, hooks, routes, or UI elements.
 6. **Use Premium UI Components.** If maintaining tables, use `ColumnToggle` (visibility) and `BulkActionBar` (multi-select actions) to ensure UI consistency.
 7. **Every bug/issue requires a preventative test.** Before closing any bug or issue, you MUST write a new test case that reproduces the failure. The test must fail before the fix and pass after. No exceptions. Log the test file path in `docs/LEARNING_LOG.md` tagged `[test created]`.
+8. **MANDATORY: Use Cortex Discovery.** All agents MUST use the "faster way" (Cortex search/briefing) for all research and symbol lookup. Improving this discovery infra is a continuous P0 requirement.
 
-## Discovery (How to Find What You Need)
+## Discovery (How to Find What You Need - The Faster Way)
 
-**Primary (Cortex — always available):**
+**Primary (Cortex — MANDATORY FOR ALL AGENTS):**
 
+- **High-Performance Symbol lookup**: Use `cortex_search <query>` MCP tool or run `npm run health -- skeleton:search "query"` in `questerix-cortex/`. This is the SSoT for exports.
 - **Codebase orientation**: Read `questerix-cortex/outputs/SKELETON_SUMMARY.md`.
-- **Symbol lookup**: Use `cortex_search <query>` MCP tool or run `npm run health -- skeleton:search "query"` in `questerix-cortex/`.
 - **Session start**: Read `questerix-cortex/outputs/AGENT_CONTEXT.md` and `questerix-cortex/outputs/NEXT_TASK.md` before coding.
 - **Session context**: Use `cortex_briefing` MCP tool to get current session context with staleness warning.
+
+**RLS Evidence Bridge (avoiding CLI false positives):**
+
+The RLS audit uses an "evidence bridge" pattern to avoid requiring local Supabase CLI authentication:
+
+1. **Remote Evidence File**: `questerix-cortex/outputs/RLS_REMOTE_EVIDENCE.json` contains the RLS audit verdict from a remote scan
+2. **Freshness Check**: If the file exists and is < 24 hours old, Cortex uses it directly (skips CLI)
+3. **Fallback**: If evidence is stale/missing, Cortex falls back to `supabase db query` (requires authenticated CLI)
+
+**Why this matters**: Local dev environments often lack Supabase CLI authentication. The evidence bridge ensures RLS checks PASS without requiring `supabase login`. If you see `RLS: ERROR` in `AGENT_CONTEXT.md`, it means:
+
+- The evidence file is > 24 hours old, AND
+- The local Supabase CLI isn't authenticated
+
+**Fix**: Run `npm run health -- intel` — if RLS shows ERROR, check `RLS_REMOTE_EVIDENCE.json` timestamp. The error is a CLI availability issue, not an actual RLS policy failure. The evidence bridge pattern ensures accurate reporting without local CLI dependencies.
 
 **Quick Commands:**
 
 - `npm run health` — Run Cortex health check
+- `npm run test` — Run Cortex unit tests (Vitest)
 - `npm run cortex:selftest` — Validate MCP server
 - `cortex_search <query>` — Search code symbols via MCP
 - `cortex_briefing` — Get session context via MCP
+- `cortex_diff` — Get structured diff since last session
+- `cortex_insights` — Get graph hotspots, orphans, cycles
+- `cortex_governance` — Check for dead doc references
 
 **Workflows:** `.agent/workflows/process.md` (lifecycle), `.agent/workflows/help.md` (commands). **Coding standards:** `docs/standards/ORACLE_COGNITION.md` (supplementary). **Rule:** Never scan `node_modules`, `build`, or `dist`.
 
@@ -183,10 +203,10 @@ Deno.test('function handles auth correctly', async () => {
 
 #### **Test Execution Order**
 
-2. **Unit/Integration Tests** (fast feedback)
-3. **E2E Tests** (full user flows)
-4. **Visual Regression** (UI consistency)
-5. **Coverage Reporting** (quality gates)
+1. **Unit/Integration Tests** (fast feedback)
+2. **E2E Tests** (full user flows)
+3. **Visual Regression** (UI consistency)
+4. **Coverage Reporting** (quality gates)
 
 #### **Quality Gates**
 

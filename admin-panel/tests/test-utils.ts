@@ -4,7 +4,7 @@ import { Page, expect } from '@playwright/test';
 export const TEST_USERS = {
   SUPER_ADMIN: {
     email: process.env.TEST_SUPER_ADMIN_EMAIL || 'mhalim80@hotmail.com',
-    password: process.env.TEST_SUPER_ADMIN_PASSWORD || '9eZCpZHhP9ArGuz',
+    password: process.env.TEST_SUPER_ADMIN_PASSWORD || 'mhalim80@hotmail.com',
   },
   ADMIN: {
     email: process.env.TEST_ADMIN_EMAIL || 'testadmin@example.com',
@@ -30,8 +30,8 @@ export async function login(
   password: string = TEST_CREDENTIALS.password
 ) {
   await page.goto('/login');
-  await page.fill('input[type="email"]', email);
-  await page.fill('input[type="password"]', password);
+  await page.fill('#login-email', email);
+  await page.fill('#login-password', password);
   await page.click('button[type="submit"]');
 
   // Wait for navigation and dashboard element

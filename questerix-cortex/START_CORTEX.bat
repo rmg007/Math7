@@ -123,7 +123,7 @@ rem --- Step 7: Start the Cortex server ---
 echo [LOG] Step 7: Starting server >> "%LOG%"
 echo.
 echo Starting Cortex server...
-start "Questerix Cortex Server" cmd /k "cd /d "%ROOT%" && npm run health"
+start "Questerix Cortex Server" cmd /k "cd /d "%ROOT%" && npm run health -- all"
 echo [LOG] Server window launched >> "%LOG%"
 
 rem --- Step 8: Wait for port to be ready ---

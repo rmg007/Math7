@@ -41,6 +41,13 @@ export interface CortexConfig {
     minCoverage: number;
     maxAgentContextSizeKB: number;
     maxHistoryRuns: number;
+    governanceThreshold?: number;
+  };
+  tierTimeouts?: {
+    smoke: number;
+    deep: number;
+    release: number;
+    deploy: number;
   };
   dashboardPort: number;
 }
@@ -63,4 +70,5 @@ export interface RunContext {
   rlsResult?: RlsAuditResult;
   optimizeResult?: OptimizeReport;
   smokePass: boolean;
+  gateFailedAt?: string;
 }

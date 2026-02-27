@@ -120,7 +120,7 @@ def execute_manifest(manifest_path: str) -> bool:
                 text=True,
                 encoding='utf-8',
                 errors='replace', # Prevent UnicodeDecodeError on non-UTF8 output
-                timeout=600  # Increase timeout to 10 minutes for slow builds
+                timeout=1800  # Increase timeout to 30 minutes for full test suites
             )
             
             # Print output to console for the user to see in real-time (if watching)
