@@ -19,8 +19,8 @@
  */
 
 import { expect, test } from '@playwright/test';
-import { loginAs } from './actions/curriculum';
-import { QuestionFormPage } from './pages/QuestionFormPage';
+import { loginAs } from '../actions/curriculum';
+import { QuestionFormPage } from '../pages/QuestionFormPage';
 
 // ---------------------------------------------------------------------------
 // Shared helpers
@@ -46,7 +46,7 @@ test.beforeEach(async ({ page }) => {
 // A. MCQ Question
 // ---------------------------------------------------------------------------
 
-test.describe('A — MCQ question', () => {
+test.describe('A — MCQ question @logic', () => {
   test('creates a valid MCQ and appears in the question list', async ({ page }) => {
     const formPage = new QuestionFormPage(page);
     await formPage.gotoNew();

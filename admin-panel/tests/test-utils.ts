@@ -43,6 +43,31 @@ export async function login(
     timeout: 15000,
   });
 }
+export async function ensureMobileMenuOpen(page: Page) {
+  const menuBtn = page.locator('button[aria-label*="menu"], button[class*="md:hidden"]').first();
+  if (await menuBtn.isVisible()) {
+    await menuBtn.click();
+    // Wait for the drawer animation to complete
+    await page.waitForTimeout(600);
+  }
+}
+
+// Radix Select helper
+export async function selectOption(
+  page: Page,
+  triggerSelector: string,
+  optionTextOrIndex: string | number
+) {
+  await page.click(triggerSelector);
+  if (typeof optionTextOrIndex === 'number') {
+    // Select by index (0-based)
+    await page.locator('[role="option"]').nth(optionTextOrIndex).click();
+  } else {
+    // Select by text
+    await page.getByRole('option', { name: optionTextOrIndex }).click();
+  }
+}
+
 export function generateTestUser() {
   const email = `test-${Date.now()}@example.com`;
   return {

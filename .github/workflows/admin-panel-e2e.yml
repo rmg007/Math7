@@ -93,7 +93,17 @@ jobs:
           EOF
 
       - name: Run E2E tests
-        run: npm run test:e2e
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "Running PR test suite (@smoke + @logic)..."
+            npm run test:e2e:pr
+          elif [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "Running Full test suite (Merge to main)..."
+            npm run test:e2e:full
+          else
+            echo "Running default full test suite..."
+            npm run test:e2e:full
+          fi
         env:
           CI: true
 

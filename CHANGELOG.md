@@ -5,6 +5,25 @@ All notable changes to the Questerix project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.8] - 2026-02-27 (Great Recovery)
+
+### Fixed
+
+- **Cortex Health Restoration**: Restored 100/100 health score after accidental system drift.
+- **RLS Hardening**: Fixed critical RLS violations in `curriculum_meta` and solved recursion/access issues across the core schema.
+- **Publishing Logic**: Patched `publish_curriculum` RPC to correctly count total live items in snapshots (fixing AP-CURR-007 test failure).
+- **Scanner Stability**: Hardened path resolution for `@/` aliases and improved graph persistence for Cortex intelligence.
+
+### Improved
+
+- **Deployment Pipeline**: Unified Cloudflare deployment script for React/Vite Admin Panel (Student App logic removed/moved).
+- **Infrastructure Health**: Integrated `ZombieHunter` for automated cleanup of detached Dart/Vite processes.
+- **Real-time Observability**: Integrated DashboardServer for live stream logs during Cortex analysis runs.
+
+### Removed
+
+- **Repo Bloat**: Officially decommissioned `questerix-student-app` from this repository (moved to a dedicated repo).
+
 ## [2.2.6] - 2026-02-24
 
 ### Fixed

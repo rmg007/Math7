@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { TEST_USERS } from './test-utils';
+import { TEST_USERS } from '../test-utils';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,7 +18,7 @@ async function login(page: import('@playwright/test').Page) {
   await page.waitForURL('**/dashboard', { timeout: 15000 });
 }
 
-test.describe('Icon Removal Verification', () => {
+test.describe('Icon Removal Verification @responsive', () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
   });

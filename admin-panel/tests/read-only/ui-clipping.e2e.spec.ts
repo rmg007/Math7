@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { TEST_USERS } from './test-utils';
+import { TEST_USERS } from '../test-utils';
 
-test.describe('UI Clipping and Interaction Verification', () => {
+test.describe('UI Clipping and Interaction Verification @responsive', () => {
   test.beforeEach(async ({ page }) => {
     // Login as Super Admin
     await page.goto('/login');

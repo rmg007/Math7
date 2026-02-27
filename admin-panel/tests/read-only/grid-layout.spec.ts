@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { TEST_USERS } from './test-utils';
+import { TEST_USERS } from '../test-utils';
 
-test.describe('Grid Layout Standards', () => {
+test.describe('Grid Layout Standards @responsive', () => {
   test.beforeEach(async ({ page }) => {
     // Login as admin
     await page.goto('/login');

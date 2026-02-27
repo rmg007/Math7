@@ -6,7 +6,7 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL ?? '';
 const supabaseServiceKey =
   process.env.TEST_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-test.describe('Registration Integrity & Auth Flow (Task 1.6/1.7)', () => {
+test.describe('Registration Integrity & Auth Flow (Task 1.6/1.7) @logic', () => {
   let testInviteCode: string;
   let testUserEmail: string;
 

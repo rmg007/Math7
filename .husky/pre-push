@@ -56,3 +56,22 @@ if grep -rn --include="*.ts" --include="*.tsx" --include="*.dart" \
   exit 1
 fi
 echo "✅ No forbidden patterns found."
+
+# 🚀 E2E SMOKE TEST GATE
+# Runs the P0 happy path tests (desktop only) to ensure no regressions.
+# Opt-out: SKIP_SMOKE=1 git push
+if [ "$SKIP_SMOKE" != "1" ]; then
+  echo "🚀 Running E2E Smoke Tests (@smoke)..."
+  # Use --project=desktop via npm script
+  cd admin-panel && npm run test:e2e:smoke
+  if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ E2E SMOKE TESTS FAILED! Push blocked."
+    echo "   Fix the regression or skip if strictly necessary: SKIP_SMOKE=1 git push"
+    exit 1
+  fi
+  echo "✅ Smoke tests passed."
+else
+  echo "⚠️  Skipping E2E Smoke Tests (SKIP_SMOKE=1)."
+fi
+

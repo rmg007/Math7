@@ -17,7 +17,7 @@
  * NOT on transient toasts.
  */
 import { expect, test } from '@playwright/test';
-import { TEST_USERS, login } from './test-utils';
+import { TEST_USERS, login } from '../test-utils';
 
 // ---------------------------------------------------------------------------
 // Shared fixtures
@@ -54,7 +54,10 @@ function mockGroupsResponse(page: import('@playwright/test').Page) {
 }
 
 // Reusable mock: POST /rest/v1/groups returns the new group
-function mockGroupInsert(page: import('@playwright/test').Page, overrides: Record<string, unknown> = {}) {
+function mockGroupInsert(
+  page: import('@playwright/test').Page,
+  overrides: Record<string, unknown> = {}
+) {
   return page.route('**/rest/v1/groups**', (route) => {
     if (route.request().method() === 'POST') {
       const requestBody = JSON.parse(route.request().postData() ?? '{}') as Record<string, unknown>;
@@ -84,7 +87,7 @@ function mockGroupInsert(page: import('@playwright/test').Page, overrides: Recor
 // ---------------------------------------------------------------------------
 // AP-MENTOR-001: Create a class-type group
 // ---------------------------------------------------------------------------
-test.describe('AP-MENTOR-001: Create Class Group', () => {
+test.describe('AP-MENTOR-001: Create Class Group @logic', () => {
   test.skip(!process.env.TEST_ADMIN_EMAIL, 'Skipped: TEST_ADMIN_EMAIL not set');
 
   test('admin can create a class-type group with a join code', async ({ page }) => {
@@ -308,9 +311,7 @@ test.describe('AP-MENTOR-004: Create Skill Mastery Assignment', () => {
 
     // Should navigate away from assignment creation
     await page.waitForURL(
-      (url) =>
-        !url.pathname.includes('/assignments/new') &&
-        !url.pathname.startsWith('/login'),
+      (url) => !url.pathname.includes('/assignments/new') && !url.pathname.startsWith('/login'),
       { timeout: 10000 }
     );
   });
@@ -368,10 +369,7 @@ test.describe('AP-MENTOR-005: Create Time Goal Assignment', () => {
 
     await page.getByRole('button', { name: /create|save|assign/i }).click();
 
-    await page.waitForURL(
-      (url) => !url.pathname.includes('/assignments/new'),
-      { timeout: 10000 }
-    );
+    await page.waitForURL((url) => !url.pathname.includes('/assignments/new'), { timeout: 10000 });
   });
 });
 

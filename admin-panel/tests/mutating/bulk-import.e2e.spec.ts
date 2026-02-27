@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { TEST_USERS } from './test-utils';
+import { TEST_USERS } from '../test-utils';
 
 // Valid mock question matching QueuedQuestionSchema (Zod discriminated union)
 function mockQuestion(content: string) {
@@ -8,15 +8,15 @@ function mockQuestion(content: string) {
     content,
     options: [
       { text: 'Yes', is_correct: true },
-      { text: 'No', is_correct: false }
+      { text: 'No', is_correct: false },
     ],
     points: 1,
     is_published: true,
-    skill_id: '00000000-0000-0000-0000-000000000000'
+    skill_id: '00000000-0000-0000-0000-000000000000',
   };
 }
 
-test.describe('Bulk Import Feature (Golden Path)', () => {
+test.describe('Bulk Import Feature (Golden Path) @logic', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/login');
     await page.fill('input[type="email"]', TEST_USERS.SUPER_ADMIN.email);
@@ -42,8 +42,8 @@ test.describe('Bulk Import Feature (Golden Path)', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          questions: [mockQuestion('Oracle Test Question: What is 2+2?')]
-        })
+          questions: [mockQuestion('Oracle Test Question: What is 2+2?')],
+        }),
       });
     });
 
@@ -51,7 +51,9 @@ test.describe('Bulk Import Feature (Golden Path)', () => {
     await page.fill('textarea', 'Generate a question for testing.');
     await page.getByRole('button', { name: /Sync AI Wisdom/i }).click();
 
-    await expect(page.getByText('Oracle Test Question: What is 2+2?')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Oracle Test Question: What is 2+2?')).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.getByText(/1 Pending Ingestion Units/i)).toBeVisible();
   });
 
@@ -62,8 +64,8 @@ test.describe('Bulk Import Feature (Golden Path)', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          questions: [mockQuestion('Commit Test Question')]
-        })
+          questions: [mockQuestion('Commit Test Question')],
+        }),
       });
     });
 
@@ -72,11 +74,13 @@ test.describe('Bulk Import Feature (Golden Path)', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify([{
-          inserted_count: 1,
-          skipped_count: 0,
-          success: true
-        }])
+        body: JSON.stringify([
+          {
+            inserted_count: 1,
+            skipped_count: 0,
+            success: true,
+          },
+        ]),
       });
     });
 
@@ -100,7 +104,9 @@ test.describe('Bulk Import Feature (Golden Path)', () => {
     // and the question disappears from the buffer. This is more reliable than a toast.
     await expect(page.getByText(/0 Pending Ingestion Units/i)).toBeVisible({ timeout: 15000 });
     // The commit button should focus on the empty state but we'll check the count text
-    await expect(page.getByRole('button', { name: /Execute Persistence Cycle \(0\)/i })).toBeDisabled();
+    await expect(
+      page.getByRole('button', { name: /Execute Persistence Cycle \(0\)/i })
+    ).toBeDisabled();
   });
 
   test('should handle import errors gracefully', async ({ page }) => {
@@ -110,8 +116,8 @@ test.describe('Bulk Import Feature (Golden Path)', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          questions: [mockQuestion('Error Test Question')]
-        })
+          questions: [mockQuestion('Error Test Question')],
+        }),
       });
     });
 
@@ -120,7 +126,7 @@ test.describe('Bulk Import Feature (Golden Path)', () => {
       await route.fulfill({
         status: 400,
         contentType: 'application/json',
-        body: JSON.stringify({ message: 'Database constraint violation' })
+        body: JSON.stringify({ message: 'Database constraint violation' }),
       });
     });
 

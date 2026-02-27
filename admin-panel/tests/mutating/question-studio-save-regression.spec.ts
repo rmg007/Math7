@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { login, TEST_USERS } from './test-utils';
+import { login, TEST_USERS } from '../test-utils';
 
-test.describe('Question Studio Save Workflow', () => {
+test.describe('Question Studio Save Workflow @logic', () => {
   test.beforeEach(async ({ page }) => {
     // Authenticate as Super Admin
     await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
@@ -22,8 +22,8 @@ test.describe('Question Studio Save Workflow', () => {
               difficulty: 'easy',
               metadata: {
                 correct_answer: 'True',
-                explanation: 'The sky appears blue due to Rayleigh scattering.'
-              }
+                explanation: 'The sky appears blue due to Rayleigh scattering.',
+              },
             },
             {
               text: 'What is 2+2?',
@@ -32,32 +32,32 @@ test.describe('Question Studio Save Workflow', () => {
               metadata: {
                 options: ['3', '4', '5', '6'],
                 correct_answer: '4',
-                explanation: 'Basic arithmetic.'
-              }
-            }
+                explanation: 'Basic arithmetic.',
+              },
+            },
           ],
           metadata: {
             model: 'test-model',
             generation_time_ms: 100,
             token_count: 50,
-            questions_generated: 2
-          }
-        })
+            questions_generated: 2,
+          },
+        }),
       });
     });
 
     // 2. Trigger Generation
     await expect(page).toHaveURL(/\/questions\/studio/);
-    
+
     // Select domain card
     const domainBtn = page.getByText('General Knowledge', { exact: true });
     await domainBtn.click();
-    
+
     // The topic input appears after domain selection
     const topicInput = page.locator('input[placeholder*="Geography"]');
     await topicInput.waitFor({ state: 'visible' });
     await topicInput.fill('Atmosphere and Basic Math');
-    
+
     // Generate
     const generateBtn = page.getByRole('button', { name: /Generate/i });
     await expect(generateBtn).toBeEnabled();
@@ -84,15 +84,15 @@ test.describe('Question Studio Save Workflow', () => {
         await route.fulfill({
           status: 201,
           contentType: 'application/json',
-          body: JSON.stringify(Array.isArray(data) ? data : [data])
+          body: JSON.stringify(Array.isArray(data) ? data : [data]),
         });
       } else {
         await route.continue();
       }
     });
 
-    const savePromise = page.waitForRequest(req => 
-      req.url().includes('/rest/v1/questions') && req.method() === 'POST'
+    const savePromise = page.waitForRequest(
+      (req) => req.url().includes('/rest/v1/questions') && req.method() === 'POST'
     );
 
     // Click Save - Button text is dynamic: "Save 2 Questions"
@@ -110,7 +110,7 @@ test.describe('Question Studio Save Workflow', () => {
     expect(firstQ).toHaveProperty('type');
     expect(firstQ).toHaveProperty('options');
     expect(firstQ).toHaveProperty('solution');
-    
+
     // These fields MUST NOT exist (they were causing the 400)
     expect(firstQ).not.toHaveProperty('difficulty');
     expect(firstQ).not.toHaveProperty('metadata');

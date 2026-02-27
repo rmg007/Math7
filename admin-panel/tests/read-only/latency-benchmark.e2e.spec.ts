@@ -2,12 +2,12 @@ import { expect, test } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { login, TEST_USERS } from './test-utils';
+import { login, TEST_USERS } from '../test-utils';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-test.describe('Latency Benchmark (Cortex Telemetry)', () => {
+test.describe('Latency Benchmark (Cortex Telemetry) @logic', () => {
   test('Analyze P50/P95 load times for core modules', async ({ page }) => {
     // 1. Login as Super Admin to access all modules
     await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);

@@ -3,7 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { TEST_USERS } from './test-utils';
+import { TEST_USERS } from '../test-utils';
 import * as fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -27,7 +27,7 @@ const pages = [
   { name: 'Bulk Import', path: '/ai-import' },
 ];
 
-test('Audit all pages', async ({ page }) => {
+test('Audit all pages @logic', async ({ page }) => {
   await login(page);
 
   const report: string[] = ['# Accessibility Audit Report\n'];
@@ -42,11 +42,13 @@ test('Audit all pages', async ({ page }) => {
       .analyze();
 
     const serious = results.violations.filter(
-      v => v.impact === 'critical' || v.impact === 'serious'
+      (v) => v.impact === 'critical' || v.impact === 'serious'
     );
 
     report.push(`## ${p.name} (${p.path})`);
-    report.push(`Total violations: ${results.violations.length} | Critical/Serious: ${serious.length}\n`);
+    report.push(
+      `Total violations: ${results.violations.length} | Critical/Serious: ${serious.length}\n`
+    );
 
     for (const v of serious) {
       report.push(`### [${v.impact?.toUpperCase()}] ${v.id}`);

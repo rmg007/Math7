@@ -1,12 +1,11 @@
 import { expect, test } from '@playwright/test';
 import {
-    createDomain,
-    createMCQQuestion,
-    createSkill,
-    loginAs,
-    publishCurriculum,
-} from './actions/curriculum';
-import { VersionHistoryPage } from './pages/VersionHistoryPage';
+  createDomain,
+  createMCQQuestion,
+  createSkill,
+  publishCurriculum,
+} from '../actions/curriculum';
+import { VersionHistoryPage } from '../pages/VersionHistoryPage';
 
 /**
  * curriculum-lifecycle.e2e.spec.ts (POM Edition)
@@ -18,14 +17,16 @@ import { VersionHistoryPage } from './pages/VersionHistoryPage';
  * The spec now reads as a business-level story, not DOM queries.
  */
 
-test.describe('Curriculum Lifecycle (P0)', () => {
+test.describe('Curriculum Lifecycle (P0) @smoke', () => {
   test.describe.configure({ mode: 'serial' });
   const timestamp = Date.now();
   const domainSlug = `test_domain_${timestamp}`;
   const skillSlug = `test_skill_${timestamp}`;
 
   test.beforeEach(async ({ page }) => {
-    await loginAs(page, 'SUPER_ADMIN');
+    // Rely on global storageState (SUPER_ADMIN)
+    await page.goto('/dashboard');
+    await expect(page.getByText(/Platform Overview/i)).toBeVisible();
   });
 
   test.afterEach(async ({ page }, testInfo) => {

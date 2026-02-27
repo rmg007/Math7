@@ -31,7 +31,7 @@ const ROLES = [
   {
     name: 'super-admin',
     email: process.env.TEST_SUPER_ADMIN_EMAIL || 'mhalim80@hotmail.com',
-    password: process.env.TEST_SUPER_ADMIN_PASSWORD || 'AJbB8e2Uiia3BgE',
+    password: process.env.TEST_SUPER_ADMIN_PASSWORD || 'mhalim80@hotmail.com',
   },
   {
     name: 'admin',
@@ -63,8 +63,9 @@ async function authenticateRole(
   await page.fill('#login-password', role.password);
   await page.click('button[type="submit"]');
 
-  // Wait for successful auth — sidebar nav confirms we're in
-  await page.waitForURL(/\/dashboard/, { timeout: 20000 });
+  // Wait for successful auth — sidebar nav or redirection confirms we're in
+  // We accept both /dashboard and /domains as redirection targets
+  await page.waitForURL(/\/((dashboard)|(domains))/, { timeout: 20000 });
 
   const statePath = path.join(AUTH_DIR, `${role.name}.json`);
   await context.storageState({ path: statePath });

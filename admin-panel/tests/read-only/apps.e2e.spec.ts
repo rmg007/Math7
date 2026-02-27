@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { TEST_USERS, login } from './test-utils';
+import { TEST_USERS, login } from '../test-utils';
 
-test.describe('Apps Management CRUD', () => {
+test.describe('Apps Management CRUD @logic', () => {
   test.beforeEach(async ({ page }) => {
     page.on('console', (msg) => {
       if (msg.type() === 'error') console.log(`BROWSER ERROR: ${msg.text()}`);

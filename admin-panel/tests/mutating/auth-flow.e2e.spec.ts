@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
-import { TEST_USERS, login } from './test-utils';
+import { TEST_USERS, login } from '../test-utils';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL ?? '';
 
@@ -16,7 +16,7 @@ if (!process.env.TEST_SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_SERVICE
   }
 }
 
-test.describe('Auth Flow & Guardrails', () => {
+test.describe('Auth Flow & Guardrails @logic', () => {
   test('Registration: Invalid invitation code is rejected (Task 1.8)', async ({ page }) => {
     await page.goto('/login');
 

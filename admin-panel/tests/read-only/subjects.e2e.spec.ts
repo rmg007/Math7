@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { TEST_USERS, login } from './test-utils';
+import { TEST_USERS, login } from '../test-utils';
 
-test.describe('Subjects Management Form Validation', () => {
+test.describe('Subjects Management Form Validation @logic', () => {
   test.beforeEach(async ({ page }) => {
     await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
   });

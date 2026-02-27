@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test.describe('Infrastructure & Security Headers', () => {
+test.describe('Infrastructure & Security Headers @logic', () => {
   test('CSP: Content-Security-Policy allows Cloudflare Workers for AI', async ({ page }) => {
     // Navigate to the root to load the head meta tags
     await page.goto('/');

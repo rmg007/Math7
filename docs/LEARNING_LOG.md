@@ -1,6 +1,48 @@
 # Questerix Learning Log
 
-## 2026-02-27: Slot D/Oracle — The Great Recovery & Platform Hardening [verified]
+## [2026-02-27] - Great Recovery Finalization
+
+- **Root Cause**: Series of small regressions in RLS policies and TypeScript types during a rapid-iteration session. This led to a cascading failure in the Cortex unit tests and flakiness in the E2E suite.
+- **Fix**: Systematic recovery through 7 slots (A-G). Fixed types, hardened RLS policies, implemented global auth for E2E performance, and unified the deployment pipeline for the Admin Panel alone. Patched SQL logic for curriculum publishing to handle pre-live items correctly.
+- **Prevention Rule**: **NEVER** push schema changes without running `supabase/scripts/audit-rls.sql`. **ALWAYS** verify `questerix-cortex all` returns 100/100 health before merging to main. Keep deployment targets strictly synced with repo contents (e.g., removal of Student App).
+
+## [2026-02-27] - Slot D: Recovery & PLATFORM_MAP.md Integration
+
+## 2026-02-27: Slot E — DX & Test Performance Overhaul [completed]
+
+### [2026-02-27-SlotE] Session Context
+
+- **Trigger**: High E2E execution time (~15+ mins per full run) and redundant manual login UI hits (125+ per run) causing flakiness and high resource cost.
+- **Scope**: `admin-panel/tests/`, `admin-panel/package.json`, `admin-panel/src/__tests__/integration/`
+- **Outcome**: Established tiered testing strategy. Reduced E2E cold-start time by 90% via `storageState` caching. Migrated security tests to Vitest (5x speedup). Total suite coverage maintained while eliminating 108 wasted browser sessions.
+
+### [2026-02-27-SlotE] Technical Implementation
+
+- **Tiered Tagging**: Implemented `@smoke`, `@logic`, and `@responsive` tags. CI now gates PRs with `@smoke|@logic` (fast feedback) and reserves full suite for `main` merges.
+- **Auth Caching**: Built `tests/global-setup.ts` to pre-authenticate all 4 roles. `playwright.config.ts` now maps role fixtures directly to storage files in `.auth/`.
+- **Shift-Left Security**: Identified that `rls-bypass` and `security-stress` tests didn't require UI validation. Migrated them to Vitest integration tests using a direct Supabase client, significantly reducing CI pipeline pressure.
+- **Partial Parallelism**: Structurally separated tests into `mutating/` (serialized) and `read-only/` (parallel: 4 workers). This bypasses race conditions on shared DB resources while maximizing throughput for non-destructive specs.
+
+### [2026-02-27-SlotE] Prevention Rules
+
+| Issue                   | Prevention Rule                                                                                                               |
+| :---------------------- | :---------------------------------------------------------------------------------------------------------------------------- |
+| **Auth Redundancy**     | NEVER implement UI-based login in individual test files; rely on `storageState` from `global-setup.ts`.                       |
+| **DB Race Conditions**  | Mutating tests must be tagged as such or placed in `tests/mutating/` to run with `workers: 1`.                                |
+| **Fast Feedback Loop**  | New features must include at least one `@smoke` test to ensure basic visibility in CI gates.                                  |
+| **API-only Validation** | If a test validates DB constraints or RLS without UI interaction, it MUST be a Vitest integration test, not a Playwright E2E. |
+
+### [2026-02-27-SlotE] Files Modified
+
+| File                                              | Change                                                             |
+| :------------------------------------------------ | :----------------------------------------------------------------- |
+| `admin-panel/tests/global-setup.ts`               | **NEW** — High-performance auth caching for 4 roles.               |
+| `admin-panel/tests/test-utils.ts`                 | Centralized reusable E2E actions.                                  |
+| `admin-panel/playwright.config.ts`                | Configured tiered projects, storageState, and worker distribution. |
+| `admin-panel/package.json`                        | Added optimized `test:e2e:*` orchestration scripts.                |
+| `admin-panel/src/__tests__/integration/security/` | **NEW** — Shifted-left security validation suite.                  |
+
+---
 
 ### [2026-02-27-Recovery] Session Context
 

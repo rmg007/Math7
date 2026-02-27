@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { TEST_USERS } from './test-utils';
+import { TEST_USERS } from '../test-utils';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,7 +31,7 @@ async function login(page: import('@playwright/test').Page) {
   await page.waitForTimeout(1500);
 }
 
-test.describe('Visual Regression — Key Pages', () => {
+test.describe('Visual Regression — Key Pages @responsive', () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
   });
@@ -54,10 +54,7 @@ test.describe('Visual Regression — Key Pages', () => {
     await page.waitForTimeout(1000);
     await expect(page).toHaveScreenshot('domains-list.png', {
       fullPage: true,
-      mask: [
-        page.locator('time'),
-        page.locator('tbody'),
-      ],
+      mask: [page.locator('time'), page.locator('tbody')],
     });
   });
 
@@ -67,10 +64,7 @@ test.describe('Visual Regression — Key Pages', () => {
     await page.waitForTimeout(1000);
     await expect(page).toHaveScreenshot('skills-list.png', {
       fullPage: true,
-      mask: [
-        page.locator('time'),
-        page.locator('tbody'),
-      ],
+      mask: [page.locator('time'), page.locator('tbody')],
     });
   });
 

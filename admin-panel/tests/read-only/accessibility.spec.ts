@@ -3,7 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { TEST_USERS } from './test-utils';
+import { TEST_USERS } from '../test-utils';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,19 +43,19 @@ interface AxeViolation {
 
 function filterViolations(violations: AxeViolation[]) {
   // Only fail on critical and serious — minor/moderate are logged but not blockers
-  return violations.filter(v => v.impact === 'critical' || v.impact === 'serious');
+  return violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
 }
 
 function formatViolations(violations: AxeViolation[]): string {
   return violations
-    .map(v => {
+    .map((v) => {
       const nodes = v.nodes.map((n: AxeNode) => `    → ${n.html}`).join('\n');
       return `[${v.impact?.toUpperCase()}] ${v.id}: ${v.description}\n  Help: ${v.helpUrl}\n${nodes}`;
     })
     .join('\n\n');
 }
 
-test.describe('Accessibility Audit', () => {
+test.describe('Accessibility Audit @logic', () => {
   test('Login page', async ({ page }) => {
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
@@ -68,7 +68,10 @@ test.describe('Accessibility Audit', () => {
     if (serious.length > 0) {
       console.log('Accessibility violations:\n' + formatViolations(serious));
     }
-    expect(serious, `Found ${serious.length} critical/serious violations on /login:\n${formatViolations(serious)}`).toHaveLength(0);
+    expect(
+      serious,
+      `Found ${serious.length} critical/serious violations on /login:\n${formatViolations(serious)}`
+    ).toHaveLength(0);
   });
 
   test.describe('Authenticated pages', () => {
@@ -89,7 +92,10 @@ test.describe('Accessibility Audit', () => {
       if (serious.length > 0) {
         console.log('Dashboard violations:\n' + formatViolations(serious));
       }
-      expect(serious, `Found ${serious.length} critical/serious violations on /dashboard:\n${formatViolations(serious)}`).toHaveLength(0);
+      expect(
+        serious,
+        `Found ${serious.length} critical/serious violations on /dashboard:\n${formatViolations(serious)}`
+      ).toHaveLength(0);
     });
 
     test('Domains List', async ({ page }) => {
@@ -105,7 +111,10 @@ test.describe('Accessibility Audit', () => {
       if (serious.length > 0) {
         console.log('Domains violations:\n' + formatViolations(serious));
       }
-      expect(serious, `Found ${serious.length} critical/serious violations on /domains:\n${formatViolations(serious)}`).toHaveLength(0);
+      expect(
+        serious,
+        `Found ${serious.length} critical/serious violations on /domains:\n${formatViolations(serious)}`
+      ).toHaveLength(0);
     });
 
     test('Questions List', async ({ page }) => {
@@ -121,7 +130,10 @@ test.describe('Accessibility Audit', () => {
       if (serious.length > 0) {
         console.log('Questions violations:\n' + formatViolations(serious));
       }
-      expect(serious, `Found ${serious.length} critical/serious violations on /questions:\n${formatViolations(serious)}`).toHaveLength(0);
+      expect(
+        serious,
+        `Found ${serious.length} critical/serious violations on /questions:\n${formatViolations(serious)}`
+      ).toHaveLength(0);
     });
 
     test('Bulk Import', async ({ page }) => {
@@ -137,7 +149,10 @@ test.describe('Accessibility Audit', () => {
       if (serious.length > 0) {
         console.log('Bulk Import violations:\n' + formatViolations(serious));
       }
-      expect(serious, `Found ${serious.length} critical/serious violations on /ai-import:\n${formatViolations(serious)}`).toHaveLength(0);
+      expect(
+        serious,
+        `Found ${serious.length} critical/serious violations on /ai-import:\n${formatViolations(serious)}`
+      ).toHaveLength(0);
     });
   });
 });

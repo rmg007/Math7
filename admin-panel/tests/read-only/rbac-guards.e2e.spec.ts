@@ -17,7 +17,7 @@
  * Supabase session — no real API calls, no data mutation.
  */
 import { expect, test } from '@playwright/test';
-import { TEST_USERS, login } from './test-utils';
+import { TEST_USERS, login } from '../test-utils';
 
 // ── Super-admin only routes ──────────────────────────────────────────────────
 const SUPER_ADMIN_ROUTES = [
@@ -37,7 +37,7 @@ const STANDARD_ADMIN_ROUTES = ['/groups', '/groups/new'] as const;
 
 // stubSessionAs removed as it's unused (using real logins for E2E)
 
-test.describe('AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role', () => {
+test.describe('AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role @logic', () => {
   // We perform a real login then try to navigate to super-admin routes.
   // The guards should redirect away from these routes.
 

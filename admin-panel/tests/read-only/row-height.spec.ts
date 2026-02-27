@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { TEST_USERS, login } from './test-utils';
+import { TEST_USERS, login } from '../test-utils';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '..', '.env.test.local') });
 dotenv.config({ path: path.resolve(__dirname, '..', '.env.test') });
 
-test.describe('Automated Row Height Test', () => {
+test.describe('Automated Row Height Test @responsive', () => {
   test.beforeEach(async ({ page }) => {
     await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
   });
