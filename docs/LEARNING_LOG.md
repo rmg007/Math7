@@ -1,5 +1,15 @@
 # Questerix Learning Log
 
+## 2026-02-27: Slot D/Oracle — The Great Recovery & Platform Hardening [verified]
+
+### [2026-02-27-Recovery] Session Context
+
+- **Trigger**: Systemic failures in Cortex health suite (MCP Server timeout), RLS violations in `curriculum_meta`, and data drift in `question-studio-page.tsx`.
+- **Scope**: `questerix-cortex/run.ts`, `questerix-cortex/src/scanner/index.ts`, `admin-panel/src/features/curriculum/pages/QuestionStudioPage.tsx`, `supabase/migrations/20260226144500_fix_publish_count_logic.sql`
+- **Outcome**: Restored 100/100 Health Score. All 4 smoke suites (Unit, Lint, Selftest, E2E) passing. Fixed graph persistence bug in Cortex.
+
+---
+
 ## 2026-02-27: Slot C — The Optimizer (Resource Management & Cleanup) [completed]
 
 ### [2026-02-27-SlotC] Session Context
@@ -34,8 +44,6 @@
 | **False positives in ts-prune** | Always verify "used in module" exports are truly internal-only                            |
 
 ---
-
-# Questerix Learning Log
 
 ## 2026-02-26: UI Stability & Cortex Progress Hardening [verified]
 
