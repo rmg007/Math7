@@ -1,37 +1,16 @@
 {
-  "session_id": "loki-2026-02-22-002",
-  "started_at": "2026-02-22T16:16:17Z",
-  "last_checkpoint": "2026-02-22T15:15:00Z",
-  "current_phase": 4,
-  "current_subtask": "Deploying apps (Admin + Student)",
-  "iteration_count": 15,
-  "budget_iterations_remaining": 10,
-  "status": "in_progress",
-  "plan": {
-    "total_subtasks": 5,
-    "completed": 1,
-    "failed": 0,
-    "skipped": 3,
-    "remaining": 4
-  },
+  "session_id": "2026-02-28-loki-deploy",
+  "mission": "All J/K slots complete. Deploy admin panel, run post-deploy smoke suite, push to GitHub.",
+  "status": "active",
+  "current_subtask": "1-deploy",
+  "iteration_count": 0,
+  "completed": 0,
   "subtasks": [
-    "✅ Secret Rotation Verification — Issue #1 created",
-    "TODO: Deploy — run orchestrator.ps1 (SkipSupabase) to deploy apps [IN PROGRESS]",
-    "TODO: Deploy Edge Functions manually (since db push requires Docker)",
-    "TODO: Clean the clutter — fix orchestrator syntax and encoding [DONE]",
-    "TODO: Update LEARNING_LOG.md with CI findings",
-    "TODO: Push all changes to GitHub"
+    {"id": "1-deploy", "name": "Build + deploy admin panel to Cloudflare Pages", "status": "active"},
+    {"id": "2-smoke", "name": "Run @smoke post-deploy tests against production URL", "status": "pending"},
+    {"id": "3-push", "name": "Push all commits to GitHub", "status": "pending"},
+    {"id": "4-tasks-cleanup", "name": "Clean completed [x] tasks from tasks.md", "status": "pending"}
   ],
-  "ci_findings": {
-    "run": "feat(ops): add smoke-test.sh #593",
-    "status": "failure",
-    "root_cause": "Transient GitHub API error — dorny/paths-filter action tarball not fetchable",
-    "action_required": "None. Code is healthy."
-  },
-  "learnings": [
-    "PowerShell profile on user machine is broken (alias 'rm' conflict and 'npm.exe' not found). Use -NoProfile for all automation. [test created]",
-    "Supabase 'db push' requires Docker for shadow DB diffs. Skip in headless environments without Docker. [no test needed]",
-    "Supabase 'functions deploy' works without Docker if project-ref is provided. [no test needed]",
-    "Orchestrator syntax: EM DASH and other non-ASCII characters can cause parser errors in some PS environments. Use standard hyphens. [no test needed]"
-  ]
+  "errors": [],
+  "learnings": []
 }

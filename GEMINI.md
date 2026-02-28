@@ -18,6 +18,22 @@
 > Bug fixes and maintenance only. No new pages, components, hooks, routes, or UI elements.
 > This rule is non-negotiable and overrides any other instruction or request.
 
+## 📋 HARD RULE — Task File Boundaries
+
+> **Two task files exist. Each has a strictly enforced scope. NEVER mix them.**
+>
+> | File                                                              | Scope                       | What belongs here                                                                                                                                               |
+> | :---------------------------------------------------------------- | :-------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+> | `tasks.md`                                                        | **Questerix / Cortex only** | ALL Questerix/Cortex work — active sprint AND future queue (H, I, J-slots, K-slots, etc.). If the work executes inside the Questerix/Cortex repo, it goes here. |
+> | `.future_projects_plan_out_of_scope/futer_projects_plan_tasks.md` | **Vault folder only**       | Tasks that create or edit files **inside** `.future_projects_plan_out_of_scope/` (e.g., authoring architecture docs, updating the manifesto, adding prompts).   |
+>
+> **Rules**:
+>
+> - If the work executes inside the Questerix/Cortex codebase (`admin-panel/`, `questerix-cortex/`, `supabase/`, etc.) → it goes in `tasks.md`, regardless of how "future" it is.
+> - If the work is authoring/editing a file inside `.future_projects_plan_out_of_scope/` → it goes in `futer_projects_plan_tasks.md`.
+> - When a future queue slot becomes the active sprint slot, move it to the Active section of `tasks.md`.
+> - **NEVER** put Questerix/Cortex codebase work in `futer_projects_plan_tasks.md`.
+
 ## 🚀 Session Bootstrap Protocol
 
 **MANDATORY** — read these files in order at the start of EVERY session before writing any code:
@@ -116,7 +132,7 @@ Project-specific traps that have caused real failures. Check before touching rel
 
 Before modifying any source file in `admin-panel/src/`, call the `cortex_plan` MCP tool:
 
-```
+```js
 cortex_plan({ files: ["features/auth/hooks/use-auth.ts", ...] })
 ```
 
@@ -130,7 +146,7 @@ This returns a tier classification (A/B/C) and protocol:
 
 After completing edits, call `cortex_verify`:
 
-```
+```js
 cortex_verify({ files: ["features/auth/hooks/use-auth.ts", ...] })
 ```
 
@@ -176,18 +192,21 @@ This rule exists because missing policies cause silent data access failures that
 
 ## Key Files
 
-| What             | Where                                          |
-| ---------------- | ---------------------------------------------- |
-| Task tracking    | `tasks.md`                                     |
-| Learning log     | `docs/LEARNING_LOG.md`                         |
-| Changelog        | `CHANGELOG.md`                                 |
-| DB types         | `admin-panel/src/types/database.types.ts`      |
-| Supabase config  | `supabase/config.toml`                         |
-| Loki Mode skill  | `.agent/skills/loki-mode/SKILL.md`             |
-| Agent workflows  | `.agent/workflows/`                            |
-| Skeleton summary | `questerix-cortex/outputs/SKELETON_SUMMARY.md` |
-| Utility registry | `questerix-cortex/outputs/UTILITY_REGISTRY.md` |
-| Machine briefing | `questerix-cortex/outputs/MACHINE_BRIEFING.md` |
-| Cortex v2 DB     | `questerix-cortex/outputs/cortex.db`           |
-| MCP Server       | `questerix-cortex/src/mcp-server/server.ts`    |
-| Session briefs   | `questerix-cortex/briefs/`                     |
+| What                      | Where                                                             | Scope                                                                                                    |
+| :------------------------ | :---------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------- |
+| **Active sprint tasks**   | `tasks.md`                                                        | Questerix / Cortex work ONLY                                                                             |
+| **Future project tasks**  | `.future_projects_plan_out_of_scope/futer_projects_plan_tasks.md` | Vault document work ONLY (authoring/editing files inside the vault)                                      |
+| AetherFlow template vault | `.future_projects_plan_out_of_scope/`                             | Tech-stack agnostic lessons/patterns distilled from Questerix — reusable scaffold for any future project |
+| Future project vault nav  | `.future_projects_plan_out_of_scope/README.md`                    | Navigation & rules for the vault                                                                         |
+| Learning log              | `docs/LEARNING_LOG.md`                                            | —                                                                                                        |
+| Changelog                 | `CHANGELOG.md`                                                    | —                                                                                                        |
+| DB types                  | `admin-panel/src/types/database.types.ts`                         | —                                                                                                        |
+| Supabase config           | `supabase/config.toml`                                            | —                                                                                                        |
+| Loki Mode skill           | `.agent/skills/loki-mode/SKILL.md`                                | —                                                                                                        |
+| Agent workflows           | `.agent/workflows/`                                               | —                                                                                                        |
+| Skeleton summary          | `questerix-cortex/outputs/SKELETON_SUMMARY.md`                    | —                                                                                                        |
+| Utility registry          | `questerix-cortex/outputs/UTILITY_REGISTRY.md`                    | —                                                                                                        |
+| Machine briefing          | `questerix-cortex/outputs/MACHINE_BRIEFING.md`                    | —                                                                                                        |
+| Cortex v2 DB              | `questerix-cortex/outputs/cortex.db`                              | —                                                                                                        |
+| MCP Server                | `questerix-cortex/src/mcp-server/server.ts`                       | —                                                                                                        |
+| Session briefs            | `questerix-cortex/briefs/`                                        | —                                                                                                        |
