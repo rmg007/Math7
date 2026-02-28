@@ -106,6 +106,7 @@ export const options = {
 // k6 doesn't support class-level state directly, so we use module-level
 // variables. Each VU gets its own copy of these.
 let vuAccessToken = null;
+let vuUserId = null; // auth user's UUID — used as FK in sessions & attempts
 let vuSessionId = null;
 let vuLoginAttempts = 0;
 const MAX_LOGIN_RETRIES = 3;
@@ -130,9 +131,11 @@ function ensureAuthenticated() {
   if (res.status !== 200) return false;
 
   try {
-    vuAccessToken = JSON.parse(res.body)?.access_token ?? null;
+    const parsed = JSON.parse(res.body);
+    vuAccessToken = parsed?.access_token ?? null;
+    vuUserId = parsed?.user?.id ?? null; // capture real user UUID for FK columns
     vuLoginAttempts = 0; // reset on success
-    return vuAccessToken !== null;
+    return vuAccessToken !== null && vuUserId !== null;
   } catch {
     return false;
   }
@@ -143,7 +146,8 @@ function ensureAuthenticated() {
  */
 function createSession(token) {
   const body = JSON.stringify({
-    user_id: "00000000-0000-0000-0000-000000000000", // placeholder — real load tests seed users
+    // user_id must be a real FK to auth.users — use the authed VU's UUID
+    user_id: vuUserId,
     skill_id: SKILL_ID === "00000000-0000-0000-0000-000000000000" ? null : SKILL_ID,
     questions_attempted: 0,
     questions_correct: 0,
@@ -174,19 +178,23 @@ function createSession(token) {
 
 /**
  * Submit a single quiz answer attempt.
- * Uses uuidv4() so each submission is unique — avoids unique constraint
- * violations in the attempts table.
+ * Uses the configured QUESTION_ID (seeded question, real FK).
+ * Falls back to a synthetic UUID only when no seed data is configured,
+ * which will fail FK constraints but still stress-tests the write path.
+ * The sessionId parameter is intentionally omitted from the payload —
+ * the schema has no session_id FK on attempts.
  */
-function submitAttempt(token, sessionId) {
+function submitAttempt(token) {
   // Randomise is_correct to simulate realistic mixed performance
   const isCorrect = Math.random() > 0.4; // 60% correct rate
   const timeSpentMs = Math.floor(Math.random() * 25000) + 3000; // 3s–28s
 
   const body = JSON.stringify({
-    user_id: "00000000-0000-0000-0000-000000000000",
+    // user_id must be a real FK to profiles.id — use the authenticated VU's UUID
+    user_id: vuUserId,
     question_id:
       QUESTION_ID === "00000000-0000-0000-0000-000000000000"
-        ? uuidv4() // Generate synthetic UUID if not configured — won't FK match but tests write throughput
+        ? uuidv4() // Synthetic UUID — FK will fail but tests write throughput shape
         : QUESTION_ID,
     response: {
       selected_option: isCorrect ? "A" : "B",
@@ -249,9 +257,10 @@ export default function () {
   // ── Create session (first iteration per VU) ───────────────────────────────
   if (!vuSessionId) {
     vuSessionId = createSession(vuAccessToken);
-    // If session create fails, reset token to force re-auth next iteration
+    // If session create fails, reset token AND userId to force re-auth next iteration
     if (!vuSessionId) {
       vuAccessToken = null;
+      vuUserId = null;
       sleep(1);
       return;
     }
@@ -260,11 +269,12 @@ export default function () {
   // ── Submit 5 answers per iteration (realistic quiz pacing) ───────────────
   // 5 answers × ~5s think time = ~25s per quiz round
   for (let i = 0; i < 5; i++) {
-    const ok = submitAttempt(vuAccessToken, vuSessionId);
+    const ok = submitAttempt(vuAccessToken);
 
-    // If a JWT expired, clear it so next iteration re-auths
+    // If a JWT expired, clear token AND userId so next iteration re-auths cleanly
     if (!ok) {
       vuAccessToken = null;
+      vuUserId = null;
       vuSessionId = null;
       break;
     }

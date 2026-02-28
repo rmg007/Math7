@@ -125,7 +125,6 @@ export function setup() {
  */
 export default function (data) {
   // ── Step 1: Login ──────────────────────────────────────────────────────────
-  const loginStart = Date.now();
   const loginRes = http.post(
     `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
     JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD }),
