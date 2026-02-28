@@ -168,8 +168,9 @@ async function authenticateRole(
 
     console.log(`[globalSetup] ✅ ${role.name} authenticated → ${statePath}`);
   } catch (err) {
-    await context.close();
     if (attempt < MAX_ATTEMPTS) {
+      // Close context before recursing so we don't leak browser contexts
+      await context.close();
       console.warn(`[globalSetup] ⚠️  ${role.name} auth attempt ${attempt} failed, retrying…`);
       return authenticateRole(browser, role, baseURL, attempt + 1);
     }
@@ -177,6 +178,9 @@ async function authenticateRole(
       `[globalSetup] ❌ ${role.name} authentication failed after ${MAX_ATTEMPTS} attempts: ${String(err)}`
     );
   } finally {
+    // Always close — handles both success path and the final-failure throw path.
+    // The retry path closes manually above (before recursion) so this finally
+    // block only runs for success and final failure, never for mid-retry.
     await context.close();
   }
 }

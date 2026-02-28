@@ -85,14 +85,21 @@ test(
     // Stub profiles to return a deleted_at timestamp — simulates soft-deleted user
     await stubProfilesDeletedAt(page, [{ deleted_at: '2024-01-01T00:00:00Z' }]);
 
-    // Also intercept /auth/v1/logout to verify sign-out is actually called
-    let signOutCalled = false;
+    // Intercept /auth/v1/logout and return 204 so signOut() doesn't throw.
+    // We use waitForRequest() (not a boolean flag) to avoid a race condition:
+    // the URL can change to /login before the signOut HTTP request is dispatched,
+    // so asserting a flag immediately after toHaveURL can be a false negative.
     await page.route(
       (url) => url.pathname.includes('/auth/v1/logout'),
       async (route) => {
-        signOutCalled = true;
         await route.fulfill({ status: 204, body: '' });
       }
+    );
+
+    // Start listening for the logout request BEFORE navigating — prevents missing it
+    const logoutRequestPromise = page.waitForRequest(
+      (req) => req.url().includes('/auth/v1/logout'),
+      { timeout: 10000 }
     );
 
     // Navigate to a protected route — AuthGuard will run
@@ -101,8 +108,9 @@ test(
     // Must redirect to /login
     await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
 
-    // Sign-out must have been called (AuthGuard calls supabase.auth.signOut())
-    expect(signOutCalled).toBe(true);
+    // Await the actual logout HTTP request — this is the definitive proof that
+    // supabase.auth.signOut() was called, not just that the URL changed.
+    await logoutRequestPromise;
   }
 );
 
