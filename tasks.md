@@ -100,7 +100,7 @@
 
 ---
 
-### [ ] Slot J-6: Chaos Hunter (Cortex Resilience Module) 🟠 NEAR-TERM
+### [/] Slot J-6: Chaos Hunter (Cortex Resilience Module) 🟠 NEAR-TERM
 
 - **Objective**: Validate the "Offline-First" and "Degraded State" promises by injecting real failures under controlled conditions.
 - **Why now**: We have declared "Offline-First" as a core platform promise. Without chaos testing, this promise is unverified marketing, not engineering.
@@ -114,32 +114,32 @@
 
 ---
 
-### [/] Slot J-7: "Verify Deploy" Button in Cortex UI 🟠 NEAR-TERM
+### [x] Slot J-7: "Verify Deploy" Button in Cortex UI 🟠 NEAR-TERM (need revision)
 
 - **Objective**: One-click post-deployment verification in the Cortex dashboard — confirms production health within 3 minutes of any deploy.
 - **Why now**: We currently have no automated post-deploy check. A silent production failure could go undetected until a user reports it.
 
 #### 🖥️ UI Design (Cortex Dashboard)
 
-- [ ] Add a **"Verify Deploy"** button alongside existing run controls.
-- [ ] Add a **target URL input field** (defaults to production, overridable for staging/preview).
-- [ ] Display a real-time streaming result panel: ✅ Passing / ❌ Failing checks as they run.
-- [ ] Show a **"Last Verified"** timestamp.
-- [ ] Store pass/fail history so regressions between deploys are visible.
+- [x] Add a **"Verify Deploy"** button alongside existing run controls.
+- [x] Add a **target URL input field** (defaults to production, overridable for staging/preview).
+- [x] Display a real-time streaming result panel: ✅ Passing / ❌ Failing checks as they run.
+- [x] Show a **"Last Verified"** timestamp.
+- [x] Store pass/fail history so regressions between deploys are visible.
 
 #### ⚙️ Backend Command (Cortex)
 
-- [ ] Create `cortex verify-deploy --env <url>` command.
-- [ ] Runs `@smoke`-tagged Playwright suite with `baseURL` overridden to the target URL.
-- [ ] Streams results back to the dashboard via existing WebSocket connection.
+- [x] Create `cortex verify-deploy --env <url>` command.
+- [x] Runs `@smoke`-tagged Playwright suite with `baseURL` overridden to the target URL.
+- [x] Streams results back to the dashboard via existing WebSocket connection.
 
 #### 🎯 `@smoke` Suite Must Cover
 
-- [ ] **Infrastructure**: `200 OK`, JS/CSS assets load, security headers present.
-- [ ] **Authentication**: Super-Admin & Mentor login. Unauthenticated user blocked and redirected.
-- [ ] **Multi-Tenancy**: Subdomain resolves to correct tenant. Branding loads from `apps` table.
-- [ ] **Supabase Connectivity**: `/rest/v1/` returns valid authenticated response. Edge Function responds within SLA.
-- [ ] **Admin Data Render**: Platform Management loads. Subjects/Apps list renders with real data.
+- [x] **Infrastructure**: `200 OK`, JS/CSS assets load, security headers present.
+- [x] **Authentication**: Super-Admin & Mentor login. Unauthenticated user blocked and redirected.
+- [x] **Multi-Tenancy**: Subdomain resolves to correct tenant. Branding loads from `apps` table.
+- [x] **Supabase Connectivity**: `/rest/v1/` returns valid authenticated response. Edge Function responds within SLA.
+- [x] **Admin Data Render**: Platform Management loads. Subjects/Apps list renders with real data.
 
 - **Verification**: All 5 check categories complete in < 3 minutes.
 - **Gate**: Must be operational before any public school onboarding push.
@@ -151,23 +151,23 @@
 > [!NOTE]
 > P3 items. Non-negotiable for a professional "1.0 Release" but do not block daily development. Start after all J-slots are complete.
 
-### [ ] Slot K-1: Security Gate (OWASP ZAP + Snyk)
+### [x] Slot K-1: Security Gate (OWASP ZAP + Snyk)
 
 - **Objective**: Automate vulnerability scanning as a release gate, not an afterthought.
-  - [ ] Integrate `OWASP ZAP` in headless mode into the monthly CI release gate.
-  - [ ] Run `npm audit` + `Snyk` on every PR (zero High/Critical findings gate).
-  - [ ] Enable `Dependabot` / `Renovate` for automated dependency update PRs.
-  - [ ] Add `pip-audit` + `Bandit` to the Python Content Engine CI step.
+  - [x] Integrate `OWASP ZAP` in headless mode into the monthly CI release gate.
+  - [x] Run `npm audit` + `Snyk` on every PR (zero High/Critical findings gate).
+  - [x] Enable `Dependabot` / `Renovate` for automated dependency update PRs.
+  - [x] Add `pip-audit` + `Bandit` to the Python Content Engine CI step.
 - **Verification**: GitHub Actions blocks merge if any High/Critical CVE is detected.
 
 ---
 
-### [ ] Slot K-2: Accessibility Gate (axe-core + WCAG 2.1 AA)
+### [x] Slot K-2: Accessibility Gate (axe-core + WCAG 2.1 AA) (need revision)
 
 - **Objective**: Ensure the Admin Panel passes WCAG 2.1 Level AA compliance automatically.
 - **Why**: Legal and ethical obligation. Currently zero automated a11y coverage exists.
-  - [ ] Integrate `axe-core` into the existing Playwright test suite.
-  - [ ] Run on all major pages: Login, Dashboard, Platform Management, Curriculum.
-  - [ ] Gate: Zero `critical` or `serious` axe violations permitted in CI.
-  - [ ] Document known exceptions with justified rationale.
+  - [x] Integrate `axe-core` into the existing Playwright test suite.
+  - [x] Run on all major pages: Login, Dashboard, Platform Management, Curriculum.
+  - [x] Gate: Zero `critical` or `serious` axe violations permitted in CI.
+  - [x] Document known exceptions with justified rationale.
 - **Verification**: `npx playwright test --grep @a11y` produces zero violations.
