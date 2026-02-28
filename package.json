@@ -26,7 +26,7 @@
     "@tiptap/extension-placeholder": "^3.18.0",
     "@tiptap/extension-underline": "^3.18.0",
     "@tiptap/react": "^3.18.0",
-    "@tiptap/starter-kit": "^3.18.0",
+    "@tiptap/starter-kit": "^3.20.0",
     "autoprefixer": "^10.4.24",
     "dotenv": "^17.2.3",
     "katex": "^0.16.28",
