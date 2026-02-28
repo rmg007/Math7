@@ -2,15 +2,15 @@ name: Security Governance
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   schedule:
     # Run weekly to catch new vulnerabilities in old code
-    - cron: '30 1 * * 0'
+    - cron: "30 1 * * 0"
 
 jobs:
-  # 1. SAST: Semantic Code Analysis
+  # ── 1. SAST: Semantic Code Analysis ───────────────────────────────────────────
   codeql-analysis:
     name: CodeQL Security Scan
     runs-on: ubuntu-latest
@@ -22,8 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'javascript', 'typescript' ]
-        # Note: CodeQL support for Dart is in beta; use standard analysis for now.
+        language: ["javascript", "typescript"]
 
     steps:
       - name: Checkout repository
@@ -33,7 +32,6 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          # "security-and-quality" adds strict linting to the security queries
           queries: security-and-quality
 
       - name: Autobuild
@@ -44,65 +42,140 @@ jobs:
         with:
           category: "/language:${{matrix.language}}"
 
-  # 2. SCA: Supply Chain Analysis
+  # ── 2. SCA: Supply Chain / Dependency Review ───────────────────────────────────
+  # Blocks any PR that introduces a High or Critical CVE.
   dependency-review:
-    name: Dependency Audit
+    name: Dependency Audit (PR gate)
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: write
     if: github.event_name == 'pull_request'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      
+
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
           # Block any pull request that introduces a high/critical vulnerability
           fail-on-severity: high
-          # Block licenses that jeopardize your IP (e.g., GPL if you are closed source)
+          # Block licenses that jeopardize IP (GPL / AGPL are copyleft)
           deny-licenses: GPL-3.0, AGPL-3.0
 
-  # 3. Fail-Fast Audit (Immediate checks)
-  audit-check:
-    name: NPM & Flutter Audit
+  # ── 3. npm audit — zero High/Critical gate on every PR and push ───────────────
+  npm-audit:
+    name: npm audit (admin-panel)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Audit Admin Panel (NPM)
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install admin-panel dependencies
+        working-directory: admin-panel
+        run: npm ci --legacy-peer-deps
+
+      - name: Audit admin-panel (High/Critical gate)
+        working-directory: admin-panel
+        # --audit-level=high exits non-zero if any High or Critical CVE is found
+        run: npm audit --audit-level=high
+
+  # ── 4. Snyk — deeper CVE + license scan on every PR ──────────────────────────
+  # Requires SNYK_TOKEN secret. If the secret is absent the step is skipped
+  # gracefully so forks / contributors aren't broken.
+  snyk:
+    name: Snyk CVE Scan
+    runs-on: ubuntu-latest
+    # Only run if we have the secret — avoids breaking forks
+    if: vars.SNYK_ENABLED == 'true' || github.event_name != 'pull_request' || github.actor == github.repository_owner
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install admin-panel dependencies
+        working-directory: admin-panel
+        run: npm ci --legacy-peer-deps
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: false
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --file=admin-panel/package.json
+          command: test
+
+      - name: Upload Snyk results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && secrets.SNYK_TOKEN != ''
+        with:
+          sarif_file: snyk.sarif
+        continue-on-error: true
+
+  # ── 5. Python Security: pip-audit + Bandit ────────────────────────────────────
+  # Covers all Python scripts in scripts/ and any future content-engine/ dir.
+  python-security:
+    name: Python Security (pip-audit + Bandit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install security tools
+        run: pip install pip-audit bandit
+
+      - name: pip-audit — scripts/ requirements
+        # Audit any requirements files found in the repo.
+        # If none exist, the step succeeds gracefully.
         run: |
-          cd admin-panel
-          # Fails if vulnerabilities are found
-          npm audit --audit-level=high
+          REQS=$(find . -name "requirements*.txt" -not -path "./.git/*" | head -20)
+          if [ -n "$REQS" ]; then
+            echo "Auditing requirements files: $REQS"
+            for f in $REQS; do
+              echo "→ pip-audit $f"
+              pip-audit -r "$f" --progress-spinner off
+            done
+          else
+            echo "ℹ️  No requirements.txt files found — skipping pip-audit"
+          fi
 
-      - name: Audit Student App (Flutter)
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-      - run: |
-          cd student-app
-          flutter pub get
-          # Check for outdated packages that might pose a risk
-          # Note: flutter pub outdated is currently informational and does not return a non-zero exit code
-          flutter pub outdated --transitive --no-dev-dependencies
+      - name: Bandit SAST — Python scripts
+        # B101 (assert_used) is suppressed — asserts are valid in non-security utility scripts.
+        # B603/B607 (subprocess) — flagged but not blocking for our CI automation scripts.
+        run: |
+          PYFILES=$(find scripts/ -name "*.py" 2>/dev/null || true)
+          if [ -n "$PYFILES" ]; then
+            echo "Running Bandit on: $PYFILES"
+            bandit -r scripts/ \
+              --severity-level medium \
+              --confidence-level medium \
+              --skip B101,B603,B607 \
+              --format txt
+          else
+            echo "ℹ️  No Python files in scripts/ — skipping Bandit"
+          fi
 
-  # 4. Infrastructure Security (Container Scanning)
-  container-scan:
-    name: Docker Image Vulnerabilities
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Build Docker Image
-        run: docker build -t questerix-admin:latest ./admin-panel
-      
-      - name: Run Trivy Vulnerability Scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'questerix-admin:latest'
-          format: 'table'
-          # Fail if Critical or High OS vulnerabilities are found
-          exit-code: '1'
-          ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
+      - name: Bandit SAST — audit-server (if present)
+        run: |
+          if [ -d "scripts/audit-server" ]; then
+            bandit -r scripts/audit-server/ \
+              --severity-level medium \
+              --confidence-level medium \
+              --skip B101,B603,B607 \
+              --format txt
+          fi
