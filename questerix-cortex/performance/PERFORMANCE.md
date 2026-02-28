@@ -10,7 +10,7 @@ This directory contains [k6](https://k6.io) load test scripts for validating the
 
 ## Directory Structure
 
-```
+```text
 questerix-cortex/performance/
 ├── config.js                    # Shared SLA thresholds, env vars, header helpers
 ├── login_spike.js               # Scenario 1: 50k concurrent auth spike

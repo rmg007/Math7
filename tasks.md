@@ -78,15 +78,15 @@
 
 ---
 
-### [/] Slot J-5: Load & Spike Testing (`k6 / Locust`) 🟠 NEAR-TERM
+### [x] Slot J-5: Load & Spike Testing (`k6 / Locust`) 🟠 NEAR-TERM
 
 - **Objective**: Establish a performance baseline to verify the system handles 50,000+ concurrent users before any major school onboarding push.
 - **Why now**: Not urgent today, but becomes a hard blocker the moment the platform is opened to a large cohort.
-  - [ ] Install and configure `k6` inside `questerix-cortex/performance/`.
-  - [ ] Write `login_spike.js` — 50k concurrent auth requests against Supavisor.
-  - [ ] Write `quiz_submit_load.js` — concurrent answer submissions to the `outbox` table.
-  - [ ] Establish baseline SLAs: P95 response time < 500ms, zero dropped connections.
-  - [ ] Document Supavisor connection pool limits found during the test.
+  - [x] Install and configure `k6` inside `questerix-cortex/performance/`.
+  - [x] Write `login_spike.js` — 50k concurrent auth requests against Supavisor.
+  - [x] Write `quiz_submit_load.js` — concurrent answer submissions to the `attempts` table.
+  - [x] Establish baseline SLAs: P95 response time < 500ms, zero dropped connections.
+  - [x] Document Supavisor connection pool limits found during the test.
 - **Verification**: `k6 run login_spike.js` passes the defined SLA thresholds.
 - **Gate**: Must be completed before any large-scale school onboarding event.
 
