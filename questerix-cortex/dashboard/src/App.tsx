@@ -4,6 +4,7 @@ import { DetailTabs } from './components/DetailTabs'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { Terminal } from './components/Terminal'
+import { VerifyDeploy } from './components/VerifyDeploy'
 import type {
     AnalystResults,
     DriftResult,
@@ -12,6 +13,9 @@ import type {
     RlsAuditResult,
     SurfaceMap,
     TestResults,
+    VerifyDeployCompletePayload,
+    VerifyDeployHistory,
+    VerifyDeployProgressPayload,
 } from './types'
 
 function App() {
@@ -25,6 +29,12 @@ function App() {
   const [rlsResult, setRlsResult] = useState<RlsAuditResult | null>(null)
   const [logs, setLogs] = useState<LogItem[]>([])
   const [isConnected, setIsConnected] = useState(false)
+
+  // ── Verify Deploy state ────────────────────────────────────────────────────
+  const [verifyProgress, setVerifyProgress] = useState<VerifyDeployProgressPayload | null>(null)
+  const [verifyLastResult, setVerifyLastResult] = useState<VerifyDeployCompletePayload | null>(null)
+  const [verifyHistory, setVerifyHistory] = useState<VerifyDeployHistory[]>([])
+  const [verifyIsRunning, setVerifyIsRunning] = useState(false)
 
   useEffect(() => {
     const cortexUrl = import.meta.env.VITE_CORTEX_URL as string | undefined
@@ -65,6 +75,35 @@ function App() {
       if (data.logs) setLogs(data.logs)
     })
 
+    // ── Verify Deploy socket events ──────────────────────────────────────────
+    newSocket.on('verifyDeployProgress', (payload: VerifyDeployProgressPayload) => {
+      setVerifyIsRunning(true)
+      setVerifyProgress(prev => {
+        // Accumulate checks from individual checkUpdate events
+        if (payload.latestCheck) {
+          const prevChecks = prev?.checks ?? []
+          const alreadyPresent = prevChecks.some(
+            c => c.category === payload.latestCheck!.category && c.name === payload.latestCheck!.name
+          )
+          if (!alreadyPresent) {
+            return { ...payload, checks: [...prevChecks, payload.latestCheck] }
+          }
+        }
+        return { ...payload, checks: prev?.checks ?? [] }
+      })
+    })
+
+    newSocket.on('verifyDeployComplete', (payload: VerifyDeployCompletePayload) => {
+      setVerifyIsRunning(false)
+      setVerifyLastResult(payload)
+      setVerifyHistory(payload.history)
+      setVerifyProgress(null)
+    })
+
+    newSocket.on('verifyDeployHistory', (history: VerifyDeployHistory[]) => {
+      setVerifyHistory(history)
+    })
+
     return () => {
       newSocket.close()
       socketRef.current = null
@@ -73,6 +112,13 @@ function App() {
 
   const handleTrigger = (target: string) => {
     socketRef.current?.emit('trigger', target)
+  }
+
+  const handleVerifyDeploy = (targetUrl: string) => {
+    setVerifyIsRunning(true)
+    setVerifyProgress(null)
+    setVerifyLastResult(null)
+    socketRef.current?.emit('verifyDeploy', { targetUrl })
   }
 
   return (
@@ -85,6 +131,13 @@ function App() {
           analystResults={analystResults}
           history={history}
           smokePass={smokePass}
+        />
+        <VerifyDeploy
+          onVerifyDeploy={handleVerifyDeploy}
+          progress={verifyProgress}
+          lastResult={verifyLastResult}
+          history={verifyHistory}
+          isRunning={verifyIsRunning}
         />
         <Terminal logs={logs} />
         <DetailTabs

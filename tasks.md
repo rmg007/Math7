@@ -8,62 +8,166 @@
 > 3. **Session Start**: Always acknowledge the active task at the start of every session.
 > 4. **Documentation**: Append every completed session to `docs/LEARNING_LOG.md` with: Root Cause, Fix, and Prevention Rule.
 > 5. **Lean Focused**: Delete all completed `[x]` tasks from this list at the end of every session.
+> 6. **Task File Boundaries**: This file is for **ALL Questerix/Cortex work** (active + queued). Tasks that add or edit files inside `.future_projects_plan_out_of_scope/` belong in `futer_projects_plan_tasks.md`.
 
 ---
 
-## 🚀 Active Roles (Strategic Recovery)
+### [/] Slot H: Final Polish & CI Compliance
 
-### [x] Slot A: The Fixer (Type Safety & P0 Regressions)
-
-- **Objective**: Resolve TypeScript errors in `question-studio-page.tsx` and restore MCP Server health.
-  - [x] Fix `question_status` missing property on line 320. [VERIFIED]
-  - [x] Align `"published"` vs `"live"` status enum on line 860. [VERIFIED]
-- **Verification**: `npx tsc --noEmit` + `questerix-cortex selftest`
-
-### [x] Slot B: The Architect (Database & Governance)
-
-- **Objective**: Fix RLS violations and implement critical domain tests.
-  - [x] Add RLS policies to `curriculum_meta` in migration `20260226144500`. [VERIFIED]
-  - [x] Implement coverage for `use-groups` and `use-known-issues`. [VERIFIED]
-- **Verification**: `psql $DATABASE_URL -f supabase/scripts/audit-rls.sql`
-
-### [x] Slot C: The Optimizer (Resource & Code Hygiene)
-
-- **Objective**: Cleanup zombie processes and remove dead code.
-  - [x] Kill zombie `dart` processes (PIDs 27932, 38252). [VERIFIED]
-  - [x] Prune the 10 unused exports flagged by Cortex (Scanner fixed & verified). [VERIFIED]
-- **Verification**: `questerix-cortex optimize` [PASS]
-
-### [x] Slot D: The Auditor (Full Platform Certification)
-
-- **Objective**: Achieve 100/100 Health Score and verify whole-platform stability.
-  - [x] Run full 711 test suite: `npx playwright test --project=desktop --project=mobile --project=tablet` [SMOKE PASS]
-  - [x] Stabilize Subjects/Apps CRUD flakiness. [VERIFIED]
-  - [x] Close session with mandatory `cortex_verify`.
-- **Verification**: `questerix-cortex all` (Health Score: 100) [PASS]
+- **Objective**: Resolve minor infrastructure warnings and ensure full suite stability.
+  - [x] Fix `validateDOMNesting` warnings in `AppsPage` and `SubjectsPage`. [DONE]
+  - [x] Resolve `ReferenceError` for `newSubjectBtn` in `subjects.e2e.spec.ts`. [DONE]
+  - [x] Harden `rbac-guards.e2e.spec.ts` redirection assertions for mobile/tablet. [DONE]
+  - [ ] Resolve GitHub Actions lint errors in `admin-panel-e2e.yml`. [PENDING]
+  - [ ] Execute full 711 test suite for final validation. [PENDING]
+- **Verification**: `npx playwright test` (Full Green)
 
 ---
 
 ## 📋 Queue (Audit & Review)
 
-### [x] Slot E: DX & Test Performance Optimization [DONE]
+### [ ] Slot I: Security & Reliability Audit (Post-Recovery)
 
-- **Objective**: Established tiered testing, global auth, and shift-left integration.
-  - [x] **P-1**: Delete 25 skeleton stub spec files. [DONE]
-  - [x] **P0**: Create `tests/global-setup.ts` with 4-role storageState auth. [DONE]
-  - [x] **P0.5**: Split `admin-panel.e2e.spec.ts` monolith. [DONE]
-  - [x] **P1**: Tag all real E2E files & setup CI matrix. [DONE]
-  - [x] **P2**: Partial parallelism (Workers: 4 for Read-Only). [DONE]
+- **Objective**: Deep-dive audit of the new `storageState` implementation for edge cases.
+  - [ ] Audit token expiry handling in `global-setup.ts`.
+  - [ ] Verify `deleted_at` profile check in `AuthGuard` under E2E scenarios.
+  - [ ] Implement automated snapshot pruning for `.auth/` artifacts.
 
-### [x] Slot F: Lead Reviewer (Antigravity) [DONE]
+---
 
-- **Objective**: Final forensic audit and certification of the recovered system.
-  - [x] Audit RLS-bypass migration. [DONE]
-  - [x] Validate `.auth/` exclusion and session freshness logic. [DONE]
-  - [x] Stress-test parallel execution. [DONE]
-  - [x] **Final Deploy Check**: Verified successful deployment to Cloudflare. [DONE]
+## 🔱 Queue (AetherFlow Scaling Refactor — Slot J)
 
-### [x] Slot G: Documentation [DONE]
+> [!NOTE]
+> Work executes in the Questerix/Cortex codebase. Activate slots one at a time by moving them to the Active section above.
 
-- [x] Update `CHANGELOG.md` with v2.2.8 "Great Recovery". [DONE]
-- [x] Update `LEARNING_LOG.md` with root cause and prevention analysis. [DONE]
+### [ ] Slot J-1: Tiered Testing Migration 🔴 URGENT
+
+- **Objective**: Tag 100% of E2E tests to enable precision CI execution and cut run time.
+- **Why now**: Currently ~60% of tests are untagged. Every PR triggers a full 711-test/8-min matrix regardless of change scope. This directly bottlenecks developer velocity.
+  - [ ] Audit all `admin-panel/tests/` spec files and identify untagged tests.
+  - [ ] Assign `@logic` to all pure business-logic tests (single viewport, desktop only).
+  - [ ] Assign `@responsive` to all layout/viewport-sensitive tests (Desktop + Mobile + Tablet).
+  - [ ] Assign `@smoke` to all critical-path tests (must pass on every PR).
+  - [ ] Update `playwright.config.ts` to support tag-based CI execution.
+- **Verification**: `npx playwright test --grep @smoke` completes in < 2 minutes.
+
+---
+
+### [ ] Slot J-2: Intent Documentation (`FEATURE_GUIDE.md`) 🟡 HIGH IMPACT
+
+- **Objective**: Document the "Why" (intent, guardrails, RBAC) for the two highest-risk feature modules.
+- **Why now**: These modules have the densest business logic. Missing intent is the #1 cause of agent-introduced regressions.
+  - [ ] Create `admin-panel/src/features/auth/FEATURE_GUIDE.md` (Login flows, JWT lifecycle, redirect guardrails).
+  - [ ] Create `admin-panel/src/features/platform/FEATURE_GUIDE.md` (Tenant resolution, app_id authority, role switching).
+- **Verification**: Reviewed by human for accuracy against current implementation.
+
+---
+
+### [ ] Slot J-3: Declarative Seeding (`questerix-seed.ts`) 🟡 HIGH IMPACT
+
+- **Objective**: A single `npm run seed` command that rebuilds a perfect, deterministic multi-tenant test world.
+- **Why now**: Needed before the next feature sprint begins. Test flakiness will compound with every new feature added without a clean state reset.
+  - [ ] Define the seed specification: 5 tenants, 4 roles (Super-Admin, Admin, Mentor, Student), 20 domains, 100 questions.
+  - [ ] Design the seed command to wipe only test data (no production risk).
+  - [ ] Integrate seed run as a prerequisite step in `global-setup.ts`.
+- **Verification**: Running the seed twice produces identical E2E results both times.
+
+---
+
+### [ ] Slot J-4: Shared Type Bridge (`@questerix/core`) 🟢 FUTURE-PROOFING
+
+- **Objective**: Establish a single source of truth for Supabase-generated types shared between Admin Panel (React) and Student App (Flutter).
+- **Why now**: Not blocking today, but becomes critical the next time a schema column is renamed.
+  - [ ] Create a `packages/core/` local directory for shared types and business interfaces.
+  - [ ] Move generated Supabase types (`database.types.ts`) to shared package.
+  - [ ] Update React app imports to consume from `@questerix/core`.
+  - [ ] Document the Flutter consumption path for the next cross-platform refactor.
+- **Verification**: A schema change in Supabase causes a TypeScript compile error in the React app before any runtime failure.
+
+---
+
+### [ ] Slot J-5: Load & Spike Testing (`k6 / Locust`) 🟠 NEAR-TERM
+
+- **Objective**: Establish a performance baseline to verify the system handles 50,000+ concurrent users before any major school onboarding push.
+- **Why now**: Not urgent today, but becomes a hard blocker the moment the platform is opened to a large cohort.
+  - [ ] Install and configure `k6` inside `questerix-cortex/performance/`.
+  - [ ] Write `login_spike.js` — 50k concurrent auth requests against Supavisor.
+  - [ ] Write `quiz_submit_load.js` — concurrent answer submissions to the `outbox` table.
+  - [ ] Establish baseline SLAs: P95 response time < 500ms, zero dropped connections.
+  - [ ] Document Supavisor connection pool limits found during the test.
+- **Verification**: `k6 run login_spike.js` passes the defined SLA thresholds.
+- **Gate**: Must be completed before any large-scale school onboarding event.
+
+---
+
+### [ ] Slot J-6: Chaos Hunter (Cortex Resilience Module) 🟠 NEAR-TERM
+
+- **Objective**: Validate the "Offline-First" and "Degraded State" promises by injecting real failures under controlled conditions.
+- **Why now**: We have declared "Offline-First" as a core platform promise. Without chaos testing, this promise is unverified marketing, not engineering.
+  - [ ] Design a `cortex chaos` runner mode inside Cortex.
+  - [ ] Implement Latency Injection: 5,000ms delay on all `/rest/v1/*` Supabase API calls.
+  - [ ] Implement Hard Failure Injection: Simulated `503` on specific Edge Functions mid-request.
+  - [ ] Implement Zombie Scenario: Kill the Python Content Engine process mid-generation.
+  - [ ] Define assertions: UI must always show recovery path, never a blank/crashed screen.
+- **Verification**: Zero blank screens or unhandled crashes under all three chaos scenarios.
+- **Gate**: Must be completed before declaring the platform "production-hardened."
+
+---
+
+### [/] Slot J-7: "Verify Deploy" Button in Cortex UI 🟠 NEAR-TERM
+
+- **Objective**: One-click post-deployment verification in the Cortex dashboard — confirms production health within 3 minutes of any deploy.
+- **Why now**: We currently have no automated post-deploy check. A silent production failure could go undetected until a user reports it.
+
+#### 🖥️ UI Design (Cortex Dashboard)
+
+- [ ] Add a **"Verify Deploy"** button alongside existing run controls.
+- [ ] Add a **target URL input field** (defaults to production, overridable for staging/preview).
+- [ ] Display a real-time streaming result panel: ✅ Passing / ❌ Failing checks as they run.
+- [ ] Show a **"Last Verified"** timestamp.
+- [ ] Store pass/fail history so regressions between deploys are visible.
+
+#### ⚙️ Backend Command (Cortex)
+
+- [ ] Create `cortex verify-deploy --env <url>` command.
+- [ ] Runs `@smoke`-tagged Playwright suite with `baseURL` overridden to the target URL.
+- [ ] Streams results back to the dashboard via existing WebSocket connection.
+
+#### 🎯 `@smoke` Suite Must Cover
+
+- [ ] **Infrastructure**: `200 OK`, JS/CSS assets load, security headers present.
+- [ ] **Authentication**: Super-Admin & Mentor login. Unauthenticated user blocked and redirected.
+- [ ] **Multi-Tenancy**: Subdomain resolves to correct tenant. Branding loads from `apps` table.
+- [ ] **Supabase Connectivity**: `/rest/v1/` returns valid authenticated response. Edge Function responds within SLA.
+- [ ] **Admin Data Render**: Platform Management loads. Subjects/Apps list renders with real data.
+
+- **Verification**: All 5 check categories complete in < 3 minutes.
+- **Gate**: Must be operational before any public school onboarding push.
+
+---
+
+## 🏛️ Queue (Long-Term Compliance — Slot K)
+
+> [!NOTE]
+> P3 items. Non-negotiable for a professional "1.0 Release" but do not block daily development. Start after all J-slots are complete.
+
+### [ ] Slot K-1: Security Gate (OWASP ZAP + Snyk)
+
+- **Objective**: Automate vulnerability scanning as a release gate, not an afterthought.
+  - [ ] Integrate `OWASP ZAP` in headless mode into the monthly CI release gate.
+  - [ ] Run `npm audit` + `Snyk` on every PR (zero High/Critical findings gate).
+  - [ ] Enable `Dependabot` / `Renovate` for automated dependency update PRs.
+  - [ ] Add `pip-audit` + `Bandit` to the Python Content Engine CI step.
+- **Verification**: GitHub Actions blocks merge if any High/Critical CVE is detected.
+
+---
+
+### [ ] Slot K-2: Accessibility Gate (axe-core + WCAG 2.1 AA)
+
+- **Objective**: Ensure the Admin Panel passes WCAG 2.1 Level AA compliance automatically.
+- **Why**: Legal and ethical obligation. Currently zero automated a11y coverage exists.
+  - [ ] Integrate `axe-core` into the existing Playwright test suite.
+  - [ ] Run on all major pages: Login, Dashboard, Platform Management, Curriculum.
+  - [ ] Gate: Zero `critical` or `serious` axe violations permitted in CI.
+  - [ ] Document known exceptions with justified rationale.
+- **Verification**: `npx playwright test --grep @a11y` produces zero violations.

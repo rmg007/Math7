@@ -24,6 +24,7 @@ import { SkeletonGenerator } from "./src/skeleton";
 import { SkeletonSearch } from "./src/skeleton/search";
 import { CortexConfig } from "./src/types";
 import { normalizePath } from "./src/utils/normalize-path";
+import { VerifyDeployRunner } from "./src/verify-deploy";
 import { FeatureVisualizer } from "./src/visualizer";
 import { ZombieHunter } from "./src/zombie-hunter";
 
@@ -370,6 +371,10 @@ async function main() {
     // Clean up any zombie processes on the dashboard port first
     ZombieHunter.clean(config.dashboardPort);
 
+    // ── Verify Deploy runner ─────────────────────────────────────────
+    const verifyDeployRunner = new VerifyDeployRunner(adminPath);
+    let verifyDeployInProgress = false;
+
     // Start dashboard server
     const dashboardServer = new DashboardServer({
       port: config.dashboardPort,
@@ -381,7 +386,51 @@ async function main() {
         // Note: In a full implementation, this would trigger a new run
         // For now, we just log it as the current run is already in progress
       },
-    });
+      onVerifyDeploy: (targetUrl) => {
+        if (verifyDeployInProgress) {
+          dashboardServer.emitLog({ text: "⚠️  Verify Deploy already in progress", color: "gray" });
+          return;
+        }
+        verifyDeployInProgress = true;
+
+        // Forward progress messages to the dashboard terminal
+        verifyDeployRunner.on("progress", (message, color) => {
+          dashboardServer.emitLog({ text: message, color });
+          dashboardServer.emitVerifyDeployProgress({
+            targetUrl,
+            status: "running",
+            checks: [],
+            message,
+            startTime: new Date().toISOString(),
+          });
+        });
+
+        // Forward individual check results (live)
+        verifyDeployRunner.on("checkUpdate", (check) => {
+          dashboardServer.emitVerifyDeployProgress({
+            targetUrl,
+            status: "running",
+            checks: [],
+            latestCheck: check,
+            startTime: new Date().toISOString(),
+          });
+        });
+
+        // Final result
+        verifyDeployRunner.once("complete", (result) => {
+          verifyDeployInProgress = false;
+          verifyDeployRunner.removeAllListeners("progress");
+          verifyDeployRunner.removeAllListeners("checkUpdate");
+          dashboardServer.emitVerifyDeployComplete(result);
+        });
+
+        // Start the run (fire and forget — events handle the streaming)
+        verifyDeployRunner.run(targetUrl).catch((err) => {
+          verifyDeployInProgress = false;
+          dashboardServer.emitLog({ text: `❌ verify-deploy crashed: ${err.message}`, color: "red" });
+        });
+      },
+    }, path.join(__dirname, "outputs"));
 
     try {
       await dashboardServer.start();
