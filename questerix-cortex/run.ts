@@ -393,6 +393,12 @@ async function main() {
         }
         verifyDeployInProgress = true;
 
+        // Always clean up stale listeners before re-attaching (guards against
+        // a run that crashed before emitting "complete")
+        verifyDeployRunner.removeAllListeners("progress");
+        verifyDeployRunner.removeAllListeners("checkUpdate");
+        verifyDeployRunner.removeAllListeners("complete");
+
         // Forward progress messages to the dashboard terminal
         verifyDeployRunner.on("progress", (message, color) => {
           dashboardServer.emitLog({ text: message, color });
@@ -416,7 +422,7 @@ async function main() {
           });
         });
 
-        // Final result
+        // Final result — once only
         verifyDeployRunner.once("complete", (result) => {
           verifyDeployInProgress = false;
           verifyDeployRunner.removeAllListeners("progress");
@@ -427,6 +433,9 @@ async function main() {
         // Start the run (fire and forget — events handle the streaming)
         verifyDeployRunner.run(targetUrl).catch((err) => {
           verifyDeployInProgress = false;
+          verifyDeployRunner.removeAllListeners("progress");
+          verifyDeployRunner.removeAllListeners("checkUpdate");
+          verifyDeployRunner.removeAllListeners("complete");
           dashboardServer.emitLog({ text: `❌ verify-deploy crashed: ${err.message}`, color: "red" });
         });
       },

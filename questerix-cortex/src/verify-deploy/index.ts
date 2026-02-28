@@ -143,9 +143,7 @@ export class VerifyDeployRunner extends EventEmitter {
         shell: true,
         env: {
           ...process.env,
-          PLAYWRIGHT_BASE_URL: baseURL,
-          BASE_URL: baseURL,
-          // Override the baseURL used in playwright.config.ts
+          // PLAYWRIGHT_TEST_BASE_URL is the official Playwright env override for baseURL
           PLAYWRIGHT_TEST_BASE_URL: baseURL,
         },
       });
