@@ -66,15 +66,16 @@
 
 ---
 
-### [/] Slot J-4: Shared Type Bridge (`@questerix/core`) 🟢 FUTURE-PROOFING
+### [x] Slot J-4: Shared Type Bridge (`@questerix/core`) 🟢 FUTURE-PROOFING
 
-- **Objective**: Establish a single source of truth for Supabase-generated types shared between Admin Panel (React) and Student App (Flutter).
-- **Why now**: Not blocking today, but becomes critical the next time a schema column is renamed.
-  - [ ] Create a `packages/core/` local directory for shared types and business interfaces.
-  - [ ] Move generated Supabase types (`database.types.ts`) to shared package.
-  - [ ] Update React app imports to consume from `@questerix/core`.
-  - [ ] Document the Flutter consumption path for the next cross-platform refactor.
-- **Verification**: A schema change in Supabase causes a TypeScript compile error in the React app before any runtime failure.
+- **Objective**: Single source of truth for Supabase-generated types shared across Admin Panel (React) and Student App (Flutter).
+  - [x] Created `packages/core/src/types/database.types.ts` — canonical location for all Supabase types.
+  - [x] Created `packages/core/src/index.ts` — barrel exports (`Database`, `Tables`, `Json`, `Enums`).
+  - [x] `admin-panel/src/lib/database.types.ts` converted to a backwards-compatible re-export shim.
+  - [x] Added `@questerix/core` alias to `vite.config.ts` and `tsconfig.json`.
+  - [x] Added `npm run typegen` to root `package.json`.
+  - [x] Documented Flutter consumption path in `packages/core/README.md`.
+- **Verification**: ✅ `tsc --noEmit` passes with 0 errors. All existing imports via `@/lib/database.types` still work.
 
 ---
 
