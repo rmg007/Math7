@@ -7,6 +7,7 @@ import { Project } from "ts-morph";
 import { Analyst } from "./src/analyst";
 import { CortexDB } from "./src/cortex-db";
 
+import { ChaosHunter } from "./src/chaos-hunter";
 import { DashboardServer } from "./src/dashboard-server";
 import { DeltaEngine } from "./src/delta";
 import { DriftDetector, DriftResult } from "./src/drift";
@@ -295,6 +296,64 @@ async function main() {
     process.exit(0);
   }
 
+  // ── Chaos Hunter — early-exit target ────────────────────────────────────────
+  // Usage: npm run health -- chaos
+  //        npm run health -- chaos --scenario=latency
+  //        npm run health -- chaos --scenario=hard-fail
+  //        npm run health -- chaos --scenario=zombie
+  if (earlyTarget === "chaos") {
+    const adminPath = path.resolve(__dirname, config.adminPanelPath);
+    const chaosHunter = new ChaosHunter(adminPath);
+
+    // Parse optional --scenario flag
+    const scenarioFlag = flags
+      .find((f) => f.startsWith("--scenario="))
+      ?.split("=")[1] as "latency" | "hard-fail" | "zombie" | undefined;
+    const scenarios = scenarioFlag ? [scenarioFlag] : undefined;
+
+    console.log(chalk.cyan.bold("\n🔥 Questerix Cortex — Chaos Hunter"));
+    if (scenarios) {
+      console.log(chalk.gray(`   Running scenario: ${scenarios[0]}`));
+    } else {
+      console.log(chalk.gray("   Running all scenarios: latency, hard-fail, zombie"));
+    }
+
+    chaosHunter.on("progress", (message: string, color?: string) => {
+      const colorFn = color ? (chalk as any)[color] || chalk.gray : chalk.gray;
+      console.log(colorFn(message));
+    });
+
+    chaosHunter.on("scenarioComplete", (result: any) => {
+      // Per-scenario summary is handled by progress events
+    });
+
+    let chaosResult: any;
+    try {
+      chaosResult = await chaosHunter.run({ scenarios });
+    } catch (err: any) {
+      console.error(chalk.red(`\n❌ Chaos Hunter crashed: ${err.message}`));
+      process.exit(1);
+    }
+
+    const outputsPath = path.join(__dirname, "outputs");
+    if (!fs.existsSync(outputsPath)) fs.mkdirSync(outputsPath, { recursive: true });
+    const reportPath = path.join(outputsPath, "CHAOS_REPORT.json");
+    fs.writeFileSync(reportPath, JSON.stringify(chaosResult, null, 2), "utf-8");
+    console.log(chalk.gray(`\n   Report saved → ${reportPath}`));
+
+    const exitCode = chaosResult.passed ? 0 : 1;
+    if (!chaosResult.passed) {
+      console.log(
+        chalk.red(`\n❌ CHAOS GATE FAILED — ${chaosResult.totalViolations} violation(s). Platform is NOT production-hardened.`)
+      );
+    } else {
+      console.log(
+        chalk.green("\n✅ CHAOS GATE PASSED — Zero violations. Offline-First promise verified.")
+      );
+    }
+    process.exit(exitCode);
+  }
+
   console.log(chalk.cyan.bold("\n🚀 Questerix Cortex — Initializing..."));
 
   // Initialize AgentOps session if API key is present
@@ -373,6 +432,9 @@ async function main() {
 
     // ── Verify Deploy runner ─────────────────────────────────────────
     const verifyDeployRunner = new VerifyDeployRunner(adminPath);
+
+    // ── Chaos Hunter instance (used by dashboard's onRunChaos callback) ──
+    const chaosHunter = new ChaosHunter(adminPath);
     let verifyDeployInProgress = false;
 
     // Start dashboard server
