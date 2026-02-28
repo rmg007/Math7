@@ -1,6 +1,20 @@
 # Questerix Learning Log
 
-## [2026-02-28] - Slot J-6: Chaos Hunter (Cortex Resilience Module)
+## [2026-02-28] - Loki Double-Check: 3 Bugs Fixed Across Slot I, J-5, H Work
+
+- **Bug 1 — `contextClosed` guard in `global-setup.ts`** [test: no test needed — bug was in test infrastructure itself]:
+  The prior "fix" for double `context.close()` introduced a subtler variant: after the retry branch calls `await context.close()` then `return authenticateRole(...)`, the `finally` block of the _original_ call still executes after the recursive call returns — closing a context that's already gone. Fixed by tracking `contextClosed = true` before the explicit close, then checking it in `finally`. Root cause: `async/await` + `return` does NOT skip `finally`.
+
+- **Bug 2 — Stale success log in `globalSetup` body** [no test needed]:
+  The `console.log('[globalSetup] ✅ All role state files written...')` was outside the `try` block, meaning it would print even if an auth role threw — misleading CI logs. Moved inside `try`.
+
+- **Bug 3 — `auth-guard-deleted-at.e2e.spec.ts` ran on 3 viewport projects** [no test needed — scoped fix]:
+  Top-level `test.use({ storageState })` applied to `desktop`, `mobile`, and `tablet` projects. Security logic tests don't vary by viewport — they were running 12 times instead of 4. Scoped to `desktop` project only.
+
+- **Bug 4 — `quiz_submit_load.js` latency measurement used JS-layer `Date.now()` delta** [no test needed]:
+  Manual `Date.now() - start` includes JS event-loop overhead and garbage collection pauses, producing inflated latency numbers. Replaced with `res.timings.duration` (k6's native HTTP-layer measurement), consistent with `login_spike.js`. Fallback to `Date.now()` delta retained for robustness.
+
+- **Prevention Rule**: `async/await` + `return` does NOT skip `finally`. Any resource that needs tracking across both the retry branch and the normal exit path must use an explicit boolean flag — not rely on control-flow assumptions.
 
 - **Architecture Decision**: Used Playwright's built-in `page.route()` network interception API instead of a proxy tool (Toxiproxy, WireMock). This approach runs entirely in-process — no infrastructure dependencies, no ports to manage, works against the live dev server or any target URL.
 - **Scenario Design**: Three independent scenarios controlled via `CHAOS_SCENARIO` env var injected at process start by `ChaosHunter`. Each Playwright `describe` block `test.skip`s itself if its scenario isn't active, so all three scenarios share one spec file cleanly.
