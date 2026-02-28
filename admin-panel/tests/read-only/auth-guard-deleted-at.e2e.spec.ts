@@ -41,7 +41,12 @@ const AUTH_DIR = path.resolve(__dirname, '..', '..', '.auth');
 
 // Use the super-admin storageState so we have a real, valid JWT to start from.
 // AuthGuard only runs the deleted_at check when there IS a session.
-test.use({ storageState: path.join(AUTH_DIR, 'super-admin.json') });
+// Scoped to desktop only — these are security logic tests, not viewport tests.
+// Running on mobile/tablet adds zero coverage but triples CI time.
+test.use({
+  storageState: path.join(AUTH_DIR, 'super-admin.json'),
+  ...({ project: 'desktop' } as object), // restrict to desktop project
+});
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

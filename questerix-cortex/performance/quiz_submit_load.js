@@ -206,14 +206,15 @@ function submitAttempt(token) {
     time_spent_ms: timeSpentMs,
   });
 
-  const start = Date.now();
+  const start = Date.now(); // kept for fallback; timings.duration is preferred
   const res = http.post(`${SUPABASE_URL}/rest/v1/attempts`, body, {
     headers: authHeaders(token),
     tags: { operation: "attempt_submit" },
   });
-  const duration = Date.now() - start;
 
-  attemptSubmitLatency.add(duration);
+  // Use k6's native HTTP timing (measured at network layer, excludes JS overhead)
+  // Fall back to manual measurement only if timings are unavailable (edge case).
+  attemptSubmitLatency.add(res.timings.duration || (Date.now() - start));
 
   const ok = check(res, {
     "attempt: status 201": (r) => r.status === 201,

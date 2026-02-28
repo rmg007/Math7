@@ -148,6 +148,9 @@ async function authenticateRole(
   const MAX_ATTEMPTS = 2;
   const context = await browser.newContext();
   const page = await context.newPage();
+  // Guard: track whether we've already closed this context in the retry branch
+  // so the finally block doesn't attempt a second close (which throws Target closed).
+  let contextClosed = false;
 
   try {
     await page.goto(`${baseURL}/login`);
@@ -169,7 +172,8 @@ async function authenticateRole(
     console.log(`[globalSetup] ✅ ${role.name} authenticated → ${statePath}`);
   } catch (err) {
     if (attempt < MAX_ATTEMPTS) {
-      // Close context before recursing so we don't leak browser contexts
+      // Close context before recursing — mark it closed so finally doesn't double-close.
+      contextClosed = true;
       await context.close();
       console.warn(`[globalSetup] ⚠️  ${role.name} auth attempt ${attempt} failed, retrying…`);
       return authenticateRole(browser, role, baseURL, attempt + 1);
@@ -178,10 +182,10 @@ async function authenticateRole(
       `[globalSetup] ❌ ${role.name} authentication failed after ${MAX_ATTEMPTS} attempts: ${String(err)}`
     );
   } finally {
-    // Always close — handles both success path and the final-failure throw path.
-    // The retry path closes manually above (before recursion) so this finally
-    // block only runs for success and final failure, never for mid-retry.
-    await context.close();
+    // Only close if not already closed by the retry branch.
+    if (!contextClosed) {
+      await context.close();
+    }
   }
 }
 
@@ -198,9 +202,8 @@ export default async function globalSetup(config: FullConfig): Promise<void> {
     for (const role of ROLES) {
       await authenticateRole(browser, role, baseURL);
     }
+    console.log('[globalSetup] ✅ All role state files written. Tests will skip login UI.');
   } finally {
     await browser.close();
   }
-
-  console.log('[globalSetup] ✅ All role state files written. Tests will skip login UI.');
 }
