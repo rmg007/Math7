@@ -21,7 +21,7 @@
     "@modelcontextprotocol/sdk": "^1.27.1",
     "agentops": "^0.1.0",
     "better-sqlite3": "^12.6.2",
-    "chalk": "^4.1.2",
+    "chalk": "^5.6.2",
     "express": "^4.21.2",
     "glob": "^11.0.1",
     "open": "^8.4.2",
