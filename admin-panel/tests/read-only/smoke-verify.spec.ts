@@ -19,18 +19,18 @@ import { TEST_USERS } from '../test-utils';
 // ─────────────────────────────────────────────────────────────────────────────
 
 test.describe('Infrastructure @smoke', () => {
-  test('Homepage returns 200 OK', async ({ page }) => {
+  test('Homepage returns 200 OK @smoke', async ({ page }) => {
     const response = await page.goto('/');
     expect(response?.status()).toBeLessThan(400);
   });
 
-  test('Title tag is present and non-empty', async ({ page }) => {
+  test('Title tag is present and non-empty @smoke', async ({ page }) => {
     await page.goto('/');
     const title = await page.title();
     expect(title.trim().length).toBeGreaterThan(0);
   });
 
-  test('Core JavaScript bundle loads without errors', async ({ page }) => {
+  test('Core JavaScript bundle loads without errors @smoke', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', (err) => errors.push(err.message));
     await page.goto('/');
@@ -46,7 +46,7 @@ test.describe('Infrastructure @smoke', () => {
     expect(criticalErrors).toHaveLength(0);
   });
 
-  test('Content-Security-Policy meta tag is present', async ({ page }) => {
+  test('Content-Security-Policy meta tag is present @smoke', async ({ page }) => {
     await page.goto('/');
     const cspMeta = page.locator('meta[http-equiv="Content-Security-Policy"]');
     // CSP may be served as an HTTP header in production (not in meta tag) — conditional check
@@ -61,7 +61,7 @@ test.describe('Infrastructure @smoke', () => {
     expect(response?.status()).toBeLessThan(400);
   });
 
-  test('Login page CSS renders (no FOUC — page has visible styled content)', async ({ page }) => {
+  test('Login page CSS renders (no FOUC — page has visible styled content) @smoke', async ({ page }) => {
     await page.goto('/login');
     // Check the login form is rendered and has reasonable dimensions
     const form = page.locator('form, [data-testid="login-form"], input[type="email"]').first();
@@ -79,13 +79,13 @@ test.describe('Infrastructure @smoke', () => {
 test.describe('Authentication @smoke', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  test('Login page loads with email/password fields', async ({ page }) => {
+  test('Login page loads with email/password fields @smoke', async ({ page }) => {
     await page.goto('/login');
     await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 10_000 });
     await expect(page.locator('input[type="password"]')).toBeVisible({ timeout: 10_000 });
   });
 
-  test('Super-Admin can log in successfully', async ({ page }) => {
+  test('Super-Admin can log in successfully @smoke', async ({ page }) => {
     await page.goto('/login');
     await page.fill('input[type="email"]', TEST_USERS.SUPER_ADMIN.email);
     await page.fill('input[type="password"]', TEST_USERS.SUPER_ADMIN.password);
@@ -95,22 +95,22 @@ test.describe('Authentication @smoke', () => {
     await page.waitForSelector('nav, main, h1', { timeout: 10_000 });
   });
 
-  test('Unauthenticated user accessing /dashboard is redirected to /login', async ({ page }) => {
+  test('Unauthenticated user accessing /dashboard is redirected to /login @smoke', async ({ page }) => {
     await page.goto('/dashboard');
     await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
   });
 
-  test('Unauthenticated user accessing /apps is redirected to /login', async ({ page }) => {
+  test('Unauthenticated user accessing /apps is redirected to /login @smoke', async ({ page }) => {
     await page.goto('/apps');
     await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
   });
 
-  test('Unauthenticated user accessing /domains is redirected to /login', async ({ page }) => {
+  test('Unauthenticated user accessing /domains is redirected to /login @smoke', async ({ page }) => {
     await page.goto('/domains');
     await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
   });
 
-  test('Invalid credentials show error, do not redirect', async ({ page }) => {
+  test('Invalid credentials show error, do not redirect @logic', async ({ page }) => {
     await page.goto('/login');
     await page.fill('input[type="email"]', 'smoke-nonexistent@questerix.com');
     await page.fill('input[type="password"]', 'WrongPassword999!');
@@ -127,7 +127,7 @@ test.describe('Authentication @smoke', () => {
 test.describe('Multi-Tenancy @smoke', () => {
   // Uses global storageState (super-admin authenticated)
 
-  test('Platform Management page loads with app/tenant data', async ({ page }) => {
+  test('Platform Management page loads with app/tenant data @smoke', async ({ page }) => {
     await page.goto('/apps');
     // The page must render — check for the section heading or a loading state
     await expect(
@@ -138,12 +138,12 @@ test.describe('Multi-Tenancy @smoke', () => {
     ).toBeVisible({ timeout: 15_000 });
   });
 
-  test('Apps page resolves without a 404 or server error', async ({ page }) => {
+  test('Apps page resolves without a 404 or server error @smoke', async ({ page }) => {
     const response = await page.goto('/apps');
     expect(response?.status()).toBeLessThan(400);
   });
 
-  test('App branding area renders (logo or app name is visible)', async ({ page }) => {
+  test('App branding area renders (logo or app name is visible) @smoke', async ({ page }) => {
     await page.goto('/dashboard');
     // The sidebar or header should show tenant branding (app name / logo)
     const brand = page
@@ -160,7 +160,7 @@ test.describe('Multi-Tenancy @smoke', () => {
     await expect(page.locator('nav, header, aside').first()).toBeVisible();
   });
 
-  test('Subjects page loads tenant-scoped data', async ({ page }) => {
+  test('Subjects page loads tenant-scoped data @smoke', async ({ page }) => {
     await page.goto('/subjects');
     await page.waitForLoadState('networkidle');
     // Either a table, list, or empty-state message must be visible
@@ -178,7 +178,7 @@ test.describe('Multi-Tenancy @smoke', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 test.describe('Supabase Connectivity @smoke', () => {
-  test('Supabase REST API is reachable from the client environment', async ({ page, context }) => {
+  test('Supabase REST API is reachable from the client environment @smoke', async ({ page, context }) => {
     // Make a direct API request to Supabase REST using the page's fetch
     const supabaseUrl = process.env.VITE_SUPABASE_URL;
     if (!supabaseUrl) {
@@ -199,7 +199,7 @@ test.describe('Supabase Connectivity @smoke', () => {
     expect(response.status()).toBeLessThan(500);
   });
 
-  test('Admin panel app loads without 500 errors from Supabase', async ({ page }) => {
+  test('Admin panel app loads without 500 errors from Supabase @smoke', async ({ page }) => {
     const supabaseErrors: string[] = [];
 
     page.on('response', (response) => {
@@ -215,7 +215,7 @@ test.describe('Supabase Connectivity @smoke', () => {
     expect(supabaseErrors).toHaveLength(0);
   });
 
-  test('Authenticated dashboard data loads within SLA (< 10s)', async ({ page }) => {
+  test('Authenticated dashboard data loads within SLA (< 10s) @smoke', async ({ page }) => {
     const start = Date.now();
     await page.goto('/dashboard');
     // Wait for any content that indicates data has loaded
@@ -227,7 +227,7 @@ test.describe('Supabase Connectivity @smoke', () => {
     expect(elapsed).toBeLessThan(10_000);
   });
 
-  test('No uncaught Supabase auth errors in console', async ({ page }) => {
+  test('No uncaught Supabase auth errors in console @logic', async ({ page }) => {
     const authErrors: string[] = [];
     page.on('console', (msg) => {
       const text = msg.text();
@@ -260,12 +260,12 @@ test.describe('Supabase Connectivity @smoke', () => {
 test.describe('Admin Data Render @smoke', () => {
   // Uses global storageState (super-admin authenticated)
 
-  test('Dashboard page renders Platform Overview heading', async ({ page }) => {
+  test('Dashboard page renders Platform Overview heading @smoke', async ({ page }) => {
     await page.goto('/dashboard');
     await expect(page.getByText(/platform overview/i).first()).toBeVisible({ timeout: 15_000 });
   });
 
-  test('Dashboard stats/cards are rendered (not blank)', async ({ page }) => {
+  test('Dashboard stats/cards are rendered (not blank) @smoke', async ({ page }) => {
     await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
     // Any card, stat, or meaningful content must be visible
@@ -275,7 +275,7 @@ test.describe('Admin Data Render @smoke', () => {
     expect(text.trim().length).toBeGreaterThan(10);
   });
 
-  test('Apps page renders without crashing (data or empty state shown)', async ({ page }) => {
+  test('Apps page renders without crashing (data or empty state shown) @smoke', async ({ page }) => {
     await page.goto('/apps');
     await page.waitForLoadState('networkidle');
     // Must render something meaningful — a table row, card, or empty-state
@@ -285,7 +285,7 @@ test.describe('Admin Data Render @smoke', () => {
     expect(text.trim().length).toBeGreaterThan(5);
   });
 
-  test('Subjects page renders without crashing (data or empty state shown)', async ({ page }) => {
+  test('Subjects page renders without crashing (data or empty state shown) @smoke', async ({ page }) => {
     await page.goto('/subjects');
     await page.waitForLoadState('networkidle');
     const mainContent = page.locator('main').first();
@@ -294,7 +294,7 @@ test.describe('Admin Data Render @smoke', () => {
     expect(text.trim().length).toBeGreaterThan(5);
   });
 
-  test('Domains page renders without crashing', async ({ page }) => {
+  test('Domains page renders without crashing @smoke', async ({ page }) => {
     await page.goto('/domains');
     await page.waitForLoadState('networkidle');
     const mainContent = page.locator('main').first();
@@ -303,7 +303,7 @@ test.describe('Admin Data Render @smoke', () => {
     expect(text.trim().length).toBeGreaterThan(5);
   });
 
-  test('Navigation links are all present (sidebar is rendered)', async ({ page }) => {
+  test('Navigation links are all present (sidebar is rendered) @smoke', async ({ page }) => {
     await page.goto('/dashboard');
     await page.waitForSelector('nav', { timeout: 10_000 });
     const nav = page.locator('nav').first();

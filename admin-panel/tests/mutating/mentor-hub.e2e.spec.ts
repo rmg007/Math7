@@ -90,7 +90,7 @@ function mockGroupInsert(
 test.describe('AP-MENTOR-001: Create Class Group @logic', () => {
   test.skip(!process.env.TEST_ADMIN_EMAIL, 'Skipped: TEST_ADMIN_EMAIL not set');
 
-  test('admin can create a class-type group with a join code', async ({ page }) => {
+  test('admin can create a class-type group with a join code @smoke', async ({ page }) => {
     await login(page, TEST_USERS.ADMIN.email, TEST_USERS.ADMIN.password);
 
     // Mock the group INSERT
@@ -132,7 +132,7 @@ test.describe('AP-MENTOR-001: Create Class Group @logic', () => {
 test.describe('AP-MENTOR-002: Create Family Group', () => {
   test.skip(!process.env.TEST_ADMIN_EMAIL, 'Skipped: TEST_ADMIN_EMAIL not set');
 
-  test('admin can create a family-type group', async ({ page }) => {
+  test('admin can create a family-type group @smoke', async ({ page }) => {
     await login(page, TEST_USERS.ADMIN.email, TEST_USERS.ADMIN.password);
 
     await mockGroupInsert(page, { type: 'family' });
@@ -164,7 +164,7 @@ test.describe('AP-MENTOR-002: Create Family Group', () => {
 test.describe('AP-MENTOR-003: Group Detail Shows Members', () => {
   test.skip(!process.env.TEST_ADMIN_EMAIL, 'Skipped: TEST_ADMIN_EMAIL not set');
 
-  test('group detail page shows all members with roles', async ({ page }) => {
+  test('group detail page shows all members with roles @smoke', async ({ page }) => {
     await login(page, TEST_USERS.ADMIN.email, TEST_USERS.ADMIN.password);
 
     // Mock single group fetch
@@ -222,7 +222,7 @@ test.describe('AP-MENTOR-003: Group Detail Shows Members', () => {
 test.describe('AP-MENTOR-004: Create Skill Mastery Assignment', () => {
   test.skip(!process.env.TEST_ADMIN_EMAIL, 'Skipped: TEST_ADMIN_EMAIL not set');
 
-  test('admin can create a skill_mastery assignment for a group', async ({ page }) => {
+  test('admin can create a skill_mastery assignment for a group @logic', async ({ page }) => {
     await login(page, TEST_USERS.ADMIN.email, TEST_USERS.ADMIN.password);
 
     // Mock skills list for the assignment form
@@ -323,7 +323,7 @@ test.describe('AP-MENTOR-004: Create Skill Mastery Assignment', () => {
 test.describe('AP-MENTOR-005: Create Time Goal Assignment', () => {
   test.skip(!process.env.TEST_ADMIN_EMAIL, 'Skipped: TEST_ADMIN_EMAIL not set');
 
-  test('admin can create a time_goal assignment', async ({ page }) => {
+  test('admin can create a time_goal assignment @logic', async ({ page }) => {
     await login(page, TEST_USERS.ADMIN.email, TEST_USERS.ADMIN.password);
 
     await page.route('**/rest/v1/assignments**', (route) => {
@@ -381,7 +381,7 @@ test.describe('AP-MENTOR-006: Student Cannot Access Groups', () => {
     storageState: { cookies: [], origins: [] },
   });
 
-  test('unauthenticated user navigating to /groups is redirected to /login', async ({ page }) => {
+  test('unauthenticated user navigating to /groups is redirected to /login @smoke', async ({ page }) => {
     // Clear any existing auth state
     await page.goto('/login');
     await page.evaluate(() => {

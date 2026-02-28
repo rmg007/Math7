@@ -1,9 +1,8 @@
-import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { expect, test } from '@playwright/test';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { TEST_USERS } from '../test-utils';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,14 +19,7 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env.test') });
  *   npx playwright test tests/accessibility.spec.ts
  */
 
-async function login(page: import('@playwright/test').Page) {
-  await page.goto('/login');
-  await page.fill('#login-email', TEST_USERS.SUPER_ADMIN.email);
-  await page.fill('#login-password', TEST_USERS.SUPER_ADMIN.password);
-  await page.click('button[type="submit"]');
-  await page.waitForURL('**/dashboard', { timeout: 15000 });
-  await page.waitForTimeout(1500);
-}
+// Note: Authenticated pages rely on global storageState (super-admin) configured in playwright.config.ts
 
 interface AxeNode {
   html: string;
@@ -56,7 +48,7 @@ function formatViolations(violations: AxeViolation[]): string {
 }
 
 test.describe('Accessibility Audit @logic', () => {
-  test('Login page', async ({ page }) => {
+  test('Login page @smoke', async ({ page }) => {
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
 
@@ -76,10 +68,10 @@ test.describe('Accessibility Audit @logic', () => {
 
   test.describe('Authenticated pages', () => {
     test.beforeEach(async ({ page }) => {
-      await login(page);
+      // Authenticated via storageState
     });
 
-    test('Dashboard', async ({ page }) => {
+    test('Dashboard @smoke', async ({ page }) => {
       await page.goto('/dashboard');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(1000);
@@ -98,7 +90,7 @@ test.describe('Accessibility Audit @logic', () => {
       ).toHaveLength(0);
     });
 
-    test('Domains List', async ({ page }) => {
+    test('Domains List @logic', async ({ page }) => {
       await page.goto('/domains');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(1000);
@@ -117,7 +109,7 @@ test.describe('Accessibility Audit @logic', () => {
       ).toHaveLength(0);
     });
 
-    test('Questions List', async ({ page }) => {
+    test('Questions List @logic', async ({ page }) => {
       await page.goto('/questions');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(1000);
@@ -136,7 +128,7 @@ test.describe('Accessibility Audit @logic', () => {
       ).toHaveLength(0);
     });
 
-    test('Bulk Import', async ({ page }) => {
+    test('Bulk Import @logic', async ({ page }) => {
       await page.goto('/ai-import');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(1000);

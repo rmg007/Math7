@@ -35,14 +35,14 @@ test.describe('Skills Management @logic', () => {
     }
   });
 
-  test('should list all skills', async ({ page }) => {
+  test('should list all skills @smoke', async ({ page }) => {
     await page.goto('/skills');
     await expect(
       page.locator('a[href="/skills/new"], button:has-text("New Skill")').first()
     ).toBeVisible({ timeout: 15000 });
   });
 
-  test('should create a new skill', async ({ page }) => {
+  test('should create a new skill @logic', async ({ page }) => {
     const testSkill = generateTestSkill();
     await page.goto('/skills/new');
 

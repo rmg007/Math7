@@ -24,7 +24,7 @@ test.describe('Responsive Layout Verification @responsive', () => {
     await login(page);
   });
 
-  test('Dashboard should not have horizontal scroll', async ({ page }) => {
+  test('Dashboard should not have horizontal scroll @responsive', async ({ page }) => {
     await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000); // Wait for animations
@@ -38,7 +38,7 @@ test.describe('Responsive Layout Verification @responsive', () => {
     ).toBeLessThanOrEqual(clientWidth + 2);
   });
 
-  test('Domain list page should be readable', async ({ page }) => {
+  test('Domain list page should be readable @responsive', async ({ page }) => {
     await page.goto('/domains');
     await page.waitForLoadState('networkidle');
     await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
@@ -51,7 +51,7 @@ test.describe('Responsive Layout Verification @responsive', () => {
     ).toBeLessThanOrEqual(clientWidth + 2);
   });
 
-  test('Skill list page should be readable', async ({ page }) => {
+  test('Skill list page should be readable @responsive', async ({ page }) => {
     await page.goto('/skills');
     await page.waitForLoadState('networkidle');
     await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
@@ -64,7 +64,7 @@ test.describe('Responsive Layout Verification @responsive', () => {
     ).toBeLessThanOrEqual(clientWidth + 2);
   });
 
-  test('Question list page should be readable', async ({ page }) => {
+  test('Question list page should be readable @responsive', async ({ page }) => {
     await page.goto('/questions');
     await page.waitForLoadState('networkidle');
     await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
@@ -77,7 +77,7 @@ test.describe('Responsive Layout Verification @responsive', () => {
     ).toBeLessThanOrEqual(clientWidth + 2);
   });
 
-  test('Creation forms should be responsive', async ({ page }) => {
+  test('Creation forms should be responsive @responsive', async ({ page }) => {
     await page.goto('/domains/new');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);

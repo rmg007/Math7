@@ -37,14 +37,14 @@ test.describe('Domains Management @logic', () => {
     }
   });
 
-  test('should list all domains', async ({ page }) => {
+  test('should list all domains @smoke', async ({ page }) => {
     await page.goto('/domains');
     await expect(
       page.locator('a[href="/domains/new"], button:has-text("New Domain")').first()
     ).toBeVisible({ timeout: 15000 });
   });
 
-  test('should create a new domain', async ({ page }) => {
+  test('should create a new domain @logic', async ({ page }) => {
     const testDomain = {
       name: `E2E Domain ${Date.now()}`,
       description: 'Testing domain creation',
@@ -82,7 +82,7 @@ test.describe('Domains Management @logic', () => {
     await expect(domainItem).toBeVisible({ timeout: 10000 });
   });
 
-  test('should edit an existing domain', async ({ page }) => {
+  test('should edit an existing domain @logic', async ({ page }) => {
     await page.goto('/domains');
     await page.waitForSelector('table tbody tr, div[class*="bg-white"][class*="rounded-lg"]', {
       timeout: 15000,
@@ -117,7 +117,7 @@ test.describe('Domains Management @logic', () => {
     }
   });
 
-  test('should delete a domain', async ({ page }) => {
+  test('should delete a domain @logic', async ({ page }) => {
     await page.goto('/domains/new');
     const tempTitle = `Delete Me ${Date.now()}`;
 

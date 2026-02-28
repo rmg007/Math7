@@ -12,7 +12,7 @@ test.describe('Grid Layout Standards @responsive', () => {
     await page.waitForURL('/dashboard');
   });
 
-  test('Subjects table should not have icons before title', async ({ page }) => {
+  test('Subjects table should not have icons before title @responsive', async ({ page }) => {
     await page.goto('/subjects');
 
     // Wait for table to load
@@ -39,7 +39,7 @@ test.describe('Grid Layout Standards @responsive', () => {
     await expect(iconContainer).not.toBeVisible();
   });
 
-  test('Domains table status column should be single line', async ({ page }) => {
+  test('Domains table status column should be single line @responsive', async ({ page }) => {
     await page.goto('/domains');
 
     // Wait for table to load

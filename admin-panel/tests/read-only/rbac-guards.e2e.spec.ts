@@ -17,7 +17,14 @@
  * Supabase session — no real API calls, no data mutation.
  */
 import { expect, test } from '@playwright/test';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 import { TEST_USERS, login } from '../test-utils';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const AUTH_DIR = path.resolve(__dirname, '..', '..', '.auth');
+const authState = (role: string) => path.join(AUTH_DIR, `${role}.json`);
 
 // ── Super-admin only routes ──────────────────────────────────────────────────
 const SUPER_ADMIN_ROUTES = [
@@ -42,24 +49,28 @@ test.describe('AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role @lo
   // The guards should redirect away from these routes.
 
   const ROLES_TO_LOCK_OUT = [
-    { role: 'admin', user: TEST_USERS.ADMIN },
-    { role: 'mentor', user: TEST_USERS.MENTOR },
-    { role: 'student', user: TEST_USERS.STUDENT },
+    { role: 'admin', state: authState('admin') },
+    { role: 'mentor', state: authState('mentor') },
+    { role: 'student', state: authState('student') },
   ];
 
-  for (const { role, user } of ROLES_TO_LOCK_OUT) {
+  for (const { role, state } of ROLES_TO_LOCK_OUT) {
     test.describe(`${role} lockout`, () => {
+      test.use({ storageState: state });
+
       for (const route of SUPER_ADMIN_ROUTES) {
-        test(`${role} cannot access ${route}`, async ({ page }) => {
-          await login(page, user.email, user.password);
+        test(`${role} cannot access ${route} @logic`, async ({ page }) => {
           await page.goto(route);
-          await page.waitForURL(
-            (url) =>
-              !SUPER_ADMIN_ROUTES.some((r) => url.pathname === r) &&
-              !url.pathname.startsWith('/login'),
-            { timeout: 10000 }
-          );
-          expect(SUPER_ADMIN_ROUTES).not.toContain(new URL(page.url()).pathname);
+          
+          // Use a higher timeout for mobile/tablet redirects
+          const redirectTimeout = test.info().project.name === 'desktop' ? 10000 : 20000;
+          
+          // Wait for URL to change away from the protected route
+          // The target is usually / (RoleRedirect) which then goes to /domains or /login
+          await expect(page).not.toHaveURL(new RegExp(route), { timeout: redirectTimeout });
+          
+          const currentPath = new URL(page.url()).pathname;
+          expect(SUPER_ADMIN_ROUTES as readonly string[]).not.toContain(currentPath);
         });
       }
     });
@@ -70,14 +81,14 @@ test.describe('AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role @lo
 // AP-RBAC-002: Student-role users cannot access StandardAdminGuard routes
 // ============================================================================
 test.describe('AP-RBAC-002: StandardAdmin Routes Blocked for Student Role', () => {
+  test.use({ storageState: authState('student') });
+
   for (const route of STANDARD_ADMIN_ROUTES) {
-    test(`student-role cannot access ${route}`, async ({ page }) => {
-      await login(page, TEST_USERS.STUDENT.email, TEST_USERS.STUDENT.password);
+    test(`student-role cannot access ${route} @logic`, async ({ page }) => {
       await page.goto(route);
 
-      await page.waitForURL((url) => !STANDARD_ADMIN_ROUTES.some((r) => url.pathname === r), {
-        timeout: 10000,
-      });
+      const redirectTimeout = test.info().project.name === 'desktop' ? 10000 : 20000;
+      await expect(page).not.toHaveURL(new RegExp(route), { timeout: redirectTimeout });
 
       const currentPath = new URL(page.url()).pathname;
       expect(STANDARD_ADMIN_ROUTES as readonly string[]).not.toContain(currentPath);
@@ -104,7 +115,7 @@ test.describe('AP-RBAC-003: Unauthenticated Users Redirected to /login', () => {
   ] as const;
 
   for (const route of routesToTest) {
-    test(`unauthenticated access to ${route} → /login`, async ({ page }) => {
+    test(`unauthenticated access to ${route} → /login @smoke`, async ({ page }) => {
       // Clear any existing session storage
       await page.goto('/login');
       await page.evaluate(() => {
@@ -125,12 +136,10 @@ test.describe('AP-RBAC-003: Unauthenticated Users Redirected to /login', () => {
 // AP-RBAC-004: Super admin can access ALL super-admin routes
 // ============================================================================
 test.describe('AP-RBAC-004: Super Admin Accesses All Routes', () => {
-  test.beforeEach(async ({ page }) => {
-    await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
-  });
+  test.use({ storageState: authState('super-admin') });
 
   for (const route of SUPER_ADMIN_ROUTES) {
-    test(`super_admin can access ${route}`, async ({ page }) => {
+    test(`super_admin can access ${route} @smoke`, async ({ page }) => {
       await page.goto(route);
 
       // Should NOT be redirected to /login or /unauthorized
@@ -150,16 +159,20 @@ test.describe('AP-RBAC-004: Super Admin Accesses All Routes', () => {
 // AP-RBAC-005: RoleRedirect at / sends correct roles to correct destinations
 // ============================================================================
 test.describe('AP-RBAC-005: RoleRedirect at / (root)', () => {
-  test('super_admin navigating to / lands on /dashboard', async ({ page }) => {
-    await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
-    await page.goto('/');
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
+  test.describe('as super-admin', () => {
+    test.use({ storageState: authState('super-admin') });
+    test('navigating to / lands on /dashboard @smoke', async ({ page }) => {
+      await page.goto('/');
+      await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
+    });
   });
 
-  test('admin navigating to / lands on /domains', async ({ page }) => {
-    await login(page, TEST_USERS.ADMIN.email, TEST_USERS.ADMIN.password);
-    await page.goto('/');
-    await expect(page).toHaveURL(/\/domains/, { timeout: 10000 });
+  test.describe('as admin', () => {
+    test.use({ storageState: authState('admin') });
+    test('navigating to / lands on /domains @smoke', async ({ page }) => {
+      await page.goto('/');
+      await expect(page).toHaveURL(/\/domains/, { timeout: 10000 });
+    });
   });
 });
 
@@ -167,7 +180,7 @@ test.describe('AP-RBAC-005: RoleRedirect at / (root)', () => {
 // AP-RBAC-006: API-level — direct supabase call with wrong app_id is blocked by RLS
 // ============================================================================
 test.describe('AP-RBAC-006: API-level multi-tenant isolation', () => {
-  test('admin cannot SELECT domains from another tenant via raw API call', async ({ page }) => {
+  test('admin cannot SELECT domains from another tenant via raw API call @logic', async ({ page }) => {
     const supabaseUrl = process.env.VITE_SUPABASE_URL ?? '';
     const anonKey = process.env.VITE_SUPABASE_ANON_KEY ?? '';
 

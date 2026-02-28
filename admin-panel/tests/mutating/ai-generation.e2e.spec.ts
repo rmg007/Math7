@@ -127,7 +127,7 @@ test.describe('AI Generation Flow @logic', () => {
     });
   });
 
-  test('should allow uploading a document and generating questions', async ({ page }) => {
+  test('should allow uploading a document and generating questions @logic', async ({ page }) => {
     // Check if we are on the page
     await expect(page.getByText(/AI Question Generator/i)).toBeVisible();
 

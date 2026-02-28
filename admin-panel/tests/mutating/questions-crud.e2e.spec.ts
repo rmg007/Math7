@@ -34,14 +34,14 @@ test.describe('Questions Management @logic', () => {
     }
   });
 
-  test('should list all questions', async ({ page }) => {
+  test('should list all questions @smoke', async ({ page }) => {
     await page.goto('/questions');
     await expect(
       page.locator('a[href="/questions/new"], button:has-text("New Question")').first()
     ).toBeVisible({ timeout: 15000 });
   });
 
-  test('should create a new MCQ question', async ({ page }) => {
+  test('should create a new MCQ question @logic', async ({ page }) => {
     await page.goto('/questions/new');
 
     const contentEditor = page.locator('.ProseMirror, textarea[name="content"]').first();

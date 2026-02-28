@@ -8,14 +8,14 @@ import { ensureMobileMenuOpen } from '../test-utils';
  * Uses global storageState (pre-authenticated as SUPER_ADMIN).
  */
 test.describe('Dashboard & Navigation @smoke', () => {
-  test('should load dashboard', async ({ page }) => {
+  test('should load dashboard @smoke', async ({ page }) => {
     await page.goto('/dashboard');
     // Wait for either the dashboard header or the platform overview text
     await expect(page.locator('h1', { hasText: 'Dashboard' })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/Platform overview/i)).toBeVisible({ timeout: 15_000 });
   });
 
-  test('should navigate to different sections from dashboard', async ({ page }) => {
+  test('should navigate to different sections from dashboard @smoke', async ({ page }) => {
     await page.goto('/dashboard');
     await ensureMobileMenuOpen(page);
 

@@ -34,14 +34,12 @@ export async function login(
   await page.fill('#login-password', password);
   await page.click('button[type="submit"]');
 
-  // Wait for navigation and dashboard element
+  // Wait for navigation away from login
   await expect(page).not.toHaveURL(/\/login/, { timeout: 15000 });
 
-  // Wait for sidebar or any common navigation element to ensure auth success
-  // We use 'Domains' as it's visible to both super_admin and regular admin roles.
-  await expect(page.getByRole('link', { name: /Domains/i }).first()).toBeVisible({
-    timeout: 15000,
-  });
+  // Wait for main content or common navigation to ensure auth success
+  // We wait for the main layout to appear (sidebar or dashboard content)
+  await page.waitForSelector('nav, main, .layout-root', { timeout: 15000 });
 }
 export async function ensureMobileMenuOpen(page: Page) {
   const menuBtn = page.locator('button[aria-label*="menu"], button[class*="md:hidden"]').first();

@@ -10,7 +10,7 @@ import { ensureMobileMenuOpen } from '../test-utils';
 test.describe('Mobile Navigation @responsive', () => {
   test.skip(({ isMobile }) => !isMobile, 'Only runs on mobile viewports');
 
-  test('should open and close mobile menu', async ({ page }) => {
+  test('should open and close mobile menu @responsive', async ({ page }) => {
     await page.goto('/dashboard');
 
     const menuBtn = page.locator('button[aria-label*="menu"], button[class*="md:hidden"]').first();
@@ -34,7 +34,7 @@ test.describe('Mobile Navigation @responsive', () => {
     ).not.toBeVisible();
   });
 
-  test('should navigate via mobile menu', async ({ page }) => {
+  test('should navigate via mobile menu @responsive', async ({ page }) => {
     await page.goto('/dashboard');
     await ensureMobileMenuOpen(page);
 

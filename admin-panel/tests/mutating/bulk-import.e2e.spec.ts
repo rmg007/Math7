@@ -29,14 +29,14 @@ test.describe('Bulk Import Feature (Golden Path) @logic', () => {
     await expect(page.getByText('Curriculum Nexus')).toBeVisible({ timeout: 15000 });
   });
 
-  test('should allow downloading the CSV template', async ({ page }) => {
+  test('should allow downloading the CSV template @smoke', async ({ page }) => {
     const downloadPromise = page.waitForEvent('download');
     await page.getByRole('button', { name: /Template/i }).click();
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toContain('bulk_import_template');
   });
 
-  test('should successfully parse questions from AI prompt', async ({ page }) => {
+  test('should successfully parse questions from AI prompt @logic', async ({ page }) => {
     await page.route('**/functions/v1/parse-import-prompt', async (route) => {
       await route.fulfill({
         status: 200,
@@ -57,7 +57,7 @@ test.describe('Bulk Import Feature (Golden Path) @logic', () => {
     await expect(page.getByText(/1 Pending Ingestion Units/i)).toBeVisible();
   });
 
-  test('should commit buffer to production matrix (Real Import)', async ({ page }) => {
+  test('should commit buffer to production matrix (Real Import) @logic', async ({ page }) => {
     // Mock AI extraction
     await page.route('**/functions/v1/parse-import-prompt', async (route) => {
       await route.fulfill({
@@ -109,7 +109,7 @@ test.describe('Bulk Import Feature (Golden Path) @logic', () => {
     ).toBeDisabled();
   });
 
-  test('should handle import errors gracefully', async ({ page }) => {
+  test('should handle import errors gracefully @logic', async ({ page }) => {
     // Mock AI extraction
     await page.route('**/functions/v1/parse-import-prompt', async (route) => {
       await route.fulfill({

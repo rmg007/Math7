@@ -28,7 +28,7 @@ test.describe('Super Admin Cross-App Operations @logic', () => {
     await expect(page).toHaveURL('/dashboard');
   });
 
-  test('should be able to see domains from other apps when filtering by "ALL APPS"', async ({
+  test('should be able to see domains from other apps when filtering by "ALL APPS" @logic', async ({
     page,
   }) => {
     await page.goto('/domains');
@@ -50,7 +50,7 @@ test.describe('Super Admin Cross-App Operations @logic', () => {
     // If we can't guarantee cross-app data, we'll skip the deletion part but verify the UI element and filter logic.
   });
 
-  test('should verify deletion capability persists across app switch', async ({ page }) => {
+  test('should verify deletion capability persists across app switch @logic', async ({ page }) => {
     // Navigate to Domains
     await page.goto('/domains');
 

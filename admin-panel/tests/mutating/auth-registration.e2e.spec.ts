@@ -53,7 +53,7 @@ test.describe('Registration Integrity & Auth Flow (Task 1.6/1.7) @logic', () => 
     }
   });
 
-  test('Registration: Valid invitation code creates profile and redirects to dashboard', async ({
+  test('Registration: Valid invitation code creates profile and redirects to dashboard @smoke', async ({
     page,
   }) => {
     testUserEmail = `reg-test-${Date.now()}@example.com`;
@@ -98,7 +98,7 @@ test.describe('Registration Integrity & Auth Flow (Task 1.6/1.7) @logic', () => 
     // we verify the row exists.
   });
 
-  test('Registration: Expired/Used invitation code is rejected (Regression)', async ({ page }) => {
+  test('Registration: Expired/Used invitation code is rejected (Regression) @logic', async ({ page }) => {
     // 1. First, consume the code (or use an already consumed one)
     // We can't easily reuse the one from the previous test if it runs in parallel,
     // so let's create a new one and manually mark it used.

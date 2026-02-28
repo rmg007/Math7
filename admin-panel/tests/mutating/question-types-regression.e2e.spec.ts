@@ -47,7 +47,7 @@ test.beforeEach(async ({ page }) => {
 // ---------------------------------------------------------------------------
 
 test.describe('A — MCQ question @logic', () => {
-  test('creates a valid MCQ and appears in the question list', async ({ page }) => {
+  test('creates a valid MCQ and appears in the question list @smoke', async ({ page }) => {
     const formPage = new QuestionFormPage(page);
     await formPage.gotoNew();
 
@@ -73,7 +73,7 @@ test.describe('A — MCQ question @logic', () => {
     });
   });
 
-  test('requires a correct-answer selection — shows validation error without it', async ({
+  test('requires a correct-answer selection — shows validation error without it @logic', async ({
     page,
   }) => {
     const formPage = new QuestionFormPage(page);
@@ -98,7 +98,7 @@ test.describe('A — MCQ question @logic', () => {
     expect(stillOnForm).toBe(true);
   });
 
-  test('append-option button adds a 5th input (above default 4)', async ({ page }) => {
+  test('append-option button adds a 5th input (above default 4) @logic', async ({ page }) => {
     const formPage = new QuestionFormPage(page);
     await formPage.gotoNew();
 
@@ -117,7 +117,7 @@ test.describe('A — MCQ question @logic', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('B — Subjective (text_input) question', () => {
-  test('creates a text_input question and appears in the question list', async ({ page }) => {
+  test('creates a text_input question and appears in the question list @smoke', async ({ page }) => {
     const formPage = new QuestionFormPage(page);
 
     await formPage.createSubjective({
@@ -132,7 +132,7 @@ test.describe('B — Subjective (text_input) question', () => {
     });
   });
 
-  test('cannot submit without filling the answer field', async ({ page }) => {
+  test('cannot submit without filling the answer field @logic', async ({ page }) => {
     const formPage = new QuestionFormPage(page);
     await formPage.gotoNew();
     await formPage.selectType('text_input');
@@ -147,7 +147,7 @@ test.describe('B — Subjective (text_input) question', () => {
     expect(stillOnForm).toBe(true);
   });
 
-  test('answer input is visible after switching to text_input type', async ({ page }) => {
+  test('answer input is visible after switching to text_input type @logic', async ({ page }) => {
     const formPage = new QuestionFormPage(page);
     await formPage.gotoNew();
     await formPage.selectType('text_input');
@@ -161,7 +161,7 @@ test.describe('B — Subjective (text_input) question', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('C — Boolean question', () => {
-  test('creates a TRUE boolean question and appears in the question list', async ({ page }) => {
+  test('creates a TRUE boolean question and appears in the question list @smoke', async ({ page }) => {
     const formPage = new QuestionFormPage(page);
 
     await formPage.createBoolean({
@@ -174,7 +174,7 @@ test.describe('C — Boolean question', () => {
     await expect(page.getByText('Is the Earth round?').first()).toBeVisible({ timeout: 15_000 });
   });
 
-  test('creates a FALSE boolean question and appears in the question list', async ({ page }) => {
+  test('creates a FALSE boolean question and appears in the question list @smoke', async ({ page }) => {
     const formPage = new QuestionFormPage(page);
 
     await formPage.createBoolean({
@@ -187,7 +187,7 @@ test.describe('C — Boolean question', () => {
     await expect(page.getByText('Is the Earth flat?').first()).toBeVisible({ timeout: 15_000 });
   });
 
-  test('boolean switch is visible after selecting boolean type', async ({ page }) => {
+  test('boolean switch is visible after selecting boolean type @logic', async ({ page }) => {
     const formPage = new QuestionFormPage(page);
     await formPage.gotoNew();
     await formPage.selectType('boolean');
@@ -237,7 +237,7 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
     ],
   };
 
-  test('AI tab loads, prompt fills, Sync button triggers, and buffer populates', async ({
+  test('AI tab loads, prompt fills, Sync button triggers, and buffer populates @smoke', async ({
     page,
   }) => {
     // Intercept both potential AI parse endpoints (Workers AI and Supabase Edge Functions)
@@ -296,7 +296,7 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
     expect(count).toBeGreaterThan(0);
   });
 
-  test('Sync button is disabled when prompt is empty', async ({ page }) => {
+  test('Sync button is disabled when prompt is empty @logic', async ({ page }) => {
     await page.goto('/ai-import');
     await page.locator('[data-testid="bulk-import-tab-ai"]').click();
 
@@ -304,7 +304,7 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
     await expect(syncBtn).toBeDisabled();
   });
 
-  test('Sync button becomes enabled after typing in prompt textarea', async ({ page }) => {
+  test('Sync button becomes enabled after typing in prompt textarea @logic', async ({ page }) => {
     await page.goto('/ai-import');
     await page.locator('[data-testid="bulk-import-tab-ai"]').click();
 
@@ -315,7 +315,7 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
     await expect(syncBtn).not.toBeDisabled();
   });
 
-  test('Dry Run switch is visible and togglable', async ({ page }) => {
+  test('Dry Run switch is visible and togglable @logic', async ({ page }) => {
     await page.goto('/ai-import');
 
     const dryRunSwitch = page.locator('[data-testid="bulk-import-dryrun-switch"]');
@@ -328,7 +328,7 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
     expect(initialChecked).not.toBe(afterChecked);
   });
 
-  test('CSV tab shows file-upload input', async ({ page }) => {
+  test('CSV tab shows file-upload input @smoke', async ({ page }) => {
     await page.goto('/ai-import');
     await page.locator('[data-testid="bulk-import-tab-csv"]').click();
 
@@ -336,7 +336,7 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
     await expect(fileInput).toBeAttached(); // hidden but present
   });
 
-  test('Template button triggers a CSV download', async ({ page }) => {
+  test('Template button triggers a CSV download @logic', async ({ page }) => {
     await page.goto('/ai-import');
 
     const [download] = await Promise.all([
@@ -356,7 +356,7 @@ test.describe('E — Form validation guard', () => {
   const types = ['multiple_choice', 'text_input', 'boolean'] as const;
 
   for (const qtype of types) {
-    test(`submitting empty ${qtype} form stays on the form`, async ({ page }) => {
+    test(`submitting empty ${qtype} form stays on the form @logic`, async ({ page }) => {
       const formPage = new QuestionFormPage(page);
       await formPage.gotoNew();
       if (qtype !== 'multiple_choice') {

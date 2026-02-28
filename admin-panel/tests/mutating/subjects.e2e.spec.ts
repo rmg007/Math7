@@ -1,21 +1,26 @@
 import { expect, test } from '@playwright/test';
-import { TEST_USERS, login } from '../test-utils';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const AUTH_DIR = path.resolve(__dirname, '..', '..', '.auth');
+const authState = (role: string) => path.join(AUTH_DIR, `${role}.json`);
 
 test.describe('Subjects Management Form Validation @logic', () => {
+  test.use({ storageState: authState('super-admin') });
+
   test.beforeEach(async ({ page }) => {
-    await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
+    await page.goto('/subjects');
+    // Wait for heading to ensure page is hydrated
+    await expect(page.getByRole('heading', { name: /Subjects/i }).first()).toBeVisible({ timeout: 20000 });
   });
 
-  test('should validate required fields and formats', async ({ page }) => {
-    await page.goto('/subjects');
-    await page.waitForLoadState('networkidle'); // Wait for full hydration
-
+  test('should validate required fields and formats @logic', async ({ page }) => {
     // Open "New Subject" dialog
     const newSubjectBtn = page.getByRole('button', { name: /New Subject/i });
-    // Handle potential multiple buttons (e.g. mobile view or loading skeletons)
-    // Use .first() but ensure it's the right one
+    await expect(newSubjectBtn.first()).toBeVisible({ timeout: 15000 });
     const btn = newSubjectBtn.first();
-    await expect(btn).toBeVisible({ timeout: 15000 });
     await btn.click();
 
     await expect(page.getByRole('dialog')).toBeVisible();
@@ -73,4 +78,5 @@ test.describe('Subjects Management Form Validation @logic', () => {
     await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15000 });
     await expect(page.getByText(`Subject ${uniqueId}`).first()).toBeVisible({ timeout: 15000 });
   });
+
 });

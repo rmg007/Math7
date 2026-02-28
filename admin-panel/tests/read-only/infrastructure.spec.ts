@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Infrastructure & Security Headers @logic', () => {
-  test('CSP: Content-Security-Policy allows Cloudflare Workers for AI', async ({ page }) => {
+  test('CSP: Content-Security-Policy allows Cloudflare Workers for AI @logic', async ({ page }) => {
     // Navigate to the root to load the head meta tags
     await page.goto('/');
 
@@ -24,7 +24,7 @@ test.describe('Infrastructure & Security Headers @logic', () => {
     expect(content).toContain('http://localhost:*');
   });
 
-  test('Security: X-Frame-Options and other headers are configured', async ({ page }) => {
+  test('Security: X-Frame-Options and other headers are configured @smoke', async ({ page }) => {
     // Note: This test checks if the environment is serving headers.
     // In local dev, Vite might not serve the _headers file, but we should
     // at least verify the page title or basic structure to ensure the app is healthy.

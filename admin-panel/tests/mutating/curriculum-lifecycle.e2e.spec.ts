@@ -37,7 +37,7 @@ test.describe('Curriculum Lifecycle (P0) @smoke', () => {
     }
   });
 
-  test('AP-CURR-001: Create Domain', async ({ page }) => {
+  test('AP-CURR-001: Create Domain @smoke', async ({ page }) => {
     const title = await createDomain(page, {
       title: `E2E Domain ${timestamp}`,
       slug: domainSlug,
@@ -47,7 +47,7 @@ test.describe('Curriculum Lifecycle (P0) @smoke', () => {
     await expect(page.getByText(title).first()).toBeVisible();
   });
 
-  test('AP-CURR-004: Create Skill', async ({ page }) => {
+  test('AP-CURR-004: Create Skill @smoke', async ({ page }) => {
     await createSkill(page, {
       title: `E2E Skill ${timestamp}`,
       slug: skillSlug,
@@ -58,7 +58,7 @@ test.describe('Curriculum Lifecycle (P0) @smoke', () => {
     await expect(page.getByText(`E2E Skill ${timestamp}`).first()).toBeVisible();
   });
 
-  test('AP-CURR-005: Create Question (Multiple Choice)', async ({ page }) => {
+  test('AP-CURR-005: Create Question (Multiple Choice) @smoke', async ({ page }) => {
     await createMCQQuestion(page, {
       questionText: `What is ${timestamp} + 1?`,
       skillName: new RegExp(`E2E Skill ${timestamp}`, 'i'),
@@ -69,7 +69,7 @@ test.describe('Curriculum Lifecycle (P0) @smoke', () => {
     await expect(page.getByText(`What is ${timestamp} + 1?`).first()).toBeVisible();
   });
 
-  test('AP-CURR-007: Publish Curriculum and Verify Snapshot', async ({ page }) => {
+  test('AP-CURR-007: Publish Curriculum and Verify Snapshot @smoke', async ({ page }) => {
     // 1. Get current versions to compare
     const vhPage = new VersionHistoryPage(page);
     await vhPage.goto();

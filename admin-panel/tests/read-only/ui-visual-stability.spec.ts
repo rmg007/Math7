@@ -23,7 +23,7 @@ test.describe('UI Visual Stability — Rich Text Editor & Symbol Matrix @respons
     qForm = new QuestionFormPage(page);
   });
 
-  test('Symbol Matrix popup should be visible and not clipped (Desktop)', async ({ page }) => {
+  test('Symbol Matrix popup should be visible and not clipped (Desktop) @responsive', async ({ page }) => {
     await qForm.gotoNew();
 
     // Open Symbol Matrix via direct click for maximum reliability
@@ -54,7 +54,7 @@ test.describe('UI Visual Stability — Rich Text Editor & Symbol Matrix @respons
     }
   });
 
-  test('Symbol Matrix popup should be visible and not clipped (Mobile 375px)', async ({ page }) => {
+  test('Symbol Matrix popup should be visible and not clipped (Mobile 375px) @responsive', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await qForm.gotoNew();
 
@@ -85,7 +85,7 @@ test.describe('UI Visual Stability — Rich Text Editor & Symbol Matrix @respons
     }
   });
 
-  test('Rich Text Editor toolbar should be accessible', async ({ page }) => {
+  test('Rich Text Editor toolbar should be accessible @smoke', async ({ page }) => {
     await qForm.gotoNew();
 
     const editor = page.locator('.ProseMirror').first();

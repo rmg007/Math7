@@ -36,7 +36,7 @@ test.describe('Visual Regression — Key Pages @responsive', () => {
     await login(page);
   });
 
-  test('Dashboard', async ({ page }) => {
+  test('Dashboard @responsive', async ({ page }) => {
     await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -48,7 +48,7 @@ test.describe('Visual Regression — Key Pages @responsive', () => {
     });
   });
 
-  test('Domains List', async ({ page }) => {
+  test('Domains List @responsive', async ({ page }) => {
     await page.goto('/domains');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -58,7 +58,7 @@ test.describe('Visual Regression — Key Pages @responsive', () => {
     });
   });
 
-  test('Skills List', async ({ page }) => {
+  test('Skills List @responsive', async ({ page }) => {
     await page.goto('/skills');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -68,7 +68,7 @@ test.describe('Visual Regression — Key Pages @responsive', () => {
     });
   });
 
-  test('Questions List', async ({ page }) => {
+  test('Questions List @responsive', async ({ page }) => {
     await page.goto('/questions');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
@@ -81,7 +81,7 @@ test.describe('Visual Regression — Key Pages @responsive', () => {
     });
   });
 
-  test('Login Page (logged out)', async ({ page }) => {
+  test('Login Page (logged out) @responsive', async ({ page }) => {
     // Navigate to login without being logged in
     await page.goto('/login');
     await page.waitForLoadState('networkidle');

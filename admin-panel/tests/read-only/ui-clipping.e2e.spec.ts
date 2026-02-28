@@ -11,7 +11,7 @@ test.describe('UI Clipping and Interaction Verification @responsive', () => {
     await page.waitForURL('**/dashboard');
   });
 
-  test('Symbol Matrix palette should not be clipped and should be fully visible on mobile', async ({
+  test('Symbol Matrix palette should not be clipped and should be fully visible on mobile @responsive', async ({
     page,
   }) => {
     // Set viewport to mobile width
@@ -54,7 +54,7 @@ test.describe('UI Clipping and Interaction Verification @responsive', () => {
     await expect(palette).not.toBeVisible();
   });
 
-  test('RichTextEditor toolbar should be fully functional and visible', async ({ page }) => {
+  test('RichTextEditor toolbar should be fully functional and visible @smoke', async ({ page }) => {
     await page.goto('/questions/new');
 
     const editor = page.locator('.ProseMirror').first();
