@@ -25,12 +25,12 @@
 
 ## 📋 Queue (Audit & Review)
 
-### [/] Slot I: Security & Reliability Audit (Post-Recovery)
+### [x] Slot I: Security & Reliability Audit (Post-Recovery)
 
 - **Objective**: Deep-dive audit of the new `storageState` implementation for edge cases.
-  - [ ] Audit token expiry handling in `global-setup.ts`.
-  - [ ] Verify `deleted_at` profile check in `AuthGuard` under E2E scenarios.
-  - [ ] Implement automated snapshot pruning for `.auth/` artifacts.
+  - [x] Audit token expiry handling in `global-setup.ts`.
+  - [x] Verify `deleted_at` profile check in `AuthGuard` under E2E scenarios.
+  - [x] Implement automated snapshot pruning for `.auth/` artifacts.
 
 ---
 
