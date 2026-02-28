@@ -100,15 +100,15 @@
 
 ---
 
-### [/] Slot J-6: Chaos Hunter (Cortex Resilience Module) 🟠 NEAR-TERM
+### [x] Slot J-6: Chaos Hunter (Cortex Resilience Module) 🟠 NEAR-TERM
 
 - **Objective**: Validate the "Offline-First" and "Degraded State" promises by injecting real failures under controlled conditions.
 - **Why now**: We have declared "Offline-First" as a core platform promise. Without chaos testing, this promise is unverified marketing, not engineering.
-  - [ ] Design a `cortex chaos` runner mode inside Cortex.
-  - [ ] Implement Latency Injection: 5,000ms delay on all `/rest/v1/*` Supabase API calls.
-  - [ ] Implement Hard Failure Injection: Simulated `503` on specific Edge Functions mid-request.
-  - [ ] Implement Zombie Scenario: Kill the Python Content Engine process mid-generation.
-  - [ ] Define assertions: UI must always show recovery path, never a blank/crashed screen.
+  - [x] Design a `cortex chaos` runner mode inside Cortex.
+  - [x] Implement Latency Injection: 5,000ms delay on all `/rest/v1/*` Supabase API calls.
+  - [x] Implement Hard Failure Injection: Simulated `503` on specific Edge Functions mid-request.
+  - [x] Implement Zombie Scenario: Kill the Python Content Engine process mid-generation.
+  - [x] Define assertions: UI must always show recovery path, never a blank/crashed screen.
 - **Verification**: Zero blank screens or unhandled crashes under all three chaos scenarios.
 - **Gate**: Must be completed before declaring the platform "production-hardened."
 
