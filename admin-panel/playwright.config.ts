@@ -56,6 +56,9 @@ export default defineConfig({
     },
     {
       name: 'mobile',
+      // Exclude logic-only security tests that don't vary by viewport.
+      // auth-guard-deleted-at runs on desktop only — no value in running 3x.
+      testMatch: /^(?!.*auth-guard-deleted-at).*\.spec\.ts$/,
       use: {
         ...devices['iPhone 12'],
         viewport: { width: 375, height: 812 },
@@ -64,6 +67,7 @@ export default defineConfig({
     },
     {
       name: 'tablet',
+      testMatch: /^(?!.*auth-guard-deleted-at).*\.spec\.ts$/,
       use: {
         ...devices['iPad Mini'],
         viewport: { width: 768, height: 1024 },
