@@ -139,6 +139,64 @@ jobs:
           path: admin-panel/test-results/**/*.webm
           retention-days: 7
 
+  # ── Accessibility Gate ─────────────────────────────────────────────────────
+  # Runs in parallel with test-e2e. Zero critical/serious violations = green.
+  # Exceptions are documented in admin-panel/docs/A11Y_EXCEPTIONS.md.
+  a11y-gate:
+    name: Accessibility Gate (WCAG 2.1 AA)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      TEST_SUPER_ADMIN_EMAIL: ${{ secrets.TEST_SUPER_ADMIN_EMAIL }}
+      TEST_SUPER_ADMIN_PASSWORD: ${{ secrets.TEST_SUPER_ADMIN_PASSWORD }}
+
+    defaults:
+      run:
+        working-directory: admin-panel
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@60edb5dd545a775178f525247ffadfb6f1e396a5 # v4.0.2
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: admin-panel/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Playwright browsers (Chromium only)
+        run: npx playwright install --with-deps chromium
+
+      - name: Create test environment file
+        run: |
+          cat > .env.test.local <<EOF
+          TEST_SUPER_ADMIN_EMAIL=$TEST_SUPER_ADMIN_EMAIL
+          TEST_SUPER_ADMIN_PASSWORD=$TEST_SUPER_ADMIN_PASSWORD
+          VITE_SUPABASE_URL=${{ secrets.TEST_VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY=${{ secrets.TEST_VITE_SUPABASE_ANON_KEY }}
+          VITE_SENTRY_ENABLED=false
+          VITE_ENABLE_ANALYTICS=false
+          VITE_ENABLE_DEBUG_LOGGING=false
+          EOF
+
+      - name: Run a11y gate (@a11y grep, desktop project)
+        run: npm run test:e2e:a11y
+        env:
+          CI: true
+
+      - name: Upload a11y report
+        if: always()
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3feb70da27092497d # v4.4.1
+        with:
+          name: a11y-playwright-report
+          path: admin-panel/playwright-report/
+          retention-days: 30
+
       - name: Comment PR with test results
         if: github.event_name == 'pull_request' && always()
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
