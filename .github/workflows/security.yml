@@ -84,14 +84,16 @@ jobs:
         # --audit-level=high exits non-zero if any High or Critical CVE is found
         run: npm audit --audit-level=high
 
-  # ── 4. Snyk — deeper CVE + license scan on every PR ──────────────────────────
-  # Requires SNYK_TOKEN secret. If the secret is absent the step is skipped
-  # gracefully so forks / contributors aren't broken.
+  # ── 4. Snyk — deeper CVE + license scan ─────────────────────────────────────
+  # Opt-in gate: only runs when the repository variable SNYK_ENABLED=true AND
+  # the SNYK_TOKEN secret is configured. This prevents CI breakage on repos
+  # or forks where the token has not been set up.
+  # Setup instructions: admin-panel/docs/SECURITY_GATES.md
   snyk:
     name: Snyk CVE Scan
     runs-on: ubuntu-latest
-    # Only run if we have the secret — avoids breaking forks
-    if: vars.SNYK_ENABLED == 'true' || github.event_name != 'pull_request' || github.actor == github.repository_owner
+    # Strictly gated — only run when explicitly opted in via repo variable
+    if: vars.SNYK_ENABLED == 'true'
     permissions:
       contents: read
       security-events: write
@@ -108,8 +110,10 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Run Snyk to check for vulnerabilities
+        id: snyk-test
         uses: snyk/actions/node@master
-        continue-on-error: false
+        # continue-on-error so the SARIF upload step always runs
+        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
@@ -122,6 +126,13 @@ jobs:
         with:
           sarif_file: snyk.sarif
         continue-on-error: true
+
+      - name: Fail job if Snyk found High/Critical vulnerabilities
+        # Hard gate AFTER uploading SARIF — ensures the report is visible even on failure
+        if: steps.snyk-test.outcome == 'failure'
+        run: |
+          echo "❌ Snyk detected High or Critical vulnerabilities. See Security tab for details."
+          exit 1
 
   # ── 5. Python Security: pip-audit + Bandit ────────────────────────────────────
   # Covers all Python scripts in scripts/ and any future content-engine/ dir.
