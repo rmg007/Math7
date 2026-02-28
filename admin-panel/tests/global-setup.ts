@@ -50,28 +50,135 @@ const ROLES = [
   },
 ] as const;
 
+/**
+ * Decode a JWT payload without verifying the signature.
+ * Used only to read the `exp` claim for logging/validation.
+ */
+function decodeJwtExpiry(token: string): Date | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf-8')) as {
+      exp?: number;
+    };
+    return payload.exp ? new Date(payload.exp * 1000) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Validate that the saved storageState contains a non-expired Supabase session.
+ * We warn (not throw) on expiry problems — a failed probe is already a hard failure above.
+ *
+ * @param statePath - Path to the saved .auth/<role>.json file
+ * @param role      - Role name for log messages
+ * @param minTtlMs  - Minimum required remaining TTL in ms (default: 60 minutes)
+ */
+function validateStateExpiry(
+  statePath: string,
+  role: string,
+  minTtlMs = 60 * 60 * 1000 // 1 hour — enough for any CI run
+): void {
+  try {
+    const raw = fs.readFileSync(statePath, 'utf-8');
+
+    // Guard: empty or skeleton file
+    if (!raw || raw.length < 50) {
+      console.warn(`[globalSetup] ⚠️  ${role}: state file is empty or suspiciously small (${raw.length} bytes).`);
+      return;
+    }
+
+    const state = JSON.parse(raw) as {
+      origins?: Array<{
+        origin: string;
+        localStorage?: Array<{ name: string; value: string }>;
+      }>;
+    };
+
+    // Locate the Supabase auth token in localStorage origins
+    let accessToken: string | null = null;
+    for (const origin of state.origins ?? []) {
+      for (const item of origin.localStorage ?? []) {
+        if (item.name.endsWith('-auth-token')) {
+          try {
+            const parsed = JSON.parse(item.value) as { access_token?: string };
+            accessToken = parsed.access_token ?? null;
+          } catch {
+            // Not JSON — skip
+          }
+        }
+      }
+    }
+
+    if (!accessToken) {
+      console.warn(`[globalSetup] ⚠️  ${role}: no Supabase auth token found in saved state. Tests may hit auth errors.`);
+      return;
+    }
+
+    const expiry = decodeJwtExpiry(accessToken);
+    if (!expiry) {
+      console.warn(`[globalSetup] ⚠️  ${role}: could not decode JWT expiry.`);
+      return;
+    }
+
+    const ttlMs = expiry.getTime() - Date.now();
+    const ttlMin = Math.round(ttlMs / 60000);
+
+    if (ttlMs < minTtlMs) {
+      console.warn(
+        `[globalSetup] ⚠️  ${role}: JWT expires in ${ttlMin}min (${expiry.toISOString()}) — ` +
+        `less than the required ${Math.round(minTtlMs / 60000)}min window. ` +
+        'Increase Supabase JWT_EXPIRY in the test project settings or reduce CI run duration.'
+      );
+    } else {
+      console.log(`[globalSetup] ✅ ${role}: JWT valid for ${ttlMin}min (expires ${expiry.toISOString()})`);
+    }
+  } catch (e) {
+    console.warn(`[globalSetup] ⚠️  ${role}: could not validate state file:`, e);
+  }
+}
+
 async function authenticateRole(
   browser: import('@playwright/test').Browser,
   role: (typeof ROLES)[number],
-  baseURL: string
+  baseURL: string,
+  attempt = 1
 ): Promise<void> {
+  const MAX_ATTEMPTS = 2;
   const context = await browser.newContext();
   const page = await context.newPage();
 
-  await page.goto(`${baseURL}/login`);
-  await page.fill('#login-email', role.email);
-  await page.fill('#login-password', role.password);
-  await page.click('button[type="submit"]');
+  try {
+    await page.goto(`${baseURL}/login`);
+    await page.fill('#login-email', role.email);
+    await page.fill('#login-password', role.password);
+    await page.click('button[type="submit"]');
 
-  // Wait for successful auth — sidebar nav or redirection confirms we're in
-  // We accept both /dashboard and /domains as redirection targets
-  await page.waitForURL(/\/((dashboard)|(domains))/, { timeout: 20000 });
+    // Wait for successful auth — sidebar nav or redirection confirms we're in
+    // We accept both /dashboard and /domains as redirection targets
+    await page.waitForURL(/\/((dashboard)|(domains))/, { timeout: 20000 });
 
-  const statePath = path.join(AUTH_DIR, `${role.name}.json`);
-  await context.storageState({ path: statePath });
-  await context.close();
+    const statePath = path.join(AUTH_DIR, `${role.name}.json`);
+    await context.storageState({ path: statePath });
 
-  console.log(`[globalSetup] ✅ ${role.name} authenticated → ${statePath}`);
+    // ── Token expiry validation ──────────────────────────────────────────────
+    // Decode the saved JWT and warn if it won't last the full CI run window.
+    validateStateExpiry(statePath, role.name);
+
+    console.log(`[globalSetup] ✅ ${role.name} authenticated → ${statePath}`);
+  } catch (err) {
+    await context.close();
+    if (attempt < MAX_ATTEMPTS) {
+      console.warn(`[globalSetup] ⚠️  ${role.name} auth attempt ${attempt} failed, retrying…`);
+      return authenticateRole(browser, role, baseURL, attempt + 1);
+    }
+    throw new Error(
+      `[globalSetup] ❌ ${role.name} authentication failed after ${MAX_ATTEMPTS} attempts: ${String(err)}`
+    );
+  } finally {
+    await context.close();
+  }
 }
 
 export default async function globalSetup(config: FullConfig): Promise<void> {

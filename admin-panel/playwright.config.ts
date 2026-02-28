@@ -18,6 +18,7 @@ const authState = (role: string) => path.join(AUTH_DIR, `${role}.json`);
 export default defineConfig({
   testDir: './tests',
   globalSetup: './tests/global-setup.ts',
+  globalTeardown: './tests/global-teardown.ts',
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,

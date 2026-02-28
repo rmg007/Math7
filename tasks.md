@@ -25,7 +25,7 @@
 
 ## 📋 Queue (Audit & Review)
 
-### [ ] Slot I: Security & Reliability Audit (Post-Recovery)
+### [/] Slot I: Security & Reliability Audit (Post-Recovery)
 
 - **Objective**: Deep-dive audit of the new `storageState` implementation for edge cases.
   - [ ] Audit token expiry handling in `global-setup.ts`.
