@@ -222,10 +222,9 @@ export class ChaosHunter extends EventEmitter {
         "--grep",
         "@chaos",
         "--reporter=json",
-        // Pass the scenario as a title-grep to run only the relevant describe block
-        `--grep-invert`,
-        // Actually run only matching scenario tests — use env var approach instead
-      ].filter((a) => a !== "--grep-invert"); // Keep full suite; env var controls behaviour
+        // The active scenario is communicated via CHAOS_SCENARIO env var.
+        // The spec uses test.skip() to run only the matching describe block.
+      ];
 
       this.emit(
         "progress",

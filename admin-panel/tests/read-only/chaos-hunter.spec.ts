@@ -38,7 +38,8 @@ import { expect, test } from '@playwright/test';
 
 const CHAOS_SCENARIO = process.env.CHAOS_SCENARIO ?? 'latency';
 const CHAOS_LATENCY_MS = Number(process.env.CHAOS_LATENCY_MS ?? 5000);
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL ?? '';
+// CHAOS_SUPABASE_URL is available for future pattern-targeted intercepts
+// const SUPABASE_URL = process.env.VITE_SUPABASE_URL ?? '';
 
 /**
  * Set up the appropriate network intercepts for the active chaos scenario.
@@ -125,13 +126,22 @@ async function assertRecoveryPath(
   ).toBeGreaterThan(0);
 
   // 2. No unhandled error overlay (Vite's error overlay / React error boundary crash overlay)
-  const viteErrorOverlay = page.locator('vite-error-overlay, #vite-error-overlay');
-  await expect(
-    viteErrorOverlay,
-    `[${CHAOS_SCENARIO}] ❌ ${routeName}: Vite error overlay visible — unhandled JS error`
-  ).not.toBeVisible({ timeout: 500 }).catch(() => {
-    // If locator throws (element type unknown), treat as not visible — OK
-  });
+  //    Use try/catch to avoid swallowing real assertion errors — we only
+  //    want to be lenient about "element not found" (selector unknown), not
+  //    about the overlay actually being visible.
+  try {
+    const viteErrorOverlay = page.locator('vite-error-overlay, #vite-error-overlay');
+    await expect(
+      viteErrorOverlay,
+      `[${CHAOS_SCENARIO}] ❌ ${routeName}: Vite error overlay visible — unhandled JS error`
+    ).not.toBeVisible({ timeout: 500 });
+  } catch (err: any) {
+    // Re-throw real assertion failures. Only swallow "strict mode" / "no element" errors.
+    if (err?.message?.includes('visible') || err?.message?.includes('overlay')) {
+      throw err;
+    }
+    // Otherwise: selector not supported in this browser context — safe to ignore
+  }
 
   // 3. Check for at least one "recovery signal":
   //    - Error message (text matching common patterns)
@@ -259,21 +269,23 @@ test.describe('Chaos — Zombie (Mid-Request Process Kill) @chaos', () => {
   test('Domains page shows empty state (not blank screen) on zombie response @chaos', async ({ page }) => {
     await armChaos(page);
     await page.goto('/domains');
-    await page.waitForLoadState('networkidle', { timeout: 20_000 });
+    // Use domcontentloaded, not networkidle — zombie scenario can cause background
+    // requests to stall and networkidle will hang indefinitely.
+    await page.waitForLoadState('domcontentloaded', { timeout: 20_000 });
     await assertRecoveryPath(page, '/domains [zombie]');
   });
 
   test('Skills page shows empty state (not blank screen) on zombie response @chaos', async ({ page }) => {
     await armChaos(page);
     await page.goto('/skills');
-    await page.waitForLoadState('networkidle', { timeout: 20_000 });
+    await page.waitForLoadState('domcontentloaded', { timeout: 20_000 });
     await assertRecoveryPath(page, '/skills [zombie]');
   });
 
   test('Questions page shows empty state (not blank screen) on zombie response @chaos', async ({ page }) => {
     await armChaos(page);
     await page.goto('/questions');
-    await page.waitForLoadState('networkidle', { timeout: 20_000 });
+    await page.waitForLoadState('domcontentloaded', { timeout: 20_000 });
     await assertRecoveryPath(page, '/questions [zombie]');
   });
 });
