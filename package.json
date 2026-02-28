@@ -9,6 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "test:e2e": "npm run test:e2e --prefix admin-panel",
+    "typegen": "supabase gen types typescript --project-id bkfhorslctqieetzqdtd > packages/core/src/types/database.types.ts",
     "deps:validate": "depcruise admin-panel/src --config .dependency-cruiser.cjs",
     "deps:graph": "depcruise admin-panel/src --config .dependency-cruiser.cjs --output-type dot > dependency-graph.dot",
     "deps:archi": "depcruise admin-panel/src --config .dependency-cruiser.cjs --output-type archi > architecture-graph.dot",

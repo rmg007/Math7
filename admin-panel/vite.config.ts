@@ -22,6 +22,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // J-4: Shared Type Bridge — resolves @questerix/core to the local package
+      // without requiring npm workspaces or npm link.
+      '@questerix/core': path.resolve(__dirname, '../packages/core/src'),
     },
   },
   server: {
