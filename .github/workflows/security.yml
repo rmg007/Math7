@@ -118,7 +118,7 @@ jobs:
 
       - name: Upload Snyk results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
-        if: always() && secrets.SNYK_TOKEN != ''
+        if: always()
         with:
           sarif_file: snyk.sarif
         continue-on-error: true
