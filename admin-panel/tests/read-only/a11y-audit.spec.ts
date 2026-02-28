@@ -8,12 +8,12 @@ import { expect, test } from '@playwright/test';
  * Zero `critical` or `serious` axe-core violations are permitted.
  *
  * Design rules:
- *   - @a11y tag on every test so `--grep @a11y` picks them all up.
- *   - Unauthenticated tests use empty storageState.
- *   - Authenticated tests use the default SUPER_ADMIN storageState from playwright.config.ts.
- *   - Each page waits for networkidle before scanning — ensures dynamic content is present.
- *   - Known, justified exceptions are suppressed via `.disableRules()` with a comment.
- *     Full rationale is in `docs/A11Y_EXCEPTIONS.md`.
+ *   - @a11y tag in every test title — `--grep @a11y` picks them all up.
+ *   - Unauthenticated tests override storageState at describe scope.
+ *   - Authenticated tests use the global SUPER_ADMIN storageState from playwright.config.ts.
+ *   - Pages wait for networkidle before scanning — ensures dynamic content is present.
+ *   - Known, justified exceptions are suppressed via `.disableRules()` with inline comment.
+ *     Full rationale: `docs/A11Y_EXCEPTIONS.md`.
  *
  * CI gate: `npm run test:e2e:a11y` — zero violations === green build.
  */
@@ -29,22 +29,25 @@ function createAxeBuilder(page: import('@playwright/test').Page) {
     new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
       /**
-       * color-contrast: Tailwind's `text-muted-foreground` (#6b7280 on white #fff)
-       * yields a 4.5:1 ratio on dark mode backgrounds but falls below 4.5:1 on
-       * light mode `bg-muted` (#f1f5f9) for some secondary labels.
-       * Tracked in docs/A11Y_EXCEPTIONS.md — EX-001.
-       * Remediation: swap `text-muted-foreground` for `text-foreground/70` on
-       * form helper text. Scheduled for Slot K-3 design token refactor.
+       * EX-001 — color-contrast: Tailwind's `text-muted-foreground` resolves to ~#6b7280,
+       * yielding 4.48:1 on white — just below the 4.5:1 WCAG AA minimum. This is a
+       * design-token-level issue, not a per-component one. Scheduled for Slot K-3 refactor.
+       * See docs/A11Y_EXCEPTIONS.md for full rationale and remediation plan.
        */
       .disableRules(['color-contrast'])
   );
 }
 
 /**
- * Assert zero critical/serious violations. Provide a readable failure message.
+ * Assert zero critical/serious violations. Throws with a readable summary if any found.
+ * Uses Playwright's expect() so failures appear as proper test failures in the report.
  */
-function expectNoViolations(violations: import('axe-core').Result[], page: string) {
-  const serious = violations.filter(
+async function assertNoViolations(
+  page: import('@playwright/test').Page,
+  routeName: string
+): Promise<void> {
+  const results = await createAxeBuilder(page).analyze();
+  const serious = results.violations.filter(
     (v) => v.impact === 'critical' || v.impact === 'serious'
   );
 
@@ -55,112 +58,91 @@ function expectNoViolations(violations: import('axe-core').Result[], page: strin
           `\n  [${v.impact?.toUpperCase()}] ${v.id}: ${v.description}\n` +
           v.nodes
             .slice(0, 3)
-            .map((n) => `    → ${n.html.slice(0, 100)}`)
+            .map((n) => `    → ${n.html.slice(0, 120)}`)
             .join('\n')
       )
       .join('\n');
 
-    throw new Error(
-      `❌ ${page}: ${serious.length} critical/serious a11y violation(s) found:${summary}\n\nSee docs/A11Y_EXCEPTIONS.md for exception policy.`
-    );
+    expect.soft(0, `❌ ${routeName}: ${serious.length} violation(s):${summary}\n\nSee docs/A11Y_EXCEPTIONS.md`).toBe(0);
   }
+
+  // Hard assertion — fails the test immediately if critical/serious violations remain
+  expect(serious, `${routeName}: expected zero critical/serious axe violations`).toHaveLength(0);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. Unauthenticated pages
 // ─────────────────────────────────────────────────────────────────────────────
 
-test.describe('A11y — Unauthenticated @a11y', () => {
+test.describe('A11y — Unauthenticated', () => {
+  // Overrides the desktop project's super-admin storageState at describe scope.
+  // Without this the auth-guard would redirect /login → /dashboard instantly.
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  test('Login page has zero critical/serious violations @a11y', async ({ page }) => {
+  test('Login page passes WCAG 2.1 AA @a11y', async ({ page }) => {
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-
-    const results = await createAxeBuilder(page).analyze();
-    expectNoViolations(results.violations, '/login');
-    expect(results.violations.filter(v => v.impact === 'critical' || v.impact === 'serious')).toHaveLength(0);
+    await assertNoViolations(page, '/login');
   });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 2. Authenticated — Core navigation pages
+// 2. Dashboard
 // ─────────────────────────────────────────────────────────────────────────────
 
-test.describe('A11y — Dashboard @a11y', () => {
-  test('Dashboard has zero critical/serious violations @a11y', async ({ page }) => {
+test.describe('A11y — Dashboard', () => {
+  test('Dashboard page passes WCAG 2.1 AA @a11y', async ({ page }) => {
     await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
-
-    const results = await createAxeBuilder(page).analyze();
-    expectNoViolations(results.violations, '/dashboard');
-    expect(results.violations.filter(v => v.impact === 'critical' || v.impact === 'serious')).toHaveLength(0);
+    await assertNoViolations(page, '/dashboard');
   });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. Platform Management pages
+// 3. Platform Management
 // ─────────────────────────────────────────────────────────────────────────────
 
-test.describe('A11y — Platform Management @a11y', () => {
-  test('Apps page has zero critical/serious violations @a11y', async ({ page }) => {
+test.describe('A11y — Platform Management', () => {
+  test('Apps page passes WCAG 2.1 AA @a11y', async ({ page }) => {
     await page.goto('/apps');
     await page.waitForLoadState('networkidle');
-
-    const results = await createAxeBuilder(page).analyze();
-    expectNoViolations(results.violations, '/apps');
-    expect(results.violations.filter(v => v.impact === 'critical' || v.impact === 'serious')).toHaveLength(0);
+    await assertNoViolations(page, '/apps');
   });
 
-  test('Subjects page has zero critical/serious violations @a11y', async ({ page }) => {
+  test('Subjects page passes WCAG 2.1 AA @a11y', async ({ page }) => {
     await page.goto('/subjects');
     await page.waitForLoadState('networkidle');
-
-    const results = await createAxeBuilder(page).analyze();
-    expectNoViolations(results.violations, '/subjects');
-    expect(results.violations.filter(v => v.impact === 'critical' || v.impact === 'serious')).toHaveLength(0);
+    await assertNoViolations(page, '/subjects');
   });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 4. Curriculum pages
+// 4. Curriculum
 // ─────────────────────────────────────────────────────────────────────────────
 
-test.describe('A11y — Curriculum @a11y', () => {
-  test('Domains list has zero critical/serious violations @a11y', async ({ page }) => {
+test.describe('A11y — Curriculum', () => {
+  test('Domains list passes WCAG 2.1 AA @a11y', async ({ page }) => {
     await page.goto('/domains');
     await page.waitForLoadState('networkidle');
-
-    const results = await createAxeBuilder(page).analyze();
-    expectNoViolations(results.violations, '/domains');
-    expect(results.violations.filter(v => v.impact === 'critical' || v.impact === 'serious')).toHaveLength(0);
+    await assertNoViolations(page, '/domains');
   });
 
-  test('Skills list has zero critical/serious violations @a11y', async ({ page }) => {
+  test('Skills list passes WCAG 2.1 AA @a11y', async ({ page }) => {
     await page.goto('/skills');
     await page.waitForLoadState('networkidle');
-
-    const results = await createAxeBuilder(page).analyze();
-    expectNoViolations(results.violations, '/skills');
-    expect(results.violations.filter(v => v.impact === 'critical' || v.impact === 'serious')).toHaveLength(0);
+    await assertNoViolations(page, '/skills');
   });
 
-  test('Questions list has zero critical/serious violations @a11y', async ({ page }) => {
+  test('Questions list passes WCAG 2.1 AA @a11y', async ({ page }) => {
     await page.goto('/questions');
     await page.waitForLoadState('networkidle');
-
-    const results = await createAxeBuilder(page).analyze();
-    expectNoViolations(results.violations, '/questions');
-    expect(results.violations.filter(v => v.impact === 'critical' || v.impact === 'serious')).toHaveLength(0);
+    await assertNoViolations(page, '/questions');
   });
 
-  test('Publish (Curriculum Release) page has zero critical/serious violations @a11y', async ({ page }) => {
+  test('Publish page passes WCAG 2.1 AA @a11y', async ({ page }) => {
     await page.goto('/publish');
     await page.waitForLoadState('networkidle');
-
-    const results = await createAxeBuilder(page).analyze();
-    expectNoViolations(results.violations, '/publish');
-    expect(results.violations.filter(v => v.impact === 'critical' || v.impact === 'serious')).toHaveLength(0);
+    await assertNoViolations(page, '/publish');
   });
 });
 
@@ -168,13 +150,10 @@ test.describe('A11y — Curriculum @a11y', () => {
 // 5. User Management
 // ─────────────────────────────────────────────────────────────────────────────
 
-test.describe('A11y — User Management @a11y', () => {
-  test('User Management page has zero critical/serious violations @a11y', async ({ page }) => {
+test.describe('A11y — User Management', () => {
+  test('User Management page passes WCAG 2.1 AA @a11y', async ({ page }) => {
     await page.goto('/users');
     await page.waitForLoadState('networkidle');
-
-    const results = await createAxeBuilder(page).analyze();
-    expectNoViolations(results.violations, '/users');
-    expect(results.violations.filter(v => v.impact === 'critical' || v.impact === 'serious')).toHaveLength(0);
+    await assertNoViolations(page, '/users');
   });
 });
