@@ -54,7 +54,7 @@ test.describe('Infrastructure @smoke', () => {
     if (hasMeta) {
       const content = await cspMeta.getAttribute('content');
       expect(content).not.toBeNull();
-      expect(content!.length).toBeGreaterThan(10);
+      expect(content?.length ?? 0).toBeGreaterThan(10);
     }
     // If not in meta, the page at minimum must load — header CSP is valid
     const response = await page.goto('/');
@@ -68,7 +68,7 @@ test.describe('Infrastructure @smoke', () => {
     await expect(form).toBeVisible({ timeout: 10_000 });
     const box = await form.boundingBox();
     expect(box).not.toBeNull();
-    expect(box!.width).toBeGreaterThan(50);
+    expect(box?.width ?? 0).toBeGreaterThan(50);
   });
 });
 

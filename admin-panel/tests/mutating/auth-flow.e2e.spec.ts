@@ -47,69 +47,76 @@ test.describe('Auth Flow & Guardrails @logic', () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test('AuthGuard: Redirects to /login if profile is deleted (Fail-Safe) (Task 1.9) @smoke', async ({
-    page,
-  }) => {
-    // 1. Browser: Login as valid user first (Admin)
-    await page.goto('/login');
-    await page.fill('input[type="email"]', TEST_USERS.ADMIN.email);
-    await page.fill('input[type="password"]', TEST_USERS.ADMIN.password);
-    await page.click('button[type="submit"]');
-    await page.waitForURL('/');
+  // Needs its own unauthenticated context — the global storageState (super-admin) would
+  // redirect /login → /dashboard before page.fill can run.
+  test.describe('AuthGuard deleted-profile (unauthenticated context)', () => {
+    test.use({ storageState: { cookies: [], origins: [] } });
 
-    // 2. API: Authenticate as Super Admin to perform the "soft delete"
-    const supabaseControl = createClient(supabaseUrl, process.env.VITE_SUPABASE_ANON_KEY ?? '', {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
+    test('AuthGuard: Redirects to /login if profile is deleted (Fail-Safe) (Task 1.9) @smoke', async ({
+      page,
+    }) => {
+      // 1. Browser: Login as valid user first (Admin)
+      await page.goto('/login');
+      await page.fill('input[type="email"]', TEST_USERS.ADMIN.email);
+      await page.fill('input[type="password"]', TEST_USERS.ADMIN.password);
+      await page.click('button[type="submit"]');
+      await page.waitForURL('/');
 
-    const { error: authError } = await supabaseControl.auth.signInWithPassword({
-      email: TEST_USERS.SUPER_ADMIN.email,
-      password: TEST_USERS.SUPER_ADMIN.password,
-    });
+      // 2. API: Authenticate as Super Admin to perform the "soft delete"
+      const supabaseControl = createClient(supabaseUrl, process.env.VITE_SUPABASE_ANON_KEY ?? '', {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
 
-    if (authError) {
-      console.warn(
-        'Skipping deletion test - Could not auth as Super Admin to perform control actions'
-      );
-      test.skip();
-      return;
-    }
+      const { error: authError } = await supabaseControl.auth.signInWithPassword({
+        email: TEST_USERS.SUPER_ADMIN.email,
+        password: TEST_USERS.SUPER_ADMIN.password,
+      });
 
-    // Get the target user's ID (Admin)
-    const { data: profile } = await supabaseControl
-      .from('profiles')
-      .select('id')
-      .eq('email', TEST_USERS.ADMIN.email)
-      .single();
-
-    expect(profile).toBeDefined();
-
-    try {
-      // 3. API: "Soft Delete" the Admin user
-      const { error: updateError } = await supabaseControl
-        .from('profiles')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', profile?.id);
-
-      expect(updateError).toBeNull();
-
-      // 4. Browser: Reload page to trigger AuthGuard check
-      await page.reload();
-
-      // 5. Browser: Expect redirect to login
-      await expect(page).toHaveURL(/\/login/, { timeout: 15000 });
-    } finally {
-      // 6. API: Restore user (CRITICAL cleanup)
-      const { error: restoreError } = await supabaseControl
-        .from('profiles')
-        .update({ deleted_at: null })
-        .eq('id', profile?.id);
-
-      if (restoreError) {
-        console.error('CRITICAL: Failed to restore admin user!', restoreError);
+      if (authError) {
+        console.warn(
+          'Skipping deletion test - Could not auth as Super Admin to perform control actions'
+        );
+        test.skip();
+        return;
       }
-    }
+
+      // Get the target user's ID (Admin)
+      const { data: profile } = await supabaseControl
+        .from('profiles')
+        .select('id')
+        .eq('email', TEST_USERS.ADMIN.email)
+        .single();
+
+      expect(profile).toBeDefined();
+
+      try {
+        // 3. API: "Soft Delete" the Admin user
+        const { error: updateError } = await supabaseControl
+          .from('profiles')
+          .update({ deleted_at: new Date().toISOString() })
+          .eq('id', profile?.id);
+
+        expect(updateError).toBeNull();
+
+        // 4. Browser: Reload page to trigger AuthGuard check
+        await page.reload();
+
+        // 5. Browser: Expect redirect to login
+        await expect(page).toHaveURL(/\/login/, { timeout: 15000 });
+      } finally {
+        // 6. API: Restore user (CRITICAL cleanup)
+        const { error: restoreError } = await supabaseControl
+          .from('profiles')
+          .update({ deleted_at: null })
+          .eq('id', profile?.id);
+
+        if (restoreError) {
+          console.error('CRITICAL: Failed to restore admin user!', restoreError);
+        }
+      }
+    });
   });
+
 
   // ===========================================================================
   // Route Protection — Unauthenticated Access

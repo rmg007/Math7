@@ -53,10 +53,13 @@ test.describe('Apps Management CRUD @logic', () => {
     await page.getByTestId('apps-search-input').fill(`App ${uniqueId}`);
     const normalizedName = `App ${uniqueId}`;
 
-    // Expect the normalized display name and subdomain cell
-    await expect(page.getByRole('cell', { name: normalizedName }).first()).toBeVisible({
-      timeout: 20000,
-    });
+    // Expect the normalized display name visible in the table
+    await expect(
+      page
+        .locator('tr')
+        .filter({ hasText: normalizedName })
+        .first()
+    ).toBeVisible({ timeout: 20000 });
 
     // Check if the subdomain is visible in the row
     const row = page.locator('tr').filter({ hasText: normalizedName });
