@@ -149,16 +149,24 @@ export class Scanner {
         `${baseName}.test.ts`,
       );
 
-      // Tiers 2 & 3: Match from cache for speed
+      // Tiers 2 & 3: Match from cache for speed. Case-insensitive and suffix-aware.
+      const lowerBase = baseName.toLowerCase();
+      const stippedBase = lowerBase.replace(/page$/, "");
       const suffixes = [".test.tsx", ".test.ts", ".e2e.spec.ts", ".spec.ts"];
-      const hasCachedTest = suffixes.some((s) =>
-        this.testFileCache?.has(`${baseName}${s}`),
-      );
+      
+      const hasCachedTest = Array.from(this.testFileCache || []).some((t) => {
+        const lowerTest = t.toLowerCase();
+        return suffixes.some(s => 
+          lowerTest === `${lowerBase}${s}` || 
+          lowerTest === `${stippedBase}${s}`
+        );
+      });
 
       const hasTest =
         fs.existsSync(siblingTestTsx) ||
         fs.existsSync(siblingTestTs) ||
-        hasCachedTest;
+        hasCachedTest ||
+        this.importsFile(relativePath);
 
       // Build export entries using ts-morph
       const exportedDeclarations = sourceFile.getExportedDeclarations();
@@ -457,5 +465,21 @@ export class Scanner {
     }
 
     return generated;
+  }
+
+  private importsFile(targetPath: string): boolean {
+    const targetBase = path.basename(targetPath, path.extname(targetPath));
+    for (const testFile of this.project.getSourceFiles()) {
+      const filePath = testFile.getFilePath();
+      if (!filePath.includes("/tests/") && !filePath.includes("\\tests\\")) continue;
+      
+      const imports = testFile.getImportDeclarations();
+      const hasImport = imports.some(imp => {
+        const moduleSpec = imp.getModuleSpecifierValue();
+        return moduleSpec.includes(targetBase);
+      });
+      if (hasImport) return true;
+    }
+    return false;
   }
 }
