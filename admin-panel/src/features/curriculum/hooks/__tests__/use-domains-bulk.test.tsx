@@ -21,9 +21,8 @@ import {
   useBulkCreateDomains,
   useBulkDeleteDomains,
   useBulkUpdateDomainsStatus,
-  useUpdateDomain,
-  useUpdateDomainOrder,
-} from '../use-domains';
+} from '../use-domains-bulk';
+import { useUpdateDomain, useUpdateDomainOrder } from '../use-domains';
 
 // ── Module mocks ──────────────────────────────────────────────────────────────
 vi.mock('@/hooks/use-app');

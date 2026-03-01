@@ -69,6 +69,16 @@ export default defineConfig({
             if (id.includes('katex') || id.includes('@tiptap')) {
               return 'editor-vendor';
             }
+            // Charts (recharts only used in DashboardPage — keeps it in a dedicated chunk)
+            if (
+              id.includes('recharts') ||
+              id.includes('d3-scale') ||
+              id.includes('d3-shape') ||
+              id.includes('d3-path') ||
+              id.includes('victory-vendor')
+            ) {
+              return 'charts-vendor';
+            }
             // Lucide icons
             if (id.includes('lucide-react')) {
               return 'icons';

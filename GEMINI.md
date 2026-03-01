@@ -30,9 +30,9 @@
 > **Rules**:
 >
 > - If the work executes inside the Questerix/Cortex codebase (`admin-panel/`, `questerix-cortex/`, `supabase/`, etc.) → it goes in `tasks.md`, regardless of how "future" it is.
-> - If the work is authoring/editing a file inside `.future_projects_plan_out_of_scope/` → it goes in `futer_projects_plan_tasks.md`.
+> - If the work is authoring/editing a file inside `.future_projects_plan_out_of_scope/` → it goes in `.future_projects_plan_out_of_scope/futer_projects_plan_tasks.md`.
 > - When a future queue slot becomes the active sprint slot, move it to the Active section of `tasks.md`.
-> - **NEVER** put Questerix/Cortex codebase work in `futer_projects_plan_tasks.md`.
+> - **NEVER** put Questerix/Cortex codebase work in `.future_projects_plan_out_of_scope/futer_projects_plan_tasks.md`.
 
 ## 🚀 Session Bootstrap Protocol
 
@@ -66,7 +66,7 @@ Questerix is an educational platform with:
 - **Admin Panel**: React/Vite/TypeScript (in `admin-panel/`)
 - **Backend**: Supabase (PostgreSQL, Edge Functions, Auth, Storage)
 - **Testing**: Vitest (unit), Playwright (E2E)
-- **Deployment**: Cloudflare Pages via `scripts/deploy-all.ps1`
+- **Deployment**: Cloudflare Pages via scripts/deploy-all.ps1 (runs from scripts/ directory)
 
 ## Autonomous Execution Rules
 

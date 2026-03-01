@@ -2,7 +2,7 @@ import { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { QueuedQuestionSchema } from '@/lib/validation/import-schema';
 
-export interface ImportResult {
+interface ImportResult {
   success: boolean;
   count: number;
   error?: string;

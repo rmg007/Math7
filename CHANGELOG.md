@@ -112,7 +112,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Workers AI**: New Cloudflare Workers project (`workers/`) with AI-powered question generation and content validation endpoints.
+- **Workers AI**: New Cloudflare Workers project (workers/ — now in questerix-content-engine repo) with AI-powered question generation and content validation endpoints.
 - **Workers AI**: Model routing — DeepSeek R1 32B for math, Llama 3.1 8B for general subjects, DeepSeek R1 for all validation.
 - **Workers Email**: Critical alert email delivery via Cloudflare Email Workers with HTML templates.
 - **Admin Panel**: Workers-first AI integration with automatic Supabase Edge Function fallback via `VITE_WORKERS_URL` env var.
@@ -121,7 +121,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Code Hygiene**: Removed 50+ stale deploy logs, test outputs, and debug files from root, admin-panel, student-app, and workers directories.
-- **Code Hygiene**: Archived `.builder/` design docs to `docs/archive/`.
+- **Code Hygiene**: Archived .builder/ design docs to docs/archive/.
 - **Code Hygiene**: Fixed Dart warning (unused `stack` catch variable in `main.dart`).
 
 - **Admin Panel**: Improved responsive layout for 375px viewports across all curriculum management pages and forms.
@@ -129,8 +129,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Admin Panel**: Standardized padding and shadow behaviors on mobile for `LoginPage`, `DomainList`, `SkillList`, and `QuestionList`.
 - **Admin Panel**: Cross-app transparency for Super Admins in Curriculum management. List views now display the associated Application name when viewing across all apps.
 - **Admin Panel**: Enhanced deletion confirmation with precise application context for impacted items.
-- **Testing**: Added `tests/responsiveness.spec.ts` for automated mobile/tablet/desktop responsiveness validation.
-- **Testing**: Added `tests/verify-icon-removal.spec.ts` to enforce clean table UI and prevent regression of decorative icons.
+- **Testing**: Added tests/responsiveness.spec.ts for automated mobile/tablet/desktop responsiveness validation.
+- **Testing**: Added tests/verify-icon-removal.spec.ts to enforce clean table UI and prevent regression of decorative icons.
 
 ### Fixed
 
@@ -180,7 +180,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Governance**: Updated `LEARNING_LOG.md` and `tasks.md` to reflect the shift from "Assumed 100% Coverage" to "Verified Stabilization."
+- **Governance**: Updated `docs/LEARNING_LOG.md` and `tasks.md` to reflect the shift from "Assumed 100% Coverage" to "Verified Stabilization."
 
 ## [2.0.1] - 2026-02-14
 

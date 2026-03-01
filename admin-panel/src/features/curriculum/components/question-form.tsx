@@ -1,7 +1,6 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -11,7 +10,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import {
   Select,
@@ -20,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { useApp } from '@/hooks/use-app';
 import type { Json } from '@/lib/database.types';
 import { Database } from '@/lib/database.types';
@@ -33,16 +30,13 @@ import {
   HelpCircle,
   Layers,
   Loader2,
-  Plus,
   Settings,
   Sparkles,
-  Trash,
   Zap,
 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { z } from 'zod';
 import { useCreateQuestion, useUpdateQuestion } from '../hooks/use-questions';
 import { useSkills } from '../hooks/use-skills';
 import {
@@ -53,34 +47,19 @@ import {
   ReorderStepsSolution,
   TextInputSolution,
 } from '../types';
+import { BooleanSubForm } from './question-form-boolean';
+import { McqMultiSubForm } from './question-form-mcq-multi';
+import { McqSubForm } from './question-form-mcq';
+import { ReorderSubForm } from './question-form-reorder';
+import { TextInputSubForm } from './question-form-text-input';
+import {
+  QUESTION_TYPES,
+  QuestionFormData,
+  STATUS_OPTIONS,
+  questionSchema,
+} from './question-form-types';
 
 type Question = Database['public']['Tables']['questions']['Row'];
-
-const QUESTION_TYPES = [
-  'multiple_choice',
-  'mcq_multi',
-  'text_input',
-  'boolean',
-  'reorder_steps',
-] as const;
-
-const STATUS_OPTIONS: { value: 'draft' | 'live'; label: string; description?: string }[] = [
-  { value: 'draft', label: 'Draft', description: 'Not visible to students' },
-  { value: 'live', label: 'Live', description: 'Visible to students' },
-];
-
-const questionSchema = z.object({
-  skill_id: z.string().uuid('Please select a target skill'),
-  type: z.enum(QUESTION_TYPES),
-  content: z.string().min(1, 'Question text is required'),
-  options: z.unknown(),
-  solution: z.unknown(),
-  explanation: z.string().optional(),
-  points: z.coerce.number().min(1),
-  status: z.enum(['draft', 'live']).default('draft'),
-});
-
-type QuestionFormData = z.infer<typeof questionSchema>;
 
 interface QuestionFormProps {
   initialData?: Question;
@@ -179,8 +158,6 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
   });
 
   const questionType = form.watch('type');
-  const currentOptions =
-    (form.watch('options') as { options: Array<{ id: string; text: string }> })?.options || [];
   const prevTypeRef = useRef(questionType);
 
   useEffect(() => {
@@ -193,7 +170,6 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
   }, [questionType, form, initialData]);
 
   const onSubmit = async (data: QuestionFormData) => {
-    // Normalize text fields: trim whitespace
     const normalized = normalizeFormData(data, {
       trim: ['content', 'explanation'],
     });
@@ -360,353 +336,11 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                       </div>
                     </div>
 
-                    {/* Multiple Choice Implementation */}
-                    {questionType === 'multiple_choice' && (
-                      <div className="space-y-6">
-                        <RadioGroup
-                          value={form.watch('solution') as string}
-                          onValueChange={(val) => form.setValue('solution', val)}
-                          className="space-y-4"
-                        >
-                          {currentOptions.map(
-                            (opt: { id: string; text: string }, index: number) => (
-                              <div key={index} className="flex items-center gap-4 group">
-                                <RadioGroupItem
-                                  value={opt.id}
-                                  className="w-6 h-6 border-2 border-gray-200 text-indigo-600 focus:ring-indigo-500/20"
-                                />
-                                <div className="flex-1 flex gap-3">
-                                  <Input
-                                    value={opt.text}
-                                    onChange={(e) => {
-                                      const newOpts = [...currentOptions];
-                                      newOpts[index].text = e.target.value;
-                                      form.setValue('options', { options: newOpts });
-                                    }}
-                                    placeholder={`Option ${opt.id.toUpperCase()}`}
-                                    data-testid={`question-mcq-option-${index}`}
-                                    className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-indigo-500/10 transition-all"
-                                    required
-                                  />
-                                </div>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => {
-                                    const newOpts = [...currentOptions];
-                                    newOpts.splice(index, 1);
-                                    form.setValue('options', { options: newOpts });
-                                    // If this was the correct answer, clear the solution
-                                    if (form.getValues('solution') === opt.id) {
-                                      form.setValue('solution', '');
-                                    }
-                                  }}
-                                  className="text-red-400 hover:text-red-600 hover:bg-red-50"
-                                >
-                                  <Trash className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            )
-                          )}
-                        </RadioGroup>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          data-testid="question-form-append-option"
-                          onClick={() => {
-                            const nextId = String.fromCharCode(97 + currentOptions.length);
-                            form.setValue('options', {
-                              options: [...currentOptions, { id: nextId, text: '' }],
-                            });
-                          }}
-                          className="rounded-xl border-dashed border-2 border-gray-200 text-gray-400 hover:text-indigo-600 hover:border-indigo-200 transition-all font-bold text-2xs uppercase tracking-widest"
-                        >
-                          <Plus className="mr-2 h-3 w-3" /> Append Option
-                        </Button>
-                      </div>
-                    )}
-
-                    {/* MCQ Multi Implementation */}
-                    {questionType === 'mcq_multi' && (
-                      <div className="space-y-6">
-                        <div className="space-y-4">
-                          {currentOptions.map(
-                            (opt: { id: string; text: string }, index: number) => {
-                              const currentCorrect = (form.watch('solution') as string[]) || [];
-                              const isChecked = currentCorrect.includes(opt.id);
-
-                              return (
-                                <div key={index} className="flex items-center gap-4 group">
-                                  <Checkbox
-                                    checked={isChecked}
-                                    onCheckedChange={(checked) => {
-                                      const updated = checked
-                                        ? [...currentCorrect, opt.id]
-                                        : currentCorrect.filter((id) => id !== opt.id);
-                                      form.setValue('solution', updated);
-                                    }}
-                                    className="w-6 h-6 rounded-md border-2 border-gray-200 text-indigo-600 focus:ring-indigo-500/20"
-                                  />
-                                  <div className="flex-1 flex gap-3">
-                                    <Input
-                                      value={opt.text}
-                                      onChange={(e) => {
-                                        const newOpts = [...currentOptions];
-                                        newOpts[index].text = e.target.value;
-                                        form.setValue('options', { options: newOpts });
-                                      }}
-                                      placeholder={`Option ${opt.id.toUpperCase()}`}
-                                      data-testid={`question-multi-option-${index}`}
-                                      className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-indigo-500/10 transition-all"
-                                      required
-                                    />
-                                  </div>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => {
-                                      const newOpts = [...currentOptions];
-                                      newOpts.splice(index, 1);
-                                      form.setValue('options', { options: newOpts });
-                                      // Also remove from solution if it was there
-                                      form.setValue(
-                                        'solution',
-                                        currentCorrect.filter((id) => id !== opt.id)
-                                      );
-                                    }}
-                                    className="text-red-400 hover:text-red-600 hover:bg-red-50"
-                                  >
-                                    <Trash className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              );
-                            }
-                          )}
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          data-testid="question-form-append-option-multi"
-                          onClick={() => {
-                            const nextId = String.fromCharCode(97 + currentOptions.length);
-                            form.setValue('options', {
-                              options: [...currentOptions, { id: nextId, text: '' }],
-                            });
-                          }}
-                          className="rounded-xl border-dashed border-2 border-gray-200 text-gray-400 hover:text-indigo-600 hover:border-indigo-200 transition-all font-bold text-2xs uppercase tracking-widest"
-                        >
-                          <Plus className="mr-2 h-3 w-3" /> Append Option
-                        </Button>
-                      </div>
-                    )}
-
-                    {/* Boolean Implementation */}
-                    {questionType === 'boolean' && (
-                      <div className="space-y-8">
-                        <div className="flex items-center justify-center gap-12 p-10 bg-gray-50/50 rounded-3xl border border-gray-100">
-                          <div className="flex flex-col items-center gap-4">
-                            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">
-                              Truth Value
-                            </span>
-                            <div className="flex items-center gap-4">
-                              <span
-                                className={`text-sm font-bold ${!(form.watch('solution') as boolean) ? 'text-gray-400' : 'text-emerald-600'}`}
-                              >
-                                False
-                              </span>
-                              <Switch
-                                checked={(form.watch('solution') as boolean) ?? false}
-                                onCheckedChange={(val) => form.setValue('solution', val)}
-                                data-testid="question-boolean-switch"
-                                className="data-[state=checked]:bg-emerald-500"
-                              />
-                              <span
-                                className={`text-sm font-bold ${(form.watch('solution') as boolean) ? 'text-emerald-600' : 'text-gray-400'}`}
-                              >
-                                True
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="h-12 w-px bg-gray-200" />
-
-                          <div className="flex-1 space-y-4">
-                            <div className="space-y-2">
-                              <label className="text-2xs font-black uppercase tracking-widest text-gray-400">
-                                True Label
-                              </label>
-                              <Input
-                                value={
-                                  (form.watch('options') as Record<string, string>)?.true_label ||
-                                  'True'
-                                }
-                                onChange={(e) => {
-                                  const opt =
-                                    (form.watch('options') as Record<string, string>) || {};
-                                  form.setValue('options', { ...opt, true_label: e.target.value });
-                                }}
-                                className="h-10 rounded-xl bg-white border-gray-100 font-bold"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <label className="text-2xs font-black uppercase tracking-widest text-gray-400">
-                                False Label
-                              </label>
-                              <Input
-                                value={
-                                  (form.watch('options') as Record<string, string>)?.false_label ||
-                                  'False'
-                                }
-                                onChange={(e) => {
-                                  const opt =
-                                    (form.watch('options') as Record<string, string>) || {};
-                                  form.setValue('options', { ...opt, false_label: e.target.value });
-                                }}
-                                className="h-10 rounded-xl bg-white border-gray-100 font-bold"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {questionType === 'text_input' && (
-                      <div className="space-y-6">
-                        <div className="space-y-3">
-                          <label className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
-                            Master Key (Exact Match)
-                          </label>
-                          <Input
-                            value={form.watch('solution') as string}
-                            onChange={(e) => form.setValue('solution', e.target.value)}
-                            placeholder="Enter the authoritative response..."
-                            data-testid="question-text-input-answer"
-                            className="h-14 rounded-2xl bg-white/50 border-gray-100 text-lg font-black tracking-tight focus:ring-8 focus:ring-emerald-500/5 transition-all"
-                            required
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Reorder Steps Implementation */}
-                    {questionType === 'reorder_steps' && (
-                      <div className="space-y-6">
-                        <div className="space-y-3">
-                          {(
-                            (
-                              form.watch('options') as {
-                                steps: Array<{ id: string; text: string }>;
-                              }
-                            )?.steps || []
-                          ).map((step, index, all) => (
-                            <div key={step.id} className="flex items-center gap-4 group">
-                              <div className="flex flex-col gap-1">
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  disabled={index === 0}
-                                  onClick={() => {
-                                    const steps = [...all];
-                                    [steps[index - 1], steps[index]] = [
-                                      steps[index],
-                                      steps[index - 1],
-                                    ];
-                                    form.setValue('options', { steps });
-                                    form.setValue(
-                                      'solution',
-                                      steps.map((s) => s.id)
-                                    );
-                                  }}
-                                  className="h-6 w-6 text-gray-400 hover:text-indigo-600"
-                                >
-                                  ▴
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  disabled={index === all.length - 1}
-                                  onClick={() => {
-                                    const steps = [...all];
-                                    [steps[index], steps[index + 1]] = [
-                                      steps[index + 1],
-                                      steps[index],
-                                    ];
-                                    form.setValue('options', { steps });
-                                    form.setValue(
-                                      'solution',
-                                      steps.map((s) => s.id)
-                                    );
-                                  }}
-                                  className="h-6 w-6 text-gray-400 hover:text-indigo-600"
-                                >
-                                  ▾
-                                </Button>
-                              </div>
-                              <div className="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs font-black text-indigo-600">
-                                {index + 1}
-                              </div>
-                              <Input
-                                value={step.text}
-                                onChange={(e) => {
-                                  const steps = [...all];
-                                  steps[index].text = e.target.value;
-                                  form.setValue('options', { steps });
-                                }}
-                                placeholder={`Step ${index + 1} content...`}
-                                className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold"
-                                required
-                              />
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  const steps = [...all];
-                                  steps.splice(index, 1);
-                                  form.setValue('options', { steps });
-                                  form.setValue(
-                                    'solution',
-                                    steps.map((s) => s.id)
-                                  );
-                                }}
-                                className="text-red-400 hover:text-red-600 hover:bg-red-50"
-                              >
-                                <Trash className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const steps =
-                              (
-                                form.watch('options') as {
-                                  steps: Array<{ id: string; text: string }>;
-                                }
-                              )?.steps || [];
-                            const nextId = String(steps.length + 1);
-                            const newSteps = [...steps, { id: nextId, text: '' }];
-                            form.setValue('options', { steps: newSteps });
-                            form.setValue(
-                              'solution',
-                              newSteps.map((s) => s.id)
-                            );
-                          }}
-                          className="rounded-xl border-dashed border-2 border-gray-200 text-gray-400 hover:text-indigo-600 hover:border-indigo-200 transition-all font-bold text-2xs uppercase tracking-widest"
-                        >
-                          <Plus className="mr-2 h-3 w-3" /> Append Step
-                        </Button>
-                      </div>
-                    )}
+                    {questionType === 'multiple_choice' && <McqSubForm form={form} />}
+                    {questionType === 'mcq_multi' && <McqMultiSubForm form={form} />}
+                    {questionType === 'boolean' && <BooleanSubForm form={form} />}
+                    {questionType === 'text_input' && <TextInputSubForm form={form} />}
+                    {questionType === 'reorder_steps' && <ReorderSubForm form={form} />}
 
                     {/* Placeholder for other complex types to maintain UI consistency */}
                     {!(QUESTION_TYPES as readonly string[]).includes(questionType) && (

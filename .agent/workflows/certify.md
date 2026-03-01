@@ -123,7 +123,7 @@ description: Independent post-implementation audit and certification
 - [ ] **Preventative Test Verification**
   - **Rule**: If a bug was fixed, a new test case MUST exist in the codebase.
   - **Verify**: Locate the specific test file/case that reproduces the bug.
-  - **Proof**: File path to the preventative test (e.g., `tests/grid-layout.spec.ts`).
+  - **Proof**: File path to the preventative test (e.g., admin-panel/tests/curriculum-lifecycle.e2e.spec.ts).
 
 - [ ] **Silent Failure Hunt Results**
   - Verify `/process` Phase 4 documented silent failure scan
@@ -182,7 +182,7 @@ description: Independent post-implementation audit and certification
 
 - [ ] **Bundle Size Check**
   - Run: `npm run build` for admin-panel
-  - Check: `dist/` size compared to before
+  - Check: dist/ size compared to before
   - **Proof**: Bundle size metrics (acceptable if <500KB increase)
 
 - [ ] **Re-Render Analysis** (React only)

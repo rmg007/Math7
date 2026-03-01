@@ -50,7 +50,7 @@ Focus on files most likely to have issues:
 
 ### Phase 4: Document Learnings
 
-1. Add any new bug patterns discovered to `QODO_GUIDE.md`
+1. Add any new bug patterns discovered to `docs/LEARNING_LOG.md`
 2. Update `docs/LEARNING_LOG.md` with analysis findings
 3. Create issues for critical hotspots
 

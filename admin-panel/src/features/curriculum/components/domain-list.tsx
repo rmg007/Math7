@@ -1,14 +1,5 @@
 import { AdminHeader } from '@/components/ui/admin-header';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { DomainDeleteDialog } from './domain-list-dialogs';
 import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
 import { ColumnToggle } from '@/components/ui/column-toggle';
@@ -51,14 +42,12 @@ import {
   type MutableRefObject,
 } from 'react';
 import { Link } from 'react-router-dom';
+import { useDeleteDomain, usePaginatedDomains, useUpdateDomainOrder } from '../hooks/use-domains';
 import {
   useBulkCreateDomains,
   useBulkDeleteDomains,
   useBulkUpdateDomainsStatus,
-  useDeleteDomain,
-  usePaginatedDomains,
-  useUpdateDomainOrder,
-} from '../hooks/use-domains';
+} from '../hooks/use-domains-bulk';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 import {
@@ -987,49 +976,15 @@ export function DomainList() {
         )}
       </div>
 
-      <AlertDialog
+      <DomainDeleteDialog
         open={Boolean(deleteConfirmation)}
         onOpenChange={(open) => !open && setDeleteConfirmation(null)}
-      >
-        <AlertDialogContent className="rounded-lg border border-gray-200 bg-white shadow-lg max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-base font-semibold text-gray-900">
-              Delete{' '}
-              {deleteConfirmation?.type === 'bulk' ? `${selectedIds.size} domains` : 'domain'}?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-gray-500">
-              {deleteConfirmation?.type === 'bulk'
-                ? `This will permanently delete ${selectedIds.size} selected domain(s).`
-                : 'This action cannot be undone.'}
-              {deleteImpact.loading ? (
-                <span className="block mt-2 text-gray-400 text-xs">
-                  Checking for dependent items...
-                </span>
-              ) : deleteImpact.skillCount > 0 || deleteImpact.questionCount > 0 ? (
-                <span className="block mt-2 font-medium text-red-600 text-xs">
-                  This will also delete {deleteImpact.skillCount} skill(s) and{' '}
-                  {deleteImpact.questionCount} question(s).
-                </span>
-              ) : null}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="h-9 px-4 rounded text-sm font-medium">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              disabled={bulkDelete.isPending || deleteDomain.isPending}
-              className="h-9 px-5 rounded bg-red-600 hover:bg-red-700 text-white font-semibold text-sm shadow-sm"
-            >
-              {(bulkDelete.isPending || deleteDomain.isPending) && (
-                <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-              )}
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        deleteType={deleteConfirmation?.type ?? 'single'}
+        selectedCount={selectedIds.size}
+        isDeleting={bulkDelete.isPending || deleteDomain.isPending}
+        onConfirm={confirmDelete}
+        deleteImpact={deleteImpact}
+      />
     </div>
   );
 }

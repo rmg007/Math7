@@ -102,7 +102,7 @@ Skills are reusable analysis frameworks the agent reads before acting.
 | `scripts/code-hygiene-scan.ps1` | Secrets, empty catches, security leaks         | Phase 4 of `/fix`    |
 | `scripts/certify-evidence.ps1`  | Collect all audit artifacts                    | `/certify` workflow  |
 | `scripts/gen-types-verify.ps1`  | `supabase gen types` + compile check           | After schema changes |
-| `scripts/deploy-all.ps1`        | Full production deployment via Cloudflare      | Release only         |
+| scripts/deploy-all.ps1          | Full production deployment via Cloudflare      | Release only         |
 
 ---
 
@@ -131,8 +131,8 @@ Skills are reusable analysis frameworks the agent reads before acting.
 | Sync Timeouts (30s)           | `sync_service.dart` → `_supabaseCall()`           | Infinite sync hang                          |
 | Auth Timeouts (15s)           | `supabase_auth_repository.dart`                   | Auth call hanging forever                   |
 | AI Timeouts (45s)             | `generateQuestions.ts`, `validateContent.ts`      | Slow AI API stalling the UI                 |
-| Health Check Timeout (5s)     | `health-check/index.ts`                           | Unhealthy health endpoint hanging           |
-| Cloudflare Timeouts (15s)     | `manage-app-domains/index.ts`                     | Cloudflare API hanging                      |
+| Health Check Timeout (5s)     | `supabase/functions/health-check/index.ts`        | Unhealthy health endpoint hanging           |
+| Cloudflare Timeouts (15s)     | `supabase/functions/manage-app-domains/index.ts`  | Cloudflare API hanging                      |
 | Auto-sync on Reconnect        | `sync_service.dart` → `syncServiceProvider`       | Student data stuck offline after reconnect  |
 | CI Destructive Migration Gate | `.github/workflows/database.yml`                  | Accidental `DROP` reaching production       |
 | Rate Limiting                 | `supabase/functions/_shared/rate-limiter.ts`      | Abuse of Edge Functions                     |
@@ -162,7 +162,7 @@ Something stuck? → /blocked
 | Admin Panel    | React 18, Vite 5, TanStack Query v5, TypeScript | `admin-panel/src/`                                |
 | Student App    | Flutter, Riverpod 2.6.1, Drift 2.24             | External repo: **questerix-student-app** (not in this repo) |
 | Backend        | Supabase (Postgres, Auth, Edge Functions)       | `supabase/`                                       |
-| Deployment     | Cloudflare Pages via `scripts/deploy-all.ps1`   | `scripts/`                                        |
+| Deployment     | Cloudflare Pages via scripts/deploy-all.ps1     | `scripts/`                                        |
 | DB Types       | Auto-generated                                  | `admin-panel/src/lib/database.types.ts`           |
 | Env Config     | Admin Panel                                     | `admin-panel/src/config/env.ts`                   |
 | Error Tracking | Supabase-native, zero-cost                      | `admin-panel/src/lib/error-tracker.ts`            |

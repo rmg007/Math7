@@ -76,7 +76,14 @@ export class Scanner {
   private testFileCache: Set<string> | null = null;
 
   /**
+   * Pages explicitly declared as covered in admin-panel/tests/smoke-coverage-manifest.json.
+   * Keys are workspace-root-relative page paths (forward-slash, matching normalizePath output).
+   */
+  private smokeManifestCoverage: Set<string> | null = null;
+
+  /**
    * Pre-loads all test filenames into a set for O(1) matching during the scan loop.
+   * Also reads the smoke-coverage-manifest.json so multi-page smoke specs are counted.
    */
   private prepareTestCache() {
     this.testFileCache = new Set();
@@ -88,6 +95,28 @@ export class Scanner {
     for (const dir of testDirs) {
       if (!fs.existsSync(dir)) continue;
       this.collectFileNames(dir, this.testFileCache);
+    }
+
+    // Load smoke-coverage-manifest.json — maps spec files → covered page paths.
+    // This handles multi-page smoke specs like curriculum-pages.smoke.spec.ts that
+    // cover many pages at once and cannot be matched by filename alone.
+    this.smokeManifestCoverage = new Set<string>();
+    const manifestPath = path.join(this.projectRoot, "tests", "smoke-coverage-manifest.json");
+    if (fs.existsSync(manifestPath)) {
+      try {
+        const raw = JSON.parse(fs.readFileSync(manifestPath, "utf-8")) as Record<string, unknown>;
+        for (const [, pages] of Object.entries(raw)) {
+          if (Array.isArray(pages)) {
+            for (const p of pages) {
+              if (typeof p === "string") {
+                this.smokeManifestCoverage.add(p.replace(/\\/g, "/"));
+              }
+            }
+          }
+        }
+      } catch {
+        /* manifest unreadable — silently skip, coverage falls back to filename matching */
+      }
     }
   }
 
@@ -149,20 +178,37 @@ export class Scanner {
         `${baseName}.test.ts`,
       );
 
-      // Tiers 2 & 3: Match from cache for speed. Case-insensitive and suffix-aware.
+      // Tiers 2 & 3: Match from cache for speed. Case-insensitive, suffix-aware,
+      // and kebab-normalised (strips hyphens so account-settings-page.smoke.spec.ts
+      // matches AccountSettingsPage.tsx).
       const lowerBase = baseName.toLowerCase();
+      // Kebab-normalised variant: remove hyphens so PascalCase pages match kebab test files.
+      const flatBase = lowerBase.replace(/-/g, "");
       const stippedBase = lowerBase.replace(/page$/, "");
-      const suffixes = [".test.tsx", ".test.ts", ".e2e.spec.ts", ".spec.ts"];
-      
+      const flatStripped = flatBase.replace(/page$/, "");
+      // Include .smoke.spec.ts so pre-push smoke tests count as coverage.
+      const suffixes = [".test.tsx", ".test.ts", ".e2e.spec.ts", ".smoke.spec.ts", ".spec.ts"];
+
       const hasCachedTest = Array.from(this.testFileCache || []).some((t) => {
+        // Normalise the test filename the same way: lowercase + strip hyphens.
         const lowerTest = t.toLowerCase();
-        return suffixes.some(s => 
-          lowerTest === `${lowerBase}${s}` || 
+        const flatTest = lowerTest.replace(/-/g, "");
+        return suffixes.some(s =>
+          flatTest === `${flatBase}${s}` ||
+          flatTest === `${flatStripped}${s}` ||
+          lowerTest === `${lowerBase}${s}` ||
           lowerTest === `${stippedBase}${s}`
         );
       });
 
+      // Tier 0: explicit declaration in smoke-coverage-manifest.json.
+      // This is the authoritative way to declare that a multi-page smoke spec
+      // (e.g. curriculum-pages.smoke.spec.ts) covers a given page.
+      const hasManifestCoverage =
+        this.smokeManifestCoverage?.has(relativePath) ?? false;
+
       const hasTest =
+        hasManifestCoverage ||
         fs.existsSync(siblingTestTsx) ||
         fs.existsSync(siblingTestTs) ||
         hasCachedTest ||

@@ -8,3 +8,21 @@ globs: admin-panel/**
 - TypeScript strict mode — zero `any` where avoidable. Use `as unknown as Type` only when bridging Supabase-generated types.
 - Stack: React + Vite + shadcn/ui + TanStack Query.
 - For file/symbol discovery use `questerix-cortex/outputs/SKELETON_SUMMARY.md` or `skeleton:search` from `questerix-cortex/`.
+
+## Test Coverage Requirement (MANDATORY)
+
+Every file under `src/features/**/pages/` **MUST** have at least one smoke test.
+
+**Pattern for new page tests** (follow `tests/read-only/account-settings-page.smoke.spec.ts`):
+1. Create `admin-panel/tests/read-only/<kebab-page-name>.smoke.spec.ts` OR add tests to `misc-pages.smoke.spec.ts` for minor pages.
+2. Tag every test `@smoke`.
+3. **MANDATORY — Register in the manifest**: add the spec → page mapping to `admin-panel/tests/smoke-coverage-manifest.json`. This is the Tier 0 mechanism the Cortex scanner uses. Without it the page will permanently show as a coverage gap.
+   ```json
+   "admin-panel/tests/read-only/my-page.smoke.spec.ts": [
+     "admin-panel/src/features/<feature>/pages/MyPage.tsx"
+   ]
+   ```
+4. Mock all Supabase write RPCs and Edge Functions with `page.route()`.
+5. Use `test.use({ storageState: { cookies: [], origins: [] } })` for any test touching Login or Registration forms.
+6. Run `npx tsc --noEmit` (zero errors) and `npx playwright test --list` (tests register) before committing.
+7. Log the new test file in `docs/LEARNING_LOG.md` with `[test created]` tag.

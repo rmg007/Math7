@@ -57,20 +57,47 @@ if grep -rn --include="*.ts" --include="*.tsx" --include="*.dart" \
 fi
 echo "✅ No forbidden patterns found."
 
-# 🚀 E2E SMOKE TEST GATE
-# Runs the P0 happy path tests (desktop only) to ensure no regressions.
+# 🚀 E2E SMOKE TEST GATE (OPTIMIZED)
+# Runs P0 smoke tests with optimized config for faster feedback.
+# 
+# Optimization strategy:
+# - Uses playwright.smoke.config.ts (parallel, no video/trace, shorter timeouts)
+# - Reuses auth state if < 30 min old (saves ~15s)
+# - Only runs on admin-panel changes (skip if only docs/cortex changed)
+#
 # Opt-out: SKIP_SMOKE=1 git push
+# Full smoke: FULL_SMOKE=1 git push (uses standard config)
+
 if [ "$SKIP_SMOKE" != "1" ]; then
-  echo "🚀 Running E2E Smoke Tests (@smoke)..."
-  # Use --project=desktop via npm script
-  cd admin-panel && npm run test:e2e:smoke
-  if [ $? -ne 0 ]; then
-    echo ""
-    echo "❌ E2E SMOKE TESTS FAILED! Push blocked."
-    echo "   Fix the regression or skip if strictly necessary: SKIP_SMOKE=1 git push"
-    exit 1
+  # Check if admin-panel files changed in this push
+  ADMIN_CHANGES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | grep "^admin-panel/" | wc -l)
+  
+  if [ "$ADMIN_CHANGES" -gt 0 ] || [ "$FORCE_SMOKE" = "1" ]; then
+    echo "🚀 Running E2E Smoke Tests (optimized)..."
+    cd admin-panel
+    
+    if [ "$FULL_SMOKE" = "1" ]; then
+      echo "   Using full smoke config (FULL_SMOKE=1)"
+      npm run test:e2e:smoke:full
+    else
+      echo "   Using optimized smoke config (parallel, no video)"
+      npm run test:e2e:smoke
+    fi
+    
+    if [ $? -ne 0 ]; then
+      echo ""
+      echo "❌ E2E SMOKE TESTS FAILED! Push blocked."
+      echo "   Options:"
+      echo "   - Fix the regression"
+      echo "   - Skip smoke: SKIP_SMOKE=1 git push"
+      echo "   - Run full smoke for debugging: FULL_SMOKE=1 git push"
+      exit 1
+    fi
+    echo "✅ Smoke tests passed."
+  else
+    echo "⏭️  No admin-panel changes detected. Skipping E2E smoke tests."
+    echo "   (Force with: FORCE_SMOKE=1 git push)"
   fi
-  echo "✅ Smoke tests passed."
 else
   echo "⚠️  Skipping E2E Smoke Tests (SKIP_SMOKE=1)."
 fi

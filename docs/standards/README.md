@@ -24,8 +24,8 @@ This directory contains all coding standards and development protocols for the Q
 
 This directory is part of the larger Questerix documentation ecosystem:
 
-- **[../best_practices.md](../best_practices.md)** - High-level project conventions (defer to ORACLE_COGNITION for details)
-- **[../SECURITY.md](../SECURITY.md)** - Security model overview (defer to ORACLE_COGNITION for implementation)
+- **`AGENTS.md`** (project root) - High-level project conventions and core rules
+- **`docs/standards/ORACLE_COGNITION.md`** Part 4 - Security model and implementation (best_practices.md and SECURITY.md were removed; content consolidated here)
 - **[../AGENTS.md](../../AGENTS.md)** (root) - Authority hierarchy, discovery, and agent rules
 - **[../.cursorrules](../../.cursorrules)** - IDE-specific IDD Protocol instructions
 

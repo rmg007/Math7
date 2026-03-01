@@ -1,14 +1,5 @@
 import { AdminHeader } from '@/components/ui/admin-header';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { QuestionDeleteDialog } from './question-list-dialogs';
 import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -76,14 +67,16 @@ import {
 import { Link } from 'react-router-dom';
 import {
   QuestionInsert,
-  useBulkCreateQuestions,
-  useBulkDeleteQuestions,
-  useBulkUpdateQuestionsStatus,
   useDeleteQuestion,
   useDuplicateQuestion,
   usePaginatedQuestions,
   useUpdateQuestionOrder,
 } from '../hooks/use-questions';
+import {
+  useBulkCreateQuestions,
+  useBulkDeleteQuestions,
+  useBulkUpdateQuestionsStatus,
+} from '../hooks/use-questions-bulk';
 import { useSkills } from '../hooks/use-skills';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
@@ -1109,39 +1102,14 @@ export function QuestionList() {
         )}
       </div>
 
-      <AlertDialog
+      <QuestionDeleteDialog
         open={Boolean(deleteConfirmation)}
         onOpenChange={(open) => !open && setDeleteConfirmation(null)}
-      >
-        <AlertDialogContent className="rounded-lg border border-gray-200 bg-white shadow-lg max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-base font-semibold text-gray-900">
-              Delete{' '}
-              {deleteConfirmation?.type === 'bulk' ? `${selectedIds.size} questions` : 'question'}?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-gray-500">
-              {deleteConfirmation?.type === 'bulk'
-                ? `This will permanently delete ${selectedIds.size} selected question(s). This action cannot be undone.`
-                : 'This action cannot be undone. This will permanently delete the question.'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="h-9 px-4 rounded text-sm font-medium">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              disabled={bulkDelete.isPending || deleteQuestion.isPending}
-              className="h-9 px-5 rounded bg-red-600 hover:bg-red-700 text-white font-semibold text-sm shadow-sm"
-            >
-              {(bulkDelete.isPending || deleteQuestion.isPending) && (
-                <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-              )}
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        deleteType={deleteConfirmation?.type ?? 'single'}
+        selectedCount={selectedIds.size}
+        isDeleting={bulkDelete.isPending || deleteQuestion.isPending}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

@@ -6,7 +6,7 @@
 > **The "Golden Command" to start development:**
 >
 > ```text
-> "Start with docs/strategy/QUICKSTART_AGENTS.md. Then check docs/technical/CONTEXT_MAP.md."
+> "Read AGENTS.md at project root. Then check questerix-cortex/outputs/AGENT_CONTEXT.md."
 > ```
 
 ---
@@ -15,8 +15,8 @@
 
 - **🔥 Start Development**: Follow instructions in `AGENTS.md` (Phase 0)
 - **🧠 Coding Standards**: [docs/standards/ORACLE_COGNITION.md](./docs/standards/ORACLE_COGNITION.md) - IDD Protocol & language patterns
-- **🐛 Best Practices**: [best_practices.md](./best_practices.md)
-- **🔒 Security Model**: [SECURITY.md](./SECURITY.md)
+- **🐛 Best Practices**: See `AGENTS.md` — Core Rules section
+- **🔒 Security Model**: See `docs/standards/ORACLE_COGNITION.md` — Part 4: Security Checklist
 
 ---
 
@@ -42,7 +42,7 @@ The project consists:
 ## 📂 Key Files
 
 - **`AGENTS.md`** (root): The Constitution. Core rules, discovery, and behavioral protocols.
-- **`docs/strategy/QUICKSTART_AGENTS.md`**: The Session Startup Checklist.
+- **`questerix-cortex/outputs/AGENT_CONTEXT.md`**: The Session Startup Snapshot (health, context, next task).
 - **`docs/technical/CONTEXT_MAP.md`**: The Map. Use this to find technical documentation.
 - **`PHASE_STATE.json`**: The Live State. Tracks validation status and current phase.
 - **`docs/technical/KNOWLEDGE_INDEX.md`**: The Knowledge Base (Project Oracle).
@@ -76,7 +76,7 @@ bash scripts/setup-automation.sh
 
 ## 🤖 For AI Agents
 
-1.  **Read `docs/strategy/QUICKSTART_AGENTS.md`** immediately to ground yourself.
+1.  **Read `AGENTS.md`** immediately to ground yourself. Then read `questerix-cortex/outputs/AGENT_CONTEXT.md`.
 2.  **Consult `docs/technical/CONTEXT_MAP.md`** to navigate the documentation.
 3.  **Check `PHASE_STATE.json`** to identify the active phase.
 4.  **Execute Phase Tasks** using the `ops_runner.py` pattern (Superpower Mode).

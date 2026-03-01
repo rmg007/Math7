@@ -54,7 +54,7 @@ Before Phase 1, create `.agent/artifacts/TASK_STATE.json`:
       4. **Resource Exhaustion** (memory leak, CPU spike, disk full, recursion depth)
       5. **Security Surface** (injection, auth bypass, data leakage in logs/errors)
     - Document each as a **concrete scenario** in the implementation plan
-    - Cross-reference with `vulnerability_taxonomy.md` for known patterns
+    - Cross-reference with `docs/standards/ORACLE_COGNITION.md` (Bug Pattern Library section) for known patterns
     - See `docs/standards/ORACLE_COGNITION.md` for IDD Protocol details
 4.  **Architectural Lockdown**: Explicitly identify the Design Patterns (e.g., Repository, Bloc, Factory) and SOLID principles. Justify why these patterns are the best choice for this specific feature.
 5.  **Structural Map**: Define the file structure and strict module boundaries to prevent spaghetti growth.
@@ -173,7 +173,7 @@ Before Phase 1, create `.agent/artifacts/TASK_STATE.json`:
       c. Re-run all tests
     - **Document**: "Silent failures found: [N]. All resolved."
 4.  **Architectural Vulnerability Check**:
-    - Read `vulnerability_taxonomy.md` for patterns relevant to changed files
+    - Read `docs/standards/ORACLE_COGNITION.md` (Bug Pattern Library section) for patterns relevant to changed files
     - Run detection methods for each applicable VUL-XXX pattern
     - If new vulnerability discovered → Append to taxonomy with VUL-XXX ID
     - Document results: "Verified: VUL-002 (Subject Leakage) - PASS"

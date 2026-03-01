@@ -31,7 +31,7 @@ const ROLES = [
   {
     name: 'super-admin',
     email: process.env.TEST_SUPER_ADMIN_EMAIL || 'mhalim80@hotmail.com',
-    password: process.env.TEST_SUPER_ADMIN_PASSWORD || 'mhalim80@hotmail.com',
+    password: process.env.TEST_SUPER_ADMIN_PASSWORD || 'AJbB8e2Uiia3BgE',
   },
   {
     name: 'admin',
@@ -85,7 +85,9 @@ function validateStateExpiry(
 
     // Guard: empty or skeleton file
     if (!raw || raw.length < 50) {
-      console.warn(`[globalSetup] ⚠️  ${role}: state file is empty or suspiciously small (${raw.length} bytes).`);
+      console.warn(
+        `[globalSetup] ⚠️  ${role}: state file is empty or suspiciously small (${raw.length} bytes).`
+      );
       return;
     }
 
@@ -112,7 +114,9 @@ function validateStateExpiry(
     }
 
     if (!accessToken) {
-      console.warn(`[globalSetup] ⚠️  ${role}: no Supabase auth token found in saved state. Tests may hit auth errors.`);
+      console.warn(
+        `[globalSetup] ⚠️  ${role}: no Supabase auth token found in saved state. Tests may hit auth errors.`
+      );
       return;
     }
 
@@ -128,11 +132,13 @@ function validateStateExpiry(
     if (ttlMs < minTtlMs) {
       console.warn(
         `[globalSetup] ⚠️  ${role}: JWT expires in ${ttlMin}min (${expiry.toISOString()}) — ` +
-        `less than the required ${Math.round(minTtlMs / 60000)}min window. ` +
-        'Increase Supabase JWT_EXPIRY in the test project settings or reduce CI run duration.'
+          `less than the required ${Math.round(minTtlMs / 60000)}min window. ` +
+          'Increase Supabase JWT_EXPIRY in the test project settings or reduce CI run duration.'
       );
     } else {
-      console.log(`[globalSetup] ✅ ${role}: JWT valid for ${ttlMin}min (expires ${expiry.toISOString()})`);
+      console.log(
+        `[globalSetup] ✅ ${role}: JWT valid for ${ttlMin}min (expires ${expiry.toISOString()})`
+      );
     }
   } catch (e) {
     console.warn(`[globalSetup] ⚠️  ${role}: could not validate state file:`, e);

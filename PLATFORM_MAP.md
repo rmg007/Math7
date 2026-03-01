@@ -45,6 +45,6 @@ The master design tokens live at `design-system/generated/css-variables.css`.
 - `landing-pages/` → **questerix-landing-pages** repo (COMPLETED)
 - `help-docs/` → **questerix-help-docs** repo (COMPLETED)
 - `content-engine/` → **questerix-content-engine** repo (COMPLETED)
-- `workers/` → **questerix-content-engine** repo (COMPLETED)
+- workers/ → **questerix-content-engine** repo (COMPLETED)
 - `student-app/` → **questerix-student-app** repo (COMPLETED)
-- `questerix_domain/` → **questerix-student-app** repo (COMPLETED)
+- questerix_domain/ → **questerix-student-app** repo (COMPLETED)

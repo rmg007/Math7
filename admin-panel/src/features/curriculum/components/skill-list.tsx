@@ -1,14 +1,5 @@
 import { AdminHeader } from '@/components/ui/admin-header';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { SkillDeleteDialog } from './skill-list-dialogs';
 import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
 import { ColumnToggle } from '@/components/ui/column-toggle';
@@ -54,14 +45,16 @@ import {
 import { Link } from 'react-router-dom';
 import { useDomains } from '../hooks/use-domains';
 import {
-  useBulkCreateSkills,
-  useBulkDeleteSkills,
-  useBulkUpdateSkillsStatus,
   useDeleteSkill,
   useDuplicateSkill,
   usePaginatedSkills,
   useUpdateSkillOrder,
 } from '../hooks/use-skills';
+import {
+  useBulkCreateSkills,
+  useBulkDeleteSkills,
+  useBulkUpdateSkillsStatus,
+} from '../hooks/use-skills-bulk';
 import { CurriculumFilterBar } from './curriculum-filter-bar';
 
 import {
@@ -755,7 +748,7 @@ export function SkillList() {
               onImport={handleImport}
               importDisabled={false}
             />
-            <Link to="/skills/new">
+            <Link to="/skills/new" aria-label="New Skill">
               <Button className="h-9 px-3 rounded bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs gap-1">
                 <Plus className="w-3.5 h-3.5" /> New Skill
               </Button>
@@ -1044,38 +1037,14 @@ export function SkillList() {
         )}
       </div>
 
-      <AlertDialog
+      <SkillDeleteDialog
         open={Boolean(deleteConfirmation)}
         onOpenChange={(open) => !open && setDeleteConfirmation(null)}
-      >
-        <AlertDialogContent className="rounded-lg border border-gray-200 bg-white shadow-lg max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-base font-semibold text-gray-900">
-              Delete {deleteConfirmation?.type === 'bulk' ? `${selectedIds.size} skills` : 'skill'}?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-gray-500">
-              {deleteConfirmation?.type === 'bulk'
-                ? `This will permanently delete ${selectedIds.size} selected skill(s) and their associated questions.`
-                : 'This action cannot be undone. This will permanently delete the skill and all associated questions.'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="h-9 px-4 rounded text-sm font-medium">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              disabled={bulkDelete.isPending || deleteSkill.isPending}
-              className="h-9 px-5 rounded bg-red-600 hover:bg-red-700 text-white font-semibold text-sm shadow-sm"
-            >
-              {(bulkDelete.isPending || deleteSkill.isPending) && (
-                <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-              )}
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        deleteType={deleteConfirmation?.type ?? 'single'}
+        selectedCount={selectedIds.size}
+        isDeleting={bulkDelete.isPending || deleteSkill.isPending}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

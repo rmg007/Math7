@@ -89,7 +89,7 @@ describe("Analyst.findDeadCode", () => {
       "admin-panel/src/services/api.ts"
     );
 
-    // Another file imports fetchData
+    // Another file imports the api.ts file (production scanner stores file-level edges)
     insertNode.run(
       "admin-panel/src/features/dashboard/hooks.ts",
       "file",
@@ -97,7 +97,7 @@ describe("Analyst.findDeadCode", () => {
     );
     insertEdge.run(
       "admin-panel/src/features/dashboard/hooks.ts",
-      "admin-panel/src/services/api.ts#fetchData",
+      "admin-panel/src/services/api.ts",
       "imports"
     );
 
@@ -201,7 +201,8 @@ describe("Analyst.findDeadCode", () => {
       "admin-panel/src/utils/helper.ts"
     );
 
-    // File that imports both
+    // File that imports helper.ts (production scanner stores file-level edges,
+    // one edge per imported file regardless of how many symbols are used)
     insertNode.run(
       "admin-panel/src/features/page.tsx",
       "file",
@@ -209,12 +210,7 @@ describe("Analyst.findDeadCode", () => {
     );
     insertEdge.run(
       "admin-panel/src/features/page.tsx",
-      "admin-panel/src/utils/helper.ts#helper1",
-      "imports"
-    );
-    insertEdge.run(
-      "admin-panel/src/features/page.tsx",
-      "admin-panel/src/utils/helper.ts#helper2",
+      "admin-panel/src/utils/helper.ts",
       "imports"
     );
 

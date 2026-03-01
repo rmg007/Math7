@@ -30,15 +30,27 @@ export class Analyst {
   }
 
   /**
-   * Finds dead code by querying the graph DB for symbol nodes with zero incoming imports.
-   * Excludes known entry points and caps results at 20.
+   * Finds dead code by querying the graph DB for symbol nodes whose parent file
+   * has zero incoming import edges.
+   *
+   * The graph stores import edges at **file** level (source_id = importer file,
+   * target_id = imported file).  Symbol node IDs have the form `file#Symbol`,
+   * so a direct join on `n.id = e.target_id` would never match.  The corrected
+   * query extracts the file path portion of each symbol's ID and joins on that.
+   *
+   * Excludes known entry points (pages, App, main, route files) and caps
+   * results at 20.
    */
   findDeadCode(db: Database.Database, limit: number = 20): Array<{ symbol: string; file: string }> {
-    // Query for symbol nodes with no incoming imports edges
+    // Join on the file portion of the symbol ID (everything before '#')
     const query = db.prepare(`
       SELECT n.id, n.file_path
       FROM nodes n
-      LEFT JOIN edges e ON n.id = e.target_id AND e.relationship = 'imports'
+      LEFT JOIN edges e ON
+        (CASE WHEN INSTR(n.id, '#') > 0
+              THEN SUBSTR(n.id, 1, INSTR(n.id, '#') - 1)
+              ELSE n.id END) = e.target_id
+        AND e.relationship = 'imports'
       WHERE n.type = 'symbol'
       GROUP BY n.id
       HAVING COUNT(e.source_id) = 0

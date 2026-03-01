@@ -25,7 +25,7 @@ You are a **Principal Reliability Engineer** performing a hands-on reliability a
 
 ## STEP 1 — DISCOVER (10% of effort)
 
-1. Read the directory tree, key config files: `package.json`, `pubspec.yaml`, `supabase/config.toml`, `wrangler.toml`, CI configs, `.env.example`
+1. Read the directory tree, key config files: `package.json`, `pubspec.yaml`, supabase/config.toml (Supabase project config — not committed to this repo), `wrangler.toml`, CI configs, `.env.example`
 2. Identify the **critical write paths** (user data creation/update, sync operations, auth flows)
 3. Map **external dependencies** and their failure modes (Supabase API, Postgres, Auth, Storage, third-party APIs)
 4. Output a **brief threat summary** (< 30 lines): critical flows, top 5 failure scenarios ranked by impact × likelihood, and key unknowns

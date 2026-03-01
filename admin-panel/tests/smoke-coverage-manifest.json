@@ -1,0 +1,46 @@
+{
+  "_comment": "Maps each smoke spec file to the source page files it covers. The Cortex scanner reads this manifest (Tier 0) to mark pages as having test coverage. MANDATORY: update this file whenever a new page is created or a new smoke spec is written.",
+  "admin-panel/tests/read-only/curriculum-pages.smoke.spec.ts": [
+    "admin-panel/src/features/curriculum/pages/domain-create-page.tsx",
+    "admin-panel/src/features/curriculum/pages/domain-edit-page.tsx",
+    "admin-panel/src/features/curriculum/pages/domains-page.tsx",
+    "admin-panel/src/features/curriculum/pages/skill-create-page.tsx",
+    "admin-panel/src/features/curriculum/pages/skill-edit-page.tsx",
+    "admin-panel/src/features/curriculum/pages/skills-page.tsx",
+    "admin-panel/src/features/curriculum/pages/question-create-page.tsx",
+    "admin-panel/src/features/curriculum/pages/question-edit-page.tsx",
+    "admin-panel/src/features/curriculum/pages/questions-page.tsx",
+    "admin-panel/src/features/curriculum/pages/question-studio-page.tsx",
+    "admin-panel/src/features/curriculum/pages/question-studio-bulk-actions.tsx",
+    "admin-panel/src/features/curriculum/pages/question-studio-filter-panel.tsx",
+    "admin-panel/src/features/curriculum/pages/publish-page.tsx",
+    "admin-panel/src/features/curriculum/pages/version-history-page.tsx"
+  ],
+  "admin-panel/tests/read-only/bulk-import-page.smoke.spec.ts": [
+    "admin-panel/src/features/ai-content/pages/BulkImportPage.tsx"
+  ],
+  "admin-panel/tests/read-only/account-settings-page.smoke.spec.ts": [
+    "admin-panel/src/features/auth/pages/AccountSettingsPage.tsx"
+  ],
+  "admin-panel/tests/read-only/ai-assistant.e2e.spec.ts": [
+    "admin-panel/src/features/ai-assistant/pages/GenerationPage.tsx",
+    "admin-panel/src/features/ai-assistant/pages/GovernancePage.tsx",
+    "admin-panel/src/features/ai-assistant/pages/SessionsPage.tsx"
+  ],
+  "admin-panel/tests/read-only/dashboard-page.smoke.spec.ts": [
+    "admin-panel/src/features/dashboard/pages/DashboardPage.tsx"
+  ],
+  "admin-panel/tests/read-only/misc-pages.smoke.spec.ts": [
+    "admin-panel/src/features/auth/pages/AuthConfirmPage.tsx",
+    "admin-panel/src/features/auth/pages/InvitationCodesPage.tsx",
+    "admin-panel/src/features/auth/pages/LoginPage.tsx",
+    "admin-panel/src/features/auth/pages/UserManagementPage.tsx",
+    "admin-panel/src/features/mentorship/pages/AssignmentCreatePage.tsx",
+    "admin-panel/src/features/mentorship/pages/GroupCreatePage.tsx",
+    "admin-panel/src/features/mentorship/pages/GroupDetailPage.tsx",
+    "admin-panel/src/features/mentorship/pages/GroupsPage.tsx",
+    "admin-panel/src/features/monitoring/pages/ErrorLogsPage.tsx",
+    "admin-panel/src/features/monitoring/pages/KnownIssuesPage.tsx",
+    "admin-panel/src/features/platform/pages/LandingsPage.tsx"
+  ]
+}

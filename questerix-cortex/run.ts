@@ -381,8 +381,12 @@ async function main() {
     skipAddingFilesFromTsConfig: true, // Lazy loading: only add what we need
   });
 
-  // Explicitly add core source files to reduce memory footprint
+  // Explicitly add core source files to reduce memory footprint.
+  // Root-level src files (App.tsx, main.tsx) are included so that their imports
+  // are tracked in the graph — without them, components they directly import
+  // (e.g. auth guards) incorrectly appear as dead exports.
   project.addSourceFilesAtPaths([
+    path.join(srcPath, "*.{ts,tsx}"),
     path.join(srcPath, "features/**/*.{ts,tsx}"),
     path.join(srcPath, "lib/**/*.{ts,tsx}"),
     path.join(srcPath, "hooks/**/*.{ts,tsx}"),

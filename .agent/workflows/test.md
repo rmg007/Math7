@@ -31,7 +31,7 @@ Activate a specific mode by saying `/test plan`, `/test write`, `/test verify`, 
    - `admin-panel/tests/**/*.spec.ts` — Playwright E2E
    - `student-app/test/**/*_test.dart` — Flutter unit/widget
    - `student-app/integration_test/**/*_test.dart` — Flutter integration
-4. Map each gap in `TEST_PLAN.md` to a proposed test file and test ID.
+4. Map each gap in `docs/TEST_PLAN.md` to a proposed test file and test ID.
 5. Output a ranked checklist: P0 → P1 → P2, with estimated effort.
 6. Create or update `tasks.md` with the new test items.
 
@@ -57,7 +57,7 @@ Set up shared test infrastructure before writing tests.
 
 ### Admin Panel (Playwright)
 
-// turbo 3. Page Object Model classes in `admin-panel/tests/pom/`:
+// turbo 3. Page Object Model classes in admin-panel/tests/pom/ (create if missing):
 
 - `LoginPage.ts`, `DomainsPage.ts`, `SkillsPage.ts`, `QuestionsPage.ts`
 - `GroupsPage.ts`, `PublishPage.ts`
@@ -67,7 +67,7 @@ Set up shared test infrastructure before writing tests.
 
 - Functions: `createDomain()`, `createSkill()`, `createQuestion()`, `publishCurriculum()`
 
-// turbo 5. Seed scripts in `admin-panel/tests/seeders/`:
+// turbo 5. Seed scripts in admin-panel/tests/seeders/ (create if missing):
 
 - `curriculum.ts` — domains, skills, questions (all 5 types)
 - `groups.ts` — group + members + assignments
@@ -89,7 +89,7 @@ Write tests following these conventions:
 Pattern: tests/<feature>.e2e.spec.ts
 IDs: AP-<FEATURE>-<NNN> (e.g., AP-AUTH-001)
 Use: test-utils.ts for TEST_USERS and login()
-Use: POM classes from tests/pom/
+Use: POM classes from admin-panel/tests/pom/
 Use: page.route() to mock Supabase REST calls
 Assert: persistent DOM state — NOT transient toasts
 ```

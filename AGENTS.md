@@ -20,6 +20,7 @@
 6. **Use Premium UI Components.** If maintaining tables, use `ColumnToggle` (visibility) and `BulkActionBar` (multi-select actions) to ensure UI consistency.
 7. **Every bug/issue requires a preventative test.** Before closing any bug or issue, you MUST write a new test case that reproduces the failure. The test must fail before the fix and pass after. No exceptions. Log the test file path in `docs/LEARNING_LOG.md` tagged `[test created]`.
 8. **MANDATORY: Use Cortex Discovery.** All agents MUST use the "faster way" (Cortex search/briefing) for all research and symbol lookup. Improving this discovery infra is a continuous P0 requirement.
+9. **New page = smoke test + manifest entry.** Whenever a new page file is added anywhere under `features/*/pages/`, you MUST: (a) add at least 3 smoke tests for it in the relevant `admin-panel/tests/read-only/*.smoke.spec.ts` file, and (b) add the page path to `admin-panel/tests/smoke-coverage-manifest.json` so the Cortex coverage scanner counts it. Failure to do both leaves a permanent gap in `questerix-cortex/outputs/AGENT_CONTEXT.md` that will flag the feature as uncovered every session.
 
 ## Discovery (How to Find What You Need - The Faster Way)
 
@@ -38,7 +39,7 @@ The RLS audit uses an "evidence bridge" pattern to avoid requiring local Supabas
 2. **Freshness Check**: If the file exists and is < 24 hours old, Cortex uses it directly (skips CLI)
 3. **Fallback**: If evidence is stale/missing, Cortex falls back to `supabase db query` (requires authenticated CLI)
 
-**Why this matters**: Local dev environments often lack Supabase CLI authentication. The evidence bridge ensures RLS checks PASS without requiring `supabase login`. If you see `RLS: ERROR` in `AGENT_CONTEXT.md`, it means:
+**Why this matters**: Local dev environments often lack Supabase CLI authentication. The evidence bridge ensures RLS checks PASS without requiring `supabase login`. If you see `RLS: ERROR` in `questerix-cortex/outputs/AGENT_CONTEXT.md`, it means:
 
 - The evidence file is > 24 hours old, AND
 - The local Supabase CLI isn't authenticated
@@ -80,7 +81,7 @@ The RLS audit uses an "evidence bridge" pattern to avoid requiring local Supabas
 
 ### Tier 2 — Visual Regression (Playwright `toHaveScreenshot`)
 
-- 5 pages × 2 viewports (Desktop + iPad Pro). Baselines in `tests/__screenshots__/`.
+- 5 pages × 2 viewports (Desktop + iPad Pro). Baselines in `admin-panel/tests/__screenshots__/`.
 - `npx playwright test tests/visual-regression.spec.ts`
 - Update baselines: `npx playwright test tests/visual-regression.spec.ts --update-snapshots`
 
@@ -88,7 +89,7 @@ The RLS audit uses an "evidence bridge" pattern to avoid requiring local Supabas
 
 ## Test Conventions
 
-- Use `TEST_USERS.SUPER_ADMIN` from `tests/test-utils.ts` for admin E2E tests.
+- Use `TEST_USERS.SUPER_ADMIN` from `admin-panel/tests/test-utils.ts` for admin E2E tests.
 - Mock Edge Functions and RPCs with `page.route()` — never call real AI APIs in tests.
 - Mock data must pass Zod validation schemas (the app validates client-side before RPC).
 - Assert on persistent state changes (buffer counts, disabled buttons), **not** transient toasts.
@@ -172,7 +173,7 @@ Deno.test('function handles auth correctly', async () => {
 
 - **Scope**: 5 pages × 2 viewports (Desktop + iPad Pro)
 - **Frequency**: PR validation
-- **Baselines**: `tests/__screenshots__/`
+- **Baselines**: `admin-panel/tests/__screenshots__/`
 
 #### **Tier 3 — Unit/Integration Tests**
 
@@ -189,7 +190,7 @@ Deno.test('function handles auth correctly', async () => {
 
 #### **Test Accounts**
 
-- **Use `TEST_USERS.SUPER_ADMIN`** from `tests/test-utils.ts` for admin E2E tests
+- **Use `TEST_USERS.SUPER_ADMIN`** from `admin-panel/tests/test-utils.ts` for admin E2E tests
 - **Never use real user credentials** in automated tests
 - **Test account credentials** stored in `.agent/TEST_ACCOUNTS.md`
 
