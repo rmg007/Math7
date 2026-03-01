@@ -10,6 +10,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { addBreadcrumb, setUser } from '@/lib/error-tracker';
 import { supabase } from '@/lib/supabase';
 import { SecurityLogger } from '@/services/SecurityLogger';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -95,6 +96,7 @@ export function LoginPage() {
       email: data.email,
       password: data.password,
     });
+    addBreadcrumb('Sign in attempt', 'auth', 'info', { email: data.email });
 
     if (error) {
       setError(error.message);
@@ -107,7 +109,8 @@ export function LoginPage() {
       });
     } else {
       await SecurityLogger.logLogin(authData.user.id);
-
+      setUser(authData.user.id, authData.user.email);
+      addBreadcrumb('Login successful', 'auth', 'info');
       navigate('/');
     }
   };

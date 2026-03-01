@@ -1,3 +1,4 @@
+import { setUser } from '@/lib/error-tracker';
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -64,6 +65,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         console.warn('Profile check failed, allowing access:', e);
       }
 
+      setUser(session.user.id, session.user.email);
       setLoading(false);
     };
 

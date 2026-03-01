@@ -3,7 +3,10 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 // Adjust path as needed based on actual file location
-const TYPE_FILE_PATH = path.resolve(__dirname, '../../lib/database.types.ts');
+const TYPE_FILE_PATH = path.resolve(
+  __dirname,
+  '../../../../packages/core/src/types/database.types.ts'
+);
 
 describe('Database Schema Sync', () => {
   // Task 3.1: Verify module export to prevent build failures

@@ -1,6 +1,6 @@
-import React from 'react';
 import { captureException } from '@/lib/error-tracker';
 import type { OracleResult } from '@/services/OracleService';
+import React from 'react';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -33,10 +33,12 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    // Log to Supabase for telemetry
+    // Log to Supabase for diagnostic tracing
     captureException(error, {
+      componentStack: errorInfo.componentStack || undefined,
+      componentName: 'ErrorBoundary',
+      tags: { severity: 'critical', layer: 'ui' },
       extra: {
-        componentStack: errorInfo.componentStack,
         type: 'react_error_boundary',
       },
     });

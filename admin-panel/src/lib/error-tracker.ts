@@ -1,24 +1,41 @@
 import type { Json } from './database.types';
 import { supabase } from './supabase';
 
+/**
+ * Enhanced Error Context with tracing and performance metrics (F-18).
+ */
 interface ErrorContext {
   url?: string;
   userAgent?: string;
   appVersion?: string;
   appId?: string;
+  componentName?: string;
+  componentStack?: string;
+  correlationId?: string;
+  tags?: Record<string, string>;
   extra?: Record<string, unknown>;
 }
 
-const MAX_BREADCRUMBS = 20;
+// ─── Constants & State ───────────────────────────────────────────────────────
+
+const MAX_BREADCRUMBS = 50; // Increased for better trace history
 const breadcrumbs: Array<{
   timestamp: string;
   message: string;
-  category?: string;
+  category: string;
+  level: 'debug' | 'info' | 'warn' | 'error';
   data?: Record<string, unknown>;
 }> = [];
 
+// Persistent Session ID for the duration of the page load
+const SESSION_ID = crypto.randomUUID();
+
+let currentUser: { id: string; email?: string } | null = null;
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 /**
- * Recursively sanitizes objects to remove potential PII (F-18).
+ * Recursively sanitizes objects to remove potential PII.
  */
 function sanitizeData(obj: Record<string, unknown>): Record<string, unknown> {
   const PII_KEYS = [
@@ -30,6 +47,8 @@ function sanitizeData(obj: Record<string, unknown>): Record<string, unknown> {
     'address',
     'name',
     'credit_card',
+    'ssn',
+    'auth',
   ];
   const sanitized: Record<string, unknown> = {};
 
@@ -46,21 +65,68 @@ function sanitizeData(obj: Record<string, unknown>): Record<string, unknown> {
 }
 
 /**
- * Adds a breadcrumb to the current session context.
- * Useful for tracking user actions leading up to an error.
+ * Gathers rich environment telemetry automatically.
+ */
+function getTelemetry() {
+  const nav = navigator as Navigator & {
+    connection?: { effectiveType: string; rtt: number; downlink: number; saveData: boolean };
+  };
+  const perf = performance as Performance & {
+    memory?: { jsHeapSizeLimit: number; usedJSHeapSize: number };
+  };
+  const conn = nav.connection;
+
+  return {
+    viewport: {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      pixelRatio: window.devicePixelRatio,
+    },
+    screen: {
+      width: window.screen.width,
+      height: window.screen.height,
+      orientation: window.screen.orientation?.type,
+    },
+    performance: {
+      memory: perf.memory
+        ? {
+            limit: Math.round(perf.memory.jsHeapSizeLimit / 1048576),
+            used: Math.round(perf.memory.usedJSHeapSize / 1048576),
+          }
+        : undefined,
+      navigationType: performance.getEntriesByType('navigation')[0]?.name,
+    },
+    network: conn
+      ? {
+          effectiveType: conn.effectiveType,
+          rtt: conn.rtt,
+          downlink: conn.downlink,
+          saveData: conn.saveData,
+        }
+      : undefined,
+    language: navigator.language,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  };
+}
+
+// ─── API ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Adds a structured breadcrumb to the current session context.
  */
 export function addBreadcrumb(
   message: string,
-  category?: string,
+  category = 'app',
+  level: 'debug' | 'info' | 'warn' | 'error' = 'info',
   data?: Record<string, unknown>
 ): void {
-  // Sanitize data before storing to prevent PII leakage in logs
   const sanitizedData = data ? sanitizeData(data) : undefined;
 
   breadcrumbs.push({
     timestamp: new Date().toISOString(),
     message,
     category,
+    level,
     data: sanitizedData,
   });
 
@@ -70,8 +136,7 @@ export function addBreadcrumb(
 }
 
 /**
- * Captures an exception and logs it to Supabase.
- * Zero-cost alternative to Sentry.
+ * Captures an exception and logs it to Supabase with full trace data.
  */
 export async function captureException(
   error: Error | unknown,
@@ -81,85 +146,96 @@ export async function captureException(
     const errorObj = error instanceof Error ? error : new Error(String(error));
     const message = errorObj.message || String(error);
 
-    // Filter out noisy/harmless browser errors (P1 Roadmap task)
+    // Filter noisy browser/network errors
     if (
-      message.includes('ResizeObserver loop completed') ||
-      message.includes('ResizeObserver loop limit exceeded') ||
+      message.includes('ResizeObserver') ||
       message.includes('signal aborted') ||
-      message.includes('user aborted a request')
+      message.includes('user aborted') ||
+      message.includes('Script error.') // Cross-origin issues
     ) {
-      if (import.meta.env.DEV) {
-        console.debug('[ErrorTracker] Filtered noisy error:', message);
-      }
       return null;
     }
 
-    const { data, error: rpcError } = await supabase.rpc('log_error', {
+    const correlationId = context?.correlationId || crypto.randomUUID();
+    const telemetry = getTelemetry();
+
+    const { error: rpcError } = await supabase.rpc('log_error', {
       p_platform: 'web',
       p_error_type: errorObj.name || 'Error',
       p_error_message: message,
-      p_stack_trace: errorObj.stack || undefined,
+      p_stack_trace: errorObj.stack || context?.componentStack || undefined,
       p_url: context?.url || window.location.href,
       p_user_agent: context?.userAgent || navigator.userAgent,
       p_app_version: context?.appVersion || import.meta.env.VITE_APP_VERSION || '1.0.0',
       p_app_id: context?.appId || undefined,
       p_extra_context: {
         ...context?.extra,
+        session_id: SESSION_ID,
+        correlation_id: correlationId,
+        component_name: context?.componentName,
+        telemetry,
         breadcrumbs: [...breadcrumbs],
+        tags: context?.tags,
+        user: currentUser,
       } as Json,
     });
 
     if (rpcError) {
-      console.error('[ErrorTracker] Failed to log error:', rpcError);
+      console.error('[ErrorTracker] RPC Failed:', rpcError);
       return null;
     }
 
     if (import.meta.env.DEV) {
-      console.log('[ErrorTracker] Error logged:', data);
+      console.log(`[ErrorTracker] 🚩 Logged ${correlationId}`, { message, telemetry });
     }
 
-    return data as string;
+    return correlationId;
   } catch (e) {
-    // Fail silently to avoid infinite loops
-    console.error('[ErrorTracker] Unexpected failure:', e);
+    console.error('[ErrorTracker] Critical Failure:', e);
     return null;
   }
 }
 
 /**
- * Captures a message (non-error event) to the error log.
+ * Captures a message with a specific severity level.
  */
 export async function captureMessage(
   message: string,
   level: 'info' | 'warning' | 'error' = 'info',
   context?: ErrorContext
 ): Promise<string | null> {
+  addBreadcrumb(message, 'manual', level === 'warning' ? 'warn' : level);
   return captureException(new Error(message), {
     ...context,
-    extra: { ...context?.extra, level },
+    tags: { level, ...context?.tags },
   });
 }
 
 /**
- * Sets user context for future error reports.
+ * Sets user context for all future logs in this session.
  */
-export function setUser(_userId: string, _email?: string): void {
-  // User context is automatically captured via Supabase auth
+export function setUser(id: string, email?: string): void {
+  currentUser = { id, email };
+  addBreadcrumb(`User identified: ${id}`, 'auth', 'info');
 }
 
 /**
- * Global error handler for uncaught exceptions.
+ * Initializes global listeners for uncaught errors and rejections.
  */
 export function initErrorTracking(): void {
-  // Capture unhandled promise rejections
+  // Promise rejections
   window.addEventListener('unhandledrejection', (event) => {
     captureException(event.reason, {
-      extra: { type: 'unhandledrejection' },
+      extra: { type: 'unhandledrejection', promise: true },
+      tags: { severity: 'critical' },
     });
   });
 
-  // Capture uncaught errors
+  // Runtime errors
   window.addEventListener('error', (event) => {
+    // Skip if handled by React Error Boundary (which calls captureException directly)
+    if (event.error?.handledByBoundary) return;
+
     captureException(event.error || event.message, {
       extra: {
         type: 'uncaught',
@@ -167,10 +243,16 @@ export function initErrorTracking(): void {
         lineno: event.lineno,
         colno: event.colno,
       },
+      tags: { severity: 'critical' },
     });
   });
 
+  // Track page visibility changes as breadcrumbs
+  document.addEventListener('visibilitychange', () => {
+    addBreadcrumb(`Visibility changed: ${document.visibilityState}`, 'system', 'debug');
+  });
+
   if (import.meta.env.DEV) {
-    console.log('[ErrorTracker] Initialized (Supabase-native)');
+    console.log(`[ErrorTracker] Tracking Active | Session: ${SESSION_ID}`);
   }
 }
