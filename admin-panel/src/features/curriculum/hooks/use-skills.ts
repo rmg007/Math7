@@ -11,7 +11,7 @@ type Skill = Database['public']['Tables']['skills']['Row'];
 
 // Form input type - excludes auto-generated fields
 // checked app_id: payload includes it
-export type SkillFormInput = {
+type SkillFormInput = {
   domain_id: string;
   slug: string;
   title: string;

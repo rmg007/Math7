@@ -10,7 +10,7 @@ import { CurriculumStatus, PaginatedResponse, PaginationParams } from '../types'
 type Domain = Database['public']['Tables']['domains']['Row'];
 
 // Form input type - excludes auto-generated fields
-export type DomainFormInput = {
+type DomainFormInput = {
   slug: string;
   title: string;
   description?: string;

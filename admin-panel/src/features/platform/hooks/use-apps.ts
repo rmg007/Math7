@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { AppInsert, AppUpdate, CompiledApp } from '@/types/platform';
 
-export type { App, AppInsert, AppUpdate, CompiledApp } from '@/types/platform';
+export type { App, AppInsert, CompiledApp } from '@/types/platform';
 
 export function useApps() {
   return useQuery({

@@ -25,14 +25,6 @@ interface DashboardStats {
   readyToPublish: number;
 }
 
-interface RecentActivity {
-  id: string;
-  type: 'domain' | 'skill' | 'question';
-  title: string;
-  action: 'created' | 'updated';
-  timestamp: string;
-}
-
 export function useDashboardStats() {
   const { currentApp } = useApp();
 
@@ -171,91 +163,5 @@ export function useDashboardStats() {
     },
     enabled: Boolean(currentApp?.app_id),
     refetchInterval: 60000,
-  });
-}
-
-export function useRecentActivity() {
-  const { currentApp } = useApp();
-
-  return useQuery({
-    queryKey: ['recent-activity', currentApp?.app_id],
-    queryFn: async (): Promise<RecentActivity[]> => {
-      const markName = 'useRecentActivity';
-      performance.mark(`${markName}:start`);
-      if (!currentApp?.app_id) throw new Error('No app selected');
-
-      const [domainsResult, skillsResult, questionsResult] = await Promise.all([
-        supabase
-          .from('domains')
-          .select('domain_id, title, created_at, updated_at')
-          .eq('app_id', currentApp.app_id)
-          .is('deleted_at', null)
-          .order('updated_at', { ascending: false })
-          .limit(4),
-        supabase
-          .from('skills')
-          .select('skill_id, title, created_at, updated_at')
-          .eq('app_id', currentApp.app_id)
-          .is('deleted_at', null)
-          .order('updated_at', { ascending: false })
-          .limit(4),
-        supabase
-          .from('questions')
-          .select('question_id, content, created_at, updated_at')
-          .eq('app_id', currentApp.app_id)
-          .is('deleted_at', null)
-          .order('updated_at', { ascending: false })
-          .limit(4),
-      ]);
-
-      if (domainsResult.error) throw domainsResult.error;
-      if (skillsResult.error) throw skillsResult.error;
-      if (questionsResult.error) throw questionsResult.error;
-
-      const activities: RecentActivity[] = [];
-
-      domainsResult.data?.forEach((d) => {
-        const isNew = d.created_at === d.updated_at;
-        activities.push({
-          id: d.domain_id,
-          type: 'domain',
-          title: d.title,
-          action: isNew ? 'created' : 'updated',
-          timestamp: d.updated_at,
-        });
-      });
-
-      skillsResult.data?.forEach((s) => {
-        const isNew = s.created_at === s.updated_at;
-        activities.push({
-          id: s.skill_id,
-          type: 'skill',
-          title: s.title,
-          action: isNew ? 'created' : 'updated',
-          timestamp: s.updated_at,
-        });
-      });
-
-      questionsResult.data?.forEach((q) => {
-        const isNew = q.created_at === q.updated_at;
-        const contentStr = typeof q.content === 'string' ? q.content : JSON.stringify(q.content);
-        activities.push({
-          id: q.question_id,
-          type: 'question',
-          title: contentStr.substring(0, 50) + (contentStr.length > 50 ? '...' : ''),
-          action: isNew ? 'created' : 'updated',
-          timestamp: q.updated_at,
-        });
-      });
-
-      performance.mark(`${markName}:end`);
-      performance.measure(markName, `${markName}:start`, `${markName}:end`);
-
-      return activities
-        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-        .slice(0, 10);
-    },
-    enabled: Boolean(currentApp?.app_id),
-    refetchInterval: 30000,
   });
 }

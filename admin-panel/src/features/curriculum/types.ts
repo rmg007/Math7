@@ -21,40 +21,29 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-export type QuestionType =
-  | 'multiple_choice'
-  | 'mcq_multi'
-  | 'text_input'
-  | 'boolean'
-  | 'reorder_steps';
-
-export interface McqOption {
+interface McqOption {
   id: string;
   text: string;
 }
 
-export interface McqOptions {
+interface McqOptions {
   options: McqOption[];
 }
 
-export interface BooleanOptions {
+interface BooleanOptions {
   true_label: string;
   false_label: string;
 }
 
-export interface TextInputOptions {
+interface TextInputOptions {
   placeholder: string;
 }
 
-export interface ReorderStepsOptions {
+interface ReorderStepsOptions {
   steps: McqOption[];
 }
 
-export type QuestionOptions =
-  | McqOptions
-  | BooleanOptions
-  | TextInputOptions
-  | ReorderStepsOptions;
+export type QuestionOptions = McqOptions | BooleanOptions | TextInputOptions | ReorderStepsOptions;
 
 export interface McqSolution {
   correct_option_id: string;
@@ -75,10 +64,3 @@ export interface TextInputSolution {
 export interface ReorderStepsSolution {
   correct_order: string[];
 }
-
-export type QuestionSolution =
-  | McqSolution
-  | McqMultiSolution
-  | BooleanSolution
-  | TextInputSolution
-  | ReorderStepsSolution;

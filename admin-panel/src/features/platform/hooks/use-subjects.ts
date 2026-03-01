@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export type Subject = Tables<'subjects'>;
 export type SubjectInsert = TablesInsert<'subjects'>;
-export type SubjectUpdate = TablesUpdate<'subjects'>;
+type SubjectUpdate = TablesUpdate<'subjects'>;
 
 export function useSubjects() {
   return useQuery({

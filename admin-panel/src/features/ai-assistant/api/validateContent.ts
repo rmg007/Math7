@@ -1,12 +1,12 @@
 import { supabase } from '@/lib/supabase';
 
-export interface ValidationRule {
+interface ValidationRule {
   name: string;
   rule_type: string;
   params: Record<string, unknown>;
 }
 
-export interface QuestionData {
+interface QuestionData {
   id?: number;
   question?: string;
   options?: unknown[];
@@ -14,7 +14,7 @@ export interface QuestionData {
   [key: string]: unknown;
 }
 
-export interface ValidationRequest {
+interface ValidationRequest {
   questions: QuestionData[];
   source_text: string;
   subject_type?: 'math' | 'english' | 'general';

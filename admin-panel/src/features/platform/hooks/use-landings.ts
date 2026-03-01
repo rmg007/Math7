@@ -3,8 +3,8 @@ import { supabase } from '@/lib/supabase';
 import { castJson } from '@/lib/type-utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-export type LandingPage = Database['public']['Tables']['app_landing_pages']['Row'];
-export type LandingPageUpdate = Database['public']['Tables']['app_landing_pages']['Update'];
+type LandingPage = Database['public']['Tables']['app_landing_pages']['Row'];
+type LandingPageUpdate = Database['public']['Tables']['app_landing_pages']['Update'];
 
 export type LandingPageWithApp = LandingPage & {
   apps: { display_name: string; subdomain: string } | null;

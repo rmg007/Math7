@@ -10,7 +10,7 @@ import { PaginatedResponse, PaginationParams } from '../types';
 
 type Question = Database['public']['Tables']['questions']['Row'];
 export type QuestionInsert = Database['public']['Tables']['questions']['Insert'];
-export type QuestionUpdate = Database['public']['Tables']['questions']['Update'];
+type QuestionUpdate = Database['public']['Tables']['questions']['Update'];
 
 function isNotNull<T>(value: T | null): value is T {
   return value !== null;
