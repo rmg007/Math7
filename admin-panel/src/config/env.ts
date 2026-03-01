@@ -35,6 +35,30 @@ interface EnvConfig {
   isDevelopment: boolean;
 }
 
+// Type for the fallback env object when import.meta.env is unavailable
+type EnvRecord = Record<string, string | boolean | undefined>;
+
+// Cached reference to import.meta.env for module-level access
+// Falls back to empty record in non-Vite contexts (e.g., Playwright Node.js)
+const _metaEnv: EnvRecord =
+  typeof import.meta !== 'undefined' && import.meta.env ? (import.meta.env as EnvRecord) : {};
+
+/**
+ * Safely get a raw value from import.meta.env.
+ * Use this for accessing env vars outside the standard EnvConfig.
+ * Returns undefined if the key doesn't exist or import.meta.env is unavailable.
+ */
+export function getMetaEnv(key: string): string | boolean | undefined {
+  return _metaEnv[key];
+}
+
+/**
+ * Check if we're in development mode (Vite DEV server).
+ */
+export function isDevMode(): boolean {
+  return Boolean(_metaEnv.DEV);
+}
+
 /**
  * Get an environment variable with optional required check.
  *
@@ -44,15 +68,15 @@ interface EnvConfig {
  */
 function getEnvVar(key: string, required = true): string {
   // Check for TEST_ prefixed version first (e.g. TEST_VITE_SUPABASE_URL)
-  const testValue = import.meta.env[`TEST_${key}`];
+  const testValue = _metaEnv[`TEST_${key}`];
   if (testValue) return typeof testValue === 'string' ? testValue : '';
 
-  const value = import.meta.env[key];
+  const value = _metaEnv[key];
   if (required && !value) {
     console.error(`Missing required environment variable: ${key}`);
-    // In development, show a warning but don't crash
-    if (import.meta.env.DEV) {
-      console.warn(`Continuing with empty value for ${key} in development mode`);
+    // In development or test contexts, show a warning but don't crash
+    if (_metaEnv.DEV || typeof process !== 'undefined') {
+      console.warn(`Continuing with empty value for ${key} in development/test mode`);
       return '';
     }
     throw new Error(`Missing required environment variable: ${key}`);
@@ -73,9 +97,9 @@ export const env: EnvConfig = {
   enableOfflineMode: getEnvVar('VITE_ENABLE_OFFLINE_MODE', false) === 'true',
   analyticsId: getEnvVar('VITE_ANALYTICS_ID', false) || null,
 
-  mode: import.meta.env.MODE as 'development' | 'production',
-  isProduction: import.meta.env.PROD,
-  isDevelopment: import.meta.env.DEV,
+  mode: (_metaEnv.MODE as 'development' | 'production') || 'development',
+  isProduction: Boolean(_metaEnv.PROD),
+  isDevelopment: Boolean(_metaEnv.DEV) || !_metaEnv.PROD,
 };
 
 /**
@@ -100,7 +124,7 @@ export function validateEnv(): void {
 }
 
 // Log configuration in development (with sensitive values redacted)
-if (import.meta.env.DEV) {
+if (_metaEnv.DEV) {
   console.log('[ENV] Loaded configuration:', {
     appVersion: env.appVersion,
     appName: env.appName,

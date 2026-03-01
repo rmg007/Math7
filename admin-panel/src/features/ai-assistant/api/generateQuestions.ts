@@ -1,3 +1,4 @@
+import { getMetaEnv, isDevMode } from '@/config/env';
 import { supabase } from '@/lib/supabase';
 
 export interface GenerateQuestionsRequest {
@@ -31,13 +32,11 @@ export interface GenerateQuestionsResponse {
   };
 }
 
-const WORKERS_URL = import.meta.env.VITE_WORKERS_URL;
+const WORKERS_URL = getMetaEnv('VITE_WORKERS_URL') as string | undefined;
 
 // In development, route Worker requests through the Vite proxy (/api/workers)
 // to bypass CORS. In production, use the real Worker URL directly.
-const EFFECTIVE_WORKERS_URL = import.meta.env.DEV
-  ? '/api/workers'
-  : WORKERS_URL;
+const EFFECTIVE_WORKERS_URL = isDevMode() ? '/api/workers' : WORKERS_URL;
 
 export async function generateQuestions(
   request: GenerateQuestionsRequest
@@ -87,16 +86,16 @@ async function generateViaSupabase(
 
   // In dev, route through the Vite proxy (/api/edge) to bypass Supabase CORS.
   // In prod, call the Edge Function URL directly.
-  const baseUrl = import.meta.env.DEV
-    ? '/api/edge'
-    : `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+  const supabaseUrl = getMetaEnv('VITE_SUPABASE_URL') as string | undefined;
+  const supabaseKey = getMetaEnv('VITE_SUPABASE_ANON_KEY') as string | undefined;
+  const baseUrl = isDevMode() ? '/api/edge' : `${supabaseUrl}/functions/v1`;
 
   const response = await fetch(`${baseUrl}/generate-questions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${session.access_token}`,
-      apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+      apikey: supabaseKey || '',
     },
     body: JSON.stringify(request),
     signal: AbortSignal.timeout(45_000),

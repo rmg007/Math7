@@ -1,3 +1,4 @@
+import { getMetaEnv } from '@/config/env';
 import { supabase } from '@/lib/supabase';
 
 interface ValidationRule {
@@ -39,7 +40,7 @@ export interface ValidationResponse {
   };
 }
 
-const WORKERS_URL = import.meta.env.VITE_WORKERS_URL;
+const WORKERS_URL = getMetaEnv('VITE_WORKERS_URL') as string | undefined;
 
 export async function validateContent(request: ValidationRequest): Promise<ValidationResponse> {
   // Use Cloudflare Workers AI if configured, fall back to Supabase Edge Functions

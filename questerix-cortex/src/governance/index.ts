@@ -53,6 +53,25 @@ function collectMarkdownFiles(projectRoot: string, dirsToScan?: string[]): strin
 }
 
 /**
+ * Check if a path looks like a glob pattern, alias, or other non-file reference.
+ */
+function isNonFilePath(p: string): boolean {
+  // Glob patterns: *, ?, [, {
+  if (/[*?[\]{]/.test(p)) return true;
+  // Path aliases: @/, ~/
+  if (p.startsWith("@/") || p.startsWith("~/")) return true;
+  // URLs without protocol (e.g., supabase.co)
+  if (/\.(com|co|io|dev|org|net)\b/.test(p)) return true;
+  // CSS/Tailwind patterns (e.g., gray-500/600)
+  if (/^[a-z]+-\d+\/\d+$/.test(p)) return true;
+  // Markdown task markers like [/] or [x]
+  if (/^\[.\]$/.test(p)) return true;
+  // Relative paths that are clearly patterns (e.g., *.md, **/*.ts)
+  if (p.includes("**") || p.startsWith("*.")) return true;
+  return false;
+}
+
+/**
  * Extract internal file references from markdown content.
  * Matches: [text](path), `path`, and "Read path" / "read path" style.
  */
@@ -68,7 +87,8 @@ function extractRefs(content: string): string[] {
     if (
       filePath &&
       !filePath.startsWith("http") &&
-      !filePath.startsWith("mailto:")
+      !filePath.startsWith("mailto:") &&
+      !isNonFilePath(filePath)
     ) {
       refs.push(filePath);
     }
@@ -78,7 +98,10 @@ function extractRefs(content: string): string[] {
   const backtickRe = /`([^`]+)`/g;
   while ((m = backtickRe.exec(content)) !== null) {
     const p = m[1].trim();
-    if (p.endsWith(".md") || (p.includes("/") && !p.includes(" "))) {
+    if (
+      (p.endsWith(".md") || (p.includes("/") && !p.includes(" "))) &&
+      !isNonFilePath(p)
+    ) {
       refs.push(p);
     }
   }
@@ -86,7 +109,10 @@ function extractRefs(content: string): string[] {
   // "Read X" or "read X" where X is a path
   const readRe = /[Rr]ead\s+[`']?([^\s`']+\.md)[`']?/g;
   while ((m = readRe.exec(content)) !== null) {
-    refs.push(m[1].trim());
+    const ref = m[1].trim();
+    if (!isNonFilePath(ref)) {
+      refs.push(ref);
+    }
   }
 
   return [...new Set(refs)];

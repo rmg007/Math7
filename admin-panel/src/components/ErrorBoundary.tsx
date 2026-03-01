@@ -1,3 +1,4 @@
+import { isDevMode } from '@/config/env';
 import { captureException } from '@/lib/error-tracker';
 import type { OracleResult } from '@/services/OracleService';
 import React from 'react';
@@ -157,7 +158,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               Dismiss
             </button>
 
-            {import.meta.env.DEV && this.state.error && (
+            {isDevMode() && this.state.error && (
               <details className="mt-12 text-left opacity-30 hover:opacity-100 transition-opacity">
                 <summary className="text-[9px] font-black text-gray-400 uppercase tracking-widest cursor-pointer list-none flex items-center gap-2">
                   <div className="w-1 h-1 bg-gray-300 rounded-full" />

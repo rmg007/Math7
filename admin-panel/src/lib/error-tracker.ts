@@ -1,3 +1,4 @@
+import { env, isDevMode } from '@/config/env';
 import type { Json } from './database.types';
 import { supabase } from './supabase';
 
@@ -166,7 +167,7 @@ export async function captureException(
       p_stack_trace: errorObj.stack || context?.componentStack || undefined,
       p_url: context?.url || window.location.href,
       p_user_agent: context?.userAgent || navigator.userAgent,
-      p_app_version: context?.appVersion || import.meta.env.VITE_APP_VERSION || '1.0.0',
+      p_app_version: context?.appVersion || env.appVersion || '1.0.0',
       p_app_id: context?.appId || undefined,
       p_extra_context: {
         ...context?.extra,
@@ -185,7 +186,7 @@ export async function captureException(
       return null;
     }
 
-    if (import.meta.env.DEV) {
+    if (isDevMode()) {
       console.log(`[ErrorTracker] 🚩 Logged ${correlationId}`, { message, telemetry });
     }
 
@@ -252,7 +253,7 @@ export function initErrorTracking(): void {
     addBreadcrumb(`Visibility changed: ${document.visibilityState}`, 'system', 'debug');
   });
 
-  if (import.meta.env.DEV) {
+  if (isDevMode()) {
     console.log(`[ErrorTracker] Tracking Active | Session: ${SESSION_ID}`);
   }
 }

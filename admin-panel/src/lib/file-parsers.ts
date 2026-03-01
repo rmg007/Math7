@@ -1,9 +1,15 @@
-// No types available for pdfjs-dist build
 import mammoth from 'mammoth';
-import * as pdfjsLib from 'pdfjs-dist';
 
-// We need to set up the worker for PDF.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.mjs';
+// pdfjs-dist is loaded lazily to avoid Node.js compatibility issues in test environments
+let pdfjsLib: typeof import('pdfjs-dist') | null = null;
+
+async function getPdfjs() {
+  if (!pdfjsLib) {
+    pdfjsLib = await import('pdfjs-dist');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.mjs';
+  }
+  return pdfjsLib;
+}
 
 export interface ParsedFile {
   name: string;
@@ -46,8 +52,9 @@ export async function parseFile(file: File): Promise<ParsedFile> {
 }
 
 async function parsePdf(file: File): Promise<string> {
+  const pdfjs = await getPdfjs();
   const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
   let fullText = '';
 
   for (let i = 1; i <= pdf.numPages; i++) {

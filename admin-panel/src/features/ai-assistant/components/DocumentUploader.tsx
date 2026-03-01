@@ -1,11 +1,18 @@
 import { CheckCircle2, File, Loader2, Upload, XCircle } from 'lucide-react';
 import mammoth from 'mammoth';
-import * as pdfjsLib from 'pdfjs-dist';
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.mjs';
+// pdfjs-dist is loaded lazily to avoid Node.js compatibility issues in test environments
+let pdfjsLib: typeof import('pdfjs-dist') | null = null;
+
+async function getPdfjs() {
+  if (!pdfjsLib) {
+    pdfjsLib = await import('pdfjs-dist');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.mjs';
+  }
+  return pdfjsLib;
+}
 
 interface DocumentUploaderProps {
   onTextExtracted: (text: string, filename: string) => void;
@@ -26,8 +33,9 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
   const [uploadState, setUploadState] = useState<UploadState>({ status: 'idle' });
 
   const extractTextFromPDF = async (file: File): Promise<string> => {
+    const pdfjs = await getPdfjs();
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
 
     const textChunks: string[] = [];
 

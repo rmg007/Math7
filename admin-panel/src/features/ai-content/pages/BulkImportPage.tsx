@@ -20,8 +20,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { useSkills } from '@/features/curriculum/hooks/use-skills';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import { getMetaEnv } from '@/config/env';
 
-const WORKERS_URL = import.meta.env.VITE_WORKERS_URL;
+const WORKERS_URL = getMetaEnv('VITE_WORKERS_URL') as string | undefined;
 
 async function parseImportPrompt(
   prompt: string,

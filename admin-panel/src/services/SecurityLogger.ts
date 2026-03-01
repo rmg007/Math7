@@ -1,3 +1,4 @@
+import { isDevMode } from '@/config/env';
 import { supabase } from '@/lib/supabase';
 import type { Json } from '@/lib/database.types';
 
@@ -26,11 +27,11 @@ class SecurityLoggerService {
       });
 
       if (error) {
-        if (import.meta.env.DEV) {
+        if (isDevMode()) {
           console.error('[SecurityLogger] Failed to log event:', error);
         }
       } else {
-        if (import.meta.env.DEV) {
+        if (isDevMode()) {
           console.log('[SecurityLogger] Event logged:', data.eventType);
         }
       }
@@ -44,14 +45,14 @@ class SecurityLoggerService {
     return this.log({
       eventType: 'login',
       severity: 'info',
-      metadata: { userId }
+      metadata: { userId },
     });
   }
 
   async logLogout() {
     return this.log({
       eventType: 'logout',
-      severity: 'info'
+      severity: 'info',
     });
   }
 
@@ -59,7 +60,7 @@ class SecurityLoggerService {
     return this.log({
       eventType: 'sensitive_action',
       severity: 'medium',
-      metadata: { action, ...metadata }
+      metadata: { action, ...metadata },
     });
   }
 }
