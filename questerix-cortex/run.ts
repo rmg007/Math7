@@ -69,7 +69,7 @@ const allSuites: Array<{
     id: "e2e",
     name: "E2E Smoke (Desktop)",
     command:
-      "npx playwright test tests/auth-flow.e2e.spec.ts --project=desktop",
+      "npx playwright test tests/mutating/auth-flow.e2e.spec.ts --project=desktop",
     tier: "smoke",
     parallel: false,
   },

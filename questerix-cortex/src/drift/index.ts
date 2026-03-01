@@ -26,8 +26,11 @@ export class DriftDetector {
   constructor(adminPanelPath: string, supabasePath: string) {
     this.typesFilePath = path.join(
       adminPanelPath,
+      "..",
+      "packages",
+      "core",
       "src",
-      "lib",
+      "types",
       "database.types.ts",
     );
     this.migrationsPath = path.join(supabasePath, "migrations");
