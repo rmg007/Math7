@@ -327,6 +327,9 @@ export class OptimizeAuditor {
 
     const files = fs.readdirSync(outputsPath);
     for (const file of files) {
+      if (file.endsWith(".db") || file.endsWith(".db-shm") || file.endsWith(".db-wal")) {
+        continue;
+      }
       const fullPath = path.join(outputsPath, file);
       try {
         const stats = fs.statSync(fullPath);
