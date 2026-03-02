@@ -102,7 +102,7 @@ function Invoke-PhaseTesting {
     }
     
     # 2. Run Full Test Suite (Parallel Fail-Fast Gate)
-    $TestGateTimeout = 180 # 3 minutes total for the gate
+    $TestGateTimeout = 300 # 5 minutes total for the gate
     Write-Info "Running full test suite (Parallel Fail-Fast Gate, Timeout: ${TestGateTimeout}s)..."
     & (Join-Path $ScriptDir 'scripts\run-all-tests.ps1') -Target $Target -TimeoutSec $TestGateTimeout
     

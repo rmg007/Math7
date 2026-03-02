@@ -50,7 +50,7 @@ if ($Target -eq "all" -or $Target -eq "admin-panel") {
         param($root, $log)
         Set-Location "$root/admin-panel"
         # Combine tsc and vitest for a single "Admin Gate" job
-        npm run typecheck; if ($LASTEXITCODE -eq 0) { npm run test -- --run } 2>&1 | Out-File "$log/admin-unit.log"
+        & { npm run typecheck; if ($LASTEXITCODE -eq 0) { npm run test } } 2>&1 | Out-File "$log/admin-unit.log"
     }
 }
 
