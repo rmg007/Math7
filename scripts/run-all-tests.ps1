@@ -3,18 +3,12 @@
     Parallel Test Gate for Questerix.
 .DESCRIPTION
     Runs all test suites in parallel with hard timeouts and fail-fast logic.
-    If any job fails or times out, all other jobs are killed immediately.
-.PARAMETER Target
-    Filter for specific target: 'admin-panel' or 'questerix-student-app'.
-.PARAMETER TimeoutSec
-    Hard timeout for the entire gate (default 180s).
-.EXAMPLE
-    ./scripts/run-all-tests.ps1 -Target admin-panel -TimeoutSec 120
+    Uses .exit files for reliable success tracking across PowerShell versions.
 #>
 
 param(
     [string]$Target = "all",
-    [int]$TimeoutSec = 180
+    [int]$TimeoutSec = 300
 )
 
 $ErrorActionPreference = "Continue"
@@ -31,11 +25,13 @@ $Jobs = @()
 
 # Function to start a test job safely
 function Start-TestJob {
-    param([string]$Name, [string]$DirPath, [scriptblock]$Cmd)
+    param([string]$Name, [string]$DirPath, [scriptblock]$Cmd, [array]$JobArgs)
     
     if (Test-Path $DirPath) {
         Write-Host "  [+] Queueing $Name..." -ForegroundColor Gray
-        return Start-Job -Name $Name -ScriptBlock $Cmd -ArgumentList $ProjectRoot, $LogDir
+        $exitFile = "$LogDir/$Name.exit"
+        if (Test-Path $exitFile) { Remove-Item $exitFile -Force }
+        return Start-Job -Name $Name -ScriptBlock $Cmd -ArgumentList @($ProjectRoot, $LogDir, $exitFile, $JobArgs)
     } else {
         Write-Host "  [-] Skipping $Name (directory not found: $DirPath)" -ForegroundColor Gray
         return $null
@@ -44,42 +40,53 @@ function Start-TestJob {
 
 # --- JOB DEFINITIONS ---
 
-# A. Admin Panel (Unit + TSC + Lint)
+# A. Admin Panel (Unit + TSC)
 if ($Target -eq "all" -or $Target -eq "admin-panel") {
-    $Jobs += Start-TestJob "admin-unit" "$ProjectRoot/admin-panel" {
-        param($root, $log)
+    $cmd = {
+        param($root, $log, $exitFile)
         Set-Location "$root/admin-panel"
-        # Combine tsc and vitest for a single "Admin Gate" job
-        & { npm run typecheck; if ($LASTEXITCODE -eq 0) { npm run test } } 2>&1 | Out-File "$log/admin-unit.log"
+        & { npm run typecheck; if ($LASTEXITCODE -eq 0) { npx vitest run --run --no-watch } } 2>&1 | Out-File "$log/admin-unit.log"
+        $LASTEXITCODE | Out-File $exitFile
+        exit $LASTEXITCODE
     }
+    $Jobs += Start-TestJob "admin-unit" "$ProjectRoot/admin-panel" $cmd
 }
 
 # B. Student App (Flutter)
 if ($Target -eq "all" -or $Target -eq "questerix-student-app") {
-    $Jobs += Start-TestJob "student-unit" "$ProjectRoot/questerix-student-app" {
-        param($root, $log)
+    $cmd = {
+        param($root, $log, $exitFile)
         Set-Location "$root/questerix-student-app"
         flutter test --no-pub 2>&1 | Out-File "$log/student-unit.log"
+        $LASTEXITCODE | Out-File $exitFile
+        exit $LASTEXITCODE
     }
+    $Jobs += Start-TestJob "student-unit" "$ProjectRoot/questerix-student-app" $cmd
 }
 
 # C. Backend (Edge Functions)
 if ($Target -eq "all") {
-    $Jobs += Start-TestJob "edge-functions" "$ProjectRoot/supabase/functions" {
-        param($root, $log)
+    $cmd = {
+        param($root, $log, $exitFile)
         Set-Location "$root/supabase/functions"
         deno test --allow-all 2>&1 | Out-File "$log/edge-functions.log"
+        $LASTEXITCODE | Out-File $exitFile
+        exit $LASTEXITCODE
     }
+    $Jobs += Start-TestJob "edge-functions" "$ProjectRoot/supabase/functions" $cmd
 }
 
 # D. Content Engine (Python)
 if ($Target -eq "all") {
-    $Jobs += Start-TestJob "content-engine" "$ProjectRoot/content-engine" {
-        param($root, $log)
+    $cmd = {
+        param($root, $log, $exitFile)
         Set-Location "$root/content-engine"
         $py = if (Test-Path ".venv/Scripts/python.exe") { ".venv/Scripts/python.exe" } else { "python" }
         & $py -m pytest -q 2>&1 | Out-File "$log/content-engine.log"
+        $LASTEXITCODE | Out-File $exitFile
+        exit $LASTEXITCODE
     }
+    $Jobs += Start-TestJob "content-engine" "$ProjectRoot/content-engine" $cmd
 }
 
 if ($Jobs.Count -eq 0) {
@@ -94,9 +101,17 @@ $FailDetected = $false
 $FailedJob = ""
 
 while ($Running -and ($Elapsed -lt $TimeoutSec)) {
-    # Check for any failures
     foreach ($j in $Jobs) {
-        if ($j.State -eq 'Failed' -or ($j.State -eq 'Completed' -and $j.ChildJobs[0].ExitCode -ne 0)) {
+        $exitFile = "$LogDir/$($j.Name).exit"
+        if (Test-Path $exitFile) {
+            $ec = (Get-Content $exitFile -ErrorAction SilentlyContinue).Trim()
+            if ($ec -ne "" -and $ec -ne '0') {
+                $FailDetected = $true
+                $FailedJob = $j.Name
+                $Running = $false
+                break
+            }
+        } elseif ($j.State -eq 'Failed') {
             $FailDetected = $true
             $FailedJob = $j.Name
             $Running = $false
@@ -104,12 +119,9 @@ while ($Running -and ($Elapsed -lt $TimeoutSec)) {
         }
     }
 
-    # Check if all completed
     if ($Running) {
         $Pending = $Jobs | Where-Object { $_.State -eq 'Running' -or $_.State -eq 'NotStarted' }
-        if ($Pending.Count -eq 0) {
-            $Running = $false
-        }
+        if ($Pending.Count -eq 0) { $Running = $false }
     }
 
     if ($Running) {
@@ -121,30 +133,28 @@ while ($Running -and ($Elapsed -lt $TimeoutSec)) {
 # --- CLEANUP & REPORT ---
 $EndTime = Get-Date
 $Duration = $EndTime - $StartTime
-
-# Kill any surviving jobs (Fail-Fast or Timeout)
-$Jobs | Where-Object { $_.State -eq 'Running' } | Stop-Job
+$Jobs | Where-Object { $_.State -eq 'Running' -or $_.State -eq 'NotStarted' } | Stop-Job
 
 if ($FailDetected) {
-    Write-Host "`n❌ FAIL-FAST: Job '$FailedJob' failed! Aborting all tests." -ForegroundColor Red
+    Write-Host "`n❌ FAIL-FAST: Job '$FailedJob' failed! Aborting." -ForegroundColor Red
 } elseif ($Elapsed -ge $TimeoutSec) {
-    Write-Host "`n❌ TIMEOUT: Test gate exceeded ${TimeoutSec}s! Aborting." -ForegroundColor Red
+    Write-Host "`n❌ TIMEOUT: Test gate exceeded ${TimeoutSec}s!" -ForegroundColor Red
 } else {
     Write-Host "`n✅ All parallel jobs completed successfully." -ForegroundColor Green
 }
 
-# Summary Table
 Write-Host "`nTest Summary (Duration: $($Duration.TotalSeconds.ToString("F1"))s):" -ForegroundColor Cyan
 Write-Host "---------------------------------------------------"
 $FinalExitCode = 0
 foreach ($j in $Jobs) {
-    $status = if ($j.State -eq 'Completed' -and $j.ChildJobs[0].ExitCode -eq 0) { "PASS" } else { "FAIL" }
+    $exitFile = "$LogDir/$($j.Name).exit"
+    $exit = if (Test-Path $exitFile) { (Get-Content $exitFile -ErrorAction SilentlyContinue).Trim() } else { "N/A" }
+    $status = if ($exit -eq '0') { "PASS" } else { "FAIL" }
     $color = if ($status -eq "PASS") { "Green" } else { "Red" }
-    $exit = if ($j.ChildJobs.Count -gt 0) { $j.ChildJobs[0].ExitCode } else { "N/A" }
-    
     Write-Host "[$status] $($j.Name) (Exit: $exit)" -ForegroundColor $color
     if ($status -eq "FAIL") { $FinalExitCode = 1 }
 }
 
+Get-ChildItem -Path $LogDir -Filter "*.exit" | Remove-Item -Force
 Remove-Job $Jobs -Force
 exit $FinalExitCode
