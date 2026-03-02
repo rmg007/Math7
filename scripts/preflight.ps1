@@ -88,7 +88,7 @@ foreach ($j in $Jobs) {
     $exit = if ($null -ne $exitContent) { $exitContent.ToString().Trim() } else { "N/A" }
     $status = if ($exit -eq '0') { "PASS" } else { "FAIL" }
     $color = if ($status -eq "PASS") { "Green" } else { "Red" }
-    Write-Host "$status: $($j.Name) (Exit: $exit)" -ForegroundColor $color
+    Write-Host "[$status] $($j.Name) (Exit: $exit)" -ForegroundColor $color
     if ($status -ne "PASS") { $FailCount++ }
 }
 
