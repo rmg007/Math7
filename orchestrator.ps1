@@ -243,9 +243,29 @@ function Invoke-PhaseSupabaseSync {
         return
     }
     
+    # Link project first (required for db push)
+    Write-Info "Linking Supabase project $projectRef..."
+    $dbPassword = $null
+    if (Test-Path ".secrets") {
+        $secrets = Get-Content ".secrets" | ConvertFrom-StringData
+        $dbPassword = $secrets["SUPABASE_DB_PASSWORD"]
+    }
+    
+    if ($null -ne $dbPassword) {
+        npx supabase link --project-ref $projectRef --password $dbPassword
+    } else {
+        Write-Warn "SUPABASE_DB_PASSWORD not found in .secrets. Linking may fail or ask for password."
+        npx supabase link --project-ref $projectRef
+    }
+    
+    if ($LASTEXITCODE -ne 0) {
+        Write-Err "Supabase link FAILED for project $projectRef"
+        exit 1
+    }
+
     # Push schema migrations
     Write-Info "Pushing schema migrations..."
-    npx supabase db push --project-ref $projectRef
+    npx supabase db push --linked
     if ($LASTEXITCODE -ne 0) {
         Write-Err "Schema migration push FAILED for project $projectRef"
         exit 1
