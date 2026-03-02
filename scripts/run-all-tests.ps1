@@ -3,7 +3,7 @@
     Parallel Test Gate for Questerix.
 .DESCRIPTION
     Runs all test suites in parallel with hard timeouts and fail-fast logic.
-    Uses Start-Process to decouple from child process stdout/stderr hanging.
+    Uses Start-Process with OS-level redirection to avoid pipe hanging.
 #>
 
 param(
@@ -45,12 +45,11 @@ if ($Target -eq "all" -or $Target -eq "admin-panel") {
     $cmd = {
         param($root, $log, $exitFile)
         $logFile = "$log/admin-unit.log"
-        
-        # We use Start-Process to avoid PowerShell pipe buffering/hanging issues
-        $p = Start-Process -FilePath "pwsh" -ArgumentList "-Command", "& { Set-Location '$root/admin-panel'; npm run typecheck; if (`$LASTEXITCODE -eq 0) { npx vitest run --run --no-watch } }" -Wait -NoNewWindow -PassThru -RedirectStandardOutput $logFile -RedirectStandardError $logFile
-        
-        $p.ExitCode | Out-File $exitFile
-        exit $p.ExitCode
+        # OS-level redirection inside child process to prevent hanging
+        $p = Start-Process -FilePath "powershell.exe" -ArgumentList "-NoProfile", "-Command", "& { Set-Location '$root/admin-panel'; npm run typecheck; if (`$LASTEXITCODE -eq 0) { npx vitest run --run --no-watch } } * > '$logFile' 2>&1" -Wait -PassThru -NoNewWindow
+        $ec = if ($null -ne $p) { $p.ExitCode } else { 1 }
+        $ec | Out-File $exitFile
+        exit $ec
     }
     $Jobs += Start-TestJob "admin-unit" "$ProjectRoot/admin-panel" $cmd
 }
@@ -60,9 +59,10 @@ if ($Target -eq "all" -or $Target -eq "questerix-student-app") {
     $cmd = {
         param($root, $log, $exitFile)
         $logFile = "$log/student-unit.log"
-        $p = Start-Process -FilePath "flutter" -ArgumentList "test", "--no-pub" -Wait -NoNewWindow -PassThru -WorkingDirectory "$root/questerix-student-app" -RedirectStandardOutput $logFile -RedirectStandardError $logFile
-        $p.ExitCode | Out-File $exitFile
-        exit $p.ExitCode
+        $p = Start-Process -FilePath "powershell.exe" -ArgumentList "-NoProfile", "-Command", "& { Set-Location '$root/questerix-student-app'; flutter test --no-pub } * > '$logFile' 2>&1" -Wait -PassThru -NoNewWindow
+        $ec = if ($null -ne $p) { $p.ExitCode } else { 1 }
+        $ec | Out-File $exitFile
+        exit $ec
     }
     $Jobs += Start-TestJob "student-unit" "$ProjectRoot/questerix-student-app" $cmd
 }
@@ -72,9 +72,10 @@ if ($Target -eq "all") {
     $cmd = {
         param($root, $log, $exitFile)
         $logFile = "$log/edge-functions.log"
-        $p = Start-Process -FilePath "deno" -ArgumentList "test", "--allow-all" -Wait -NoNewWindow -PassThru -WorkingDirectory "$root/supabase/functions" -RedirectStandardOutput $logFile -RedirectStandardError $logFile
-        $p.ExitCode | Out-File $exitFile
-        exit $p.ExitCode
+        $p = Start-Process -FilePath "powershell.exe" -ArgumentList "-NoProfile", "-Command", "& { Set-Location '$root/supabase/functions'; deno test --allow-all } * > '$logFile' 2>&1" -Wait -PassThru -NoNewWindow
+        $ec = if ($null -ne $p) { $p.ExitCode } else { 1 }
+        $ec | Out-File $exitFile
+        exit $ec
     }
     $Jobs += Start-TestJob "edge-functions" "$ProjectRoot/supabase/functions" $cmd
 }
@@ -84,11 +85,10 @@ if ($Target -eq "all") {
     $cmd = {
         param($root, $log, $exitFile)
         $logFile = "$log/content-engine.log"
-        Set-Location "$root/content-engine"
-        $py = if (Test-Path ".venv/Scripts/python.exe") { ".venv/Scripts/python.exe" } else { "python" }
-        $p = Start-Process -FilePath $py -ArgumentList "-m", "pytest", "-q" -Wait -NoNewWindow -PassThru -RedirectStandardOutput $logFile -RedirectStandardError $logFile
-        $p.ExitCode | Out-File $exitFile
-        exit $p.ExitCode
+        $p = Start-Process -FilePath "powershell.exe" -ArgumentList "-NoProfile", "-Command", "& { Set-Location '$root/content-engine'; `$py = if (Test-Path '.venv/Scripts/python.exe') { '.venv/Scripts/python.exe' } else { 'python' }; & `$py -m pytest -q } * > '$logFile' 2>&1" -Wait -PassThru -NoNewWindow
+        $ec = if ($null -ne $p) { $p.ExitCode } else { 1 }
+        $ec | Out-File $exitFile
+        exit $ec
     }
     $Jobs += Start-TestJob "content-engine" "$ProjectRoot/content-engine" $cmd
 }
@@ -108,7 +108,7 @@ while ($Running -and ($Elapsed -lt $TimeoutSec)) {
     foreach ($j in $Jobs) {
         $exitFile = "$LogDir/$($j.Name).exit"
         if (Test-Path $exitFile) {
-            $content = (Get-Content $exitFile -ErrorAction SilentlyContinue)
+            $content = Get-Content $exitFile -ErrorAction SilentlyContinue
             if ($null -ne $content) {
                 $ec = $content.ToString().Trim()
                 if ($ec -ne "" -and $ec -ne '0') {
