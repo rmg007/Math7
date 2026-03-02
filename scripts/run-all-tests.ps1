@@ -3,7 +3,7 @@
     Parallel Test Gate for Questerix.
 .DESCRIPTION
     Runs all test suites in parallel with hard timeouts and fail-fast logic.
-    Uses .exit files for reliable success tracking across PowerShell versions.
+    Uses Start-Process to decouple from child process stdout/stderr hanging.
 #>
 
 param(
@@ -25,13 +25,13 @@ $Jobs = @()
 
 # Function to start a test job safely
 function Start-TestJob {
-    param([string]$Name, [string]$DirPath, [scriptblock]$Cmd, [array]$JobArgs)
+    param([string]$Name, [string]$DirPath, [scriptblock]$Cmd)
     
     if (Test-Path $DirPath) {
         Write-Host "  [+] Queueing $Name..." -ForegroundColor Gray
         $exitFile = "$LogDir/$Name.exit"
         if (Test-Path $exitFile) { Remove-Item $exitFile -Force }
-        return Start-Job -Name $Name -ScriptBlock $Cmd -ArgumentList @($ProjectRoot, $LogDir, $exitFile, $JobArgs)
+        return Start-Job -Name $Name -ScriptBlock $Cmd -ArgumentList @($ProjectRoot, $LogDir, $exitFile)
     } else {
         Write-Host "  [-] Skipping $Name (directory not found: $DirPath)" -ForegroundColor Gray
         return $null
@@ -44,10 +44,13 @@ function Start-TestJob {
 if ($Target -eq "all" -or $Target -eq "admin-panel") {
     $cmd = {
         param($root, $log, $exitFile)
-        Set-Location "$root/admin-panel"
-        & { npm run typecheck; if ($LASTEXITCODE -eq 0) { npx vitest run --run --no-watch } } 2>&1 | Out-File "$log/admin-unit.log"
-        $LASTEXITCODE | Out-File $exitFile
-        exit $LASTEXITCODE
+        $logFile = "$log/admin-unit.log"
+        
+        # We use Start-Process to avoid PowerShell pipe buffering/hanging issues
+        $p = Start-Process -FilePath "pwsh" -ArgumentList "-Command", "& { Set-Location '$root/admin-panel'; npm run typecheck; if (`$LASTEXITCODE -eq 0) { npx vitest run --run --no-watch } }" -Wait -NoNewWindow -PassThru -RedirectStandardOutput $logFile -RedirectStandardError $logFile
+        
+        $p.ExitCode | Out-File $exitFile
+        exit $p.ExitCode
     }
     $Jobs += Start-TestJob "admin-unit" "$ProjectRoot/admin-panel" $cmd
 }
@@ -56,10 +59,10 @@ if ($Target -eq "all" -or $Target -eq "admin-panel") {
 if ($Target -eq "all" -or $Target -eq "questerix-student-app") {
     $cmd = {
         param($root, $log, $exitFile)
-        Set-Location "$root/questerix-student-app"
-        flutter test --no-pub 2>&1 | Out-File "$log/student-unit.log"
-        $LASTEXITCODE | Out-File $exitFile
-        exit $LASTEXITCODE
+        $logFile = "$log/student-unit.log"
+        $p = Start-Process -FilePath "flutter" -ArgumentList "test", "--no-pub" -Wait -NoNewWindow -PassThru -WorkingDirectory "$root/questerix-student-app" -RedirectStandardOutput $logFile -RedirectStandardError $logFile
+        $p.ExitCode | Out-File $exitFile
+        exit $p.ExitCode
     }
     $Jobs += Start-TestJob "student-unit" "$ProjectRoot/questerix-student-app" $cmd
 }
@@ -68,10 +71,10 @@ if ($Target -eq "all" -or $Target -eq "questerix-student-app") {
 if ($Target -eq "all") {
     $cmd = {
         param($root, $log, $exitFile)
-        Set-Location "$root/supabase/functions"
-        deno test --allow-all 2>&1 | Out-File "$log/edge-functions.log"
-        $LASTEXITCODE | Out-File $exitFile
-        exit $LASTEXITCODE
+        $logFile = "$log/edge-functions.log"
+        $p = Start-Process -FilePath "deno" -ArgumentList "test", "--allow-all" -Wait -NoNewWindow -PassThru -WorkingDirectory "$root/supabase/functions" -RedirectStandardOutput $logFile -RedirectStandardError $logFile
+        $p.ExitCode | Out-File $exitFile
+        exit $p.ExitCode
     }
     $Jobs += Start-TestJob "edge-functions" "$ProjectRoot/supabase/functions" $cmd
 }
@@ -80,11 +83,12 @@ if ($Target -eq "all") {
 if ($Target -eq "all") {
     $cmd = {
         param($root, $log, $exitFile)
+        $logFile = "$log/content-engine.log"
         Set-Location "$root/content-engine"
         $py = if (Test-Path ".venv/Scripts/python.exe") { ".venv/Scripts/python.exe" } else { "python" }
-        & $py -m pytest -q 2>&1 | Out-File "$log/content-engine.log"
-        $LASTEXITCODE | Out-File $exitFile
-        exit $LASTEXITCODE
+        $p = Start-Process -FilePath $py -ArgumentList "-m", "pytest", "-q" -Wait -NoNewWindow -PassThru -RedirectStandardOutput $logFile -RedirectStandardError $logFile
+        $p.ExitCode | Out-File $exitFile
+        exit $p.ExitCode
     }
     $Jobs += Start-TestJob "content-engine" "$ProjectRoot/content-engine" $cmd
 }
@@ -104,12 +108,15 @@ while ($Running -and ($Elapsed -lt $TimeoutSec)) {
     foreach ($j in $Jobs) {
         $exitFile = "$LogDir/$($j.Name).exit"
         if (Test-Path $exitFile) {
-            $ec = (Get-Content $exitFile -ErrorAction SilentlyContinue).Trim()
-            if ($ec -ne "" -and $ec -ne '0') {
-                $FailDetected = $true
-                $FailedJob = $j.Name
-                $Running = $false
-                break
+            $content = (Get-Content $exitFile -ErrorAction SilentlyContinue)
+            if ($null -ne $content) {
+                $ec = $content.ToString().Trim()
+                if ($ec -ne "" -and $ec -ne '0') {
+                    $FailDetected = $true
+                    $FailedJob = $j.Name
+                    $Running = $false
+                    break
+                }
             }
         } elseif ($j.State -eq 'Failed') {
             $FailDetected = $true
@@ -148,7 +155,8 @@ Write-Host "---------------------------------------------------"
 $FinalExitCode = 0
 foreach ($j in $Jobs) {
     $exitFile = "$LogDir/$($j.Name).exit"
-    $exit = if (Test-Path $exitFile) { (Get-Content $exitFile -ErrorAction SilentlyContinue).Trim() } else { "N/A" }
+    $exitContent = if (Test-Path $exitFile) { Get-Content $exitFile -ErrorAction SilentlyContinue } else { "N/A" }
+    $exit = if ($null -ne $exitContent) { $exitContent.ToString().Trim() } else { "N/A" }
     $status = if ($exit -eq '0') { "PASS" } else { "FAIL" }
     $color = if ($status -eq "PASS") { "Green" } else { "Red" }
     Write-Host "[$status] $($j.Name) (Exit: $exit)" -ForegroundColor $color
