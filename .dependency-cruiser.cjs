@@ -69,7 +69,12 @@ module.exports = {
       comment: 'Production code should not import dev dependencies',
       from: {
         path: '^(admin-panel|landing-pages)/src',
-        pathNot: '\\.(spec|test)\\.(js|mjs|cjs|ts|tsx)$',
+        pathNot: [
+          '\\.(spec|test)\\.(js|mjs|cjs|ts|tsx)$',
+          'vitest\\.setup\\.ts$',
+          '__tests__/',
+          'mocks/',
+        ],
       },
       to: {
         dependencyTypes: ['npm-dev'],
