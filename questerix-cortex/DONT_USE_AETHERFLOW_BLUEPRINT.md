@@ -15,7 +15,7 @@ To achieve a "Zero Technical Debt" state and ensure 5M+ user scalability, we pri
 - **Components**: 5 tenants, 20 domains, 100 questions.
 - **Payoff**: 100% predictable E2E tests. The database becomes a "stateless" artifact, eliminating random flakes from stale data.
 
-### 2. Agent-Native Documentation (`FEATURE_GUIDE.md`)
+### 2. Agent-Native Documentation (FEATURE_GUIDE.md)
 
 - **The Idea**: Every feature folder in `admin-panel/src/features/*` receives a guide focused on **Intent** (The Why), not just syntax.
 - **Payoff**: Makes the codebase "AI-Safe." Future agents aren't "guessing" business rules; they are following confirmed guardrails.
@@ -116,7 +116,7 @@ _Testing how the app behaves when things go wrong._
 | P0       | RLS Policy Verification (pgTAP/Playwright)         | ✅ Done    |
 | P0       | storageState session snapshots for E2E speed       | ✅ Done    |
 | P1       | `questerix-seed.ts` Declarative Seeding            | ⬜ Pending |
-| P1       | `FEATURE_GUIDE.md` (Intent Documentation)          | ⬜ Pending |
+| P1       | FEATURE_GUIDE.md (Intent Documentation)            | ⬜ Pending |
 | P1       | Shared Type Bridge (`@questerix/core`)             | ⬜ Pending |
 | P1       | Tiered Testing Migration (remaining 60%)           | ⬜ Pending |
 | P2       | k6 / Locust Load Testing (50k concurrent baseline) | ⬜ Pending |

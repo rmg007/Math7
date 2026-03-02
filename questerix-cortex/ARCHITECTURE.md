@@ -10,15 +10,15 @@
 
 ## 2. Primary Outputs
 
-1. **`AGENT_CONTEXT.md`**: (Max 20KB) A compressed briefing file for the agent. Contains: Surface map delta, failing hooks/pages, current P0 risks.
-2. **`NEXT_TASK.md`**: Auto-generated task list for the user to review and paste. Priority: Failures (P0) → Coverage Gaps (P1) → Improvements (P2).
-3. **`HEALTH_REPORT.md`**: Premium human dashboard with health scores and coverage heatmaps.
+1. **AGENT_CONTEXT.md**: (Max 20KB) A compressed briefing file for the agent. Contains: Surface map delta, failing hooks/pages, current P0 risks.
+2. **NEXT_TASK.md**: Auto-generated task list for the user to review and paste. Priority: Failures (P0) → Coverage Gaps (P1) → Improvements (P2).
+3. **HEALTH_REPORT.md**: Premium human dashboard with health scores and coverage heatmaps.
 
 ## 3. Modules
 
 ### 🔍 Scanner (Semantic)
 
-- Uses `ts-morph` to map the `admin-panel/src` surface area.
+- Uses `ts-morph` to map the admin-panel/src surface area.
 - Tracks: Pages, Hooks, Services, and their linked test coverage.
 
 ### 🏃 Orchestrator (Runner)
@@ -80,7 +80,7 @@
 | `cortex_verify`     | Run verification and update fragility after edits |
 | `cortex_query`      | Symbol lookup with suffix matching                |
 | `cortex_fragility`  | Check fragility index for files                   |
-| `cortex_briefing`   | Read AGENT_CONTEXT.md with staleness warning      |
+| `cortex_briefing`   | `AGENT_CONTEXT.md` with staleness warning         |
 | `cortex_search`     | SQLite FTS5 symbol search                         |
 | `cortex_diff`       | Structured diff since last session/24h/commit     |
 | `cortex_insights`   | Graph intelligence: hotspots, orphans, cycles     |

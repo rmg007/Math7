@@ -101,15 +101,17 @@ function Invoke-PhaseTesting {
         exit 1
     }
     
-    # 2. Run Full Test Suite
-    Write-Info "Running full test suite (Parallel)..."
-    & (Join-Path $ScriptDir 'scripts\run-all-tests.ps1')
+    # 2. Run Full Test Suite (Parallel Fail-Fast Gate)
+    $TestGateTimeout = 180 # 3 minutes total for the gate
+    Write-Info "Running full test suite (Parallel Fail-Fast Gate, Timeout: ${TestGateTimeout}s)..."
+    & (Join-Path $ScriptDir 'scripts\run-all-tests.ps1') -Target $Target -TimeoutSec $TestGateTimeout
+    
     if ($LASTEXITCODE -ne 0) {
-        Write-Err "Test suite failed. Aborting deployment."
+        Write-Err "Test suite gate FAILED. Deployment aborted."
         exit 1
     }
     
-    Write-Success "All pre-deploy tests passed"
+    Write-Success "All pre-deploy test suites PASSED (Green Suite Rule)"
 }
 
 # =============================================================================
@@ -364,61 +366,31 @@ function Invoke-PhaseSmoke {
         return
     }
 
-    $smokeScript = Join-Path $ScriptDir 'scripts\smoke-test.sh'
-
+    # New PowerShell Smoke Gate (Replaces smoke-test.sh)
+    $smokeScript = Join-Path $ScriptDir 'scripts\smoke-gate.ps1'
+    
     if (-not (Test-Path $smokeScript)) {
-        Write-Warn "Smoke test script not found at $smokeScript - skipping"
+        Write-Warn "Smoke gate script not found at $smokeScript - skipping"
         return
     }
 
-    # Pass Supabase anon key so the edge-function endpoint gets authenticated
-    Write-Info "Running post-deploy smoke test against production endpoints..."
-    $env:SUPABASE_ANON_KEY = $script:Config.global.SUPABASE_ANON_KEY
-
-    # Use bash if available (native Linux/macOS/WSL), otherwise skip gracefully
-    if (Get-Command 'bash' -ErrorAction SilentlyContinue) {
-        bash $smokeScript
-        if ($LASTEXITCODE -ne 0) {
-            Write-Err "Smoke test FAILED - one or more endpoints returned non-2xx. Check the URLs above."
-            exit 1
-        }
-        Write-Success "Smoke test passed - all production endpoints are healthy"
-    } else {
-        Write-Warn "bash not found in PATH - running inline PowerShell smoke test instead"
-        $adminUrl       = $script:Config.global.ADMIN_PANEL_URL
-        $studentUrl     = $script:Config.global.STUDENT_APP_URL
-        $supabaseUrl    = $script:Config.global.SUPABASE_URL
-        $workersUrl     = 'https://questerix-workers.mhalim80.workers.dev'
-
-        $endpoints = @(
-            @{ Label = 'Admin Panel';             Url = $adminUrl },
-            @{ Label = 'Student App';             Url = $studentUrl },
-            @{ Label = 'Supabase Auth';           Url = "$supabaseUrl/auth/v1/health" },
-            @{ Label = 'Workers AI';              Url = "$workersUrl/health" },
-            @{ Label = 'Edge Function (health)';  Url = "$supabaseUrl/functions/v1/health-check" }
-        )
-
-        $smoked = 0
-        foreach ($ep in $endpoints) {
-            try {
-                $resp = Invoke-WebRequest -Uri $ep.Url -TimeoutSec 10 -UseBasicParsing -ErrorAction Stop
-                if ($resp.StatusCode -ge 200 -and $resp.StatusCode -le 299) {
-                    Write-Success "[$($resp.StatusCode)] $($ep.Label)"
-                    $smoked++
-                } else {
-                    Write-Err "[$($resp.StatusCode)] $($ep.Label) -> FAIL"
-                }
-            } catch {
-                Write-Err "[ERR] $($ep.Label) -> $($_.Exception.Message)"
-            }
-        }
-
-        if ($smoked -lt $endpoints.Count) {
-            Write-Err "Smoke test FAILED - $($endpoints.Count - $smoked) endpoint(s) unhealthy."
-            exit 1
-        }
-        Write-Success "All $($endpoints.Count) endpoints healthy."
+    # Determine URL based on target for smoke test
+    $smokeUrl = ""
+    if ($Target -eq 'admin-panel') {
+        $smokeUrl = "https://$($script:Config.cloudflare.admin_project).pages.dev"
+    } elseif ($Target -eq 'questerix-student-app') {
+        $smokeUrl = "https://$($script:Config.cloudflare.student_project).pages.dev"
     }
+
+    Write-Info "Running production smoke gate against: $Target"
+    & $smokeScript -Target $Target -Url $smokeUrl
+    
+    if ($LASTEXITCODE -ne 0) {
+        Write-Err "Smoke gate FAILED. Production verification did not pass."
+        exit 1
+    }
+    
+    Write-Success "Smoke verification passed"
 }
 
 # =============================================================================
@@ -466,41 +438,104 @@ function Invoke-PhaseCleanup {
     Write-Info "Log file: $LogFile"
 }
 
+function Update-DeploymentLog {
+    param([string]$Status, [string]$Details = "")
+    
+    $logFile = Join-Path $ScriptDir "questerix-cortex/outputs/DEPLOY_LOG.md"
+    $logDir = Split-Path $logFile
+    if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
+    
+    $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+    $entry = "| $timestamp | $Target | $Env | $Status | $Details |"
+    
+    if (-not (Test-Path $logFile)) {
+        Set-Content -Path $logFile -Value "# Questerix Deployment Log`n`n| Timestamp | Target | Env | Status | Details |`n|---|---|---|---|---|`n$entry"
+    } else {
+        Add-Content -Path $logFile -Value $entry
+    }
+    
+    # Prune log if it gets too long (keep last 50 entries)
+    $lines = Get-Content $logFile
+    if ($lines.Count -gt 55) {
+        $header = $lines[0..4]
+        $lastFifty = $lines | Select-Object -Last 50
+        $header + $lastFifty | Set-Content $logFile
+    }
+}
+
 # =============================================================================
 # MAIN EXECUTION
 # =============================================================================
 function Main {
-    Write-Host ""
-    Write-Info "QUESTERIX UNIFIED DEPLOYMENT PIPELINE"
-    Write-Info "Started at: $(Get-Date)"
-    Write-Info "Environment: $Env | Target: $Target"
-    Write-Host ""
-    
-    # ---- PRODUCTION SAFETY LOCK ----
-    if ($Env -eq 'production' -and -not $ConfirmProd) {
-        Write-Err "PRODUCTION DEPLOY BLOCKED: You must pass -ConfirmProd to deploy to production."
-        Write-Err "Example: ./orchestrator.ps1 -Env production -ConfirmProd -Target admin-panel"
+    try {
+        Write-Host ""
+        Write-Info "QUESTERIX UNIFIED DEPLOYMENT PIPELINE"
+        Write-Info "Started at: $(Get-Date)"
+        Write-Info "Environment: $Env | Target: $Target"
+        Write-Host ""
+
+        # 1. Start Watchdog (8-hour hung check)
+        $watchdogScript = Join-Path $ScriptDir 'scripts\watchdog.ps1'
+        if (Test-Path $watchdogScript) {
+            Start-Job -Name "deploy-watchdog" -ScriptBlock {
+                param($script, $orchPid, $target) # orchPid avoids reserved 'pid'
+                & $script -OrchestratorPid $orchPid -Target $target
+            } -ArgumentList $watchdogScript, $PID, $Target | Out-Null
+            Write-Info "Watchdog started (PID: $PID)"
+        }
+        
+        # ---- PRODUCTION SAFETY LOCK ----
+        if ($Env -eq 'production' -and -not $ConfirmProd) {
+            Write-Err "PRODUCTION DEPLOY BLOCKED: You must pass -ConfirmProd to deploy to production."
+            Write-Err "Example: ./orchestrator.ps1 -Env production -ConfirmProd -Target admin-panel"
+            exit 1
+        }
+        
+        if (-not $SkipTesting) {
+            Invoke-PhaseTesting
+        } else {
+            Write-Warn "Skipping testing phase (--SkipTesting flag)"
+            Update-DeploymentLog "WARN" "Testing skipped"
+        }
+        
+        Invoke-PhaseValidation
+        Invoke-PhaseGenerateEnv
+        
+        if (-not $SkipSupabase) {
+            Invoke-PhaseSupabaseSync
+        } else {
+            Write-Warn "Skipping Supabase sync phase (--SkipSupabase flag)"
+        }
+        
+        Invoke-PhaseBuild
+        Invoke-PhaseDeploy
+        Invoke-PhaseSmoke
+        
+        # Final success notification
+        $notifyScript = Join-Path $ScriptDir 'scripts\notify.ps1'
+        if (Test-Path $notifyScript) {
+            & $notifyScript -Type SUCCESS -Target $Target -Env $Env -Message "Deployment successful. Log: $LogFile"
+        }
+        
+        Invoke-PhaseCleanup
+        Update-DeploymentLog "SUCCESS" "Log: $LogFile"
+
+    } catch {
+        $err = $_.Exception.Message
+        Write-Err "DEPLOYMENT FAILED: $err"
+        
+        # Failure notification
+        $notifyScript = Join-Path $ScriptDir 'scripts\notify.ps1'
+        if (Test-Path $notifyScript) {
+            & $notifyScript -Type FAIL -Target $Target -Env $Env -Message "Deployment failed: $err"
+        }
+        
+        Update-DeploymentLog "FAIL" "Error: $err"
         exit 1
+    } finally {
+        # Ensure any background jobs (except watchdog) are cleaned up if needed
+        # (watchdog will die on its own when it detects this PID is gone)
     }
-    
-    if (-not $SkipTesting) {
-        Invoke-PhaseTesting
-    } else {
-        Write-Warn "Skipping testing phase (--SkipTesting flag)"
-    }
-    Invoke-PhaseValidation
-    Invoke-PhaseGenerateEnv
-    
-    if (-not $SkipSupabase) {
-        Invoke-PhaseSupabaseSync
-    } else {
-        Write-Warn "Skipping Supabase sync phase (--SkipSupabase flag)"
-    }
-    
-    Invoke-PhaseBuild
-    Invoke-PhaseDeploy
-    Invoke-PhaseSmoke
-    Invoke-PhaseCleanup
 }
 
 # Run main function

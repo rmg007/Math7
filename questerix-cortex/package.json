@@ -12,7 +12,8 @@
     "cortex:setup": "node dist/scripts/setup.js",
     "lint": "eslint . --ext ts",
     "format": "prettier --write \"**/*.ts\"",
-    "governance:check": "ts-node src/governance/cli.ts --check"
+    "governance:check": "ts-node src/governance/cli.ts --check",
+    "governance:fix": "ts-node src/governance/cli.ts --fix"
   },
   "bin": {
     "cortex-mcp-server": "./dist/src/mcp-server/index.js"

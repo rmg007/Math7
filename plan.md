@@ -1,8 +1,9 @@
-# 🧠 Cortex v2: Real-Time Codebase Intelligence via MCP
+# 🧠 Cortex v2: Real-Time Codebase Intelligence via MCP (Design Document)
 
 > **Vision**: Turn Cortex from a batch report generator into a **queryable intelligence layer** that any AI coding agent can consult mid-session. One system. One database. Five tools. Universal across IDEs.
 >
-> **Revision**: v8 (2026-02-25). Codebase-revalidated: file count corrected (184, not 136), tsc errors now 0 (baseline strategy removed — direct pass/fail), export count updated (~343), E2E test count added (64 files). All prior 28 issues confirmed addressed.
+> **Status**: Implementation Status & Design Document.
+> **Reconciliation**: This document has been updated to reflect the _actual built implementation_ in `questerix-cortex`, discarding deprecated session estimates and addressing known architectural gaps.
 
 ---
 
@@ -82,13 +83,13 @@ Today, Cortex runs once, dumps markdown files, and the agent reads them at sessi
 
 ### Tool Definitions
 
-| Tool                              | Input                                                     | Output                                                                                                                                                                                                             | Replaces                             |
-| --------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
-| `cortex_impact(files)`            | List of file paths the agent plans to modify              | Affected files (2-hop), relevant test files, fragility warnings                                                                                                                                                    | Manual grep + guesswork              |
-| `cortex_query(symbol)`            | A bare symbol name (e.g., `useAuth`) or file-qualified ID | All consumers, importers, and dependents. If bare name matches multiple nodes, returns all matches for disambiguation                                                                                              | `grep_search` for imports            |
-| `cortex_plan(description, files)` | Natural language intent + target files                    | Risk assessment (incorporating RiskScorer dimensions), **triage tier classification**, recommended verification commands, warnings                                                                                 | Reading stale `AGENT_CONTEXT.md`     |
-| `cortex_fragility(file)`          | Single file path                                          | Change count, failure count, fragility index (0.0–1.0), recent failure patterns, confidence level                                                                                                                  | Nothing (new capability)             |
-| `cortex_verify(files)`            | List of changed files                                     | Runs project-wide `tsc --noEmit --incremental` (baseline-aware) + only the **tests** mapped to those files via the graph. Returns pass/fail. **Writes results to `change_log` and triggers fragility attribution** | Full `npm run test` (5 min → 30 sec) |
+| Tool                              | Input                                                     | Output                                                                                                                                                                               | Replaces                             |
+| --------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
+| `cortex_impact(files)`            | List of file paths the agent plans to modify              | Affected files (2-hop), relevant test files, fragility warnings                                                                                                                      | Manual grep + guesswork              |
+| `cortex_query(symbol)`            | A bare symbol name (e.g., `useAuth`) or file-qualified ID | All consumers, importers, and dependents. If bare name matches multiple nodes, returns all matches for disambiguation                                                                | `grep_search` for imports            |
+| `cortex_plan(description, files)` | Natural language intent + target files                    | **triage tier classification** based on structural factors and fragility, recommended verification commands, warnings. Note: `RiskScorer` dimension integration is currently absent. | Reading stale `AGENT_CONTEXT.md`     |
+| `cortex_fragility(file)`          | Single file path                                          | Change count, failure count, fragility index (0.0–1.0), recent failure patterns, confidence level                                                                                    | Nothing (new capability)             |
+| `cortex_verify(files)`            | List of changed files                                     | Runs project-wide `tsc --noEmit --incremental` + mapped tests. **Mandatory Input Sanitization needed to prevent command injection**. Returns pass/fail.                              | Full `npm run test` (5 min → 30 sec) |
 
 ---
 
@@ -279,15 +280,13 @@ For 184 files, the 2-3 second speed penalty is irrelevant. Building custom resol
 
 **Impact on Session 1 estimate**: +1.5 hours for resolution logic integration + testing. Session 1 total revised to ~4.5 hours.
 
-### Incremental Scan: `Scanner.scanFiles(paths: string[])`
+### Incremental Scan and Legacy Bottlenecks
 
-The current `Scanner.scan()` processes every source file. The new method:
-
-1. Creates or reuses a long-lived ts-morph `Project` (initialized with `tsConfigFilePath: admin-panel/tsconfig.json`, `skipFileDependencyResolution` **removed**).
-2. For specified files: if already in the project, call `sourceFile.refreshFromFileSystem()` to pick up disk changes. If new, add via `project.addSourceFileAtPath(path)`.
-3. Resolves their imports to file paths via `getModuleSpecifierSourceFile()`.
-4. Returns nodes/edges for those files only.
-5. The full `scan()` method continues to exist for batch health checks.
+1. Creates or reuses a long-lived ts-morph `Project` (initialized with `tsConfigFilePath: admin-panel/tsconfig.json`).
+2. **Current implementation bottleneck**: `writeGraph()` currently fetches all `this.project.getSourceFiles()` and passes them to `scanFiles()`.
+3. For ~184 files, this means every full scan re-parses and re-resolves all imports (which can take 10+ seconds). `refreshFromFileSystem()` is not strictly incremental at this scale.
+4. Returns nodes/edges for the processed files.
+5. The full `scan()` method still exists but possesses a legacy flaw: it stores raw specifiers in `map.dependencies`. Only `scanFiles()` → `writeGraph()` currently produces accurately resolved edges.
 
 ---
 
@@ -343,18 +342,17 @@ Implemented once in a shared `normalizePath()` utility, called at the entry poin
 
 **How it works**:
 
-1. `scan_meta` table stores the last git commit hash that was scanned.
+1. `scan_meta` table stores the last git commit hash that was scanned. Note: The `upsertScanMeta` call currently occurs outside the database transaction, leading to minor potential desyncs if the upsert hits a crash.
 2. When `cortex_impact` is called, the server:
-   a. Runs `git rev-parse HEAD` and compares to `scan_meta.last_scan_commit`. If different, advances the stored commit.
-   b. Runs `git diff --name-only --diff-filter=d <last_scan_commit>` to get **modified/added files** (excludes deleted).
+   a. Runs `git rev-parse HEAD` and compares to `scan_meta.last_scan_commit`.
+   b. Runs `git diff --name-only --diff-filter=d <last_scan_commit>` to get **modified/added files**.
    c. Runs `git diff --name-only --diff-filter=D <last_scan_commit>` to get **deleted files**.
-3. Modified/added files are re-scanned via `Scanner.scanFiles(paths)` — which resolves imports, deletes old edges for those files, and re-inserts current edges.
-4. Deleted files trigger graph pruning: `DELETE FROM nodes WHERE file_path = ?` + cascade-delete related edges.
-5. The recursive CTE then runs on the **current** graph.
 
-> **Latency**: For a typical 3-file change mid-session, the delta adds **~1-2 seconds** on Windows with OneDrive sync. This includes ts-morph reparse + import resolution + file-system probes for extension matching across 184 source files. On a local SSD without sync, expect ~500ms. Both are well within the 60-second success criterion but the delta itself is not sub-second on all setups.
+> **⚠️ Delta Scan Blind Spot**: This mechanism ONLY covers **committed changes**. Workspace edits made by an agent mid-session are invisible to the graph until a commit happens. Future revisions should evaluate `git diff HEAD` (working tree) to resolve this real-time execution gap.
 
-**Server architecture implication**: The MCP server must hold a reference to the Scanner instance and call it incrementally — not spawn a new process.
+> **Latency**: For a typical 3-file change mid-session, the delta adds **~1-2 seconds** on Windows with OneDrive sync.
+
+**Server architecture implication**: The MCP server holds a reference to the Scanner instance (`getScanner()` singleton). This keeps 184 ASTs in memory indefinitely — a noted memory pressure tradeoff lacking LRU eviction.
 
 ---
 
@@ -362,28 +360,15 @@ Implemented once in a shared `normalizePath()` utility, called at the entry poin
 
 > **Core Problem**: Unit tests import their modules directly (`tests` edges). E2E tests don't — they navigate to URLs, which render components. There's no import edge from `auth.spec.ts` to `useAuth.ts`.
 
-### Phase 1: Convention-Based Mapping (Session 1)
+### Phase 1: Convention-Based vs Manifest-Based
 
-Persist page-to-test associations as `tests` edges using filename stem matching:
+While the initial plan estimated 40-50% coverage using filename stem matching, **the implementation has already superseded this.**
 
-| E2E Test File                 | Mapped Page Component                      | Logic             |
-| ----------------------------- | ------------------------------------------ | ----------------- |
-| `tests/LoginPage.spec.ts`     | `features/auth/pages/LoginPage.tsx`        | Direct stem match |
-| `tests/settings-page.spec.ts` | `features/platform/pages/SettingsPage.tsx` | Kebab-to-Pascal   |
-
-**Realistic coverage expectation**: There are **64 E2E test files** in `admin-panel/tests/`. Convention-based mapping will cover **~40-50%** of them (~26-32 tests). Many tests have no clean page-name correspondence:
-
-- `question-studio-save-regression.spec.ts` — regression test, no single page
-- `super-admin-cross-app.spec.ts` — cross-feature flow, no single page
-- `version-history-page.spec.ts` — may not map to a page with that exact name
-- `latency-benchmark.e2e.spec.ts` — infrastructure test, no page component
-- `rbac-guards.e2e.spec.ts` — cross-feature security test
-
-**Impact**: For the ~50% of E2E tests (~32-38 files) that don't map via convention, `cortex_verify` won't include them in targeted runs. This means targeted verification catches **most** page-specific regressions but may miss cross-feature and regression-specific E2E tests. The full suite remains the fallback for Tier C changes.
+The Scanner natively relies on `smoke-coverage-manifest.json` handles robust E2E test-to-page mappings. This resolves the complexity of matching cross-feature (\*.smoke.spec.ts) files manually and negates the need for raw naming conventions.
 
 ### Phase 2: Route-Based Mapping (Deferred)
 
-Parse the React Router config to map URL paths → page components → import subtrees. Only implement if false-negative rate on `cortex_verify` is too high (i.e., targeted tests keep missing regressions that full-suite catches).
+Parse the React Router config to map URL paths → page components → import subtrees. Deferred indefinitely given the manifest success.
 
 ---
 
@@ -409,48 +394,33 @@ Parse the React Router config to map URL paths → page components → import su
 
 **Agent behavior**: "I want to change these files" → call `cortex_plan(description, files)` → receive tier + guidance → follow tier protocol.
 
-### `cortex_plan` and RiskScorer Integration
+### `cortex_plan` Scope Correction
 
-> **v6 Clarification**: The existing `RiskScorer` module computes a composite risk score across 6 dimensions (smokeGate, deepTests, typeSafety, schemaIntegrity, securityPosture, coverageTrajectory). `cortex_plan` uses the triage decision tree for **tier classification** (structural analysis: file count, extensions, fragility, boundaries) and the `RiskScorer.calculateScore()` for **risk assessment within the tier** (health-based: are tests passing? is coverage declining?).
+> **Architectural Divergence**: The originally planned `RiskScorer` health-dimension integration (evaluating typing, coverage, trajectory) is **absent** from the handler in `server.ts`.
 >
-> These are complementary, not duplicative:
->
-> - **Decision tree** → answers "what tier is this?" (Tier A/B/C)
-> - **RiskScorer** → answers "how risky within that tier?" (LOW/MEDIUM/HIGH within Tier B)
->
-> `cortex_plan` returns both: `{ tier: 'TIER_B', risk: 'MEDIUM', riskDetails: { typeSafety: 0.85, coverage: 0.72 }, ... }`
+> Furthermore, boundary checks (e.g., verifying `shared/`, `lib/`, `hooks/` structures) are NOT performed by the implementation. The Tier engine purely leverages file counts, extension structures, and raw fragility limits.
 
 ### Tier Classification: The Decision Tree (Inside `cortex_plan`)
 
 ```
 function determineTier(files, edges, fragility):
 
-  // Tier A — Trivial
-  if files.length === 1
-     AND file extension is .css, .md, or .txt
-     AND no edges cross feature boundaries:
-    return TIER_A
-
-  // Tier A — Safe JSON (non-structural)
-  if files.length === 1
-     AND file extension is .json
-     AND NOT matchesAny(file, STRUCTURAL_JSON_LIST):  // Uses glob matching (minimatch)
-    return TIER_A
-
-  // Tier C — Surgical (check FIRST, before Tier B)
-  if ANY file is a migration (.sql), RLS policy, or auth module:
+  // Tier C — Surgical (check FIRST)
+  if files.length > 10:
     return TIER_C
-  if ANY file has fragility_index > 0.3 AND confidence >= 'MEDIUM':
-    return TIER_C
-  if files.length > 5:
-    return TIER_C
-  if ANY file is in shared/ or lib/ or hooks/ (cross-feature utilities):
-    return TIER_C
-  if ANY matchesAny(file, STRUCTURAL_JSON_LIST):
+  if ANY file has fragility_index > 0.5:
     return TIER_C
 
   // Tier B — Moderate (default)
-  return TIER_B
+  if files.length > 5:
+    return TIER_B
+  if ANY file has fragility_index > 0.3:
+    return TIER_B
+
+  // Tier A — Trivial (Auto-Approve)
+  // The implementation natively defaults to Auto-approve if it bypasses B & C
+  // No explicit file-extension matching is utilized.
+  return TIER_A
 
 STRUCTURAL_JSON_LIST = [
   'package.json',
@@ -461,16 +431,11 @@ STRUCTURAL_JSON_LIST = [
   '*.config.ts',
   '*.config.js'
 ]
-
-// NOTE: matchesAny() uses glob matching (minimatch or equivalent),
-// NOT Array.includes(). A naive === check won't match patterns
-// like 'tsconfig.*.json' against 'tsconfig.app.json'.
 ```
 
 ### Tier A: Trivial (Auto-Approve)
 
-**Classification**: Returned by `cortex_plan`. Agent does not self-classify.
-**Protocol**: No further tool calls needed. Direct edit.
+**Classification**: The implementation falls-through to A when < 5 files are modified with `< 0.3` fragility.
 
 ### Tier B: Moderate (Auto-Plan)
 
@@ -640,6 +605,19 @@ The incremental delta scan (via `git diff`) only re-scans modified files inside 
 
 ---
 
+## Architectural Blind Spots & Missing Concerns
+
+Based on a forensic reality-check of the deployed `server.ts` system, the following critical gaps exist:
+
+| Missing Concern                          | Impact & Proposed Mitigation                                                                                                                                                                                                                                                       |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Schema Migration Strategy**            | The code utilizes `CREATE TABLE IF NOT EXISTS`. There is zero native schema migration logic. If `cortex.db` columns change, the backend silently fails. **Mitigation**: Instruct servers to explicitly delete `cortex.db` and rebuild via `npm run health` upon schema iterations. |
+| **Concurrent IDE Instances**             | Two overlapping MCP servers opening `cortex.db` triggers concurrent `SQLITE_BUSY` contention, mildly offset by `busy_timeout=5000`. Unhandled multi-window support.                                                                                                                |
+| **Input Sanitization (`cortex_verify`)** | The `execSync` utility directly executes paths resolved from agent input. Without heavy string sanitization, agents can trigger arbitrary shell command injection (`; rm -rf /`).                                                                                                  |
+| **Silent Process Observability**         | The MCP server possesses no health tracking, metrics, or internal logging limits beyond stderr. Server hangs or timeouts are silently buried in the IDE.                                                                                                                           |
+
+---
+
 ## Integration with Existing Cortex Modules
 
 | Existing Module | Current Role                                  | v2 Extension                                                                                                                                                                     |
@@ -654,19 +632,17 @@ The incremental delta scan (via `git diff`) only re-scans modified files inside 
 
 ---
 
-## Execution Roadmap: 5 Sessions, Each Standalone
+## Implementation Status (Post-Execution)
 
-| Session | Deliverable                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Depends On     | Estimated Effort | Key Decisions                                                                                                                                                                                                                                                                                  |
-| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1**   | SQLite schema (`cortex.db` with WAL, all 6 tables) + **Remove `skipFileDependencyResolution: true`** + **`tsConfigFilePath: admin-panel/tsconfig.json`** (NOT cortex tsconfig) + **Smoke test `bundler` resolution in first 15 min** + Import Specifier Resolution via ts-morph native `getModuleSpecifierSourceFile()` + `Scanner.scanFiles(paths)` incremental method + Scanner writes resolved file-qualified `nodes`/`edges` using upsert + per-file edge refresh + stale pruning + convention-based E2E test mapping (~40-50% of 64 test files) + `normalizePath()` utility (including `@/` alias) + edge direction convention (source=actor, target=acted-upon) | Nothing        | **~4.5 hours**   | ts-morph initialized with admin-panel tsconfig (has `@/*` paths + bundler resolution). Smoke test validates `getModuleSpecifierSourceFile()` returns non-null for `@/` imports before building anything. Upsert pattern for concurrent safety. File-level edges only. ~184 files, ~343 exports |
-| **2**   | MCP server (`@modelcontextprotocol/sdk`, stdio) with `cortex_impact` and `cortex_query` (suffix match + disambiguation) + incremental delta scan (`--diff-filter=d` for modified, `--diff-filter=D` for deleted) + session UUID + `scan_meta` advancement via `git rev-parse HEAD` + graceful degradation + **all child processes use `stdio: 'pipe'`** + GitOracle read-only (never `ship()`)                                                                                                                                                                                                                                                                        | Session 1      | ~3.5 hours       | stdio safety rule enforced. Delta ~1-2s on Windows/OneDrive. `cortex_query` suffix-matches bare symbols                                                                                                                                                                                        |
-| **3**   | `cortex_fragility` tool + `cortex_verify` writes to `change_log` + fragility attribution logic + rolling window decay (last 20 changes) + `fragility_index` as cached column recalculated by `cortex_verify` + **tsc direct pass/fail** (0 pre-existing errors as of v8) + **`tsc` runs with `cwd: adminPath`**                                                                                                                                                                                                                                                                                                                                                       | Session 1      | **~2.5 hours**   | Cache column, not computed on read. Historian unchanged. tsc direct pass/fail (no baseline needed — 0 pre-existing errors). tsc and test runner use `cwd: adminPath`. Baseline strategy documented in v7 as fallback if errors re-accumulate                                                   |
-| **4**   | `cortex_plan` (universal entry point: triage decision tree with **glob matching** for STRUCTURAL_JSON_LIST + RiskScorer integration for risk assessment) + `cortex_verify` (full read+write: `tsc --incremental` direct pass/fail + targeted tests + change_log + fragility + `tool_calls` logging) + compliance checking                                                                                                                                                                                                                                                                                                                                             | Sessions 2 & 3 | ~3 hours         | `cortex_plan` classifies tier internally + calls RiskScorer for risk level. `tsc` is project-wide with `--incremental`. `tool_calls` table enables persistent compliance                                                                                                                       |
-| **5**   | Wire into agent rules (GEMINI.md, AGENTS.md) + compliance reporting in Reporter (joins `tool_calls` + `change_log` by session_id) + graceful degradation for all edge cases + document scope boundaries (admin-panel only, ~40-50% of 64 E2E tests)                                                                                                                                                                                                                                                                                                                                                                                                                   | Session 4      | ~1.5 hours       | Every tool returns valid response in all states. Protocol violations flagged in health report. Graph scope = admin-panel only                                                                                                                                                                  |
+The standalone phase execution roadmap has been **100% completed**. The system actively operates in production under Cortex v2 logic. The previous theoretical 5-session sprint estimates have been archived.
 
-> **Sessions 2 and 3 are independent** — they can run in parallel. Every session delivers usable value on its own. No big-bang migration.
->
-> **Total estimated effort**: ~15 hours across 5 sessions (reduced from 15.5h — Session 3 simplified by removing tsc baseline logic).
+| Component Group               | Status   | Notes                                                                                                                                                    |
+| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Storage & SQLite Schema**   | **LIVE** | 6-table core (`nodes`, `edges`, `change_log`, `fragility`, `scan_meta`, `tool_calls`) active in WAL mode.                                                |
+| **MCP SDK Integration**       | **LIVE** | Fully operational `stdio` transport.                                                                                                                     |
+| **Tool Execution**            | **LIVE** | `cortex_impact`, `cortex_query`, `cortex_plan`, `cortex_fragility`, and `cortex_verify` operating, though tier logic diverges from origin specification. |
+| **Fragility Engine**          | **LIVE** | Tracing test failures through dependency edges + rolling decay updates caching successfully.                                                             |
+| **Compliance & Verification** | **LIVE** | Active feedback loop via `tool_calls` validation logic.                                                                                                  |
 
 ---
 
@@ -675,7 +651,7 @@ The incremental delta scan (via `git diff`) only re-scans modified files inside 
 | Rejected Idea                                   | Why                                                                                                                                      |
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | **Remote Supabase graph**                       | Network latency (500ms vs 5ms), offline breakage, "canonical truth" ambiguity                                                            |
-| **Neo4j**                                       | Overkill for ~136 source files. SQLite CTEs handle 5-hop traversals in <10ms                                                             |
+| **Neo4j**                                       | Overkill for ~184 source files. SQLite CTEs handle 5-hop traversals in <10ms                                                             |
 | **Surgical Sandbox** (`/tmp` workspace)         | Breaks TypeScript import resolution, path aliases, test infrastructure                                                                   |
 | **Symbol-level edges** (v2)                     | Exponential edge count. Start file-level; add symbol-level for hooks/utilities in v3                                                     |
 | **Full human gate for all changes**             | Kills velocity for trivial fixes. Triage tiers (A/B/C) balance safety with speed                                                         |
@@ -722,4 +698,4 @@ When this is complete, the following should be true:
 
 ---
 
-> **Status**: ✅ Planning Complete (v8 — Final). All 28+ review findings addressed across 7 review rounds, including codebase re-validation of file counts, error counts, and export counts. Zero known ambiguities. Ready for Session 1 implementation on approval.
+> **Status**: ✅ **Design Document Finalized**. All components are actively deployed in `questerix-cortex`. The architectural divergences and blind spots listed above (e.g., tier threshold drift, schema migration safety, execution injection vulnerabilities) represent the primary tech debt vectors tracking against future v3 revisions.

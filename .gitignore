@@ -137,3 +137,5 @@ student-app/
 .gemini/antigravity/knowledge/
 !.gemini/antigravity/knowledge/.keep
 .aider*
+
+.claude/
