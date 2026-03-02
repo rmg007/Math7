@@ -1,86 +1,103 @@
-# preflight.ps1 - Parallel Validation Suite
-# Runs type checks, linting, and dependency validation in parallel.
+<#
+.SYNOPSIS
+    Parallel Preflight Validation for Questerix.
+.DESCRIPTION
+    Runs type checks, linting, and dependency validation in parallel.
+    Uses temporary script files for maximum reliability.
+#>
 
 $ErrorActionPreference = "Continue"
-$startTime = Get-Date
+$StartTime = Get-Date
 
-$logDir = "$PSScriptRoot/../.agent/logs/preflight"
-if (!(Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
+# 1. Setup Logging & Temp Workdir
+$ProjectRoot = Resolve-Path "$PSScriptRoot/.."
+$LogDir = "$ProjectRoot/questerix-cortex/outputs/logs/preflight"
+if (!(Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir -Force | Out-Null }
+$TempScripts = "$LogDir/tmp_scripts"
+if (!(Test-Path $TempScripts)) { New-Item -ItemType Directory -Path $TempScripts -Force | Out-Null }
 
 Write-Host "Starting Preflight Validation Suite..." -ForegroundColor Cyan
 
-$root = Resolve-Path "$PSScriptRoot/.."
-$jobs = @()
+$Jobs = @()
 
-# 1. Admin Panel Typecheck
-$jobs += Start-Job -Name "admin-typecheck" -ScriptBlock {
-    param($rootPath)
-    Set-Location "$rootPath/admin-panel"
-    npx tsc --noEmit 2>&1 | Out-File "$rootPath/.agent/logs/preflight/admin-typecheck.log"
-    exit $LASTEXITCODE
-} -ArgumentList $root
-
-# 2. Admin Panel Linting
-$jobs += Start-Job -Name "admin-lint" -ScriptBlock {
-    param($rootPath)
-    Set-Location "$rootPath/admin-panel"
-    npm run lint 2>&1 | Out-File "$rootPath/.agent/logs/preflight/admin-lint.log"
-    exit $LASTEXITCODE
-} -ArgumentList $root
-
-# 3. Student App Static Analysis
-$jobs += Start-Job -Name "student-analyze" -ScriptBlock {
-    param($rootPath)
-    if (Test-Path "$rootPath/student-app") {
-        Set-Location "$rootPath/student-app"
-        flutter analyze 2>&1 | Out-File "$rootPath/.agent/logs/preflight/student-analyze.log"
-        exit $LASTEXITCODE
-    }
-    exit 0
-} -ArgumentList $root
-
-# 4. Dependency Validation
-$jobs += Start-Job -Name "deps-validate" -ScriptBlock {
-    param($rootPath)
-    Set-Location $rootPath
-    npm run deps:validate 2>&1 | Out-File "$rootPath/.agent/logs/preflight/deps-validate.log"
-    exit $LASTEXITCODE
-} -ArgumentList $root
-
-Write-Host "Waiting for jobs..." -ForegroundColor Yellow
-
-# Wait for all jobs to complete
-$jobs | Wait-Job | Out-Null
-
-$endTime = Get-Date
-$duration = $endTime - $startTime
-
-Write-Host "Preflight Results (Duration: $($duration.TotalSeconds)s):" -ForegroundColor Cyan
-Write-Host "---------------------------------------------------"
-
-$failCount = 0
-foreach ($job in $jobs) {
-    # Receive-Job ensures the job object is updated with the exit code
-    $null = Receive-Job $job
-    $ec = $job.ChildJobs[0].ExitCode
+# Function to start a preflight job safely
+function Start-PreflightJob {
+    param([string]$Name, [string]$DirPath, [string]$CommandText)
     
-    if ($null -eq $ec -and $job.State -eq "Completed") {
-        # Fallback for jobs that don't report ExitCode but completed
-        $ec = 0
-    }
-
-    if ($ec -eq 0) {
-        Write-Host "PASS: $($job.Name)" -ForegroundColor Green
+    if (Test-Path $DirPath) {
+        Write-Host "  [+] Queueing $Name..." -ForegroundColor Gray
+        $exitFile = "$LogDir/$Name.exit"
+        $logFile = "$LogDir/$Name.log"
+        $scriptPath = "$TempScripts/$Name.ps1"
+        
+        if (Test-Path $exitFile) { Remove-Item $exitFile -Force }
+        if (Test-Path $logFile) { Remove-Item $logFile -Force }
+        
+        $scriptContent = @"
+try {
+    Set-Location "$DirPath"
+    & { $CommandText } *>> "$logFile"
+    `$LASTEXITCODE | Out-File "$exitFile"
+} catch {
+    `$_.Exception.Message | Out-File "$logFile" -Append
+    1 | Out-File "$exitFile"
+}
+"@
+        $scriptContent | Out-File $scriptPath -Encoding UTF8
+        return Start-Job -Name $Name -ScriptBlock { param($s) & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $s } -ArgumentList $scriptPath
     } else {
-        Write-Host "FAIL: $($job.Name) (ExitCode: $ec) - See $logDir/$($job.Name).log" -ForegroundColor Red
-        $failCount++
+        # Silent skip if directory not found (e.g. only subset of platform exists)
+        return $null
     }
 }
 
-Remove-Job $jobs
+# --- JOB DEFINITIONS ---
 
-if ($failCount -gt 0) {
-    Write-Host "Preflight FAILED with $failCount error(s)." -ForegroundColor Red
+# 1. Admin Panel Typecheck
+$Jobs += Start-PreflightJob "admin-typecheck" "$ProjectRoot/admin-panel" "npx tsc --noEmit"
+
+# 2. Admin Panel Linting
+$Jobs += Start-PreflightJob "admin-lint" "$ProjectRoot/admin-panel" "npm run lint"
+
+# 3. Student App Static Analysis
+# Fix: Corrected directory name from 'student-app' to 'questerix-student-app'
+$Jobs += Start-PreflightJob "student-analyze" "$ProjectRoot/questerix-student-app" "flutter analyze"
+
+# 4. Dependency Validation
+$Jobs += Start-PreflightJob "deps-validate" "$ProjectRoot" "npm run deps:validate"
+
+$Jobs = $Jobs | Where-Object { $null -ne $_ }
+if ($Jobs.Count -eq 0) {
+    Write-Host "⚠️ No preflight jobs to run." -ForegroundColor Yellow
+    exit 0
+}
+
+Write-Host "Waiting for jobs..." -ForegroundColor Yellow
+$Jobs | Wait-Job | Out-Null
+
+$EndTime = Get-Date
+$Duration = $EndTime - $StartTime
+
+Write-Host "Preflight Results (Duration: $($Duration.TotalSeconds.ToString("F1"))s):" -ForegroundColor Cyan
+Write-Host "---------------------------------------------------"
+
+$FailCount = 0
+foreach ($j in $Jobs) {
+    $exitFile = "$LogDir/$($j.Name).exit"
+    $exitContent = if (Test-Path $exitFile) { Get-Content $exitFile -ErrorAction SilentlyContinue } else { "N/A" }
+    $exit = if ($null -ne $exitContent) { $exitContent.ToString().Trim() } else { "N/A" }
+    $status = if ($exit -eq '0') { "PASS" } else { "FAIL" }
+    $color = if ($status -eq "PASS") { "Green" } else { "Red" }
+    Write-Host "$status: $($j.Name) (Exit: $exit)" -ForegroundColor $color
+    if ($status -ne "PASS") { $FailCount++ }
+}
+
+# Final Clean
+Get-ChildItem -Path $LogDir -Filter "*.exit" | Remove-Item -Force -ErrorAction SilentlyContinue
+Remove-Job $Jobs -Force
+
+if ($FailCount -gt 0) {
+    Write-Host "Preflight FAILED with $FailCount error(s)." -ForegroundColor Red
     exit 1
 } else {
     Write-Host "Preflight PASSED!" -ForegroundColor Green
