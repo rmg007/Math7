@@ -247,8 +247,9 @@ function Invoke-PhaseSupabaseSync {
     Write-Info "Linking Supabase project $projectRef..."
     $dbPassword = $null
     if (Test-Path ".secrets") {
-        $secrets = Get-Content ".secrets" | ConvertFrom-StringData
-        $dbPassword = $secrets["SUPABASE_DB_PASSWORD"]
+        $secrets = Get-Content ".secrets"
+        $match = $secrets | Select-String "SUPABASE_DB_PASSWORD=(.*)"
+        if ($match) { $dbPassword = $match.Matches.Groups[1].Value.Trim() }
     }
     
     if ($null -ne $dbPassword) {
