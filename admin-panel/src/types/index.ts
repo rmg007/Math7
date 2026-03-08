@@ -67,6 +67,9 @@ export interface QuestionImportData {
   options: Json;
   solution: Json;
   explanation: string;
+  hint_text?: string;
+  rule_text?: string;
+  eli10_text?: string;
   skill_id: string;
   sort_order: number;
 }

@@ -48,7 +48,7 @@ function formatViolations(violations: AxeViolation[]): string {
 }
 
 test.describe('Accessibility Audit @logic', () => {
-  test('Login page @smoke', async ({ page }) => {
+  test('Login page @regression', async ({ page }) => {
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
 
@@ -71,7 +71,7 @@ test.describe('Accessibility Audit @logic', () => {
       // Authenticated via storageState
     });
 
-    test('Dashboard @smoke', async ({ page }) => {
+    test('Dashboard @regression', async ({ page }) => {
       await page.goto('/dashboard');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(1000);

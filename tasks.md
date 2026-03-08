@@ -15,23 +15,11 @@
 
 ## Active Sprint Tasks
 
-- [/] Reliable Deploy Pipeline Implementation (Master Task)
-  - [x] Track E: CI/CD Audit (Read-only)
-  - [x] Track C: Notifications & Watchdog (New Scripts)
-  - [x] Track B: Smoke Gate (New Script + Refactor)
-  - [x] Track A: Refactor `run-all-tests.ps1` (Parallel Gate)
-  - [x] Track D: Orchestrator Phase 5 & Deployment Log
+- [/] **Test Suite Refresh & Deployment**
+  - [ ] Update all post-deployment tests to reflect the current API mocking strategy and route list.
+  - [ ] Run full test suite to guarantee green execution.
+  - [ ] Commit everything and deploy to Cloudflare via `orchestrator.ps1`.
 
 ## Queued Tasks
 
-- [ ] **[LATER] Test Suite Refresh + Deploy + Cortex Deployment Logging**
-  - Update all post-deployment tests to reflect the current API mocking strategy and route list
-  - Run full test suite, commit, and deploy to Cloudflare
-  - Add a structured deployment log file inside `questerix-cortex/outputs/` only (e.g. `DEPLOY_LOG.md`)
-    - Log format: timestamp, phase results, Cloudflare deploy URL, test pass/fail summary
-    - Must be cleaned regularly (keep only last N entries); no sensitive data
-    - Log must NOT exist outside of `questerix-cortex/` — not in docs, not in repo root
-
-## Completed Tasks
-
-- [x] Brainstorming and Planning session with the User.
+_- *(No Queued Tasks)*_

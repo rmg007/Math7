@@ -24,7 +24,9 @@ test.describe('Infrastructure & Security Headers @logic', () => {
     expect(content).toContain('http://localhost:*');
   });
 
-  test('Security: X-Frame-Options and other headers are configured @smoke', async ({ page }) => {
+  test('Security: X-Frame-Options and other headers are configured @regression', async ({
+    page,
+  }) => {
     // Note: This test checks if the environment is serving headers.
     // In local dev, Vite might not serve the _headers file, but we should
     // at least verify the page title or basic structure to ensure the app is healthy.

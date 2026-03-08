@@ -25,7 +25,8 @@ Apply UUID validation in these scenarios:
 // UUID validation helper
 function isValidUUID(uuid: string | undefined | null): uuid is string {
   if (!uuid) return false;
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidRegex.test(uuid);
 }
 ```
@@ -37,24 +38,24 @@ export function useMyQuery(id: string) {
   const { currentApp } = useApp();
 
   return useQuery({
-    queryKey: ['my-data', id, currentApp?.app_id],
+    queryKey: ["my-data", id, currentApp?.app_id],
     queryFn: async () => {
       // Step 1: Check existence
       if (!currentApp?.app_id) {
-        throw new Error('No app selected');
+        throw new Error("No app selected");
       }
 
       // Step 2: Validate UUID format
       if (!isValidUUID(currentApp.app_id)) {
-        console.error('Invalid app_id format:', currentApp.app_id);
+        console.error("Invalid app_id format:", currentApp.app_id);
         throw new Error(`Invalid app ID format: ${currentApp.app_id}`);
       }
 
       // Step 3: Execute query
       const { data, error } = await supabase
-        .from('my_table')
-        .select('*')
-        .eq('app_id', currentApp.app_id); // Now safe
+        .from("my_table")
+        .select("*")
+        .eq("app_id", currentApp.app_id); // Now safe
 
       if (error) throw error;
       return data;
@@ -73,13 +74,13 @@ export function useCreateItem() {
 
   return useMutation({
     mutationFn: async (item: ItemInput) => {
-      if (!currentApp?.app_id) throw new Error('No app selected');
+      if (!currentApp?.app_id) throw new Error("No app selected");
       if (!isValidUUID(currentApp.app_id)) {
         throw new Error(`Invalid app ID format: ${currentApp.app_id}`);
       }
 
       const { data, error } = await supabase
-        .from('items')
+        .from("items")
         .insert({ ...item, app_id: currentApp.app_id })
         .select()
         .single();
@@ -96,42 +97,48 @@ export function useCreateItem() {
 ## Common Mistakes
 
 ### ❌ DON'T: Only check existence
+
 ```typescript
-if (!currentApp?.app_id) throw new Error('No app selected');
+if (!currentApp?.app_id) throw new Error("No app selected");
 // Missing format validation!
 ```
 
 ### ❌ DON'T: Skip validation in enabled flag
+
 ```typescript
-enabled: Boolean(currentApp?.app_id)
+enabled: Boolean(currentApp?.app_id);
 // Query will execute with invalid UUID!
 ```
 
 ### ❌ DON'T: Use non-null assertion
+
 ```typescript
 .eq('app_id', currentApp.app_id!)
 // Bypasses TypeScript safety!
 ```
 
 ### ✅ DO: Validate both existence and format
+
 ```typescript
-if (!currentApp?.app_id) throw new Error('No app selected');
+if (!currentApp?.app_id) throw new Error("No app selected");
 if (!isValidUUID(currentApp.app_id)) {
   throw new Error(`Invalid app ID format: ${currentApp.app_id}`);
 }
 ```
 
 ### ✅ DO: Add debug logging
+
 ```typescript
 if (!isValidUUID(currentApp.app_id)) {
-  console.error('Invalid app_id:', currentApp.app_id);
+  console.error("Invalid app_id:", currentApp.app_id);
   throw new Error(`Invalid app ID format: ${currentApp.app_id}`);
 }
 ```
 
 ### ✅ DO: Use in enabled flag
+
 ```typescript
-enabled: Boolean(currentApp?.app_id) && isValidUUID(currentApp?.app_id)
+enabled: Boolean(currentApp?.app_id) && isValidUUID(currentApp?.app_id);
 ```
 
 ---
@@ -160,6 +167,7 @@ When implementing UUID validation:
 ## Questions?
 
 If you encounter UUID validation issues:
+
 1. Check the browser console for debug logs
 2. Verify the UUID format matches RFC 4122
 3. Ensure localStorage hasn't been corrupted

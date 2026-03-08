@@ -51,7 +51,7 @@ test.describe('Auth Flow & Guardrails @logic', () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test('AuthGuard: Redirects to /login if profile is deleted (Fail-Safe) (Task 1.9) @smoke', async ({
+  test('AuthGuard: Redirects to /login if profile is deleted (Fail-Safe) (Task 1.9)', async ({
     page,
   }) => {
     // 1. Browser: Login as valid user first (Admin)
@@ -119,7 +119,7 @@ test.describe('Auth Flow & Guardrails @logic', () => {
   // Route Protection — Unauthenticated Access
   // ===========================================================================
 
-  test('RouteProtection: Unauthenticated user accessing "/" is redirected to /login (AC-04) @smoke', async ({
+  test('RouteProtection: Unauthenticated user accessing "/" is redirected to /login (AC-04)', async ({
     page,
   }) => {
     // Navigate directly without any session
@@ -128,7 +128,7 @@ test.describe('Auth Flow & Guardrails @logic', () => {
     await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
   });
 
-  test('RouteProtection: Unauthenticated user accessing a deep admin route is redirected to /login @smoke', async ({
+  test('RouteProtection: Unauthenticated user accessing a deep admin route is redirected to /login', async ({
     page,
   }) => {
     await page.goto('/apps');
@@ -200,7 +200,7 @@ test.describe('Auth Flow & Guardrails @logic', () => {
     await expect(page.getByText(/please enter your email/i)).toBeVisible({ timeout: 5000 });
   });
 
-  test('ForgotPassword: "Back to Sign In" returns to login form @smoke', async ({ page }) => {
+  test('ForgotPassword: "Back to Sign In" returns to login form', async ({ page }) => {
     await page.goto('/login');
     await page.getByRole('button', { name: /forgot password/i }).click();
     await expect(page.getByRole('button', { name: /send reset link/i })).toBeVisible();
@@ -213,13 +213,20 @@ test.describe('Auth Flow & Guardrails @logic', () => {
   // Login Success — Navigation
   // ===========================================================================
 
-  test('Login: Successful admin login navigates to dashboard (SI-02) @smoke', async ({ page }) => {
+  test('Login: Successful admin login navigates to dashboard (SI-02) @regression', async ({
+    page,
+  }) => {
     await login(page, TEST_USERS.ADMIN.email, TEST_USERS.ADMIN.password);
     // login() helper already asserts we're NOT on /login and Dashboard link is visible
     await expect(page).not.toHaveURL(/\/login/);
   });
 
-  test('Login: Already-authenticated user visiting /login is redirected to dashboard @smoke', async ({
+  test('Login: Successful student login navigates to dashboard @regression', async ({ page }) => {
+    await login(page, TEST_USERS.STUDENT.email, TEST_USERS.STUDENT.password);
+    await expect(page).not.toHaveURL(/\/login/);
+  });
+
+  test('Login: Already-authenticated user visiting /login is redirected to dashboard', async ({
     page,
   }) => {
     // Login first
@@ -268,7 +275,7 @@ test.describe('Auth Flow & Guardrails @logic', () => {
     await expect(page.getByRole('button', { name: /back to sign in/i })).toBeVisible();
   });
 
-  test('AuthConfirmPage: Visiting /auth/confirm with no token redirects to /login (EC-04) @smoke', async ({
+  test('AuthConfirmPage: Visiting /auth/confirm with no token redirects to /login (EC-04)', async ({
     page,
   }) => {
     await page.goto('/auth/confirm');

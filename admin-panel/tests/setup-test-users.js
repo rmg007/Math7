@@ -16,6 +16,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load environment variables
+dotenv.config({ path: path.resolve(__dirname, '../.secrets') });
 dotenv.config({ path: path.resolve(__dirname, '../.env.test.local') });
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
@@ -43,8 +44,8 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 // Verified working test accounts (password == email convention)
 const TEST_USERS = [
   {
-    email: 'mhalim80@hotmail.com',
-    password: '9eZCpZHhP9ArGuz',
+    email: process.env.TEST_SUPER_ADMIN_EMAIL || 'mhalim80@hotmail.com',
+    password: process.env.TEST_SUPER_ADMIN_PASSWORD || 'AJbB8e2Uiia3BgE',
     role: 'super_admin',
     metadata: {
       name: 'Ryan Gonzalez',
@@ -52,8 +53,8 @@ const TEST_USERS = [
     },
   },
   {
-    email: 'testadmin@example.com',
-    password: 'testadmin@example.com',
+    email: process.env.TEST_ADMIN_EMAIL || 'testadmin@example.com',
+    password: process.env.TEST_ADMIN_PASSWORD || 'testadmin@example.com',
     role: 'admin',
     metadata: {
       name: 'Test Admin',
@@ -61,17 +62,8 @@ const TEST_USERS = [
     },
   },
   {
-    email: 'admin1@example.com',
-    password: 'admin1@example.com',
-    role: 'admin',
-    metadata: {
-      name: 'Admin One',
-      role: 'admin',
-    },
-  },
-  {
-    email: 'testmentor@example.com',
-    password: 'testmentor@example.com',
+    email: process.env.TEST_MENTOR_EMAIL || 'testmentor@example.com',
+    password: process.env.TEST_MENTOR_PASSWORD || 'testmentor@example.com',
     role: 'mentor',
     metadata: {
       name: 'Test Mentor',
@@ -79,8 +71,8 @@ const TEST_USERS = [
     },
   },
   {
-    email: 'teststudent@example.com',
-    password: 'teststudent@example.com',
+    email: process.env.TEST_STUDENT_EMAIL || 'teststudent@example.com',
+    password: process.env.TEST_STUDENT_PASSWORD || 'teststudent@example.com',
     role: 'student',
     metadata: {
       name: 'Test Student',

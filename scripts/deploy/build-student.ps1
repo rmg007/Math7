@@ -5,27 +5,28 @@
     Builds the Flutter Student App for web with environment variables
     injected via --dart-define flags
 #>
-
+ 
 param(
     [string]$DefinesFile
 )
-
+ 
 $ErrorActionPreference = 'Stop'
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RootDir = Split-Path -Parent (Split-Path -Parent $ScriptDir)
-$StudentAppDir = Join-Path $RootDir 'student-app'
-
+$SiblingDir = Split-Path -Parent $RootDir
+$StudentAppDir = Join-Path $SiblingDir 'questerix-student-app'
+ 
 if (-not $DefinesFile) {
     $DefinesFile = Join-Path $RootDir '.flutter-defines.tmp'
 }
-
+ 
 # Check dart-define flags file exists
 if (-not (Test-Path $DefinesFile)) {
     Write-Host "ERROR: $DefinesFile not found." -ForegroundColor Red
     Write-Host "Run generate-env.ps1 first." -ForegroundColor Red
     exit 1
 }
-
+ 
 $definesContent = Get-Content $DefinesFile
 $dartDefineFlags = ""
 foreach ($line in $definesContent) {
@@ -33,20 +34,20 @@ foreach ($line in $definesContent) {
         $dartDefineFlags += " --dart-define=$line"
     }
 }
-
+ 
 Set-Location $StudentAppDir
-
+ 
 Write-Host "Cleaning previous Flutter build..." -ForegroundColor Cyan
 flutter clean
-
+ 
 Write-Host "Getting Flutter packages..." -ForegroundColor Cyan
 flutter pub get
-
+ 
 Write-Host "Building Flutter web with dart-define flags..." -ForegroundColor Cyan
-$buildCommand = "flutter build web --release $dartDefineFlags"
-Write-Host "Command: flutter build web --release [FLAGS_HIDDEN]" -ForegroundColor DarkGray
+$buildCommand = "flutter build web --release --no-tree-shake-icons $dartDefineFlags"
+Write-Host "Command: flutter build web --release --no-tree-shake-icons [FLAGS_HIDDEN]" -ForegroundColor DarkGray
 Invoke-Expression $buildCommand
-
+ 
 if (Test-Path (Join-Path $StudentAppDir 'build\web')) {
     Write-Host " Flutter web build complete: build/web/" -ForegroundColor Green
 } else {

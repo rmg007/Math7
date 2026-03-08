@@ -63,7 +63,12 @@ async function assertNoViolations(
       )
       .join('\n');
 
-    expect.soft(0, `❌ ${routeName}: ${serious.length} violation(s):${summary}\n\nSee docs/A11Y_EXCEPTIONS.md`).toBe(0);
+    expect
+      .soft(
+        0,
+        `❌ ${routeName}: ${serious.length} violation(s):${summary}\n\nSee docs/A11Y_EXCEPTIONS.md`
+      )
+      .toBe(0);
   }
 
   // Hard assertion — fails the test immediately if critical/serious violations remain
@@ -79,7 +84,7 @@ test.describe('A11y — Unauthenticated', () => {
   // Without this the auth-guard would redirect /login → /dashboard instantly.
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  test('Login page passes WCAG 2.1 AA @a11y @smoke', async ({ page }) => {
+  test('Login page passes WCAG 2.1 AA @a11y @regression', async ({ page }) => {
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
     await assertNoViolations(page, '/login');
@@ -91,7 +96,7 @@ test.describe('A11y — Unauthenticated', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 test.describe('A11y — Dashboard', () => {
-  test('Dashboard page passes WCAG 2.1 AA @a11y @smoke', async ({ page }) => {
+  test('Dashboard page passes WCAG 2.1 AA @a11y @regression', async ({ page }) => {
     await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
     await assertNoViolations(page, '/dashboard');
@@ -103,13 +108,13 @@ test.describe('A11y — Dashboard', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 test.describe('A11y — Platform Management', () => {
-  test('Apps page passes WCAG 2.1 AA @a11y @smoke', async ({ page }) => {
+  test('Apps page passes WCAG 2.1 AA @a11y @regression', async ({ page }) => {
     await page.goto('/apps');
     await page.waitForLoadState('networkidle');
     await assertNoViolations(page, '/apps');
   });
 
-  test('Subjects page passes WCAG 2.1 AA @a11y @smoke', async ({ page }) => {
+  test('Subjects page passes WCAG 2.1 AA @a11y @regression', async ({ page }) => {
     await page.goto('/subjects');
     await page.waitForLoadState('networkidle');
     await assertNoViolations(page, '/subjects');
@@ -121,25 +126,25 @@ test.describe('A11y — Platform Management', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 test.describe('A11y — Curriculum', () => {
-  test('Domains list passes WCAG 2.1 AA @a11y @smoke', async ({ page }) => {
+  test('Domains list passes WCAG 2.1 AA @a11y @regression', async ({ page }) => {
     await page.goto('/domains');
     await page.waitForLoadState('networkidle');
     await assertNoViolations(page, '/domains');
   });
 
-  test('Skills list passes WCAG 2.1 AA @a11y @smoke', async ({ page }) => {
+  test('Skills list passes WCAG 2.1 AA @a11y @regression', async ({ page }) => {
     await page.goto('/skills');
     await page.waitForLoadState('networkidle');
     await assertNoViolations(page, '/skills');
   });
 
-  test('Questions list passes WCAG 2.1 AA @a11y @smoke', async ({ page }) => {
+  test('Questions list passes WCAG 2.1 AA @a11y @regression', async ({ page }) => {
     await page.goto('/questions');
     await page.waitForLoadState('networkidle');
     await assertNoViolations(page, '/questions');
   });
 
-  test('Publish page passes WCAG 2.1 AA @a11y @smoke', async ({ page }) => {
+  test('Publish page passes WCAG 2.1 AA @a11y @regression', async ({ page }) => {
     await page.goto('/publish');
     await page.waitForLoadState('networkidle');
     await assertNoViolations(page, '/publish');
@@ -151,7 +156,7 @@ test.describe('A11y — Curriculum', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 test.describe('A11y — User Management', () => {
-  test('User Management page passes WCAG 2.1 AA @a11y @smoke', async ({ page }) => {
+  test('User Management page passes WCAG 2.1 AA @a11y @regression', async ({ page }) => {
     await page.goto('/users');
     await page.waitForLoadState('networkidle');
     await assertNoViolations(page, '/users');

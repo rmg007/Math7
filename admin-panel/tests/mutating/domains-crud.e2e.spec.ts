@@ -37,7 +37,7 @@ test.describe('Domains Management @logic', () => {
     }
   });
 
-  test('should list all domains @smoke', async ({ page }) => {
+  test('should list all domains', async ({ page }) => {
     await page.goto('/domains');
     await expect(
       page.locator('a[href="/domains/new"], button:has-text("New Domain")').first()

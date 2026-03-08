@@ -26,7 +26,9 @@ test.describe('Automated Row Height Test @responsive', () => {
   ];
 
   for (const p of PAGES) {
-    test(`Table rows in ${p.name} should be single-line (constant height) @responsive`, async ({ page }) => {
+    test(`Table rows in ${p.name} should be single-line (constant height) @responsive`, async ({
+      page,
+    }) => {
       await page.goto(p.url);
       await page.waitForLoadState('networkidle');
 

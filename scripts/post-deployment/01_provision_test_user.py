@@ -23,11 +23,15 @@ def provision_test_user():
         
     supabase: Client = create_client(url, key)
     
-    email = os.getenv("PROD_BOT_EMAIL", "mhalim80@hotmail.com")
+    email = os.getenv("PROD_BOT_EMAIL")
     
     # 1. Provision Account securely
     print(f"[2/3] Provisioning Test Account: {email}")
-    password = os.getenv("PROD_BOT_PASSWORD", "AJbB8e2Uiia3BgE")
+    password = os.getenv("PROD_BOT_PASSWORD")
+    
+    if not email or not password:
+        print("ERROR: PROD_BOT_EMAIL and PROD_BOT_PASSWORD must be set in the environment.", file=sys.stderr)
+        sys.exit(1)
     
     try:
         # Check if user exists by listing all users (only possible via admin API)

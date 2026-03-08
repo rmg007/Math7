@@ -34,17 +34,17 @@ const MOCK_SESSION_WITH_PROFILE = {
 };
 
 /**
- * AI Assistant & Governance Tests — @smoke @logic
+ * AI Assistant & Governance Tests — @regression @logic
  * Verifies that the AI generation, sessions, and governance pages load correctly.
  *
  * Uses global storageState (pre-authenticated as SUPER_ADMIN).
  */
-test.describe('AI Assistant Pages @smoke', () => {
+test.describe('AI Assistant Pages @regression', () => {
   test.beforeEach(({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'unauthenticated', 'AI pages require authentication');
   });
 
-  test('Generation Page should load and display required UI elements @smoke @logic', async ({
+  test('Generation Page should load and display required UI elements @regression @logic', async ({
     page,
   }) => {
     await page.goto('/ai-questions');
@@ -58,7 +58,9 @@ test.describe('AI Assistant Pages @smoke', () => {
     ).toBeVisible();
   });
 
-  test('Sessions Page should load and display telemetry and history @smoke', async ({ page }) => {
+  test('Sessions Page should load and display telemetry and history @regression', async ({
+    page,
+  }) => {
     await page.goto('/ai-sessions');
     // On mobile, getByText('AI Sessions') might match the hidden sidebar item.
     // We look for the main header title or the error state.
@@ -68,7 +70,9 @@ test.describe('AI Assistant Pages @smoke', () => {
     await expect(header.or(errorMsg).first()).toBeVisible({ timeout: 15_000 });
   });
 
-  test('Governance Page should load and display usage metrics @smoke @logic', async ({ page }) => {
+  test('Governance Page should load and display usage metrics @regression @logic', async ({
+    page,
+  }) => {
     await page.goto('/governance');
     await expect(page.locator('h1', { hasText: 'Governance' })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText('Cost Estimation (Approx)')).toBeVisible();
@@ -80,33 +84,35 @@ test.describe('AI Assistant Pages @smoke', () => {
 // ---------------------------------------------------------------------------
 // Generation Page — structural and interaction checks
 // ---------------------------------------------------------------------------
-test.describe('Generation Page — Structural Checks @smoke', () => {
+test.describe('Generation Page — Structural Checks @regression', () => {
   test.beforeEach(({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'unauthenticated', 'AI pages require authentication');
   });
 
-  test('shows Bulk Import CSV navigation link @smoke', async ({ page }) => {
+  test('shows Bulk Import CSV navigation link @regression', async ({ page }) => {
     await page.goto('/ai-questions');
     await expect(page.getByRole('link', { name: /Bulk Import CSV/i })).toBeVisible({
       timeout: 15_000,
     });
   });
 
-  test('generate button is disabled when no document is uploaded @smoke', async ({ page }) => {
+  test('generate button is disabled when no document is uploaded @regression', async ({ page }) => {
     await page.goto('/ai-questions');
     await page.waitForLoadState('networkidle');
     const generateBtn = page.getByRole('button', { name: /Initiate Intelligent Generation/i });
     await expect(generateBtn).toBeDisabled({ timeout: 15_000 });
   });
 
-  test('difficulty distribution inputs are rendered with correct ids @smoke', async ({ page }) => {
+  test('difficulty distribution inputs are rendered with correct ids @regression', async ({
+    page,
+  }) => {
     await page.goto('/ai-questions');
     await expect(page.locator('#easy')).toBeVisible({ timeout: 15_000 });
     await expect(page.locator('#medium')).toBeVisible();
     await expect(page.locator('#hard')).toBeVisible();
   });
 
-  test('refinement prompt textarea is present @smoke', async ({ page }) => {
+  test('refinement prompt textarea is present @regression', async ({ page }) => {
     await page.goto('/ai-questions');
     await expect(page.locator('#instructions')).toBeVisible({ timeout: 15_000 });
   });
@@ -115,12 +121,12 @@ test.describe('Generation Page — Structural Checks @smoke', () => {
 // ---------------------------------------------------------------------------
 // Sessions Page — mocked API responses
 // ---------------------------------------------------------------------------
-test.describe('Sessions Page — Mocked API Responses @smoke', () => {
+test.describe('Sessions Page — Mocked API Responses @regression', () => {
   test.beforeEach(({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'unauthenticated', 'AI pages require authentication');
   });
 
-  test('renders all 4 metric cards when sessions are present @smoke', async ({ page }) => {
+  test('renders all 4 metric cards when sessions are present @regression', async ({ page }) => {
     await page.route('**/rest/v1/ai_generation_sessions*', async (route) => {
       if (route.request().method() === 'GET') {
         await route.fulfill({
@@ -140,7 +146,7 @@ test.describe('Sessions Page — Mocked API Responses @smoke', () => {
     await expect(page.getByText('Avg Latency')).toBeVisible();
   });
 
-  test('Session History heading is visible and session row renders with mocked model @smoke', async ({
+  test('Session History heading is visible and session row renders with mocked model @regression', async ({
     page,
   }) => {
     await page.route('**/rest/v1/ai_generation_sessions*', async (route) => {
@@ -160,7 +166,7 @@ test.describe('Sessions Page — Mocked API Responses @smoke', () => {
     await expect(page.getByText('gemini-1.5-flash')).toBeVisible();
   });
 
-  test('shows No Telemetry Detected empty state when sessions array is empty @smoke', async ({
+  test('shows No Telemetry Detected empty state when sessions array is empty @regression', async ({
     page,
   }) => {
     await page.route('**/rest/v1/ai_generation_sessions*', async (route) => {
@@ -179,7 +185,7 @@ test.describe('Sessions Page — Mocked API Responses @smoke', () => {
     await expect(page.getByText('No Telemetry Detected')).toBeVisible({ timeout: 15_000 });
   });
 
-  test('search input accepts text and filters the sessions count display @smoke', async ({
+  test('search input accepts text and filters the sessions count display @regression', async ({
     page,
   }) => {
     await page.route('**/rest/v1/ai_generation_sessions*', async (route) => {
@@ -207,12 +213,14 @@ test.describe('Sessions Page — Mocked API Responses @smoke', () => {
 // ---------------------------------------------------------------------------
 // Governance Page — mocked API responses
 // ---------------------------------------------------------------------------
-test.describe('Governance Page — Mocked API Responses @smoke', () => {
+test.describe('Governance Page — Mocked API Responses @regression', () => {
   test.beforeEach(({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'unauthenticated', 'AI pages require authentication');
   });
 
-  test('renders tenant usage row with display name from mocked data @smoke', async ({ page }) => {
+  test('renders tenant usage row with display name from mocked data @regression', async ({
+    page,
+  }) => {
     await page.route('**/rest/v1/ai_generation_sessions*', async (route) => {
       if (route.request().method() === 'GET') {
         await route.fulfill({
@@ -229,7 +237,7 @@ test.describe('Governance Page — Mocked API Responses @smoke', () => {
     await expect(page.getByText('Test Academy')).toBeVisible({ timeout: 15_000 });
   });
 
-  test('shows No AI Usage Data Found empty state when no sessions exist @smoke', async ({
+  test('shows No AI Usage Data Found empty state when no sessions exist @regression', async ({
     page,
   }) => {
     await page.route('**/rest/v1/ai_generation_sessions*', async (route) => {
@@ -248,7 +256,7 @@ test.describe('Governance Page — Mocked API Responses @smoke', () => {
     await expect(page.getByText('No AI Usage Data Found')).toBeVisible({ timeout: 15_000 });
   });
 
-  test('search input filters the tenant table @smoke', async ({ page }) => {
+  test('search input filters the tenant table @regression', async ({ page }) => {
     await page.route('**/rest/v1/ai_generation_sessions*', async (route) => {
       if (route.request().method() === 'GET') {
         await route.fulfill({
@@ -270,7 +278,9 @@ test.describe('Governance Page — Mocked API Responses @smoke', () => {
     await expect(page.getByText('Test Academy')).toBeVisible();
   });
 
-  test('search input hides rows that do not match the filter term @smoke', async ({ page }) => {
+  test('search input hides rows that do not match the filter term @regression', async ({
+    page,
+  }) => {
     await page.route('**/rest/v1/ai_generation_sessions*', async (route) => {
       if (route.request().method() === 'GET') {
         await route.fulfill({
@@ -291,7 +301,7 @@ test.describe('Governance Page — Mocked API Responses @smoke', () => {
     await expect(page.getByText('No AI Usage Data Found')).toBeVisible({ timeout: 10_000 });
   });
 
-  test('AI Security and Governance Protocol section is visible @smoke', async ({ page }) => {
+  test('AI Security and Governance Protocol section is visible @regression', async ({ page }) => {
     await page.goto('/governance');
     await expect(page.getByText('AI Security & Governance Protocol')).toBeVisible({
       timeout: 15_000,

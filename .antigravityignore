@@ -1,0 +1,13 @@
+# .antigravityignore - Focus Control
+# UNCOMMENT a line to IGNORE that project.
+# COMMENT OUT a line to make it VISIBLE to the AI.
+
+# --- Current Focus: questerix-student-app ---
+
+# SELF (This project)
+.
+
+# SIBLINGS
+# ../questerix-student-app/
+../questerix-landing-pages/
+../questerix-help-docs/

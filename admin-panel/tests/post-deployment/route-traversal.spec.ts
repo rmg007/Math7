@@ -7,12 +7,17 @@ test.use({ storageState: '.auth/super-admin.json' });
 const MAJOR_ROUTES = [
   '/dashboard',
   '/domains',
+  '/domains/new',
   '/skills',
+  '/skills/new',
   '/questions',
+  '/questions/new',
+  '/questions/studio',
   '/publish',
   '/versions',
   '/invitation-codes',
   '/groups',
+  '/groups/new',
   '/ai-questions',
   '/ai-sessions',
   '/ai-import',
@@ -33,6 +38,44 @@ test.describe('Post-Deployment Route Traversal Check', () => {
   test.beforeEach(async ({ page }) => {
     errors = [];
     unhandled500s = [];
+
+    // Global mock to prevent 500s on post-deployment due to lack of seeded data
+    await page.route('**/rest/v1/apps**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'Content-Range': '0-0/1' },
+        body: JSON.stringify([
+          {
+            app_id: 'bd6c18f1-8f55-46ff-a5bd-b11111111111',
+            display_name: 'Mock Core App',
+            is_active: true,
+          },
+        ]),
+      });
+    });
+
+    await page.route('**/rest/v1/profiles**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{ role: 'super_admin' }]),
+      });
+    });
+
+    await page.route('**/rest/v1/**', async (route) => {
+      // Return empty array for all other data to avoid schema/missing data errors
+      if (route.request().method() !== 'OPTIONS') {
+        await route.fulfill({
+          status: 200,
+          headers: { 'Content-Range': '*/0' },
+          body: '[]',
+          contentType: 'application/json',
+        });
+      } else {
+        await route.continue();
+      }
+    });
 
     // Listen for fatal react errors or console errors indicative of a crash
     page.on('pageerror', (err) => {

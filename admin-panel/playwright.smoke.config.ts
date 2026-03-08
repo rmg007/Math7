@@ -56,7 +56,7 @@ export default defineConfig({
   reporter: [['list']],
 
   use: {
-    baseURL: 'http://localhost:5000',
+    baseURL: process.env.BASE_URL || 'http://localhost:5000',
     // No trace/video/screenshot - saves significant time
     trace: 'off',
     screenshot: 'off',

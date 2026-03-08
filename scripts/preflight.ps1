@@ -30,9 +30,10 @@ function Start-PreflightJob {
         $logFile = "$LogDir/$Name.log"
         $scriptPath = "$TempScripts/$Name.ps1"
         
-        if (Test-Path $exitFile) { Remove-Item $exitFile -Force }
-        if (Test-Path $logFile) { Remove-Item $logFile -Force }
+        if (Test-Path $exitFile) { Remove-Item $exitFile -Force -ErrorAction SilentlyContinue }
+        if (Test-Path $logFile) { Remove-Item $logFile -Force -ErrorAction SilentlyContinue }
         
+        # Use npx -y to skip prompts and use explicit output redirection
         $scriptContent = @"
 try {
     Set-Location "$DirPath"
@@ -46,7 +47,6 @@ try {
         $scriptContent | Out-File $scriptPath -Encoding UTF8
         return Start-Job -Name $Name -ScriptBlock { param($s) & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $s } -ArgumentList $scriptPath
     } else {
-        # Silent skip if directory not found (e.g. only subset of platform exists)
         return $null
     }
 }
@@ -54,13 +54,12 @@ try {
 # --- JOB DEFINITIONS ---
 
 # 1. Admin Panel Typecheck
-$Jobs += Start-PreflightJob "admin-typecheck" "$ProjectRoot/admin-panel" "npx tsc --noEmit"
+$Jobs += Start-PreflightJob "admin-typecheck" "$ProjectRoot/admin-panel" "npx -y tsc --noEmit"
 
 # 2. Admin Panel Linting
 $Jobs += Start-PreflightJob "admin-lint" "$ProjectRoot/admin-panel" "npm run lint"
 
 # 3. Student App Static Analysis
-# Fix: Corrected directory name from 'student-app' to 'questerix-student-app'
 $Jobs += Start-PreflightJob "student-analyze" "$ProjectRoot/questerix-student-app" "flutter analyze"
 
 # 4. Dependency Validation

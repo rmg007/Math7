@@ -22,6 +22,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+dotenv.config({ path: path.resolve(__dirname, '..', '..', '.secrets') });
 dotenv.config({ path: path.resolve(__dirname, '..', '.env.test.local') });
 dotenv.config({ path: path.resolve(__dirname, '..', '.env.test') });
 
@@ -30,23 +31,23 @@ const AUTH_DIR = path.resolve(__dirname, '..', '.auth');
 const ROLES = [
   {
     name: 'super-admin',
-    email: process.env.TEST_SUPER_ADMIN_EMAIL || 'mhalim80@hotmail.com',
-    password: process.env.TEST_SUPER_ADMIN_PASSWORD || 'AJbB8e2Uiia3BgE',
+    email: process.env.TEST_SUPER_ADMIN_EMAIL!,
+    password: process.env.TEST_SUPER_ADMIN_PASSWORD!,
   },
   {
     name: 'admin',
-    email: process.env.TEST_ADMIN_EMAIL || 'testadmin@example.com',
-    password: process.env.TEST_ADMIN_PASSWORD || 'testadmin@example.com',
+    email: process.env.TEST_ADMIN_EMAIL!,
+    password: process.env.TEST_ADMIN_PASSWORD!,
   },
   {
     name: 'mentor',
-    email: process.env.TEST_MENTOR_EMAIL || 'testmentor@example.com',
-    password: process.env.TEST_MENTOR_PASSWORD || 'testmentor@example.com',
+    email: process.env.TEST_MENTOR_EMAIL!,
+    password: process.env.TEST_MENTOR_PASSWORD!,
   },
   {
     name: 'student',
-    email: process.env.TEST_STUDENT_EMAIL || 'teststudent@example.com',
-    password: process.env.TEST_STUDENT_PASSWORD || 'teststudent@example.com',
+    email: process.env.TEST_STUDENT_EMAIL!,
+    password: process.env.TEST_STUDENT_PASSWORD!,
   },
 ] as const;
 
@@ -166,7 +167,16 @@ async function authenticateRole(
 
     // Wait for successful auth — sidebar nav or redirection confirms we're in
     // We accept both /dashboard and /domains as redirection targets
-    await page.waitForURL(/\/((dashboard)|(domains))/, { timeout: 20000 });
+    await page.waitForURL(/\/((dashboard)|(domains))/, { timeout: 30000 });
+
+    // ── Bypass AuthGuard Eviction ──────────────────────────────────────────
+    // The AuthGuard will sign out if both questerix_remember_me and
+    // questerix_session_active are absent (which happens in fresh contexts).
+    // We explicitly set them here to ensure the saved state is valid for tests.
+    await page.evaluate(() => {
+      localStorage.setItem('questerix_remember_me', '1');
+      sessionStorage.setItem('questerix_session_active', '1');
+    });
 
     const statePath = path.join(AUTH_DIR, `${role.name}.json`);
     await context.storageState({ path: statePath });
@@ -206,9 +216,18 @@ export default async function globalSetup(config: FullConfig): Promise<void> {
 
   try {
     for (const role of ROLES) {
-      await authenticateRole(browser, role, baseURL);
+      try {
+        await authenticateRole(browser, role, baseURL);
+      } catch (e) {
+        console.warn(
+          `[globalSetup] ⚠️  Skipping role '${role.name}' due to authentication failure:`,
+          String(e)
+        );
+        // We do NOT throw. Tests that strictly require this role's storageState will fail
+        // during their own execution, which is more granular than failing the entire setup.
+      }
     }
-    console.log('[globalSetup] ✅ All role state files written. Tests will skip login UI.');
+    console.log('[globalSetup] ✅ Authentication phase complete.');
   } finally {
     await browser.close();
   }

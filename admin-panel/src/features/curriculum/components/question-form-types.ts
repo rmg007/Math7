@@ -20,6 +20,9 @@ export const questionSchema = z.object({
   options: z.unknown(),
   solution: z.unknown(),
   explanation: z.string().optional(),
+  hint_text: z.string().optional(),
+  rule_text: z.string().optional(),
+  eli10_text: z.string().optional(),
   points: z.coerce.number().min(1),
   status: z.enum(['draft', 'live']).default('draft'),
 });

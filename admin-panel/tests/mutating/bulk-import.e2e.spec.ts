@@ -29,7 +29,7 @@ test.describe('Bulk Import Feature (Golden Path) @logic', () => {
     await expect(page.getByText('Curriculum Nexus')).toBeVisible({ timeout: 15000 });
   });
 
-  test('should allow downloading the CSV template @smoke', async ({ page }) => {
+  test('should allow downloading the CSV template', async ({ page }) => {
     const downloadPromise = page.waitForEvent('download');
     await page.getByRole('button', { name: /Template/i }).click();
     const download = await downloadPromise;

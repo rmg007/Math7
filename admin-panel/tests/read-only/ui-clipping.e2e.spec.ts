@@ -54,7 +54,9 @@ test.describe('UI Clipping and Interaction Verification @responsive', () => {
     await expect(palette).not.toBeVisible();
   });
 
-  test('RichTextEditor toolbar should be fully functional and visible @smoke', async ({ page }) => {
+  test('RichTextEditor toolbar should be fully functional and visible @regression', async ({
+    page,
+  }) => {
     await page.goto('/questions/new');
 
     const editor = page.locator('.ProseMirror').first();

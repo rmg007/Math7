@@ -233,3 +233,45 @@
 [2026-03-01 03:00:07] Space recovered: 118.33 MB
 [2026-03-01 03:00:07] Final size: 131.08 KB
 [2026-03-01 03:00:07] 
+[2026-03-08 03:16:38] 
+[2026-03-08 03:16:38] AGENT MEMORY CLEANUP STARTED
+[2026-03-08 03:16:38] Mode: LIVE
+[2026-03-08 03:16:38] Retain: 3 days / 15 sessions
+[2026-03-08 03:16:38] Before: 99.70 MB | 574 files | 12 sessions
+[2026-03-08 03:16:38] 
+[2026-03-08 03:16:38] Phase 1: Stripping media artifacts...
+[2026-03-08 03:16:38]   Stripped .tempmediaStorage from 05be354b-be9a-4c8b-b834-c280e2f56045 (39.55 MB)
+[2026-03-08 03:16:39] Phase 2: Pruning resolved state snapshots...
+[2026-03-08 03:16:39] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-08 03:16:39] Phase 4: Cleaning project root temp files...
+[2026-03-08 03:16:39] Phase 5: Pruning indexed artifacts...
+[2026-03-08 03:16:39] 
+[2026-03-08 03:16:39] CLEANUP COMPLETE
+[2026-03-08 03:16:39] Sessions: 12 -> 12 (-0)
+[2026-03-08 03:16:39] Files removed: 23
+[2026-03-08 03:16:39] Space recovered: 76.49 MB
+[2026-03-08 03:16:39] Final size: 23.21 MB
+[2026-03-08 03:16:39] 
+[2026-03-08 19:46:06] 
+[2026-03-08 19:46:06] AGENT MEMORY CLEANUP STARTED
+[2026-03-08 19:46:06] Mode: LIVE
+[2026-03-08 19:46:06] Retain: 3 days / 15 sessions
+[2026-03-08 19:46:06] Before: 117.42 KB | 9 files | 12 sessions
+[2026-03-08 19:46:06] 
+[2026-03-08 19:46:06] Phase 1: Stripping media artifacts...
+[2026-03-08 19:46:07] Phase 2: Pruning resolved state snapshots...
+[2026-03-08 19:46:07] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-08 19:46:07] Phase 4: Cleaning project root temp files...
+[2026-03-08 19:46:07]   Removed: tasks.json (338 B)
+[2026-03-08 19:46:07]   Removed: tasks.status.json (611 B)
+[2026-03-08 19:46:07]   Removed: tasks.json (312 B)
+[2026-03-08 19:46:07]   Removed: tasks.status.json (4.25 KB)
+[2026-03-08 19:46:07]   Removed: migration_list.tmp (3.61 KB)
+[2026-03-08 19:46:07] Phase 5: Pruning indexed artifacts...
+[2026-03-08 19:46:07] 
+[2026-03-08 19:46:07] CLEANUP COMPLETE
+[2026-03-08 19:46:07] Sessions: 12 -> 12 (-0)
+[2026-03-08 19:46:07] Files removed: 5
+[2026-03-08 19:46:07] Space recovered: 9.10 KB
+[2026-03-08 19:46:07] Final size: 117.42 KB
+[2026-03-08 19:46:07] 

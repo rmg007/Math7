@@ -16,10 +16,12 @@ test.describe('Apps Management CRUD @logic', () => {
     });
     await page.goto('/apps');
     // Wait for the main heading to be visible, ensuring the page is hydrated
-    await expect(page.getByRole('heading', { name: /Applications/i }).first()).toBeVisible({ timeout: 20000 });
+    await expect(page.getByRole('heading', { name: /Applications/i }).first()).toBeVisible({
+      timeout: 20000,
+    });
   });
 
-  test('should handle full CRUD with normalization @smoke', async ({ page }) => {
+  test('should handle full CRUD with normalization', async ({ page }) => {
     // 1. CREATE
     const newAppBtn = page.getByRole('button', { name: /New Application/i }).first();
     await expect(newAppBtn).toBeVisible({ timeout: 15000 });
@@ -54,12 +56,9 @@ test.describe('Apps Management CRUD @logic', () => {
     const normalizedName = `App ${uniqueId}`;
 
     // Expect the normalized display name visible in the table
-    await expect(
-      page
-        .locator('tr')
-        .filter({ hasText: normalizedName })
-        .first()
-    ).toBeVisible({ timeout: 20000 });
+    await expect(page.locator('tr').filter({ hasText: normalizedName }).first()).toBeVisible({
+      timeout: 20000,
+    });
 
     // Check if the subdomain is visible in the row
     const row = page.locator('tr').filter({ hasText: normalizedName });

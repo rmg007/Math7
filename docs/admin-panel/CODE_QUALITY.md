@@ -7,21 +7,25 @@ This project uses automated code quality tools to catch issues before they reach
 ## Tools
 
 ### ESLint
+
 - **Lints** TypeScript and React code for common errors
 - **Runs** automatically on pre-commit and in CI
--  **Configuration**: `.eslintrc.cjs`
+- **Configuration**: `.eslintrc.cjs`
 
 ### TypeScript Compiler
+
 - **Type-checks** all code
 - **Runs** on pre-commit and in CI
 - **Configuration**: `tsconfig.json`
 
 ### Prettier
+
 - **Formats** code consistently
 - **Runs** automatically on save (VS Code) and pre-commit
 - **Configuration**: `.prettierrc`
 
 ### Pre-commit Hooks
+
 - **Runs** linting and formatting automatically before each commit
 - **Powered by**: Husky + lint-staged
 - **Blocks** commits with errors
@@ -47,6 +51,7 @@ npm run format
 ### Pre-commit Hook Behavior
 
 When you commit code, the hook automatically:
+
 1. Lints changed `.ts` and `.tsx` files (with auto-fix)
 2. Formats changed files
 3. Runs type checking on the entire codebase
@@ -55,6 +60,7 @@ When you commit code, the hook automatically:
 ### VS Code Integration
 
 If you're using VS Code with the workspace settings:
+
 - **Format on Save**: Code is auto-formatted when you save
 - **ESLint Auto-fix**: ESLint errors are fixed on save
 - **Inline Errors**: See linting and type errors as you type
@@ -64,11 +70,13 @@ If you're using VS Code with the workspace settings:
 ### Issue: `any` Type Usage
 
 **Problem**:
+
 ```typescript
 const items = data.map((item: any) => item.str); // ❌
 ```
 
 **Solution**:
+
 ```typescript
 interface Item {
   str: string;
@@ -79,11 +87,13 @@ const items = data.map((item: Item) => item.str); // ✅
 ### Issue: Unused Variables
 
 **Problem**:
+
 ```typescript
 const unusedVar = getValue(); // ❌
 ```
 
 **Solutions**:
+
 ```typescript
 // Option 1: Remove if truly unused
 // (delete the line)
@@ -95,11 +105,13 @@ const _unusedVar = getValue(); // ✅
 ### Issue: Non-null Assertion Overuse
 
 **Problem**:
+
 ```typescript
 const value = obj!.property!.value!; // ❌
 ```
 
 **Solution**:
+
 ```typescript
 // Use optional chaining and nullish coalescing
 const value = obj?.property?.value ?? defaultValue; // ✅
@@ -113,13 +125,17 @@ if (obj?.property?.value) {
 ### Issue: Yoda Conditions
 
 **Problem**:
+
 ```typescript
-if (null === value) { } // ❌
+if (null === value) {
+} // ❌
 ```
 
 **Solution**:
+
 ```typescript
-if (value === null) { } // ✅
+if (value === null) {
+} // ✅
 ```
 
 ## Bypassing Pre-commit (Emergency Only)
@@ -134,6 +150,7 @@ git commit --no-verify
 ## CI/CD Quality Gates
 
 The CI pipeline enforces:
+
 - ✅ Linting (`npm run lint`)
 - ✅ Type checking (`npm run typecheck`)
 - ✅ Unit tests

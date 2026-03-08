@@ -34,7 +34,7 @@ test.describe('Questions Management @logic', () => {
     }
   });
 
-  test('should list all questions @smoke', async ({ page }) => {
+  test('should list all questions', async ({ page }) => {
     await page.goto('/questions');
     await expect(
       page.locator('a[href="/questions/new"], button:has-text("New Question")').first()

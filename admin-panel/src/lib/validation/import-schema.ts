@@ -8,6 +8,9 @@ const BaseQuestionSchema = z.object({
   skill_id: z.string().regex(uuidRegex, { message: 'Invalid skill_id format (must be UUID)' }),
   content: z.string().min(1, { message: 'Content is required' }),
   explanation: z.string().optional(),
+  hint_text: z.string().optional(),
+  rule_text: z.string().optional(),
+  eli10_text: z.string().optional(),
   points: z.number().int().min(0, { message: 'Points must be a non-negative integer' }),
   is_published: z.boolean(),
 });

@@ -991,6 +991,7 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          is_test_account: boolean | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
         }
@@ -1002,6 +1003,7 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          is_test_account?: boolean | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
@@ -1013,6 +1015,7 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          is_test_account?: boolean | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
@@ -1033,10 +1036,14 @@ export type Database = {
           content_hash: string | null
           created_at: string
           deleted_at: string | null
+          difficulty_level: number | null
+          eli10_text: string | null
           explanation: string | null
+          hint_text: string | null
           options: Json | null
           points: number | null
           question_id: string
+          rule_text: string | null
           skill_id: string
           solution: Json
           sort_order: number | null
@@ -1050,10 +1057,14 @@ export type Database = {
           content_hash?: string | null
           created_at?: string
           deleted_at?: string | null
+          difficulty_level?: number | null
+          eli10_text?: string | null
           explanation?: string | null
+          hint_text?: string | null
           options?: Json | null
           points?: number | null
           question_id?: string
+          rule_text?: string | null
           skill_id: string
           solution: Json
           sort_order?: number | null
@@ -1067,10 +1078,14 @@ export type Database = {
           content_hash?: string | null
           created_at?: string
           deleted_at?: string | null
+          difficulty_level?: number | null
+          eli10_text?: string | null
           explanation?: string | null
+          hint_text?: string | null
           options?: Json | null
           points?: number | null
           question_id?: string
+          rule_text?: string | null
           skill_id?: string
           solution?: Json
           sort_order?: number | null
@@ -1136,6 +1151,58 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "apps"
             referencedColumns: ["app_id"]
+          },
+        ]
+      }
+      session_events: {
+        Row: {
+          app_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          question_id: string
+          type: Database["public"]["Enums"]["event_type"]
+          user_id: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          question_id: string
+          type: Database["public"]["Enums"]["event_type"]
+          user_id: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          question_id?: string
+          type?: Database["public"]["Enums"]["event_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_events_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+          {
+            foreignKeyName: "session_events_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["question_id"]
+          },
+          {
+            foreignKeyName: "session_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1501,10 +1568,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      batch_insert_session_events: {
+        Args: { events_json: Json }
+        Returns: undefined
+      }
       check_global_ai_quota: { Args: never; Returns: Json }
       check_group_membership: {
         Args: { p_group_id: string; p_user_id: string }
         Returns: boolean
+      }
+      check_sync_health: {
+        Args: { client_version: string; schema_version: number }
+        Returns: Json
       }
       consume_tenant_tokens: {
         Args: { p_app_id: string; p_operation?: string; p_tokens_used: number }
@@ -1630,6 +1705,13 @@ export type Database = {
       assignment_status: "pending" | "completed" | "late"
       assignment_type: "skill_mastery" | "time_goal" | "custom"
       curriculum_status: "draft" | "published" | "live"
+      event_type:
+        | "attempt"
+        | "skip"
+        | "flag"
+        | "hint_used"
+        | "rule_used"
+        | "eli10_used"
       group_type: "class" | "family"
       question_type:
         | "multiple_choice"
@@ -1769,6 +1851,14 @@ export const Constants = {
       assignment_status: ["pending", "completed", "late"],
       assignment_type: ["skill_mastery", "time_goal", "custom"],
       curriculum_status: ["draft", "published", "live"],
+      event_type: [
+        "attempt",
+        "skip",
+        "flag",
+        "hint_used",
+        "rule_used",
+        "eli10_used",
+      ],
       group_type: ["class", "family"],
       question_type: [
         "multiple_choice",

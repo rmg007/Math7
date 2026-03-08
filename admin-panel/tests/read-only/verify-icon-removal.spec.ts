@@ -28,7 +28,10 @@ test.describe('Icon Removal Verification @responsive', () => {
   const FORBIDDEN_ICONS = ['.lucide-layout', '.lucide-graduation-cap', '.lucide-globe'];
 
   for (const pageUrl of PAGES) {
-    test(`should not have decorative icons in ${pageUrl} table @logic`, async ({ page, isMobile }) => {
+    test(`should not have decorative icons in ${pageUrl} table @logic`, async ({
+      page,
+      isMobile,
+    }) => {
       // Skip pages that hide table on mobile
       if (isMobile && pageUrl !== '/apps') {
         test.skip(true, 'Table is hidden on mobile for this page');

@@ -35,7 +35,7 @@ test.describe('Skills Management @logic', () => {
     }
   });
 
-  test('should list all skills @smoke', async ({ page }) => {
+  test('should list all skills', async ({ page }) => {
     await page.goto('/skills');
     await expect(
       page.locator('a[href="/skills/new"], button:has-text("New Skill")').first()

@@ -1,11 +1,11 @@
 /**
- * BulkImportPage Smoke Tests @smoke
+ * BulkImportPage Smoke Tests @regression
  *
  * Covers: admin-panel/src/features/ai-content/pages/BulkImportPage.tsx
  * Route:  /ai-import
  *
  * Design rules:
- *   - @smoke tag on every test so --grep @smoke picks them up.
+ *   - @regression tag on every test so --grep @regression picks them up.
  *   - Read-only / non-mutating: no real AI calls, no DB writes.
  *   - Edge Function and Workers AI endpoints are mocked via page.route().
  *   - Uses global storageState (super-admin authenticated) — no auth override.
@@ -18,7 +18,7 @@ const WORKERS_AI_PATTERN = '**/ai/parse-import-prompt';
 
 const EMPTY_AI_RESPONSE = JSON.stringify({ questions: [] });
 
-test.describe('BulkImportPage @smoke', () => {
+test.describe('BulkImportPage @regression', () => {
   test.beforeEach(async ({ page }) => {
     // Mock both AI endpoints to prevent real network calls
     await page.route(EDGE_FN_PATTERN, (route) =>
@@ -32,31 +32,31 @@ test.describe('BulkImportPage @smoke', () => {
     await expect(page.locator('[data-testid="bulk-import-page"]')).toBeVisible({ timeout: 15000 });
   });
 
-  test('page loads with Curriculum Nexus heading @smoke', async ({ page }) => {
+  test('page loads with Curriculum Nexus heading @regression', async ({ page }) => {
     await expect(page.getByText('Curriculum Nexus')).toBeVisible();
   });
 
-  test('CSV upload dropzone is present in DOM @smoke', async ({ page }) => {
+  test('CSV upload dropzone is present in DOM @regression', async ({ page }) => {
     // The file input is opacity-0 (hidden behind dropzone overlay) — use toBeAttached, not toBeVisible
     await expect(page.locator('[data-testid="bulk-import-file-upload"]')).toBeAttached();
   });
 
-  test('dropzone container shows "Drop CSV Artifact" prompt @smoke', async ({ page }) => {
+  test('dropzone container shows "Drop CSV Artifact" prompt @regression', async ({ page }) => {
     // The CSV tab is active by default — verify the visible drop-zone inner label is rendered
     await expect(page.getByText(/Drop CSV Artifact/i)).toBeVisible();
   });
 
-  test('commit button is disabled when import queue is empty @smoke', async ({ page }) => {
+  test('commit button is disabled when import queue is empty @regression', async ({ page }) => {
     // On fresh load the importQueue is empty, so the Execute button must be disabled
     await expect(page.locator('[data-testid="bulk-import-commit-btn"]')).toBeDisabled();
   });
 
-  test('both CSV Matrix and AI Synthesis tabs are visible @smoke', async ({ page }) => {
+  test('both CSV Matrix and AI Synthesis tabs are visible @regression', async ({ page }) => {
     await expect(page.locator('[data-testid="bulk-import-tab-csv"]')).toBeVisible();
     await expect(page.locator('[data-testid="bulk-import-tab-ai"]')).toBeVisible();
   });
 
-  test('AI Synthesis sync button is disabled when prompt textarea is empty @smoke', async ({
+  test('AI Synthesis sync button is disabled when prompt textarea is empty @regression', async ({
     page,
   }) => {
     await page.locator('[data-testid="bulk-import-tab-ai"]').click();
@@ -64,20 +64,22 @@ test.describe('BulkImportPage @smoke', () => {
     await expect(page.locator('[data-testid="bulk-import-sync-btn"]')).toBeDisabled();
   });
 
-  test('download template button is visible @smoke', async ({ page }) => {
+  test('download template button is visible @regression', async ({ page }) => {
     await expect(page.locator('[data-testid="bulk-import-template-btn"]')).toBeVisible();
   });
 
-  test('skill selector is rendered @smoke', async ({ page }) => {
+  test('skill selector is rendered @regression', async ({ page }) => {
     await expect(page.locator('[data-testid="bulk-import-skill-select"]')).toBeVisible();
   });
 
-  test('nexus buffer card is rendered with 0 pending units on load @smoke', async ({ page }) => {
+  test('nexus buffer card is rendered with 0 pending units on load @regression', async ({
+    page,
+  }) => {
     await expect(page.locator('[data-testid="bulk-import-buffer-card"]')).toBeVisible();
     await expect(page.getByText(/0 Pending Ingestion Units/i)).toBeVisible();
   });
 
-  test('AI import with mocked Edge Function populates buffer @smoke', async ({ page }) => {
+  test('AI import with mocked Edge Function populates buffer @regression', async ({ page }) => {
     // Override the mock to return one question
     await page.route(EDGE_FN_PATTERN, (route) =>
       route.fulfill({

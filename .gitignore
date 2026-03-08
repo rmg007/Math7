@@ -98,10 +98,19 @@ docs/HANDOVER.md
 .session/
 logs/
 tsc_errors*.txt
-git_status.txt
+status.txt
+mobile_fail.txt
+eslint_full.txt
+mobile_*.txt
+*.diagnostic.md
+all_spec_files.txt
+smoke_files.txt
+unused-exports.txt
+diff.txt
+forensic_test.txt
+migration_list.tmp
 *.tmp
 tmp/
-unused-exports.txt
 
 # CI Failure Audit (local forensic data)
 _gh_failures/

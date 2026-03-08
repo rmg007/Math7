@@ -13,7 +13,9 @@ test.describe('Subjects Management Form Validation @logic', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/subjects');
     // Wait for heading to ensure page is hydrated
-    await expect(page.getByRole('heading', { name: /Subjects/i }).first()).toBeVisible({ timeout: 20000 });
+    await expect(page.getByRole('heading', { name: /Subjects/i }).first()).toBeVisible({
+      timeout: 20000,
+    });
   });
 
   test('should validate required fields and formats @logic', async ({ page }) => {
@@ -78,5 +80,4 @@ test.describe('Subjects Management Form Validation @logic', () => {
     await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15000 });
     await expect(page.getByText(`Subject ${uniqueId}`).first()).toBeVisible({ timeout: 15000 });
   });
-
 });

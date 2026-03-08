@@ -2,22 +2,22 @@ import { expect, test } from '@playwright/test';
 import { TEST_USERS } from '../test-utils';
 
 /**
- * Basic Authentication Tests — @smoke
+ * Basic Authentication Tests — @regression
  * Tests the core login/logout flow and route protection.
  *
  * ⚠️ Runs in 'unauthenticated' project (no global storageState).
  */
-test.describe('Authentication @smoke', () => {
+test.describe('Authentication @regression', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  test('should load login page @smoke', async ({ page }) => {
+  test('should load login page @regression', async ({ page }) => {
     await page.goto('/login');
     await expect(page).toHaveTitle(/Admin/);
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();
   });
 
-  test('should login with valid credentials @smoke', async ({ page }) => {
+  test('should login with valid credentials @regression', async ({ page }) => {
     await page.goto('/login');
     await page.fill('input[type="email"]', TEST_USERS.SUPER_ADMIN.email);
     await page.fill('input[type="password"]', TEST_USERS.SUPER_ADMIN.password);
@@ -33,7 +33,7 @@ test.describe('Authentication @smoke', () => {
     await expect(page.locator('text=Invalid login credentials')).toBeVisible({ timeout: 10000 });
   });
 
-  test('should logout successfully @smoke', async ({ page }) => {
+  test('should logout successfully @regression', async ({ page }) => {
     // Login first
     await page.goto('/login');
     await page.fill('input[type="email"]', TEST_USERS.SUPER_ADMIN.email);
@@ -67,7 +67,9 @@ test.describe('Authentication @smoke', () => {
     }
   });
 
-  test('should redirect to login when accessing protected route without auth @smoke', async ({ page }) => {
+  test('should redirect to login when accessing protected route without auth @regression', async ({
+    page,
+  }) => {
     await page.goto('/domains');
     await expect(page).toHaveURL(/\/login/);
   });

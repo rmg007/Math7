@@ -47,7 +47,7 @@ test.beforeEach(async ({ page }) => {
 // ---------------------------------------------------------------------------
 
 test.describe('A — MCQ question @logic', () => {
-  test('creates a valid MCQ and appears in the question list @smoke', async ({ page }) => {
+  test('creates a valid MCQ and appears in the question list', async ({ page }) => {
     const formPage = new QuestionFormPage(page);
     await formPage.gotoNew();
 
@@ -117,7 +117,7 @@ test.describe('A — MCQ question @logic', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('B — Subjective (text_input) question', () => {
-  test('creates a text_input question and appears in the question list @smoke', async ({ page }) => {
+  test('creates a text_input question and appears in the question list', async ({ page }) => {
     const formPage = new QuestionFormPage(page);
 
     await formPage.createSubjective({
@@ -161,7 +161,7 @@ test.describe('B — Subjective (text_input) question', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('C — Boolean question', () => {
-  test('creates a TRUE boolean question and appears in the question list @smoke', async ({ page }) => {
+  test('creates a TRUE boolean question and appears in the question list', async ({ page }) => {
     const formPage = new QuestionFormPage(page);
 
     await formPage.createBoolean({
@@ -174,7 +174,7 @@ test.describe('C — Boolean question', () => {
     await expect(page.getByText('Is the Earth round?').first()).toBeVisible({ timeout: 15_000 });
   });
 
-  test('creates a FALSE boolean question and appears in the question list @smoke', async ({ page }) => {
+  test('creates a FALSE boolean question and appears in the question list', async ({ page }) => {
     const formPage = new QuestionFormPage(page);
 
     await formPage.createBoolean({
@@ -237,7 +237,7 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
     ],
   };
 
-  test('AI tab loads, prompt fills, Sync button triggers, and buffer populates @smoke', async ({
+  test('AI tab loads, prompt fills, Sync button triggers, and buffer populates', async ({
     page,
   }) => {
     // Intercept both potential AI parse endpoints (Workers AI and Supabase Edge Functions)
@@ -328,7 +328,7 @@ test.describe('D — Bulk-import AI prompt (mocked)', () => {
     expect(initialChecked).not.toBe(afterChecked);
   });
 
-  test('CSV tab shows file-upload input @smoke', async ({ page }) => {
+  test('CSV tab shows file-upload input', async ({ page }) => {
     await page.goto('/ai-import');
     await page.locator('[data-testid="bulk-import-tab-csv"]').click();
 

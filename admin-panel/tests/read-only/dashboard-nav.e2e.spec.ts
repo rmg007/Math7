@@ -2,20 +2,20 @@ import { expect, test } from '@playwright/test';
 import { ensureMobileMenuOpen } from '../test-utils';
 
 /**
- * Dashboard & Navigation Tests — @smoke
+ * Dashboard & Navigation Tests — @regression
  * Tests the heartbeat of the admin panel: dashboard loading and primary navigation.
  *
  * Uses global storageState (pre-authenticated as SUPER_ADMIN).
  */
-test.describe('Dashboard & Navigation @smoke', () => {
-  test('should load dashboard @smoke', async ({ page }) => {
+test.describe('Dashboard & Navigation @regression', () => {
+  test('should load dashboard @regression', async ({ page }) => {
     await page.goto('/dashboard');
     // Wait for either the dashboard header or the platform overview text
     await expect(page.locator('h1', { hasText: 'Dashboard' })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/Platform overview/i)).toBeVisible({ timeout: 15_000 });
   });
 
-  test('should navigate to different sections from dashboard @smoke', async ({ page }) => {
+  test('should navigate to different sections from dashboard @regression', async ({ page }) => {
     await page.goto('/dashboard');
     await ensureMobileMenuOpen(page);
 

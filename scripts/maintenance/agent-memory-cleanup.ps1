@@ -138,12 +138,31 @@ foreach ($session in $sessionsToDelete) {
 #  Phase 4: Clean root workspace temp files 
 Write-Log "Phase 4: Cleaning project root temp files..."
 
-$rootCleanup = @(
+$rootCleanupFiles = @(
     "$ProjectRoot\.flutter-defines.tmp",
-    "$ProjectRoot\dependency-report.html"
+    "$ProjectRoot\dependency-report.html",
+    "$ProjectRoot\tasks.json",
+    "$ProjectRoot\tasks.status.json",
+    "$ProjectRoot\test-output.txt"
 )
 
-foreach ($file in $rootCleanup) {
+$StudentAppRoot = "$env:USERPROFILE\OneDrive\Desktop\Important Projects\questerix-student-app"
+if (Test-Path $StudentAppRoot) {
+    $rootCleanupFiles += "$StudentAppRoot\tasks.json"
+    $rootCleanupFiles += "$StudentAppRoot\tasks.status.json"
+    $rootCleanupFiles += "$StudentAppRoot\test_output.txt" # Common in student app
+    
+    Get-ChildItem -Path $StudentAppRoot -Filter "*.tmp" -File | ForEach-Object {
+        $rootCleanupFiles += $_.FullName
+    }
+}
+
+# Collect all *.tmp files from root
+Get-ChildItem -Path $ProjectRoot -Filter "*.tmp" -File | ForEach-Object {
+    $rootCleanupFiles += $_.FullName
+}
+
+foreach ($file in ($rootCleanupFiles | Select-Object -Unique)) {
     if (Test-Path $file) {
         $fileSize = (Get-Item $file).Length
         $recoveredBytes += $fileSize

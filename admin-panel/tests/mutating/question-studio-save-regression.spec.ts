@@ -8,7 +8,9 @@ test.describe('Question Studio Save Workflow @logic', () => {
     await page.goto('/questions/studio');
   });
 
-  test('should transform and save generated questions without 400 error @logic', async ({ page }) => {
+  test('should transform and save generated questions without 400 error @logic', async ({
+    page,
+  }) => {
     // 1. Setup Mock for Generation
     await page.route('**/generate-questions', async (route) => {
       await route.fulfill({

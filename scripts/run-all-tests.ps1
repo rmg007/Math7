@@ -35,8 +35,8 @@ function Start-TestJob {
         $logFile = "$LogDir/$Name.log"
         $scriptPath = "$TempScripts/$Name.ps1"
         
-        if (Test-Path $exitFile) { Remove-Item $exitFile -Force }
-        if (Test-Path $logFile) { Remove-Item $logFile -Force }
+        if (Test-Path $exitFile) { Remove-Item $exitFile -Force -ErrorAction SilentlyContinue }
+        if (Test-Path $logFile) { Remove-Item $logFile -Force -ErrorAction SilentlyContinue }
         
         # Isolation script: runs the command and writes the exit code to the file
         $scriptContent = @"
@@ -49,10 +49,9 @@ try {
     1 | Out-File "$exitFile"
 }
 "@
-        $scriptContent | Out-File $scriptPath -Encoding UTF8
-        
-        # Start isolated job
-        return Start-Job -Name $Name -ScriptBlock { param($s) & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $s } -ArgumentList $scriptPath
+        # Start isolated job using pwsh if available, fallback to powershell
+        $exe = if (Get-Command "pwsh" -ErrorAction SilentlyContinue) { "pwsh.exe" } else { "powershell.exe" }
+        return Start-Job -Name $Name -ScriptBlock { param($s, $e) & $e -NoProfile -ExecutionPolicy Bypass -File $s } -ArgumentList $scriptPath, $exe
     } else {
         Write-Host "  [-] Skipping $Name (directory not found: $DirPath)" -ForegroundColor Gray
         return $null

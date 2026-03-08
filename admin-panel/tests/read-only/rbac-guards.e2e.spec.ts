@@ -61,14 +61,14 @@ test.describe('AP-RBAC-001: Super-Admin Routes Blocked for Admin/Mentor Role @lo
       for (const route of SUPER_ADMIN_ROUTES) {
         test(`${role} cannot access ${route} @logic`, async ({ page }) => {
           await page.goto(route);
-          
+
           // Use a higher timeout for mobile/tablet redirects
           const redirectTimeout = test.info().project.name === 'desktop' ? 10000 : 20000;
-          
+
           // Wait for URL to change away from the protected route
           // The target is usually / (RoleRedirect) which then goes to /domains or /login
           await expect(page).not.toHaveURL(new RegExp(route), { timeout: redirectTimeout });
-          
+
           const currentPath = new URL(page.url()).pathname;
           expect(SUPER_ADMIN_ROUTES as readonly string[]).not.toContain(currentPath);
         });
@@ -115,7 +115,7 @@ test.describe('AP-RBAC-003: Unauthenticated Users Redirected to /login', () => {
   ] as const;
 
   for (const route of routesToTest) {
-    test(`unauthenticated access to ${route} → /login @smoke`, async ({ page }) => {
+    test(`unauthenticated access to ${route} → /login @regression`, async ({ page }) => {
       // Clear any existing session storage
       await page.goto('/login');
       await page.evaluate(() => {
@@ -139,7 +139,7 @@ test.describe('AP-RBAC-004: Super Admin Accesses All Routes', () => {
   test.use({ storageState: authState('super-admin') });
 
   for (const route of SUPER_ADMIN_ROUTES) {
-    test(`super_admin can access ${route} @smoke`, async ({ page }) => {
+    test(`super_admin can access ${route} @regression`, async ({ page }) => {
       await page.goto(route);
 
       // Should NOT be redirected to /login or /unauthorized
@@ -161,7 +161,7 @@ test.describe('AP-RBAC-004: Super Admin Accesses All Routes', () => {
 test.describe('AP-RBAC-005: RoleRedirect at / (root)', () => {
   test.describe('as super-admin', () => {
     test.use({ storageState: authState('super-admin') });
-    test('navigating to / lands on /dashboard @smoke', async ({ page }) => {
+    test('navigating to / lands on /dashboard @regression', async ({ page }) => {
       await page.goto('/');
       await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
     });
@@ -169,7 +169,7 @@ test.describe('AP-RBAC-005: RoleRedirect at / (root)', () => {
 
   test.describe('as admin', () => {
     test.use({ storageState: authState('admin') });
-    test('navigating to / lands on /domains @smoke', async ({ page }) => {
+    test('navigating to / lands on /domains @regression', async ({ page }) => {
       await page.goto('/');
       await expect(page).toHaveURL(/\/domains/, { timeout: 10000 });
     });
@@ -180,7 +180,9 @@ test.describe('AP-RBAC-005: RoleRedirect at / (root)', () => {
 // AP-RBAC-006: API-level — direct supabase call with wrong app_id is blocked by RLS
 // ============================================================================
 test.describe('AP-RBAC-006: API-level multi-tenant isolation', () => {
-  test('admin cannot SELECT domains from another tenant via raw API call @logic', async ({ page }) => {
+  test('admin cannot SELECT domains from another tenant via raw API call @logic', async ({
+    page,
+  }) => {
     const supabaseUrl = process.env.VITE_SUPABASE_URL ?? '';
     const anonKey = process.env.VITE_SUPABASE_ANON_KEY ?? '';
 

@@ -6,45 +6,57 @@ import Papa from 'papaparse';
  */
 export const BULK_IMPORT_TEMPLATE = [
   {
-    content: "What is 2 + 2?",
-    type: "multiple_choice",
+    content: 'What is 2 + 2?',
+    type: 'multiple_choice',
     points: 1,
-    explanation: "Basic addition.",
+    explanation: 'Basic addition.',
+    hint_text: 'Try counting on your fingers.',
+    rule_text: 'Addition of integers.',
+    eli10_text: 'When you have two apples and get two more, you have four.',
     options: JSON.stringify([
-      { text: "3", is_correct: false },
-      { text: "4", is_correct: true },
-      { text: "5", is_correct: false }
+      { text: '3', is_correct: false },
+      { text: '4', is_correct: true },
+      { text: '5', is_correct: false },
     ]),
-    solution: JSON.stringify({ text: "4" })
+    solution: JSON.stringify({ text: '4' }),
   },
   {
-    content: "Which of these are prime numbers?",
-    type: "mcq_multi",
+    content: 'Which of these are prime numbers?',
+    type: 'mcq_multi',
     points: 2,
-    explanation: "2 and 3 are prime.",
+    explanation: '2 and 3 are prime.',
+    hint_text: 'Prime numbers only have two factors.',
+    rule_text: 'Prime number definition.',
+    eli10_text: "Primes are special numbers that can't be split into equal smaller groups.",
     options: JSON.stringify([
-      { text: "2", is_correct: true },
-      { text: "3", is_correct: true },
-      { text: "4", is_correct: false }
+      { text: '2', is_correct: true },
+      { text: '3', is_correct: true },
+      { text: '4', is_correct: false },
     ]),
-    solution: JSON.stringify(["2", "3"])
+    solution: JSON.stringify(['2', '3']),
   },
   {
-    content: "The Earth is flat.",
-    type: "boolean",
+    content: 'The Earth is flat.',
+    type: 'boolean',
     points: 1,
-    explanation: "The Earth is a sphere.",
-    options: "null",
-    solution: "false"
+    explanation: 'The Earth is a sphere.',
+    hint_text: 'Think about photos from space.',
+    rule_text: 'Planetary physics.',
+    eli10_text: 'The world is actually a big ball, even if it looks flat on the ground.',
+    options: 'null',
+    solution: 'false',
   },
   {
-    content: "Capital of France?",
-    type: "text_input",
+    content: 'Capital of France?',
+    type: 'text_input',
     points: 1,
-    explanation: "Paris is the capital.",
-    options: "null",
-    solution: "Paris"
-  }
+    explanation: 'Paris is the capital.',
+    hint_text: 'City of lights.',
+    rule_text: 'World Geography.',
+    eli10_text: 'Paris is the most famous city in France.',
+    options: 'null',
+    solution: 'Paris',
+  },
 ];
 
 /**

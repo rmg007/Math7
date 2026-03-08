@@ -54,6 +54,7 @@ export function AccountSettingsPage() {
             avatar_url: null,
             deleted_at: null,
             updated_at: authUser.created_at,
+            is_test_account: false,
           });
         }
       }

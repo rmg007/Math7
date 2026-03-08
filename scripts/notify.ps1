@@ -36,19 +36,48 @@ switch ($Type) {
     'WATCHDOG' { Write-Host $LogMessage -ForegroundColor Yellow -BackgroundColor Black }
 }
 
-# 3. Windows Toast (via BurntToast)
-if (Get-Module -ListAvailable BurntToast) {
+# 3. Windows Native Toast (Zero Dependency)
+function Show-NativeToast {
+    param($Title, $Message)
     try {
-        # Check if module is imported or can be imported
-        if (-not (Get-Module BurntToast)) { Import-Module BurntToast }
+        [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
+        [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] > $null
         
-        New-BurntToastNotification -Text $Title, $Message
+        $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
+        $textNodes = $template.GetElementsByTagName("text")
+        $textNodes.Item(0).AppendChild($template.CreateTextNode($Title)) > $null
+        $textNodes.Item(1).AppendChild($template.CreateTextNode($Message)) > $null
+        
+        $toast = [Windows.UI.Notifications.ToastNotification]::new($template)
+        $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("Questerix Pipeline")
+        $notifier.Show($toast)
     } catch {
-        Write-Warning "Failed to fire BurntToast notification: $_"
+        Write-Warning "Native toast failed: $_. Falling back to simple popup."
+        $wshell = New-Object -ComObject WScript.Shell
+        $wshell.Popup($Message, 0, $Title, 64) > $null
     }
-} else {
-    # If BurntToast is missing, we don't block the script, just move on
-    # We could potentially install it here if requested, but plan said "no setup"
 }
 
-# 4. Optional: Add additional channels here (Slack, Email, etc. controlled by .secrets)
+Show-NativeToast -Title $Title -Message $Message
+
+# 4. Optional: Discord Webhook (Reads from .secrets)
+# To use: add DISCORD_WEBHOOK_URL=https://... to your .secrets file
+$SecretsPath = Join-Path (Split-Path $PSScriptRoot -Parent) ".secrets"
+if (Test-Path $SecretsPath) {
+    $RawSecrets = Get-Content $SecretsPath -Raw
+    $Secrets = ConvertFrom-StringData $RawSecrets
+    if ($Secrets.ContainsKey("DISCORD_WEBHOOK_URL")) {
+        $WebhookUrl = $Secrets["DISCORD_WEBHOOK_URL"]
+        if ($WebhookUrl -like "http*") {
+            try {
+                $Payload = @{
+                    content = "**$Title**`n$Message"
+                }
+                $Json = $Payload | ConvertTo-Json -Depth 2
+                Invoke-RestMethod -Uri $WebhookUrl -Method Post -Body $Json -ContentType "application/json" > $null
+            } catch {
+                Write-Warning "Discord notification failed: $($_.Exception.Message)"
+            }
+        }
+    }
+}

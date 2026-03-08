@@ -40,7 +40,7 @@ test.describe('Visual Layout Regression Tests (The AI Eye)', () => {
     await page.route('**/rest/v1/skills**', async (route) => {
       await route.fulfill({ status: 200, headers: { 'Content-Range': '*/128' }, body: '[]' });
     });
-    await page.route('**/rest/v1/questions?select=type', async (route) => {
+    await page.route('**/rest/v1/questions**', async (route) => {
       if (route.request().method() === 'HEAD') {
         await route.fulfill({ status: 200, headers: { 'Content-Range': '*/307' }, body: '' });
       } else {
@@ -58,6 +58,13 @@ test.describe('Visual Layout Regression Tests (The AI Eye)', () => {
     });
     await page.route('**/rest/v1/error_logs**', async (route) => {
       await route.fulfill({ status: 200, headers: { 'Content-Range': '*/3' }, body: '[]' });
+    });
+    await page.route('**/rest/v1/profiles**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{ role: 'super_admin' }]),
+      });
     });
 
     // 1. Storage state provides auth. Navigate to dashboard directly.

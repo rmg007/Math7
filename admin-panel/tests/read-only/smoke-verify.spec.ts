@@ -2,13 +2,13 @@ import { expect, test } from '@playwright/test';
 import { TEST_USERS } from '../test-utils';
 
 /**
- * Smoke Suite — @smoke
+ * Smoke Suite — @regression
  *
  * Post-deployment production health checks. All 5 categories must pass.
  * Triggered by `cortex verify-deploy --env <url>` via the Cortex Dashboard.
  *
  * Design rules:
- *   - @smoke tag on every describe block so `--grep @smoke` picks them all up.
+ *   - @regression tag on every describe block so `--grep @regression` picks them all up.
  *   - Tests must be idempotent (read-only, no DB mutations).
  *   - Target URL is overridden at runtime via PLAYWRIGHT_TEST_BASE_URL.
  *   - Must complete the full suite in < 3 minutes.
@@ -18,19 +18,19 @@ import { TEST_USERS } from '../test-utils';
 // 1. Infrastructure — 200 OK, assets load, security headers present
 // ─────────────────────────────────────────────────────────────────────────────
 
-test.describe('Infrastructure @smoke', () => {
+test.describe('Infrastructure @regression', () => {
   test('Homepage returns 200 OK @smoke', async ({ page }) => {
     const response = await page.goto('/');
     expect(response?.status()).toBeLessThan(400);
   });
 
-  test('Title tag is present and non-empty @smoke', async ({ page }) => {
+  test('Title tag is present and non-empty @regression', async ({ page }) => {
     await page.goto('/');
     const title = await page.title();
     expect(title.trim().length).toBeGreaterThan(0);
   });
 
-  test('Core JavaScript bundle loads without errors @smoke', async ({ page }) => {
+  test('Core JavaScript bundle loads without errors @regression', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', (err) => errors.push(err.message));
     await page.goto('/');
@@ -46,7 +46,7 @@ test.describe('Infrastructure @smoke', () => {
     expect(criticalErrors).toHaveLength(0);
   });
 
-  test('Content-Security-Policy meta tag is present @smoke', async ({ page }) => {
+  test('Content-Security-Policy meta tag is present @regression', async ({ page }) => {
     await page.goto('/');
     const cspMeta = page.locator('meta[http-equiv="Content-Security-Policy"]');
     // CSP may be served as an HTTP header in production (not in meta tag) — conditional check
@@ -61,7 +61,9 @@ test.describe('Infrastructure @smoke', () => {
     expect(response?.status()).toBeLessThan(400);
   });
 
-  test('Login page CSS renders (no FOUC — page has visible styled content) @smoke', async ({ page }) => {
+  test('Login page CSS renders (no FOUC — page has visible styled content) @regression', async ({
+    page,
+  }) => {
     await page.goto('/login');
     // Check the login form is rendered and has reasonable dimensions
     const form = page.locator('form, [data-testid="login-form"], input[type="email"]').first();
@@ -76,16 +78,16 @@ test.describe('Infrastructure @smoke', () => {
 // 2. Authentication — Super-Admin login, Mentor login, unauthenticated blocked
 // ─────────────────────────────────────────────────────────────────────────────
 
-test.describe('Authentication @smoke', () => {
+test.describe('Authentication @regression', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  test('Login page loads with email/password fields @smoke', async ({ page }) => {
+  test('Login page loads with email/password fields @regression', async ({ page }) => {
     await page.goto('/login');
     await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 10_000 });
     await expect(page.locator('input[type="password"]')).toBeVisible({ timeout: 10_000 });
   });
 
-  test('Super-Admin can log in successfully @smoke', async ({ page }) => {
+  test('Super-Admin can log in successfully @regression', async ({ page }) => {
     await page.goto('/login');
     await page.fill('input[type="email"]', TEST_USERS.SUPER_ADMIN.email);
     await page.fill('input[type="password"]', TEST_USERS.SUPER_ADMIN.password);
@@ -95,17 +97,23 @@ test.describe('Authentication @smoke', () => {
     await page.waitForSelector('nav, main, h1', { timeout: 10_000 });
   });
 
-  test('Unauthenticated user accessing /dashboard is redirected to /login @smoke', async ({ page }) => {
+  test('Unauthenticated user accessing /dashboard is redirected to /login @regression', async ({
+    page,
+  }) => {
     await page.goto('/dashboard');
     await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
   });
 
-  test('Unauthenticated user accessing /apps is redirected to /login @smoke', async ({ page }) => {
+  test('Unauthenticated user accessing /apps is redirected to /login @regression', async ({
+    page,
+  }) => {
     await page.goto('/apps');
     await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
   });
 
-  test('Unauthenticated user accessing /domains is redirected to /login @smoke', async ({ page }) => {
+  test('Unauthenticated user accessing /domains is redirected to /login @regression', async ({
+    page,
+  }) => {
     await page.goto('/domains');
     await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
   });
@@ -124,10 +132,10 @@ test.describe('Authentication @smoke', () => {
 // 3. Multi-Tenancy — App/tenant data loads correctly for authenticated user
 // ─────────────────────────────────────────────────────────────────────────────
 
-test.describe('Multi-Tenancy @smoke', () => {
+test.describe('Multi-Tenancy @regression', () => {
   // Uses global storageState (super-admin authenticated)
 
-  test('Platform Management page loads with app/tenant data @smoke', async ({ page }) => {
+  test('Platform Management page loads with app/tenant data @regression', async ({ page }) => {
     await page.goto('/apps');
     // The page must render — check for the section heading or a loading state
     await expect(
@@ -138,12 +146,12 @@ test.describe('Multi-Tenancy @smoke', () => {
     ).toBeVisible({ timeout: 15_000 });
   });
 
-  test('Apps page resolves without a 404 or server error @smoke', async ({ page }) => {
+  test('Apps page resolves without a 404 or server error @regression', async ({ page }) => {
     const response = await page.goto('/apps');
     expect(response?.status()).toBeLessThan(400);
   });
 
-  test('App branding area renders (logo or app name is visible) @smoke', async ({ page }) => {
+  test('App branding area renders (logo or app name is visible) @regression', async ({ page }) => {
     await page.goto('/dashboard');
     // The sidebar or header should show tenant branding (app name / logo)
     const brand = page
@@ -177,8 +185,11 @@ test.describe('Multi-Tenancy @smoke', () => {
 // 4. Supabase Connectivity — API responds, Edge Functions within SLA
 // ─────────────────────────────────────────────────────────────────────────────
 
-test.describe('Supabase Connectivity @smoke', () => {
-  test('Supabase REST API is reachable from the client environment @smoke', async ({ page, context }) => {
+test.describe('Supabase Connectivity @regression', () => {
+  test('Supabase REST API is reachable from the client environment @smoke', async ({
+    page,
+    context,
+  }) => {
     // Make a direct API request to Supabase REST using the page's fetch
     const supabaseUrl = process.env.VITE_SUPABASE_URL;
     if (!supabaseUrl) {
@@ -199,7 +210,7 @@ test.describe('Supabase Connectivity @smoke', () => {
     expect(response.status()).toBeLessThan(500);
   });
 
-  test('Admin panel app loads without 500 errors from Supabase @smoke', async ({ page }) => {
+  test('Admin panel app loads without 500 errors from Supabase @regression', async ({ page }) => {
     const supabaseErrors: string[] = [];
 
     page.on('response', (response) => {
@@ -215,7 +226,7 @@ test.describe('Supabase Connectivity @smoke', () => {
     expect(supabaseErrors).toHaveLength(0);
   });
 
-  test('Authenticated dashboard data loads within SLA (< 10s) @smoke', async ({ page }) => {
+  test('Authenticated dashboard data loads within SLA (< 10s) @regression', async ({ page }) => {
     const start = Date.now();
     await page.goto('/dashboard');
     // Wait for any content that indicates data has loaded
@@ -257,7 +268,7 @@ test.describe('Supabase Connectivity @smoke', () => {
 // 5. Admin Data Render — Platform Management loads, Subjects/Apps show data
 // ─────────────────────────────────────────────────────────────────────────────
 
-test.describe('Admin Data Render @smoke', () => {
+test.describe('Admin Data Render @regression', () => {
   // Uses global storageState (super-admin authenticated)
 
   test('Dashboard page renders Platform Overview heading @smoke', async ({ page }) => {
@@ -275,7 +286,9 @@ test.describe('Admin Data Render @smoke', () => {
     expect(text.trim().length).toBeGreaterThan(10);
   });
 
-  test('Apps page renders without crashing (data or empty state shown) @smoke', async ({ page }) => {
+  test('Apps page renders without crashing (data or empty state shown) @regression', async ({
+    page,
+  }) => {
     await page.goto('/apps');
     await page.waitForLoadState('networkidle');
     // Must render something meaningful — a table row, card, or empty-state
@@ -285,7 +298,9 @@ test.describe('Admin Data Render @smoke', () => {
     expect(text.trim().length).toBeGreaterThan(5);
   });
 
-  test('Subjects page renders without crashing (data or empty state shown) @smoke', async ({ page }) => {
+  test('Subjects page renders without crashing (data or empty state shown) @regression', async ({
+    page,
+  }) => {
     await page.goto('/subjects');
     await page.waitForLoadState('networkidle');
     const mainContent = page.locator('main').first();
@@ -294,7 +309,7 @@ test.describe('Admin Data Render @smoke', () => {
     expect(text.trim().length).toBeGreaterThan(5);
   });
 
-  test('Domains page renders without crashing @smoke', async ({ page }) => {
+  test('Domains page renders without crashing @regression', async ({ page }) => {
     await page.goto('/domains');
     await page.waitForLoadState('networkidle');
     const mainContent = page.locator('main').first();
@@ -303,7 +318,7 @@ test.describe('Admin Data Render @smoke', () => {
     expect(text.trim().length).toBeGreaterThan(5);
   });
 
-  test('Navigation links are all present (sidebar is rendered) @smoke', async ({ page }) => {
+  test('Navigation links are all present (sidebar is rendered) @regression', async ({ page }) => {
     await page.goto('/dashboard');
     await page.waitForSelector('nav', { timeout: 10_000 });
     const nav = page.locator('nav').first();
