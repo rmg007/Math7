@@ -112,20 +112,31 @@ function Invoke-PhaseSupabase {
     }
     
     $projectRef = $script:Config.supabase.project_ref
+    $region = $script:Config.supabase.region
     if (-not $projectRef) { throw "supabase.project_ref not found in master-config.json!" }
+    if (-not $region) { throw "supabase.region not found in master-config.json!" }
 
     Start-Timer "SupabaseSync"
 
-    # 1. Apply Migrations (using npx supabase)
-    Write-Info "Pushing migrations to project: $projectRef"
-    # We use npx supabase db push with the service key if possible, 
-    # but the CLI usually needs a DB_URL or linking.
-    # Since we have SUPABASE_DB_PASSWORD in .secrets, we can build the DB_URL.
+    # 1. Apply Migrations (using npx supabase with pooler)
+    Write-Info "Pushing migrations to project: $projectRef ($region)"
     
     if ($script:Secrets.ContainsKey('SUPABASE_DB_PASSWORD')) {
-        $dbUrl = "postgresql://postgres:$($script:Secrets['SUPABASE_DB_PASSWORD'])@db.$projectRef.supabase.co:5432/postgres"
-        Write-Info "Executing: npx supabase db push --db-url [HIDDEN]"
-        cmd.exe /c "npx supabase db push --db-url `"$dbUrl`""
+        $dbPass = $script:Secrets['SUPABASE_DB_PASSWORD']
+        Write-Info "Linking to project: $projectRef"
+        $OldEAP = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        
+        # 1. Link project
+        $linkOutput = npx supabase link --project-ref $projectRef --password "$dbPass" 2>&1
+        $linkOutput | ForEach-Object { Write-Info $_ }
+        
+        # 2. Push migrations
+        Write-Info "Pushing migrations..."
+        $pushOutput = npx supabase db push --password "$dbPass" 2>&1
+        $pushOutput | ForEach-Object { Write-Info $_ }
+        
+        $ErrorActionPreference = $OldEAP
         if ($LASTEXITCODE -ne 0) { throw "Supabase migration push failed" }
     } else {
         Write-Warn "SUPABASE_DB_PASSWORD not found. Skipping migration push (manual check required)."
@@ -134,8 +145,16 @@ function Invoke-PhaseSupabase {
     # 2. Generate Types
     Write-Info "Generating TypeScript types..."
     $typePath = Join-Path $ScriptDir "admin-panel\src\lib\database.types.ts"
-    cmd.exe /c "npx supabase gen types typescript --project-id $projectRef > `"$typePath`""
-    if ($LASTEXITCODE -ne 0) { throw "Supabase type generation failed" }
+    $OldEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $output = npx supabase gen types typescript --project-id $projectRef 2>&1
+    $ErrorActionPreference = $OldEAP
+    if ($LASTEXITCODE -eq 0) {
+        $output | Out-File $typePath -Encoding utf8
+    } else {
+        $output | ForEach-Object { Write-Err $_ }
+        throw "Supabase type generation failed"
+    }
     
     # 3. Deploy Edge Functions (Optional - if any changed)
     # [Placeholder for selective edge function deployment]

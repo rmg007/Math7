@@ -331,3 +331,118 @@
 [2026-03-09 07:19:03] Space recovered: 668 B
 [2026-03-09 07:19:03] Final size: 122.80 KB
 [2026-03-09 07:19:03] 
+[2026-03-11 14:54:54] 
+[2026-03-11 14:54:54] AGENT MEMORY CLEANUP STARTED
+[2026-03-11 14:54:54] Mode: LIVE
+[2026-03-11 14:54:54] Retain: 3 days / 15 sessions
+[2026-03-11 14:54:54] Before: 16.71 MB | 324 files | 17 sessions
+[2026-03-11 14:54:54] 
+[2026-03-11 14:54:54] Phase 1: Stripping media artifacts...
+[2026-03-11 14:54:54]   Stripped .tempmediaStorage from a1f02d33-4293-43fe-84e7-8ccaa93474f4 (5.45 MB)
+[2026-03-11 14:54:54] Phase 2: Pruning resolved state snapshots...
+[2026-03-11 14:54:55] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-11 14:54:55]   Deleting session 819dafbb-fd01-490f-a53f-b7185c0fc86a (3.09 KB, last used: 03/01/2026 03:00:03)
+[2026-03-11 14:54:55] Phase 4: Cleaning project root temp files...
+[2026-03-11 14:54:55]   Removed: tasks.json (248 B)
+[2026-03-11 14:54:55]   Removed: tasks.status.json (13.00 KB)
+[2026-03-11 14:54:55]   Removed: tasks.json (387 B)
+[2026-03-11 14:54:55]   Removed: tasks.status.json (1.46 KB)
+[2026-03-11 14:54:55]   Removed: test_output.txt (4.99 KB)
+[2026-03-11 14:54:55] Phase 5: Pruning indexed artifacts...
+[2026-03-11 14:54:55] 
+[2026-03-11 14:54:55] CLEANUP COMPLETE
+[2026-03-11 14:54:55] Sessions: 17 -> 16 (-1)
+[2026-03-11 14:54:55] Files removed: 32
+[2026-03-11 14:54:55] Space recovered: 14.80 MB
+[2026-03-11 14:54:55] Final size: 1.92 MB
+[2026-03-11 14:54:55] 
+[2026-03-11 14:55:40] 
+[2026-03-11 14:55:40] AGENT MEMORY CLEANUP STARTED
+[2026-03-11 14:55:40] Mode: LIVE
+[2026-03-11 14:55:40] Retain: 3 days / 15 sessions
+[2026-03-11 14:55:40] Before: 1.92 MB | 70 files | 16 sessions
+[2026-03-11 14:55:40] 
+[2026-03-11 14:55:40] Phase 1: Stripping media artifacts...
+[2026-03-11 14:55:40] Phase 2: Pruning resolved state snapshots...
+[2026-03-11 14:55:40] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-11 14:55:40] Phase 4: Cleaning project root temp files...
+[2026-03-11 14:55:40] Phase 5: Pruning indexed artifacts...
+[2026-03-11 14:55:40] 
+[2026-03-11 14:55:40] CLEANUP COMPLETE
+[2026-03-11 14:55:40] Sessions: 16 -> 16 (-0)
+[2026-03-11 14:55:40] Files removed: 0
+[2026-03-11 14:55:40] Space recovered: 0 B
+[2026-03-11 14:55:40] Final size: 1.92 MB
+[2026-03-11 14:55:40] 
+[2026-03-11 14:56:35] 
+[2026-03-11 14:56:35] AGENT MEMORY CLEANUP STARTED
+[2026-03-11 14:56:35] Mode: LIVE
+[2026-03-11 14:56:35] Retain: 3 days / 15 sessions
+[2026-03-11 14:56:35] Before: 1.92 MB | 70 files | 16 sessions
+[2026-03-11 14:56:35] 
+[2026-03-11 14:56:35] Phase 1: Stripping media artifacts...
+[2026-03-11 14:56:35] Phase 2: Pruning resolved state snapshots...
+[2026-03-11 14:56:35] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-11 14:56:35] Phase 4: Cleaning project root temp files...
+[2026-03-11 14:56:35] Phase 5: Pruning indexed artifacts...
+[2026-03-11 14:56:35] 
+[2026-03-11 14:56:35] CLEANUP COMPLETE
+[2026-03-11 14:56:35] Sessions: 16 -> 16 (-0)
+[2026-03-11 14:56:35] Files removed: 0
+[2026-03-11 14:56:35] Space recovered: 0 B
+[2026-03-11 14:56:35] Final size: 1.92 MB
+[2026-03-11 14:56:36] 
+[2026-03-11 15:02:48] 
+[2026-03-11 15:02:48] AGENT MEMORY CLEANUP STARTED
+[2026-03-11 15:02:48] Mode: LIVE
+[2026-03-11 15:02:48] Retain: 3 days / 15 sessions
+[2026-03-11 15:02:48] Before: 1.92 MB | 70 files | 16 sessions
+[2026-03-11 15:02:48] 
+[2026-03-11 15:02:48] Phase 1: Stripping media artifacts...
+[2026-03-11 15:02:48] Phase 2: Pruning resolved state snapshots...
+[2026-03-11 15:02:48] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-11 15:02:48] Phase 4: Cleaning project root temp files...
+[2026-03-11 15:02:48] Phase 5: Pruning indexed artifacts...
+[2026-03-11 15:02:48] 
+[2026-03-11 15:02:48] CLEANUP COMPLETE
+[2026-03-11 15:02:48] Sessions: 16 -> 16 (-0)
+[2026-03-11 15:02:48] Files removed: 0
+[2026-03-11 15:02:48] Space recovered: 0 B
+[2026-03-11 15:02:48] Final size: 1.92 MB
+[2026-03-11 15:02:48] 
+[2026-03-11 15:04:13] 
+[2026-03-11 15:04:13] AGENT MEMORY CLEANUP STARTED
+[2026-03-11 15:04:13] Mode: LIVE
+[2026-03-11 15:04:13] Retain: 3 days / 15 sessions
+[2026-03-11 15:04:13] Before: 1.92 MB | 70 files | 16 sessions
+[2026-03-11 15:04:13] 
+[2026-03-11 15:04:13] Phase 1: Stripping media artifacts...
+[2026-03-11 15:04:13] Phase 2: Pruning resolved state snapshots...
+[2026-03-11 15:04:13] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-11 15:04:13] Phase 4: Cleaning project root temp files...
+[2026-03-11 15:04:13] Phase 5: Pruning indexed artifacts...
+[2026-03-11 15:04:13] 
+[2026-03-11 15:04:13] CLEANUP COMPLETE
+[2026-03-11 15:04:13] Sessions: 16 -> 16 (-0)
+[2026-03-11 15:04:13] Files removed: 0
+[2026-03-11 15:04:13] Space recovered: 0 B
+[2026-03-11 15:04:13] Final size: 1.92 MB
+[2026-03-11 15:04:13] 
+[2026-03-11 15:06:35] 
+[2026-03-11 15:06:35] AGENT MEMORY CLEANUP STARTED
+[2026-03-11 15:06:35] Mode: LIVE
+[2026-03-11 15:06:35] Retain: 3 days / 15 sessions
+[2026-03-11 15:06:35] Before: 1.92 MB | 70 files | 16 sessions
+[2026-03-11 15:06:35] 
+[2026-03-11 15:06:36] Phase 1: Stripping media artifacts...
+[2026-03-11 15:06:36] Phase 2: Pruning resolved state snapshots...
+[2026-03-11 15:06:36] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-11 15:06:36] Phase 4: Cleaning project root temp files...
+[2026-03-11 15:06:36] Phase 5: Pruning indexed artifacts...
+[2026-03-11 15:06:36] 
+[2026-03-11 15:06:36] CLEANUP COMPLETE
+[2026-03-11 15:06:36] Sessions: 16 -> 16 (-0)
+[2026-03-11 15:06:36] Files removed: 0
+[2026-03-11 15:06:36] Space recovered: 0 B
+[2026-03-11 15:06:36] Final size: 1.92 MB
+[2026-03-11 15:06:36] 

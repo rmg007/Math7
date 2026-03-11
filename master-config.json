@@ -38,6 +38,7 @@
     "student_project": "questerix-student"
   },
   "supabase": {
-    "project_ref": "bkfhorslctqieetzqdtd"
+    "project_ref": "bkfhorslctqieetzqdtd",
+    "region": "us-east-1"
   }
 }
