@@ -13,7 +13,7 @@ import {
   usePaginatedQuestions,
   useQuestion,
   useQuestions,
-  useUpdateQuestion
+  useUpdateQuestion,
 } from '../use-questions';
 
 // Mock dependencies
@@ -38,10 +38,22 @@ describe('useQuestions', () => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 
-const MOCK_QUESTION_ID = '550e8400-e29b-41d4-a716-446655440000';
+  const MOCK_QUESTION_ID = '550e8400-e29b-41d4-a716-446655440000';
   const mockQuestions = [
-    { id: MOCK_QUESTION_ID, question_id: MOCK_QUESTION_ID, content: 'Question 1', skill_id: 'skill-1', status: 'draft' },
-    { id: '550e8400-e29b-41d4-a716-446655440001', question_id: '550e8400-e29b-41d4-a716-446655440001', content: 'Question 2', skill_id: 'skill-1', status: 'live' },
+    {
+      id: MOCK_QUESTION_ID,
+      question_id: MOCK_QUESTION_ID,
+      content: 'Question 1',
+      skill_id: 'skill-1',
+      status: 'draft',
+    },
+    {
+      id: '550e8400-e29b-41d4-a716-446655440001',
+      question_id: '550e8400-e29b-41d4-a716-446655440001',
+      content: 'Question 2',
+      skill_id: 'skill-1',
+      status: 'live',
+    },
   ];
 
   beforeEach(() => {
@@ -53,7 +65,21 @@ const MOCK_QUESTION_ID = '550e8400-e29b-41d4-a716-446655440000';
     vi.mocked(supabase.from).mockReturnValue(mockSupabase.queryBuilder as any);
 
     vi.mocked(useApp).mockReturnValue({
-      currentApp: { app_id: 'app-1' },
+      currentApp: {
+        app_id: 'app-1',
+        created_at: new Date().toISOString(),
+        display_name: 'Test App',
+        grade_level: 'K-12',
+        grade_number: 1,
+        is_active: true,
+        subdomain: 'test',
+        subject_id: 'subject-1',
+        updated_at: new Date().toISOString(),
+        ai_token_limit: 0,
+        branding: {},
+        description: '',
+        features: {},
+      },
       apps: [],
       isLoading: false,
       setCurrentApp: vi.fn(),
@@ -141,13 +167,13 @@ const MOCK_QUESTION_ID = '550e8400-e29b-41d4-a716-446655440000';
 
       const { result } = renderHook(() => useCreateQuestion(), { wrapper });
 
-      const newQuestion = { 
-        content: 'New Question', 
-        skill_id: 'skill-1', 
+      const newQuestion = {
+        content: 'New Question',
+        skill_id: 'skill-1',
         status: 'draft' as const,
         app_id: 'app-1',
         solution: 'Solution',
-        type: 'multiple_choice' as any
+        type: 'multiple_choice' as any,
       };
       await result.current.mutateAsync(newQuestion);
 
@@ -196,10 +222,16 @@ const MOCK_QUESTION_ID = '550e8400-e29b-41d4-a716-446655440000';
 
       const { result } = renderHook(() => useBulkUpdateQuestionsStatus(), { wrapper });
 
-      await result.current.mutateAsync({ question_ids: [MOCK_QUESTION_ID, '550e8400-e29b-41d4-a716-446655440001'], status: 'live' });
+      await result.current.mutateAsync({
+        question_ids: [MOCK_QUESTION_ID, '550e8400-e29b-41d4-a716-446655440001'],
+        status: 'live',
+      });
 
       expect(mockSupabase.queryBuilder.update).toHaveBeenCalledWith({ status: 'live' });
-      expect(mockSupabase.queryBuilder.in).toHaveBeenCalledWith('question_id', [MOCK_QUESTION_ID, '550e8400-e29b-41d4-a716-446655440001']);
+      expect(mockSupabase.queryBuilder.in).toHaveBeenCalledWith('question_id', [
+        MOCK_QUESTION_ID,
+        '550e8400-e29b-41d4-a716-446655440001',
+      ]);
     });
   });
 
@@ -216,7 +248,10 @@ const MOCK_QUESTION_ID = '550e8400-e29b-41d4-a716-446655440000';
       expect(mockSupabase.queryBuilder.update).toHaveBeenCalledWith({
         deleted_at: expect.any(String),
       });
-      expect(mockSupabase.queryBuilder.in).toHaveBeenCalledWith('question_id', [MOCK_QUESTION_ID, '550e8400-e29b-41d4-a716-446655440001']);
+      expect(mockSupabase.queryBuilder.in).toHaveBeenCalledWith('question_id', [
+        MOCK_QUESTION_ID,
+        '550e8400-e29b-41d4-a716-446655440001',
+      ]);
     });
   });
 });

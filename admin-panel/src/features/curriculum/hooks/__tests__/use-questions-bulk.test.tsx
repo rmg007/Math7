@@ -79,6 +79,7 @@ function mockApp(overrides: Record<string, unknown> = {}) {
       ai_token_limit: 0,
       branding: {},
       description: '',
+      features: {},
     },
     apps: [],
     isLoading: false,

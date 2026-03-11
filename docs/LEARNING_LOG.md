@@ -1,5 +1,18 @@
 # Questerix Learning Log
 
+## [2026-03-11] - Smoke Test Resilience & Deterministic Mocking
+
+- **Root Cause**: Failing Playwright smoke tests for mentorship features in production staging. Root causes included: (1) `StandardAdminGuard` redirects due to missing `apps` and `profiles` records in a clean test environment; (2) Strict mode violations in Playwright when UI rendered multiple identical buttons (one in header, one in empty state); (3) Mismatch between test expectations and actual rendered text in `EmptyState` components; (4) Incorrect table name for landing pages in REST endpoint intercepts.
+- **Fix**:
+  1. **Global Auth Guard Mocks**: Implemented global `beforeEach` mocks for `apps` and `profiles` REST endpoints in `misc-pages.smoke.spec.ts`. Updated `profiles` mock to support `.single()` requests via `Accept` header detection (`application/vnd.pgrst.object+json`).
+  2. **Strict Mode Resolution**: Updated button locators to use `.first()` when multiple matches exist (e.g., "New Issue" button in header vs. empty state).
+  3. **Deterministic REST Mocks**: Added precise mocks for `known_issues`, `error_logs`, and `app_landing_pages`. Fixed table name from `landing_pages` to `app_landing_pages` for registry editor compatibility.
+  4. **Text Assertion Calibration**: Adjusted `expect(getByRole('heading'))` to match exact rendered strings: "No known issues", "No landing pages yet", "No errors found".
+  5. **Project Selection**: Explicitly targeted the `desktop` project to ensure consistent viewport and browser settings.
+- **Prevention Rule**: **ALWAYS** verify guard dependencies (apps, profiles) are mocked at a global level for smoke tests to prevent unhandled redirects. **NEVER** use generic text locators for buttons that appear in both header actions and empty states; use `getByRole(...).first()` or unique `data-testid` where available. Use `questerix-cortex/outputs/SKELETON_SUMMARY.md` to verify exact database table names before writing REST intercepts.
+
+---
+
 ## [2026-03-01] - Platform Infrastructure Post-Deployment Testing Suite
 
 - **Root Cause**: Need for post-deployment platform infrastructure testing to actively measure latency, throughput, and essential security headers without deep application logic. No scripts existed for basic availability and security assertion in production.
@@ -3037,3 +3050,13 @@ Added `question-studio-bulk-actions.tsx` and `question-studio-filter-panel.tsx` 
   un_command tool leads to frozen, hanging background jobs because these tools require interactive terminal inputs (TTY) that the agent runner cannot handle.
 - **Fix**: Never try to run Claude or other interactive CLI tools inside the agent's background terminal.
 - **Prevention Rule**: When delegating work to another agent, generate the \HANDOFF.md\ file and instruct the USER to run the command in their own external terminal. NEVER use the background shell to bootstrap another interactive AI agent.
+
+## [2026-03-12] - RLS Governance Audit & Hardening (Student Economy)
+
+- **Root Cause**: New tables (user_activity, user_metadata, purchases) added in v14 parity lacked explicit RLS isolation patterns for super_admin bypass and standardized tenant context resolution. Existing policies used subqueries instead of the optimized current_app_id() helper.
+- **Fix**: Implemented 20260312000000_harden_student_economy_rls.sql and curriculum_meta hardening.
+  - Standardized RLS on current_app_id() for better performance.
+  - Added explicit global jwt_is_super_admin() bypass for all economy and tracking tables.
+  - Enforced strict app_id = current_app_id() isolation for user_metadata, user_activity, purchases, attempts, sessions, and skill_progress.
+  - Restricted curriculum_meta and curriculum_snapshots read access to the tenant's own app_id.
+- **Prevention Rule**: Every migration that creates a table with an app_id MUST include a policy that checks app_id = current_app_id() or jwt_is_super_admin(). Global super-admin bypass is a mandatory requirement for all multi-tenant tables.

@@ -9,11 +9,10 @@ import { TEST_USERS, login } from '../test-utils';
 
 test.describe('Squad Registry @smoke', () => {
   test('Super-Admin can read the Groups list @smoke', async ({ page }) => {
-    await login(page, TEST_USERS.SUPER_ADMIN.email, TEST_USERS.SUPER_ADMIN.password);
     await page.goto('/groups');
 
     // Check for "Groups" or "Squads" heading or a table
-    await expect(page.locator('h1, main')).toContainText(/Groups|Squads/i, { timeout: 15000 });
+    await expect(page.getByRole('main')).toContainText(/Groups|Squads/i, { timeout: 15000 });
 
     // Page must render something (list or empty state)
     await page.waitForLoadState('networkidle');

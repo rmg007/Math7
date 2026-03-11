@@ -58,17 +58,25 @@ export function ReorderSubForm({ form }: ReorderSubFormProps) {
             <div className="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs font-black text-indigo-600">
               {index + 1}
             </div>
-            <Input
-              value={step.text}
-              onChange={(e) => {
-                const newSteps = [...all];
-                newSteps[index].text = e.target.value;
-                form.setValue('options', { steps: newSteps });
-              }}
-              placeholder={`Step ${index + 1} content...`}
-              className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold"
-              required
-            />
+            <div className="flex-1 relative">
+              <Input
+                value={step.text}
+                onChange={(e) => {
+                  const newSteps = [...all];
+                  newSteps[index].text = e.target.value;
+                  form.setValue('options', { steps: newSteps });
+                }}
+                placeholder={`Step ${index + 1} content...`}
+                className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold"
+                required
+                maxLength={200}
+              />
+              <span
+                className={`text-[10px] absolute right-4 top-1/2 -translate-y-1/2 font-mono font-bold transition-colors ${step.text.length > 180 ? 'text-rose-500' : 'text-gray-300'}`}
+              >
+                {step.text.length}/200
+              </span>
+            </div>
             <Button
               type="button"
               variant="ghost"

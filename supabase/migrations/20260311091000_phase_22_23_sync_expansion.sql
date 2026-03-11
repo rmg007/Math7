@@ -24,6 +24,11 @@ CREATE TABLE IF NOT EXISTS public.achievements (
 ALTER TABLE public.achievements ENABLE ROW LEVEL SECURITY;
 
 -- 4. Policies
+DO $$ BEGIN
+    DROP POLICY IF EXISTS achievements_tenant_isolation ON public.achievements;
+EXCEPTION WHEN undefined_object THEN NULL;
+END $$;
+
 CREATE POLICY achievements_tenant_isolation ON public.achievements
 FOR ALL TO authenticated
 USING (
@@ -40,7 +45,10 @@ COMMENT ON TABLE public.achievements IS 'Gamification locks/unlocks for students
 COMMENT ON COLUMN public.achievements.type IS 'Achievement identifier: mastery_1, streak_3, scholar_patience, resilient_1...';
 
 -- 6. Trigger for updated_at
-CREATE TRIGGER set_achievements_updated_at
-  BEFORE UPDATE ON public.achievements
-  FOR EACH ROW
-  EXECUTE FUNCTION public.set_updated_at();
+DO $$ BEGIN
+  CREATE TRIGGER set_achievements_updated_at
+    BEFORE UPDATE ON public.achievements
+    FOR EACH ROW
+    EXECUTE FUNCTION public.update_updated_at_column();
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

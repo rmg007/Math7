@@ -6,11 +6,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-    useCreateSkill,
-    useDuplicateSkill,
-    usePaginatedSkills,
-    useSkill,
-    useSkills,
+  useCreateSkill,
+  useDuplicateSkill,
+  usePaginatedSkills,
+  useSkill,
+  useSkills,
 } from '../use-skills';
 
 // Mock dependencies
@@ -54,10 +54,12 @@ describe('useSkills', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     queryClient.clear();
-    
+
     // Fresh mock for every test
     mockSupabase = createMockSupabase();
-    vi.mocked(supabase.from).mockReturnValue(mockSupabase.queryBuilder as unknown as ReturnType<typeof supabase.from>);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockSupabase.queryBuilder as unknown as ReturnType<typeof supabase.from>
+    );
 
     vi.mocked(useApp).mockReturnValue({
       currentApp: {
@@ -73,6 +75,7 @@ describe('useSkills', () => {
         subdomain: 'test',
         subject_id: null,
         updated_at: new Date().toISOString(),
+        features: {},
       },
       apps: [],
       isLoading: false,
@@ -87,8 +90,9 @@ describe('useSkills', () => {
 
   describe('useSkills hook', () => {
     it('should fetch skills for current app', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: mockSkills, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: mockSkills, error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useSkills(), { wrapper });
@@ -100,8 +104,9 @@ describe('useSkills', () => {
     });
 
     it('should filter by domainId', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: [mockSkills[0]], error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: [mockSkills[0]], error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useSkills('domain-1'), { wrapper });
@@ -112,8 +117,9 @@ describe('useSkills', () => {
 
   describe('useSkill (single)', () => {
     it('should fetch a single skill by id', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: mockSkills[0], error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: mockSkills[0], error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useSkill('550e8400-e29b-41d4-a716-446655440001'), {
@@ -122,7 +128,10 @@ describe('useSkills', () => {
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-      expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith('skill_id', '550e8400-e29b-41d4-a716-446655440001');
+      expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith(
+        'skill_id',
+        '550e8400-e29b-41d4-a716-446655440001'
+      );
       expect(mockSupabase.queryBuilder.maybeSingle).toHaveBeenCalled();
       expect(result.current.data).toEqual(mockSkills[0]);
     });
@@ -130,12 +139,13 @@ describe('useSkills', () => {
 
   describe('usePaginatedSkills', () => {
     it('should fetch paginated skills', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({
-          data: mockSkills,
-          error: null,
-          count: 2,
-        }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({
+            data: mockSkills,
+            error: null,
+            count: 2,
+          }).then(onFulfilled)
       );
 
       const params = { page: 1, pageSize: 10 };
@@ -149,8 +159,9 @@ describe('useSkills', () => {
 
   describe('useCreateSkill', () => {
     it('should insert a new skill', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: mockSkills[0], error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: mockSkills[0], error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useCreateSkill(), { wrapper });
@@ -185,28 +196,33 @@ describe('useSkills', () => {
       };
 
       // Mock fetching original
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: originalSkill, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: originalSkill, error: null }).then(onFulfilled)
       );
 
       // Mock inserting duplicate
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({
-          data: {
-            ...originalSkill,
-            title: 'Skill 1 (Copy)',
-            slug: 'skill-1_copy_123',
-            status: 'draft',
-          },
-          error: null,
-        }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({
+            data: {
+              ...originalSkill,
+              title: 'Skill 1 (Copy)',
+              slug: 'skill-1_copy_123',
+              status: 'draft',
+            },
+            error: null,
+          }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useDuplicateSkill(), { wrapper });
 
       await result.current.mutateAsync('550e8400-e29b-41d4-a716-446655440001');
 
-      expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith('skill_id', '550e8400-e29b-41d4-a716-446655440001');
+      expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith(
+        'skill_id',
+        '550e8400-e29b-41d4-a716-446655440001'
+      );
       expect(mockSupabase.queryBuilder.insert).toHaveBeenCalledWith(
         expect.objectContaining({
           app_id: mockAppId,
@@ -240,6 +256,7 @@ describe('useSkills', () => {
           subdomain: 'current',
           subject_id: null,
           updated_at: new Date().toISOString(),
+          features: {},
         },
         apps: [],
         isLoading: false,
@@ -251,22 +268,32 @@ describe('useSkills', () => {
         isSuperAdmin: true,
       });
 
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: originalSkill, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: originalSkill, error: null }).then(onFulfilled)
       );
 
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({
-          data: { ...originalSkill, app_id: mockAppId, title: 'Cross-App Skill (Copy)', status: 'draft' },
-          error: null,
-        }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({
+            data: {
+              ...originalSkill,
+              app_id: mockAppId,
+              title: 'Cross-App Skill (Copy)',
+              status: 'draft',
+            },
+            error: null,
+          }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useDuplicateSkill(), { wrapper });
 
       await result.current.mutateAsync('550e8400-e29b-41d4-a716-446655440001');
 
-      expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith('skill_id', '550e8400-e29b-41d4-a716-446655440001');
+      expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith(
+        'skill_id',
+        '550e8400-e29b-41d4-a716-446655440001'
+      );
       expect(mockSupabase.queryBuilder.eq).not.toHaveBeenCalledWith('app_id', mockAppId);
       expect(mockSupabase.queryBuilder.insert).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -277,6 +304,3 @@ describe('useSkills', () => {
     });
   });
 });
-
-
-

@@ -4,12 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -18,23 +18,23 @@ import { castJson } from '@/lib/type-utils';
 import { cn, isValidUUID } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-    ArrowLeft,
-    Check,
-    CheckCircle,
-    Circle,
-    ClipboardList,
-    Clock,
-    Copy,
-    Edit3,
-    Home,
-    Layers,
-    LayoutDashboard,
-    Plus,
-    School,
-    Settings,
-    Trash2,
-    UserPlus,
-    Users,
+  ArrowLeft,
+  Check,
+  CheckCircle,
+  Circle,
+  ClipboardList,
+  Clock,
+  Copy,
+  Edit3,
+  Home,
+  Layers,
+  LayoutDashboard,
+  Plus,
+  School,
+  Settings,
+  Trash2,
+  UserPlus,
+  Users,
 } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -126,7 +126,12 @@ const MemberRow = memo(
             ) : (
               <>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-gray-900 text-sm leading-tight">{displayName}</h3>
+                  <Link
+                    to={`/students/${member.user_id}`}
+                    className="font-bold text-gray-900 text-sm leading-tight hover:text-teal-600 transition-colors"
+                  >
+                    {displayName}
+                  </Link>
                   {isAnonymous && (
                     <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-semibold uppercase">
                       Anon
@@ -889,7 +894,7 @@ export function GroupDetailPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="h-12 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest border-red-100 text-red-300 hover:text-red-400 hover:bg-red-50 transition-all font-bold"
+                  className="h-12 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest border-red-100 text-red-300 hover:text-red-400 hover:bg-red-50 transition-all"
                   disabled
                 >
                   DECOMMISSION UNIT

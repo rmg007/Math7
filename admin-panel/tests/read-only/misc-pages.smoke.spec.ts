@@ -38,6 +38,44 @@ const FAKE_GROUP = {
   updated_at: new Date().toISOString(),
 };
 
+test.beforeEach(async ({ page }) => {
+  // Global mocks for AppContext and Guards
+
+  // Mock apps (required for AppContext to find a current app).
+  await page.route('**/rest/v1/apps**', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify([{ app_id: 'test-app', display_name: 'Test App', is_active: true }]),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock profiles for super-admin/admin detection in guards.
+  await page.route('**/rest/v1/profiles**', async (route) => {
+    if (route.request().method() !== 'GET') {
+      await route.continue();
+      return;
+    }
+    const acceptHeader = route.request().headers()['accept'] ?? '';
+    const profile = { role: 'super_admin', app_id: 'test-app' };
+
+    if (acceptHeader.includes('pgrst.object')) {
+      await route.fulfill({
+        contentType: 'application/vnd.pgrst.object+json',
+        body: JSON.stringify(profile),
+      });
+    } else {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify([profile]),
+      });
+    }
+  });
+});
+
 // ── LoginPage ─────────────────────────────────────────────────────────────────
 // Uses an empty storageState so the browser is fully unauthenticated.
 // The global super-admin session must NOT be present — otherwise the page
@@ -77,7 +115,9 @@ test.describe('LoginPage @regression', () => {
 
   test('registration form appears after toggle @regression', async ({ page }) => {
     await page.getByText(/Don't have an account/i).click();
-    await expect(page.getByText('Create Account')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('button', { name: 'Create Account' })).toBeVisible({
+      timeout: 5000,
+    });
     await expect(page.locator('#fullName')).toBeVisible();
     await expect(page.locator('#inviteCode')).toBeVisible();
   });
@@ -114,7 +154,9 @@ test.describe('AuthConfirmPage @regression', () => {
   }) => {
     // Hash fragment is client-side only — scanner safe, no API call until button click.
     await page.goto('/auth/confirm#token_hash=smoketesthash&type=recovery');
-    await expect(page.getByText(/Set New Password/i)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Set New Password' })).toBeVisible({
+      timeout: 15000,
+    });
     await expect(page.locator('#new-password')).toBeVisible();
     await expect(page.locator('#confirm-password')).toBeVisible();
   });
@@ -166,11 +208,13 @@ test.describe('InvitationCodesPage @regression', () => {
   });
 
   test('page heading reads "Invitation Codes" @regression', async ({ page }) => {
-    await expect(page.getByText('Invitation Codes')).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Invitation Codes', exact: true })
+    ).toBeVisible();
   });
 
   test('Generate Code section is visible @regression', async ({ page }) => {
-    await expect(page.getByText('Generate Code')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Generate Code' })).toBeVisible();
   });
 
   test('Max Uses and Expires (days) inputs are present @regression', async ({ page }) => {
@@ -233,7 +277,7 @@ test.describe('GroupsPage @regression', () => {
   });
 
   test('page heading reads "Squad Registry" @regression', async ({ page }) => {
-    await expect(page.getByText('Squad Registry')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Squad Registry' })).toBeVisible();
   });
 
   test('"Initialize Squad" button links to /groups/new @regression', async ({ page }) => {
@@ -283,8 +327,8 @@ test.describe('GroupCreatePage @regression', () => {
   });
 
   test('CLASSROOM and DOMESTIC protocol type options are present @regression', async ({ page }) => {
-    await expect(page.getByText('CLASSROOM')).toBeVisible();
-    await expect(page.getByText('DOMESTIC')).toBeVisible();
+    await expect(page.getByText('CLASSROOM', { exact: true })).toBeVisible();
+    await expect(page.getByText('DOMESTIC', { exact: true })).toBeVisible();
   });
 
   test('Allow Anonymous Entry toggle is present @regression', async ({ page }) => {
@@ -352,7 +396,7 @@ test.describe('GroupDetailPage @regression', () => {
   });
 
   test('join code is displayed @regression', async ({ page }) => {
-    await expect(page.getByText('SMK001')).toBeVisible();
+    await expect(page.locator('code').getByText('SMK001')).toBeVisible();
   });
 
   test('back navigation link is present @regression', async ({ page }) => {
@@ -402,11 +446,13 @@ test.describe('AssignmentCreatePage @regression', () => {
     });
 
     await page.goto(`/groups/${FAKE_UUID}/assignments/new`);
-    await expect(page.getByText('Initialize Assignment')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('admin-header-title')).toHaveText('Initialize Assignment', {
+      timeout: 15000,
+    });
   });
 
   test('page heading reads "Initialize Assignment" @regression', async ({ page }) => {
-    await expect(page.getByText('Initialize Assignment')).toBeVisible();
+    await expect(page.getByTestId('admin-header-title')).toHaveText('Initialize Assignment');
   });
 
   test('Protocol Selection section is present @regression', async ({ page }) => {
@@ -444,11 +490,13 @@ test.describe('ErrorLogsPage @regression', () => {
     });
 
     await page.goto('/error-logs');
-    await expect(page.getByText('Error Logs')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Error Logs', exact: true })).toBeVisible({
+      timeout: 15000,
+    });
   });
 
   test('page heading reads "Error Logs" @regression', async ({ page }) => {
-    await expect(page.getByText('Error Logs')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Error Logs', exact: true })).toBeVisible();
   });
 
   test('search input is present @regression', async ({ page }) => {
@@ -457,7 +505,10 @@ test.describe('ErrorLogsPage @regression', () => {
 
   test('empty state is shown when no error logs exist @regression', async ({ page }) => {
     // The page renders an EmptyState component when the list is empty.
-    await expect(page.getByText(/No error logs/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'No errors found' })).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByText('Your app is running smoothly.')).toBeVisible();
   });
 });
 
@@ -473,11 +524,13 @@ test.describe('KnownIssuesPage @regression', () => {
     });
 
     await page.goto('/known-issues');
-    await expect(page.getByText('Known Issues')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Known Issues', exact: true })).toBeVisible({
+      timeout: 15000,
+    });
   });
 
   test('page heading reads "Known Issues" @regression', async ({ page }) => {
-    await expect(page.getByText('Known Issues')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Known Issues', exact: true })).toBeVisible();
   });
 
   test('search input is present @regression', async ({ page }) => {
@@ -485,38 +538,40 @@ test.describe('KnownIssuesPage @regression', () => {
   });
 
   test('"New Issue" button is visible @regression', async ({ page }) => {
-    await expect(page.getByRole('button', { name: /New Issue/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /New Issue/i }).first()).toBeVisible();
   });
 
   test('empty state is shown when no issues exist @regression', async ({ page }) => {
-    await expect(page.getByText(/No known issues/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'No known issues' })).toBeVisible({
+      timeout: 10000,
+    });
   });
 });
 
 // ── LandingsPage ──────────────────────────────────────────────────────────────
 test.describe('LandingsPage @regression', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/rest/v1/landing_pages**', async (route) => {
+    // Mock app_landing_pages REST reads.
+    await page.route('**/rest/v1/app_landing_pages**', async (route) => {
       if (route.request().method() === 'GET') {
-        await route.fulfill({ contentType: 'application/json', body: '[]' });
-      } else {
-        await route.continue();
-      }
-    });
-    await page.route('**/rest/v1/apps**', async (route) => {
-      if (route.request().method() === 'GET') {
-        await route.fulfill({ contentType: 'application/json', body: '[]' });
+        await route.fulfill({
+          contentType: 'application/json',
+          headers: { 'Content-Range': '0-0/0' },
+          body: '[]',
+        });
       } else {
         await route.continue();
       }
     });
 
     await page.goto('/landings');
-    await expect(page.getByText('Landing Pages')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Landing Pages', exact: true })).toBeVisible({
+      timeout: 15000,
+    });
   });
 
   test('page heading reads "Landing Pages" @regression', async ({ page }) => {
-    await expect(page.getByText('Landing Pages')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Landing Pages', exact: true })).toBeVisible();
   });
 
   test('search input is present @regression', async ({ page }) => {
@@ -524,6 +579,8 @@ test.describe('LandingsPage @regression', () => {
   });
 
   test('empty state is shown when no landing pages exist @regression', async ({ page }) => {
-    await expect(page.getByText(/No landing pages/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'No landing pages yet' })).toBeVisible({
+      timeout: 10000,
+    });
   });
 });

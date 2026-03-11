@@ -71,3 +71,10 @@
     - [x] **Success Criteria**: Root directory is automatically cleared of all "agent-transient" files after a green deployment.
 
 - [x] Brainstorming and Planning session with the User.
+
+### [Completed on 2026-03-09]
+
+- [x] **Test Suite Refresh & Deployment**
+  - [x] Update all post-deployment tests to reflect the current API mocking strategy and route list.
+  - [x] Run full test suite to guarantee green execution.
+  - [x] Commit everything and deploy to Cloudflare via orchestrator.ps1.

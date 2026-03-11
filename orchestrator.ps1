@@ -77,7 +77,21 @@ function Invoke-PhasePreflight {
     if (-not (Test-Path $ConfigFile)) { throw "master-config.json not found!" }
     $script:Config = Get-Content $ConfigFile | ConvertFrom-Json
  
-    # 3. Cloudflare Access Check
+    # 3. Secrets Loader
+    Write-Info "Loading secrets..."
+    $script:Secrets = @{}
+    $secretsPath = Join-Path $ScriptDir ".secrets"
+    if (Test-Path $secretsPath) {
+        Get-Content $secretsPath | ForEach-Object {
+            if ($_ -match '^([A-Z_]+)=(.*)$') {
+                $script:Secrets[$Matches[1]] = $Matches[2].Trim()
+            }
+        }
+    } else {
+        Write-Warn ".secrets file not found. Some phases may fail."
+    }
+
+    # 4. Cloudflare Access Check
     # (npx wrangler whoami --config $null) | Out-Null
     
     Write-Success "Preflight passed"
@@ -92,8 +106,41 @@ function Invoke-PhaseSupabase {
     
     if ($DryRun) { Write-Warn "Dry run - skipping actual sync"; return }
     
-    # Logic for migrations push and type generation here.
-    # [Placeholder for actual sync logic]
+    # Check for secrets
+    if (-not $script:Secrets.ContainsKey('SUPABASE_SERVICE_KEY')) {
+        throw "SUPABASE_SERVICE_KEY not found in .secrets!"
+    }
+    
+    $projectRef = $script:Config.supabase.project_ref
+    if (-not $projectRef) { throw "supabase.project_ref not found in master-config.json!" }
+
+    Start-Timer "SupabaseSync"
+
+    # 1. Apply Migrations (using npx supabase)
+    Write-Info "Pushing migrations to project: $projectRef"
+    # We use npx supabase db push with the service key if possible, 
+    # but the CLI usually needs a DB_URL or linking.
+    # Since we have SUPABASE_DB_PASSWORD in .secrets, we can build the DB_URL.
+    
+    if ($script:Secrets.ContainsKey('SUPABASE_DB_PASSWORD')) {
+        $dbUrl = "postgresql://postgres:$($script:Secrets['SUPABASE_DB_PASSWORD'])@db.$projectRef.supabase.co:5432/postgres"
+        Write-Info "Executing: npx supabase db push --db-url [HIDDEN]"
+        cmd.exe /c "npx supabase db push --db-url `"$dbUrl`""
+        if ($LASTEXITCODE -ne 0) { throw "Supabase migration push failed" }
+    } else {
+        Write-Warn "SUPABASE_DB_PASSWORD not found. Skipping migration push (manual check required)."
+    }
+
+    # 2. Generate Types
+    Write-Info "Generating TypeScript types..."
+    $typePath = Join-Path $ScriptDir "admin-panel\src\lib\database.types.ts"
+    cmd.exe /c "npx supabase gen types typescript --project-id $projectRef > `"$typePath`""
+    if ($LASTEXITCODE -ne 0) { throw "Supabase type generation failed" }
+    
+    # 3. Deploy Edge Functions (Optional - if any changed)
+    # [Placeholder for selective edge function deployment]
+    
+    Stop-Timer "SupabaseSync"
     Write-Success "Supabase synchronized"
 }
  
@@ -107,7 +154,7 @@ function Invoke-PhaseBuild {
     Start-Timer "Build"
     # Generate Environment Files
     Write-Info "Generating environment files..."
-    & (Join-Path $ScriptDir 'scripts\deploy\generate-env.ps1') -ConfigFile $script:ConfigFile -Env $Env
+    & (Join-Path $ScriptDir 'scripts\deploy\generate-env.ps1') -ConfigFile $script:ConfigFile
     
     # Clean previous builds
     Write-Info "Cleaning previous build artifacts..."
@@ -122,7 +169,8 @@ function Invoke-PhaseBuild {
     if ($Target -eq 'all' -or $Target -eq 'admin-panel') {
         Write-Host "[BUILD] Building Admin Panel..." -ForegroundColor Cyan
         Push-Location (Join-Path $ScriptDir 'admin-panel')
-        npm run build
+        cmd.exe /c "npm run build"
+        if ($LASTEXITCODE -ne 0) { throw "Admin Panel build failed" }
         Pop-Location
     }
  
@@ -242,7 +290,7 @@ function Main {
         Write-Info "Rotating deployment and cortex logs..."
         $outputsDir = Join-Path $ScriptDir "questerix-cortex\outputs"
         $logsToClean = @(
-            Join-Path $outputsDir "logs",
+            (Join-Path $outputsDir "logs"),
             $ScriptDir # root log files
         )
         

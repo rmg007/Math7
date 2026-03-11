@@ -299,12 +299,19 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                       render={({ field }) => (
                         <FormItem className="space-y-4">
                           <FormControl>
-                            <RichTextEditor
-                              value={field.value}
-                              onChange={field.onChange}
-                              placeholder="Formulate the assessment prompt..."
-                              className="min-h-[200px]"
-                            />
+                            <div className="relative">
+                              <RichTextEditor
+                                value={field.value}
+                                onChange={field.onChange}
+                                placeholder="Formulate the assessment prompt..."
+                                className="min-h-[200px]"
+                              />
+                              <div
+                                className={`absolute bottom-4 right-4 text-[10px] font-black px-3 py-1 rounded-full backdrop-blur-md border transition-all ${field.value.length > 750 ? 'bg-rose-50 text-rose-600 border-rose-200 shadow-lg shadow-rose-500/10' : 'bg-white/40 text-gray-400 border-gray-100'}`}
+                              >
+                                {field.value.length}/800
+                              </div>
+                            </div>
                           </FormControl>
                           <FormMessage className="text-xs font-bold text-red-500 italic" />
                         </FormItem>
@@ -379,12 +386,19 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <RichTextEditor
-                              value={field.value || ''}
-                              onChange={field.onChange}
-                              placeholder="Anchor the correct logic here..."
-                              className="min-h-[120px]"
-                            />
+                            <div className="relative">
+                              <RichTextEditor
+                                value={field.value || ''}
+                                onChange={field.onChange}
+                                placeholder="Anchor the correct logic here..."
+                                className="min-h-[120px]"
+                              />
+                              <div
+                                className={`absolute bottom-4 right-4 text-[10px] font-black px-3 py-1 rounded-full backdrop-blur-md border transition-all ${(field.value?.length || 0) > 1100 ? 'bg-rose-50 text-rose-600 border-rose-200 shadow-lg shadow-rose-500/10' : 'bg-white/40 text-gray-400 border-gray-100'}`}
+                              >
+                                {field.value?.length || 0}/1200
+                              </div>
+                            </div>
                           </FormControl>
                           <FormMessage className="text-xs font-bold text-red-500 italic" />
                         </FormItem>
@@ -422,12 +436,20 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                               Progressive Hint
                             </FormLabel>
                             <FormControl>
-                              <Input
-                                {...field}
-                                value={field.value || ''}
-                                placeholder="Give a subtle nudge without giving it away..."
-                                className="h-14 rounded-2xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-amber-500/10 transition-all placeholder:text-gray-300 placeholder:italic"
-                              />
+                              <div className="relative">
+                                <Input
+                                  {...field}
+                                  value={field.value || ''}
+                                  maxLength={400}
+                                  placeholder="Give a subtle nudge without giving it away..."
+                                  className="h-14 rounded-2xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-amber-500/10 transition-all placeholder:text-gray-300 placeholder:italic pr-20"
+                                />
+                                <div
+                                  className={`absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black px-2 py-1 rounded-lg backdrop-blur-md border transition-all ${(field.value?.length || 0) > 350 ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-gray-50/50 text-gray-400 border-gray-100'}`}
+                                >
+                                  {field.value?.length || 0}/400
+                                </div>
+                              </div>
                             </FormControl>
                             <FormMessage className="text-2xs font-bold text-red-500 italic" />
                           </FormItem>
@@ -444,12 +466,20 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                               Fundamental Rule / Formula
                             </FormLabel>
                             <FormControl>
-                              <Input
-                                {...field}
-                                value={field.value || ''}
-                                placeholder="State the core theorem or rule (e.g. Pythagoras Theorem)..."
-                                className="h-14 rounded-2xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-gray-300 placeholder:italic"
-                              />
+                              <div className="relative">
+                                <Input
+                                  {...field}
+                                  value={field.value || ''}
+                                  maxLength={400}
+                                  placeholder="State the core theorem or rule (e.g. Pythagoras Theorem)..."
+                                  className="h-14 rounded-2xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-gray-300 placeholder:italic pr-20"
+                                />
+                                <div
+                                  className={`absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black px-2 py-1 rounded-lg backdrop-blur-md border transition-all ${(field.value?.length || 0) > 350 ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-gray-50/50 text-gray-400 border-gray-100'}`}
+                                >
+                                  {field.value?.length || 0}/400
+                                </div>
+                              </div>
                             </FormControl>
                             <FormMessage className="text-2xs font-bold text-red-500 italic" />
                           </FormItem>
@@ -466,12 +496,19 @@ export function QuestionForm({ initialData }: QuestionFormProps) {
                               ELI10 Explanation
                             </FormLabel>
                             <FormControl>
-                              <RichTextEditor
-                                value={field.value || ''}
-                                onChange={field.onChange}
-                                placeholder="Explain like I'm 10 - simplify the complex..."
-                                className="min-h-[100px]"
-                              />
+                              <div className="relative">
+                                <RichTextEditor
+                                  value={field.value || ''}
+                                  onChange={field.onChange}
+                                  placeholder="Explain like I'm 10 - simplify the complex..."
+                                  className="min-h-[100px]"
+                                />
+                                <div
+                                  className={`absolute bottom-4 right-4 text-[10px] font-black px-3 py-1 rounded-full backdrop-blur-md border transition-all ${(field.value?.length || 0) > 350 ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-white/40 text-gray-400 border-gray-100'}`}
+                                >
+                                  {field.value?.length || 0}/400
+                                </div>
+                              </div>
                             </FormControl>
                             <FormMessage className="text-2xs font-bold text-red-500 italic" />
                           </FormItem>

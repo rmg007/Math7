@@ -75,6 +75,7 @@ function mockApp(overrides: Partial<ReturnType<typeof useApp>> = {}) {
       ai_token_limit: 0,
       branding: {},
       description: '',
+      features: {},
     },
     apps: [],
     isLoading: false,
@@ -85,7 +86,7 @@ function mockApp(overrides: Partial<ReturnType<typeof useApp>> = {}) {
     userRole: null,
     isSuperAdmin: false,
     ...overrides,
-  } );
+  });
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -318,7 +319,13 @@ describe('useCreateQuestion — error handling', () => {
     const { wrapper } = makeWrapper();
 
     // Note: 'multiple_choice' is the canonical type (not 'mcq')
-    const types = ['multiple_choice', 'mcq_multi', 'text_input', 'boolean', 'reorder_steps'] as const;
+    const types = [
+      'multiple_choice',
+      'mcq_multi',
+      'text_input',
+      'boolean',
+      'reorder_steps',
+    ] as const;
     for (const type of types) {
       vi.clearAllMocks();
       resolveOnce({ question_id: MOCK_QUESTION_ID, type, app_id: MOCK_APP_ID });
@@ -365,7 +372,7 @@ describe('useUpdateQuestion — update mutation', () => {
       question_id: MOCK_QUESTION_ID,
       content: 'Updated question text',
       status: 'live',
-    } );
+    });
 
     expect(mockChain.update).toHaveBeenCalledWith(
       expect.objectContaining({ content: 'Updated question text', status: 'live' })
@@ -390,7 +397,7 @@ describe('useUpdateQuestion — update mutation', () => {
     await result.current.mutateAsync({
       question_id: MOCK_QUESTION_ID,
       status: 'live',
-    } );
+    });
 
     // Must filter by app_id (prevents cross-tenant mutation)
     const eqCalls = updateChain.eq.mock.calls as [string, string][];
@@ -419,12 +426,12 @@ describe('useUpdateQuestion — update mutation', () => {
       result.current.mutateAsync({
         question_id: MOCK_QUESTION_ID,
         status: 'live',
-      } )
+      })
     ).rejects.toMatchObject({ message: 'update failed' });
   });
 
   it('super admin update does not require app_id filter (RLS handles it)', async () => {
-    mockApp({ isSuperAdmin: true } );
+    mockApp({ isSuperAdmin: true });
     const { wrapper } = makeWrapper();
     const mockChain = getMockChain();
     const updateChain = {
@@ -443,9 +450,7 @@ describe('useUpdateQuestion — update mutation', () => {
       result.current.mutateAsync({
         question_id: MOCK_QUESTION_ID,
         status: 'live',
-      } )
+      })
     ).resolves.toBeDefined();
   });
 });
-
-

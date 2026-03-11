@@ -301,6 +301,7 @@ export function KnownIssuesPage() {
             </Button>
             <Button
               onClick={() => handleOpenDialog()}
+              data-testid="new-issue-button"
               className="h-9 px-3 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs gap-1"
             >
               <Plus className="w-3.5 h-3.5" /> New Issue

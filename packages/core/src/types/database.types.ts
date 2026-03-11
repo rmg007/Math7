@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          app_id: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          type: string
+          unlocked_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          type: string
+          unlocked_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          type?: string
+          unlocked_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievements_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+          {
+            foreignKeyName: "achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_generation_sessions: {
         Row: {
           app_id: string | null
@@ -273,6 +321,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           display_name: string
+          features: Json | null
           grade_level: string
           grade_number: number | null
           is_active: boolean | null
@@ -287,6 +336,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_name: string
+          features?: Json | null
           grade_level: string
           grade_number?: number | null
           is_active?: boolean | null
@@ -301,6 +351,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_name?: string
+          features?: Json | null
           grade_level?: string
           grade_number?: number | null
           is_active?: boolean | null
@@ -377,8 +428,11 @@ export type Database = {
       }
       attempts: {
         Row: {
+          app_id: string | null
+          confidence_rating: number | null
           created_at: string
           deleted_at: string | null
+          difficulty_perception: string | null
           id: string
           is_correct: boolean
           question_id: string
@@ -389,8 +443,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          app_id?: string | null
+          confidence_rating?: number | null
           created_at?: string
           deleted_at?: string | null
+          difficulty_perception?: string | null
           id?: string
           is_correct: boolean
           question_id: string
@@ -401,8 +458,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          app_id?: string | null
+          confidence_rating?: number | null
           created_at?: string
           deleted_at?: string | null
+          difficulty_perception?: string | null
           id?: string
           is_correct?: boolean
           question_id?: string
@@ -413,6 +473,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "attempts_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
           {
             foreignKeyName: "attempts_question_id_fkey"
             columns: ["question_id"]
@@ -1029,6 +1096,57 @@ export type Database = {
           },
         ]
       }
+      purchases: {
+        Row: {
+          app_id: string
+          created_at: string | null
+          deleted_at: string | null
+          id: string
+          item_id: string
+          item_name: string
+          points_cost: number
+          purchased_at: string | null
+          user_id: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          item_id: string
+          item_name: string
+          points_cost: number
+          purchased_at?: string | null
+          user_id: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          item_id?: string
+          item_name?: string
+          points_cost?: number
+          purchased_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+          {
+            foreignKeyName: "purchases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       questions: {
         Row: {
           app_id: string
@@ -1208,6 +1326,7 @@ export type Database = {
       }
       sessions: {
         Row: {
+          app_id: string | null
           created_at: string | null
           deleted_at: string | null
           ended_at: string | null
@@ -1221,6 +1340,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          app_id?: string | null
           created_at?: string | null
           deleted_at?: string | null
           ended_at?: string | null
@@ -1234,6 +1354,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          app_id?: string | null
           created_at?: string | null
           deleted_at?: string | null
           ended_at?: string | null
@@ -1248,6 +1369,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "sessions_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+          {
             foreignKeyName: "sessions_skill_id_fkey"
             columns: ["skill_id"]
             isOneToOne: false
@@ -1258,6 +1386,7 @@ export type Database = {
       }
       skill_progress: {
         Row: {
+          app_id: string | null
           correct_attempts: number | null
           created_at: string
           current_streak: number | null
@@ -1273,6 +1402,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          app_id?: string | null
           correct_attempts?: number | null
           created_at?: string
           current_streak?: number | null
@@ -1288,6 +1418,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          app_id?: string | null
           correct_attempts?: number | null
           created_at?: string
           current_streak?: number | null
@@ -1303,6 +1434,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "skill_progress_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
           {
             foreignKeyName: "skill_progress_skill_id_fkey"
             columns: ["skill_id"]
@@ -1563,6 +1701,92 @@ export type Database = {
           },
         ]
       }
+      user_activity: {
+        Row: {
+          activity_date: string
+          app_id: string
+          created_at: string | null
+          id: string
+          points_earned: number | null
+          questions_attempted: number | null
+          time_spent_ms: number | null
+          user_id: string
+        }
+        Insert: {
+          activity_date: string
+          app_id: string
+          created_at?: string | null
+          id?: string
+          points_earned?: number | null
+          questions_attempted?: number | null
+          time_spent_ms?: number | null
+          user_id: string
+        }
+        Update: {
+          activity_date?: string
+          app_id?: string
+          created_at?: string | null
+          id?: string
+          points_earned?: number | null
+          questions_attempted?: number | null
+          time_spent_ms?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_activity_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+          {
+            foreignKeyName: "user_activity_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_metadata: {
+        Row: {
+          app_id: string
+          daily_streak: number | null
+          hints_balance: number | null
+          id: string
+          last_active_date: string | null
+          points_balance: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          app_id: string
+          daily_streak?: number | null
+          hints_balance?: number | null
+          id: string
+          last_active_date?: string | null
+          points_balance?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          app_id?: string
+          daily_streak?: number | null
+          hints_balance?: number | null
+          id?: string
+          last_active_date?: string | null
+          points_balance?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_metadata_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1597,6 +1821,7 @@ export type Database = {
         Args: { p_expires_days?: number; p_max_uses?: number }
         Returns: string
       }
+      get_sync_integrity_stats: { Args: { p_app_id: string }; Returns: Json }
       import_questions_bulk: {
         Args: { questions_data: Json }
         Returns: {
@@ -1669,6 +1894,7 @@ export type Database = {
       submit_attempt_and_update_progress: {
         Args: { attempts_json: Json }
         Returns: {
+          app_id: string | null
           correct_attempts: number | null
           created_at: string
           current_streak: number | null

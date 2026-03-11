@@ -38,7 +38,13 @@ export function McqSubForm({ form }: McqSubFormProps) {
                 data-testid={`question-mcq-option-${index}`}
                 className="h-12 rounded-xl bg-white/50 border-gray-100 font-bold focus:ring-4 focus:ring-indigo-500/10 transition-all"
                 required
+                maxLength={200}
               />
+              <span
+                className={`text-[10px] absolute right-16 top-1/2 -translate-y-1/2 font-mono font-bold transition-colors ${opt.text.length > 180 ? 'text-rose-500' : 'text-gray-300'}`}
+              >
+                {opt.text.length}/200
+              </span>
             </div>
             <Button
               type="button"

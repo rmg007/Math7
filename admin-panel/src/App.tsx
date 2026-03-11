@@ -113,6 +113,11 @@ const GroupDetailPage = lazy(() =>
     default: m.GroupDetailPage,
   }))
 );
+const StudentDetailPage = lazy(() =>
+  import('./features/mentorship/pages/StudentDetailPage').then((m) => ({
+    default: m.StudentDetailPage,
+  }))
+);
 const AssignmentCreatePage = lazy(() =>
   import('./features/mentorship/pages/AssignmentCreatePage').then((m) => ({
     default: m.AssignmentCreatePage,
@@ -449,6 +454,16 @@ const router = createBrowserRouter([
           <StandardAdminGuard>
             <Suspense fallback={<LoadingPage />}>
               <GroupDetailPage />
+            </Suspense>
+          </StandardAdminGuard>
+        ),
+      },
+      {
+        path: '/students/:id',
+        element: (
+          <StandardAdminGuard>
+            <Suspense fallback={<LoadingPage />}>
+              <StudentDetailPage />
             </Suspense>
           </StandardAdminGuard>
         ),

@@ -31,23 +31,23 @@ const AUTH_DIR = path.resolve(__dirname, '..', '.auth');
 const ROLES = [
   {
     name: 'super-admin',
-    email: process.env.TEST_SUPER_ADMIN_EMAIL!,
-    password: process.env.TEST_SUPER_ADMIN_PASSWORD!,
+    email: process.env.TEST_SUPER_ADMIN_EMAIL ?? '',
+    password: process.env.TEST_SUPER_ADMIN_PASSWORD ?? '',
   },
   {
     name: 'admin',
-    email: process.env.TEST_ADMIN_EMAIL!,
-    password: process.env.TEST_ADMIN_PASSWORD!,
+    email: process.env.TEST_ADMIN_EMAIL ?? '',
+    password: process.env.TEST_ADMIN_PASSWORD ?? '',
   },
   {
     name: 'mentor',
-    email: process.env.TEST_MENTOR_EMAIL!,
-    password: process.env.TEST_MENTOR_PASSWORD!,
+    email: process.env.TEST_MENTOR_EMAIL ?? '',
+    password: process.env.TEST_MENTOR_PASSWORD ?? '',
   },
   {
     name: 'student',
-    email: process.env.TEST_STUDENT_EMAIL!,
-    password: process.env.TEST_STUDENT_PASSWORD!,
+    email: process.env.TEST_STUDENT_EMAIL ?? '',
+    password: process.env.TEST_STUDENT_PASSWORD ?? '',
   },
 ] as const;
 

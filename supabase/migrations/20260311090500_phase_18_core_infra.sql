@@ -28,6 +28,11 @@ CREATE TABLE IF NOT EXISTS public.session_events (
 ALTER TABLE public.session_events ENABLE ROW LEVEL SECURITY;
 
 -- 4. Policies
+DO $$ BEGIN
+    DROP POLICY IF EXISTS session_events_tenant_isolation ON public.session_events;
+EXCEPTION WHEN undefined_object THEN NULL;
+END $$;
+
 CREATE POLICY session_events_tenant_isolation ON public.session_events
 FOR ALL TO authenticated
 USING (

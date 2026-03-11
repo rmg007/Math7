@@ -1,0 +1,34 @@
+
+> admin-panel@0.0.0 lint
+> eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0
+
+
+C:\Users\mhali\OneDrive\Desktop\Important Projects\Questerix\admin-panel\tests\global-setup.ts
+  34:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  35:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  39:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  40:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  44:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  45:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  49:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  50:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+Γ£û 8 problems (0 errors, 8 warnings)
+
+node.exe : ESLint found too many 
+warnings (maximum: 0).
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Users\mhali\AppData\Roaming\ 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo          : No 
+   tSpecified: (ESLint found to  
+  ...s (maximum: 0).:String) [   
+ ], RemoteException
+    + FullyQualifiedErrorId : Na 
+   tiveCommandError
+ 
