@@ -1,6 +1,7 @@
 import { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { QueuedQuestionSchema } from '@/lib/validation/import-schema';
+import { addBreadcrumb, captureException } from '@/lib/error-tracker';
 
 interface ImportResult {
   success: boolean;
@@ -57,7 +58,7 @@ export class CurriculumService {
       }
 
       for (let i = 0; i < chunks.length; i++) {
-        console.log(`Importing batch ${i + 1} of ${chunks.length}...`);
+        addBreadcrumb(`Importing batch ${i + 1} of ${chunks.length}...`, 'curriculum', 'info');
 
         type RPCArgs = Database['public']['Functions']['import_questions_bulk']['Args'];
         const { data, error } = await supabase.rpc('import_questions_bulk', {
@@ -89,7 +90,9 @@ export class CurriculumService {
         count: totalInserted,
       };
     } catch (err: unknown) {
-      console.error('CurriculumService.importQuestionsBulk failure:', err);
+      captureException(err, {
+        tags: { service: 'CurriculumService', method: 'importQuestionsBulk' },
+      });
       return {
         success: false,
         count: 0,

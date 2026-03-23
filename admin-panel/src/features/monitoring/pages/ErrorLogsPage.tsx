@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/contexts/AppContext';
+import { captureException } from '@/lib/error-tracker';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useToast } from '@/hooks/use-toast';
 import { useUrlState } from '@/hooks/use-url-state';
@@ -153,7 +154,11 @@ export function ErrorLogsPage() {
         title: 'Error Log Deleted',
         description: 'The error log has been permanently removed.',
       });
-    } catch (error) {
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'ErrorLogsPage', method: 'handleDelete' },
+        extra: { errorId: error.id },
+      });
       toast({ title: 'Error', description: 'Failed to delete error log', variant: 'destructive' });
     }
   };
@@ -240,7 +245,11 @@ export function ErrorLogsPage() {
         title: 'Batch Updated',
         description: `Updated ${selectedIds.size} logs to ${status}.`,
       });
-    } catch (error) {
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'ErrorLogsPage', method: 'handleBulkStatusUpdate' },
+        extra: { status, idsCount: selectedIds.size },
+      });
       toast({ title: 'Error', description: 'Failed to update logs', variant: 'destructive' });
     }
   };
@@ -251,7 +260,11 @@ export function ErrorLogsPage() {
       await bulkDeleteErrors.mutateAsync(Array.from(selectedIds));
       setSelectedIds(new Set());
       toast({ title: 'Batch Deleted', description: `Deleted ${selectedIds.size} logs.` });
-    } catch (error) {
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'ErrorLogsPage', method: 'handleBulkDelete' },
+        extra: { idsCount: selectedIds.size },
+      });
       toast({ title: 'Error', description: 'Failed to delete logs', variant: 'destructive' });
     }
   };

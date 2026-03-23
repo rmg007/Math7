@@ -172,11 +172,7 @@ test.describe('Multi-Tenancy @regression', () => {
     await page.goto('/subjects');
     await page.waitForLoadState('networkidle');
     // Either a table, list, or empty-state message must be visible
-    const content = page
-      .locator(
-        'table, [role="row"], [data-testid*="subject"], p:has-text(/no subject|create/i), h1'
-      )
-      .first();
+    const content = page.locator('h1, table, [role="row"], [data-testid*="subject"]').first();
     await expect(content).toBeVisible({ timeout: 15_000 });
   });
 });

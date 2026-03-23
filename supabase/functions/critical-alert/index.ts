@@ -28,6 +28,8 @@ function timingSafeEqual(a: string, b: string): boolean {
   return result === 0;
 }
 
+import { checkEnvironmentGuard } from "../_shared/env-guard.ts";
+
 export const criticalAlertHandler = withErrorSanitization(
   async (req: Request) => {
     // Rate limiting
@@ -35,6 +37,12 @@ export const criticalAlertHandler = withErrorSanitization(
     if (!rateLimitResult.allowed) {
       return rateLimitResult.response!;
     }
+
+    // ========================================
+    // NEW: ENVIRONMENT GUARD (SEC-P0-02)
+    // ========================================
+    const envError = await checkEnvironmentGuard(req);
+    if (envError) return envError;
 
     const webhookSecret = Deno.env.get("ERROR_WEBHOOK_SECRET");
     const incomingSecret = req.headers.get("x-webhook-secret");

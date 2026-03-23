@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from 'npm:@google/generative-ai@0.1.3';
 import { createSanitizedErrorResponse, withErrorSanitization } from '../_shared/error-sanitizer.ts';
 import { sanitizeCustomInstructions, sanitizeSourceText } from '../_shared/input-sanitizer.ts';
 import { addRateLimitHeaders, createRateLimitMiddleware, rateLimitConfigs } from '../_shared/rate-limiter.ts';
+import { checkEnvironmentGuard } from '../_shared/env-guard.ts'
 
 const ALLOWED_ORIGINS = [
   'http://localhost:3000',
@@ -36,11 +37,15 @@ interface ImportRequest {
 }
 
 export const parseImportHandler = withErrorSanitization(
-  async (req: Request) => {
+  async (req: Request, deps?: { supabase?: any; adminSupabase?: any }) => {
     // Handle CORS preflight
     if (req.method === 'OPTIONS') {
       return new Response('ok', { headers: getCorsHeaders(req) });
     }
+
+    // --- HADES SECURITY PATCH: ENVIRONMENT GUARD ---
+    const envError = checkEnvironmentGuard(req)
+    if (envError) return envError
 
     // Rate limiting
     const rateLimitResult = rateLimit.middleware(req);
@@ -54,24 +59,24 @@ export const parseImportHandler = withErrorSanitization(
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    
+    // Create a user-scoped client that respects RLS
+    const supabaseClient = (deps?.supabase as any) || createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
 
     // Verify the user's JWT
-    const token = authHeader.replace('Bearer ', '');
-    const authErrorCheck = await supabase.auth.getUser(token);
-    const user = authErrorCheck.data.user;
-    const authError = authErrorCheck.error;
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
     
     if (authError || !user) {
       return createSanitizedErrorResponse('UNAUTHORIZED', 'Invalid or expired token');
     }
 
-    // Get user's app_id for tenant isolation
-    const { data: profile, error: profileError } = await supabase
+    // Get user's app_id for tenant isolation (respecting RLS)
+    const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('app_id, role')
-      .eq('id', user.id)
       .single();
 
     if (profileError || !profile?.app_id) {
@@ -127,8 +132,9 @@ export const parseImportHandler = withErrorSanitization(
     const actualTokenCount = usageMetadata?.totalTokenCount ?? 
       Math.ceil((prompt.length + generatedText.length) / 4);
 
-    // Consume tokens
-    const { error: quotaError } = await supabase.rpc('consume_tenant_tokens', {
+    // Consume tokens using admin client (bypasses RLS to record system usage)
+    const adminClient = (deps?.adminSupabase as any) || createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+    const { error: quotaError } = await adminClient.rpc('consume_tenant_tokens', {
       p_app_id: profile.app_id,
       p_tokens_used: actualTokenCount,
       p_operation: 'parse_import'

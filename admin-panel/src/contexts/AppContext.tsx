@@ -1,4 +1,5 @@
 import { App } from '@/features/platform/hooks/use-apps';
+import { captureException } from '@/lib/error-tracker';
 import { supabase } from '@/lib/supabase';
 import { SecurityLogger } from '@/services/SecurityLogger';
 import { ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -71,13 +72,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 .update({ app_id: activeApp.app_id })
                 .eq('id', user.id);
             } catch (err) {
-              console.error('Failed to sync default app to profile:', err);
+              captureException(err as Error, {
+                tags: { component: 'AppProvider', method: 'syncDefaultApp' },
+              });
             }
           }
         }
       }
     } catch (err) {
-      console.error('Failed to load apps:', err);
+      captureException(err as Error, {
+        tags: { component: 'AppProvider', method: 'loadApps' },
+      });
     } finally {
       setIsLoading(false);
       isLoadingRef.current = false;
@@ -121,7 +126,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem(STORAGE_KEY, app.app_id);
     } catch (err) {
-      console.error('Failed to save app preference to localStorage:', err);
+      captureException(err as Error, {
+        tags: { component: 'AppProvider', method: 'handleSetCurrentApp', action: 'localStorage' },
+        extra: { storageKey: STORAGE_KEY },
+      });
     }
 
     // Persist to profile for RLS context
@@ -132,7 +140,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try {
         await supabase.from('profiles').update({ app_id: app.app_id }).eq('id', user.id);
       } catch (err) {
-        console.error('Failed to sync app preference to profile:', err);
+        captureException(err as Error, {
+          tags: { component: 'AppProvider', method: 'handleSetCurrentApp', action: 'profileSync' },
+        });
       }
     }
   }, []);
@@ -143,7 +153,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try {
         localStorage.setItem(SIDEBAR_COLLAPSE_KEY, JSON.stringify(newState));
       } catch (err) {
-        console.error('Failed to save sidebar state to localStorage:', err);
+        captureException(err as Error, {
+          tags: { component: 'AppProvider', method: 'toggleSidebar' },
+          extra: { storageKey: SIDEBAR_COLLAPSE_KEY },
+        });
       }
       return newState;
     });

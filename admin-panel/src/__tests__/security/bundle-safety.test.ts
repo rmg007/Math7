@@ -74,10 +74,10 @@ describe('Bundle Safety & Secret Scanning', () => {
     const violations: string[] = [];
     // Regex detects .signUp({ ... role: ... })
     // Matches .signUp( followed by anything until it sees user_metadata or data, then checks for role: inside
-    const roleEscalationRegex = /\.signUp\(\s*\{[\s\S]*?role\s*:/;
-
     allFiles.forEach((file) => {
       const content = fs.readFileSync(file, 'utf-8');
+      // REL-09: Local regex to avoid stateful .test() side effects
+      const roleEscalationRegex = /\.signUp\(\s*\{[\s\S]*?role\s*:/;
       if (roleEscalationRegex.test(content)) {
         violations.push(path.relative(SRC_DIR, file));
       }
@@ -91,10 +91,10 @@ describe('Bundle Safety & Secret Scanning', () => {
   it('should not console.log sensitive invitation codes', () => {
     const violations: string[] = [];
     // Specific check for invitation codes being logged
-    const invitationLogRegex = /console\.log\([^)]*invitation[^)]*\)/i;
-
     allFiles.forEach((file) => {
       const content = fs.readFileSync(file, 'utf-8');
+      // REL-09: Local regex to avoid stateful .test() side effects
+      const invitationLogRegex = /console\.log\([^)]*invitation[^)]*\)/i;
       if (invitationLogRegex.test(content)) {
         violations.push(`${path.relative(SRC_DIR, file)} logs 'invitation' info`);
       }
@@ -103,6 +103,26 @@ describe('Bundle Safety & Secret Scanning', () => {
     expect(
       violations,
       `FAIL: Found console.log of invitation data: ${violations.join(', ')}`
+    ).toEqual([]);
+  });
+
+  it('should not contain hardcoded JWT patterns', () => {
+    const violations: string[] = [];
+    // JWT pattern: ey[A-Za-z0-9-_=]+\.ey[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+
+    allFiles.forEach((file) => {
+      const content = fs.readFileSync(file, 'utf-8');
+      // REL-09: Local regex to avoid stateful .test() side effects
+      const jwtRegex = /ey[A-Za-z0-9-_=]+\.ey[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+/;
+      if (jwtRegex.test(content)) {
+        // Skip common false positives if any are known
+        // No current false positives in admin-panel
+        violations.push(`${path.relative(SRC_DIR, file)} contains a hardcoded JWT pattern`);
+      }
+    });
+
+    expect(
+      violations,
+      `FAIL: Found hardcoded JWTs in client bundle: ${violations.join(', ')}`
     ).toEqual([]);
   });
 });

@@ -33,6 +33,8 @@ interface EnvConfig {
   isProduction: boolean;
   /** Whether running in development */
   isDevelopment: boolean;
+  /** API timeout in milliseconds */
+  apiTimeout: number;
 }
 
 // Type for the fallback env object when import.meta.env is unavailable
@@ -100,6 +102,7 @@ export const env: EnvConfig = {
   mode: (_metaEnv.MODE as 'development' | 'production') || 'development',
   isProduction: Boolean(_metaEnv.PROD),
   isDevelopment: Boolean(_metaEnv.DEV) || !_metaEnv.PROD,
+  apiTimeout: Number(getEnvVar('VITE_API_TIMEOUT', false)) || 15000,
 };
 
 /**

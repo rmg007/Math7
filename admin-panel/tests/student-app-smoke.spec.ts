@@ -8,7 +8,7 @@ import { expect, test } from '@playwright/test';
  * not caught by static analysis.
  */
 
-test.describe('Student App Infrastructure @smoke', () => {
+test.describe('Student App Infrastructure @student-smoke', () => {
   test('Homepage loads successfully', async ({ page }) => {
     const response = await page.goto('/');
     expect(response?.status()).toBeLessThan(400);

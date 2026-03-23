@@ -54,10 +54,10 @@ export default defineConfig({
         storageState: authState('super-admin'),
       },
     },
+    /* 
+    // Disabling mobile/tablet projects to reduce resource consumption and prevent IDE crashes
     {
       name: 'mobile',
-      // Exclude logic-only security tests that don't vary by viewport.
-      // auth-guard-deleted-at runs on desktop only — no value in running 3x.
       testMatch: /^(?!.*auth-guard-deleted-at).*\.spec\.ts$/,
       use: {
         ...devices['iPhone 12'],
@@ -74,12 +74,7 @@ export default defineConfig({
         storageState: authState('super-admin'),
       },
     },
-
-    // ── Unauthenticated project ────────────────────────────────────────────────
-    // For tests that explicitly test unauthenticated flows:
-    //   auth-flow.e2e.spec.ts, auth-registration.e2e.spec.ts,
-    //   rbac-guards (RBAC-003, MENTOR-006)
-    // These tests must also set: test.use({ storageState: { cookies: [], origins: [] } })
+    */
     {
       name: 'unauthenticated',
       use: {

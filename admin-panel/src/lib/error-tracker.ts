@@ -38,7 +38,7 @@ let currentUser: { id: string; email?: string } | null = null;
 /**
  * Recursively sanitizes objects to remove potential PII.
  */
-function sanitizeData(obj: Record<string, unknown>): Record<string, unknown> {
+export function sanitizeData(obj: Record<string, unknown>): Record<string, unknown> {
   const PII_KEYS = [
     'email',
     'password',
@@ -47,6 +47,9 @@ function sanitizeData(obj: Record<string, unknown>): Record<string, unknown> {
     'phone',
     'address',
     'name',
+    'full_name',
+    'userId',
+    'user_id',
     'credit_card',
     'ssn',
     'auth',
@@ -58,11 +61,36 @@ function sanitizeData(obj: Record<string, unknown>): Record<string, unknown> {
       sanitized[key] = '[REDACTED]';
     } else if (value && typeof value === 'object' && !Array.isArray(value)) {
       sanitized[key] = sanitizeData(value as Record<string, unknown>);
+    } else if (typeof value === 'string') {
+      sanitized[key] = sanitizeString(value);
     } else {
       sanitized[key] = value;
     }
   }
   return sanitized;
+}
+
+/**
+ * Sanitizes strings for PII like emails.
+ */
+export function sanitizeString(str: string): string {
+  if (!str) return str;
+  // Basic email regex: word chars @ word chars . word chars
+  const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+  return str.replace(emailRegex, '[EMAIL_REDACTED]');
+}
+
+/**
+ * Hashes a string using SHA-256 for PII protection.
+ */
+export async function hashString(str: string): Promise<string> {
+  const msgUint8 = new TextEncoder().encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+    .substring(0, 16);
 }
 
 /**
@@ -163,13 +191,13 @@ export async function captureException(
     const { error: rpcError } = await supabase.rpc('log_error', {
       p_platform: 'web',
       p_error_type: errorObj.name || 'Error',
-      p_error_message: message,
-      p_stack_trace: errorObj.stack || context?.componentStack || undefined,
+      p_error_message: sanitizeString(message),
+      p_stack_trace: sanitizeString(errorObj.stack || context?.componentStack || ''),
       p_url: context?.url || window.location.href,
       p_user_agent: context?.userAgent || navigator.userAgent,
       p_app_version: context?.appVersion || env.appVersion || '1.0.0',
       p_app_id: context?.appId || undefined,
-      p_extra_context: {
+      p_extra_context: sanitizeData({
         ...context?.extra,
         session_id: SESSION_ID,
         correlation_id: correlationId,
@@ -177,8 +205,8 @@ export async function captureException(
         telemetry,
         breadcrumbs: [...breadcrumbs],
         tags: context?.tags,
-        user: currentUser,
-      } as Json,
+        user: currentUser ? { id: currentUser.id } : null, // Only log UID, not email
+      }) as Json,
     });
 
     if (rpcError) {

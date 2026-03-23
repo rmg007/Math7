@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createSanitizedErrorResponse, withErrorSanitization } from "../_shared/error-sanitizer.ts";
 import { addRateLimitHeaders, createRateLimitMiddleware, rateLimitConfigs } from "../_shared/rate-limiter.ts";
+import { checkEnvironmentGuard } from "../_shared/env-guard.ts"
 
 // --- HADES SECURITY PATCH: Externalize Infra IDs ---
 const CLOUDFLARE_ACCOUNT_ID = Deno.env.get("CLOUDFLARE_ACCOUNT_ID");
@@ -39,6 +40,10 @@ export const manageAppDomainsHandler = withErrorSanitization(
     if (!rateLimitResult.allowed) {
       return rateLimitResult.response!;
     }
+
+    // --- HADES SECURITY PATCH: ENVIRONMENT GUARD ---
+    const envError = checkEnvironmentGuard(req)
+    if (envError) return envError
 
     const webhookSecret = Deno.env.get("DOMAIN_WEBHOOK_SECRET");
     const incomingSecret = req.headers.get("x-webhook-secret");

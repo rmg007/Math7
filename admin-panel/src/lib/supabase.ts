@@ -21,6 +21,20 @@ function getSupabaseClient(): SupabaseClient<Database> {
       persistSession: true,
       autoRefreshToken: true,
     },
+    global: {
+      fetch: (url, options) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), env.apiTimeout);
+
+        // If options already has a signal (from manual AbortController), we need to handle both.
+        // But for simplicity and SSoT reliability, we prioritize the global session timeout
+        // while allowing the browser's native fetch to handle the merge if possible.
+        return fetch(url, {
+          ...options,
+          signal: options?.signal || controller.signal,
+        }).finally(() => clearTimeout(timeoutId));
+      },
+    },
   });
 
   return _supabase;

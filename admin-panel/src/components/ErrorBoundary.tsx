@@ -56,7 +56,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       const results = await OracleService.findSolutionForError(error);
       this.setState({ oracleResults: results });
     } catch (err) {
-      console.error('Oracle Search Integration Failed:', err);
+      captureException(err as Error, {
+        tags: { component: 'ErrorBoundary', method: 'handleOracleSearch' },
+      });
     } finally {
       this.setState({ searching: false });
     }

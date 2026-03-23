@@ -323,30 +323,17 @@ export function useDuplicateQuestion() {
 
 export function useUpdateQuestionOrder() {
   const queryClient = useQueryClient();
-  const { currentApp, isSuperAdmin } = useApp();
+  const { currentApp } = useApp();
 
   return useMutation({
     mutationFn: async (updates: { question_id: string; sort_order: number }[]) => {
-      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
+      if (!currentApp?.app_id) throw new Error('No app selected');
 
-      const promises = updates.map(({ question_id, sort_order }) => {
-        let query = supabase
-          .from('questions')
-          .update({ sort_order })
-          .eq('question_id', question_id);
-
-        if (!isSuperAdmin && currentApp?.app_id) {
-          query = query.eq('app_id', currentApp.app_id);
-        }
-
-        return query;
+      const { error } = await supabase.rpc('reorder_questions', {
+        p_orders: updates,
       });
 
-      const results = await Promise.all(promises);
-      const errors = results.filter((r: { error: unknown }) => r.error);
-      if (errors.length > 0) {
-        throw errors[0].error;
-      }
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['questions'] });

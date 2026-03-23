@@ -21,6 +21,7 @@ import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
 import type { DataColumn } from '@/lib/data-utils';
 import { sanitizeHtml } from '@/lib/sanitize';
+import { captureException } from '@/lib/error-tracker';
 import { cn, formatIdentifier } from '@/lib/utils';
 import type { QuestionListItem } from '@/types';
 import {
@@ -690,7 +691,9 @@ export function QuestionList() {
       await bulkCreate.mutateAsync(questionsToImport as QuestionInsert[]);
       showToast(`Successfully imported ${questionsToImport.length} questions`, 'success');
     } catch (error) {
-      console.error('Import error:', error);
+      captureException(error as Error, {
+        tags: { component: 'QuestionList', method: 'handleImport' },
+      });
       const message = error instanceof Error ? error.message : 'Failed to import questions';
       showToast(message, 'error');
     }

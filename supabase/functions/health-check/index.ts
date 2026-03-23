@@ -279,11 +279,19 @@ async function performHealthCheck(): Promise<HealthCheckResult> {
   };
 }
 
+import { checkEnvironmentGuard } from '../_shared/env-guard.ts';
+
 export const healthCheckHandler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
+
+  // ========================================
+  // NEW: ENVIRONMENT GUARD (SEC-P0-02)
+  // ========================================
+  const envError = await checkEnvironmentGuard(req);
+  if (envError) return envError;
   
   if (req.method !== 'GET') {
     return new Response('Method not allowed', { 

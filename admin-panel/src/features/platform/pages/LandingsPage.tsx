@@ -1,47 +1,45 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Pagination } from '@/components/ui/pagination';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { captureException } from '@/lib/error-tracker';
 import { normalizeFormData } from '@/lib/normalization';
-import {
-    ChevronLeft,
-    Globe,
-    LayoutPanelTop,
-    Pencil,
-    Plus,
-    Save,
-    Search,
-    X,
-} from 'lucide-react';
+import { ChevronLeft, Globe, LayoutPanelTop, Pencil, Plus, Save, Search, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApps } from '../hooks/use-apps';
 import {
-    useCreateLandingPage,
-    useLandingPages,
-    useUpdateLandingPage,
-    type LandingPageWithApp,
+  useCreateLandingPage,
+  useLandingPages,
+  useUpdateLandingPage,
+  type LandingPageWithApp,
 } from '../hooks/use-landings';
 
 export function LandingsPage() {
@@ -88,14 +86,26 @@ export function LandingsPage() {
       });
       toast({ title: 'Success', description: 'Landing page updated' });
       setEditingLanding(null);
-    } catch (_error) {
-      toast({ title: 'Error', description: 'Failed to update landing page', variant: 'destructive' });
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'LandingsPage', method: 'handleSave' },
+        extra: { landingId: editingLanding.landing_page_id },
+      });
+      toast({
+        title: 'Error',
+        description: 'Failed to update landing page',
+        variant: 'destructive',
+      });
     }
   };
 
   const handleCreate = async () => {
     if (!selectedAppId) {
-      toast({ title: 'Error', description: 'Please select an application', variant: 'destructive' });
+      toast({
+        title: 'Error',
+        description: 'Please select an application',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -112,14 +122,23 @@ export function LandingsPage() {
         app_id: selectedAppId,
         hero_headline: 'Welcome to the Future of Learning',
         hero_subheadline: 'Engage with a personalized curriculum designed for your specific goals.',
-        meta_title: apps?.find((a) => a.app_id === selectedAppId)?.display_name || 'Academic Portal',
+        meta_title:
+          apps?.find((a) => a.app_id === selectedAppId)?.display_name || 'Academic Portal',
         meta_description: 'Experience premium educational content with Questerix.',
       });
       toast({ title: 'Success', description: 'Landing page created' });
       setIsCreateDialogOpen(false);
       handleEdit(newLanding as LandingPageWithApp);
-    } catch (_error) {
-      toast({ title: 'Error', description: 'Failed to create landing page', variant: 'destructive' });
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'LandingsPage', method: 'handleCreate' },
+        extra: { appId: selectedAppId },
+      });
+      toast({
+        title: 'Error',
+        description: 'Failed to create landing page',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -138,12 +157,8 @@ export function LandingsPage() {
               <ChevronLeft className="w-4 h-4" />
             </Button>
             <div>
-              <h2 className="text-base font-semibold text-gray-900">
-                Edit Landing Page
-              </h2>
-              <p className="text-xs text-gray-500">
-                {editingLanding.apps?.display_name}
-              </p>
+              <h2 className="text-base font-semibold text-gray-900">Edit Landing Page</h2>
+              <p className="text-xs text-gray-500">{editingLanding.apps?.display_name}</p>
             </div>
           </div>
 
@@ -296,21 +311,11 @@ export function LandingsPage() {
         <Table className="w-full">
           <TableHeader>
             <TableRow className="bg-gray-50">
-              <TableHead className="px-4">
-                Application
-              </TableHead>
-              <TableHead className="hidden md:table-cell">
-                URL
-              </TableHead>
-              <TableHead className="hidden lg:table-cell">
-                Headline
-              </TableHead>
-              <TableHead>
-                Status
-              </TableHead>
-              <TableHead className="text-right px-4 border-l border-gray-100">
-                Actions
-              </TableHead>
+              <TableHead className="px-4">Application</TableHead>
+              <TableHead className="hidden md:table-cell">URL</TableHead>
+              <TableHead className="hidden lg:table-cell">Headline</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right px-4 border-l border-gray-100">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -354,10 +359,7 @@ export function LandingsPage() {
               </TableRow>
             ) : (
               paginatedLandings.map((l) => (
-                <TableRow
-                  key={l.landing_page_id}
-                  className="even:bg-gray-50/40"
-                >
+                <TableRow key={l.landing_page_id} className="even:bg-gray-50/40">
                   <TableCell className="px-4">
                     <span className="font-medium text-gray-900 text-xs truncate">
                       {l.apps?.display_name}
@@ -379,9 +381,7 @@ export function LandingsPage() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <StatusBadge
-                      status={(l.status as StatusType) || 'draft'}
-                    />
+                    <StatusBadge status={(l.status as StatusType) || 'draft'} />
                   </TableCell>
                   <TableCell className="px-4 text-right border-l border-gray-100">
                     <Button
@@ -443,9 +443,12 @@ export function LandingsPage() {
                         {app.display_name} ({app.subdomain})
                       </SelectItem>
                     ))}
-                  {apps?.filter((app) => !landings?.some((l) => l.app_id === app.app_id)).length === 0 && (
+                  {apps?.filter((app) => !landings?.some((l) => l.app_id === app.app_id)).length ===
+                    0 && (
                     <div className="p-3 text-center space-y-2">
-                      <p className="text-xs text-gray-500">All applications already have landing pages.</p>
+                      <p className="text-xs text-gray-500">
+                        All applications already have landing pages.
+                      </p>
                       <Button asChild variant="outline" size="sm" className="text-xs">
                         <Link to="/apps">Create New Application</Link>
                       </Button>

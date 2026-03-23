@@ -1,5 +1,5 @@
 import { useApp } from '@/hooks/use-app';
-import { Database } from '@/lib/database.types';
+import { Database, Json } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -240,27 +240,17 @@ export {
 
 export function useUpdateDomainOrder() {
   const queryClient = useQueryClient();
-  const { currentApp, isSuperAdmin } = useApp();
+  const { currentApp } = useApp();
 
   return useMutation({
     mutationFn: async (updates: { domain_id: string; sort_order: number }[]) => {
-      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
+      if (!currentApp?.app_id) throw new Error('No app selected');
 
-      const promises = updates.map(({ domain_id, sort_order }) => {
-        let query = supabase.from('domains').update({ sort_order }).eq('domain_id', domain_id);
-
-        if (!isSuperAdmin && currentApp?.app_id) {
-          query = query.eq('app_id', currentApp.app_id);
-        }
-
-        return query;
+      const { error } = await supabase.rpc('reorder_domains', {
+        p_orders: updates as unknown as Json,
       });
 
-      const results = await Promise.all(promises);
-      const errors = results.filter((r: { error: unknown }) => r.error);
-      if (errors.length > 0) {
-        throw errors[0].error;
-      }
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['domains'] });

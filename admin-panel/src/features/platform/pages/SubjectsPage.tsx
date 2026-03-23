@@ -1,84 +1,85 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
 import { ColumnToggle } from '@/components/ui/column-toggle';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
+import { captureException } from '@/lib/error-tracker';
 import type { DataColumn } from '@/lib/data-utils';
 import { normalizeFormData } from '@/lib/normalization';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-    Boxes,
-    CheckCircle2,
-    CheckSquare,
-    Filter,
-    Loader2,
-    Pencil,
-    Plus,
-    Search,
-    Square,
-    Trash2,
-    X,
+  Boxes,
+  CheckCircle2,
+  CheckSquare,
+  Filter,
+  Loader2,
+  Pencil,
+  Plus,
+  Search,
+  Square,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
-    useBulkCreateSubjects,
-    useBulkDeleteSubjects,
-    useBulkUpdateSubjectsStatus,
-    useCheckSubjectSlug,
-    useCreateSubject,
-    useDeleteSubject,
-    useSubjects,
-    useUpdateSubject,
-    type Subject,
-    type SubjectInsert,
+  useBulkCreateSubjects,
+  useBulkDeleteSubjects,
+  useBulkUpdateSubjectsStatus,
+  useCheckSubjectSlug,
+  useCreateSubject,
+  useDeleteSubject,
+  useSubjects,
+  useUpdateSubject,
+  type Subject,
+  type SubjectInsert,
 } from '../hooks/use-subjects';
 
 interface SubjectRowProps {
@@ -493,11 +494,14 @@ export function SubjectsPage() {
         toast({ title: 'Success', description: 'Subject created' });
       }
       setIsDialogOpen(false);
-    } catch (error: unknown) {
-      console.error('Failed to save subject:', error);
+    } catch (err: unknown) {
+      captureException(err as Error, {
+        tags: { component: 'SubjectsPage', method: 'onSubmit' },
+        extra: { isEditing: Boolean(editingSubject) },
+      });
 
       let errorMessage = 'An unexpected error occurred while saving the subject.';
-      const supabaseError = error as { code?: string; status?: number };
+      const supabaseError = err as { code?: string; status?: number };
 
       // Handle Supabase/Postgres 409 Conflict (Duplicate Key)
       if (supabaseError?.code === '23505' || supabaseError?.status === 409) {
@@ -542,7 +546,11 @@ export function SubjectsPage() {
       });
       toast({ title: 'Success', description: `${selectedIds.size} subjects updated` });
       setSelectedIds(new Set());
-    } catch (error) {
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'SubjectsPage', method: 'handleBulkStatusUpdate' },
+        extra: { status, idsCount: selectedIds.size },
+      });
       toast({ title: 'Error', description: 'Failed to update subjects', variant: 'destructive' });
     }
   };
@@ -557,7 +565,11 @@ export function SubjectsPage() {
       await bulkDelete.mutateAsync(Array.from(selectedIds));
       toast({ title: 'Success', description: `${selectedIds.size} subjects deleted` });
       setSelectedIds(new Set());
-    } catch (error) {
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'SubjectsPage', method: 'confirmBulkDelete' },
+        extra: { idsCount: selectedIds.size },
+      });
       toast({ title: 'Error', description: 'Failed to delete subjects', variant: 'destructive' });
     } finally {
       setDeleteConfirmation(null);
@@ -597,11 +609,13 @@ export function SubjectsPage() {
       }) as SubjectInsert[];
       await bulkCreate.mutateAsync(subjectsToCreate);
       toast({ title: 'Success', description: `${data.length} subjects imported successfully` });
-    } catch (error) {
-      console.error('Import error:', error);
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'SubjectsPage', method: 'handleImport' },
+      });
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to import subjects',
+        description: err instanceof Error ? err.message : 'Failed to import subjects',
         variant: 'destructive',
       });
     }
@@ -621,13 +635,17 @@ export function SubjectsPage() {
         title: 'Subject Deleted',
         description: 'The subject and all associated metadata have been removed.',
       });
-    } catch (error: unknown) {
+    } catch (err: unknown) {
+      captureException(err as Error, {
+        tags: { component: 'SubjectsPage', method: 'confirmSingleDelete' },
+        extra: { id },
+      });
       let description = 'Failed to delete subject';
       if (
-        typeof error === 'object' &&
-        error !== null &&
-        'code' in error &&
-        (error as { code: string }).code === '23503'
+        typeof err === 'object' &&
+        err !== null &&
+        'code' in err &&
+        (err as { code: string }).code === '23503'
       ) {
         description =
           'Cannot delete this subject because it is assigned to one or more Applications.';

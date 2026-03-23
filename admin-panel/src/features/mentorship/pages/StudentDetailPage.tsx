@@ -32,6 +32,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useMemo } from 'react';
 import {
   Bar,
   BarChart,
@@ -44,6 +45,8 @@ import {
   YAxis,
 } from 'recharts';
 
+const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6'];
+
 export function StudentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -54,15 +57,69 @@ export function StudentDetailPage() {
   const { data: purchases } = useStudentPurchases(studentId);
   const { data: attempts } = useStudentAttempts(studentId);
 
+  // Process Metacognition Data (Memoized to prevent redundant calculations)
+  const confidenceData = useMemo(
+    () =>
+      attempts?.reduce(
+        (acc: { name: string; value: number }[], attempt) => {
+          if (attempt.confidence_rating !== null) {
+            const rating = attempt.confidence_rating;
+            const existing = acc.find((d) => d.name === rating.toString());
+            if (existing) existing.value++;
+            else acc.push({ name: rating.toString(), value: 1 });
+          }
+          return acc;
+        },
+        [] as { name: string; value: number }[]
+      ) || [],
+    [attempts]
+  );
+
+  const difficultyData = useMemo(
+    () =>
+      attempts?.reduce(
+        (acc: { name: string; value: number }[], attempt) => {
+          if (attempt.difficulty_perception !== null) {
+            const perception = attempt.difficulty_perception;
+            const existing = acc.find((d) => d.name === perception);
+            if (existing) existing.value++;
+            else acc.push({ name: perception, value: 1 });
+          }
+          return acc;
+        },
+        [] as { name: string; value: number }[]
+      ) || [],
+    [attempts]
+  );
+
+  // Pre-process activity map for O(1) lookup in heatmap
+  const activityMap = useMemo(() => {
+    const map = new Map<string, number>();
+    activity?.forEach((a) => {
+      if (a.activity_date) {
+        map.set(a.activity_date, a.questions_attempted || 0);
+      }
+    });
+    return map;
+  }, [activity]);
+
+  const masteryScore = useMemo(() => {
+    if (!attempts || attempts.length === 0) return 0;
+    const correct = attempts.filter((a) => a.is_correct).length;
+    return Math.round((correct / attempts.length) * 100);
+  }, [attempts]);
+
   if (isProfileLoading) {
     return (
       <div className="p-8">
         <Skeleton className="h-12 w-1/3 mb-6" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Skeleton className="h-32" />
           <Skeleton className="h-32" />
           <Skeleton className="h-32" />
           <Skeleton className="h-32" />
         </div>
+        <Skeleton className="h-[400px] w-full" />
       </div>
     );
   }
@@ -81,37 +138,6 @@ export function StudentDetailPage() {
       </div>
     );
   }
-
-  // Process Metacognition Data
-  const confidenceData =
-    attempts?.reduce(
-      (acc: { name: string; value: number }[], attempt) => {
-        if (attempt.confidence_rating !== null) {
-          const rating = attempt.confidence_rating;
-          const existing = acc.find((d) => d.name === rating.toString());
-          if (existing) existing.value++;
-          else acc.push({ name: rating.toString(), value: 1 });
-        }
-        return acc;
-      },
-      [] as { name: string; value: number }[]
-    ) || [];
-
-  const difficultyData =
-    attempts?.reduce(
-      (acc: { name: string; value: number }[], attempt) => {
-        if (attempt.difficulty_perception !== null) {
-          const perception = attempt.difficulty_perception;
-          const existing = acc.find((d) => d.name === perception);
-          if (existing) existing.value++;
-          else acc.push({ name: perception, value: 1 });
-        }
-        return acc;
-      },
-      [] as { name: string; value: number }[]
-    ) || [];
-
-  const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6'];
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -204,13 +230,7 @@ export function StudentDetailPage() {
                 <BarChart3 className="h-4 w-4" />
               </div>
               <div className="flex items-end gap-2 text-gray-900">
-                <span className="text-3xl font-black">
-                  {(((attempts?.filter((a) => a.is_correct).length || 0) /
-                    (attempts?.length || 1)) *
-                    100) |
-                    0}
-                  %
-                </span>
+                <span className="text-3xl font-black">{masteryScore}%</span>
                 <span className="text-xs font-bold mb-1 opacity-50 uppercase tracking-widest">
                   Score
                 </span>
@@ -363,8 +383,7 @@ export function StudentDetailPage() {
                     const date = new Date();
                     date.setDate(date.getDate() - (89 - i));
                     const dateStr = date.toISOString().split('T')[0];
-                    const dayActivity = activity?.find((a) => a.activity_date === dateStr);
-                    const count = dayActivity?.questions_attempted || 0;
+                    const count = activityMap.get(dateStr) || 0;
 
                     return (
                       <div

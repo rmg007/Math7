@@ -133,7 +133,7 @@ function Invoke-PhaseSupabase {
         
         # 2. Push migrations
         Write-Info "Pushing migrations..."
-        $pushOutput = npx supabase db push --password "$dbPass" 2>&1
+        $pushOutput = npx supabase db push --password "$dbPass" --yes 2>&1
         $pushOutput | ForEach-Object { Write-Info $_ }
         
         $ErrorActionPreference = $OldEAP
@@ -247,17 +247,33 @@ function Invoke-PhaseSmoke {
         return
     }
  
-    # Gate-then-Promote: We test the preview subdomain
-    $smokeUrl = ""
-    if ($Target -eq 'admin-panel') {
-        $smokeUrl = "https://preview.$($script:Config.cloudflare.admin_project).pages.dev"
-    } elseif ($Target -eq 'questerix-student-app' -or $Target -eq 'all') {
-        $smokeUrl = "https://preview.$($script:Config.cloudflare.student_project).pages.dev"
-    }
- 
-    Write-Info "Running production smoke gate against: $smokeUrl"
+    # Gate-then-Promote: We test the preview subdomains
     Start-Timer "SmokeGate"
-    & $smokeScript -Target $Target -Url $smokeUrl
+
+    if ($Target -eq 'all') {
+        # Test Admin Panel
+        $adminUrl = "https://preview.$($script:Config.cloudflare.admin_project).pages.dev"
+        Write-Info "Running Admin Panel smoke tests against: $adminUrl"
+        & $smokeScript -Target admin-panel -Url $adminUrl
+        if ($LASTEXITCODE -ne 0) { throw "Admin Panel smoke gate failed" }
+
+        # Test Student App
+        $studentUrl = "https://preview.$($script:Config.cloudflare.student_project).pages.dev"
+        Write-Info "Running Student App smoke tests against: $studentUrl"
+        & $smokeScript -Target questerix-student-app -Url $studentUrl
+        if ($LASTEXITCODE -ne 0) { throw "Student App smoke gate failed" }
+    } else {
+        $smokeUrl = ""
+        if ($Target -eq 'admin-panel') {
+            $smokeUrl = "https://preview.$($script:Config.cloudflare.admin_project).pages.dev"
+        } else {
+            $smokeUrl = "https://preview.$($script:Config.cloudflare.student_project).pages.dev"
+        }
+        Write-Info "Running $Target smoke gate against: $smokeUrl"
+        & $smokeScript -Target $Target -Url $smokeUrl
+        if ($LASTEXITCODE -ne 0) { throw "$Target smoke gate failed" }
+    }
+
     Stop-Timer "SmokeGate"
     
     if ($LASTEXITCODE -ne 0) {

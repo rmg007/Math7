@@ -4,6 +4,7 @@ import { useApp } from '@/hooks/use-app';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import { addBreadcrumb, captureException } from '@/lib/error-tracker';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Activity, Calendar, CheckCircle, Clock, Loader2, ShieldCheck, Target } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -70,8 +71,11 @@ export function AssignmentCreatePage() {
     if (isContextSwitching) {
       const targetApp = apps.find((a) => a.app_id === group.app_id);
       if (targetApp) {
-        console.log(
-          `[AssignmentCreatePage] Switching context from ${currentApp?.display_name} to ${targetApp.display_name}`
+        addBreadcrumb(
+          `Switching context from ${currentApp?.display_name} to ${targetApp.display_name}`,
+          'navigation',
+          'info',
+          { from: currentApp?.app_id, to: targetApp.app_id }
         );
         setCurrentApp(targetApp);
       }
@@ -141,6 +145,10 @@ export function AssignmentCreatePage() {
       navigate(`/groups/${groupId}`);
     },
     onError: (error: Error) => {
+      captureException(error, {
+        tags: { component: 'AssignmentCreatePage', method: 'createAssignment' },
+        extra: { groupId, targetId, type, scope, dueDate },
+      });
       toast({
         title: 'Error',
         description: error.message,

@@ -14,6 +14,7 @@ import {
   Trash2,
   User,
 } from 'lucide-react';
+import { captureException } from '@/lib/error-tracker';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -80,7 +81,9 @@ export function AccountSettingsPage() {
       navigate('/login');
     } catch (err) {
       setError('Failed to deactivate account. Please try again.');
-      console.error('Deactivate error:', err);
+      captureException(err as Error, {
+        tags: { component: 'AccountSettingsPage', method: 'handleDeactivateAccount' },
+      });
       setActionLoading(false);
     }
   };
@@ -107,7 +110,9 @@ export function AccountSettingsPage() {
       navigate('/login');
     } catch (err) {
       setError('Failed to delete account. Please contact support.');
-      console.error('Delete error:', err);
+      captureException(err as Error, {
+        tags: { component: 'AccountSettingsPage', method: 'handleDeleteAccount' },
+      });
       setActionLoading(false);
     }
   };

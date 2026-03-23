@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from 'npm:@google/generative-ai@0.1.3';
 import { createSanitizedErrorResponse, withErrorSanitization } from '../_shared/error-sanitizer.ts';
 import { sanitizeSourceText } from '../_shared/input-sanitizer.ts';
 import { addRateLimitHeaders, createRateLimitMiddleware, rateLimitConfigs } from '../_shared/rate-limiter.ts';
+import { checkEnvironmentGuard } from '../_shared/env-guard.ts';
 
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || 'http://localhost:3000,http://localhost:5173').split(',');
 
@@ -32,7 +33,7 @@ interface ValidationRequest {
 }
 
 export const validateContentHandler = withErrorSanitization(
-  async (req: Request, deps?: { supabase?: Record<string, unknown>; genAI?: Record<string, unknown> }) => {
+  async (req: Request, deps?: { supabase?: Record<string, unknown>; adminSupabase?: Record<string, unknown>; genAI?: Record<string, unknown> }) => {
     const corsHeaders = getCorsHeaders(req);
     if (req.method === 'OPTIONS') {
       return new Response('ok', { headers: corsHeaders });
@@ -45,6 +46,12 @@ export const validateContentHandler = withErrorSanitization(
       return rateLimitResult.response!;
     }
 
+    // ========================================
+    // NEW: ENVIRONMENT GUARD (SEC-P0-02)
+    // ========================================
+    const envError = await checkEnvironmentGuard(req);
+    if (envError) return envError;
+
     // Authentication check
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
@@ -52,24 +59,24 @@ export const validateContentHandler = withErrorSanitization(
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = (deps?.supabase as any) || createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    
+    // Create a user-scoped client that respects RLS
+    const supabaseClient = (deps?.supabase as any) || createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
 
     // Verify the user's JWT
-    const token = authHeader.replace('Bearer ', '');
-    const authErrorCheck = await supabase.auth.getUser(token);
-    const user = authErrorCheck.data.user;
-    const authError = authErrorCheck.error;
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
     
     if (authError || !user) {
       return createSanitizedErrorResponse('UNAUTHORIZED', 'Invalid or expired token');
     }
 
-    // Get user's app_id for tenant isolation
-    const { data: profile, error: profileError } = await supabase
+    // Get user's app_id for tenant isolation (respecting RLS)
+    const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('app_id, role')
-      .eq('id', user.id)
       .single();
 
     if (profileError || !profile?.app_id) {
@@ -137,8 +144,9 @@ export const validateContentHandler = withErrorSanitization(
     const actualTokenCount = usageMetadata?.totalTokenCount ?? 
       Math.ceil((prompt.length + validationText.length) / 4);
 
-    // Consume tenant tokens
-    const { error: quotaError } = await supabase.rpc('consume_tenant_tokens', {
+    // Consume tenant tokens using admin client
+    const adminClient = (deps?.adminSupabase as any) || createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+    const { error: quotaError } = await adminClient.rpc('consume_tenant_tokens', {
       p_app_id: profile.app_id,
       p_tokens_used: actualTokenCount,
       p_operation: 'validate_content'

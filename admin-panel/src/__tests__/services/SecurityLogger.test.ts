@@ -112,7 +112,7 @@ describe('SecurityLogger', () => {
         'log_security_event',
         expect.objectContaining({
           p_event_type: 'login',
-          p_metadata: { userId: 'user-123' },
+          p_metadata: { userId_hash: 'fcdec6df4d44dbc6' },
         })
       );
     });
@@ -136,6 +136,31 @@ describe('SecurityLogger', () => {
           p_metadata: { action: 'delete_record', id: 'rec-1' },
         })
       );
+    });
+
+    it('should hash PII in sensitive action metadata', async () => {
+      await SecurityLogger.logSensitiveAction('update_user', {
+        email: 'test@example.com',
+        userId: 'user-123',
+      });
+      expect(supabase.rpc).toHaveBeenCalledWith(
+        'log_security_event',
+        expect.objectContaining({
+          p_event_type: 'sensitive_action',
+          p_metadata: expect.objectContaining({
+            action: 'update_user',
+            email_hash: expect.any(String),
+            userId_hash: 'fcdec6df4d44dbc6',
+          }),
+        })
+      );
+
+      // Ensure raw PII is NOT in metadata
+      const calls = vi.mocked(supabase.rpc).mock.calls;
+      const lastCall = calls[calls.length - 1];
+      const metadata = (lastCall?.[1] as any)?.p_metadata;
+      expect(metadata.email).toBeUndefined();
+      expect(metadata.userId).toBeUndefined();
     });
   });
 });

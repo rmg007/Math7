@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { captureException } from '@/lib/error-tracker';
 import { DataColumn } from '@/lib/data-utils';
 import type { Database } from '@/lib/database.types';
 import { cn } from '@/lib/utils';
@@ -154,8 +155,11 @@ export function KnownIssuesPage() {
         toast({ title: 'Success', description: 'Issue created' });
       }
       setIsDialogOpen(false);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'KnownIssuesPage', method: 'handleSubmit' },
+        extra: { isEditing: Boolean(editingIssue) },
+      });
       toast({ title: 'Error', description: 'Failed to save issue', variant: 'destructive' });
     }
   };
@@ -168,7 +172,10 @@ export function KnownIssuesPage() {
       const results = await OracleService.search(oracleQuery);
       setOracleResults(results);
     } catch (err) {
-      console.error(err);
+      captureException(err as Error, {
+        tags: { component: 'KnownIssuesPage', method: 'handleOracleSearch' },
+        extra: { query: oracleQuery },
+      });
       toast({
         title: 'Search Failed',
         description: 'Failed to query knowledge base.',
@@ -184,7 +191,11 @@ export function KnownIssuesPage() {
     try {
       await deleteIssue.mutateAsync(id);
       toast({ title: 'Deleted', description: 'Issue has been removed.' });
-    } catch (error) {
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'KnownIssuesPage', method: 'handleDelete' },
+        extra: { id },
+      });
       toast({ title: 'Error', description: 'Failed to delete issue', variant: 'destructive' });
     }
   };
@@ -261,7 +272,11 @@ export function KnownIssuesPage() {
         title: 'Batch Updated',
         description: `Updated ${selectedIds.size} issues to ${status}.`,
       });
-    } catch (error) {
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'KnownIssuesPage', method: 'handleBulkStatusUpdate' },
+        extra: { status, idsCount: selectedIds.size },
+      });
       toast({ title: 'Error', description: 'Failed to update issues', variant: 'destructive' });
     }
   };
@@ -272,7 +287,11 @@ export function KnownIssuesPage() {
       await bulkDeleteIssues.mutateAsync(Array.from(selectedIds));
       setSelectedIds(new Set());
       toast({ title: 'Batch Deleted', description: `Deleted ${selectedIds.size} issues.` });
-    } catch (error) {
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'KnownIssuesPage', method: 'handleBulkDelete' },
+        extra: { idsCount: selectedIds.size },
+      });
       toast({ title: 'Error', description: 'Failed to delete issues', variant: 'destructive' });
     }
   };

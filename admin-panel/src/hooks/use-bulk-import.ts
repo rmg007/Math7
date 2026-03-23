@@ -1,4 +1,5 @@
 import { useToast } from '@/hooks/use-toast';
+import { captureException } from '@/lib/error-tracker';
 import type { QueuedQuestion } from '@/lib/validation/import-schema';
 import { CurriculumService } from '@/services/CurriculumService';
 import Papa from 'papaparse';
@@ -117,6 +118,10 @@ export function useBulkImport() {
         });
       }
     } catch (err: unknown) {
+      captureException(err as Error, {
+        tags: { component: 'useBulkImport', method: 'processImport' },
+        extra: { queueLength: importQueue.length, isDryRun },
+      });
       toast({
         title: 'Unexpected Error',
         description: err instanceof Error ? err.message : 'An error occurred',

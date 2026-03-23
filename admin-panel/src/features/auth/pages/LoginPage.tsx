@@ -10,7 +10,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { addBreadcrumb, setUser } from '@/lib/error-tracker';
+import { addBreadcrumb, captureException, setUser } from '@/lib/error-tracker';
 import { supabase } from '@/lib/supabase';
 import { SecurityLogger } from '@/services/SecurityLogger';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -105,7 +105,9 @@ export function LoginPage() {
         severity: 'low',
         metadata: { email: data.email, reason: error.message },
       }).catch((err) => {
-        console.error('Failed to log security event:', err);
+        captureException(err as Error, {
+          tags: { component: 'LoginPage', action: 'securityLog', event: 'failed_login' },
+        });
       });
     } else {
       await SecurityLogger.logLogin(authData.user.id);
@@ -152,7 +154,9 @@ export function LoginPage() {
         severity: 'medium',
         metadata: { email: data.email, inviteCode: data.inviteCode.slice(-4) },
       }).catch((err) => {
-        console.error('Failed to log security event:', err);
+        captureException(err as Error, {
+          tags: { component: 'LoginPage', action: 'securityLog', event: 'failed_register_invite' },
+        });
       });
       return;
     }
@@ -176,7 +180,9 @@ export function LoginPage() {
         severity: 'low',
         metadata: { email: data.email, reason: signUpError.message },
       }).catch((err) => {
-        console.error('Failed to log security event:', err);
+        captureException(err as Error, {
+          tags: { component: 'LoginPage', action: 'securityLog', event: 'failed_register' },
+        });
       });
       return;
     }
@@ -191,7 +197,9 @@ export function LoginPage() {
           userId: signUpData.user.id,
         },
       }).catch((err) => {
-        console.error('Failed to log security event:', err);
+        captureException(err as Error, {
+          tags: { component: 'LoginPage', action: 'securityLog', event: 'register' },
+        });
       });
     }
 
@@ -210,7 +218,9 @@ export function LoginPage() {
         severity: 'medium',
         metadata: { email: data.email, inviteCode: data.inviteCode.slice(-4) },
       }).catch((err) => {
-        console.error('Failed to log security event:', err);
+        captureException(err as Error, {
+          tags: { component: 'LoginPage', action: 'securityLog', event: 'failed_register_consume' },
+        });
       });
       return;
     }

@@ -310,27 +310,17 @@ export function useDuplicateSkill() {
 
 export function useUpdateSkillOrder() {
   const queryClient = useQueryClient();
-  const { currentApp, isSuperAdmin } = useApp();
+  const { currentApp } = useApp();
 
   return useMutation({
     mutationFn: async (updates: { skill_id: string; sort_order: number }[]) => {
-      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
+      if (!currentApp?.app_id) throw new Error('No app selected');
 
-      const promises = updates.map(({ skill_id, sort_order }) => {
-        let query = supabase.from('skills').update({ sort_order }).eq('skill_id', skill_id);
-
-        // checked app_id: conditional RLS
-        if (!isSuperAdmin && currentApp?.app_id) {
-          query = query.eq('app_id', currentApp.app_id);
-        }
-        return query;
+      const { error } = await supabase.rpc('reorder_skills', {
+        p_orders: updates,
       });
 
-      const results = await Promise.all(promises);
-      const errors = results.filter((r) => r.error);
-      if (errors.length > 0) {
-        throw errors[0].error;
-      }
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['skills'] });

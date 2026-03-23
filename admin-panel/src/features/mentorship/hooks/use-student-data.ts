@@ -17,26 +17,27 @@ export function useStudentProfile(userId: string) {
     queryFn: async () => {
       if (!currentApp?.app_id) throw new Error('No app selected');
 
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .eq('app_id', currentApp.app_id)
-        .single();
+      const [profileRes, metadataRes] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .eq('app_id', currentApp.app_id)
+          .single(),
+        supabase
+          .from('user_metadata')
+          .select('*')
+          .eq('id', userId)
+          .eq('app_id', currentApp.app_id)
+          .single(),
+      ]);
 
-      if (profileError) throw profileError;
-
-      const { data: metadata } = await supabase
-        .from('user_metadata')
-        .select('*')
-        .eq('id', userId)
-        .eq('app_id', currentApp.app_id)
-        .single();
+      if (profileRes.error) throw profileRes.error;
 
       // Metadata might not exist yet if student hasn't logged into schema v14
       return {
-        ...profile,
-        metadata: (metadata as UserMetadata) || null,
+        ...profileRes.data,
+        metadata: (metadataRes.data as UserMetadata) || null,
       };
     },
     enabled: Boolean(currentApp?.app_id && userId),

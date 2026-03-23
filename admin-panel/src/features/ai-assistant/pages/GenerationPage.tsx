@@ -4,11 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/contexts/AppContext';
@@ -16,13 +16,23 @@ import { useBulkCreateQuestions } from '@/features/curriculum/hooks/use-question
 import { useSkills } from '@/features/curriculum/hooks/use-skills';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { AlertCircle, CheckCircle2, Download, FileUp, Save, Sparkles, Wand2, Zap } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Download,
+  FileUp,
+  Save,
+  Sparkles,
+  Wand2,
+  Zap,
+} from 'lucide-react';
 import Papa from 'papaparse';
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
 import { governedGenerateQuestions } from '../api/governedGeneration';
 import { DocumentUploader } from '../components/DocumentUploader';
+import { addBreadcrumb, captureException } from '@/lib/error-tracker';
 import { GeneratedQuestion, QuestionReviewGrid } from '../components/QuestionReviewGrid';
 
 interface DifficultyConfig {
@@ -104,8 +114,11 @@ export const GenerationPage: React.FC = () => {
       setGeneratedQuestions(transformedQuestions);
       setValidationSummary(result.validation || null);
       setGovernanceInfo(result.governance);
-
-      console.log(`Generated ${result.metadata.questions_generated} questions.`);
+      addBreadcrumb(
+        `Generated ${result.metadata.questions_generated} questions.`,
+        'ai-assistant',
+        'info'
+      );
 
       if (result.validation?.status === 'flagged') {
         toast({
@@ -115,7 +128,10 @@ export const GenerationPage: React.FC = () => {
         });
       }
     } catch (err) {
-      console.error('Generation error:', err);
+      captureException(err, {
+        tags: { component: 'GenerationPage', method: 'handleGenerate' },
+        extra: { difficultyConfig, hasText: Boolean(extractedText) },
+      });
       setError(err instanceof Error ? err.message : 'Failed to generate questions');
     } finally {
       setIsGenerating(false);
@@ -219,7 +235,10 @@ export const GenerationPage: React.FC = () => {
 
       setGeneratedQuestions([]); // Clear after successful import
     } catch (err) {
-      console.error('Import error:', err);
+      captureException(err, {
+        tags: { component: 'GenerationPage', method: 'handleImportDirectly' },
+        extra: { questionCount: generatedQuestions.length, skillId: selectedSkillId },
+      });
       setError(err instanceof Error ? err.message : 'Failed to save questions to library');
     } finally {
       setIsSaving(false);
@@ -236,8 +255,8 @@ export const GenerationPage: React.FC = () => {
         icon={Wand2}
         actions={
           <Link to="/ai-import">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="group gap-2 bg-white/50 backdrop-blur-sm border-gray-200/50 hover:bg-white hover:border-purple-200 transition-all duration-300"
             >
               <FileUp className="w-4 h-4 text-purple-600 transition-transform group-hover:-translate-y-0.5" />
@@ -259,7 +278,9 @@ export const GenerationPage: React.FC = () => {
                 <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-blue-600/10 text-blue-600 text-sm font-bold shadow-inner">
                   1
                 </div>
-                <CardTitle className="text-gray-900 font-bold tracking-tight">Source Material</CardTitle>
+                <CardTitle className="text-gray-900 font-bold tracking-tight">
+                  Source Material
+                </CardTitle>
               </div>
               <CardDescription className="text-gray-500 text-xs leading-relaxed">
                 Upload a document to serve as the ground truth for generation.
@@ -290,12 +311,16 @@ export const GenerationPage: React.FC = () => {
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-[10px] font-medium text-gray-500">
                     <span>Quota Remaining</span>
-                    <span className="text-purple-600">{governanceInfo.quota_remaining.toLocaleString()} tokens</span>
+                    <span className="text-purple-600">
+                      {governanceInfo.quota_remaining.toLocaleString()} tokens
+                    </span>
                   </div>
                   <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-1000 ease-out"
-                      style={{ width: `${Math.min(100, (governanceInfo.tokens_consumed / (governanceInfo.tokens_consumed + governanceInfo.quota_remaining)) * 100)}%` }}
+                      style={{
+                        width: `${Math.min(100, (governanceInfo.tokens_consumed / (governanceInfo.tokens_consumed + governanceInfo.quota_remaining)) * 100)}%`,
+                      }}
                     />
                   </div>
                 </div>
@@ -306,20 +331,26 @@ export const GenerationPage: React.FC = () => {
 
         <div className="lg:col-span-8 space-y-10">
           {/* Step 2: Configure Generation */}
-          <Card className={cn(
-            "glass-card border-0 shadow-2xl transition-all duration-500",
-            extractedText ? "shadow-purple-500/10 opacity-100 translate-y-0" : "opacity-40 grayscale translate-y-4 pointer-events-none"
-          )}>
+          <Card
+            className={cn(
+              'glass-card border-0 shadow-2xl transition-all duration-500',
+              extractedText
+                ? 'shadow-purple-500/10 opacity-100 translate-y-0'
+                : 'opacity-40 grayscale translate-y-4 pointer-events-none'
+            )}
+          >
             <div className="absolute top-0 right-0 p-8 opacity-10">
               <Sparkles className="w-24 h-24 text-purple-600" />
             </div>
-            
+
             <CardHeader className="pb-4">
               <div className="flex items-center gap-3 mb-1">
                 <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-purple-600/10 text-purple-600 text-sm font-bold shadow-inner">
                   2
                 </div>
-                <CardTitle className="text-gray-900 font-bold tracking-tight">Generation Strategy</CardTitle>
+                <CardTitle className="text-gray-900 font-bold tracking-tight">
+                  Generation Strategy
+                </CardTitle>
               </div>
               <CardDescription className="text-gray-500 text-xs">
                 Configure constraints and creative direction for the AI.
@@ -329,7 +360,9 @@ export const GenerationPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div className="space-y-5">
                   <div className="flex items-center justify-between">
-                    <Label className="text-gray-700 font-bold text-sm tracking-tight">Complexity Distribution</Label>
+                    <Label className="text-gray-700 font-bold text-sm tracking-tight">
+                      Complexity Distribution
+                    </Label>
                     <span className="text-[10px] font-bold px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">
                       {totalQuestions} Target
                     </span>
@@ -338,12 +371,20 @@ export const GenerationPage: React.FC = () => {
                     {[
                       { id: 'easy', color: 'bg-green-500', label: 'Easy' },
                       { id: 'medium', color: 'bg-amber-500', label: 'Medium' },
-                      { id: 'hard', color: 'bg-rose-500', label: 'Hard' }
+                      { id: 'hard', color: 'bg-rose-500', label: 'Hard' },
                     ].map((diff) => (
                       <div key={diff.id} className="space-y-2 group">
                         <div className="flex items-center gap-1.5 px-1">
-                          <div className={cn("w-1.5 h-1.5 rounded-full transition-all group-focus-within:scale-150", diff.color)} />
-                          <Label htmlFor={diff.id} className="text-[10px] font-bold text-gray-500 uppercase tracking-widest cursor-pointer">
+                          <div
+                            className={cn(
+                              'w-1.5 h-1.5 rounded-full transition-all group-focus-within:scale-150',
+                              diff.color
+                            )}
+                          />
+                          <Label
+                            htmlFor={diff.id}
+                            className="text-[10px] font-bold text-gray-500 uppercase tracking-widest cursor-pointer"
+                          >
                             {diff.label}
                           </Label>
                         </div>
@@ -366,7 +407,10 @@ export const GenerationPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="instructions" className="text-gray-700 font-bold text-sm tracking-tight">
+                  <Label
+                    htmlFor="instructions"
+                    className="text-gray-700 font-bold text-sm tracking-tight"
+                  >
                     Refinement Prompt
                   </Label>
                   <Textarea
@@ -386,7 +430,7 @@ export const GenerationPage: React.FC = () => {
                   className="w-full h-14 relative group overflow-hidden bg-[#1a1b4b] hover:bg-[#25266b] text-white rounded-2xl shadow-2xl shadow-indigo-200 transition-all duration-300"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  
+
                   {isGenerating ? (
                     <span className="flex items-center gap-3 font-semibold tracking-wide">
                       <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -399,7 +443,7 @@ export const GenerationPage: React.FC = () => {
                     </span>
                   )}
                 </Button>
-                
+
                 {error && (
                   <div className="mt-4 p-4 bg-rose-50/50 border border-rose-100 rounded-xl flex items-center gap-3 animate-in shake-in duration-500">
                     <AlertCircle className="w-5 h-5 text-rose-500 flex-shrink-0" />
@@ -412,19 +456,29 @@ export const GenerationPage: React.FC = () => {
 
           {/* Validation Report (Approved/Flagged) */}
           {validationSummary && (
-            <div className={cn(
-              "p-6 rounded-3xl border animate-in slide-in-from-top-4 duration-500",
-              validationSummary.status === 'approved' 
-                ? "bg-emerald-50/30 border-emerald-100/50" 
-                : "bg-amber-50/30 border-amber-100/50 text-amber-900"
-            )}>
+            <div
+              className={cn(
+                'p-6 rounded-3xl border animate-in slide-in-from-top-4 duration-500',
+                validationSummary.status === 'approved'
+                  ? 'bg-emerald-50/30 border-emerald-100/50'
+                  : 'bg-amber-50/30 border-amber-100/50 text-amber-900'
+              )}
+            >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className={cn(
-                    "p-2 rounded-xl",
-                    validationSummary.status === 'approved' ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-600"
-                  )}>
-                    {validationSummary.status === 'approved' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                  <div
+                    className={cn(
+                      'p-2 rounded-xl',
+                      validationSummary.status === 'approved'
+                        ? 'bg-emerald-100 text-emerald-600'
+                        : 'bg-amber-100 text-amber-600'
+                    )}
+                  >
+                    {validationSummary.status === 'approved' ? (
+                      <CheckCircle2 className="w-5 h-5" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5" />
+                    )}
                   </div>
                   <div>
                     <h3 className="text-sm font-bold tracking-tight">AI Content Audit</h3>
@@ -432,13 +486,19 @@ export const GenerationPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className={cn(
-                    "text-2xl font-black font-mono leading-none",
-                    validationSummary.status === 'approved' ? "text-emerald-600" : "text-amber-600"
-                  )}>
+                  <span
+                    className={cn(
+                      'text-2xl font-black font-mono leading-none',
+                      validationSummary.status === 'approved'
+                        ? 'text-emerald-600'
+                        : 'text-amber-600'
+                    )}
+                  >
                     {(validationSummary.overall_score * 100).toFixed(0)}%
                   </span>
-                  <p className="text-[10px] uppercase font-bold tracking-widest opacity-50">Confidence Score</p>
+                  <p className="text-[10px] uppercase font-bold tracking-widest opacity-50">
+                    Confidence Score
+                  </p>
                 </div>
               </div>
               <div className="prose prose-sm max-w-none text-gray-700 text-xs leading-relaxed">
@@ -454,14 +514,16 @@ export const GenerationPage: React.FC = () => {
         <Card className="glass-card border-0 shadow-3xl animate-in fade-in zoom-in-95 duration-700">
           <CardHeader className="relative overflow-hidden border-b border-gray-100/50 pb-8">
             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
-            
+
             <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-8 relative">
               <div className="space-y-1">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-600/10 text-indigo-600 text-sm font-bold shadow-inner">
                     3
                   </div>
-                  <CardTitle className="text-gray-900 font-extrabold text-2xl tracking-tight">Refine & Persist</CardTitle>
+                  <CardTitle className="text-gray-900 font-extrabold text-2xl tracking-tight">
+                    Refine & Persist
+                  </CardTitle>
                 </div>
                 <CardDescription className="text-gray-500 font-medium">
                   Review generated artifacts and synchronize with your curriculum library.
@@ -476,8 +538,8 @@ export const GenerationPage: React.FC = () => {
                     </SelectTrigger>
                     <SelectContent className="glass-card border-gray-800 bg-gray-900/95 text-white p-2">
                       {skills?.map((skill) => (
-                        <SelectItem 
-                          key={skill.skill_id} 
+                        <SelectItem
+                          key={skill.skill_id}
                           value={skill.skill_id}
                           className="rounded-lg focus:bg-indigo-600 focus:text-white"
                         >
@@ -524,7 +586,7 @@ export const GenerationPage: React.FC = () => {
               <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:rotate-12 transition-transform duration-1000">
                 <CheckCircle2 className="w-48 h-48" />
               </div>
-              
+
               <div className="relative">
                 <h4 className="text-lg font-black mb-6 flex items-center gap-3">
                   <CheckCircle2 className="w-6 h-6 text-indigo-300" />
@@ -532,15 +594,35 @@ export const GenerationPage: React.FC = () => {
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                   {[
-                    { n: 1, t: "Verification", d: "Review each artifact in the interactive grid for accuracy." },
-                    { n: 2, t: "Contextualize", d: "Assign a target skill to provide pedagogical alignment." },
-                    { n: 3, t: "Persist", d: "Synchronize approved content with the global library." },
-                    { n: 4, t: "Distribute", d: "Questions become instantly available for student assignments." }
+                    {
+                      n: 1,
+                      t: 'Verification',
+                      d: 'Review each artifact in the interactive grid for accuracy.',
+                    },
+                    {
+                      n: 2,
+                      t: 'Contextualize',
+                      d: 'Assign a target skill to provide pedagogical alignment.',
+                    },
+                    {
+                      n: 3,
+                      t: 'Persist',
+                      d: 'Synchronize approved content with the global library.',
+                    },
+                    {
+                      n: 4,
+                      t: 'Distribute',
+                      d: 'Questions become instantly available for student assignments.',
+                    },
                   ].map((step) => (
                     <div key={step.n} className="space-y-2">
-                       <span className="text-xs font-black text-indigo-400 font-mono tracking-widest">{step.n.toString().padStart(2, '0')}</span>
-                       <h5 className="font-bold text-white leading-none mb-1">{step.t}</h5>
-                       <p className="text-indigo-200 text-[11px] leading-relaxed opacity-80">{step.d}</p>
+                      <span className="text-xs font-black text-indigo-400 font-mono tracking-widest">
+                        {step.n.toString().padStart(2, '0')}
+                      </span>
+                      <h5 className="font-bold text-white leading-none mb-1">{step.t}</h5>
+                      <p className="text-indigo-200 text-[11px] leading-relaxed opacity-80">
+                        {step.d}
+                      </p>
                     </div>
                   ))}
                 </div>

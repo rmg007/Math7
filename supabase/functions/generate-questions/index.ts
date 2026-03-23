@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from 'npm:@google/generative-ai@0.1.3';
 import { createSanitizedErrorResponse, withErrorSanitization } from '../_shared/error-sanitizer.ts';
 import { validateGenerationRequest } from '../_shared/input-sanitizer.ts';
 import { addRateLimitHeaders, createRateLimitMiddleware, rateLimitConfigs } from '../_shared/rate-limiter.ts';
+import { checkEnvironmentGuard } from '../_shared/env-guard.ts';
 
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || 'http://localhost:3000,http://localhost:5173,http://localhost:5000').split(',');
 
@@ -33,12 +34,18 @@ interface GenerationRequest {
 }
 
 export const generateQuestionsHandler = withErrorSanitization(
-  async (req: Request, deps?: { supabase?: Record<string, unknown>; genAI?: Record<string, unknown> }) => {
+  async (req: Request, deps?: { supabase?: Record<string, unknown>; adminSupabase?: Record<string, unknown>; genAI?: Record<string, unknown> }) => {
     // Handle CORS preflight
     const corsHeaders = getCorsHeaders(req);
     if (req.method === 'OPTIONS') {
       return new Response('ok', { headers: corsHeaders });
     }
+
+    // ========================================
+    // NEW: ENVIRONMENT GUARD (SEC-P0-02)
+    // ========================================
+    const envError = await checkEnvironmentGuard(req);
+    if (envError) return envError;
 
     // Rate limiting check
     const rateLimitResult = rateLimit.middleware(req);
@@ -56,26 +63,28 @@ export const generateQuestionsHandler = withErrorSanitization(
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = (deps?.supabase as any) || createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    
+    // Create a user-scoped client that respects RLS
+    const supabaseClient = (deps?.supabase as any) || createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
 
     // Verify the user's JWT
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
     
     if (authError || !user) {
       return createSanitizedErrorResponse('UNAUTHORIZED', 'Invalid or expired token');
     }
 
-    // Get user's app_id for tenant isolation
-    const { data: profile, error: profileError } = await supabase
+    // Get user's app_id for tenant isolation (respecting RLS)
+    const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('app_id, role')
-      .eq('id', user.id)
       .single();
 
     if (profileError || !profile?.app_id) {
-      return createSanitizedErrorResponse('FORBIDDEN', 'Access denied');
+      return createSanitizedErrorResponse('FORBIDDEN', 'User profile not found or missing tenant');
     }
 
     // Only admins can generate questions
@@ -203,7 +212,9 @@ export const generateQuestionsHandler = withErrorSanitization(
     // Use a best-effort approach: if the quota RPC isn't available yet
     // (e.g. migration not applied) we log a warning but do NOT block generation.
     try {
-      const { error: quotaError } = await supabase.rpc('consume_tenant_tokens', {
+      // Consume tokens using admin client (bypasses RLS to record system usage)
+      const adminClient = (deps?.adminSupabase as any) || createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+      const { error: quotaError } = await adminClient.rpc('consume_tenant_tokens', {
         p_app_id: profile.app_id,
         p_tokens_used: actualTokenCount,
         p_operation: 'generate_questions'

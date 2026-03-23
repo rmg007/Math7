@@ -21,7 +21,7 @@ test.describe('AccountSettingsPage @regression', () => {
   });
 
   test('page loads with Settings heading @smoke', async ({ page }) => {
-    await expect(page.getByText('Settings')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
   });
 
   test('profile section is visible with identity fields @regression', async ({ page }) => {

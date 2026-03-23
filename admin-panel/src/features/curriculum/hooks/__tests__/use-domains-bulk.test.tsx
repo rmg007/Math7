@@ -42,9 +42,13 @@ vi.mock('@/lib/supabase', () => {
     };
     return chain;
   };
+  const mockRpc = vi.fn().mockResolvedValue({ error: null });
   const mockFrom = createMockChain();
   return {
-    supabase: { from: vi.fn(() => mockFrom) },
+    supabase: {
+      from: vi.fn(() => mockFrom),
+      rpc: mockRpc,
+    },
   };
 });
 
@@ -260,25 +264,12 @@ describe('useUpdateDomainOrder — AP-CURR-013', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockApp();
+    // Reset rpc mock to default success response
+    vi.mocked(supabase.rpc as any).mockResolvedValue({ error: null });
   });
 
-  it('AP-CURR-013: issues one update per domain with correct sort_order', async () => {
+  it('AP-CURR-013: calls reorder_domains RPC with correct orders payload', async () => {
     const { wrapper } = makeWrapper();
-    const mockChain = getMockChain();
-
-    // Each call to update returns a new chain so we can spy per-domain
-    const updateChains: any[] = [];
-    mockChain.update.mockImplementation(() => {
-      const updateChain = {
-        eq: vi.fn().mockReturnThis(),
-        then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
-          Promise.resolve({ data: null, error: null }).then(onFulfilled)
-        ),
-      };
-      updateChains.push(updateChain);
-      return updateChain;
-    });
-
     const { result } = renderHook(() => useUpdateDomainOrder(), { wrapper });
     const updates = [
       { domain_id: DOMAIN_IDS[0], sort_order: 1 },
@@ -286,51 +277,28 @@ describe('useUpdateDomainOrder — AP-CURR-013', () => {
     ];
     await result.current.mutateAsync(updates);
 
-    expect(mockChain.update).toHaveBeenCalledTimes(2);
-    expect(mockChain.update).toHaveBeenNthCalledWith(1, { sort_order: 1 });
-    expect(mockChain.update).toHaveBeenNthCalledWith(2, { sort_order: 2 });
-
-    // Each domain update must be filtered by domain_id
-    expect(updateChains[0].eq).toHaveBeenCalledWith('domain_id', DOMAIN_IDS[0]);
-    expect(updateChains[1].eq).toHaveBeenCalledWith('domain_id', DOMAIN_IDS[1]);
-  });
-
-  it('AP-CURR-013b: tenant admin update includes app_id filter per domain', async () => {
-    const { wrapper } = makeWrapper();
-    const mockChain = getMockChain();
-
-    const updateChain = {
-      eq: vi.fn().mockReturnThis(),
-      then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: null }).then(onFulfilled)
-      ),
-    };
-    mockChain.update.mockReturnValue(updateChain);
-
-    const { result } = renderHook(() => useUpdateDomainOrder(), { wrapper });
-    await result.current.mutateAsync([{ domain_id: DOMAIN_IDS[0], sort_order: 1 }]);
-
-    const eqCalls = updateChain.eq.mock.calls as [string, string][];
-    expect(eqCalls.some(([col, val]) => col === 'app_id' && val === MOCK_APP_ID)).toBe(true);
-  });
-
-  it('AP-CURR-013c: throws aggregate error when any update fails', async () => {
-    const { wrapper } = makeWrapper();
-    const mockChain = getMockChain();
-
-    let callCount = 0;
-    mockChain.update.mockImplementation(() => {
-      callCount++;
-      const err = callCount === 2 ? { message: 'constraint violation' } : null;
-      return {
-        eq: vi.fn().mockReturnThis(),
-        then: vi.fn((onFulfilled: (value: unknown) => unknown) =>
-          Promise.resolve({ data: null, error: err }).then(onFulfilled)
-        ),
-      };
+    expect(supabase.rpc).toHaveBeenCalledWith('reorder_domains', {
+      p_orders: updates,
     });
+  });
 
+  it('AP-CURR-013b: throws when no app is selected', async () => {
+    mockApp({ currentApp: null });
+    const { wrapper } = makeWrapper();
     const { result } = renderHook(() => useUpdateDomainOrder(), { wrapper });
+
+    await expect(
+      result.current.mutateAsync([{ domain_id: DOMAIN_IDS[0], sort_order: 1 }])
+    ).rejects.toThrow('No app selected');
+  });
+
+  it('AP-CURR-013c: throws when RPC returns an error', async () => {
+    vi.mocked(supabase.rpc as any).mockResolvedValue({
+      error: { message: 'constraint violation' },
+    });
+    const { wrapper } = makeWrapper();
+    const { result } = renderHook(() => useUpdateDomainOrder(), { wrapper });
+
     await expect(
       result.current.mutateAsync([
         { domain_id: DOMAIN_IDS[0], sort_order: 1 },

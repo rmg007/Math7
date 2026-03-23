@@ -6,6 +6,7 @@ import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
 import type { Tables } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 import { CheckSquare, Copy, Key, Loader2, Power, Search, Square, X, Zap } from 'lucide-react';
+import { captureException } from '@/lib/error-tracker';
 import { memo, useCallback, useEffect, useState } from 'react';
 
 import { EmptyState } from '@/components/ui/empty-state';
@@ -171,7 +172,9 @@ export function InvitationCodesPage() {
 
     if (error) {
       setError('Failed to load invitation codes');
-      console.error(error);
+      captureException(error, {
+        tags: { component: 'InvitationCodesPage', method: 'fetchCodes' },
+      });
     } else {
       setCodes((data as InvitationCode[]) || []);
     }
@@ -201,7 +204,9 @@ export function InvitationCodesPage() {
       setExpiresDays('');
     } catch (err) {
       setError('Failed to generate invitation code. Make sure you are a super admin.');
-      console.error(err);
+      captureException(err as Error, {
+        tags: { component: 'InvitationCodesPage', method: 'handleGenerateCode' },
+      });
     } finally {
       setGenerating(false);
     }
@@ -219,7 +224,9 @@ export function InvitationCodesPage() {
         await fetchCodes();
       } catch (err) {
         setError('Failed to deactivate code');
-        console.error(err);
+        captureException(err as Error, {
+          tags: { component: 'InvitationCodesPage', method: 'handleDeactivateCode' },
+        });
       }
     },
     [fetchCodes]
@@ -231,7 +238,9 @@ export function InvitationCodesPage() {
       setCopiedId(codeId);
       setTimeout(() => setCopiedId(null), 2000);
     } catch (err) {
-      console.error('Failed to copy:', err);
+      captureException(err as Error, {
+        tags: { component: 'InvitationCodesPage', method: 'handleCopyCode' },
+      });
     }
   }, []);
 
@@ -255,7 +264,9 @@ export function InvitationCodesPage() {
       await fetchCodes();
     } catch (err) {
       setError('Bulk deactivation encountered errors.');
-      console.error(err);
+      captureException(err as Error, {
+        tags: { component: 'InvitationCodesPage', method: 'handleBulkDeactivate' },
+      });
     } finally {
       setDeactivating(false);
     }

@@ -28,8 +28,10 @@ function getCorsHeaders(req: Request) {
 
 const rateLimit = createRateLimitMiddleware(rateLimitConfigs.validateContent);
 
+import { checkEnvironmentGuard } from '../_shared/env-guard.ts';
+
 export const revokeUserSessionsHandler = withErrorSanitization(
-  async (req: Request, deps?: { supabase?: any }) => {
+  async (req: Request, deps?: { supabase?: Record<string, unknown>; adminSupabase?: Record<string, unknown>; genAI?: Record<string, unknown> }) => {
     // Handle CORS preflight
     if (req.method === 'OPTIONS') {
       return new Response('ok', { headers: getCorsHeaders(req) });
@@ -41,30 +43,36 @@ export const revokeUserSessionsHandler = withErrorSanitization(
       return rateLimitResult.response!;
     }
 
+    // ========================================
+    // NEW: ENVIRONMENT GUARD (SEC-P0-02)
+    // ========================================
+    const envError = await checkEnvironmentGuard(req);
+    if (envError) return envError;
+
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return createSanitizedErrorResponse('UNAUTHORIZED', 'Missing authorization header');
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = deps?.supabase || createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    
+    // Create a user-scoped client that respects RLS
+    const supabaseClient = (deps?.supabase as any) || createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
 
     // Verify the requesting user's JWT
-    const token = authHeader.replace('Bearer ', '');
-    const authErrorCheck = await supabase.auth.getUser(token);
-    const user = authErrorCheck.data.user;
-    const authError = authErrorCheck.error;
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
     
     if (authError || !user) {
       return createSanitizedErrorResponse('UNAUTHORIZED', 'Invalid or expired token');
     }
 
-    // Get user's app_id and admin status
-    const { data: profile, error: profileError } = await supabase
+    // Get user's app_id and admin status (respecting RLS)
+    const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('app_id, role')
-      .eq('id', user.id)
       .single();
 
     if (profileError || !profile?.app_id) {
@@ -82,8 +90,8 @@ export const revokeUserSessionsHandler = withErrorSanitization(
       return createSanitizedErrorResponse('BAD_REQUEST', 'userId is required');
     }
 
-    // Verify the target user belongs to the same tenant
-    const { data: targetProfile, error: targetError } = await supabase
+    // Verify the target user belongs to the same tenant (respecting RLS)
+    const { data: targetProfile, error: targetError } = await supabaseClient
       .from('profiles')
       .select('app_id')
       .eq('id', userId)
@@ -93,8 +101,9 @@ export const revokeUserSessionsHandler = withErrorSanitization(
       return createSanitizedErrorResponse('NOT_FOUND', 'Target user not found or access denied');
     }
 
-    // Revoke all sessions for the target user
-    const { error: revokeError } = await supabase.auth.admin.signOut(userId);
+    // Revoke all sessions using admin client
+    const adminClient = (deps?.adminSupabase as any) || createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+    const { error: revokeError } = await adminClient.auth.admin.signOut(userId);
 
     if (revokeError) {
       console.error('Failed to revoke sessions:', revokeError);

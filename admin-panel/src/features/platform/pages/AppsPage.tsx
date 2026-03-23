@@ -1,91 +1,92 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { Button } from '@/components/ui/button';
 import { ColumnToggle } from '@/components/ui/column-toggle';
 import { DataToolbar } from '@/components/ui/data-toolbar';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Switch } from '@/components/ui/switch';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
+import { captureException } from '@/lib/error-tracker';
 import type { DataColumn } from '@/lib/data-utils';
 import { normalizeFormData } from '@/lib/normalization';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-    AlertTriangle,
-    CheckCircle2,
-    CheckSquare,
-    Circle,
-    ExternalLink,
-    Filter,
-    Layers,
-    Layout,
-    Loader2,
-    Pencil,
-    Plus,
-    Power,
-    Search,
-    Square,
-    Trash2,
-    X,
+  AlertTriangle,
+  CheckCircle2,
+  CheckSquare,
+  Circle,
+  ExternalLink,
+  Filter,
+  Layers,
+  Layout,
+  Loader2,
+  Pencil,
+  Plus,
+  Power,
+  Search,
+  Square,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
-    useApps,
-    useBulkCreateApps,
-    useBulkDeleteApps,
-    useBulkUpdateAppsStatus,
-    useCheckAppSubdomain,
-    useCreateApp,
-    useDeleteApp,
-    useUpdateApp,
-    type AppInsert,
-    type CompiledApp,
+  useApps,
+  useBulkCreateApps,
+  useBulkDeleteApps,
+  useBulkUpdateAppsStatus,
+  useCheckAppSubdomain,
+  useCreateApp,
+  useDeleteApp,
+  useUpdateApp,
+  type AppInsert,
+  type CompiledApp,
 } from '../hooks/use-apps';
 import { useSubjects } from '../hooks/use-subjects';
 
@@ -451,7 +452,11 @@ export function AppsPage() {
       });
       toast({ title: 'Success', description: `${selectedIds.size} applications updated` });
       setSelectedIds(new Set());
-    } catch (error) {
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'AppsPage', method: 'handleBulkStatusUpdate' },
+        extra: { is_active, idsCount: selectedIds.size },
+      });
       toast({
         title: 'Error',
         description: 'Failed to update applications',
@@ -470,7 +475,11 @@ export function AppsPage() {
       await bulkDelete.mutateAsync(Array.from(selectedIds));
       toast({ title: 'Success', description: `${selectedIds.size} applications deleted` });
       setSelectedIds(new Set());
-    } catch (error) {
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'AppsPage', method: 'confirmBulkDelete' },
+        extra: { idsCount: selectedIds.size },
+      });
       toast({
         title: 'Error',
         description: 'Failed to delete applications',
@@ -549,11 +558,13 @@ export function AppsPage() {
         title: 'Success',
         description: `Successfully imported ${appsToCreate.length} applications`,
       });
-    } catch (error) {
-      console.error('Import error:', error);
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'AppsPage', method: 'handleImport' },
+      });
       toast({
         title: 'Import Failed',
-        description: error instanceof Error ? error.message : 'Unknown error',
+        description: err instanceof Error ? err.message : 'Unknown error',
         variant: 'destructive',
       });
     }
@@ -590,11 +601,14 @@ export function AppsPage() {
         toast({ title: 'Success', description: 'Application created' });
       }
       setIsDialogOpen(false);
-    } catch (error: unknown) {
-      console.error('Failed to save application:', error);
+    } catch (err: unknown) {
+      captureException(err as Error, {
+        tags: { component: 'AppsPage', method: 'onSubmit' },
+        extra: { isEditing: Boolean(editingApp) },
+      });
 
       let errorMessage = 'An unexpected error occurred while saving the application.';
-      const supabaseError = error as { code?: string; status?: number };
+      const supabaseError = err as { code?: string; status?: number };
 
       // Handle Supabase/Postgres 409 Conflict (Duplicate Key)
       if (supabaseError?.code === '23505' || supabaseError?.status === 409) {
@@ -622,7 +636,11 @@ export function AppsPage() {
     try {
       await deleteApp.mutateAsync(id);
       toast({ title: 'Deleted', description: 'Application has been removed.' });
-    } catch (error) {
+    } catch (err) {
+      captureException(err as Error, {
+        tags: { component: 'AppsPage', method: 'confirmSingleDelete' },
+        extra: { id },
+      });
       toast({
         title: 'Error',
         description: 'Failed to delete application',

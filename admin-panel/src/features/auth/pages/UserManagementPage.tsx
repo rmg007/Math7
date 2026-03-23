@@ -32,6 +32,7 @@ import {
   UserX,
   X,
 } from 'lucide-react';
+import { captureException } from '@/lib/error-tracker';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -240,7 +241,9 @@ export function UserManagementPage() {
       if (fetchError) throw fetchError;
       setUsers((data as AdminUser[]) || []);
     } catch (err) {
-      console.error('Error fetching users:', err);
+      captureException(err as Error, {
+        tags: { component: 'UserManagementPage', method: 'fetchUsers' },
+      });
       setError('Failed to retrieve user directory');
     } finally {
       setLoading(false);
@@ -270,7 +273,13 @@ export function UserManagementPage() {
         });
 
         if (revokeError) {
-          console.error('Failed to revoke user sessions:', revokeError);
+          captureException(revokeError, {
+            tags: {
+              component: 'UserManagementPage',
+              method: 'handleDeactivate',
+              action: 'revokeSessions',
+            },
+          });
         }
 
         toast({
@@ -279,6 +288,10 @@ export function UserManagementPage() {
         });
         fetchUsers();
       } catch (err) {
+        captureException(err as Error, {
+          tags: { component: 'UserManagementPage', method: 'handleDeactivate' },
+          extra: { userId },
+        });
         toast({
           title: 'Error',
           description: 'Failed to deactivate user',
@@ -302,6 +315,10 @@ export function UserManagementPage() {
         toast({ title: 'User Reactivated', description: 'Access has been restored.' });
         fetchUsers();
       } catch (err) {
+        captureException(err as Error, {
+          tags: { component: 'UserManagementPage', method: 'handleReactivate' },
+          extra: { userId },
+        });
         toast({
           title: 'Error',
           description: 'Failed to restore user access',
@@ -338,6 +355,10 @@ export function UserManagementPage() {
         setSelectedIds(new Set());
         fetchUsers();
       } catch (err) {
+        captureException(err as Error, {
+          tags: { component: 'UserManagementPage', method: 'handleBulkToggleStatus' },
+          extra: { status, idsCount: selectedIds.size },
+        });
         toast({
           title: 'Error',
           description: 'Operation failed for one or more users.',

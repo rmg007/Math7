@@ -1,5 +1,6 @@
 import { generateQuestions } from '@/features/ai-assistant/api/generateQuestions';
 import { useToast } from '@/hooks/use-toast';
+import { captureException } from '@/lib/error-tracker';
 import { useState } from 'react';
 import { z } from 'zod';
 
@@ -79,6 +80,10 @@ export function useAIGenerator() {
     } catch (err) {
       const msg = (err as Error).message;
       setError(msg);
+      captureException(err as Error, {
+        tags: { component: 'useAIGenerator', method: 'generate' },
+        extra: { params },
+      });
       toast({
         title: 'Generation Failed',
         description: msg,
