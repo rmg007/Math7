@@ -43,6 +43,9 @@ useDefault = true
     '''supabase/functions/_shared/.*\.test\.ts''',
     '''admin-panel/tests/''',
 
+    # Post-deployment provisioning scripts (read from env, no hardcoded secrets)
+    '''scripts/post-deployment/01_provision_test_user\.py''',
+
     # Gitleaks temp artifacts
     '''full_diff\.txt''',
     '''gitleaks-report\.json''',
@@ -54,6 +57,12 @@ useDefault = true
     # Replit config (uses Supabase anon key for dev, not a secret)
     '''\.replit$''',
   ]
+  # Historical commit flagged as false positive:
+  # 0f237e7a — PROD_BOT_PASSWORD = os.getenv(...) misidentified as generic-api-key
+  commits = [
+    "0f237e7a6b3e31307e06572489bc78d9d7522659",
+  ]
+
   regexTarget = "line"
   regexes = [
     # Example/placeholder values in documentation
