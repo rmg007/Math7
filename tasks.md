@@ -6,6 +6,12 @@
 
 ---
 
+## ✏️ Active — Documentation Update
+
+- [x] **DOC-01: Update CHANGELOG.md & LEARNING_LOG.md** — All March 2026 hardening sessions added to CHANGELOG (v2.3.1–2.3.3). [done]
+
+---
+
 ## 🔴 P0 — Security (High Blast Radius)
 
 ### Database / Backend

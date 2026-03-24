@@ -10,6 +10,20 @@
 > When the two files conflict, **`GEMINI.md` wins for Antigravity IDE** sessions.
 > When adding a new universal coding rule, add it here. When adding an Antigravity-specific permission, add it to `GEMINI.md`.
 
+## 🔴 MANDATORY TASK CLOSE CHECKLIST — Run After EVERY Task
+
+> **This runs after EVERY task, not just at end of session.**
+> Do not sign off or say "done" until all 4 steps are complete.
+
+- [ ] **1. TIME_LOG** — Add a row to `docs/TIME_LOG.md` with: date, time range, hours, app(s), work type (`dev`/`devops`/`arch`/`qa`/`docs`/`ops`), description. Recalculate monthly total + YTD.
+- [ ] **2. LEARNING_LOG** — Append session summary to `docs/LEARNING_LOG.md` with what was done and any prevention rules discovered.
+- [ ] **3. Temp Files** — Delete any scratch files, debug scripts, or `/tmp/` files created during this task. Note cleanup in TIME_LOG row.
+- [ ] **4. tasks.md** — Mark completed tasks `[x]`. Add any newly discovered sub-tasks.
+
+> ❌ Skipping any step = **non-compliant session**. The user has explicitly flagged this as a recurring problem that must be fixed.
+
+---
+
 ## Core Rules
 
 1. **No TODO/FIXME/HACK in code.** All work items go in `tasks.md`.
@@ -21,6 +35,8 @@
 7. **Every bug/issue requires a preventative test.** Before closing any bug or issue, you MUST write a new test case that reproduces the failure. The test must fail before the fix and pass after. No exceptions. Log the test file path in `docs/LEARNING_LOG.md` tagged `[test created]`.
 8. **MANDATORY: Use Cortex Discovery.** All agents MUST use the "faster way" (Cortex search/briefing) for all research and symbol lookup. Improving this discovery infra is a continuous P0 requirement.
 9. **New page = smoke test + manifest entry.** Whenever a new page file is added anywhere under `features/*/pages/`, you MUST: (a) add at least 3 smoke tests for it in the relevant `admin-panel/tests/read-only/*.smoke.spec.ts` file, and (b) add the page path to `admin-panel/tests/smoke-coverage-manifest.json` so the Cortex coverage scanner counts it. Failure to do both leaves a permanent gap in `questerix-cortex/outputs/AGENT_CONTEXT.md` that will flag the feature as uncovered every session.
+10. **Update TIME_LOG.md at the end of every session.** Append a row to the current month's session table in `docs/TIME_LOG.md` with: date, time range (if known), hours worked, which app(s), work type (`dev`/`devops`/`arch`/`qa`/`docs`/`ops`), and a one-line description. Recalculate the monthly total and YTD summary. This is mandatory for tax and payroll accuracy. No exceptions.
+11. **Clean temp files at the end of every session.** Delete any scratch, diagnostic, or temporary files created during the session (e.g., files written to `/tmp/`, one-off debug scripts, throwaway data files). Do NOT delete files in `docs/`, `tasks.md`, or any committed source file. Log the cleanup in the TIME_LOG session row.
 
 ## Discovery (How to Find What You Need - The Faster Way)
 
@@ -70,6 +86,7 @@ The RLS audit uses an "evidence bridge" pattern to avoid requiring local Supabas
 | Agent workflows              | `.agent/workflows/*.md`             | —                 |
 | Test account credentials     | `.agent/TEST_ACCOUNTS.md`           | hardcoded in code |
 | Project documentation        | `docs/`                             | root directory    |
+| **Developer time log**       | `docs/TIME_LOG.md`                  | `tasks.md`        |
 
 ## Testing Strategy
 

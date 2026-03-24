@@ -5,6 +5,42 @@ All notable changes to the Questerix project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.3] - 2026-03-22 (Production Deployment)
+
+### Deployed
+
+- **Admin Panel**: Live at `https://849ea64f.questerix-admin.pages.dev`
+- **Student App**: Live at `https://ec173809.questerix-student.pages.dev`
+- **Pipeline**: Ran `generate-env.ps1` → Flutter Web build → `wrangler` deploy for both apps.
+
+## [2.3.2] - 2026-03-20 (Hardening: TSC Zero, Vitest 607/607, Flutter Zero Issues)
+
+### Fixed
+
+- **Testing (Admin Panel)**: Resolved `TSC2349 (never)` in `auth-guard.test.tsx` — used object wrapper `{ fn: T | null }` to bypass TypeScript CFA limitation on `let` mutations inside callbacks.
+- **Testing (Admin Panel)**: Fixed `vi.hoisted()` ordering issue in `DocumentUploader.test.tsx` — mock factories now use `vi.hoisted()` for all referenced variables.
+- **Testing (Admin Panel)**: Polyfilled `File.arrayBuffer()` in test helpers — JSDOM does not implement it natively.
+- **Testing (Admin Panel)**: Suppressed `unhandledRejection` noise from `Promise.reject()` in mocks using `.catch(() => {})`.
+- **Testing (Admin Panel)**: Fixed `rls-bypass` integration test — corrected status constraint (`new`) and apps anon-access assertion.
+- **Testing (Student App)**: Rewrote `auth_controller_test.dart` to use `ProviderContainer` + `authServiceProvider.overrideWithValue(mock)` pattern.
+- **Security**: Closed SEC-P0-03 — `localStorage` audit PASS; only boolean flags and opaque IDs stored, no PII.
+
+### Added
+
+- **Tests Created**: `auth_controller_test.dart` (8/8 passing), `DocumentUploader.test.tsx` (13/13), `auth-guard.test.tsx` (8/8).
+
+## [2.3.1] - 2026-03-20 (GoRouter, Riverpod Error Observer & Vitest Fix)
+
+### Added
+
+- **Student App — Routing**: GoRouter `17.1.0` installed. `app_router.dart` created with public/auth route separation, `ShellRoute` wrapping `MainShell`, auth guard bridging Supabase auth events via `refreshListenable`.
+- **Student App — Observability**: `RiverpodErrorObserver` implemented in `lib/src/core/errors/riverpod_error_observer.dart`. Filters transient errors; routes unexpected failures to `errorTracker.captureException`. Wired to root `ProviderContainer` in `main.dart`.
+
+### Fixed
+
+- **Testing (Admin Panel)**: `auth-guard.test.tsx` rewritten with `vi.hoisted()` — eliminates "Cannot access before initialization" hoist trap.
+- **Testing (Admin Panel)**: `use-domains-bulk.test.tsx` AP-CURR-013 block rewritten to assert against `supabase.rpc` (not `.from().update()`).
+
 ## [2.2.8] - 2026-02-27 (Great Recovery)
 
 ### Fixed

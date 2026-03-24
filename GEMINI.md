@@ -1,5 +1,21 @@
 # Questerix — AI Agent Instructions
 
+---
+
+## 🔴 MANDATORY TASK CLOSE CHECKLIST — Run After EVERY Task
+
+> **This runs after EVERY task, not just at end of session.**
+> Do not sign off or say "done" until all 4 steps are complete.
+
+- [ ] **1. TIME_LOG** — Add a row to `docs/TIME_LOG.md` (main Questerix repo) with: date, time range, hours, app(s), work type, description. Recalculate monthly total + YTD.
+- [ ] **2. LEARNING_LOG** — Append session summary to `docs/LEARNING_LOG.md` with what was done and any prevention rules discovered.
+- [ ] **3. Temp Files** — Delete any scratch files, debug scripts, or `/tmp/` files created during this task. Note cleanup in TIME_LOG row.
+- [ ] **4. tasks.md** — Mark completed tasks `[x]`. Add any newly discovered sub-tasks.
+
+> ❌ Skipping any step = **non-compliant session**. The user has explicitly flagged this pattern.
+
+---
+
 ## 🛑 MANDATORY: Work Discipline & Tasks.md
 
 > **CRITICAL**: BEFORE performing ANY work (reading files, writing code, running tests), you MUST read `tasks.md`.
@@ -47,6 +63,17 @@
 7. `questerix-cortex/outputs/UTILITY_REGISTRY.md` — before writing any new helper
 
 > Skip to step 6-7 only if you are 100% sure you are not modifying shared hooks or utilities.
+
+## 🏁 Session Close Protocol
+
+**MANDATORY** — at the END of every session before signing off:
+
+1. **Update `docs/TIME_LOG.md`** — add a row to the current month with hours, app(s), work type, and description. Recalculate monthly total and YTD summary.
+2. **Clean temp files** — delete any scratch files, one-off debug scripts, or `/tmp/` files created during the session.
+3. **Append to `docs/LEARNING_LOG.md`** — summarize what was done and any prevention rules discovered.
+4. **Update `tasks.md`** — mark completed tasks `[x]`, add any new discovered tasks.
+
+> Session close is as important as session start. A session without a TIME_LOG entry is an unrecorded business expense.
 
 ## Light Bootstrap (for trivial tasks)
 
@@ -199,6 +226,7 @@ This rule exists because missing policies cause silent data access failures that
 | AetherFlow template vault | `.future_projects_plan_out_of_scope/`                             | Tech-stack agnostic lessons/patterns distilled from Questerix — reusable scaffold for any future project |
 | Future project vault nav  | `.future_projects_plan_out_of_scope/README.md`                    | Navigation & rules for the vault                                                                         |
 | Learning log              | `docs/LEARNING_LOG.md`                                            | —                                                                                                        |
+| **Developer time log**    | `docs/TIME_LOG.md`                                                | Payroll / tax records — update every session                                                             |
 | Changelog                 | `CHANGELOG.md`                                                    | —                                                                                                        |
 | DB types                  | `admin-panel/src/types/database.types.ts`                         | —                                                                                                        |
 | Supabase config           | `supabase/config.toml`                                            | —                                                                                                        |
