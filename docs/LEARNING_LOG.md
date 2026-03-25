@@ -1,5 +1,17 @@
 # Questerix Learning Log
 
+## [2026-03-25] — AI Studio Modernization: Dynamic Dropdowns, Prompt Persistence & History
+
+- **What was done**: Full AI Studio overhaul — replaced hardcoded domain buttons and static config with dynamic dropdowns, added tag-based topic input, prompt preview/editor panel, generation history page with master-detail layout, and navigation link. Created `use-studio-prompts.ts` hook for CRUD operations, refactored `use-studio-generator.ts` for dynamic domains/multi-topic support, wrote migration SQL for `studio_prompts` table with FK on `questions`.
+- **Key Design Decision**: Used `const db = supabase as any` type bridge in `use-studio-prompts.ts` because the database migration hasn't been applied yet. This avoids TypeScript errors while keeping the hook functional. Once `supabase gen types typescript` is run post-migration, the `as any` can be removed.
+- **Prevention Rules Discovered**:
+  - When refactoring hook signatures (e.g., `topic: string` → `topics: string[]`), ALL test files importing those types must be updated simultaneously — partial updates cause cascading TSC failures.
+  - For database tables that don't exist yet, use a clean `const db = supabase as any` pattern at the top of the hook file rather than scattering `as any` casts throughout — it's cleaner to audit and remove later.
+  - When adding `.map()` callbacks in TSX files under `strict` mode, always provide explicit type annotations for the callback parameter to avoid TS7006 implicit `any` errors.
+- **Blocker**: Migration `supabase/migrations/20260325000001_create_studio_prompts.sql` must be manually applied before the feature works at runtime.
+
+---
+
 ## [2026-03-22] — Production Deployment: Admin & Student Apps Live
 
 - **Root Cause**: Manual deployment requested by user to sync latest changes to production environment.

@@ -52,6 +52,11 @@ const QuestionStudioPage = lazy(() =>
     default: m.QuestionStudioPage,
   }))
 );
+const StudioHistoryPage = lazy(() =>
+  import('./features/curriculum/pages/studio-history-page').then((m) => ({
+    default: m.StudioHistoryPage,
+  }))
+);
 const QuestionEditPage = lazy(() =>
   import('./features/curriculum/pages/question-edit-page').then((m) => ({
     default: m.QuestionEditPage,
@@ -388,6 +393,16 @@ const router = createBrowserRouter([
           <ErrorBoundary>
             <Suspense fallback={<LoadingPage />}>
               <QuestionStudioPage />
+            </Suspense>
+          </ErrorBoundary>
+        ),
+      },
+      {
+        path: '/questions/studio/history',
+        element: (
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingPage />}>
+              <StudioHistoryPage />
             </Suspense>
           </ErrorBoundary>
         ),

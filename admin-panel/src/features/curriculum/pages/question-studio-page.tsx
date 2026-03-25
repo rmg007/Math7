@@ -9,9 +9,9 @@ import {
 } from '@/components/ui/select';
 import { useApp } from '@/hooks/use-app';
 import {
+  buildStudioPrompt,
   useStudioGenerator,
   type DifficultyMix,
-  type Domain,
   type QuestionType,
   type StudioConfig,
 } from '@/hooks/use-studio-generator';
@@ -25,6 +25,7 @@ import { StudioQuestionCard } from '../components/studio-question-card';
 import { type QuestionInsert } from '../hooks/use-questions';
 import { useBulkCreateQuestions } from '../hooks/use-questions-bulk';
 import { useSkills } from '../hooks/use-skills';
+import { useCreateStudioPrompt, useUpdateStudioPrompt } from '../hooks/use-studio-prompts';
 import { QuestionStudioBulkActions } from './question-studio-bulk-actions';
 import { QuestionStudioFilterPanel } from './question-studio-filter-panel';
 
@@ -33,32 +34,33 @@ export function QuestionStudioPage() {
   const { toast } = useToast();
 
   // Config state
-  const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
-  const [topic, setTopic] = useState('');
+  const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
+  const [topics, setTopics] = useState<string[]>([]);
   const [count, setCount] = useState(10);
-  const [customCount, setCustomCount] = useState(false);
   const [diffMix, setDiffMix] = useState<DifficultyMix>({ easy: 3, medium: 4, hard: 3 });
+  const [diffPreset, setDiffPreset] = useState('Balanced');
   const [selectedTypes, setSelectedTypes] = useState<QuestionType[]>(['mcq', 'text_input']);
   const [customInstructions, setCustomInstructions] = useState('');
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Deployment state
   const [skillId, setSkillId] = useState('');
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [reviewed, setReviewed] = useState(false);
   const [savingIdx, setSavingIdx] = useState<number | null>(null);
+  const [currentPromptId, setCurrentPromptId] = useState<string | null>(null);
 
   // Hooks
   const { currentApp } = useApp();
   const studio = useStudioGenerator();
   const { data: skills } = useSkills();
   const bulkCreate = useBulkCreateQuestions();
+  const createPrompt = useCreateStudioPrompt();
+  const updatePrompt = useUpdateStudioPrompt();
 
   // ── Nav guard ─────────────────────────────────────────
   const blocker = useBlocker(() => studio.hasUnsaved);
 
-  const canGenerate =
-    selectedDomain !== null && topic.trim().length >= 3 && selectedTypes.length > 0;
+  const canGenerate = selectedDomain !== null && topics.length > 0 && selectedTypes.length > 0;
 
   const handleGenerate = async () => {
     if (!selectedDomain || !canGenerate) return;
@@ -73,14 +75,41 @@ export function QuestionStudioPage() {
 
     const config: StudioConfig = {
       domain: selectedDomain,
-      topic: topic.trim(),
+      topics,
       count,
       difficultyMix: diffMix,
       questionTypes: selectedTypes,
       customInstructions: customInstructions.trim() || undefined,
     };
 
-    await studio.generateBatch(config);
+    const success = await studio.generateBatch(config);
+
+    // Save the prompt record to the database
+    if (success && currentApp?.app_id) {
+      try {
+        const {
+          data: { user },
+        } = await (await import('@/lib/supabase')).supabase.auth.getUser();
+        if (user) {
+          const prompt = await createPrompt.mutateAsync({
+            app_id: currentApp.app_id,
+            created_by: user.id,
+            domain_name: selectedDomain,
+            topics,
+            question_count: count,
+            difficulty_mix: diffMix,
+            question_types: selectedTypes,
+            assembled_prompt: buildStudioPrompt(config),
+            custom_instructions: customInstructions.trim() || undefined,
+            questions_generated: studio.stagedQuestions.length,
+          });
+          setCurrentPromptId(prompt.id);
+        }
+      } catch {
+        // Non-blocking: prompt saving is best-effort
+        console.warn('Failed to save studio prompt record');
+      }
+    }
   };
 
   const handleSave = async () => {
@@ -155,7 +184,7 @@ export function QuestionStudioPage() {
         solution = toJson({ correct_order: correctOrder });
       }
 
-      return {
+      const insert: Record<string, unknown> = {
         content: q.text,
         type: dbType as Database['public']['Enums']['question_type'],
         skill_id: skillId,
@@ -165,16 +194,38 @@ export function QuestionStudioPage() {
         explanation: q.metadata.explanation || '',
         options,
         solution,
-      } as QuestionInsert;
+      };
+
+      // Link to studio prompt if available
+      if (currentPromptId) {
+        insert.studio_prompt_id = currentPromptId;
+      }
+
+      return insert as QuestionInsert;
     });
 
     try {
       await bulkCreate.mutateAsync(payload);
+
+      // Update the prompt record with saved count
+      if (currentPromptId) {
+        try {
+          await updatePrompt.mutateAsync({
+            id: currentPromptId,
+            questions_saved: keptQuestions.length,
+            status: 'saved',
+          });
+        } catch {
+          console.warn('Failed to update studio prompt status');
+        }
+      }
+
       toast({
         title: `✓ ${keptQuestions.length} questions saved!`,
         description: `Added to ${skills?.find((s) => s.skill_id === skillId)?.title ?? 'skill'} as ${status}.`,
       });
       studio.resetBatch();
+      setCurrentPromptId(null);
       navigate('/questions');
     } catch (err) {
       toast({
@@ -247,20 +298,18 @@ export function QuestionStudioPage() {
         <QuestionStudioFilterPanel
           selectedDomain={selectedDomain}
           setSelectedDomain={setSelectedDomain}
-          topic={topic}
-          setTopic={setTopic}
+          topics={topics}
+          setTopics={setTopics}
           count={count}
           setCount={setCount}
-          customCount={customCount}
-          setCustomCount={setCustomCount}
           diffMix={diffMix}
           setDiffMix={setDiffMix}
+          diffPreset={diffPreset}
+          setDiffPreset={setDiffPreset}
           selectedTypes={selectedTypes}
           setSelectedTypes={setSelectedTypes}
           customInstructions={customInstructions}
           setCustomInstructions={setCustomInstructions}
-          showAdvanced={showAdvanced}
-          setShowAdvanced={setShowAdvanced}
           isGenerating={studio.status === 'generating'}
           canGenerate={canGenerate}
           onGenerate={handleGenerate}
@@ -292,7 +341,7 @@ export function QuestionStudioPage() {
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">AI Question Studio</h2>
                 <p className="text-gray-400 text-sm max-w-sm">
-                  Choose a domain and topic on the left, then click{' '}
+                  Choose a domain and add topics on the left, then click{' '}
                   <strong className="text-indigo-600">Generate</strong> to create your question
                   batch.
                 </p>
@@ -378,7 +427,7 @@ export function QuestionStudioPage() {
                     setSavingIdx(i);
                     const config: StudioConfig = {
                       domain: selectedDomain ?? 'General Knowledge',
-                      topic: topic.trim(),
+                      topics: topics.length > 0 ? topics : ['General'],
                       count,
                       difficultyMix: diffMix,
                       questionTypes: selectedTypes,

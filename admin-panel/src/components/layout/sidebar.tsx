@@ -72,6 +72,7 @@ const navigationGroups: NavGroup[] = [
       { name: 'Skills', href: '/skills', icon: Layers },
       { name: 'Questions', href: '/questions', icon: FileText },
       { name: 'AI Studio', href: '/questions/studio', icon: Sparkles },
+      { name: 'AI Studio History', href: '/questions/studio/history', icon: History },
       { name: 'Groups', href: '/groups', icon: Users },
       { name: 'Bulk Import', href: '/ai-import', icon: FileUp },
     ],

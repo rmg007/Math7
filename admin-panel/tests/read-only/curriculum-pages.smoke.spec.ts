@@ -264,24 +264,21 @@ test.describe('QuestionStudioPage @regression', () => {
     await expect(page.getByRole('heading', { name: 'AI Question Studio' })).toBeVisible();
   });
 
-  test('domain selector grid is rendered @regression', async ({ page }) => {
-    // Six domain buttons (Mathematics, English Language, History, Science,
-    // Computer Science, General Knowledge) rendered as a grid on load.
-    await expect(page.getByText('Mathematics')).toBeVisible();
-    await expect(page.getByText('Computer Science')).toBeVisible();
+  test('domain selector is rendered @regression', async ({ page }) => {
+    await expect(page.getByText('Subject Domain')).toBeVisible();
+    await expect(page.getByText('Select a domain...')).toBeVisible();
   });
 
   test('Generate button is disabled until domain and topic are selected @regression', async ({
     page,
   }) => {
     // On initial load no domain is selected → Generate button must be disabled.
-    await expect(page.getByRole('button', { name: /Generate \d+ Questions/i })).toBeDisabled();
+    await expect(page.getByRole('button', { name: /Generate 10 Questions/i })).toBeDisabled();
   });
 
-  test('quantity preset buttons are rendered @regression', async ({ page }) => {
-    // Preset buttons: 5, 10, 20, 30
-    await expect(page.getByRole('button', { name: '10' })).toBeVisible();
-    await expect(page.getByRole('button', { name: '20' })).toBeVisible();
+  test('topics input and helper text are rendered @regression', async ({ page }) => {
+    await expect(page.getByPlaceholder('Type a topic and press Enter')).toBeVisible();
+    await expect(page.getByText('Add at least one topic to generate questions')).toBeVisible();
   });
 
   test('idle empty state prompt is visible @regression', async ({ page }) => {

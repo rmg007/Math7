@@ -1,80 +1,20 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import type { DifficultyMix, Domain, QuestionType } from '@/hooks/use-studio-generator';
-import { cn } from '@/lib/utils';
 import {
-  BookOpen,
-  Brain,
-  Calculator,
-  Code2,
-  FlaskConical,
-  Globe,
-  RefreshCw,
-  Sparkles,
-} from 'lucide-react';
-import type { ElementType } from 'react';
-
-const DOMAINS: { label: Domain; icon: ElementType; color: string; chips: string[] }[] = [
-  {
-    label: 'Mathematics',
-    icon: Calculator,
-    color: 'from-blue-500 to-indigo-600',
-    chips: [
-      'Integer Operations',
-      'Algebra',
-      'Geometry',
-      'Trigonometry',
-      'Statistics',
-      'Calculus',
-      'Fractions & Decimals',
-    ],
-  },
-  {
-    label: 'English Language',
-    icon: BookOpen,
-    color: 'from-emerald-500 to-teal-600',
-    chips: [
-      'Grammar',
-      'Vocabulary',
-      'Reading Comprehension',
-      'First Conditional',
-      'Writing',
-      'Punctuation',
-    ],
-  },
-  {
-    label: 'History',
-    icon: Globe,
-    color: 'from-amber-500 to-orange-600',
-    chips: [
-      'World War II',
-      'Industrial Revolution',
-      'Ancient Civilizations',
-      'Cold War',
-      'French Revolution',
-    ],
-  },
-  {
-    label: 'Science',
-    icon: FlaskConical,
-    color: 'from-rose-500 to-pink-600',
-    chips: ['Physics', 'Chemistry', 'Biology', 'Earth Science', 'Forces & Motion'],
-  },
-  {
-    label: 'Computer Science',
-    icon: Code2,
-    color: 'from-violet-500 to-purple-600',
-    chips: ['Algorithms', 'Programming Logic', 'Data Structures', 'Pseudocode', 'Python Basics'],
-  },
-  {
-    label: 'General Knowledge',
-    icon: Brain,
-    color: 'from-sky-500 to-cyan-600',
-    chips: ['Geography', 'Current Affairs', 'Science Facts', 'Arts & Culture'],
-  },
-];
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useDomains } from '@/features/curriculum/hooks/use-domains';
+import type { DifficultyMix, QuestionType, StudioConfig } from '@/hooks/use-studio-generator';
+import { buildStudioPrompt } from '@/hooks/use-studio-generator';
+import { cn } from '@/lib/utils';
+import { ChevronDown, ChevronUp, Eye, EyeOff, Plus, RefreshCw, Sparkles, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 const QUESTION_TYPES: { key: QuestionType; label: string; desc: string }[] = [
   { key: 'mcq', label: 'MCQ', desc: 'Single correct' },
@@ -84,7 +24,7 @@ const QUESTION_TYPES: { key: QuestionType; label: string; desc: string }[] = [
   { key: 'reorder_steps', label: 'Reorder', desc: 'Sequence logic' },
 ];
 
-const QUANTITY_PRESETS = [5, 10, 20, 30];
+const QUANTITY_OPTIONS = [5, 10, 15, 20, 25, 30];
 
 const DIFFICULTY_PRESETS: { label: string; mix: (count: number) => DifficultyMix }[] = [
   {
@@ -122,22 +62,20 @@ const DIFFICULTY_PRESETS: { label: string; mix: (count: number) => DifficultyMix
 ];
 
 interface QuestionStudioFilterPanelProps {
-  selectedDomain: Domain | null;
-  setSelectedDomain: (domain: Domain | null) => void;
-  topic: string;
-  setTopic: (topic: string) => void;
+  selectedDomain: string | null;
+  setSelectedDomain: (domain: string | null) => void;
+  topics: string[];
+  setTopics: React.Dispatch<React.SetStateAction<string[]>>;
   count: number;
   setCount: (n: number) => void;
-  customCount: boolean;
-  setCustomCount: (custom: boolean) => void;
   diffMix: DifficultyMix;
   setDiffMix: (mix: DifficultyMix) => void;
+  diffPreset: string;
+  setDiffPreset: (preset: string) => void;
   selectedTypes: QuestionType[];
   setSelectedTypes: React.Dispatch<React.SetStateAction<QuestionType[]>>;
   customInstructions: string;
   setCustomInstructions: (instructions: string) => void;
-  showAdvanced: boolean;
-  setShowAdvanced: React.Dispatch<React.SetStateAction<boolean>>;
   isGenerating: boolean;
   canGenerate: boolean;
   onGenerate: () => void;
@@ -146,40 +84,66 @@ interface QuestionStudioFilterPanelProps {
 export function QuestionStudioFilterPanel({
   selectedDomain,
   setSelectedDomain,
-  topic,
-  setTopic,
+  topics,
+  setTopics,
   count,
   setCount,
-  customCount,
-  setCustomCount,
   diffMix,
   setDiffMix,
+  diffPreset,
+  setDiffPreset,
   selectedTypes,
   setSelectedTypes,
   customInstructions,
   setCustomInstructions,
-  showAdvanced,
-  setShowAdvanced,
   isGenerating,
   canGenerate,
   onGenerate,
 }: QuestionStudioFilterPanelProps) {
-  const activeDomain = DOMAINS.find((d) => d.label === selectedDomain);
+  const { data: domains } = useDomains();
+  const [topicInput, setTopicInput] = useState('');
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [showCustomDiff, setShowCustomDiff] = useState(false);
 
   const handleCountChange = (n: number) => {
     setCount(n);
-    const total = diffMix.easy + diffMix.medium + diffMix.hard || 10;
-    setDiffMix({
-      easy: Math.round((diffMix.easy / total) * n),
-      medium: Math.round((diffMix.medium / total) * n),
-      hard: n - Math.round((diffMix.easy / total) * n) - Math.round((diffMix.medium / total) * n),
-    });
+    const preset = DIFFICULTY_PRESETS.find((p) => p.label === diffPreset);
+    if (preset) {
+      setDiffMix(preset.mix(n));
+    } else {
+      const total = diffMix.easy + diffMix.medium + diffMix.hard || 10;
+      setDiffMix({
+        easy: Math.round((diffMix.easy / total) * n),
+        medium: Math.round((diffMix.medium / total) * n),
+        hard: n - Math.round((diffMix.easy / total) * n) - Math.round((diffMix.medium / total) * n),
+      });
+    }
   };
 
   const handleDiffInput = (key: keyof DifficultyMix, value: number) => {
     const newMix = { ...diffMix, [key]: Math.max(0, value) };
     setDiffMix(newMix);
     setCount(newMix.easy + newMix.medium + newMix.hard);
+    setDiffPreset('Custom');
+  };
+
+  const handleAddTopic = () => {
+    const trimmed = topicInput.trim();
+    if (trimmed && !topics.includes(trimmed)) {
+      setTopics((prev) => [...prev, trimmed]);
+      setTopicInput('');
+    }
+  };
+
+  const handleRemoveTopic = (topic: string) => {
+    setTopics((prev) => prev.filter((t) => t !== topic));
+  };
+
+  const handleTopicKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddTopic();
+    }
   };
 
   const toggleType = (type: QuestionType) => {
@@ -188,132 +152,124 @@ export function QuestionStudioFilterPanel({
     );
   };
 
-  const applyPreset = (mix: DifficultyMix) => setDiffMix(mix);
+  // Build live prompt preview
+  const previewPrompt = useMemo(() => {
+    if (!selectedDomain || topics.length === 0) return '';
+    const config: StudioConfig = {
+      domain: selectedDomain,
+      topics,
+      count,
+      difficultyMix: diffMix,
+      questionTypes: selectedTypes,
+      customInstructions: customInstructions.trim() || undefined,
+    };
+    return buildStudioPrompt(config);
+  }, [selectedDomain, topics, count, diffMix, selectedTypes, customInstructions]);
 
   return (
     <aside className="w-80 flex-shrink-0 border-r border-gray-100 bg-gray-50/70 overflow-y-auto p-5 space-y-5">
-      {/* Domain selector */}
+      {/* ── Subject Domain (Dropdown) ────────────────────── */}
       <div className="space-y-2">
         <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
           Subject Domain
         </Label>
-        <div className="grid grid-cols-2 gap-2">
-          {DOMAINS.map((d) => {
-            const Icon = d.icon;
-            const isActive = selectedDomain === d.label;
-            return (
-              <button
-                key={d.label}
-                onClick={() => {
-                  setSelectedDomain(d.label);
-                  setTopic('');
-                }}
-                className={cn(
-                  'flex flex-col items-center gap-1.5 p-3 rounded-xl border text-xs font-semibold transition-all duration-150',
-                  isActive
-                    ? 'border-indigo-300 bg-indigo-50 text-indigo-700 shadow-sm'
-                    : 'border-gray-200 bg-white text-gray-500 hover:border-indigo-200 hover:bg-indigo-50/50'
-                )}
-              >
-                <div
-                  className={cn(
-                    'w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br text-white shadow-sm',
-                    isActive ? d.color : 'from-gray-300 to-gray-400'
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                </div>
-                <span className="leading-tight text-center">{d.label}</span>
-              </button>
-            );
-          })}
-        </div>
+        <Select
+          value={selectedDomain ?? ''}
+          onValueChange={(v) => {
+            setSelectedDomain(v || null);
+          }}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select a domain..." />
+          </SelectTrigger>
+          <SelectContent>
+            {domains?.map((d) => (
+              <SelectItem key={d.domain_id} value={d.title}>
+                {d.title}
+              </SelectItem>
+            ))}
+            {/* Fallback if no domains in DB yet */}
+            {(!domains || domains.length === 0) && (
+              <>
+                <SelectItem value="Mathematics">Mathematics</SelectItem>
+                <SelectItem value="English Language">English Language</SelectItem>
+                <SelectItem value="History">History</SelectItem>
+                <SelectItem value="Science">Science</SelectItem>
+                <SelectItem value="Computer Science">Computer Science</SelectItem>
+                <SelectItem value="General Knowledge">General Knowledge</SelectItem>
+              </>
+            )}
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Topic input + chips */}
-      {selectedDomain && (
-        <div className="space-y-2 animate-in fade-in duration-200">
-          <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-            Topic
-          </Label>
+      {/* ── Topics (Dynamic Add/Delete) ──────────────────── */}
+      <div className="space-y-2">
+        <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          Topics
+        </Label>
+        <div className="flex gap-1.5">
           <Input
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder={`e.g. "${activeDomain?.chips[0] ?? 'Enter specific topic'}"`}
-            className="text-sm"
+            value={topicInput}
+            onChange={(e) => setTopicInput(e.target.value)}
+            onKeyDown={handleTopicKeyDown}
+            placeholder="Type a topic and press Enter"
+            className="text-sm flex-1"
           />
-          {activeDomain && (
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {activeDomain.chips.map((chip) => (
-                <button
-                  key={chip}
-                  onClick={() => setTopic(chip)}
-                  className={cn(
-                    'text-[11px] px-2 py-1 rounded-full border transition-colors',
-                    topic === chip
-                      ? 'bg-indigo-600 text-white border-indigo-600'
-                      : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-300 hover:text-indigo-600'
-                  )}
-                >
-                  {chip}
-                </button>
-              ))}
-            </div>
-          )}
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleAddTopic}
+            disabled={!topicInput.trim()}
+            className="h-9 w-9 p-0 flex-shrink-0"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
         </div>
-      )}
+        {topics.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {topics.map((topic) => (
+              <span
+                key={topic}
+                className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-indigo-600 text-white font-semibold"
+              >
+                {topic}
+                <button
+                  onClick={() => handleRemoveTopic(topic)}
+                  className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        {topics.length === 0 && (
+          <p className="text-[11px] text-gray-400">Add at least one topic to generate questions</p>
+        )}
+      </div>
 
-      {/* Quantity */}
+      {/* ── Number of Questions (Dropdown) ───────────────── */}
       <div className="space-y-2">
         <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
           Number of Questions
         </Label>
-        <div className="flex gap-1.5">
-          {QUANTITY_PRESETS.map((n) => (
-            <button
-              key={n}
-              onClick={() => {
-                handleCountChange(n);
-                setCustomCount(false);
-              }}
-              className={cn(
-                'flex-1 h-9 rounded-lg border text-sm font-semibold transition-colors',
-                !customCount && count === n
-                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                  : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-300'
-              )}
-            >
-              {n}
-            </button>
-          ))}
-          <button
-            onClick={() => setCustomCount(true)}
-            className={cn(
-              'flex-1 h-9 rounded-lg border text-sm font-semibold transition-colors',
-              customCount
-                ? 'bg-indigo-600 text-white border-indigo-600'
-                : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-300'
-            )}
-          >
-            Custom
-          </button>
-        </div>
-        {customCount && (
-          <Input
-            type="number"
-            min={1}
-            max={50}
-            value={count}
-            onChange={(e) =>
-              handleCountChange(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))
-            }
-            className="text-sm"
-            placeholder="Enter number (1–50)"
-          />
-        )}
+        <Select value={String(count)} onValueChange={(v) => handleCountChange(Number(v))}>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {QUANTITY_OPTIONS.map((n) => (
+              <SelectItem key={n} value={String(n)}>
+                {n} questions
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Difficulty Mixer */}
+      {/* ── Difficulty Mix (Dropdown → Custom) ───────────── */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -330,52 +286,66 @@ export function QuestionStudioFilterPanel({
             Total: {diffMix.easy + diffMix.medium + diffMix.hard} / {count}
           </span>
         </div>
-        {/* Presets */}
-        <div className="grid grid-cols-2 gap-1.5">
-          {DIFFICULTY_PRESETS.map((p) => (
-            <button
-              key={p.label}
-              onClick={() => applyPreset(p.mix(count))}
-              className="h-7 rounded-lg border border-gray-200 bg-white text-[11px] font-semibold text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition-colors"
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-        {/* Manual inputs */}
-        <div className="grid grid-cols-3 gap-2">
-          {(['easy', 'medium', 'hard'] as const).map((d) => (
-            <div key={d} className="space-y-1">
-              <label
-                className={cn(
-                  'text-[10px] font-bold uppercase tracking-wide block',
-                  d === 'easy'
-                    ? 'text-emerald-600'
-                    : d === 'medium'
-                      ? 'text-amber-600'
-                      : 'text-rose-600'
-                )}
-              >
-                {d}
-              </label>
-              <Input
-                type="number"
-                min={0}
-                value={diffMix[d]}
-                onChange={(e) => handleDiffInput(d, parseInt(e.target.value) || 0)}
-                className="h-8 text-sm text-center font-semibold"
-              />
-            </div>
-          ))}
-        </div>
+        <Select
+          value={diffPreset}
+          onValueChange={(v) => {
+            setDiffPreset(v);
+            if (v === 'Custom') {
+              setShowCustomDiff(true);
+            } else {
+              setShowCustomDiff(false);
+              const preset = DIFFICULTY_PRESETS.find((p) => p.label === v);
+              if (preset) setDiffMix(preset.mix(count));
+            }
+          }}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {DIFFICULTY_PRESETS.map((p) => (
+              <SelectItem key={p.label} value={p.label}>
+                {p.label}
+              </SelectItem>
+            ))}
+            <SelectItem value="Custom">Custom</SelectItem>
+          </SelectContent>
+        </Select>
+        {(diffPreset === 'Custom' || showCustomDiff) && (
+          <div className="grid grid-cols-3 gap-2 animate-in fade-in duration-200">
+            {(['easy', 'medium', 'hard'] as const).map((d) => (
+              <div key={d} className="space-y-1">
+                <label
+                  className={cn(
+                    'text-[10px] font-bold uppercase tracking-wide block',
+                    d === 'easy'
+                      ? 'text-emerald-600'
+                      : d === 'medium'
+                        ? 'text-amber-600'
+                        : 'text-rose-600'
+                  )}
+                >
+                  {d}
+                </label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={diffMix[d]}
+                  onChange={(e) => handleDiffInput(d, parseInt(e.target.value) || 0)}
+                  className="h-8 text-sm text-center font-semibold"
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Question type chips */}
+      {/* ── Question Types (Multi-select chips) ──────────── */}
       <div className="space-y-2">
         <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
           Question Types
         </Label>
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="space-y-1">
           {QUESTION_TYPES.map(({ key, label, desc }) => {
             const isActive = selectedTypes.includes(key);
             return (
@@ -383,16 +353,28 @@ export function QuestionStudioFilterPanel({
                 key={key}
                 onClick={() => toggleType(key)}
                 className={cn(
-                  'flex flex-col items-start px-3 py-2 rounded-xl border text-left transition-all',
+                  'flex items-center justify-between w-full px-3 py-2 rounded-lg border text-left text-sm transition-all',
                   isActive
                     ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
                     : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-300'
                 )}
               >
-                <span className="text-xs font-bold">{label}</span>
-                <span className={cn('text-[10px]', isActive ? 'text-indigo-200' : 'text-gray-400')}>
-                  {desc}
-                </span>
+                <div>
+                  <span className="font-semibold text-xs">{label}</span>
+                  <span
+                    className={cn(
+                      'ml-2 text-[10px]',
+                      isActive ? 'text-indigo-200' : 'text-gray-400'
+                    )}
+                  >
+                    {desc}
+                  </span>
+                </div>
+                {isActive && (
+                  <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-white" />
+                  </div>
+                )}
               </button>
             );
           })}
@@ -402,30 +384,40 @@ export function QuestionStudioFilterPanel({
         )}
       </div>
 
-      {/* Advanced section */}
+      {/* ── Prompt Preview / Editor ──────────────────────── */}
       <div className="space-y-2">
         <button
-          onClick={() => setShowAdvanced((s) => !s)}
-          className="text-xs font-semibold text-indigo-500 hover:text-indigo-700 transition-colors"
+          onClick={() => setShowPrompt((s) => !s)}
+          className="flex items-center gap-1.5 text-xs font-semibold text-indigo-500 hover:text-indigo-700 transition-colors"
         >
-          {showAdvanced ? '− Hide' : '+ Add'} Custom Instructions
+          {showPrompt ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          {showPrompt ? 'Hide' : 'View'} Prompt Preview
+          {showPrompt ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
         </button>
-        {showAdvanced && (
-          <Textarea
-            value={customInstructions}
-            onChange={(e) => setCustomInstructions(e.target.value)}
-            placeholder='e.g. "Avoid questions involving fractions" or "Use a story context for each question"'
-            className="min-h-[80px] text-xs resize-none"
-          />
+        {showPrompt && (
+          <div className="space-y-2 animate-in fade-in duration-200">
+            <div className="bg-white border border-gray-200 rounded-xl p-3 max-h-48 overflow-y-auto">
+              <pre className="text-[11px] text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">
+                {previewPrompt || 'Select a domain and add topics to preview the prompt.'}
+              </pre>
+            </div>
+            <Textarea
+              value={customInstructions}
+              onChange={(e) => setCustomInstructions(e.target.value)}
+              placeholder='Optional: Add custom instructions, e.g. "Avoid fractions" or "Use a story context"'
+              className="min-h-[60px] text-xs resize-none"
+            />
+          </div>
         )}
       </div>
 
-      {/* Generate button */}
+      {/* ── Generate Button ─────────────────────────────── */}
       <div className="pt-2 space-y-2">
         {canGenerate && (
           <p className="text-[11px] text-gray-400 leading-snug bg-gray-100 rounded-lg px-3 py-2">
             Generating <strong>{count}</strong> {selectedDomain} questions on{' '}
-            <strong>"{topic}"</strong> ({diffMix.easy}E / {diffMix.medium}M / {diffMix.hard}H)
+            <strong>"{topics.join(', ')}"</strong> ({diffMix.easy}E / {diffMix.medium}M /{' '}
+            {diffMix.hard}H)
           </p>
         )}
         <Button

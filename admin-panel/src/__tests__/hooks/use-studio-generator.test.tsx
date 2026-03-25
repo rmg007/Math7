@@ -24,7 +24,7 @@ Object.defineProperty(globalThis, 'crypto', {
 
 const BASE_CONFIG: StudioConfig = {
   domain: 'Mathematics',
-  topic: 'Algebra',
+  topics: ['Algebra'],
   count: 3,
   difficultyMix: { easy: 1, medium: 1, hard: 1 },
   questionTypes: ['mcq'],
@@ -90,7 +90,7 @@ describe('useStudioGenerator', () => {
 
       let success: boolean | undefined;
       await act(async () => {
-        success = await result.current.generateBatch({ ...BASE_CONFIG, topic: 'Xy' });
+        success = await result.current.generateBatch({ ...BASE_CONFIG, topics: ['Xy'] });
       });
 
       expect(success).toBe(false);
