@@ -3,14 +3,14 @@ import { Textarea } from '@/components/ui/textarea';
 import type { Difficulty, StagedQuestion } from '@/hooks/use-studio-generator';
 import { cn } from '@/lib/utils';
 import {
-    CheckCircle2,
-    ChevronDown,
-    ChevronUp,
-    Edit3,
-    RefreshCw,
-    Trash2,
-    TrendingDown,
-    TrendingUp,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Edit3,
+  RefreshCw,
+  Trash2,
+  TrendingDown,
+  TrendingUp,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -32,7 +32,7 @@ const DIFFICULTY_STYLES: Record<Difficulty, { label: string; className: string }
 };
 
 const TYPE_LABELS: Record<string, string> = {
-  mcq: 'MCQ',
+  multiple_choice: 'MCQ',
   mcq_multi: 'MCQ Multi',
   text_input: 'Short Answer',
   boolean: 'True / False',
@@ -53,9 +53,7 @@ export function StudioQuestionCard({
   const [isEditMode, setIsEditMode] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
   const [editText, setEditText] = useState(question.text);
-  const [editExplanation, setEditExplanation] = useState(
-    question.metadata.explanation ?? ''
-  );
+  const [editExplanation, setEditExplanation] = useState(question.metadata.explanation ?? '');
 
   const diffStyle = DIFFICULTY_STYLES[question.difficulty];
 
@@ -137,7 +135,7 @@ export function StudioQuestionCard({
       </div>
 
       {/* MCQ options */}
-      {(question.question_type === 'mcq' || question.question_type === 'mcq_multi') &&
+      {(question.question_type === 'multiple_choice' || question.question_type === 'mcq_multi') &&
         question.metadata.options && (
           <div className="px-4 pb-2 grid grid-cols-2 gap-1.5">
             {question.metadata.options.map((opt, i) => {
@@ -154,9 +152,7 @@ export function StudioQuestionCard({
                       : 'bg-gray-50 border-gray-200 text-gray-600'
                   )}
                 >
-                  <span className="font-bold mr-1 opacity-50">
-                    {String.fromCharCode(65 + i)}.
-                  </span>
+                  <span className="font-bold mr-1 opacity-50">{String.fromCharCode(65 + i)}.</span>
                   {opt}
                 </div>
               );
@@ -228,7 +224,11 @@ export function StudioQuestionCard({
       {/* Edit mode save/cancel */}
       {isEditMode && (
         <div className="px-4 pb-3 flex gap-2">
-          <Button size="sm" onClick={handleSaveEdit} className="text-xs h-7 bg-indigo-600 hover:bg-indigo-700 text-white">
+          <Button
+            size="sm"
+            onClick={handleSaveEdit}
+            className="text-xs h-7 bg-indigo-600 hover:bg-indigo-700 text-white"
+          >
             Save
           </Button>
           <Button size="sm" variant="ghost" onClick={handleCancelEdit} className="text-xs h-7">

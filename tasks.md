@@ -12,6 +12,35 @@
 
 ---
 
+## [/] Task 100: Deploy Questerix (Session: 2026-03-25)
+
+- [x] Apply migration: `20260325000001_create_studio_prompts.sql` [verified]
+- [ ] Generate environment files (`generate-env.ps1`)
+- [ ] Build and Deploy Admin Panel
+- [ ] Build and Deploy Student App
+- [ ] Verify Deployment
+
+---
+
+## [/] Task 101: AI Studio Stabilization & Workers AI Migration
+
+Last Update: 2026-03-25
+
+- [x] **Data Cleanup**: Clear `questions`, `studio_prompts`, `ai_generation_sessions`, `generation_audit_log`, `ai_debug_logs`. [done]
+- [x] **Refactor API**: Strictly use Cloudflare Workers AI in `generateQuestions.ts` and `validateContent.ts`. [verified]
+- [x] **Standardize Types**: Unified `mcq` to `multiple_choice` across hooks, components, and tests. [done]
+- [x] **Harden Pipeline**: Implemented Zod safe-parsing for AI content and robust prompt record lifecycle. [done]
+- [ ] **Delete Obsolete APIs**: Remove Supabase Edge Function AI fallbacks (e.g. in `BulkImportPage.tsx`).
+- [ ] **Fix E2E Tests**:
+  - [ ] Resolve persistent button interaction timeouts in `ai-studio-workers.e2e.spec.ts`.
+  - [ ] Adjust type selection logic to avoid toggling default types OFF.
+  - [ ] Ensure `unauthenticated` project tests correctly redirect or are excluded.
+- [ ] **Verify Error Handling**:
+  - [ ] Verify UI gracefully handles Workers AI 500 errors.
+  - [ ] Verify redirection/error when `VITE_WORKERS_URL` is missing.
+
+---
+
 ## 🔴 P0 — Security (High Blast Radius)
 
 ### Database / Backend

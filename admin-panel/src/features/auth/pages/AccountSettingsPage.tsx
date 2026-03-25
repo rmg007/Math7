@@ -119,10 +119,11 @@ export function AccountSettingsPage() {
 
   if (loading) {
     return (
-      <div className="space-y-8 animate-pulse p-8 max-w-4xl mx-auto">
-        <div className="h-20 bg-gray-100/50 rounded-2xl w-2/3"></div>
-        <div className="h-48 bg-gray-100/50 rounded-2xl"></div>
-        <div className="h-48 bg-gray-100/50 rounded-2xl"></div>
+      <div className="space-y-8 animate-pulse p-8 max-w-4xl mx-auto" role="status" aria-busy="true">
+        <div className="h-20 bg-gray-100/50 rounded-2xl w-2/3" aria-hidden="true"></div>
+        <div className="h-48 bg-gray-100/50 rounded-2xl" aria-hidden="true"></div>
+        <div className="h-48 bg-gray-100/50 rounded-2xl" aria-hidden="true"></div>
+        <span className="sr-only">Loading account settings...</span>
       </div>
     );
   }
@@ -139,8 +140,12 @@ export function AccountSettingsPage() {
       />
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 backdrop-blur-xl rounded-2xl p-4 flex items-center gap-3 animate-in shake duration-500">
-          <AlertTriangle className="h-5 w-5 text-red-600" />
+        <div
+          className="bg-red-500/10 border border-red-500/20 backdrop-blur-xl rounded-2xl p-4 flex items-center gap-3 animate-in shake duration-500"
+          role="alert"
+          aria-live="polite"
+        >
+          <AlertTriangle className="h-5 w-5 text-red-600" aria-hidden="true" />
           <p className="text-sm text-red-700 font-bold tracking-tight">{error}</p>
         </div>
       )}
@@ -149,10 +154,12 @@ export function AccountSettingsPage() {
       <div
         className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/20 p-10 shadow-sm hover:shadow-xl transition-all"
         data-testid="settings-profile-section"
+        role="region"
+        aria-label="Profile Information"
       >
         <div className="flex items-center gap-4 mb-8">
           <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/10">
-            <BadgeCheck className="h-6 w-6 text-indigo-600" />
+            <BadgeCheck className="h-6 w-6 text-indigo-600" aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-xl font-black text-gray-900 tracking-tight">Profile</h2>
@@ -165,42 +172,69 @@ export function AccountSettingsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-gray-400">
-              <User className="w-3.5 h-3.5" />
-              <label className="text-2xs font-black uppercase tracking-extra-wide">
+              <User className="w-3.5 h-3.5" aria-hidden="true" />
+              <label
+                id="label-legal-name"
+                className="text-2xs font-black uppercase tracking-extra-wide"
+              >
                 Legal Name
               </label>
             </div>
-            <p className="text-lg font-bold text-gray-900 tracking-tight ml-5.5">
+            <p
+              className="text-lg font-bold text-gray-900 tracking-tight ml-5.5"
+              aria-labelledby="label-legal-name"
+            >
               {user?.full_name || 'Anonymous User'}
             </p>
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-gray-400">
-              <Mail className="w-3.5 h-3.5" />
-              <label className="text-2xs font-black uppercase tracking-extra-wide">
+              <Mail className="w-3.5 h-3.5" aria-hidden="true" />
+              <label
+                id="label-contact-email"
+                className="text-2xs font-black uppercase tracking-extra-wide"
+              >
                 Contact Email
               </label>
             </div>
-            <p className="text-lg font-bold text-gray-900 tracking-tight ml-5.5">{user?.email}</p>
+            <p
+              className="text-lg font-bold text-gray-900 tracking-tight ml-5.5"
+              aria-labelledby="label-contact-email"
+            >
+              {user?.email}
+            </p>
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-gray-400">
-              <Shield className="w-3.5 h-3.5" />
-              <label className="text-2xs font-black uppercase tracking-extra-wide">Role</label>
+              <Shield className="w-3.5 h-3.5" aria-hidden="true" />
+              <label id="label-role" className="text-2xs font-black uppercase tracking-extra-wide">
+                Role
+              </label>
             </div>
-            <p className="text-lg font-black text-indigo-600 tracking-tight ml-5.5 uppercase italic">
+            <p
+              className="text-lg font-black text-indigo-600 tracking-tight ml-5.5 uppercase italic"
+              aria-labelledby="label-role"
+            >
               {formatIdentifier(user?.role)}
             </p>
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-gray-400">
-              <Calendar className="w-3.5 h-3.5" />
-              <label className="text-2xs font-black uppercase tracking-extra-wide">Joined</label>
+              <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
+              <label
+                id="label-joined"
+                className="text-2xs font-black uppercase tracking-extra-wide"
+              >
+                Joined
+              </label>
             </div>
-            <p className="text-lg font-bold text-gray-900 tracking-tight ml-5.5">
+            <p
+              className="text-lg font-bold text-gray-900 tracking-tight ml-5.5"
+              aria-labelledby="label-joined"
+            >
               {user?.created_at
                 ? new Date(user.created_at).toLocaleDateString(undefined, {
                     year: 'numeric',
@@ -221,21 +255,31 @@ export function AccountSettingsPage() {
       {/* Danger Zone Sections */}
       <div className="space-y-6">
         <div className="flex items-center gap-3 px-2">
-          <ShieldAlert className="w-5 h-5 text-red-500/50" />
-          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em]">
+          <ShieldAlert className="w-5 h-5 text-red-500/50" aria-hidden="true" />
+          <h3
+            id="danger-zone-heading"
+            className="text-xs font-black text-gray-400 uppercase tracking-[0.3em]"
+          >
             Danger Zone
           </h3>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Deactivation Card */}
-          <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-amber-500/10 hover:border-amber-500/20 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between p-10">
+          <div
+            className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-amber-500/10 hover:border-amber-500/20 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between p-10"
+            role="region"
+            aria-labelledby="deactivate-heading"
+          >
             <div>
               <div className="flex items-center gap-4 mb-4">
                 <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600">
-                  <BadgeCheck className="h-6 w-6 opacity-20" />
+                  <BadgeCheck className="h-6 w-6 opacity-20" aria-hidden="true" />
                 </div>
-                <h2 className="text-lg font-black text-gray-900 tracking-tight">
+                <h2
+                  id="deactivate-heading"
+                  className="text-lg font-black text-gray-900 tracking-tight"
+                >
                   Deactivate Account
                 </h2>
               </div>
@@ -257,8 +301,13 @@ export function AccountSettingsPage() {
               <div
                 className="bg-amber-500/5 backdrop-blur-md border border-amber-500/20 rounded-2xl p-6 space-y-4 animate-in zoom-in-95 duration-300"
                 data-testid="settings-deactivate-confirm-panel"
+                role="alert"
+                aria-live="polite"
               >
-                <p className="text-xs font-bold text-amber-800 leading-relaxed uppercase tracking-tight">
+                <p
+                  id="deactivate-confirm-text"
+                  className="text-xs font-bold text-amber-800 leading-relaxed uppercase tracking-tight"
+                >
                   Are you sure you want to deactivate your account? You will be signed out
                   immediately.
                 </p>
@@ -286,13 +335,19 @@ export function AccountSettingsPage() {
           </div>
 
           {/* Delete Card */}
-          <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-red-500/10 hover:border-red-500/20 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between p-10">
+          <div
+            className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-red-500/10 hover:border-red-500/20 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between p-10"
+            role="region"
+            aria-labelledby="delete-heading"
+          >
             <div>
               <div className="flex items-center gap-4 mb-4">
                 <div className="p-2.5 rounded-xl bg-red-500/10 text-red-600">
-                  <Trash2 className="h-6 w-6 opacity-20" />
+                  <Trash2 className="h-6 w-6 opacity-20" aria-hidden="true" />
                 </div>
-                <h2 className="text-lg font-black text-gray-900 tracking-tight">Delete Account</h2>
+                <h2 id="delete-heading" className="text-lg font-black text-gray-900 tracking-tight">
+                  Delete Account
+                </h2>
               </div>
               <p className="text-sm text-gray-500 font-medium leading-relaxed mb-8">
                 Permanently delete your account and all associated data.{' '}
@@ -313,8 +368,13 @@ export function AccountSettingsPage() {
               <div
                 className="bg-red-500/5 backdrop-blur-md border border-red-500/20 rounded-2xl p-6 space-y-4 animate-in zoom-in-95 duration-300"
                 data-testid="settings-delete-confirm-panel"
+                role="alert"
+                aria-live="polite"
               >
-                <p className="text-2xs font-black text-red-800 leading-relaxed uppercase tracking-widest">
+                <p
+                  id="delete-confirm-instruction"
+                  className="text-2xs font-black text-red-800 leading-relaxed uppercase tracking-widest"
+                >
                   Type{' '}
                   <span className="bg-red-600 text-white px-1.5 py-0.5 rounded italic">DELETE</span>{' '}
                   to confirm deletion.
@@ -325,6 +385,8 @@ export function AccountSettingsPage() {
                   placeholder="AUTHORIZATION CODE"
                   data-testid="settings-delete-confirm-input"
                   className="bg-white/50 border-red-200/50 rounded-xl h-10 font-mono font-black text-red-600 text-center tracking-[0.5em] focus:ring-red-500/20"
+                  aria-labelledby="delete-confirm-instruction"
+                  aria-required="true"
                 />
                 <div className="flex flex-col gap-2">
                   <Button

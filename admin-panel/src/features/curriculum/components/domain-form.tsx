@@ -198,13 +198,18 @@ export function DomainForm() {
 
   if (domainError) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <ShieldCheck className="w-12 h-12 text-red-500" />
+      <div
+        className="flex flex-col items-center justify-center min-h-[400px] space-y-4"
+        role="alert"
+        aria-live="assertive"
+      >
+        <ShieldCheck className="w-12 h-12 text-red-500" aria-hidden="true" />
         <h3 className="text-xl font-bold text-red-900">Error Loading Domain</h3>
         <p className="text-red-700 max-w-md text-center">{(domainError as Error).message}</p>
         <button
           onClick={() => navigate('/domains')}
           className="px-4 py-2 bg-white border border-red-200 rounded-lg text-red-700 font-bold hover:bg-red-50 transition-colors"
+          aria-label="Back to domains list"
         >
           Return to Domains
         </button>
@@ -214,8 +219,12 @@ export function DomainForm() {
 
   if (isInitialLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <Loader2 className="w-12 h-12 text-purple-500 animate-spin" />
+      <div
+        className="flex flex-col items-center justify-center min-h-[400px] space-y-4"
+        role="status"
+        aria-busy="true"
+      >
+        <Loader2 className="w-12 h-12 text-purple-500 animate-spin" aria-hidden="true" />
         <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">
           Loading Domain...
         </p>
@@ -225,9 +234,9 @@ export function DomainForm() {
 
   if (!currentApp) {
     return (
-      <Card className="bg-amber-50 border-amber-200">
+      <Card className="bg-amber-50 border-amber-200" role="alert">
         <CardContent className="p-8 flex flex-col items-center text-center space-y-4">
-          <Globe className="w-12 h-12 text-amber-500" />
+          <Globe className="w-12 h-12 text-amber-500" aria-hidden="true" />
           <h3 className="text-xl font-bold text-amber-900">No App Selected</h3>
           <p className="text-amber-700">
             Please select an application from the sidebar to manage domains.
@@ -238,7 +247,11 @@ export function DomainForm() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div
+      className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700"
+      role="main"
+      aria-label={isEditing ? 'Modify Domain' : 'Create Domain'}
+    >
       <AdminHeader
         title={isEditing ? 'Modify Domain' : 'Create Domain'}
         description={isEditing ? 'Update domain details.' : 'Add a new domain.'}
@@ -250,18 +263,22 @@ export function DomainForm() {
           onSubmit={form.handleSubmit(onSubmit)}
           data-testid="domain-form"
           className="space-y-8"
+          aria-label={isEditing ? 'Modify domain form' : 'Create domain form'}
         >
           <fieldset
             disabled={form.formState.isSubmitting}
             className="space-y-8 disabled:opacity-60"
+            aria-busy={form.formState.isSubmitting}
           >
             {error && (
               <div
                 data-testid="form-error"
                 className="p-4 rounded-2xl bg-red-50 border border-red-100 flex items-start gap-4"
+                role="alert"
+                aria-live="assertive"
               >
                 <div className="p-2 bg-red-100 rounded-full shrink-0">
-                  <ShieldCheck className="w-5 h-5 text-red-600" />
+                  <ShieldCheck className="w-5 h-5 text-red-600" aria-hidden="true" />
                 </div>
                 <div className="space-y-1 pt-1">
                   <h4 className="text-sm font-bold text-red-900 uppercase tracking-wider">
@@ -281,7 +298,7 @@ export function DomainForm() {
                     render={({ field }) => (
                       <FormItem className="space-y-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <Globe className="w-4 h-4 text-indigo-500" />
+                          <Globe className="w-4 h-4 text-indigo-500" aria-hidden="true" />
                           <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
                             Related App
                           </FormLabel>
@@ -293,7 +310,10 @@ export function DomainForm() {
                           disabled={!isSuperAdmin} // Only Super Admins can change app association
                         >
                           <FormControl>
-                            <SelectTrigger className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all border">
+                            <SelectTrigger
+                              className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all border"
+                              aria-label="Select related application"
+                            >
                               <SelectValue placeholder="Select Application" />
                             </SelectTrigger>
                           </FormControl>
@@ -320,7 +340,7 @@ export function DomainForm() {
                     render={({ field }) => (
                       <FormItem className="space-y-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <FileText className="w-4 h-4 text-purple-500" />
+                          <FileText className="w-4 h-4 text-purple-500" aria-hidden="true" />
                           <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
                             Title
                           </FormLabel>
@@ -331,6 +351,7 @@ export function DomainForm() {
                             {...field}
                             className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-purple-500/10 transition-all border"
                             required
+                            aria-required="true"
                           />
                         </FormControl>
                         <FormMessage className="text-xs font-bold text-red-500 italic" />
@@ -344,7 +365,7 @@ export function DomainForm() {
                     render={({ field }) => (
                       <FormItem className="space-y-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <Globe className="w-4 h-4 text-blue-500" />
+                          <Globe className="w-4 h-4 text-blue-500" aria-hidden="true" />
                           <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
                             Slug
                           </FormLabel>
@@ -356,6 +377,7 @@ export function DomainForm() {
                             disabled={isEditing}
                             className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all border disabled:opacity-50"
                             required
+                            aria-required="true"
                             pattern="[a-z0-9_]+"
                             title="Lowercase letters, numbers, and underscores only"
                           />
@@ -376,7 +398,7 @@ export function DomainForm() {
                     render={({ field }) => (
                       <FormItem className="space-y-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <ListOrdered className="w-4 h-4 text-amber-500" />
+                          <ListOrdered className="w-4 h-4 text-amber-500" aria-hidden="true" />
                           <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
                             Order
                           </FormLabel>
@@ -387,6 +409,7 @@ export function DomainForm() {
                             {...field}
                             className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-amber-500/10 transition-all border"
                             required
+                            aria-required="true"
                           />
                         </FormControl>
                         <FormMessage className="text-xs font-bold text-red-500 italic" />
@@ -400,7 +423,7 @@ export function DomainForm() {
                     render={({ field }) => (
                       <FormItem className="space-y-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                          <ShieldCheck className="w-4 h-4 text-emerald-500" aria-hidden="true" />
                           <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
                             Status
                           </FormLabel>
@@ -414,6 +437,7 @@ export function DomainForm() {
                             <SelectTrigger
                               data-testid="status-select"
                               className="h-14 rounded-2xl border-gray-100 bg-white/50 text-lg font-bold tracking-tight focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all border"
+                              aria-label="Select domain status"
                             >
                               <SelectValue placeholder="Select status" />
                             </SelectTrigger>
@@ -449,7 +473,7 @@ export function DomainForm() {
                   render={({ field }) => (
                     <FormItem className="space-y-3">
                       <div className="flex items-center gap-2 mb-1">
-                        <FileText className="w-4 h-4 text-indigo-500" />
+                        <FileText className="w-4 h-4 text-indigo-500" aria-hidden="true" />
                         <FormLabel className="text-2xs font-black uppercase tracking-extra-wide text-gray-400">
                           Description
                         </FormLabel>

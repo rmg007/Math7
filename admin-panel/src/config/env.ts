@@ -35,6 +35,8 @@ interface EnvConfig {
   isDevelopment: boolean;
   /** API timeout in milliseconds */
   apiTimeout: number;
+  /** Workers AI URL */
+  workersUrl: string;
 }
 
 // Type for the fallback env object when import.meta.env is unavailable
@@ -103,6 +105,7 @@ export const env: EnvConfig = {
   isProduction: Boolean(_metaEnv.PROD),
   isDevelopment: Boolean(_metaEnv.DEV) || !_metaEnv.PROD,
   apiTimeout: Number(getEnvVar('VITE_API_TIMEOUT', false)) || 15000,
+  workersUrl: getEnvVar('VITE_WORKERS_URL', false),
 };
 
 /**
@@ -136,5 +139,6 @@ if (_metaEnv.DEV) {
     supabaseAnonKey: env.supabaseAnonKey ? '***configured***' : 'NOT SET',
     enableOfflineMode: env.enableOfflineMode,
     analyticsId: env.analyticsId ? '***configured***' : null,
+    workersUrl: env.workersUrl ? '***configured***' : 'NOT SET',
   });
 }

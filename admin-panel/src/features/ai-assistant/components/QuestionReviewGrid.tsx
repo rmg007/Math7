@@ -5,7 +5,7 @@ import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 export interface GeneratedQuestion {
   id: string;
   text: string;
-  question_type: 'mcq' | 'mcq_multi' | 'text_input' | 'boolean' | 'reorder_steps';
+  question_type: 'multiple_choice' | 'mcq_multi' | 'text_input' | 'boolean' | 'reorder_steps';
   difficulty: 'easy' | 'medium' | 'hard';
   metadata: {
     options?: string[];
@@ -39,10 +39,8 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
 
   const handleSaveEdit = () => {
     if (!editForm) return;
-    
-    const updatedQuestions = questions.map((q) =>
-      q.id === editForm.id ? editForm : q
-    );
+
+    const updatedQuestions = questions.map((q) => (q.id === editForm.id ? editForm : q));
     onQuestionsChange(updatedQuestions);
     setEditingId(null);
     setEditForm(null);
@@ -53,10 +51,9 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
     onQuestionsChange(updatedQuestions);
   };
 
-
   const getQuestionTypeLabel = (type: string) => {
     switch (type) {
-      case 'mcq':
+      case 'multiple_choice':
         return 'Multiple Choice (Single)';
       case 'mcq_multi':
         return 'Multiple Choice (Multi)';
@@ -85,23 +82,40 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
         <h3 className="text-lg font-semibold text-gray-900">
           Generated Questions ({questions.length})
         </h3>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-green-500" />
+        <div
+          className="flex items-center gap-3"
+          role="status"
+          aria-label="Question difficulty breakdown"
+        >
+          <div
+            className="flex items-center gap-1.5"
+            aria-label={`${questions.filter((q) => q.difficulty === 'easy').length} easy questions`}
+          >
+            <span className="w-2 h-2 rounded-full bg-green-500" aria-hidden="true" />
             <span className="text-sm font-medium text-gray-600">
               {questions.filter((q) => q.difficulty === 'easy').length} Easy
             </span>
           </div>
-          <span className="text-gray-300">·</span>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-yellow-500" />
+          <span className="text-gray-300" aria-hidden="true">
+            ·
+          </span>
+          <div
+            className="flex items-center gap-1.5"
+            aria-label={`${questions.filter((q) => q.difficulty === 'medium').length} medium questions`}
+          >
+            <span className="w-2 h-2 rounded-full bg-yellow-500" aria-hidden="true" />
             <span className="text-sm font-medium text-gray-600">
               {questions.filter((q) => q.difficulty === 'medium').length} Medium
             </span>
           </div>
-          <span className="text-gray-300">·</span>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-red-500" />
+          <span className="text-gray-300" aria-hidden="true">
+            ·
+          </span>
+          <div
+            className="flex items-center gap-1.5"
+            aria-label={`${questions.filter((q) => q.difficulty === 'hard').length} hard questions`}
+          >
+            <span className="w-2 h-2 rounded-full bg-red-500" aria-hidden="true" />
             <span className="text-sm font-medium text-gray-600">
               {questions.filter((q) => q.difficulty === 'hard').length} Hard
             </span>
@@ -109,14 +123,16 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3" role="list" aria-label="Generated questions list">
         {questions.map((question, index) => {
           const isEditing = editingId === question.id;
-          const displayQuestion = (isEditing && editForm) ? editForm : question;
+          const displayQuestion = isEditing && editForm ? editForm : question;
 
           return (
             <div
               key={question.id}
+              role="listitem"
+              aria-label={`Question ${index + 1}`}
               className={`
                 border rounded-lg p-4 transition-all
                 ${isEditing ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-white'}
@@ -124,11 +140,14 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
               `}
             >
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
+                <div
+                  className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700"
+                  aria-hidden="true"
+                >
                   {index + 1}
                 </div>
 
-                <div className="flex-grow">
+                <div className="flex-grow" aria-live="polite">
                   {/* Question Text */}
                   <div className="mb-3">
                     {isEditing ? (
@@ -139,6 +158,8 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
                         }
                         className="w-full p-2 border border-gray-300 rounded-md text-sm"
                         rows={3}
+                        aria-label={`Edit text for question ${index + 1}`}
+                        autoFocus
                       />
                     ) : (
                       <p className="text-gray-800 font-medium">{displayQuestion.text}</p>
@@ -149,17 +170,28 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
                   <div className="space-y-2 text-sm">
                     {displayQuestion.metadata.options && (
                       <div>
-                        <span className="font-semibold text-gray-600">Options:</span>
-                        <ul className="list-disc list-inside text-gray-700 ml-2">
+                        <span
+                          className="font-semibold text-gray-600"
+                          id={`q-${question.id}-options-label`}
+                        >
+                          Options:
+                        </span>
+                        <ul
+                          className="list-disc list-inside text-gray-700 ml-2"
+                          role="list"
+                          aria-labelledby={`q-${question.id}-options-label`}
+                        >
                           {displayQuestion.metadata.options.map((opt, i) => (
-                            <li key={i}>{opt}</li>
+                            <li key={i} role="listitem">
+                              {opt}
+                            </li>
                           ))}
                         </ul>
                       </div>
                     )}
 
                     {displayQuestion.metadata.correct_answer && (
-                      <div>
+                      <div aria-label="Correct answer">
                         <span className="font-semibold text-gray-600">Answer:</span>{' '}
                         <span className="text-green-700 font-medium">
                           {Array.isArray(displayQuestion.metadata.correct_answer)
@@ -170,19 +202,31 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
                     )}
 
                     {displayQuestion.metadata.explanation && (
-                      <div>
+                      <div aria-label="Explanation">
                         <span className="font-semibold text-gray-600">Explanation:</span>{' '}
-                        <span className="text-gray-700">{displayQuestion.metadata.explanation}</span>
+                        <span className="text-gray-700">
+                          {displayQuestion.metadata.explanation}
+                        </span>
                       </div>
                     )}
                   </div>
 
                   {/* Validation Errors */}
                   {question.validation_errors && question.validation_errors.length > 0 && (
-                    <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-md">
+                    <div
+                      className="mt-3 p-2 bg-red-50 border border-red-200 rounded-md"
+                      role="alert"
+                      aria-live="assertive"
+                    >
                       <div className="flex items-start gap-2">
-                        <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                        <AlertCircle
+                          className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5"
+                          aria-hidden="true"
+                        />
                         <div className="text-xs text-red-700">
+                          <p className="font-semibold mb-1">
+                            Validation Errors for question {index + 1}:
+                          </p>
                           {question.validation_errors.map((err, i) => (
                             <div key={i}>• {err}</div>
                           ))}
@@ -192,12 +236,10 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
                   )}
 
                   {/* Metadata Tags */}
-                  <div className="flex items-center gap-2 mt-3">
-                    <StatusBadge 
-                      status={displayQuestion.difficulty as StatusType} 
-                    />
-                    <StatusBadge 
-                      status="draft" 
+                  <div className="flex items-center gap-2 mt-3" aria-label="Question tags">
+                    <StatusBadge status={displayQuestion.difficulty as StatusType} />
+                    <StatusBadge
+                      status="draft"
                       label={getQuestionTypeLabel(displayQuestion.question_type)}
                     />
                   </div>
@@ -210,16 +252,18 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
                       <button
                         onClick={handleSaveEdit}
                         className="p-2 text-green-600 hover:bg-green-50 rounded-md transition-colors"
+                        aria-label={`Save changes to question ${index + 1}`}
                         title="Save changes"
                       >
-                        <Save className="w-4 h-4" />
+                        <Save className="w-4 h-4" aria-hidden="true" />
                       </button>
                       <button
                         onClick={handleCancelEdit}
                         className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                        aria-label={`Cancel editing question ${index + 1}`}
                         title="Cancel"
                       >
-                        <X className="w-4 h-4" />
+                        <X className="w-4 h-4" aria-hidden="true" />
                       </button>
                     </>
                   ) : (
@@ -227,16 +271,18 @@ export const QuestionReviewGrid: React.FC<QuestionReviewGridProps> = ({
                       <button
                         onClick={() => handleStartEdit(question)}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                        aria-label={`Edit question ${index + 1}`}
                         title="Edit question"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <Edit2 className="w-4 h-4" aria-hidden="true" />
                       </button>
                       <button
                         onClick={() => handleDelete(question.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                        aria-label={`Delete question ${index + 1}`}
                         title="Delete question"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
                       </button>
                     </>
                   )}

@@ -17,11 +17,12 @@ import { ChevronDown, ChevronUp, Eye, EyeOff, Plus, RefreshCw, Sparkles, X } fro
 import { useMemo, useState } from 'react';
 
 const QUESTION_TYPES: { key: QuestionType; label: string; desc: string }[] = [
-  { key: 'mcq', label: 'MCQ', desc: 'Single correct' },
-  { key: 'mcq_multi', label: 'MCQ Multi', desc: 'Multiple correct' },
+  { key: 'multiple_choice', label: 'Multiple Choice', desc: 'Single correct' },
+  { key: 'mcq_multi', label: 'Multiple Answer', desc: 'Multi-select' },
   { key: 'boolean', label: 'True / False', desc: 'Binary choice' },
   { key: 'text_input', label: 'Short Answer', desc: 'Text response' },
   { key: 'reorder_steps', label: 'Reorder', desc: 'Sequence logic' },
+  { key: 'matching', label: 'Matching', desc: 'Term/Def pairs' },
 ];
 
 const QUANTITY_OPTIONS = [5, 10, 15, 20, 25, 30];
@@ -100,7 +101,7 @@ export function QuestionStudioFilterPanel({
   canGenerate,
   onGenerate,
 }: QuestionStudioFilterPanelProps) {
-  const { data: domains } = useDomains();
+  const { data: domains, isLoading: isDomainsLoading } = useDomains();
   const [topicInput, setTopicInput] = useState('');
   const [showPrompt, setShowPrompt] = useState(false);
   const [showCustomDiff, setShowCustomDiff] = useState(false);
@@ -167,7 +168,10 @@ export function QuestionStudioFilterPanel({
   }, [selectedDomain, topics, count, diffMix, selectedTypes, customInstructions]);
 
   return (
-    <aside className="w-80 flex-shrink-0 border-r border-gray-100 bg-gray-50/70 overflow-y-auto p-5 space-y-5">
+    <aside
+      className="w-80 flex-shrink-0 border-r border-gray-100 bg-gray-50/70 overflow-y-auto p-5 space-y-5"
+      data-testid="studio-filter-aside"
+    >
       {/* ── Subject Domain (Dropdown) ────────────────────── */}
       <div className="space-y-2">
         <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -179,24 +183,44 @@ export function QuestionStudioFilterPanel({
             setSelectedDomain(v || null);
           }}
         >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a domain..." />
+          <SelectTrigger className="w-full" data-testid="studio-domain-select">
+            <SelectValue
+              placeholder={
+                isDomainsLoading ? 'Loading domains...' : selectedDomain || 'Select a domain...'
+              }
+            />
           </SelectTrigger>
           <SelectContent>
             {domains?.map((d) => (
-              <SelectItem key={d.domain_id} value={d.title}>
+              <SelectItem
+                key={d.domain_id}
+                value={d.title}
+                data-testid={`domain-option-${d.title}`}
+              >
                 {d.title}
               </SelectItem>
             ))}
             {/* Fallback if no domains in DB yet */}
-            {(!domains || domains.length === 0) && (
+            {!isDomainsLoading && (!domains || domains.length === 0) && (
               <>
-                <SelectItem value="Mathematics">Mathematics</SelectItem>
-                <SelectItem value="English Language">English Language</SelectItem>
-                <SelectItem value="History">History</SelectItem>
-                <SelectItem value="Science">Science</SelectItem>
-                <SelectItem value="Computer Science">Computer Science</SelectItem>
-                <SelectItem value="General Knowledge">General Knowledge</SelectItem>
+                <SelectItem value="Mathematics" data-testid="domain-option-Mathematics">
+                  Mathematics
+                </SelectItem>
+                <SelectItem value="English Language" data-testid="domain-option-English Language">
+                  English Language
+                </SelectItem>
+                <SelectItem value="History" data-testid="domain-option-History">
+                  History
+                </SelectItem>
+                <SelectItem value="Science" data-testid="domain-option-Science">
+                  Science
+                </SelectItem>
+                <SelectItem value="Computer Science" data-testid="domain-option-Computer Science">
+                  Computer Science
+                </SelectItem>
+                <SelectItem value="General Knowledge" data-testid="domain-option-General Knowledge">
+                  General Knowledge
+                </SelectItem>
               </>
             )}
           </SelectContent>
@@ -256,7 +280,7 @@ export function QuestionStudioFilterPanel({
           Number of Questions
         </Label>
         <Select value={String(count)} onValueChange={(v) => handleCountChange(Number(v))}>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full" data-testid="studio-count-select">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -299,7 +323,7 @@ export function QuestionStudioFilterPanel({
             }
           }}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full" data-testid="studio-diff-preset-select">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -352,6 +376,8 @@ export function QuestionStudioFilterPanel({
               <button
                 key={key}
                 onClick={() => toggleType(key)}
+                data-testid={`type-btn-${key}`}
+                aria-pressed={isActive}
                 className={cn(
                   'flex items-center justify-between w-full px-3 py-2 rounded-lg border text-left text-sm transition-all',
                   isActive
@@ -423,6 +449,7 @@ export function QuestionStudioFilterPanel({
         <Button
           onClick={onGenerate}
           disabled={!canGenerate || isGenerating}
+          data-testid="generate-btn"
           className="w-full bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white shadow-md shadow-indigo-200 font-semibold gap-2"
         >
           {isGenerating ? (

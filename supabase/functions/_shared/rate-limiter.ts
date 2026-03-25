@@ -21,6 +21,11 @@ interface RateLimitResult {
   circuitResetTime?: number;
 }
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 // Enhanced rate limiter with persistence and circuit breaking
 class RateLimiter {
   private requests = new Map<string, { count: number; resetTime: number }>();
@@ -217,6 +222,7 @@ export function createRateLimitMiddleware(config: RateLimitConfig) {
                 'X-RateLimit-Remaining': result.remaining.toString(),
                 'X-RateLimit-Reset': result.resetTime.toString(),
                 'Retry-After': Math.ceil((result.resetTime - Date.now()) / 1000).toString(),
+                ...corsHeaders,
                 ...(result.circuitOpen && {
                   'X-Circuit-Breaker': 'open',
                   'X-Circuit-Reset': result.circuitResetTime?.toString(),

@@ -167,27 +167,17 @@ function PromptDetail({ prompt }: { prompt: StudioPromptRow }) {
             Saved Questions ({linkedQuestions.length})
           </p>
           <div className="space-y-1.5 max-h-48 overflow-y-auto">
-            {linkedQuestions.map(
-              (q: { question_id: string; content: string; type: string; difficulty: string }) => (
+            {(linkedQuestions as Array<{ question_id: string; content: string; type: string }>).map(
+              (q) => (
                 <div
                   key={q.question_id}
                   className="flex items-start gap-2 text-xs bg-white border border-gray-100 rounded-lg px-3 py-2"
                 >
-                  <span
-                    className={cn(
-                      'inline-block w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0',
-                      q.difficulty === 'easy'
-                        ? 'bg-emerald-500'
-                        : q.difficulty === 'medium'
-                          ? 'bg-amber-500'
-                          : 'bg-rose-500'
-                    )}
-                  />
+                  <span className="inline-block w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 bg-indigo-400" />
                   <div className="flex-1 min-w-0">
                     <p className="text-gray-700 line-clamp-2">{q.content}</p>
                     <div className="flex gap-2 mt-1">
                       <span className="text-[10px] text-gray-400 font-medium">{q.type}</span>
-                      <span className="text-[10px] text-gray-400 font-medium">{q.difficulty}</span>
                     </div>
                   </div>
                 </div>
@@ -325,6 +315,7 @@ export function StudioHistoryPage() {
               return (
                 <button
                   key={p.id}
+                  data-testid="prompt-item"
                   onClick={() => setSelectedId(p.id)}
                   className={cn(
                     'w-full text-left px-4 py-3 border-b border-gray-100 transition-colors',

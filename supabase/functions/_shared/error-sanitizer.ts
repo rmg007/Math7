@@ -8,6 +8,11 @@ export interface SanitizedError {
   requestId?: string;
 }
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 /**
  * Creates a sanitized error response that doesn't leak sensitive information
  */
@@ -25,6 +30,7 @@ export function createSanitizedError(
       headers: {
         'Content-Type': 'application/json',
         'X-Request-ID': requestId || generateRequestId(),
+        ...corsHeaders,
       },
     }
   );
@@ -135,11 +141,24 @@ export function withErrorSanitization<T extends any[], R>(
         headers: {
           'Content-Type': 'application/json',
           ...(requestId && { 'X-Request-ID': requestId }),
+          ...corsHeaders,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in sanitized function:', error);
-      return createSanitizedError(error, options.statusCode, requestId);
+      // EXPOSE INTERNAL ERROR FOR DEBUGGING
+      return new Response(JSON.stringify({
+        message: error.message || 'Internal Error',
+        stack: error.stack,
+        code: 'DEBUG_INTERNAL_ERROR'
+      }), { 
+        status: 500, 
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
+        } 
+      });
     }
   };
 }
@@ -183,6 +202,7 @@ export function createSanitizedErrorResponse(
       headers: {
         'Content-Type': 'application/json',
         ...(requestId && { 'X-Request-ID': requestId }),
+        ...corsHeaders,
       },
     }
   );

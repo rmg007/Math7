@@ -27,13 +27,13 @@ const BASE_CONFIG: StudioConfig = {
   topics: ['Algebra'],
   count: 3,
   difficultyMix: { easy: 1, medium: 1, hard: 1 },
-  questionTypes: ['mcq'],
+  questionTypes: ['multiple_choice'],
 };
 
 const MOCK_API_QUESTIONS = [
   {
     text: 'What is 2 + 2?',
-    question_type: 'mcq' as const,
+    question_type: 'multiple_choice' as const,
     difficulty: 'easy' as const,
     metadata: {
       options: ['3', '4', '5', '6'],
@@ -43,7 +43,7 @@ const MOCK_API_QUESTIONS = [
   },
   {
     text: 'What is x in 2x = 10?',
-    question_type: 'mcq' as const,
+    question_type: 'multiple_choice' as const,
     difficulty: 'medium' as const,
     metadata: {
       options: ['4', '5', '6', '7'],

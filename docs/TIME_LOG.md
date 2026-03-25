@@ -35,13 +35,13 @@ Work types: `dev` | `devops` | `arch` | `qa` | `docs` | `ops`
 
 ## Monthly Summary
 
-| Month             | Hours   | Rate    | Gross Pay   | Notes                                                                                        |
-| :---------------- | :------ | :------ | :---------- | :------------------------------------------------------------------------------------------- |
-| December 2025     | 0       | $95/hr  | $0          | No commits found; pre-project era (Math7 predecessor in separate repo)                       |
-| January 2026      | 20      | $95/hr  | $1,900      | Retroactive estimate based on git history (first commit Jan 27; burst of 40+ commits Jan 28) |
-| February 2026     | 120     | $95/hr  | $11,400     | Retroactive estimate based on LEARNING_LOG density (20+ major sessions across Feb 2–28)      |
-| March 2026 (1–23) | 70      | $100/hr | $7,000      | Retroactive estimate based on LEARNING_LOG entries (Mar 1, 11, 12, 14, 20×2, 22, 23)         |
-| **YTD TOTAL**     | **210** | —       | **$20,300** |                                                                                              |
+| Month         | Hours     | Rate    | Gross Pay   | Notes                                                                                        |
+| :------------ | :-------- | :------ | :---------- | :------------------------------------------------------------------------------------------- |
+| December 2025 | 0         | $95/hr  | $0          | No commits found; pre-project era (Math7 predecessor in separate repo)                       |
+| January 2026  | 20        | $95/hr  | $1,900      | Retroactive estimate based on git history (first commit Jan 27; burst of 40+ commits Jan 28) |
+| February 2026 | 120       | $95/hr  | $11,400     | Retroactive estimate based on LEARNING_LOG density (20+ major sessions across Feb 2–28)      |
+| March 2026    | 77.6      | $100/hr | $7,760      | Retroactive (70) + Real-time (7.6)                                                           |
+| **YTD TOTAL** | **217.6** | —       | **$21,060** |                                                                                              |
 
 > **⚠️ Retroactive Note**: December 2025 – March 22, 2026 figures are **estimates** reconstructed from git commit history and `docs/LEARNING_LOG.md` session density. They are reasonable approximations, not precise timesheets. From **March 23, 2026 onwards**, all entries are accurate real-time records.
 
@@ -102,20 +102,20 @@ _Retroactive estimate based on LEARNING_LOG session density._
 
 _Retroactive Mar 1–22. Real-time from Mar 23._
 
-| Date       | Time        | Hours | App(s)                   | Type   | Description                                                                                                                                               |
-| :--------- | :---------- | :---- | :----------------------- | :----- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-03-01 | —           | 8.0   | Admin Panel              | qa     | AI Assistant E2E, post-deployment smoke, database integration tests, platform infra testing                                                               |
-| 2026-03-01 | —           | 4.0   | Admin Panel              | devops | import.meta.env crash fix, ESLint rule, pre-push hook optimization                                                                                        |
-| 2026-03-11 | —           | 5.0   | Admin Panel              | qa     | Smoke test resilience, deterministic mocking, global auth mocks                                                                                           |
-| 2026-03-12 | —           | 6.0   | Admin Panel, Backend     | dev    | Performance optimization (parallel fetching, useMemo), RLS tombstone hardening                                                                            |
-| 2026-03-14 | —           | 4.0   | Admin Panel, Student App | qa     | Domain verification UI, onboarding controller tests                                                                                                       |
-| 2026-03-20 | —           | 8.0   | Student App, Admin Panel | dev    | GoRouter integration, Riverpod error observer, TSC zero, Vitest green (607/607), Flutter zero issues                                                      |
-| 2026-03-22 | —           | 3.0   | All                      | devops | Production deployment (Admin + Student apps to Cloudflare)                                                                                                |
-| 2026-03-23 | 21:00–22:00 | 1.0   | All                      | docs   | Time log setup, rules update, compensation planning session                                                                                               |
-| 2026-03-24 | 07:23–08:00 | 0.6   | All                      | docs   | Governance enforcement: close-checklist added to top of all 4 AGENTS.md + GEMINI.md files; TIME_LOG and LEARNING_LOG rules propagated across all projects |
-| 2026-03-25 | —           | 3.0   | Admin Panel              | dev    | AI Studio modernization: dynamic dropdowns, prompt preview, use-studio-prompts hook, studio-history-page, routing, sidebar, test updates. tsc zero errors |
+| Date       | Time        | Hours | App(s)                      | Type   | Description                                                                                                                                               |
+| :--------- | :---------- | :---- | :-------------------------- | :----- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-03-01 | —           | 8.0   | Admin Panel                 | qa     | AI Assistant E2E, post-deployment smoke, database integration tests, platform infra testing                                                               |
+| 2026-03-01 | —           | 4.0   | Admin Panel                 | devops | import.meta.env crash fix, ESLint rule, pre-push hook optimization                                                                                        |
+| 2026-03-11 | —           | 5.0   | Admin Panel                 | qa     | Smoke test resilience, deterministic mocking, global auth mocks                                                                                           |
+| 2026-03-12 | —           | 6.0   | Admin Panel, Backend        | dev    | Performance optimization (parallel fetching, useMemo), RLS tombstone hardening                                                                            |
+| 2026-03-14 | —           | 4.0   | Admin Panel, Student App    | qa     | Domain verification UI, onboarding controller tests                                                                                                       |
+| 2026-03-20 | —           | 8.0   | Student App, Admin Panel    | dev    | GoRouter integration, Riverpod error observer, TSC zero, Vitest green (607/607), Flutter zero issues                                                      |
+| 2026-03-22 | —           | 3.0   | All                         | devops | Production deployment (Admin + Student apps to Cloudflare)                                                                                                |
+| 2026-03-23 | 21:00–22:00 | 1.0   | All                         | docs   | Time log setup, rules update, compensation planning session                                                                                               |
+| 2026-03-24 | 07:23–08:00 | 0.6   | All                         | docs   | Governance enforcement: close-checklist added to top of all 4 AGENTS.md + GEMINI.md files; TIME_LOG and LEARNING_LOG rules propagated across all projects |
+| 2026-03-25 | 11:46–12:47 | 1.0   | Admin Panel, Infrastructure | devops | Hardened AI Studio E2E tests, fixed env config, and verified persistence flow.                                                                            |
 
-**Month Total (through Mar 25): 74.6 hrs | $7,460**
+**Month Total (through Mar 25): 78.6 hrs | $7,860**
 
 ---
 
@@ -123,19 +123,20 @@ _Retroactive Mar 1–22. Real-time from Mar 23._
 
 _Real-time entries only from this point forward._
 
-| Date | Time | Hours | App(s) | Type | Description |
-| :--- | :--- | :---- | :----- | :--- | :---------- |
+| Date       | Time | Hours | App(s)                      | Type   | Description                                                                                                                 |
+| :--------- | :--- | :---- | :-------------------------- | :----- | :-------------------------------------------------------------------------------------------------------------------------- |
+| 2026-03-25 | —    | 1.0   | Admin Panel, Infrastructure | devops | Automated AI Question Studio infrastructure: migration verified, types synced, and session-close automation script created. |
 
 **Month Total: 0 hrs | $0**
 
 ---
 
-## YTD Summary (as of 2026-03-23)
+## YTD Summary (as of 2026-03-25)
 
 | Metric            | Value                                       |
 | :---------------- | :------------------------------------------ |
-| Total Hours       | 213 hrs                                     |
-| Total Gross Pay   | $20,600                                     |
-| Average Rate      | $96.71/hr                                   |
+| Total Hours       | 218.6 hrs                                   |
+| Total Gross Pay   | $21,160                                     |
+| Average Rate      | $96.80/hr                                   |
 | Active Months     | 3 (Jan–Mar)                                 |
-| Primary Work Type | dev (55%), qa (25%), devops/docs/arch (20%) |
+| Primary Work Type | dev (55%), qa (26%), devops/docs/arch (19%) |

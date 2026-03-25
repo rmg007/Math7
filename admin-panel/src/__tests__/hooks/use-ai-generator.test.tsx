@@ -13,7 +13,7 @@ describe('useAIGenerator', () => {
   const mockQuestions = [
     {
       text: 'Question 1',
-      question_type: 'mcq' as const,
+      question_type: 'multiple_choice' as const,
       difficulty: 'medium' as const,
       metadata: {
         options: ['Option A', 'Option B'],

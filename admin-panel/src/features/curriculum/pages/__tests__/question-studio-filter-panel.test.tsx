@@ -28,7 +28,7 @@ vi.mock('@/features/curriculum/hooks/use-domains', () => ({
 }));
 
 const defaultDiffMix: DifficultyMix = { easy: 3, medium: 4, hard: 3 };
-const defaultTypes: QuestionType[] = ['mcq', 'boolean'];
+const defaultTypes: QuestionType[] = ['multiple_choice', 'boolean'];
 
 type FilterPanelProps = Parameters<typeof QuestionStudioFilterPanel>[0];
 
@@ -84,7 +84,7 @@ describe('QuestionStudioFilterPanel — AP-CURR-070..089', () => {
   });
 
   it('AP-CURR-079: warning is absent when at least one type is selected', () => {
-    render(<QuestionStudioFilterPanel {...buildProps({ selectedTypes: ['mcq'] })} />);
+    render(<QuestionStudioFilterPanel {...buildProps({ selectedTypes: ['multiple_choice'] })} />);
     expect(screen.queryByText(/select at least one type/i)).not.toBeInTheDocument();
   });
 
@@ -112,19 +112,20 @@ describe('QuestionStudioFilterPanel — AP-CURR-070..089', () => {
     expect(onGenerate).toHaveBeenCalledTimes(1);
   });
 
-  it('AP-CURR-083: renders all 5 question type buttons', () => {
+  it('AP-CURR-083: renders all 6 question type buttons', () => {
     render(<QuestionStudioFilterPanel {...buildProps()} />);
-    expect(screen.getByText('MCQ')).toBeInTheDocument();
-    expect(screen.getByText('MCQ Multi')).toBeInTheDocument();
+    expect(screen.getByText('Multiple Choice')).toBeInTheDocument();
+    expect(screen.getByText('Multiple Answer')).toBeInTheDocument();
     expect(screen.getByText('True / False')).toBeInTheDocument();
     expect(screen.getByText('Short Answer')).toBeInTheDocument();
     expect(screen.getByText('Reorder')).toBeInTheDocument();
+    expect(screen.getByText('Matching')).toBeInTheDocument();
   });
 
   it('AP-CURR-084: clicking a question type calls setSelectedTypes', () => {
     const setSelectedTypes = vi.fn();
     render(<QuestionStudioFilterPanel {...buildProps({ setSelectedTypes })} />);
-    fireEvent.click(screen.getByText('MCQ Multi'));
+    fireEvent.click(screen.getByText('Multiple Choice'));
     expect(setSelectedTypes).toHaveBeenCalledTimes(1);
   });
 

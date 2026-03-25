@@ -2,52 +2,15 @@ import { useApp } from '@/hooks/use-app';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isValidUUID } from '@/lib/utils';
-
-// Supabase client doesn't know about studio_prompts until types are regenerated.
-// Using `as any` bridge to bypass — replace once `supabase gen types` is run.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any;
+import { Tables, TablesInsert, TablesUpdate } from '@/lib/database.types';
 
 // ─────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────
 
-export interface StudioPromptRow {
-  id: string;
-  app_id: string;
-  created_by: string;
-  domain_name: string;
-  topics: string[];
-  question_count: number;
-  difficulty_mix: { easy: number; medium: number; hard: number };
-  question_types: string[];
-  assembled_prompt: string;
-  custom_instructions: string | null;
-  model_used: string | null;
-  token_count: number | null;
-  generation_time_ms: number | null;
-  questions_generated: number;
-  questions_saved: number;
-  status: 'generated' | 'saved' | 'failed';
-  created_at: string;
-  updated_at: string;
-}
-
-export interface StudioPromptInsert {
-  app_id: string;
-  created_by: string;
-  domain_name: string;
-  topics: string[];
-  question_count: number;
-  difficulty_mix: { easy: number; medium: number; hard: number };
-  question_types: string[];
-  assembled_prompt: string;
-  custom_instructions?: string;
-  model_used?: string;
-  token_count?: number;
-  generation_time_ms?: number;
-  questions_generated?: number;
-}
+export type StudioPromptRow = Tables<'studio_prompts'>;
+export type StudioPromptInsert = TablesInsert<'studio_prompts'>;
+export type StudioPromptUpdate = TablesUpdate<'studio_prompts'>;
 
 // ─────────────────────────────────────────────────────────
 // Hooks
@@ -65,7 +28,7 @@ export function useStudioPrompts(page = 1, pageSize = 20) {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      const { data, error, count } = await db
+      const { data, error, count } = await supabase
         .from('studio_prompts')
         .select('*', { count: 'exact' })
         .eq('app_id', currentApp.app_id)
@@ -93,7 +56,7 @@ export function useStudioPrompt(promptId: string | null) {
     queryFn: async () => {
       if (!promptId) throw new Error('No prompt ID');
 
-      const { data, error } = await db
+      const { data, error } = await supabase
         .from('studio_prompts')
         .select('*')
         .eq('id', promptId)
@@ -113,9 +76,9 @@ export function useStudioPromptQuestions(promptId: string | null) {
     queryFn: async () => {
       if (!promptId) throw new Error('No prompt ID');
 
-      const { data, error } = await db
+      const { data, error } = await supabase
         .from('questions')
-        .select('question_id, content, type, difficulty, status, created_at')
+        .select('question_id, content, type, status, created_at')
         .eq('studio_prompt_id', promptId)
         .is('deleted_at', null)
         .order('created_at', { ascending: true });
@@ -133,7 +96,11 @@ export function useCreateStudioPrompt() {
 
   return useMutation({
     mutationFn: async (prompt: StudioPromptInsert) => {
-      const { data, error } = await db.from('studio_prompts').insert(prompt).select().single();
+      const { data, error } = await supabase
+        .from('studio_prompts')
+        .insert(prompt)
+        .select()
+        .single();
 
       if (error) throw error;
       return data as StudioPromptRow;
@@ -149,11 +116,8 @@ export function useUpdateStudioPrompt() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      ...updates
-    }: { id: string } & Partial<Pick<StudioPromptRow, 'questions_saved' | 'status'>>) => {
-      const { data, error } = await db
+    mutationFn: async ({ id, ...updates }: { id: string } & StudioPromptUpdate) => {
+      const { data, error } = await supabase
         .from('studio_prompts')
         .update(updates)
         .eq('id', id)

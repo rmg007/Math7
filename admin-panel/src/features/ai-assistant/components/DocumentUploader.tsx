@@ -134,13 +134,13 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
   const getStatusIcon = () => {
     switch (uploadState.status) {
       case 'extracting':
-        return <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />;
+        return <Loader2 className="w-12 h-12 text-blue-500 animate-spin" aria-hidden="true" />;
       case 'success':
-        return <CheckCircle2 className="w-12 h-12 text-green-500" />;
+        return <CheckCircle2 className="w-12 h-12 text-green-500" aria-hidden="true" />;
       case 'error':
-        return <XCircle className="w-12 h-12 text-red-500" />;
+        return <XCircle className="w-12 h-12 text-red-500" aria-hidden="true" />;
       default:
-        return <Upload className="w-12 h-12 text-gray-400" />;
+        return <Upload className="w-12 h-12 text-gray-400" aria-hidden="true" />;
     }
   };
 
@@ -158,7 +158,7 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full" role="region" aria-label="Document upload section">
       <div
         {...getRootProps()}
         className={`
@@ -167,20 +167,25 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
           ${getStatusColor()}
           hover:border-blue-400 hover:bg-blue-50
         `}
+        role="button"
+        aria-label={
+          isDragActive ? 'Drop the file here' : 'Click or drag and drop to upload source document'
+        }
+        aria-describedby="upload-constraints"
       >
         <input {...getInputProps()} />
 
         <div className="flex flex-col items-center gap-4">
           {getStatusIcon()}
 
-          <div>
+          <div role="status" aria-busy={uploadState.status === 'extracting'} aria-live="polite">
             {uploadState.status === 'idle' && (
               <>
                 <p className="text-lg font-semibold text-gray-700 mb-1">
                   {isDragActive ? 'Drop the file here' : 'Upload Source Document'}
                 </p>
                 <p className="text-sm text-gray-500">Drag & drop or click to select</p>
-                <p className="text-xs text-gray-400 mt-2">
+                <p id="upload-constraints" className="text-xs text-gray-400 mt-2">
                   PDF, DOCX, PNG, JPG (max {maxSizeMB}MB)
                 </p>
               </>
@@ -198,7 +203,7 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
             {uploadState.status === 'success' && (
               <>
                 <p className="text-lg font-semibold text-green-700 mb-1">
-                  <File className="inline w-5 h-5 mr-2" />
+                  <File className="inline w-5 h-5 mr-2" aria-hidden="true" />
                   {uploadState.filename}
                 </p>
                 <p className="text-sm text-green-600">{uploadState.message}</p>
@@ -208,6 +213,7 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
                     setUploadState({ status: 'idle' });
                   }}
                   className="mt-3 text-sm text-blue-600 hover:text-blue-800 underline"
+                  aria-label="Upload another document"
                 >
                   Upload another document
                 </button>
@@ -215,7 +221,7 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
             )}
 
             {uploadState.status === 'error' && (
-              <>
+              <div role="alert" aria-live="assertive">
                 <p className="text-lg font-semibold text-red-700 mb-1">Upload Failed</p>
                 <p className="text-sm text-red-600">{uploadState.message}</p>
                 <button
@@ -224,23 +230,34 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
                     setUploadState({ status: 'idle' });
                   }}
                   className="mt-3 text-sm text-blue-600 hover:text-blue-800 underline"
+                  aria-label="Try uploading again"
                 >
                   Try again
                 </button>
-              </>
+              </div>
             )}
           </div>
         </div>
       </div>
 
       {uploadState.extractedText && (
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">Extracted Text Preview</h4>
-          <div className="text-xs text-gray-600 font-mono max-h-32 overflow-y-auto whitespace-pre-wrap">
+        <div
+          className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200"
+          role="region"
+          aria-labelledby="preview-heading"
+        >
+          <h4 id="preview-heading" className="text-sm font-semibold text-gray-700 mb-2">
+            Extracted Text Preview
+          </h4>
+          <div
+            className="text-xs text-gray-600 font-mono max-h-32 overflow-y-auto whitespace-pre-wrap"
+            role="log"
+            aria-label="Partial preview of extracted text"
+          >
             {uploadState.extractedText.substring(0, 500)}
             {uploadState.extractedText.length > 500 && '...'}
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-gray-500 mt-2" aria-live="polite">
             Total characters: {uploadState.extractedText.length.toLocaleString()}
           </p>
         </div>

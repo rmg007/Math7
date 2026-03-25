@@ -39,7 +39,12 @@ describe('governedGenerateQuestions', () => {
 
   const mockGenerationResponse = {
     questions: [
-      { text: 'Q1', question_type: 'mcq' as const, difficulty: 'easy' as const, metadata: {} },
+      {
+        text: 'Q1',
+        question_type: 'multiple_choice' as const,
+        difficulty: 'easy' as const,
+        metadata: {},
+      },
     ],
     metadata: {
       model: '@cf/meta/llama-3.1-8b-instruct',

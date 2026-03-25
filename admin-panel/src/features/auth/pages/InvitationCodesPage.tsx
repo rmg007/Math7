@@ -63,11 +63,16 @@ const InvitationCodeRow = memo(
     return (
       <TableRow data-testid="invitation-row" className="even:bg-gray-50/40">
         <TableCell className="px-3 w-8">
-          <button onClick={() => onSelect(code.id)} className="text-gray-300 hover:text-gray-500">
+          <button
+            onClick={() => onSelect(code.id)}
+            className="text-gray-300 hover:text-gray-500"
+            aria-label={isSelected ? 'Deselect invitation code' : 'Select invitation code'}
+            aria-checked={isSelected}
+          >
             {isSelected ? (
-              <CheckSquare className="h-4 w-4 text-teal-600" />
+              <CheckSquare className="h-4 w-4 text-teal-600" aria-hidden="true" />
             ) : (
-              <Square className="h-4 w-4" />
+              <Square className="h-4 w-4" aria-hidden="true" />
             )}
           </button>
         </TableCell>
@@ -97,8 +102,9 @@ const InvitationCodeRow = memo(
               size="sm"
               onClick={() => onCopy(code.code, code.id)}
               className="h-7 px-2 rounded text-xs text-gray-400 hover:text-teal-600 hover:bg-teal-50 gap-1"
+              aria-label={`Copy code ${code.code}`}
             >
-              <Copy className="h-3 w-3" />
+              <Copy className="h-3 w-3" aria-hidden="true" />
               {copiedId === code.id ? 'Copied' : 'Copy'}
             </Button>
             {code.is_active && (
@@ -107,8 +113,9 @@ const InvitationCodeRow = memo(
                 size="sm"
                 onClick={() => onDeactivate(code.id)}
                 className="h-7 px-2 rounded text-xs text-gray-400 hover:text-red-600 hover:bg-red-50 gap-1"
+                aria-label={`Deactivate code ${code.code}`}
               >
-                <Power className="h-3 w-3" />
+                <Power className="h-3 w-3" aria-hidden="true" />
                 Deactivate
               </Button>
             )}
@@ -299,41 +306,55 @@ export function InvitationCodesPage() {
       />
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
-          <X className="h-4 w-4 text-red-500 shrink-0" />
+        <div
+          className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2"
+          role="alert"
+          aria-live="polite"
+        >
+          <X className="h-4 w-4 text-red-500 shrink-0" aria-hidden="true" />
           <p className="text-xs text-red-700">{error}</p>
           <button
             onClick={() => setError(null)}
             className="ml-auto text-red-400 hover:text-red-600"
-            title="Dismiss"
+            aria-label="Dismiss error"
           >
-            <X className="h-3 w-3" />
+            <X className="h-3 w-3" aria-hidden="true" />
           </button>
         </div>
       )}
 
       {success && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-center gap-2">
-          <CheckSquare className="h-4 w-4 text-emerald-500 shrink-0" />
+        <div
+          className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-center gap-2"
+          role="status"
+          aria-live="polite"
+        >
+          <CheckSquare className="h-4 w-4 text-emerald-500 shrink-0" aria-hidden="true" />
           <p className="text-xs text-emerald-700">{success}</p>
           <button
             onClick={() => setSuccess(null)}
             className="ml-auto text-emerald-400 hover:text-emerald-600"
-            title="Dismiss"
+            aria-label="Dismiss success message"
           >
-            <X className="h-3 w-3" />
+            <X className="h-3 w-3" aria-hidden="true" />
           </button>
         </div>
       )}
 
       {/* Generator Section */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-md p-5">
+      <div
+        className="bg-white rounded-lg border border-gray-200 shadow-md p-5"
+        role="region"
+        aria-labelledby="generator-heading"
+      >
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 rounded-lg bg-teal-50 border border-teal-100">
-            <Zap className="h-4 w-4 text-teal-600" />
+            <Zap className="h-4 w-4 text-teal-600" aria-hidden="true" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-gray-900">Generate Code</h2>
+            <h2 id="generator-heading" className="text-sm font-semibold text-gray-900">
+              Generate Code
+            </h2>
             <p className="text-[11px] text-gray-500">
               Create a new invitation code for user onboarding
             </p>
@@ -342,33 +363,42 @@ export function InvitationCodesPage() {
 
         <div className="flex flex-wrap gap-3 items-end">
           <div className="space-y-1">
-            <label className="text-[11px] font-medium text-gray-600">Max Uses</label>
+            <label htmlFor="max-uses" className="text-[11px] font-medium text-gray-600">
+              Max Uses
+            </label>
             <Input
+              id="max-uses"
               type="number"
               min="1"
               value={maxUses}
               onChange={(e) => setMaxUses(e.target.value)}
               className="w-24 h-9 rounded border border-gray-300 bg-white text-gray-900 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
               placeholder="1"
+              aria-label="Maximum number of uses"
             />
           </div>
           <div className="space-y-1">
-            <label className="text-[11px] font-medium text-gray-600">Expires (days)</label>
+            <label htmlFor="expires-days" className="text-[11px] font-medium text-gray-600">
+              Expires (days)
+            </label>
             <Input
+              id="expires-days"
               type="number"
               min="1"
               value={expiresDays}
               onChange={(e) => setExpiresDays(e.target.value)}
               className="w-24 h-9 rounded border border-gray-300 bg-white text-gray-900 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-sm"
               placeholder="Never"
+              aria-label="Expiration in days"
             />
           </div>
           <Button
             onClick={handleGenerateCode}
             disabled={generating}
             className="h-9 px-4 rounded bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs shadow-sm gap-1.5"
+            aria-label={generating ? 'Generating invitation code' : 'Generate invitation code'}
           >
-            {generating && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            {generating && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
             {generating ? 'Generating...' : 'Generate Code'}
           </Button>
         </div>
@@ -376,12 +406,21 @@ export function InvitationCodesPage() {
 
       {/* Bulk Actions Bar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md">
+        <div
+          className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md"
+          role="alert"
+          aria-live="polite"
+        >
           <div className="flex items-center gap-3 pl-2">
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold">
+            <span
+              className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold"
+              aria-hidden="true"
+            >
               {selectedIds.size}
             </span>
-            <span className="text-xs text-teal-200 font-medium">selected</span>
+            <span className="text-xs text-teal-200 font-medium">
+              {selectedIds.size} {selectedIds.size === 1 ? 'code' : 'codes'} selected
+            </span>
           </div>
           <div className="flex items-center gap-1">
             <Button
@@ -390,11 +429,12 @@ export function InvitationCodesPage() {
               onClick={handleBulkDeactivate}
               disabled={deactivating}
               className="h-7 px-3 rounded text-xs text-red-400 hover:text-white hover:bg-red-600 gap-1"
+              aria-label={`Deactivate ${selectedIds.size} selected codes`}
             >
               {deactivating ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
+                <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
               ) : (
-                <Power className="h-3 w-3" />
+                <Power className="h-3 w-3" aria-hidden="true" />
               )}
               {deactivating ? 'Deactivating...' : 'Deactivate'}
             </Button>
@@ -403,8 +443,9 @@ export function InvitationCodesPage() {
               size="sm"
               onClick={() => setSelectedIds(new Set())}
               className="h-7 px-2 rounded text-xs text-teal-300 hover:text-white hover:bg-white/10"
+              aria-label="Clear selection"
             >
-              <X className="h-3 w-3" />
+              <X className="h-3 w-3" aria-hidden="true" />
             </Button>
           </div>
         </div>
@@ -413,9 +454,16 @@ export function InvitationCodesPage() {
       {/* Table Card */}
       <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
         {/* Card Header: Search + Count */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
+        <div
+          className="flex items-center gap-3 px-4 py-3 border-b border-gray-200"
+          role="search"
+          aria-label="Filters"
+        >
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400"
+              aria-hidden="true"
+            />
             <input
               type="text"
               placeholder="Search codes..."
@@ -425,6 +473,7 @@ export function InvitationCodesPage() {
                 setCurrentPage(1);
               }}
               className="w-full pl-9 pr-8 py-1.5 rounded border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none focus-visible:outline-none text-sm"
+              aria-label="Search invitation codes"
             />
             {searchQuery && (
               <button
@@ -433,13 +482,13 @@ export function InvitationCodesPage() {
                   setCurrentPage(1);
                 }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-200 text-gray-400 hover:text-gray-600 rounded"
-                title="Clear"
+                aria-label="Clear search"
               >
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3" aria-hidden="true" />
               </button>
             )}
           </div>
-          <span className="text-[11px] text-gray-500 whitespace-nowrap">
+          <span className="text-[11px] text-gray-500 whitespace-nowrap" aria-live="polite">
             {filteredCodes.length} {filteredCodes.length === 1 ? 'code' : 'codes'}
           </span>
         </div>
@@ -451,12 +500,17 @@ export function InvitationCodesPage() {
                 <button
                   onClick={handleSelectAll}
                   className="text-gray-300 hover:text-gray-500"
-                  title="Select all"
+                  aria-label={
+                    selectedIds.size > 0 && selectedIds.size === paginatedCodes.length
+                      ? 'Deselect all rows'
+                      : 'Select all rows'
+                  }
+                  aria-checked={selectedIds.size > 0 && selectedIds.size === paginatedCodes.length}
                 >
                   {selectedIds.size > 0 && selectedIds.size === paginatedCodes.length ? (
-                    <CheckSquare className="h-4 w-4 text-teal-600" />
+                    <CheckSquare className="h-4 w-4 text-teal-600" aria-hidden="true" />
                   ) : (
-                    <Square className="h-4 w-4" />
+                    <Square className="h-4 w-4" aria-hidden="true" />
                   )}
                 </button>
               </TableHead>
@@ -508,30 +562,48 @@ export function InvitationCodesPage() {
               <TableHead className="text-right px-4 border-l border-gray-100">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody role={loading ? 'status' : 'rowgroup'} aria-busy={loading}>
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i} className="even:bg-gray-50/40">
                   <TableCell className="px-3">
-                    <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" aria-hidden="true" />
                   </TableCell>
                   <TableCell className="px-4">
-                    <div className="h-5 bg-gray-200 rounded w-28 animate-pulse" />
+                    <div
+                      className="h-5 bg-gray-200 rounded w-28 animate-pulse"
+                      aria-hidden="true"
+                    />
                   </TableCell>
                   <TableCell>
-                    <div className="h-4 bg-gray-200 rounded-full w-16 animate-pulse" />
+                    <div
+                      className="h-4 bg-gray-200 rounded-full w-16 animate-pulse"
+                      aria-hidden="true"
+                    />
                   </TableCell>
                   <TableCell>
-                    <div className="h-3.5 bg-gray-200 rounded w-12 animate-pulse" />
+                    <div
+                      className="h-3.5 bg-gray-200 rounded w-12 animate-pulse"
+                      aria-hidden="true"
+                    />
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    <div className="h-3.5 bg-gray-200 rounded w-20 animate-pulse" />
+                    <div
+                      className="h-3.5 bg-gray-200 rounded w-20 animate-pulse"
+                      aria-hidden="true"
+                    />
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
-                    <div className="h-3.5 bg-gray-200 rounded w-20 animate-pulse" />
+                    <div
+                      className="h-3.5 bg-gray-200 rounded w-20 animate-pulse"
+                      aria-hidden="true"
+                    />
                   </TableCell>
                   <TableCell className="px-4">
-                    <div className="h-7 w-16 bg-gray-200 rounded animate-pulse ml-auto" />
+                    <div
+                      className="h-7 w-16 bg-gray-200 rounded animate-pulse ml-auto"
+                      aria-hidden="true"
+                    />
                   </TableCell>
                 </TableRow>
               ))
@@ -554,6 +626,7 @@ export function InvitationCodesPage() {
                             setCurrentPage(1);
                           }}
                           className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                          aria-label="Clear search"
                         >
                           Clear Search
                         </Button>

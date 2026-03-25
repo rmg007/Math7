@@ -6,17 +6,13 @@ import { sanitizeSourceText } from '../_shared/input-sanitizer.ts';
 import { addRateLimitHeaders, createRateLimitMiddleware, rateLimitConfigs } from '../_shared/rate-limiter.ts';
 import { checkEnvironmentGuard } from '../_shared/env-guard.ts';
 
-const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || 'http://localhost:3000,http://localhost:5173').split(',');
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
-function getCorsHeaders(req?: Request): Record<string, string> {
-  const origin = req?.headers.get('Origin') || '';
-  const allowedOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
-  return {
-    'Access-Control-Allow-Origin': allowedOrigin,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Max-Age': '86400',
-  };
+function getCorsHeaders(_req?: Request): Record<string, string> {
+  return corsHeaders;
 }
 
 // Rate limiter must be created OUTSIDE the handler to persist state across requests
@@ -77,10 +73,12 @@ export const validateContentHandler = withErrorSanitization(
     const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('app_id, role')
+      .eq('id', user.id) // Ensure we only get the current user's profile
       .single();
 
     if (profileError || !profile?.app_id) {
-      return createSanitizedErrorResponse('FORBIDDEN', 'Access denied');
+      console.error('Profile lookup failed:', { profileError, user_id: user.id });
+      return createSanitizedErrorResponse('FORBIDDEN', 'User profile not found or missing tenant');
     }
 
     // Only admins can validate content

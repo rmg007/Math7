@@ -229,10 +229,17 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 overflow-x-hidden">
+    <div
+      className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 overflow-x-hidden"
+      role="main"
+      aria-label="Questerix Login Page"
+    >
       <div className="w-full max-w-md px-4">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
+          <div
+            className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4"
+            aria-hidden="true"
+          >
             <Rocket className="w-6 h-6 text-primary" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">Questerix Admin</h1>
@@ -254,11 +261,14 @@ export function LoginPage() {
           </CardHeader>
           <CardContent>
             {isForgotPassword ? (
-              <div className="space-y-4">
+              <div className="space-y-4" role="form" aria-label="Reset password form">
                 {resetEmailSent ? (
-                  <div className="text-center space-y-3">
+                  <div className="text-center space-y-3" role="alert" aria-live="polite">
                     <div className="mx-auto w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                      <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
+                      <CheckCircle2
+                        className="w-6 h-6 text-green-600 dark:text-green-400"
+                        aria-hidden="true"
+                      />
                     </div>
                     <p className="text-sm text-muted-foreground">
                       Check your email for a password reset link. If you don&apos;t see it, check
@@ -273,8 +283,9 @@ export function LoginPage() {
                         setError(null);
                       }}
                       className="text-muted-foreground"
+                      aria-label="Back to sign in page"
                     >
-                      <ArrowLeft className="w-4 h-4 mr-1" />
+                      <ArrowLeft className="w-4 h-4 mr-1" aria-hidden="true" />
                       Back to Sign In
                     </Button>
                   </div>
@@ -289,16 +300,30 @@ export function LoginPage() {
                         value={resetEmail}
                         onChange={(e) => setResetEmail(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && onForgotPassword()}
+                        aria-required="true"
+                        aria-label="Email address for password reset"
                       />
                     </div>
                     {error && (
-                      <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4" />
+                      <div
+                        className="bg-destructive/10 text-destructive text-sm p-3 rounded-md flex items-center gap-2"
+                        role="alert"
+                        aria-live="assertive"
+                      >
+                        <AlertCircle className="w-4 h-4" aria-hidden="true" />
                         {error}
                       </div>
                     )}
-                    <Button className="w-full" onClick={onForgotPassword} disabled={isResetting}>
-                      {isResetting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    <Button
+                      className="w-full"
+                      onClick={onForgotPassword}
+                      disabled={isResetting}
+                      aria-label="Send reset link"
+                      aria-busy={isResetting}
+                    >
+                      {isResetting && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                      )}
                       Send Reset Link
                     </Button>
                     <Button
@@ -308,24 +333,30 @@ export function LoginPage() {
                         setError(null);
                       }}
                       className="w-full text-muted-foreground"
+                      aria-label="Back to sign in"
                     >
-                      <ArrowLeft className="w-4 h-4 mr-1" />
+                      <ArrowLeft className="w-4 h-4 mr-1" aria-hidden="true" />
                       Back to Sign In
                     </Button>
                   </>
                 )}
               </div>
             ) : isRegister ? (
-              <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
+              <form
+                onSubmit={registerForm.handleSubmit(onRegister)}
+                className="space-y-4"
+                aria-label="Register account form"
+              >
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name</Label>
                   <Input
                     id="fullName"
                     placeholder="John Doe"
                     {...registerForm.register('fullName')}
+                    aria-required="true"
                   />
                   {registerForm.formState.errors.fullName && (
-                    <p className="text-sm text-destructive">
+                    <p className="text-sm text-destructive" role="alert">
                       {registerForm.formState.errors.fullName.message}
                     </p>
                   )}
@@ -338,9 +369,10 @@ export function LoginPage() {
                     type="email"
                     placeholder="name@example.com"
                     {...registerForm.register('email')}
+                    aria-required="true"
                   />
                   {registerForm.formState.errors.email && (
-                    <p className="text-sm text-destructive">
+                    <p className="text-sm text-destructive" role="alert">
                       {registerForm.formState.errors.email.message}
                     </p>
                   )}
@@ -354,6 +386,7 @@ export function LoginPage() {
                       type={showRegisterPassword ? 'text' : 'password'}
                       {...registerForm.register('password')}
                       className="pr-10"
+                      aria-required="true"
                     />
                     <Button
                       type="button"
@@ -361,19 +394,17 @@ export function LoginPage() {
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                       onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                      aria-label={showRegisterPassword ? 'Hide password' : 'Show password'}
                     >
                       {showRegisterPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                       ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
+                        <Eye className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                       )}
-                      <span className="sr-only">
-                        {showRegisterPassword ? 'Hide password' : 'Show password'}
-                      </span>
                     </Button>
                   </div>
                   {registerForm.formState.errors.password && (
-                    <p className="text-sm text-destructive">
+                    <p className="text-sm text-destructive" role="alert">
                       {registerForm.formState.errors.password.message}
                     </p>
                   )}
@@ -385,17 +416,22 @@ export function LoginPage() {
                     id="inviteCode"
                     placeholder="INV-..."
                     {...registerForm.register('inviteCode')}
+                    aria-required="true"
                   />
                   {registerForm.formState.errors.inviteCode && (
-                    <p className="text-sm text-destructive">
+                    <p className="text-sm text-destructive" role="alert">
                       {registerForm.formState.errors.inviteCode.message}
                     </p>
                   )}
                 </div>
 
                 {error && (
-                  <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" />
+                  <div
+                    className="bg-destructive/10 text-destructive text-sm p-3 rounded-md flex items-center gap-2"
+                    role="alert"
+                    aria-live="assertive"
+                  >
+                    <AlertCircle className="w-4 h-4" aria-hidden="true" />
                     {error}
                   </div>
                 )}
@@ -404,15 +440,20 @@ export function LoginPage() {
                   className="w-full"
                   type="submit"
                   disabled={registerForm.formState.isSubmitting}
+                  aria-busy={registerForm.formState.isSubmitting}
                 >
                   {registerForm.formState.isSubmitting && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                   )}
                   Create Account
                 </Button>
               </form>
             ) : (
-              <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
+              <form
+                onSubmit={loginForm.handleSubmit(onLogin)}
+                className="space-y-4"
+                aria-label="Sign in form"
+              >
                 <div className="space-y-2">
                   <Label htmlFor="login-email">Email</Label>
                   <Input
@@ -421,9 +462,10 @@ export function LoginPage() {
                     type="email"
                     placeholder="name@example.com"
                     {...loginForm.register('email')}
+                    aria-required="true"
                   />
                   {loginForm.formState.errors.email && (
-                    <p className="text-sm text-destructive">
+                    <p className="text-sm text-destructive" role="alert">
                       {loginForm.formState.errors.email.message}
                     </p>
                   )}
@@ -438,6 +480,7 @@ export function LoginPage() {
                       type={showPassword ? 'text' : 'password'}
                       {...loginForm.register('password')}
                       className="pr-10"
+                      aria-required="true"
                     />
                     <Button
                       type="button"
@@ -445,19 +488,17 @@ export function LoginPage() {
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                       ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
+                        <Eye className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                       )}
-                      <span className="sr-only">
-                        {showPassword ? 'Hide password' : 'Show password'}
-                      </span>
                     </Button>
                   </div>
                   {loginForm.formState.errors.password && (
-                    <p className="text-sm text-destructive">
+                    <p className="text-sm text-destructive" role="alert">
                       {loginForm.formState.errors.password.message}
                     </p>
                   )}
@@ -467,8 +508,10 @@ export function LoginPage() {
                   <div
                     data-testid="auth-error"
                     className="bg-destructive/10 text-destructive text-sm p-3 rounded-md flex items-center gap-2"
+                    role="alert"
+                    aria-live="assertive"
                   >
-                    <AlertCircle className="w-4 h-4" />
+                    <AlertCircle className="w-4 h-4" aria-hidden="true" />
                     {error}
                   </div>
                 )}
@@ -479,6 +522,7 @@ export function LoginPage() {
                       id="remember-me"
                       checked={rememberMe}
                       onCheckedChange={(checked) => setRememberMe(checked === true)}
+                      aria-label="Remember my login session"
                     />
                     <Label
                       htmlFor="remember-me"
@@ -495,6 +539,7 @@ export function LoginPage() {
                       setIsForgotPassword(true);
                       setError(null);
                     }}
+                    aria-label="Forgotten password? Click to reset"
                   >
                     Forgot password?
                   </Button>
@@ -505,9 +550,10 @@ export function LoginPage() {
                   className="w-full"
                   type="submit"
                   disabled={loginForm.formState.isSubmitting}
+                  aria-busy={loginForm.formState.isSubmitting}
                 >
                   {loginForm.formState.isSubmitting && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                   )}
                   Sign In
                 </Button>
@@ -523,6 +569,7 @@ export function LoginPage() {
                   setError(null);
                 }}
                 className="text-muted-foreground"
+                aria-label={isRegister ? 'Switch to sign in form' : 'Switch to registration form'}
               >
                 {isRegister
                   ? 'Already have an account? Sign in'

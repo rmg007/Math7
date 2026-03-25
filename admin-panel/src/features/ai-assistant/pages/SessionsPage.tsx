@@ -83,17 +83,21 @@ export const SessionsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center h-64" role="status" aria-busy="true">
+        <div
+          className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"
+          aria-hidden="true"
+        />
+        <span className="sr-only">Loading sessions...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-6xl mx-auto p-6" role="alert" aria-live="assertive">
         <div className="p-4 bg-red-50 border border-red-200 rounded-md flex items-start gap-2">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
           <div>
             <h3 className="font-semibold text-red-900">Error Loading Sessions</h3>
             <p className="text-sm text-red-700">{error}</p>
@@ -112,11 +116,18 @@ export const SessionsPage: React.FC = () => {
       />
 
       {/* Summary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
+      <div
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        aria-label="Session metrics summary"
+      >
+        <div
+          className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group"
+          role="region"
+          aria-label="Total Artifacts"
+        >
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/10 group-hover:scale-110 transition-transform">
-              <FileText className="h-6 w-6 text-purple-600" />
+              <FileText className="h-6 w-6 text-purple-600" aria-hidden="true" />
             </div>
             <div>
               <p className="text-2xs font-black text-gray-400 uppercase tracking-widest leading-none">
@@ -127,7 +138,7 @@ export const SessionsPage: React.FC = () => {
               </h3>
             </div>
           </div>
-          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden" aria-hidden="true">
             <div className="h-full bg-purple-500 w-[70%]" />
           </div>
           <p className="text-2xs text-gray-400 mt-3 font-bold uppercase tracking-widest">
@@ -135,10 +146,14 @@ export const SessionsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
+        <div
+          className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group"
+          role="region"
+          aria-label="Import Rate"
+        >
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/10 group-hover:scale-110 transition-transform">
-              <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+              <CheckCircle2 className="h-6 w-6 text-emerald-600" aria-hidden="true" />
             </div>
             <div>
               <p className="text-2xs font-black text-gray-400 uppercase tracking-widest leading-none">
@@ -151,7 +166,7 @@ export const SessionsPage: React.FC = () => {
               </h3>
             </div>
           </div>
-          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden" aria-hidden="true">
             <div
               className="h-full bg-emerald-500"
               style={{
@@ -164,10 +179,14 @@ export const SessionsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
+        <div
+          className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group"
+          role="region"
+          aria-label="Compute Cost"
+        >
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/10 group-hover:scale-110 transition-transform">
-              <DollarSign className="h-6 w-6 text-blue-600" />
+              <DollarSign className="h-6 w-6 text-blue-600" aria-hidden="true" />
             </div>
             <div>
               <p className="text-2xs font-black text-gray-400 uppercase tracking-widest leading-none">
@@ -178,7 +197,7 @@ export const SessionsPage: React.FC = () => {
               </h3>
             </div>
           </div>
-          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden" aria-hidden="true">
             <div className="h-full bg-blue-500 w-[45%]" />
           </div>
           <p className="text-2xs text-blue-600 mt-3 font-bold uppercase tracking-widest">
@@ -186,10 +205,14 @@ export const SessionsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group">
+        <div
+          className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/20 hover:shadow-md transition-all group"
+          role="region"
+          aria-label="Avg Latency"
+        >
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 rounded-2xl bg-orange-500/10 border border-orange-500/10 group-hover:scale-110 transition-transform">
-              <Clock className="h-6 w-6 text-orange-600" />
+              <Clock className="h-6 w-6 text-orange-600" aria-hidden="true" />
             </div>
             <div>
               <p className="text-2xs font-black text-gray-400 uppercase tracking-widest leading-none">
@@ -207,7 +230,7 @@ export const SessionsPage: React.FC = () => {
               </h3>
             </div>
           </div>
-          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden" aria-hidden="true">
             <div className="h-full bg-orange-500 w-[60%]" />
           </div>
           <p className="text-2xs text-orange-600 mt-3 font-bold uppercase tracking-widest">
@@ -217,31 +240,43 @@ export const SessionsPage: React.FC = () => {
       </div>
 
       {/* Intelligence Filter Bar */}
-      <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center">
+      <div
+        className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-sm border border-white/20 p-6 flex flex-col md:flex-row gap-6 items-center"
+        role="search"
+        aria-label="Session search and filters"
+      >
         <div className="relative flex-1 w-full group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+          <Search
+            className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors"
+            aria-hidden="true"
+          />
           <input
             type="text"
             placeholder="Search telemetry by model or status..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-100 bg-white/50 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none text-sm font-medium"
+            aria-label="Search telemetry by model or status"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
               className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
-              title="Clear search"
+              aria-label="Clear search"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
           )}
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <div className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2">
+          <div
+            className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/10 rounded-xl flex items-center gap-2"
+            role="status"
+            aria-live="polite"
+          >
             <span className="text-2xs font-black text-indigo-500 uppercase tracking-widest">
-              Sessions:
+              Filtered Sessions:
             </span>
             <span className="text-sm font-black text-indigo-700 tracking-tight">
               {filteredSessions.length}
@@ -262,7 +297,21 @@ export const SessionsPage: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full" aria-label="AI session history table">
+            <caption className="sr-only">
+              List of past AI generation sessions with model, questions generated, time, and cost.
+            </caption>
+            <thead>
+              <tr className="sr-only">
+                <th scope="col">Date</th>
+                <th scope="col">Model</th>
+                <th scope="col">Generated</th>
+                <th scope="col">Imported</th>
+                <th scope="col">Time</th>
+                <th scope="col">Cost</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
             <tbody className="divide-y divide-gray-50">
               {filteredSessions.map((session) => (
                 <tr key={session.id} className="hover:bg-indigo-50/30 transition-colors group">
@@ -284,25 +333,29 @@ export const SessionsPage: React.FC = () => {
                     {session.model_used}
                   </td>
                   <td className="px-4 py-5 text-center">
+                    <span className="sr-only">Generated: </span>
                     <span className="px-3 py-1 rounded-full bg-gray-100 font-mono font-black text-gray-900 text-xs shadow-sm">
                       {session.questions_generated}
                     </span>
                   </td>
                   <td className="px-4 py-5 text-center">
+                    <span className="sr-only">Imported: </span>
                     <span className="px-3 py-1 rounded-full bg-emerald-50 font-mono font-black text-emerald-700 text-xs shadow-sm">
                       {session.questions_imported}
                     </span>
                   </td>
-                  <td className="px-4 py-5 text-right font-bold text-gray-500 text-xs">
+                  <td className="px-4 py-5 text-right font-bold text-gray-500 text-xs text-nowrap">
+                    <span className="sr-only">Duration: </span>
                     {((session.generation_time_ms || 0) / 1000).toFixed(2)}s
                   </td>
                   <td className="px-4 py-5 text-right font-mono font-black text-blue-600 text-xs">
-                    ${calculateCost(session).toFixed(4)}
+                    <span className="sr-only">Cost: </span>${calculateCost(session).toFixed(4)}
                   </td>
                   <td className="px-8 py-5 text-center">
                     <StatusBadge
                       status={getStatusType(session.status)}
                       label={(session.status || 'reviewing').toUpperCase()}
+                      aria-label={`Session status: ${session.status || 'reviewing'}`}
                     />
                   </td>
                 </tr>

@@ -17,7 +17,8 @@
     "VITE_SUPABASE_PUBLISHABLE_KEY": "${global.SUPABASE_PUBLISHABLE_KEY}",
     "VITE_ENABLE_OFFLINE_MODE": "true",
     "VITE_ANALYTICS_ID": "",
-    "VITE_GEMINI_API_KEY": "${global.GEMINI_API_KEY}"
+    "VITE_GEMINI_API_KEY": "${global.GEMINI_API_KEY}",
+    "VITE_WORKERS_URL": "https://questerix-workers.mhalim80.workers.dev"
   },
   "student": {
     "APP_NAME": "Questerix",

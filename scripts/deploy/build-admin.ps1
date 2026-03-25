@@ -18,10 +18,10 @@ if (Test-Path 'dist') {
 }
 
 Write-Host "Installing Admin Panel dependencies..." -ForegroundColor Cyan
-npm install --silent
+npm.cmd install --silent
 
 Write-Host "Building Admin Panel with Vite..." -ForegroundColor Cyan
-npm run build
+npm.cmd run build
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host " npm run build failed with exit code $LASTEXITCODE" -ForegroundColor Red

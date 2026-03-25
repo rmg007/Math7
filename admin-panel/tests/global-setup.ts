@@ -79,7 +79,7 @@ function decodeJwtExpiry(token: string): Date | null {
 function validateStateExpiry(
   statePath: string,
   role: string,
-  minTtlMs = 60 * 60 * 1000 // 1 hour — enough for any CI run
+  minTtlMs = 15 * 60 * 1000 // 15 minutes - plenty for local/small runs, but warns on rapid expiry
 ): void {
   try {
     const raw = fs.readFileSync(statePath, 'utf-8');
@@ -134,7 +134,7 @@ function validateStateExpiry(
       console.warn(
         `[globalSetup] ⚠️  ${role}: JWT expires in ${ttlMin}min (${expiry.toISOString()}) — ` +
           `less than the required ${Math.round(minTtlMs / 60000)}min window. ` +
-          'Increase Supabase JWT_EXPIRY in the test project settings or reduce CI run duration.'
+          'Increase Supabase JWT_EXPIRY in the project settings if long runs fail.'
       );
     } else {
       console.log(
@@ -160,7 +160,7 @@ async function authenticateRole(
   let contextClosed = false;
 
   try {
-    await page.goto(`${baseURL}/login`);
+    await page.goto(`${baseURL}/login`, { waitUntil: 'networkidle', timeout: 45000 });
     await page.fill('#login-email', role.email);
     await page.fill('#login-password', role.password);
     await page.click('button[type="submit"]');

@@ -62,6 +62,33 @@ export type Database = {
           },
         ]
       }
+      ai_debug_logs: {
+        Row: {
+          details: Json | null
+          event_time: string | null
+          id: string
+          level: string | null
+          message: string | null
+          version: string | null
+        }
+        Insert: {
+          details?: Json | null
+          event_time?: string | null
+          id?: string
+          level?: string | null
+          message?: string | null
+          version?: string | null
+        }
+        Update: {
+          details?: Json | null
+          event_time?: string | null
+          id?: string
+          level?: string | null
+          message?: string | null
+          version?: string | null
+        }
+        Relationships: []
+      }
       ai_generation_sessions: {
         Row: {
           app_id: string | null
@@ -1166,6 +1193,7 @@ export type Database = {
           solution: Json
           sort_order: number | null
           status: Database["public"]["Enums"]["curriculum_status"] | null
+          studio_prompt_id: string | null
           type: Database["public"]["Enums"]["question_type"]
           updated_at: string
         }
@@ -1187,6 +1215,7 @@ export type Database = {
           solution: Json
           sort_order?: number | null
           status?: Database["public"]["Enums"]["curriculum_status"] | null
+          studio_prompt_id?: string | null
           type: Database["public"]["Enums"]["question_type"]
           updated_at?: string
         }
@@ -1208,6 +1237,7 @@ export type Database = {
           solution?: Json
           sort_order?: number | null
           status?: Database["public"]["Enums"]["curriculum_status"] | null
+          studio_prompt_id?: string | null
           type?: Database["public"]["Enums"]["question_type"]
           updated_at?: string
         }
@@ -1225,6 +1255,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "skills"
             referencedColumns: ["skill_id"]
+          },
+          {
+            foreignKeyName: "questions_studio_prompt_id_fkey"
+            columns: ["studio_prompt_id"]
+            isOneToOne: false
+            referencedRelation: "studio_prompts"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1618,6 +1655,84 @@ export type Database = {
           },
         ]
       }
+      studio_prompts: {
+        Row: {
+          app_id: string
+          assembled_prompt: string
+          created_at: string
+          created_by: string
+          custom_instructions: string | null
+          difficulty_mix: Json
+          domain_name: string
+          generation_time_ms: number | null
+          id: string
+          model_used: string | null
+          question_count: number
+          question_types: string[]
+          questions_generated: number | null
+          questions_saved: number | null
+          status: string
+          token_count: number | null
+          topics: string[]
+          updated_at: string
+        }
+        Insert: {
+          app_id: string
+          assembled_prompt: string
+          created_at?: string
+          created_by: string
+          custom_instructions?: string | null
+          difficulty_mix: Json
+          domain_name: string
+          generation_time_ms?: number | null
+          id?: string
+          model_used?: string | null
+          question_count: number
+          question_types?: string[]
+          questions_generated?: number | null
+          questions_saved?: number | null
+          status?: string
+          token_count?: number | null
+          topics?: string[]
+          updated_at?: string
+        }
+        Update: {
+          app_id?: string
+          assembled_prompt?: string
+          created_at?: string
+          created_by?: string
+          custom_instructions?: string | null
+          difficulty_mix?: Json
+          domain_name?: string
+          generation_time_ms?: number | null
+          id?: string
+          model_used?: string | null
+          question_count?: number
+          question_types?: string[]
+          questions_generated?: number | null
+          questions_saved?: number | null
+          status?: string
+          token_count?: number | null
+          topics?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_prompts_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["app_id"]
+          },
+          {
+            foreignKeyName: "studio_prompts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subjects: {
         Row: {
           color_hex: string | null
@@ -1833,6 +1948,7 @@ export type Database = {
         Args: { p_app_id: string; p_group_id: string }
         Returns: boolean
       }
+      is_tenant_admin: { Args: never; Returns: boolean }
       jwt_is_admin: { Args: never; Returns: boolean }
       jwt_is_mentor: { Args: never; Returns: boolean }
       jwt_is_super_admin: { Args: never; Returns: boolean }
@@ -1886,11 +2002,15 @@ export type Database = {
         Args: { last_sync_time?: string; table_name: string }
         Returns: Json
       }
+      reorder_domains: { Args: { p_orders: Json }; Returns: undefined }
+      reorder_questions: { Args: { p_orders: Json }; Returns: undefined }
+      reorder_skills: { Args: { p_orders: Json }; Returns: undefined }
       role_is_super_admin: { Args: never; Returns: boolean }
       rollback_publish: {
         Args: { p_app_id: string; p_target_version: number }
         Returns: Json
       }
+      sanitize_jsonb_pii: { Args: { p_data: Json }; Returns: Json }
       submit_attempt_and_update_progress: {
         Args: { attempts_json: Json }
         Returns: {
@@ -1945,6 +2065,7 @@ export type Database = {
         | "text_input"
         | "boolean"
         | "reorder_steps"
+        | "matching"
       user_role: "super_admin" | "admin" | "student" | "mentor"
     }
     CompositeTypes: {
@@ -2092,6 +2213,7 @@ export const Constants = {
         "text_input",
         "boolean",
         "reorder_steps",
+        "matching",
       ],
       user_role: ["super_admin", "admin", "student", "mentor"],
     },

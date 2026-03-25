@@ -169,7 +169,10 @@ export function AuthConfirmPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-4 shadow-sm">
+          <div
+            className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-4 shadow-sm"
+            aria-hidden="true"
+          >
             {isSuccess ? (
               <CheckCircle2 className="w-7 h-7 text-green-600" />
             ) : isError ? (
@@ -189,7 +192,10 @@ export function AuthConfirmPage() {
                   ? 'Set New Password'
                   : 'Confirm Your Account'}
           </h1>
-          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+          <p
+            id="auth-confirm-description"
+            className="mt-2 text-sm text-zinc-500 dark:text-zinc-400"
+          >
             {isSuccess
               ? isRecovery
                 ? 'Password updated successfully. Redirecting to sign in…'
@@ -207,8 +213,12 @@ export function AuthConfirmPage() {
           {/* Error state */}
           {isError && (
             <div className="space-y-4">
-              <div className="flex items-start gap-3 bg-destructive/10 text-destructive text-sm p-4 rounded-xl">
-                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <div
+                className="flex items-start gap-3 bg-destructive/10 text-destructive text-sm p-4 rounded-xl"
+                role="alert"
+                aria-live="assertive"
+              >
+                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <span>{errorMessage || 'This link has expired or is invalid.'}</span>
               </div>
               {/* Show password form again if user typed bad passwords */}
@@ -223,6 +233,7 @@ export function AuthConfirmPage() {
               <button
                 onClick={() => navigate('/login', { replace: true })}
                 className="w-full py-3 px-4 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/90 transition-all hover:shadow-md active:scale-95 text-sm"
+                aria-label="Back to Sign In"
               >
                 Back to Sign In
               </button>
@@ -231,9 +242,12 @@ export function AuthConfirmPage() {
 
           {/* Success state */}
           {isSuccess && (
-            <div className="text-center py-4">
+            <div className="text-center py-4" role="status" aria-live="polite">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
+                <CheckCircle2
+                  className="w-8 h-8 text-green-600 dark:text-green-400"
+                  aria-hidden="true"
+                />
               </div>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 You'll be redirected in a moment…
@@ -290,15 +304,23 @@ export function AuthConfirmPage() {
                 id="auth-confirm-btn"
                 onClick={handleConfirm}
                 disabled={isLoading}
+                aria-label={
+                  isLoading
+                    ? 'Verifying authentication'
+                    : isRecovery
+                      ? 'Set New Password'
+                      : 'Confirm and sign in'
+                }
                 className="w-full py-3 px-4 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/90 transition-all hover:shadow-md active:scale-95 text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100"
               >
-                {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                {isLoading && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
                 {isLoading ? 'Verifying…' : isRecovery ? 'Set New Password' : 'Confirm & Sign In'}
               </button>
 
               <button
                 onClick={() => navigate('/login', { replace: true })}
                 className="w-full py-2 text-sm text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
+                aria-label="Cancel and back to sign in"
               >
                 ← Back to Sign In
               </button>

@@ -38,7 +38,7 @@ if ($env:CLOUDFLARE_API_TOKEN) {
 if ($IncludeLanding -and $cfLanding -and ($Target -eq 'all')) {
     Write-Host "[DEPLOY] Deploying Landing Pages..." -ForegroundColor Cyan
     $landingDir = Join-Path $RootDir 'landing-pages\dist'
-    npx -y wrangler pages deploy $landingDir --project-name $cfLanding --commit-dirty --branch $Branch
+    npx.cmd -y wrangler pages deploy $landingDir --project-name $cfLanding --commit-dirty --branch $Branch
     if ($LASTEXITCODE -eq 0) {
         Write-Host "[PASS] Landing Pages deployed successfully" -ForegroundColor Green
     } else {
@@ -50,7 +50,7 @@ if ($IncludeLanding -and $cfLanding -and ($Target -eq 'all')) {
 if ($Target -eq 'all' -or $Target -eq 'admin-panel') {
     Write-Host "[DEPLOY] Deploying Admin Panel..." -ForegroundColor Cyan
     $adminDist = Join-Path $RootDir 'admin-panel\dist'
-    npx -y wrangler pages deploy $adminDist --project-name $cfAdmin --commit-dirty --branch $Branch
+    npx.cmd -y wrangler pages deploy $adminDist --project-name $cfAdmin --commit-dirty --branch $Branch
     if ($LASTEXITCODE -eq 0) {
         Write-Host "[PASS] Admin Panel deployed successfully" -ForegroundColor Green
     } else {
@@ -70,7 +70,7 @@ if ($Target -eq 'all' -or $Target -eq 'questerix-student-app') {
       exit 1
     }
  
-    npx -y wrangler pages deploy $studentDist --project-name $cfStudent --commit-dirty --branch $Branch
+    npx.cmd -y wrangler pages deploy $studentDist --project-name $cfStudent --commit-dirty --branch $Branch
     if ($LASTEXITCODE -eq 0) {
         Write-Host "[PASS] Student App deployed successfully" -ForegroundColor Green
     } else {

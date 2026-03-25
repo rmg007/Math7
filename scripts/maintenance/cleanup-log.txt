@@ -623,3 +623,185 @@
 [2026-03-22 03:00:07] Space recovered: 123.13 MB
 [2026-03-22 03:00:07] Final size: 15.95 MB
 [2026-03-22 03:00:07] 
+[2026-03-25 03:38:43] 
+[2026-03-25 03:38:43] AGENT MEMORY CLEANUP STARTED
+[2026-03-25 03:38:43] Mode: LIVE
+[2026-03-25 03:38:43] Retain: 3 days / 15 sessions
+[2026-03-25 03:38:43] Before: 296.24 MB | 1659 files | 83 sessions
+[2026-03-25 03:38:43] 
+[2026-03-25 03:38:43] Phase 1: Stripping media artifacts...
+[2026-03-25 03:38:44]   Stripped .tempmediaStorage from 49a608ec-da07-4193-8cc9-ae446d0390b6 (28.92 MB)
+[2026-03-25 03:38:46]   Stripped .tempmediaStorage from 6e870a6e-aa3c-408a-b012-ab04770da897 (63.63 MB)
+[2026-03-25 03:38:49] Phase 2: Pruning resolved state snapshots...
+[2026-03-25 03:38:49] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-25 03:38:50]   Deleting session f5924b0b-4d96-492e-9283-e4afdbc30d39 (1.90 MB, last used: 03/22/2026 03:00:06)
+[2026-03-25 03:38:50]   Deleting session e627f707-6ff7-40c9-aef8-94e7022277af (517.33 KB, last used: 03/22/2026 03:00:06)
+[2026-03-25 03:38:50]   Deleting session dd453868-d679-4414-a7c9-0e6d1185df4b (35.69 KB, last used: 03/22/2026 03:00:06)
+[2026-03-25 03:38:50]   Deleting session c0d4188c-aaf9-48f4-aa52-6b3cea5d89c6 (5.91 KB, last used: 03/22/2026 03:00:06)
+[2026-03-25 03:38:50]   Deleting session 98bf0ce5-26c7-4d89-a277-04092130a6c9 (2.95 KB, last used: 03/22/2026 03:00:06)
+[2026-03-25 03:38:50]   Deleting session 8b2c78ad-b7ba-4905-8c47-6a8bf8dad170 (10.36 KB, last used: 03/22/2026 03:00:06)
+[2026-03-25 03:38:50]   Deleting session 81426be7-60d2-48a5-86dc-09d49f2f049e (5.52 KB, last used: 03/22/2026 03:00:06)
+[2026-03-25 03:38:50]   Deleting session 7c3f4bcb-ab1c-425d-a1cc-e138c5057e2b (31.59 KB, last used: 03/22/2026 03:00:06)
+[2026-03-25 03:38:50]   Deleting session 0d275da1-dc39-437c-8a76-91ccc1303d25 (3.34 KB, last used: 03/22/2026 03:00:06)
+[2026-03-25 03:38:50]   Deleting session f8aca12e-a66a-4f3a-894c-47cd4916272c (1.28 MB, last used: 03/22/2026 03:00:06)
+[2026-03-25 03:38:50]   Deleting session b2873f2b-fd88-4c31-b82e-986f146f98bd (1.20 MB, last used: 03/22/2026 03:00:05)
+[2026-03-25 03:38:50]   Deleting session 7e956abe-5452-46a3-b7fc-3f03f4c8fba6 (1.14 MB, last used: 03/22/2026 03:00:05)
+[2026-03-25 03:38:50]   Deleting session 6da5bcdf-0a38-4975-96bc-61f8ac2dd949 (9.10 MB, last used: 03/22/2026 03:00:05)
+[2026-03-25 03:38:50]   Deleting session 093833b9-83f5-4f23-9f54-43dea7d936db (742.52 KB, last used: 03/22/2026 03:00:05)
+[2026-03-25 03:38:51]   Deleting session 69c27cc3-4957-4acc-828c-b6757fe167cc (0 B, last used: 03/21/2026 22:43:45)
+[2026-03-25 03:38:51]   Deleting session d820e0dd-7c9e-4926-9d4e-7dc33f6a3618 (0 B, last used: 03/21/2026 22:22:41)
+[2026-03-25 03:38:51]   Deleting session a2d9315a-3777-45d5-b86f-d679be42929d (0 B, last used: 03/21/2026 22:17:44)
+[2026-03-25 03:38:51]   Deleting session 126f94e6-26fa-46b1-b758-9bfe35ce0af7 (0 B, last used: 03/21/2026 22:03:25)
+[2026-03-25 03:38:51]   Deleting session 0170bb7a-6bee-49e8-8b79-ea1d65263a46 (0 B, last used: 03/21/2026 21:53:59)
+[2026-03-25 03:38:51]   Deleting session 8e393c2a-3b36-41a3-ae41-34525c9ab0bb (0 B, last used: 03/21/2026 21:35:18)
+[2026-03-25 03:38:51]   Deleting session f917c49a-34b9-4b91-bdb5-e6cd472a0fa0 (0 B, last used: 03/21/2026 21:25:56)
+[2026-03-25 03:38:51]   Deleting session bdbff121-631e-48fd-8abc-faf85faf0eee (0 B, last used: 03/21/2026 21:11:20)
+[2026-03-25 03:38:51]   Deleting session 7d33a397-c223-48cd-8948-f7ac357163d8 (0 B, last used: 03/21/2026 20:19:29)
+[2026-03-25 03:38:51]   Deleting session 9de20a4c-538a-4702-9d0e-a59a8ca9ae47 (0 B, last used: 03/21/2026 16:06:05)
+[2026-03-25 03:38:51]   Deleting session de8e09f3-5305-4a6a-a5cc-a049487a48de (0 B, last used: 03/21/2026 15:10:39)
+[2026-03-25 03:38:51]   Deleting session eb90206b-725d-425e-8e51-383e33e2a7a4 (0 B, last used: 03/21/2026 11:19:02)
+[2026-03-25 03:38:51]   Deleting session 3eabba45-b13e-4822-bf9b-15e3c300d509 (0 B, last used: 03/21/2026 11:12:32)
+[2026-03-25 03:38:51]   Deleting session eb6b605b-19f1-4b85-b24f-fa3aefa96679 (0 B, last used: 03/21/2026 10:35:02)
+[2026-03-25 03:38:51]   Deleting session d45e21bf-20b0-4b79-9a17-90151f8d134d (0 B, last used: 03/21/2026 08:27:12)
+[2026-03-25 03:38:51]   Deleting session ed09c36f-8d76-4730-a078-c79a8397f432 (0 B, last used: 03/21/2026 06:59:31)
+[2026-03-25 03:38:51]   Deleting session 6f3409d7-2e36-4cc3-8b4f-281bee8ab794 (0 B, last used: 03/21/2026 04:07:14)
+[2026-03-25 03:38:51]   Deleting session fa4584bf-d97b-4df8-9370-7de64d91c7ac (0 B, last used: 03/20/2026 22:54:53)
+[2026-03-25 03:38:51]   Deleting session 2adf468f-4024-45f3-8ced-8f3b8b33265c (0 B, last used: 03/20/2026 14:30:17)
+[2026-03-25 03:38:51]   Deleting session b4517b9e-0a9f-4989-96bc-5fde19afa427 (0 B, last used: 03/20/2026 14:29:33)
+[2026-03-25 03:38:51]   Deleting session 9c15cdd3-46a4-4c37-a28d-eb334d6d223a (0 B, last used: 03/20/2026 14:11:45)
+[2026-03-25 03:38:52]   Deleting session 08af5508-afcd-4561-844b-f7645dcee6fd (0 B, last used: 03/20/2026 08:12:18)
+[2026-03-25 03:38:52]   Deleting session ce8428fe-b23d-4962-a316-80e4859b653c (4.51 KB, last used: 03/20/2026 06:32:27)
+[2026-03-25 03:38:52]   Deleting session d7ee757b-ae4c-47e4-ae54-35ac63e2dbc4 (0 B, last used: 03/20/2026 05:18:14)
+[2026-03-25 03:38:52]   Deleting session 572219b5-5381-49b7-b7c1-431de1c842d7 (0 B, last used: 03/20/2026 04:37:34)
+[2026-03-25 03:38:52]   Deleting session 46d800e1-47db-4a08-8cfd-b344971e3f2c (0 B, last used: 03/19/2026 21:07:45)
+[2026-03-25 03:38:52]   Deleting session 8d2f05b9-2aa5-4b4d-b507-e2ae99ced0c3 (0 B, last used: 03/19/2026 20:58:24)
+[2026-03-25 03:38:52]   Deleting session c192581f-b886-4498-b7e1-82ba26d71bb0 (0 B, last used: 03/19/2026 20:53:41)
+[2026-03-25 03:38:52]   Deleting session 552e7122-dcf6-4a36-93ed-9330f033cbb6 (0 B, last used: 03/19/2026 19:55:40)
+[2026-03-25 03:38:52]   Deleting session c38050d2-6f83-4452-a516-74088fc44db8 (0 B, last used: 03/19/2026 19:52:30)
+[2026-03-25 03:38:52]   Deleting session 16eda74d-3eab-45a3-98bd-cb8d662f81c7 (0 B, last used: 03/19/2026 18:21:45)
+[2026-03-25 03:38:52]   Deleting session e6fb1300-0a05-44ad-88f8-5c55c856395d (0 B, last used: 03/19/2026 16:35:36)
+[2026-03-25 03:38:52]   Deleting session eafc6a61-1590-484b-a14e-7d4cb5e18cfa (0 B, last used: 03/19/2026 14:21:49)
+[2026-03-25 03:38:52]   Deleting session 35599da3-47da-4af9-b9d8-0fdf7072abf9 (0 B, last used: 03/19/2026 14:08:27)
+[2026-03-25 03:38:52]   Deleting session d5e41a5e-0aeb-4243-a269-9be5346d6299 (0 B, last used: 03/19/2026 12:47:34)
+[2026-03-25 03:38:52]   Deleting session 5ee994e5-8778-4faf-9c89-b7b45e1a69ff (0 B, last used: 03/19/2026 11:27:03)
+[2026-03-25 03:38:52] Phase 4: Cleaning project root temp files...
+[2026-03-25 03:38:52]   Removed: .flutter-defines.tmp (609 B)
+[2026-03-25 03:38:52] Phase 5: Pruning indexed artifacts...
+[2026-03-25 03:38:53] 
+[2026-03-25 03:38:53] CLEANUP COMPLETE
+[2026-03-25 03:38:53] Sessions: 83 -> 33 (-50)
+[2026-03-25 03:38:53] Files removed: 64
+[2026-03-25 03:38:53] Space recovered: 252.73 MB
+[2026-03-25 03:38:53] Final size: 43.51 MB
+[2026-03-25 03:38:53] 
+[2026-03-25 03:39:08] 
+[2026-03-25 03:39:08] AGENT MEMORY CLEANUP STARTED
+[2026-03-25 03:39:08] Mode: LIVE
+[2026-03-25 03:39:08] Retain: 3 days / 15 sessions
+[2026-03-25 03:39:08] Before: 43.51 MB | 253 files | 33 sessions
+[2026-03-25 03:39:08] 
+[2026-03-25 03:39:08] Phase 1: Stripping media artifacts...
+[2026-03-25 03:39:10] Phase 2: Pruning resolved state snapshots...
+[2026-03-25 03:39:10] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-25 03:39:10] Phase 4: Cleaning project root temp files...
+[2026-03-25 03:39:10] Phase 5: Pruning indexed artifacts...
+[2026-03-25 03:39:10] 
+[2026-03-25 03:39:10] CLEANUP COMPLETE
+[2026-03-25 03:39:10] Sessions: 33 -> 33 (-0)
+[2026-03-25 03:39:10] Files removed: 0
+[2026-03-25 03:39:10] Space recovered: 0 B
+[2026-03-25 03:39:10] Final size: 43.51 MB
+[2026-03-25 03:39:11] 
+[2026-03-25 03:41:00] 
+[2026-03-25 03:41:00] AGENT MEMORY CLEANUP STARTED
+[2026-03-25 03:41:00] Mode: LIVE
+[2026-03-25 03:41:00] Retain: 3 days / 15 sessions
+[2026-03-25 03:41:00] Before: 43.51 MB | 253 files | 33 sessions
+[2026-03-25 03:41:00] 
+[2026-03-25 03:41:00] Phase 1: Stripping media artifacts...
+[2026-03-25 03:41:01] Phase 2: Pruning resolved state snapshots...
+[2026-03-25 03:41:02] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-25 03:41:02] Phase 4: Cleaning project root temp files...
+[2026-03-25 03:41:02] Phase 5: Pruning indexed artifacts...
+[2026-03-25 03:41:02] 
+[2026-03-25 03:41:02] CLEANUP COMPLETE
+[2026-03-25 03:41:02] Sessions: 33 -> 33 (-0)
+[2026-03-25 03:41:02] Files removed: 0
+[2026-03-25 03:41:02] Space recovered: 0 B
+[2026-03-25 03:41:02] Final size: 43.51 MB
+[2026-03-25 03:41:02] 
+[2026-03-25 03:45:22] 
+[2026-03-25 03:45:22] AGENT MEMORY CLEANUP STARTED
+[2026-03-25 03:45:22] Mode: LIVE
+[2026-03-25 03:45:23] Retain: 3 days / 15 sessions
+[2026-03-25 03:45:23] Before: 43.51 MB | 253 files | 33 sessions
+[2026-03-25 03:45:23] 
+[2026-03-25 03:45:23] Phase 1: Stripping media artifacts...
+[2026-03-25 03:45:24] Phase 2: Pruning resolved state snapshots...
+[2026-03-25 03:45:24] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-25 03:45:24] Phase 4: Cleaning project root temp files...
+[2026-03-25 03:45:24]   Removed: .flutter-defines.tmp (668 B)
+[2026-03-25 03:45:24] Phase 5: Pruning indexed artifacts...
+[2026-03-25 03:45:24] 
+[2026-03-25 03:45:24] CLEANUP COMPLETE
+[2026-03-25 03:45:24] Sessions: 33 -> 33 (-0)
+[2026-03-25 03:45:24] Files removed: 1
+[2026-03-25 03:45:24] Space recovered: 668 B
+[2026-03-25 03:45:24] Final size: 43.51 MB
+[2026-03-25 03:45:25] 
+[2026-03-25 03:46:20] 
+[2026-03-25 03:46:20] AGENT MEMORY CLEANUP STARTED
+[2026-03-25 03:46:20] Mode: LIVE
+[2026-03-25 03:46:20] Retain: 3 days / 15 sessions
+[2026-03-25 03:46:21] Before: 43.51 MB | 253 files | 33 sessions
+[2026-03-25 03:46:21] 
+[2026-03-25 03:46:21] Phase 1: Stripping media artifacts...
+[2026-03-25 03:46:26] Phase 2: Pruning resolved state snapshots...
+[2026-03-25 03:46:26] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-25 03:46:27] Phase 4: Cleaning project root temp files...
+[2026-03-25 03:46:27]   Removed: .flutter-defines.tmp (668 B)
+[2026-03-25 03:46:27] Phase 5: Pruning indexed artifacts...
+[2026-03-25 03:46:27] 
+[2026-03-25 03:46:27] CLEANUP COMPLETE
+[2026-03-25 03:46:27] Sessions: 33 -> 33 (-0)
+[2026-03-25 03:46:27] Files removed: 1
+[2026-03-25 03:46:27] Space recovered: 668 B
+[2026-03-25 03:46:27] Final size: 43.51 MB
+[2026-03-25 03:46:28] 
+[2026-03-25 03:49:27] 
+[2026-03-25 03:49:27] AGENT MEMORY CLEANUP STARTED
+[2026-03-25 03:49:27] Mode: LIVE
+[2026-03-25 03:49:27] Retain: 3 days / 15 sessions
+[2026-03-25 03:49:27] Before: 43.51 MB | 253 files | 33 sessions
+[2026-03-25 03:49:27] 
+[2026-03-25 03:49:27] Phase 1: Stripping media artifacts...
+[2026-03-25 03:49:28] Phase 2: Pruning resolved state snapshots...
+[2026-03-25 03:49:29] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-25 03:49:29] Phase 4: Cleaning project root temp files...
+[2026-03-25 03:49:29]   Removed: .flutter-defines.tmp (668 B)
+[2026-03-25 03:49:29] Phase 5: Pruning indexed artifacts...
+[2026-03-25 03:49:29] 
+[2026-03-25 03:49:29] CLEANUP COMPLETE
+[2026-03-25 03:49:29] Sessions: 33 -> 33 (-0)
+[2026-03-25 03:49:29] Files removed: 1
+[2026-03-25 03:49:29] Space recovered: 668 B
+[2026-03-25 03:49:29] Final size: 43.51 MB
+[2026-03-25 03:49:29] 
+[2026-03-25 04:03:06] 
+[2026-03-25 04:03:06] AGENT MEMORY CLEANUP STARTED
+[2026-03-25 04:03:06] Mode: LIVE
+[2026-03-25 04:03:06] Retain: 3 days / 15 sessions
+[2026-03-25 04:03:06] Before: 43.51 MB | 253 files | 33 sessions
+[2026-03-25 04:03:06] 
+[2026-03-25 04:03:06] Phase 1: Stripping media artifacts...
+[2026-03-25 04:03:07] Phase 2: Pruning resolved state snapshots...
+[2026-03-25 04:03:07] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-25 04:03:07] Phase 4: Cleaning project root temp files...
+[2026-03-25 04:03:07] Phase 5: Pruning indexed artifacts...
+[2026-03-25 04:03:07] 
+[2026-03-25 04:03:08] CLEANUP COMPLETE
+[2026-03-25 04:03:08] Sessions: 33 -> 33 (-0)
+[2026-03-25 04:03:08] Files removed: 0
+[2026-03-25 04:03:08] Space recovered: 0 B
+[2026-03-25 04:03:08] Final size: 43.51 MB
+[2026-03-25 04:03:08] 

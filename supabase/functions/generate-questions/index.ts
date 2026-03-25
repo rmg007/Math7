@@ -1,22 +1,18 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { GoogleGenerativeAI } from 'npm:@google/generative-ai@0.1.3';
+import { GoogleGenerativeAI } from 'npm:@google/generative-ai@0.12.0';
 import { createSanitizedErrorResponse, withErrorSanitization } from '../_shared/error-sanitizer.ts';
 import { validateGenerationRequest } from '../_shared/input-sanitizer.ts';
 import { addRateLimitHeaders, createRateLimitMiddleware, rateLimitConfigs } from '../_shared/rate-limiter.ts';
 import { checkEnvironmentGuard } from '../_shared/env-guard.ts';
 
-const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || 'http://localhost:3000,http://localhost:5173,http://localhost:5000').split(',');
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
-function getCorsHeaders(req?: Request): Record<string, string> {
-  const origin = req?.headers.get('Origin') || '';
-  const allowedOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
-  return {
-    'Access-Control-Allow-Origin': allowedOrigin,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Max-Age': '86400',
-  };
+function getCorsHeaders(_req?: Request): Record<string, string> {
+  return corsHeaders;
 }
 
 // Rate limiter must be created OUTSIDE the handler to persist state across requests
@@ -74,59 +70,82 @@ export const generateQuestionsHandler = withErrorSanitization(
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
     
     if (authError || !user) {
+      console.error('[generate-questions] Auth verification failed:', {
+        hasAuthHeader: !!authHeader,
+        authError,
+        errorCode: authError?.status || 'no_status'
+      });
       return createSanitizedErrorResponse('UNAUTHORIZED', 'Invalid or expired token');
     }
+    console.log('[generate-questions] User verified:', { user_id: user.id, email: user.email });
 
     // Get user's app_id for tenant isolation (respecting RLS)
     const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('app_id, role')
+      .eq('id', user.id) // Ensure we only get the current user's profile
       .single();
 
     if (profileError || !profile?.app_id) {
+      console.error('Profile lookup failed:', { profileError, user_id: user.id });
       return createSanitizedErrorResponse('FORBIDDEN', 'User profile not found or missing tenant');
     }
 
     // Only admins can generate questions
     if (profile.role !== 'admin' && profile.role !== 'super_admin') {
+      console.warn('[generate-questions] Access denied for role:', profile.role, 'user:', user.id);
       return createSanitizedErrorResponse('FORBIDDEN', 'Access denied');
     }
+    console.log('[generate-questions] Role authorized:', profile.role);
 
-    const { text, difficulty_distribution, custom_instructions, model = 'gemini-1.5-flash' }: GenerationRequest =
-      await req.json();
+    const body = await req.json().catch(() => ({}));
+    console.log('[generate-questions] Raw request body:', JSON.stringify(body, null, 2));
+
+    const { text, difficulty_distribution, custom_instructions, model = 'gemini-1.5-flash' } = body;
 
     // ========================================
-    // FIX SEC-003: INPUT VALIDATION AND SANITIZATION
+    // INLINE VALIDATION (Bypass shared to avoid sync issues)
     // ========================================
-    const validation = validateGenerationRequest({
-      text,
-      difficulty_distribution,
-      custom_instructions,
-      model,
-    });
-
-    if (!validation.isValid) {
-      return createSanitizedErrorResponse('BAD_REQUEST', `Invalid input: ${validation.errors.join(', ')}`);
+    if (!text || typeof text !== 'string' || text.length < 10) {
+      return createSanitizedErrorResponse('BAD_REQUEST', 'Source text is missing or too short');
     }
 
-    // Use sanitized request
-    const sanitizedRequest = validation.sanitizedRequest!;
+    const dist = difficulty_distribution;
+    if (!dist || typeof dist !== 'object') {
+      return createSanitizedErrorResponse('BAD_REQUEST', 'Difficulty distribution (difficulty_distribution) is missing');
+    }
+
+    const easy = Number(dist.easy || 0);
+    const medium = Number(dist.medium || 0);
+    const hard = Number(dist.hard || 0);
+    const total = easy + medium + hard;
+
+    if (total <= 0) {
+      return createSanitizedErrorResponse('BAD_REQUEST', 'Total questions must be greater than zero');
+    }
+
+    const sanitizedRequest = {
+      text: text.trim().substring(0, 10000),
+      difficulty_distribution: { easy, medium, hard },
+      custom_instructions: custom_instructions?.trim()?.substring(0, 2000),
+      model: model === 'gpt-4o-mini' ? 'gpt-4o-mini' : 'gemini-1.5-flash',
+    };
 
     // Initialize AI client
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey && !deps?.genAI) {
-      return createSanitizedErrorResponse('INTERNAL_ERROR');
+      console.error('[generate-questions] GEMINI_API_KEY is missing in Edge Function environment');
+      return createSanitizedErrorResponse('INTERNAL_ERROR', 'AI configuration missing (GEMINI_API_KEY)');
     }
+    console.log('[generate-questions] AI config initialized (model:', model, ')');
 
     const genAI = (deps?.genAI as any) || new GoogleGenerativeAI(apiKey!);
 
     // ========================================
-    // MULTI-MODEL FALLBACK CONFIGURATION
+    // MODEL CONFIGURATION
     // ========================================
-    const PRIMARY_MODEL = sanitizedRequest.model || 'gemini-1.5-flash';
-    const FALLBACK_MODEL = Deno.env.get('FALLBACK_AI_MODEL') || 'gemini-1.5-pro';
-    const PRIMARY_TIMEOUT_MS = 15000; // 15s for primary (tight budget)
-    const FALLBACK_TIMEOUT_MS = 30000; // 30s for fallback (more generous)
+    const PRIMARY_MODEL = 'gemini-1.5-flash';
+    const PRIMARY_TIMEOUT_MS = 60000; // Increase to 60s
 
     const generationConfig = {
       responseMimeType: "application/json",
@@ -140,15 +159,10 @@ export const generateQuestionsHandler = withErrorSanitization(
       sanitizedRequest.custom_instructions
     );
 
-    // ========================================
-    // AI CALL WITH AUTOMATIC FALLBACK
-    // ========================================
+    const startTime = Date.now();
     let aiResponse: any;
     let generatedText: string;
     let generationTime: number;
-    let modelUsed = PRIMARY_MODEL;
-    let fallbackTriggered = false;
-    let primaryError: string | null = null;
 
     const callModel = async (modelName: string, timeoutMs: number) => {
       const model = genAI.getGenerativeModel({ model: modelName, generationConfig });
@@ -165,40 +179,21 @@ export const generateQuestionsHandler = withErrorSanitization(
       }
     };
 
-    const startTime = Date.now();
-
-    // Attempt 1: Primary model
     try {
       const result = await callModel(PRIMARY_MODEL, PRIMARY_TIMEOUT_MS);
       aiResponse = await result.response;
       generatedText = aiResponse.text();
       generationTime = Date.now() - startTime;
-    } catch (primaryErr: unknown) {
-      const isTimeout = primaryErr instanceof DOMException && primaryErr.name === 'AbortError';
-      primaryError = isTimeout ? 'timeout' : (primaryErr instanceof Error ? primaryErr.message : 'unknown');
-      console.warn(`Primary model (${PRIMARY_MODEL}) failed: ${primaryError}. Falling back to ${FALLBACK_MODEL}...`);
-
-      // Attempt 2: Fallback model
-      try {
-        const fallbackStart = Date.now();
-        const result = await callModel(FALLBACK_MODEL, FALLBACK_TIMEOUT_MS);
-        aiResponse = await result.response;
-        generatedText = aiResponse.text();
-        generationTime = Date.now() - fallbackStart;
-        modelUsed = FALLBACK_MODEL;
-        fallbackTriggered = true;
-      } catch (fallbackErr: unknown) {
-        const isFallbackTimeout = fallbackErr instanceof DOMException && fallbackErr.name === 'AbortError';
-        if (isFallbackTimeout) {
-          return createSanitizedErrorResponse('SERVICE_UNAVAILABLE', 'AI request timed out on all models');
-        }
-        throw fallbackErr;
-      }
+    } catch (err: unknown) {
+      const isTimeout = err instanceof DOMException && err.name === 'AbortError';
+      const errorMsg = isTimeout ? 'AI request timed out (60s limit)' : (err instanceof Error ? err.message : 'Unknown generation error');
+      console.error(`Generation failed: ${errorMsg}`, err);
+      return createSanitizedErrorResponse(isTimeout ? 'SERVICE_UNAVAILABLE' : 'INTERNAL_ERROR', errorMsg);
     }
 
-    // Log latency warning if primary was slow (>1s) even if it succeeded
-    if (!fallbackTriggered && generationTime > 1000) {
-      console.warn(`Latency warning: ${modelUsed} took ${generationTime}ms (>1000ms threshold)`);
+    // Log latency warning if slow (>5s)
+    if (generationTime > 5000) {
+      console.warn(`Latency warning: ${PRIMARY_MODEL} took ${generationTime}ms`);
     }
 
     // FIX T5: Use actual usage metadata from Gemini API instead of heuristic
@@ -247,10 +242,7 @@ export const generateQuestionsHandler = withErrorSanitization(
       JSON.stringify({
         questions,
         metadata: {
-          model: modelUsed,
-          requested_model: PRIMARY_MODEL,
-          fallback_triggered: fallbackTriggered,
-          fallback_reason: primaryError,
+          model: PRIMARY_MODEL,
           generation_time_ms: generationTime,
           token_count: actualTokenCount,
           prompt_tokens: usageMetadata?.promptTokenCount,

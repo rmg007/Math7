@@ -1,7 +1,3 @@
-import { useBulkImport } from '@/hooks/use-bulk-import';
-import { Download, FileUp, Play, Sparkles, Terminal, Trash2, X, Zap } from 'lucide-react';
-import { useState } from 'react';
-
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,53 +13,14 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { governedGenerateQuestions } from '@/features/ai-assistant/api/governedGeneration';
 import { useSkills } from '@/features/curriculum/hooks/use-skills';
+import { useApp } from '@/hooks/use-app';
+import { useBulkImport } from '@/hooks/use-bulk-import';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase';
-import { getMetaEnv } from '@/config/env';
-
-const WORKERS_URL = getMetaEnv('VITE_WORKERS_URL') as string | undefined;
-
-async function parseImportPrompt(
-  prompt: string,
-  skillId: string
-): Promise<{ questions: unknown[] }> {
-  const markName = 'BulkImport:parseAI';
-  performance.mark(`${markName}:start`);
-  try {
-    if (WORKERS_URL) {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not authenticated');
-      const response = await fetch(`${WORKERS_URL}/ai/parse-import-prompt`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ prompt, skillId }),
-        signal: AbortSignal.timeout(45_000),
-      });
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        throw new Error(
-          (body as { error?: string }).error || `Workers AI error: ${response.status}`
-        );
-      }
-      return response.json() as Promise<{ questions: unknown[] }>;
-    }
-    // Fallback: Supabase Edge Function (Gemini)
-    const { data, error } = await supabase.functions.invoke('parse-import-prompt', {
-      body: { prompt, skillId },
-    });
-    if (error) throw error;
-    return data as { questions: unknown[] };
-  } finally {
-    performance.mark(`${markName}:end`);
-    performance.measure(markName, `${markName}:start`, `${markName}:end`);
-  }
-}
+import { Download, FileUp, Play, Sparkles, Terminal, Trash2, X, Zap } from 'lucide-react';
+import { useState } from 'react';
+import type { QueuedQuestion } from '@/lib/validation/import-schema';
 
 export default function BulkImportPage() {
   const {
@@ -78,6 +35,7 @@ export default function BulkImportPage() {
   } = useBulkImport();
 
   const { toast } = useToast();
+  const { currentApp } = useApp();
   const { data: skills } = useSkills();
   const [selectedSkillId, setSelectedSkillId] = useState<string>('');
   const [importPrompt, setImportPrompt] = useState('');
@@ -90,25 +48,106 @@ export default function BulkImportPage() {
 
   const handleAiImport = async () => {
     if (!importPrompt.trim()) return;
+    if (!currentApp) {
+      toast({ title: 'Application context missing', variant: 'destructive' });
+      return;
+    }
 
     setIsAiParsing(true);
     try {
       const markName = 'BulkImportPage:handleAiImport';
       performance.mark(`${markName}:start`);
-      const data = await parseImportPrompt(importPrompt, selectedSkillId);
 
-      if (data?.questions) {
-        setImportQueue((prev) => [...prev, ...(data.questions as typeof prev)]);
+      const response = await governedGenerateQuestions(currentApp.app_id, {
+        text: `Extract curriculum questions from this unstructured content: ${importPrompt}`,
+        difficulty_distribution: { easy: 4, medium: 3, hard: 3 },
+      });
+
+      if (response?.questions) {
+        // Map response to match the import queue expectations (QueuedQuestion schema)
+        // Note: QueuedQuestion is a discriminated union. We must provide all necessary fields.
+        const questionsToQueue = response.questions.flatMap((q): QueuedQuestion[] => {
+          const base = {
+            content: q.text,
+            skill_id: selectedSkillId,
+            points: 1,
+            is_published: true, // Required by BaseQuestionSchema
+            explanation: q.metadata.explanation,
+          };
+
+          // Map based on question_type
+          if (q.question_type === 'multiple_choice') {
+            const options =
+              q.metadata.options?.map((opt) => ({
+                text: opt,
+                is_correct: opt === q.metadata.correct_answer,
+              })) || [];
+
+            if (options.length < 2) return []; // Skip invalid questions
+
+            return [
+              {
+                ...base,
+                type: 'multiple_choice' as const,
+                options,
+              },
+            ];
+          }
+
+          if (q.question_type === 'text_input') {
+            return [
+              {
+                ...base,
+                type: 'text_input' as const,
+                solution:
+                  typeof q.metadata.correct_answer === 'string' ? q.metadata.correct_answer : '',
+              },
+            ];
+          }
+
+          if (q.question_type === 'boolean') {
+            return [
+              {
+                ...base,
+                type: 'boolean' as const,
+                solution: String(q.metadata.correct_answer).toLowerCase() === 'true',
+              },
+            ];
+          }
+
+          if (q.question_type === 'reorder_steps') {
+            const steps = q.metadata.options || [];
+            if (steps.length < 2) return [];
+
+            return [
+              {
+                ...base,
+                type: 'reorder_steps' as const,
+                options: steps,
+                solution:
+                  typeof q.metadata.correct_answer === 'string'
+                    ? q.metadata.correct_answer.split(',').map((s) => s.trim())
+                    : Array.isArray(q.metadata.correct_answer)
+                      ? q.metadata.correct_answer
+                      : steps,
+              },
+            ];
+          }
+
+          return []; // Unsupported type for bulk import
+        });
+
+        setImportQueue((prev) => [...prev, ...questionsToQueue]);
         setImportPrompt('');
         toast({
-          title: 'AI Sync Successful',
-          description: `Extracted ${data.questions.length} questions from prompt.`,
+          title: 'AI Synthesis Successful',
+          description: `Extracted ${questionsToQueue.length} questions from content.`,
         });
       }
     } catch (err: unknown) {
       toast({
         title: 'Import failed',
-        description: err instanceof Error ? err.message : 'An error occurred',
+        description: err instanceof Error ? err.message : 'An error occurred during AI synthesis.',
         variant: 'destructive',
       });
     } finally {

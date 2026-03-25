@@ -84,11 +84,14 @@ const UserRow = memo(
                 ? 'text-gray-200 cursor-not-allowed'
                 : 'text-gray-300 hover:text-gray-500'
             )}
+            aria-label={`${isSelected ? 'Deselect' : 'Select'} user ${user.full_name || user.email}`}
+            aria-checked={isSelected}
+            role="checkbox"
           >
             {isSelected ? (
-              <CheckSquare className="h-4 w-4 text-teal-600" />
+              <CheckSquare className="h-4 w-4 text-teal-600" aria-hidden="true" />
             ) : (
-              <Square className="h-4 w-4" />
+              <Square className="h-4 w-4" aria-hidden="true" />
             )}
           </button>
         </TableCell>
@@ -105,24 +108,39 @@ const UserRow = memo(
                   {user.full_name || 'No name'}
                 </span>
                 {user.id === currentUserId && (
-                  <span className="px-1.5 py-0.5 rounded bg-teal-600 text-white text-[9px] font-semibold uppercase">
+                  <span
+                    className="px-1.5 py-0.5 rounded bg-teal-600 text-white text-[9px] font-semibold uppercase"
+                    aria-label="Current User"
+                  >
                     You
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-gray-400 font-mono truncate">{user.email}</p>
+              <p
+                className="text-[11px] text-gray-400 font-mono truncate"
+                aria-label={`Email: ${user.email}`}
+              >
+                {user.email}
+              </p>
             </div>
           </div>
         </TableCell>
         <TableCell>
           {user.role === 'super_admin' ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 rounded-full text-[11px] font-medium text-purple-700">
-              <ShieldAlert className="w-3 h-3" />
+            <span
+              className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 rounded-full text-[11px] font-medium text-purple-700"
+              role="status"
+            >
+              <ShieldAlert className="w-3 h-3" aria-hidden="true" />
               Super Admin
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 rounded-full text-[11px] font-medium text-emerald-700">
-              <Shield className="w-3 h-3" />
+            <span
+              className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 rounded-full text-[11px] font-medium text-emerald-700"
+              role="status"
+              aria-label="User role: Admin"
+            >
+              <Shield className="w-3 h-3" aria-hidden="true" />
               Admin
             </span>
           )}
@@ -142,7 +160,10 @@ const UserRow = memo(
           <span className="text-xs text-gray-500">{formatDate(user.created_at)}</span>
         </TableCell>
         <TableCell>
-          <StatusBadge status={user.deleted_at ? 'inactive' : 'active'} />
+          <StatusBadge
+            status={user.deleted_at ? 'inactive' : 'active'}
+            aria-label={`Account status: ${user.deleted_at ? 'Deactivated' : 'Active'}`}
+          />
         </TableCell>
         <TableCell className="px-4 text-right border-l border-gray-100">
           {user.id !== currentUserId && (
@@ -153,8 +174,9 @@ const UserRow = memo(
                   size="sm"
                   onClick={() => onReactivate(user.id)}
                   className="h-7 px-2 rounded text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 gap-1"
+                  aria-label={`Reactivate account for ${user.full_name || user.email}`}
                 >
-                  <UserCheck className="h-3 w-3" />
+                  <UserCheck className="h-3 w-3" aria-hidden="true" />
                   Reactivate
                 </Button>
               ) : (
@@ -163,8 +185,9 @@ const UserRow = memo(
                   size="sm"
                   onClick={() => onDeactivate(user.id)}
                   className="h-7 px-2 rounded text-xs text-red-500 hover:text-red-700 hover:bg-red-50 gap-1"
+                  aria-label={`Deactivate account for ${user.full_name || user.email}`}
                 >
-                  <UserX className="h-3 w-3" />
+                  <UserX className="h-3 w-3" aria-hidden="true" />
                   Deactivate
                 </Button>
               )}
@@ -455,20 +478,31 @@ export function UserManagementPage() {
       />
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
-          <ShieldAlert className="h-4 w-4 text-red-500 shrink-0" />
+        <div
+          className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2"
+          role="alert"
+          aria-live="polite"
+        >
+          <ShieldAlert className="h-4 w-4 text-red-500 shrink-0" aria-hidden="true" />
           <p className="text-xs text-red-700">{error}</p>
         </div>
       )}
 
       {/* Bulk Actions Bar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md">
+        <div
+          className="flex items-center justify-between p-3 bg-teal-900 rounded-lg shadow-md"
+          role="toolbar"
+          aria-label="Bulk actions for selected users"
+        >
           <div className="flex items-center gap-3 pl-2">
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold">
+            <span
+              className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-semibold"
+              aria-hidden="true"
+            >
               {selectedIds.size}
             </span>
-            <span className="text-xs text-teal-200 font-medium">selected</span>
+            <span className="text-xs text-teal-200 font-medium">selected users</span>
           </div>
           <div className="flex items-center gap-1">
             <Button
@@ -476,8 +510,9 @@ export function UserManagementPage() {
               size="sm"
               onClick={() => handleBulkToggleStatus('reactivate')}
               className="h-7 px-3 rounded text-xs text-teal-200 hover:text-white hover:bg-white/10 gap-1"
+              aria-label="Reactivate selected users"
             >
-              <UserCheck className="h-3 w-3" />
+              <UserCheck className="h-3 w-3" aria-hidden="true" />
               Reactivate
             </Button>
             <Button
@@ -485,8 +520,9 @@ export function UserManagementPage() {
               size="sm"
               onClick={() => handleBulkToggleStatus('deactivate')}
               className="h-7 px-3 rounded text-xs text-red-400 hover:text-white hover:bg-red-600 gap-1"
+              aria-label="Deactivate selected users"
             >
-              <UserX className="h-3 w-3" />
+              <UserX className="h-3 w-3" aria-hidden="true" />
               Deactivate
             </Button>
             <Button
@@ -494,8 +530,9 @@ export function UserManagementPage() {
               size="sm"
               onClick={() => setSelectedIds(new Set())}
               className="h-7 px-2 rounded text-xs text-teal-300 hover:text-white hover:bg-white/10"
+              aria-label="Clear all selected users"
             >
-              <X className="h-3 w-3" />
+              <X className="h-3 w-3" aria-hidden="true" />
             </Button>
           </div>
         </div>
@@ -503,9 +540,12 @@ export function UserManagementPage() {
 
       <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden">
         {/* Card Header: Search + Count */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200" role="search">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400"
+              aria-hidden="true"
+            />
             <input
               type="text"
               placeholder="Search users..."
@@ -515,6 +555,7 @@ export function UserManagementPage() {
                 setCurrentPage(1);
               }}
               className="w-full pl-9 pr-8 py-1.5 rounded border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none focus-visible:outline-none text-sm"
+              aria-label="Search user directory"
             />
             {searchQuery && (
               <button
@@ -523,14 +564,19 @@ export function UserManagementPage() {
                   setCurrentPage(1);
                 }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-200 text-gray-400 hover:text-gray-600 rounded"
-                title="Clear"
+                title="Clear search"
+                aria-label="Clear search"
               >
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3" aria-hidden="true" />
               </button>
             )}
           </div>
-          <span className="text-[11px] text-gray-500 whitespace-nowrap">
-            {filteredUsers.length} {filteredUsers.length === 1 ? 'user' : 'users'}
+          <span
+            className="text-[11px] text-gray-500 whitespace-nowrap"
+            aria-live="polite"
+            role="status"
+          >
+            {filteredUsers.length} {filteredUsers.length === 1 ? 'user' : 'users'} found
           </span>
         </div>
 
@@ -542,13 +588,19 @@ export function UserManagementPage() {
                   onClick={handleSelectAll}
                   className="text-gray-300 hover:text-gray-500"
                   title="Select all"
+                  aria-label="Select all users on this page"
+                  role="checkbox"
+                  aria-checked={
+                    selectedIds.size > 0 &&
+                    selectedIds.size === paginatedUsers.filter((u) => u.id !== currentUserId).length
+                  }
                 >
                   {selectedIds.size > 0 &&
                   selectedIds.size ===
                     paginatedUsers.filter((u) => u.id !== currentUserId).length ? (
-                    <CheckSquare className="h-4 w-4 text-teal-600" />
+                    <CheckSquare className="h-4 w-4 text-teal-600" aria-hidden="true" />
                   ) : (
-                    <Square className="h-4 w-4" />
+                    <Square className="h-4 w-4" aria-hidden="true" />
                   )}
                 </button>
               </TableHead>
@@ -594,38 +646,62 @@ export function UserManagementPage() {
               <TableHead className="text-right px-4 border-l border-gray-100">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody role="status" aria-busy={loading}>
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i} className="even:bg-gray-50/40">
                   <TableCell className="px-3">
-                    <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" aria-hidden="true" />
                   </TableCell>
                   <TableCell className="px-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse" />
+                      <div
+                        className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse"
+                        aria-hidden="true"
+                      />
                       <div className="space-y-1">
-                        <div className="h-3.5 bg-gray-200 rounded w-24 animate-pulse" />
-                        <div className="h-3 bg-gray-200 rounded w-32 animate-pulse" />
+                        <div
+                          className="h-3.5 bg-gray-200 rounded w-24 animate-pulse"
+                          aria-hidden="true"
+                        />
+                        <div
+                          className="h-3 bg-gray-200 rounded w-32 animate-pulse"
+                          aria-hidden="true"
+                        />
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="h-4 bg-gray-200 rounded-full w-16 animate-pulse" />
+                    <div
+                      className="h-4 bg-gray-200 rounded-full w-16 animate-pulse"
+                      aria-hidden="true"
+                    />
                   </TableCell>
                   {isSuperAdmin && (
                     <TableCell className="hidden lg:table-cell">
-                      <div className="h-3.5 bg-gray-200 rounded w-20 animate-pulse" />
+                      <div
+                        className="h-3.5 bg-gray-200 rounded w-20 animate-pulse"
+                        aria-hidden="true"
+                      />
                     </TableCell>
                   )}
                   <TableCell className="hidden md:table-cell">
-                    <div className="h-3.5 bg-gray-200 rounded w-20 animate-pulse" />
+                    <div
+                      className="h-3.5 bg-gray-200 rounded w-20 animate-pulse"
+                      aria-hidden="true"
+                    />
                   </TableCell>
                   <TableCell>
-                    <div className="h-4 bg-gray-200 rounded-full w-14 animate-pulse" />
+                    <div
+                      className="h-4 bg-gray-200 rounded-full w-14 animate-pulse"
+                      aria-hidden="true"
+                    />
                   </TableCell>
                   <TableCell className="px-4">
-                    <div className="h-7 w-20 bg-gray-200 rounded animate-pulse ml-auto" />
+                    <div
+                      className="h-7 w-20 bg-gray-200 rounded animate-pulse ml-auto"
+                      aria-hidden="true"
+                    />
                   </TableCell>
                 </TableRow>
               ))
@@ -643,8 +719,11 @@ export function UserManagementPage() {
                     action={
                       !searchQuery ? (
                         <Link to="/invitation-codes">
-                          <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm gap-1.5">
-                            <Key className="h-3.5 w-3.5" />
+                          <Button
+                            className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm gap-1.5"
+                            aria-label="Navigate to generate invitation code"
+                          >
+                            <Key className="h-3.5 w-3.5" aria-hidden="true" />
                             Generate Invitation Code
                           </Button>
                         </Link>
@@ -655,6 +734,7 @@ export function UserManagementPage() {
                             setCurrentPage(1);
                           }}
                           className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm"
+                          aria-label="Clear search terms"
                         >
                           Clear Search
                         </Button>

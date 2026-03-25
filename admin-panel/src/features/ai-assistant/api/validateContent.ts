@@ -1,4 +1,4 @@
-import { getMetaEnv } from '@/config/env';
+import { getMetaEnv, isDevMode } from '@/config/env';
 import { supabase } from '@/lib/supabase';
 
 interface ValidationRule {
@@ -41,13 +41,13 @@ export interface ValidationResponse {
 }
 
 const WORKERS_URL = getMetaEnv('VITE_WORKERS_URL') as string | undefined;
+const EFFECTIVE_WORKERS_URL = isDevMode() ? '/api/workers' : WORKERS_URL;
 
 export async function validateContent(request: ValidationRequest): Promise<ValidationResponse> {
-  // Use Cloudflare Workers AI if configured, fall back to Supabase Edge Functions
-  if (WORKERS_URL) {
-    return validateViaWorkers(request);
+  if (!WORKERS_URL) {
+    throw new Error('Cloudflare Workers AI (VITE_WORKERS_URL) is not configured');
   }
-  return validateViaSupabase(request);
+  return validateViaWorkers(request);
 }
 
 async function validateViaWorkers(request: ValidationRequest): Promise<ValidationResponse> {
@@ -56,7 +56,7 @@ async function validateViaWorkers(request: ValidationRequest): Promise<Validatio
   } = await supabase.auth.getSession();
   if (!session) throw new Error('Not authenticated');
 
-  const response = await fetch(`${WORKERS_URL}/ai/validate-content`, {
+  const response = await fetch(`${EFFECTIVE_WORKERS_URL}/ai/validate-content`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -74,26 +74,4 @@ async function validateViaWorkers(request: ValidationRequest): Promise<Validatio
   }
 
   return response.json() as Promise<ValidationResponse>;
-}
-
-async function validateViaSupabase(request: ValidationRequest): Promise<ValidationResponse> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 45_000);
-
-  try {
-    const { data, error } = await supabase.functions.invoke<ValidationResponse>(
-      'validate-content',
-      {
-        body: request,
-        headers: { 'x-timeout': '45000' },
-        signal: controller.signal,
-      }
-    );
-
-    if (error) throw error;
-    if (!data) throw new Error('No data returned from validation Edge Function');
-    return data;
-  } finally {
-    clearTimeout(timeoutId);
-  }
 }

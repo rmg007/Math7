@@ -73,10 +73,22 @@ CREATE TRIGGER trigger_sanitize_error_logs
     FOR EACH ROW
     EXECUTE FUNCTION public.trg_sanitize_error_logs();
 
--- 4. Set search_path on promote_error_to_issue if it exists and wasn't hardened
--- (Checking if existed in 20260312000000_harden_security_definer_functions.sql)
-ALTER FUNCTION public.promote_error_to_issue(uuid, uuid) SET search_path = public;
-ALTER FUNCTION public.log_error(text, text, text, text, text, text, text, uuid, jsonb) SET search_path = public;
+-- 4. Set search_path on promote_error_to_issue and log_error if they exist
+DO $body$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'promote_error_to_issue'
+  ) THEN
+    EXECUTE 'ALTER FUNCTION public.promote_error_to_issue(uuid, text, text, text) SET search_path = public';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'log_error'
+  ) THEN
+    EXECUTE 'ALTER FUNCTION public.log_error(text, text, text, text, text, text, text, uuid, jsonb) SET search_path = public';
+  END IF;
+END $body$;
 
 -- 5. Add a comment for audit
 COMMENT ON COLUMN public.error_logs.extra_context IS 'Contains additional error metadata, automatically sanitized for PII.';

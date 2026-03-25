@@ -1,15 +1,17 @@
 import { generateQuestions } from '@/features/ai-assistant/api/generateQuestions';
 import { useToast } from '@/hooks/use-toast';
 import { useCallback, useState } from 'react';
-
 import { z } from 'zod';
+import { useApp } from './use-app';
+import { supabase } from '@/lib/supabase';
+import { toJson } from '@/lib/utils';
 
 // ─────────────────────────────────────────────────────────
-// Types
+// Types (aligned with Database Enums)
 // ─────────────────────────────────────────────────────────
 
 export type QuestionType =
-  | 'mcq'
+  | 'multiple_choice'
   | 'mcq_multi'
   | 'text_input'
   | 'boolean'
@@ -43,6 +45,9 @@ export interface StagedQuestion {
     options?: string[];
     correct_answer?: string | string[];
     explanation?: string;
+    /** For matching types */
+    terms?: string[];
+    definitions?: string[];
   };
   kept: boolean;
   edited: boolean;
@@ -56,80 +61,85 @@ export type StudioStatus = 'idle' | 'generating' | 'done' | 'error';
 
 const StagedQuestionSchema = z.object({
   text: z.string(),
-  question_type: z.enum(['mcq', 'mcq_multi', 'text_input', 'boolean', 'reorder_steps']),
+  question_type: z.enum([
+    'multiple_choice',
+    'mcq_multi',
+    'text_input',
+    'boolean',
+    'reorder_steps',
+    'matching',
+  ]),
   difficulty: z.enum(['easy', 'medium', 'hard']),
   metadata: z.object({
     options: z.array(z.string()).optional(),
     correct_answer: z.union([z.string(), z.array(z.string())]).optional(),
     explanation: z.string().optional(),
+    terms: z.array(z.string()).optional(),
+    definitions: z.array(z.string()).optional(),
   }),
 });
 
 // ─────────────────────────────────────────────────────────
-// Domain-specific prompt instructions
+// Domain-specific prompt instructions (Generic Builder)
 // ─────────────────────────────────────────────────────────
 
 function getDomainInstructions(domain: string): string {
   const normalized = domain.toLowerCase();
 
-  if (
-    normalized.includes('math') ||
-    normalized.includes('algebra') ||
-    normalized.includes('geometry') ||
-    normalized.includes('calculus')
-  ) {
-    return 'Include calculation steps in explanations. For integer/arithmetic topics, include at least one question with negative numbers. For geometry, reference formulas by name.';
+  const mathKeywords = ['math', 'algebra', 'geometry', 'calculus', 'arithmetic', 'physics'];
+  const languageKeywords = ['english', 'language', 'grammar', 'writing', 'reading', 'linguistics'];
+  const historyKeywords = ['history', 'social studies', 'geography', 'civics'];
+  const scienceKeywords = ['science', 'biology', 'chemistry', 'scientific'];
+  const codingKeywords = ['computer', 'programming', 'coding', 'software', 'technology', 'it'];
+
+  if (mathKeywords.some((k) => normalized.includes(k))) {
+    return 'Include calculation steps in explanations. For integer/arithmetic topics, include at least one question with negative numbers. For geometry, reference formulas by name. Always use clear, unambiguous mathematical notation.';
   }
-  if (
-    normalized.includes('english') ||
-    normalized.includes('language') ||
-    normalized.includes('grammar') ||
-    normalized.includes('writing')
-  ) {
-    return 'For fill-in-the-blank, ensure the surrounding sentence provides a unique contextual clue that points to exactly one answer. For grammar types, include the rule in the explanation.';
+  if (languageKeywords.some((k) => normalized.includes(k))) {
+    return 'For fill-in-the-blank, ensure the surrounding sentence provides a unique contextual clue that points to exactly one answer. For grammar types, include the rule in the explanation. Use age-appropriate vocabulary.';
   }
-  if (normalized.includes('history')) {
-    return 'Ground every question in specific dates, persons, or events. Avoid overly broad questions. For reorder types, use chronological sequencing.';
+  if (historyKeywords.some((k) => normalized.includes(k))) {
+    return 'Ground every question in specific dates, persons, or events. Avoid overly broad or subjective questions. For reorder types, use chronological sequencing.';
   }
-  if (
-    normalized.includes('science') ||
-    normalized.includes('physics') ||
-    normalized.includes('chemistry') ||
-    normalized.includes('biology')
-  ) {
-    return 'Reference the scientific concept or law by name in the explanation. For lab/experiment topics, prefer reorder steps type.';
+  if (scienceKeywords.some((k) => normalized.includes(k))) {
+    return 'Reference the scientific concept or law by name in the explanation. Use correct terminology. For lab/experiment topics, prefer reorder steps type to describe processes.';
   }
-  if (
-    normalized.includes('computer') ||
-    normalized.includes('programming') ||
-    normalized.includes('coding') ||
-    normalized.includes('software')
-  ) {
-    return 'For programming topics, use correct syntax in questions and options. Prefer short, precise code snippets over prose descriptions.';
+  if (codingKeywords.some((k) => normalized.includes(k))) {
+    return 'For programming topics, use correct syntax in questions and options. Prefer short, precise code snippets over prose descriptions. Explain code outputs line-by-line.';
   }
-  return 'Keep questions factual and unambiguous. Mix question types freely.';
+
+  return 'Keep questions factual, unambiguous, and focused on core principles. Mix question types to challenge different cognitive skills. Ensure explanations clarify exactly why the correct answer is right.';
 }
 
 function getTypeInstructions(types: QuestionType[]): string {
   const instructions: string[] = [];
+
+  if (types.includes('multiple_choice')) {
+    instructions.push(
+      'For `multiple_choice`, always provide exactly 4 options. The `correct_answer` must match exactly one of the options.'
+    );
+  }
   if (types.includes('matching')) {
     instructions.push(
-      'For matching questions, include a `terms` array and a `definitions` array in metadata of equal length.'
+      'For `matching` questions, include a `terms` array and a `definitions` array in metadata of equal length (3-5 items).'
     );
   }
   if (types.includes('reorder_steps')) {
     instructions.push(
-      'For reorder_steps questions, provide the steps in shuffled order in `options` and the correct sequence as the `correct_answer` array.'
+      'For `reorder_steps` questions, provide the steps in shuffled order in `options` and the correct sequence as the `correct_answer` array.'
     );
-  }
-  if (types.includes('mcq') || types.includes('mcq_multi')) {
-    instructions.push('For MCQ questions, always provide exactly 4 options.');
   }
   if (types.includes('boolean')) {
     instructions.push(
-      'For boolean questions, the `correct_answer` must be exactly "True" or "False".'
+      'For `boolean` questions, the `correct_answer` must be exactly "True" or "False".'
     );
   }
+  if (types.includes('mcq_multi')) {
+    instructions.push(
+      'For `mcq_multi`, provide 4-6 options and a `correct_answer` array containing all correct options.'
+    );
+  }
+
   return instructions.join('\n');
 }
 
@@ -166,7 +176,7 @@ QUALITY RULES:
 - Every question must be about the specified topic(s) — no tangential content.
 - Every question must have a clear, unambiguous correct answer.
 - Every question must include an explanation that teaches the concept.
-- Distractors for MCQ must be plausible but clearly wrong upon reflection.
+- Distractors for MCQ/multiple_choice must be plausible but clearly wrong upon reflection.
 - Vary question phrasing — do not repeat the same sentence structure.
 ${customInstructions ? `\nADDITIONAL INSTRUCTIONS FROM AUTHOR:\n${customInstructions}` : ''}`;
 }
@@ -180,6 +190,8 @@ export function useStudioGenerator() {
   const [stagedQuestions, setStagedQuestions] = useState<StagedQuestion[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [lastPrompt, setLastPrompt] = useState<string | null>(null);
+  const [currentPromptId, setCurrentPromptId] = useState<string | null>(null);
+  const { currentApp } = useApp();
   const { toast } = useToast();
 
   // ── Generate a full batch ──────────────────────────────
@@ -206,31 +218,79 @@ export function useStudioGenerator() {
       setStatus('generating');
       setError(null);
       setStagedQuestions([]);
+      let promptId: string | null = null;
 
       try {
         const prompt = buildStudioPrompt(config);
         setLastPrompt(prompt);
+        setCurrentPromptId(null);
         const { easy, medium, hard } = config.difficultyMix;
 
+        // 1. Create prompt record (status generated)
+        const { data: userData } = await supabase.auth.getUser();
+        const user = userData.user;
+        if (!user) throw new Error('No authenticated user');
+        if (!currentApp?.app_id) throw new Error('No app selected');
+
+        const { data: promptRecord, error: promptError } = await supabase
+          .from('studio_prompts')
+          .insert({
+            app_id: currentApp.app_id,
+            created_by: user.id,
+            domain_name: config.domain,
+            topics: config.topics,
+            question_count: config.count,
+            difficulty_mix: toJson(config.difficultyMix),
+            question_types: config.questionTypes,
+            custom_instructions: config.customInstructions,
+            assembled_prompt: prompt,
+            status: 'generated',
+          })
+          .select()
+          .single();
+
+        if (promptError) throw new Error(`Could not record prompt: ${promptError.message}`);
+        promptId = promptRecord.id;
+        setCurrentPromptId(promptId);
+
+        const startTime = Date.now();
         const response = await generateQuestions({
           text: prompt,
           difficulty_distribution: { easy, medium, hard },
         });
+        const duration = Date.now() - startTime;
 
-        const validated = z
-          .array(StagedQuestionSchema)
-          .parse(response.questions)
-          .map((q) => ({
-            ...q,
-            id: crypto.randomUUID(),
-            kept: true,
-            edited: false,
-            question_type: q.question_type as QuestionType,
-            difficulty: q.difficulty as Difficulty,
-          }));
+        const validationResult = z.array(StagedQuestionSchema).safeParse(response.questions);
+        if (!validationResult.success) {
+          console.error('[Studio] Validation failed:', validationResult.error.format());
+          throw new Error(
+            `AI returned invalid question format: ${validationResult.error.errors[0]?.message || 'Unknown error'}`
+          );
+        }
+
+        const validated: StagedQuestion[] = validationResult.data.map((q) => ({
+          ...q,
+          id: crypto.randomUUID(),
+          kept: true,
+          edited: false,
+          question_type: q.question_type as QuestionType,
+          difficulty: q.difficulty as Difficulty,
+        }));
 
         setStagedQuestions(validated);
         setStatus('done');
+
+        // 2. Update prompt record (success metadata)
+        if (promptRecord) {
+          await supabase
+            .from('studio_prompts')
+            .update({
+              questions_generated: validated.length,
+              generation_time_ms: duration,
+              model_used: 'Cloudflare Workers AI',
+            })
+            .eq('id', promptRecord.id);
+        }
 
         toast({
           title: '✦ Generation complete',
@@ -240,13 +300,20 @@ export function useStudioGenerator() {
         return true;
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Generation failed';
+        console.error('[Studio] Generation error:', err);
         setError(msg);
         setStatus('error');
+
+        // 3. Mark prompt record as failed
+        if (promptId) {
+          await supabase.from('studio_prompts').update({ status: 'failed' }).eq('id', promptId);
+        }
+
         toast({ title: 'Generation failed', description: msg, variant: 'destructive' });
         return false;
       }
     },
-    [toast]
+    [toast, currentApp]
   );
 
   // ── Regenerate a single card ───────────────────────────
@@ -269,16 +336,18 @@ export function useStudioGenerator() {
           difficulty_distribution: singleConfig.difficultyMix,
         });
 
-        const validated = z.array(StagedQuestionSchema).parse(response.questions);
-        if (validated.length === 0) return;
+        const validationResult = z.array(StagedQuestionSchema).safeParse(response.questions);
+        if (!validationResult.success || validationResult.data.length === 0) {
+          throw new Error('AI returned invalid format for replacement card.');
+        }
 
         const replacement: StagedQuestion = {
-          ...validated[0],
+          ...validationResult.data[0],
           id: crypto.randomUUID(),
           kept: true,
           edited: false,
-          question_type: validated[0].question_type as QuestionType,
-          difficulty: validated[0].difficulty as Difficulty,
+          question_type: validationResult.data[0].question_type as QuestionType,
+          difficulty: validationResult.data[0].difficulty as Difficulty,
         };
 
         setStagedQuestions((prev) => {
@@ -366,7 +435,9 @@ export function useStudioGenerator() {
     stagedQuestions,
     error,
     lastPrompt,
+    currentPromptId,
     keptCount,
+
     removedCount,
     editedCount,
     hasUnsaved,

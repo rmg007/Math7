@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/select';
 import { useApp } from '@/hooks/use-app';
 import {
-  buildStudioPrompt,
   useStudioGenerator,
   type DifficultyMix,
   type QuestionType,
@@ -19,13 +18,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Database, Json } from '@/lib/database.types';
 import { cn, toJson } from '@/lib/utils';
 import { AlertCircle, Layers, RefreshCw, Save, Sparkles } from 'lucide-react';
-import { useState } from 'react';
-import { useBlocker, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useBlocker, useNavigate, useSearchParams } from 'react-router-dom';
 import { StudioQuestionCard } from '../components/studio-question-card';
 import { type QuestionInsert } from '../hooks/use-questions';
 import { useBulkCreateQuestions } from '../hooks/use-questions-bulk';
 import { useSkills } from '../hooks/use-skills';
-import { useCreateStudioPrompt, useUpdateStudioPrompt } from '../hooks/use-studio-prompts';
+import { useUpdateStudioPrompt } from '../hooks/use-studio-prompts';
 import { QuestionStudioBulkActions } from './question-studio-bulk-actions';
 import { QuestionStudioFilterPanel } from './question-studio-filter-panel';
 
@@ -39,7 +38,10 @@ export function QuestionStudioPage() {
   const [count, setCount] = useState(10);
   const [diffMix, setDiffMix] = useState<DifficultyMix>({ easy: 3, medium: 4, hard: 3 });
   const [diffPreset, setDiffPreset] = useState('Balanced');
-  const [selectedTypes, setSelectedTypes] = useState<QuestionType[]>(['mcq', 'text_input']);
+  const [selectedTypes, setSelectedTypes] = useState<QuestionType[]>([
+    'multiple_choice',
+    'text_input',
+  ]);
   const [customInstructions, setCustomInstructions] = useState('');
 
   // Deployment state
@@ -47,20 +49,74 @@ export function QuestionStudioPage() {
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [reviewed, setReviewed] = useState(false);
   const [savingIdx, setSavingIdx] = useState<number | null>(null);
-  const [currentPromptId, setCurrentPromptId] = useState<string | null>(null);
 
   // Hooks
-  const { currentApp } = useApp();
+  const { currentApp, isLoading: isAppLoading } = useApp();
   const studio = useStudioGenerator();
   const { data: skills } = useSkills();
   const bulkCreate = useBulkCreateQuestions();
-  const createPrompt = useCreateStudioPrompt();
   const updatePrompt = useUpdateStudioPrompt();
+
+  const [searchParams] = useSearchParams();
+
+  // ── Sync Params ───────────────────────────────────────
+  useEffect(() => {
+    const domain = searchParams.get('domain');
+    const topicsParam = searchParams.get('topics');
+    const countParam = searchParams.get('count');
+    const typesParam = searchParams.get('types');
+    const easyParam = searchParams.get('easy');
+    const mediumParam = searchParams.get('medium');
+    const hardParam = searchParams.get('hard');
+    const instructions = searchParams.get('instructions');
+
+    if (domain) setSelectedDomain(domain);
+    if (topicsParam) setTopics(topicsParam.split(',').filter(Boolean));
+    if (countParam) setCount(parseInt(countParam) || 10);
+    if (typesParam) setSelectedTypes(typesParam.split(',').filter(Boolean) as QuestionType[]);
+
+    if (easyParam || mediumParam || hardParam) {
+      const easy = parseInt(easyParam || '0') || 0;
+      const medium = parseInt(mediumParam || '0') || 0;
+      const hard = parseInt(hardParam || '0') || 0;
+      setDiffMix({ easy, medium, hard });
+      setDiffPreset('Custom');
+    }
+    if (instructions) setCustomInstructions(instructions);
+  }, [searchParams]);
 
   // ── Nav guard ─────────────────────────────────────────
   const blocker = useBlocker(() => studio.hasUnsaved);
 
-  const canGenerate = selectedDomain !== null && topics.length > 0 && selectedTypes.length > 0;
+  // 2. Sync Difficulty Mix with Count
+  useEffect(() => {
+    const totalDifficulty = diffMix.easy + diffMix.medium + diffMix.hard;
+    if (totalDifficulty !== count && count > 0) {
+      if (totalDifficulty === 0) {
+        // Initial state: give all to easy
+        setDiffMix({ easy: count, medium: 0, hard: 0 });
+        return;
+      }
+
+      const ratio = count / totalDifficulty;
+      const newEasy = Math.floor(diffMix.easy * ratio);
+      const newMedium = Math.floor(diffMix.medium * ratio);
+
+      // Give the remainder to hard to ensure sum equals exactly count
+      const newHard = count - newEasy - newMedium;
+
+      // Update only if values actually changed to avoid infinite loops
+      if (newEasy !== diffMix.easy || newMedium !== diffMix.medium || newHard !== diffMix.hard) {
+        setDiffMix({ easy: newEasy, medium: newMedium, hard: newHard });
+      }
+    }
+  }, [count, diffMix]);
+
+  const canGenerate =
+    selectedDomain !== null &&
+    topics.length > 0 &&
+    selectedTypes.length > 0 &&
+    diffMix.easy + diffMix.medium + diffMix.hard === count;
 
   const handleGenerate = async () => {
     if (!selectedDomain || !canGenerate) return;
@@ -82,34 +138,7 @@ export function QuestionStudioPage() {
       customInstructions: customInstructions.trim() || undefined,
     };
 
-    const success = await studio.generateBatch(config);
-
-    // Save the prompt record to the database
-    if (success && currentApp?.app_id) {
-      try {
-        const {
-          data: { user },
-        } = await (await import('@/lib/supabase')).supabase.auth.getUser();
-        if (user) {
-          const prompt = await createPrompt.mutateAsync({
-            app_id: currentApp.app_id,
-            created_by: user.id,
-            domain_name: selectedDomain,
-            topics,
-            question_count: count,
-            difficulty_mix: diffMix,
-            question_types: selectedTypes,
-            assembled_prompt: buildStudioPrompt(config),
-            custom_instructions: customInstructions.trim() || undefined,
-            questions_generated: studio.stagedQuestions.length,
-          });
-          setCurrentPromptId(prompt.id);
-        }
-      } catch {
-        // Non-blocking: prompt saving is best-effort
-        console.warn('Failed to save studio prompt record');
-      }
-    }
+    await studio.generateBatch(config);
   };
 
   const handleSave = async () => {
@@ -137,16 +166,16 @@ export function QuestionStudioPage() {
       let options: Json = null;
       let solution: Json = null;
 
-      const dbType = q.question_type === 'mcq' ? 'multiple_choice' : q.question_type;
+      const dbType = q.question_type;
 
-      if (q.question_type === 'mcq' || q.question_type === 'mcq_multi') {
+      if (q.question_type === 'multiple_choice' || q.question_type === 'mcq_multi') {
         const mappedOptions = (q.metadata.options || []).map((text, i) => ({
           id: String.fromCharCode(97 + i),
           text,
         }));
         options = toJson({ options: mappedOptions });
 
-        if (q.question_type === 'mcq') {
+        if (q.question_type === 'multiple_choice') {
           const correctText = q.metadata.correct_answer as string;
           const correctIdx = q.metadata.options?.indexOf(correctText) ?? 0;
           solution = toJson({
@@ -182,6 +211,13 @@ export function QuestionStudioPage() {
           })
           .filter(Boolean);
         solution = toJson({ correct_order: correctOrder });
+      } else if (q.question_type === 'matching') {
+        const pairs = (q.metadata.terms || []).map((term, i) => ({
+          term,
+          definition: q.metadata.definitions?.[i] || '',
+        }));
+        options = toJson({ pairs: pairs.sort(() => Math.random() - 0.5) });
+        solution = toJson({ pairs });
       }
 
       const insert: Record<string, unknown> = {
@@ -197,8 +233,8 @@ export function QuestionStudioPage() {
       };
 
       // Link to studio prompt if available
-      if (currentPromptId) {
-        insert.studio_prompt_id = currentPromptId;
+      if (studio.currentPromptId) {
+        insert.studio_prompt_id = studio.currentPromptId;
       }
 
       return insert as QuestionInsert;
@@ -208,10 +244,10 @@ export function QuestionStudioPage() {
       await bulkCreate.mutateAsync(payload);
 
       // Update the prompt record with saved count
-      if (currentPromptId) {
+      if (studio.currentPromptId) {
         try {
           await updatePrompt.mutateAsync({
-            id: currentPromptId,
+            id: studio.currentPromptId,
             questions_saved: keptQuestions.length,
             status: 'saved',
           });
@@ -225,7 +261,7 @@ export function QuestionStudioPage() {
         description: `Added to ${skills?.find((s) => s.skill_id === skillId)?.title ?? 'skill'} as ${status}.`,
       });
       studio.resetBatch();
-      setCurrentPromptId(null);
+      setReviewed(false);
       navigate('/questions');
     } catch (err) {
       toast({
@@ -235,6 +271,18 @@ export function QuestionStudioPage() {
       });
     }
   };
+
+  if (isAppLoading) {
+    return (
+      <div className="flex flex-col gap-6 animate-pulse">
+        <div className="h-10 bg-gray-200 rounded-lg w-1/4 mb-4" />
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+          <div className="xl:col-span-1 h-[600px] bg-gray-100 rounded-2xl" />
+          <div className="xl:col-span-3 h-[600px] bg-white rounded-2xl border border-dashed border-gray-200" />
+        </div>
+      </div>
+    );
+  }
 
   // ── Blocker dialog ────────────────────────────────────
   if (blocker.state === 'blocked') {

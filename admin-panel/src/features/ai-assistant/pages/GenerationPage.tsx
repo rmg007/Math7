@@ -157,7 +157,7 @@ export const GenerationPage: React.FC = () => {
 
       return {
         content: q.text,
-        type: q.question_type === 'mcq' ? 'multiple_choice' : q.question_type,
+        type: q.question_type,
         points: q.difficulty === 'hard' ? 20 : q.difficulty === 'medium' ? 10 : 5,
         status: 'draft',
         options: JSON.stringify(options),
@@ -210,12 +210,7 @@ export const GenerationPage: React.FC = () => {
         return {
           app_id: currentApp?.app_id || '',
           content: q.text,
-          type: (q.question_type === 'mcq' ? 'multiple_choice' : q.question_type) as
-            | 'boolean'
-            | 'multiple_choice'
-            | 'mcq_multi'
-            | 'text_input'
-            | 'reorder_steps',
+          type: q.question_type,
           points: q.difficulty === 'hard' ? 20 : q.difficulty === 'medium' ? 10 : 5,
           status: 'draft' as const,
           options,
@@ -248,7 +243,11 @@ export const GenerationPage: React.FC = () => {
   const totalQuestions = difficultyConfig.easy + difficultyConfig.medium + difficultyConfig.hard;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 pb-12">
+    <main
+      className="max-w-7xl mx-auto space-y-10 pb-12"
+      role="main"
+      aria-label="AI Question Generation Interface"
+    >
       <AdminHeader
         title="AI Question Generator"
         description="Craft high-quality educational content through intelligent document analysis and behavioral generation."
@@ -271,18 +270,28 @@ export const GenerationPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         <div className="lg:col-span-4 space-y-8">
           {/* Step 1: Upload Document */}
-          <Card className="glass-card overflow-hidden border-0 shadow-xl shadow-blue-500/5 group">
+          <Card
+            className="glass-card overflow-hidden border-0 shadow-xl shadow-blue-500/5 group"
+            role="region"
+            aria-label="Step 1: Source Material Upload"
+          >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <CardHeader className="relative pb-2">
               <div className="flex items-center gap-3 mb-1">
-                <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-blue-600/10 text-blue-600 text-sm font-bold shadow-inner">
+                <div
+                  className="flex items-center justify-center w-8 h-8 rounded-xl bg-blue-600/10 text-blue-600 text-sm font-bold shadow-inner"
+                  aria-hidden="true"
+                >
                   1
                 </div>
                 <CardTitle className="text-gray-900 font-bold tracking-tight">
                   Source Material
                 </CardTitle>
               </div>
-              <CardDescription className="text-gray-500 text-xs leading-relaxed">
+              <CardDescription
+                id="source-material-desc"
+                className="text-gray-500 text-xs leading-relaxed"
+              >
                 Upload a document to serve as the ground truth for generation.
               </CardDescription>
             </CardHeader>
@@ -294,7 +303,11 @@ export const GenerationPage: React.FC = () => {
           {/* Governance Mini-View (Only show if gen has happened) */}
           {governanceInfo && (
             <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-700 delay-200">
-              <div className="glass-card p-5 border-0 shadow-lg shadow-purple-500/5">
+              <div
+                className="glass-card p-5 border-0 shadow-lg shadow-purple-500/5"
+                role="region"
+                aria-label="Usage and Quota"
+              >
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
@@ -305,17 +318,24 @@ export const GenerationPage: React.FC = () => {
                     </p>
                   </div>
                   <div className="p-2 bg-purple-50 rounded-lg">
-                    <Zap className="w-4 h-4 text-purple-600" />
+                    <Zap className="w-4 h-4 text-purple-600" aria-hidden="true" />
                   </div>
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1.5" aria-live="polite">
                   <div className="flex justify-between text-[10px] font-medium text-gray-500">
                     <span>Quota Remaining</span>
                     <span className="text-purple-600">
                       {governanceInfo.quota_remaining.toLocaleString()} tokens
                     </span>
                   </div>
-                  <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden"
+                    role="progressbar"
+                    aria-label="Token usage"
+                    aria-valuenow={governanceInfo.tokens_consumed}
+                    aria-valuemin={0}
+                    aria-valuemax={governanceInfo.tokens_consumed + governanceInfo.quota_remaining}
+                  >
                     <div
                       className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-1000 ease-out"
                       style={{
@@ -332,6 +352,8 @@ export const GenerationPage: React.FC = () => {
         <div className="lg:col-span-8 space-y-10">
           {/* Step 2: Configure Generation */}
           <Card
+            role="region"
+            aria-label="Step 2: Generation Strategy"
             className={cn(
               'glass-card border-0 shadow-2xl transition-all duration-500',
               extractedText
@@ -340,19 +362,22 @@ export const GenerationPage: React.FC = () => {
             )}
           >
             <div className="absolute top-0 right-0 p-8 opacity-10">
-              <Sparkles className="w-24 h-24 text-purple-600" />
+              <Sparkles className="w-24 h-24 text-purple-600" aria-hidden="true" />
             </div>
 
             <CardHeader className="pb-4">
               <div className="flex items-center gap-3 mb-1">
-                <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-purple-600/10 text-purple-600 text-sm font-bold shadow-inner">
+                <div
+                  className="flex items-center justify-center w-8 h-8 rounded-xl bg-purple-600/10 text-purple-600 text-sm font-bold shadow-inner"
+                  aria-hidden="true"
+                >
                   2
                 </div>
                 <CardTitle className="text-gray-900 font-bold tracking-tight">
                   Generation Strategy
                 </CardTitle>
               </div>
-              <CardDescription className="text-gray-500 text-xs">
+              <CardDescription id="strategy-desc" className="text-gray-500 text-xs">
                 Configure constraints and creative direction for the AI.
               </CardDescription>
             </CardHeader>
@@ -363,11 +388,18 @@ export const GenerationPage: React.FC = () => {
                     <Label className="text-gray-700 font-bold text-sm tracking-tight">
                       Complexity Distribution
                     </Label>
-                    <span className="text-[10px] font-bold px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full"
+                      aria-live="polite"
+                    >
                       {totalQuestions} Target
                     </span>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div
+                    className="grid grid-cols-3 gap-4"
+                    role="group"
+                    aria-label="Difficulty counts"
+                  >
                     {[
                       { id: 'easy', color: 'bg-green-500', label: 'Easy' },
                       { id: 'medium', color: 'bg-amber-500', label: 'Medium' },
@@ -380,6 +412,7 @@ export const GenerationPage: React.FC = () => {
                               'w-1.5 h-1.5 rounded-full transition-all group-focus-within:scale-150',
                               diff.color
                             )}
+                            aria-hidden="true"
                           />
                           <Label
                             htmlFor={diff.id}
@@ -400,6 +433,7 @@ export const GenerationPage: React.FC = () => {
                             })
                           }
                           className="h-11 bg-white/50 border-gray-200/50 focus:border-purple-400 focus:ring-purple-400/20 rounded-xl transition-all font-mono font-bold"
+                          aria-label={`Number of ${diff.label} questions`}
                         />
                       </div>
                     ))}
@@ -419,6 +453,7 @@ export const GenerationPage: React.FC = () => {
                     onChange={(e) => setCustomInstructions(e.target.value)}
                     placeholder="e.g., Focus on bloom's taxonomy, maintain clinical terminology..."
                     className="min-h-[110px] bg-white/50 border-gray-200/50 focus:border-purple-400 focus:ring-purple-400/20 rounded-xl text-sm leading-relaxed"
+                    aria-label="Generation instructions"
                   />
                 </div>
               </div>
@@ -428,25 +463,41 @@ export const GenerationPage: React.FC = () => {
                   onClick={handleGenerate}
                   disabled={isGenerating || !extractedText || totalQuestions === 0}
                   className="w-full h-14 relative group overflow-hidden bg-[#1a1b4b] hover:bg-[#25266b] text-white rounded-2xl shadow-2xl shadow-indigo-200 transition-all duration-300"
+                  aria-label={
+                    isGenerating ? 'Synthesizing knowledge...' : 'Initiate knowledge generation'
+                  }
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                   {isGenerating ? (
                     <span className="flex items-center gap-3 font-semibold tracking-wide">
-                      <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                      <div
+                        className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"
+                        aria-hidden="true"
+                      />
                       Synthesizing Knowledge...
                     </span>
                   ) : (
                     <span className="flex items-center gap-2 font-semibold tracking-wide">
-                      <Wand2 className="w-5 h-5 text-purple-400 group-hover:rotate-12 transition-transform" />
+                      <Wand2
+                        className="w-5 h-5 text-purple-400 group-hover:rotate-12 transition-transform"
+                        aria-hidden="true"
+                      />
                       Initiate Intelligent Generation
                     </span>
                   )}
                 </Button>
 
                 {error && (
-                  <div className="mt-4 p-4 bg-rose-50/50 border border-rose-100 rounded-xl flex items-center gap-3 animate-in shake-in duration-500">
-                    <AlertCircle className="w-5 h-5 text-rose-500 flex-shrink-0" />
+                  <div
+                    className="mt-4 p-4 bg-rose-50/50 border border-rose-100 rounded-xl flex items-center gap-3 animate-in shake-in duration-500"
+                    role="alert"
+                    aria-live="assertive"
+                  >
+                    <AlertCircle
+                      className="w-5 h-5 text-rose-500 flex-shrink-0"
+                      aria-hidden="true"
+                    />
                     <p className="text-xs text-rose-700 font-semibold">{error}</p>
                   </div>
                 )}
@@ -457,6 +508,8 @@ export const GenerationPage: React.FC = () => {
           {/* Validation Report (Approved/Flagged) */}
           {validationSummary && (
             <div
+              role="region"
+              aria-label="Quality audit results"
               className={cn(
                 'p-6 rounded-3xl border animate-in slide-in-from-top-4 duration-500',
                 validationSummary.status === 'approved'
@@ -473,6 +526,7 @@ export const GenerationPage: React.FC = () => {
                         ? 'bg-emerald-100 text-emerald-600'
                         : 'bg-amber-100 text-amber-600'
                     )}
+                    aria-hidden="true"
                   >
                     {validationSummary.status === 'approved' ? (
                       <CheckCircle2 className="w-5 h-5" />
@@ -493,6 +547,7 @@ export const GenerationPage: React.FC = () => {
                         ? 'text-emerald-600'
                         : 'text-amber-600'
                     )}
+                    aria-label={`Quality score: ${(validationSummary.overall_score * 100).toFixed(0)} percent`}
                   >
                     {(validationSummary.overall_score * 100).toFixed(0)}%
                   </span>
@@ -501,7 +556,10 @@ export const GenerationPage: React.FC = () => {
                   </p>
                 </div>
               </div>
-              <div className="prose prose-sm max-w-none text-gray-700 text-xs leading-relaxed">
+              <div
+                className="prose prose-sm max-w-none text-gray-700 text-xs leading-relaxed"
+                aria-live="polite"
+              >
                 <ReactMarkdown>{validationSummary.summary}</ReactMarkdown>
               </div>
             </div>
@@ -511,14 +569,21 @@ export const GenerationPage: React.FC = () => {
 
       {/* Step 3: Review & Library Integration */}
       {generatedQuestions.length > 0 && (
-        <Card className="glass-card border-0 shadow-3xl animate-in fade-in zoom-in-95 duration-700">
+        <Card
+          className="glass-card border-0 shadow-3xl animate-in fade-in zoom-in-95 duration-700"
+          role="region"
+          aria-label="Step 3: Review and Synchronization"
+        >
           <CardHeader className="relative overflow-hidden border-b border-gray-100/50 pb-8">
             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
 
             <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-8 relative">
               <div className="space-y-1">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-600/10 text-indigo-600 text-sm font-bold shadow-inner">
+                  <div
+                    className="flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-600/10 text-indigo-600 text-sm font-bold shadow-inner"
+                    aria-hidden="true"
+                  >
                     3
                   </div>
                   <CardTitle className="text-gray-900 font-extrabold text-2xl tracking-tight">
@@ -533,7 +598,10 @@ export const GenerationPage: React.FC = () => {
               <div className="flex flex-wrap items-center gap-4">
                 <div className="w-full sm:w-72 group">
                   <Select value={selectedSkillId} onValueChange={setSelectedSkillId}>
-                    <SelectTrigger className="h-12 bg-white/80 border-indigo-100 hover:border-indigo-300 focus:ring-indigo-400/20 rounded-xl transition-all">
+                    <SelectTrigger
+                      className="h-12 bg-white/80 border-indigo-100 hover:border-indigo-300 focus:ring-indigo-400/20 rounded-xl transition-all"
+                      aria-label="Select target skill"
+                    >
                       <SelectValue placeholder="Target Skill Context..." />
                     </SelectTrigger>
                     <SelectContent className="glass-card border-gray-800 bg-gray-900/95 text-white p-2">
@@ -555,8 +623,9 @@ export const GenerationPage: React.FC = () => {
                     onClick={handleExportCSV}
                     variant="ghost"
                     className="h-12 px-6 rounded-xl text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 font-bold transition-all border border-transparent hover:border-emerald-100 gap-2"
+                    aria-label="Export generated questions to CSV"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-4 h-4" aria-hidden="true" />
                     CSV Data
                   </Button>
 
@@ -564,11 +633,15 @@ export const GenerationPage: React.FC = () => {
                     onClick={handleImportDirectly}
                     disabled={isSaving || !selectedSkillId}
                     className="h-12 px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 gap-3 transition-all active:scale-95"
+                    aria-label={isSaving ? 'Saving to library...' : 'Sync questions to library'}
                   >
                     {isSaving ? (
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <div
+                        className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                        aria-hidden="true"
+                      />
                     ) : (
-                      <Save className="w-5 h-5" />
+                      <Save className="w-5 h-5" aria-hidden="true" />
                     )}
                     Sync to Library
                   </Button>
@@ -631,6 +704,6 @@ export const GenerationPage: React.FC = () => {
           </CardContent>
         </Card>
       )}
-    </div>
+    </main>
   );
 };

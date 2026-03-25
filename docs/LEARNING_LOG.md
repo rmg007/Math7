@@ -1,5 +1,17 @@
 # Questerix Learning Log
 
+## [2026-03-25] — AI Studio E2E Hardening & Environment Synchronization
+
+- **What was done**: Stabilized the AI Studio E2E test suite by resolving environment configuration blockers and refining locator strategies. Centralized environment variable access in `src/config/env.ts` and configured `VITE_WORKERS_URL` for the test environment. Hardened `ai-studio-workers.e2e.spec.ts` with robust locators for Shadcn `Select` and the mandatory "Review" checkbox, ensuring valid persistence cycles in CI and local runs.
+- **Key Design Decision**: Centralized environment validation in the core config layer (`env.ts`). This ensures the application "fails fast" with a clear error if critical variables like `VITE_WORKERS_URL` are missing, rather than failing silently or with cryptic network errors during runtime.
+- **Prevention Rules Discovered**:
+  - **MANDATORY**: When testing Shadcn/Radix components, avoid generic role-based selectors (`getByRole('button')`) if the internal DOM structure is complex. Prefer `locator('button:has-text("...")')` or `getByTestId` for more stable interactions.
+  - **Environment Safety**: Always provide dummy values for all required `VITE_*` variables in `.env.test`, even if the tests use network mocking, to satisfy application-level boot validation.
+  - **Auth Refresh**: Supabase `autoRefreshToken: true` handles JWT expiration transparently. Do not attempt to manually "fix" or increase JWT duration in client code if it's already set to a safe default (e.g., 60m).
+- **Test Created/Hardened**: `admin-panel/tests/mutating/ai-studio-workers.e2e.spec.ts` [test created]
+
+---
+
 ## [2026-03-25] — AI Studio Modernization: Dynamic Dropdowns, Prompt Persistence & History
 
 - **What was done**: Full AI Studio overhaul — replaced hardcoded domain buttons and static config with dynamic dropdowns, added tag-based topic input, prompt preview/editor panel, generation history page with master-detail layout, and navigation link. Created `use-studio-prompts.ts` hook for CRUD operations, refactored `use-studio-generator.ts` for dynamic domains/multi-topic support, wrote migration SQL for `studio_prompts` table with FK on `questions`.
@@ -3154,3 +3166,10 @@ Added `question-studio-bulk-actions.tsx` and `question-studio-filter-panel.tsx` 
   - Enforced strict app_id = current_app_id() isolation for user_metadata, user_activity, purchases, attempts, sessions, and skill_progress.
   - Restricted curriculum_meta and curriculum_snapshots read access to the tenant's own app_id.
 - **Prevention Rule**: Every migration that creates a table with an app_id MUST include a policy that checks app_id = current_app_id() or jwt_is_super_admin(). Global super-admin bypass is a mandatory requirement for all multi-tenant tables.
+
+### Session: 2026-03-25
+
+- **App(s)**: Admin Panel, Infrastructure
+- **Work Type**: devops
+- **Summary**: Automated AI Question Studio infrastructure: migration verified, types synced, and session-close automation script created.
+- **Learning**: Automated the documentation tax to reduce session-close friction.

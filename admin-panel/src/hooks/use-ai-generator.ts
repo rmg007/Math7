@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 const AIQuestionSchema = z.object({
   text: z.string(),
-  question_type: z.enum(['mcq', 'mcq_multi', 'text_input', 'boolean', 'reorder_steps']),
+  question_type: z.enum(['multiple_choice', 'mcq_multi', 'text_input', 'boolean', 'reorder_steps']),
   difficulty: z.enum(['easy', 'medium', 'hard']),
   metadata: z.object({
     options: z.array(z.string()).optional(),

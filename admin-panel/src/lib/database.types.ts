@@ -56,6 +56,33 @@ export type Database = {
           },
         ];
       };
+      ai_debug_logs: {
+        Row: {
+          details: Json | null;
+          event_time: string | null;
+          id: string;
+          level: string | null;
+          message: string | null;
+          version: string | null;
+        };
+        Insert: {
+          details?: Json | null;
+          event_time?: string | null;
+          id?: string;
+          level?: string | null;
+          message?: string | null;
+          version?: string | null;
+        };
+        Update: {
+          details?: Json | null;
+          event_time?: string | null;
+          id?: string;
+          level?: string | null;
+          message?: string | null;
+          version?: string | null;
+        };
+        Relationships: [];
+      };
       ai_generation_sessions: {
         Row: {
           app_id: string | null;
@@ -1160,6 +1187,7 @@ export type Database = {
           solution: Json;
           sort_order: number | null;
           status: Database['public']['Enums']['curriculum_status'] | null;
+          studio_prompt_id: string | null;
           type: Database['public']['Enums']['question_type'];
           updated_at: string;
         };
@@ -1181,6 +1209,7 @@ export type Database = {
           solution: Json;
           sort_order?: number | null;
           status?: Database['public']['Enums']['curriculum_status'] | null;
+          studio_prompt_id?: string | null;
           type: Database['public']['Enums']['question_type'];
           updated_at?: string;
         };
@@ -1202,6 +1231,7 @@ export type Database = {
           solution?: Json;
           sort_order?: number | null;
           status?: Database['public']['Enums']['curriculum_status'] | null;
+          studio_prompt_id?: string | null;
           type?: Database['public']['Enums']['question_type'];
           updated_at?: string;
         };
@@ -1219,6 +1249,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'skills';
             referencedColumns: ['skill_id'];
+          },
+          {
+            foreignKeyName: 'questions_studio_prompt_id_fkey';
+            columns: ['studio_prompt_id'];
+            isOneToOne: false;
+            referencedRelation: 'studio_prompts';
+            referencedColumns: ['id'];
           },
         ];
       };
@@ -1612,6 +1649,84 @@ export type Database = {
           },
         ];
       };
+      studio_prompts: {
+        Row: {
+          app_id: string;
+          assembled_prompt: string;
+          created_at: string;
+          created_by: string;
+          custom_instructions: string | null;
+          difficulty_mix: Json;
+          domain_name: string;
+          generation_time_ms: number | null;
+          id: string;
+          model_used: string | null;
+          question_count: number;
+          question_types: string[];
+          questions_generated: number | null;
+          questions_saved: number | null;
+          status: string;
+          token_count: number | null;
+          topics: string[];
+          updated_at: string;
+        };
+        Insert: {
+          app_id: string;
+          assembled_prompt: string;
+          created_at?: string;
+          created_by: string;
+          custom_instructions?: string | null;
+          difficulty_mix: Json;
+          domain_name: string;
+          generation_time_ms?: number | null;
+          id?: string;
+          model_used?: string | null;
+          question_count: number;
+          question_types?: string[];
+          questions_generated?: number | null;
+          questions_saved?: number | null;
+          status?: string;
+          token_count?: number | null;
+          topics?: string[];
+          updated_at?: string;
+        };
+        Update: {
+          app_id?: string;
+          assembled_prompt?: string;
+          created_at?: string;
+          created_by?: string;
+          custom_instructions?: string | null;
+          difficulty_mix?: Json;
+          domain_name?: string;
+          generation_time_ms?: number | null;
+          id?: string;
+          model_used?: string | null;
+          question_count?: number;
+          question_types?: string[];
+          questions_generated?: number | null;
+          questions_saved?: number | null;
+          status?: string;
+          token_count?: number | null;
+          topics?: string[];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'studio_prompts_app_id_fkey';
+            columns: ['app_id'];
+            isOneToOne: false;
+            referencedRelation: 'apps';
+            referencedColumns: ['app_id'];
+          },
+          {
+            foreignKeyName: 'studio_prompts_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       subjects: {
         Row: {
           color_hex: string | null;
@@ -1889,6 +2004,7 @@ export type Database = {
         Args: { p_app_id: string; p_target_version: number };
         Returns: Json;
       };
+      sanitize_jsonb_pii: { Args: { p_data: Json }; Returns: Json };
       submit_attempt_and_update_progress: {
         Args: { attempts_json: Json };
         Returns: {
@@ -1931,7 +2047,13 @@ export type Database = {
       curriculum_status: 'draft' | 'published' | 'live';
       event_type: 'attempt' | 'skip' | 'flag' | 'hint_used' | 'rule_used' | 'eli10_used';
       group_type: 'class' | 'family';
-      question_type: 'multiple_choice' | 'mcq_multi' | 'text_input' | 'boolean' | 'reorder_steps';
+      question_type:
+        | 'multiple_choice'
+        | 'mcq_multi'
+        | 'text_input'
+        | 'boolean'
+        | 'reorder_steps'
+        | 'matching';
       user_role: 'super_admin' | 'admin' | 'student' | 'mentor';
     };
     CompositeTypes: {
@@ -2064,7 +2186,14 @@ export const Constants = {
       curriculum_status: ['draft', 'published', 'live'],
       event_type: ['attempt', 'skip', 'flag', 'hint_used', 'rule_used', 'eli10_used'],
       group_type: ['class', 'family'],
-      question_type: ['multiple_choice', 'mcq_multi', 'text_input', 'boolean', 'reorder_steps'],
+      question_type: [
+        'multiple_choice',
+        'mcq_multi',
+        'text_input',
+        'boolean',
+        'reorder_steps',
+        'matching',
+      ],
       user_role: ['super_admin', 'admin', 'student', 'mentor'],
     },
   },

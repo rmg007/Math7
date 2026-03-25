@@ -103,11 +103,10 @@ export function sanitizeSourceText(text: string): SanitizationResult {
 /**
  * Validates difficulty distribution parameters
  */
-export function validateDifficultyDistribution(distribution: {
-  easy: number;
-  medium: number;
-  hard: number;
-}): { isValid: boolean; error?: string } {
+export function validateDifficultyDistribution(distribution: any): { isValid: boolean; error?: string } {
+  if (!distribution) {
+    return { isValid: false, error: 'Difficulty distribution is missing (difficulty_distribution)' };
+  }
   const { easy, medium, hard } = distribution;
   
   // Check for negative numbers

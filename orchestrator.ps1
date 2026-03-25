@@ -150,7 +150,15 @@ function Invoke-PhaseSupabase {
     $output = npx supabase gen types typescript --project-id $projectRef 2>&1
     $ErrorActionPreference = $OldEAP
     if ($LASTEXITCODE -eq 0) {
-        $output | Out-File $typePath -Encoding utf8
+        # Filter out CLI advisory/warning lines (update notices etc.) to avoid corrupting the TS file
+        $cleanOutput = $output | Where-Object {
+            $_ -notmatch "^A new version of Supabase CLI" -and
+            $_ -notmatch "^We recommend updating" -and
+            $_ -notmatch "^https://supabase.com/docs" -and
+            $_ -notmatch "^\[WARN\]" -and
+            $_ -notmatch "^\[INFO\]"
+        }
+        $cleanOutput | Out-File $typePath -Encoding utf8
     } else {
         $output | ForEach-Object { Write-Err $_ }
         throw "Supabase type generation failed"
