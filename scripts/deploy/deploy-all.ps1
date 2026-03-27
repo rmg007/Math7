@@ -13,7 +13,9 @@ param(
  
     [switch]$IncludeLanding,
     
-    [switch]$SkipLanding
+    [switch]$SkipLanding,
+    
+    [string]$StudentAppDir = (Join-Path (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)) '..\questerix-student-app')
 )
  
 $ErrorActionPreference = 'Stop'
@@ -61,9 +63,8 @@ if ($Target -eq 'all' -or $Target -eq 'admin-panel') {
 # 3. Student App
 if ($Target -eq 'all' -or $Target -eq 'questerix-student-app') {
     Write-Host "[DEPLOY] Deploying Student App..." -ForegroundColor Cyan
-    # Student App is a sibling of the Questerix project
-    $siblingRootDir = Split-Path -Parent $RootDir
-    $studentDist = Join-Path $siblingRootDir 'questerix-student-app\build\web'
+    # Student App is a sibling by default, can be passed in
+    $studentDist = Join-Path $StudentAppDir 'build\web'
     
     if (-not (Test-Path $studentDist)) {
       Write-Error "Student App build output NOT FOUND at $studentDist. Run build-student.ps1 first."

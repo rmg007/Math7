@@ -62,8 +62,9 @@ export function useCreateApp() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apps-admin'] });
-      queryClient.invalidateQueries({ queryKey: ['apps'] }); // AppContext query
+      queryClient.invalidateQueries({
+        predicate: (query) => ['apps-admin', 'apps'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }
@@ -86,8 +87,9 @@ export function useUpdateApp() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apps-admin'] });
-      queryClient.invalidateQueries({ queryKey: ['apps'] });
+      queryClient.invalidateQueries({
+        predicate: (query) => ['apps-admin', 'apps'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }
@@ -103,8 +105,9 @@ export function useDeleteApp() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apps-admin'] });
-      queryClient.invalidateQueries({ queryKey: ['apps'] });
+      queryClient.invalidateQueries({
+        predicate: (query) => ['apps-admin', 'apps'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }
@@ -117,8 +120,9 @@ export function useBulkUpdateAppsStatus() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apps-admin'] });
-      queryClient.invalidateQueries({ queryKey: ['apps'] });
+      queryClient.invalidateQueries({
+        predicate: (query) => ['apps-admin', 'apps'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }
@@ -131,8 +135,9 @@ export function useBulkDeleteApps() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apps-admin'] });
-      queryClient.invalidateQueries({ queryKey: ['apps'] });
+      queryClient.invalidateQueries({
+        predicate: (query) => ['apps-admin', 'apps'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }
@@ -159,8 +164,9 @@ export function useBulkCreateApps() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apps-admin'] });
-      queryClient.invalidateQueries({ queryKey: ['apps'] });
+      queryClient.invalidateQueries({
+        predicate: (query) => ['apps-admin', 'apps'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }

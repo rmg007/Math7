@@ -1,5 +1,5 @@
 import { env, isDevMode } from '@/config/env';
-import type { Json } from './database.types';
+import type { Json } from '@questerix/core/types/database';
 import { supabase } from './supabase';
 
 /**

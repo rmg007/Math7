@@ -2,16 +2,16 @@
 
 ### What Changed
 
-
 ### Why
 
-
 ### How to Test
+
 ```bash
 # Commands to verify the change
 ```
 
 ### Screenshots
+
 <!-- If UI change, include before/after -->
 
 ---
@@ -22,12 +22,13 @@
 - [ ] Tests added or explicitly justified
 - [ ] All checks pass locally:
   - [ ] `flutter analyze` — no issues
-  - [ ] `flutter test` — all pass  
+  - [ ] `flutter test` — all pass
   - [ ] `npm run lint` — no errors
   - [ ] `npm run build` — success
 - [ ] No new warnings introduced
 - [ ] Docs updated only where needed
 - [ ] Rollback plan stated
+- [ ] **Cross-Repo Contract Check**: If Supabase schema changed, I have updated `questerix-student-app/lib/src/core/database/tables.dart` and bumped `schemaVersion`.
 
 ---
 
@@ -39,7 +40,7 @@
 
 ## Related Issues
 
-<!-- 
-- Closes #issue_number 
+<!--
+- Closes #issue_number
 - Related to #issue_number
 -->

@@ -1,5 +1,5 @@
 import { useApp } from '@/hooks/use-app';
-import { Database } from '@/lib/database.types';
+import { Database } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -193,8 +193,9 @@ export function useCreateSkill() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['skills'] });
-      queryClient.invalidateQueries({ queryKey: ['skills-paginated'] });
+      queryClient.invalidateQueries({
+        predicate: (query) => ['skills', 'skills-paginated'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }
@@ -223,9 +224,11 @@ export function useUpdateSkill() {
       return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['skills'] });
-      queryClient.invalidateQueries({ queryKey: ['skills-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['skill', data.skill_id] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['skills', 'skills-paginated'].includes(query.queryKey[0] as string) ||
+          (query.queryKey[0] === 'skill' && query.queryKey[1] === data.skill_id),
+      });
     },
   });
 }
@@ -253,8 +256,9 @@ export function useDeleteSkill() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['skills'] });
-      queryClient.invalidateQueries({ queryKey: ['skills-paginated'] });
+      queryClient.invalidateQueries({
+        predicate: (query) => ['skills', 'skills-paginated'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }
@@ -301,9 +305,10 @@ export function useDuplicateSkill() {
       return data as Skill;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['skills'] });
-      queryClient.invalidateQueries({ queryKey: ['skills-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['skills', 'skills-paginated', 'dashboard-stats'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }
@@ -323,8 +328,9 @@ export function useUpdateSkillOrder() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['skills'] });
-      queryClient.invalidateQueries({ queryKey: ['skills-paginated'] });
+      queryClient.invalidateQueries({
+        predicate: (query) => ['skills', 'skills-paginated'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }

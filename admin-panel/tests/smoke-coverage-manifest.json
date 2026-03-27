@@ -39,8 +39,16 @@
     "admin-panel/src/features/mentorship/pages/GroupCreatePage.tsx",
     "admin-panel/src/features/mentorship/pages/GroupDetailPage.tsx",
     "admin-panel/src/features/mentorship/pages/GroupsPage.tsx",
+    "admin-panel/src/features/mentorship/pages/StudentDetailPage.tsx",
     "admin-panel/src/features/monitoring/pages/ErrorLogsPage.tsx",
     "admin-panel/src/features/monitoring/pages/KnownIssuesPage.tsx",
     "admin-panel/src/features/platform/pages/LandingsPage.tsx"
+  ],
+  "admin-panel/tests/read-only/ai-studio-history.e2e.spec.ts": [
+    "admin-panel/src/features/curriculum/pages/studio-history-page.tsx"
+  ],
+  "admin-panel/tests/read-only/smoke-verify.spec.ts": [
+    "admin-panel/src/features/platform/pages/AppsPage.tsx",
+    "admin-panel/src/features/platform/pages/SubjectsPage.tsx"
   ]
 }

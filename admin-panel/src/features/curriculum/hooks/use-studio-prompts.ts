@@ -2,7 +2,7 @@ import { useApp } from '@/hooks/use-app';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isValidUUID } from '@/lib/utils';
-import { Tables, TablesInsert, TablesUpdate } from '@/lib/database.types';
+import { Tables, TablesInsert, TablesUpdate } from '@questerix/core/types/database';
 
 // ─────────────────────────────────────────────────────────
 // Types
@@ -128,8 +128,11 @@ export function useUpdateStudioPrompt() {
       return data as StudioPromptRow;
     },
     onSuccess: (data: StudioPromptRow) => {
-      queryClient.invalidateQueries({ queryKey: ['studio-prompts'] });
-      queryClient.invalidateQueries({ queryKey: ['studio-prompt', data.id] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['studio-prompts'].includes(query.queryKey[0] as string) ||
+          (query.queryKey[0] === 'studio-prompt' && query.queryKey[1] === data.id),
+      });
     },
   });
 }

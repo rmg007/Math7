@@ -1,5 +1,5 @@
 import { useApp } from '@/hooks/use-app';
-import type { Tables } from '@/lib/database.types';
+import type { Tables } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { castJson } from '@/lib/type-utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -229,16 +229,21 @@ export function usePublishCurriculum() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['curriculum-meta'] });
-      queryClient.invalidateQueries({ queryKey: ['publish-preview'] });
-      queryClient.invalidateQueries({ queryKey: ['publish-history'] });
-      queryClient.invalidateQueries({ queryKey: ['domains'] });
-      queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['skills'] });
-      queryClient.invalidateQueries({ queryKey: ['skills-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          [
+            'curriculum-meta',
+            'publish-preview',
+            'publish-history',
+            'domains',
+            'domains-paginated',
+            'skills',
+            'skills-paginated',
+            'questions',
+            'questions-paginated',
+            'dashboard-stats',
+          ].includes(query.queryKey[0] as string),
+      });
     },
   });
 }

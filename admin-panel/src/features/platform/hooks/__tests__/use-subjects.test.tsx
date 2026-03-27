@@ -1,4 +1,4 @@
-import { TablesInsert, TablesUpdate } from '@/lib/database.types';
+import { TablesInsert, TablesUpdate } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -51,14 +51,15 @@ describe('useSubjects hooks', () => {
 
     // Fresh mock for every test
     mockSupabase = createMockSupabase();
-    vi.mocked(supabase.from).mockReturnValue(mockSupabase.queryBuilder);
+    vi.mocked(supabase.from).mockReturnValue(mockSupabase.queryBuilder as any);
   });
 
   // ── useSubjects ───────────────────────────────────────────────────────────────
   describe('useSubjects', () => {
     it('fetches subjects ordered by display_order', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: mockSubjects, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: mockSubjects, error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useSubjects(), { wrapper });
@@ -74,8 +75,9 @@ describe('useSubjects hooks', () => {
   // ── useCreateSubject ──────────────────────────────────────────────────────────
   describe('useCreateSubject', () => {
     it('inserts a new subject', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: mockSubjects[0], error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: mockSubjects[0], error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useCreateSubject(), { wrapper });
@@ -90,8 +92,9 @@ describe('useSubjects hooks', () => {
   // ── useUpdateSubject ──────────────────────────────────────────────────────────
   describe('useUpdateSubject', () => {
     it('updates an existing subject', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: mockSubjects[0], error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: mockSubjects[0], error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useUpdateSubject(), { wrapper });
@@ -103,13 +106,17 @@ describe('useSubjects hooks', () => {
     });
 
     it('throws when subject not found', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useUpdateSubject(), { wrapper });
 
-      const updatePayload: TablesUpdate<'subjects'> & { id: string } = { id: VALID_UUID, title: 'X' };
+      const updatePayload: TablesUpdate<'subjects'> & { id: string } = {
+        id: VALID_UUID,
+        title: 'X',
+      };
       await expect(result.current.mutateAsync(updatePayload)).rejects.toThrow(
         `Subject with ID ${VALID_UUID} not found for update.`
       );
@@ -119,8 +126,9 @@ describe('useSubjects hooks', () => {
   // ── useDeleteSubject ──────────────────────────────────────────────────────────
   describe('useDeleteSubject', () => {
     it('deletes a subject', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useDeleteSubject(), { wrapper });
@@ -149,7 +157,10 @@ describe('useSubjects hooks', () => {
       await result.current.mutateAsync([VALID_UUID, VALID_UUID_2]);
 
       expect(mockSupabase.queryBuilder.delete).toHaveBeenCalled();
-      expect(mockSupabase.queryBuilder.in).toHaveBeenCalledWith('subject_id', [VALID_UUID, VALID_UUID_2]);
+      expect(mockSupabase.queryBuilder.in).toHaveBeenCalledWith('subject_id', [
+        VALID_UUID,
+        VALID_UUID_2,
+      ]);
     });
   });
 
@@ -170,8 +181,9 @@ describe('useSubjects hooks', () => {
   // ── useCheckSubjectSlug ───────────────────────────────────────────────────────
   describe('useCheckSubjectSlug', () => {
     it('returns true for available slug', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ count: 0, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ count: 0, error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useCheckSubjectSlug(), { wrapper });
@@ -182,8 +194,9 @@ describe('useSubjects hooks', () => {
     });
 
     it('returns false for taken slug', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ count: 1, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ count: 1, error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useCheckSubjectSlug(), { wrapper });

@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { AdminHeader } from '@/components/ui/admin-header';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
-import { Database } from '@/lib/database.types';
+import { Database } from '@questerix/core/types/database';
 
 type GenerationSession = Database['public']['Tables']['ai_generation_sessions']['Row'];
 

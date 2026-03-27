@@ -314,12 +314,14 @@ describe('useBulkCreateSkills — AP-CURR-066', () => {
     const { result } = renderHook(() => useBulkCreateSkills(), { wrapper });
     await result.current.mutateAsync([{ title: 'Skill A', slug: 'skill-a', sort_order: 1 }]);
 
-    const invalidatedKeys = invalidateSpy.mock.calls.map((call) => (call[0] as any)?.queryKey);
-    expect(invalidatedKeys).toContainEqual(['skills']);
-    expect(invalidatedKeys).toContainEqual(['skills-paginated']);
-    // useBulkCreateSkills must NOT touch these — would cause unnecessary refetches
-    expect(invalidatedKeys).not.toContainEqual(['dashboard-stats']);
-    expect(invalidatedKeys).not.toContainEqual(['publish-preview']);
+    const predicates = invalidateSpy.mock.calls.map((call) => (call[0] as any)?.predicate);
+
+    const isInvalidated = (key: string) => predicates.some((p) => p({ queryKey: [key] }));
+
+    expect(isInvalidated('skills')).toBe(true);
+    expect(isInvalidated('skills-paginated')).toBe(true);
+    expect(isInvalidated('dashboard-stats')).toBe(false);
+    expect(isInvalidated('publish-preview')).toBe(false);
   });
 });
 
@@ -348,12 +350,13 @@ describe('useBulkDeleteSkills — cache invalidation — AP-CURR-069b', () => {
     const { result } = renderHook(() => useBulkDeleteSkills(), { wrapper });
     await result.current.mutateAsync(SKILL_IDS);
 
-    const invalidatedKeys = invalidateSpy.mock.calls.map((call) => (call[0] as any)?.queryKey);
-    expect(invalidatedKeys).toContainEqual(['skills']);
-    expect(invalidatedKeys).toContainEqual(['skills-paginated']);
-    expect(invalidatedKeys).toContainEqual(['dashboard-stats']);
-    // Deleting skills does NOT affect publish-preview
-    expect(invalidatedKeys).not.toContainEqual(['publish-preview']);
+    const predicates = invalidateSpy.mock.calls.map((call) => (call[0] as any)?.predicate);
+    const isInvalidated = (key: string) => predicates.some((p) => p({ queryKey: [key] }));
+
+    expect(isInvalidated('skills')).toBe(true);
+    expect(isInvalidated('skills-paginated')).toBe(true);
+    expect(isInvalidated('dashboard-stats')).toBe(true);
+    expect(isInvalidated('publish-preview')).toBe(false);
   });
 });
 
@@ -380,11 +383,12 @@ describe('useBulkUpdateSkillsStatus — cache invalidation — AP-CURR-069c', ()
     const { result } = renderHook(() => useBulkUpdateSkillsStatus(), { wrapper });
     await result.current.mutateAsync({ skill_ids: SKILL_IDS, status: 'published' });
 
-    const invalidatedKeys = invalidateSpy.mock.calls.map((call) => (call[0] as any)?.queryKey);
-    expect(invalidatedKeys).toContainEqual(['skills']);
-    expect(invalidatedKeys).toContainEqual(['skills-paginated']);
-    expect(invalidatedKeys).toContainEqual(['dashboard-stats']);
-    // Status changes affect publish state — publish-preview MUST be invalidated
-    expect(invalidatedKeys).toContainEqual(['publish-preview']);
+    const predicates = invalidateSpy.mock.calls.map((call) => (call[0] as any)?.predicate);
+    const isInvalidated = (key: string) => predicates.some((p) => p({ queryKey: [key] }));
+
+    expect(isInvalidated('skills')).toBe(true);
+    expect(isInvalidated('skills-paginated')).toBe(true);
+    expect(isInvalidated('dashboard-stats')).toBe(true);
+    expect(isInvalidated('publish-preview')).toBe(true);
   });
 });

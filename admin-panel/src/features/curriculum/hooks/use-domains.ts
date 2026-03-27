@@ -1,5 +1,5 @@
 import { useApp } from '@/hooks/use-app';
-import { Database, Json } from '@/lib/database.types';
+import { Database, Json } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -165,8 +165,10 @@ export function useCreateDomain() {
       return data as Domain;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['domains'] });
-      queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['domains', 'domains-paginated'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }
@@ -196,9 +198,11 @@ export function useUpdateDomain() {
       return data as Domain;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['domains'] });
-      queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['domain', data.domain_id] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['domains', 'domains-paginated'].includes(query.queryKey[0] as string) ||
+          (query.queryKey[0] === 'domain' && query.queryKey[1] === data.domain_id),
+      });
     },
   });
 }
@@ -226,8 +230,10 @@ export function useDeleteDomain() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['domains'] });
-      queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['domains', 'domains-paginated'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }
@@ -253,8 +259,10 @@ export function useUpdateDomainOrder() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['domains'] });
-      queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['domains', 'domains-paginated'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }

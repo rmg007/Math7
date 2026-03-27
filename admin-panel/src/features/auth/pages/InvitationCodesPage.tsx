@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
 import { StatusBadge, type StatusType } from '@/components/ui/status-badge';
-import type { Tables } from '@/lib/database.types';
+import type { Tables } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { CheckSquare, Copy, Key, Loader2, Power, Search, Square, X, Zap } from 'lucide-react';
 import { captureException } from '@/lib/error-tracker';

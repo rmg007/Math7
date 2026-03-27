@@ -1,5 +1,5 @@
 import { useApp } from '@/hooks/use-app';
-import { Database } from '@/lib/database.types';
+import { Database } from '@questerix/core/types/database';
 import { escapePostgrestSearch } from '@/lib/postgrest-utils';
 import { supabase } from '@/lib/supabase';
 import { castJson } from '@/lib/type-utils';
@@ -206,9 +206,12 @@ export function useCreateQuestion() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['questions', 'questions-paginated', 'dashboard-stats'].includes(
+            query.queryKey[0] as string
+          ),
+      });
     },
   });
 }
@@ -243,9 +246,11 @@ export function useUpdateQuestion() {
       return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['question', data.question_id] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['questions', 'questions-paginated'].includes(query.queryKey[0] as string) ||
+          (query.queryKey[0] === 'question' && query.queryKey[1] === data.question_id),
+      });
     },
   });
 }
@@ -271,8 +276,10 @@ export function useDeleteQuestion() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['questions', 'questions-paginated'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }
@@ -314,9 +321,12 @@ export function useDuplicateQuestion() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['questions', 'questions-paginated', 'dashboard-stats'].includes(
+            query.queryKey[0] as string
+          ),
+      });
     },
   });
 }
@@ -336,8 +346,10 @@ export function useUpdateQuestionOrder() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['questions', 'questions-paginated'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }

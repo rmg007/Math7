@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
 import { useToast } from '@/hooks/use-toast';
-import { Database } from '@/lib/database.types';
+import { Database } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { castJson } from '@/lib/type-utils';
 import { Activity, Search, Shield, X, Zap } from 'lucide-react';

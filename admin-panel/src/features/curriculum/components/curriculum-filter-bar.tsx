@@ -1,71 +1,103 @@
-import { Filter, Search, X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { CurriculumStatus } from '../types';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { StatusFilter } from '@/features/platform/components/platform-toolbar';
 
 interface CurriculumFilterBarProps {
   searchPlaceholder: string;
   searchQuery: string;
-  setSearchQuery: (query: string) => void;
+  onSearchChange: (query: string) => void;
   statusFilter: 'all' | CurriculumStatus;
-  setStatusFilter: (status: 'all' | CurriculumStatus) => void;
+  onStatusChange: (status: 'all' | CurriculumStatus) => void;
+  selectedSkillId?: string;
+  onSkillChange?: (id: string) => void;
+  appFilter?: string;
+  onAppChange?: (appId: string) => void;
+  hasActiveFilters?: boolean;
+  onClearFilters?: () => void;
   extraFilters?: React.ReactNode;
   count?: number;
   countLabel?: string;
+  className?: string;
 }
 
 export function CurriculumFilterBar({
   searchPlaceholder,
   searchQuery,
-  setSearchQuery,
+  onSearchChange,
   statusFilter,
-  setStatusFilter,
+  onStatusChange,
+  selectedSkillId: _selectedSkillId,
+  onSkillChange: _onSkillChange,
+  appFilter: _appFilter,
+  onAppChange: _onAppChange,
+  hasActiveFilters,
+  onClearFilters,
   extraFilters,
   count,
   countLabel,
+  className,
 }: CurriculumFilterBarProps) {
   return (
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 flex-wrap">
+    <div
+      className={cn(
+        'flex items-center gap-3 px-4 py-3 border-b border-gray-100 flex-wrap bg-white',
+        className
+      )}
+    >
       <div className="relative flex-1 min-w-[200px]">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <input
           type="text"
           placeholder={searchPlaceholder}
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-9 pr-8 py-1.5 rounded border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none focus-visible:outline-none text-sm"
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="w-full pl-10 pr-10 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/5 outline-none transition-all text-sm"
         />
         {searchQuery && (
           <button
-            onClick={() => setSearchQuery('')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-200 text-gray-400 hover:text-gray-600 rounded"
+            onClick={() => onSearchChange('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-md transition-colors"
             title="Clear"
           >
-            <X className="h-3 w-3" />
+            <X className="h-4 w-4" />
           </button>
         )}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         {extraFilters}
-        <div className="relative">
-          <select
-            aria-label="Filter by status"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as 'all' | CurriculumStatus)}
-            className="h-8 appearance-none pl-3 pr-8 text-xs font-medium rounded border border-gray-200 bg-white text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 outline-none cursor-pointer"
+
+        <StatusFilter
+          value={statusFilter}
+          onChange={onStatusChange}
+          options={[
+            { value: 'all', label: 'All Status' },
+            { value: 'draft', label: 'Draft' },
+            { value: 'published', label: 'Published' },
+            { value: 'live', label: 'Live' },
+          ]}
+        />
+
+        {hasActiveFilters && onClearFilters && (
+          <Button
+            variant="ghost"
+            onClick={onClearFilters}
+            className="h-8 px-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-red-600 hover:text-red-700 hover:bg-red-50"
           >
-            <option value="all">All Statuses</option>
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="live">Live</option>
-          </select>
-          <Filter className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
-        </div>
+            Clear Filters
+          </Button>
+        )}
       </div>
 
       {count !== undefined && (
-        <span className="text-[11px] text-gray-500 whitespace-nowrap">
-          {count} {countLabel || 'items'}
-        </span>
+        <div className="hidden sm:flex items-center px-3 py-1.5 bg-gray-50/50 border border-gray-100 rounded-xl shadow-sm">
+          <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mr-2">
+            {countLabel || 'Pool'}
+          </span>
+          <span className="text-xs font-bold text-teal-600 tabular-nums">{count}</span>
+        </div>
       )}
     </div>
   );

@@ -31,7 +31,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { captureException } from '@/lib/error-tracker';
 import { DataColumn } from '@/lib/data-utils';
-import type { Database } from '@/lib/database.types';
+import type { Database } from '@questerix/core/types/database';
 import { cn } from '@/lib/utils';
 import type { OracleResult } from '@/services/OracleService';
 import DOMPurify from 'dompurify';

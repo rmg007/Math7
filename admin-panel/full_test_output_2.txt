@@ -1,0 +1,212 @@
+
+> admin-panel@0.0.0 test
+> vitest run src/features/curriculum/components/__tests__/question-list.test.tsx
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mC:/dev/Important Projects/Questerix/admin-panel[39m
+
+stderr | src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > renders loading state
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ReferenceError: handleImport is not defined
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:153:19)
+    at renderWithHooks (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:114:17)
+ReferenceError: handleImport is not defined
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:153:19)
+    at renderWithHooks (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:114:17)
+stderr | src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > renders empty state when no questions found
+The above error occurred in the <QuestionList> component:
+
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:81:40)
+    at Router (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-router\dist\umd\react-router.development.js:1207:17)
+    at BrowserRouter (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-router-dom\dist\umd\react-router-dom.development.js:695:7)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+ReferenceError: handleImport is not defined
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:153:19)
+    at renderWithHooks (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:114:17)
+ReferenceError: handleImport is not defined
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:153:19)
+    at renderWithHooks (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:114:17)
+stderr | src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > renders question rows when data is present
+The above error occurred in the <QuestionList> component:
+
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:81:40)
+    at Router (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-router\dist\umd\react-router.development.js:1207:17)
+    at BrowserRouter (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-router-dom\dist\umd\react-router-dom.development.js:695:7)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+ReferenceError: handleImport is not defined
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:153:19)
+    at renderWithHooks (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:114:17)
+ReferenceError: handleImport is not defined
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:153:19)
+    at renderWithHooks (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:114:17)
+stderr | src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > calls handleSelectAll when select all button is clicked
+The above error occurred in the <QuestionList> component:
+
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:81:40)
+    at Router (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-router\dist\umd\react-router.development.js:1207:17)
+    at BrowserRouter (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-router-dom\dist\umd\react-router-dom.development.js:695:7)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+ReferenceError: handleImport is not defined
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:153:19)
+    at renderWithHooks (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:114:17)
+ReferenceError: handleImport is not defined
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:153:19)
+    at renderWithHooks (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:114:17)
+stderr | src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > shows delete dialog when deleteConfirmation is set
+The above error occurred in the <QuestionList> component:
+
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:81:40)
+    at Router (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-router\dist\umd\react-router.development.js:1207:17)
+    at BrowserRouter (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-router-dom\dist\umd\react-router-dom.development.js:695:7)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+ReferenceError: handleImport is not defined
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:153:19)
+    at renderWithHooks (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:114:17)
+ReferenceError: handleImport is not defined
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:153:19)
+    at renderWithHooks (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (C:\dev\Important Projects\Questerix\admin-panel\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:114:17)
+stderr | src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > calls confirmDelete when confirm is clicked in delete dialog
+The above error occurred in the <QuestionList> component:
+
+    at QuestionList (C:/dev/Important Projects/Questerix/admin-panel/src/features/curriculum/components/question-list.tsx:81:40)
+    at Router (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-router\dist\umd\react-router.development.js:1207:17)
+    at BrowserRouter (C:\dev\Important Projects\Questerix\admin-panel\node_modules\react-router-dom\dist\umd\react-router-dom.development.js:695:7)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+ [31m❯[39m src/features/curriculum/components/__tests__/question-list.test.tsx [2m([22m[2m6 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 220[2mms[22m[39m
+     [32m✓[39m renders loading state[32m 114[2mms[22m[39m
+[31m     [31m×[31m renders empty state when no questions found[39m[32m 56[2mms[22m[39m
+[31m     [31m×[31m renders question rows when data is present[39m[32m 12[2mms[22m[39m
+[31m     [31m×[31m calls handleSelectAll when select all button is clicked[39m[32m 11[2mms[22m[39m
+[31m     [31m×[31m shows delete dialog when deleteConfirmation is set[39m[32m 8[2mms[22m[39m
+[31m     [31m×[31m calls confirmDelete when confirm is clicked in delete dialog[39m[32m 9[2mms[22m[39m
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > renders empty state when no questions found
+ FAIL  src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > renders question rows when data is present
+ FAIL  src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > calls handleSelectAll when select all button is clicked
+ FAIL  src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > shows delete dialog when deleteConfirmation is set
+ FAIL  src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > calls confirmDelete when confirm is clicked in delete dialog
+ReferenceError: handleImport is not defined
+ ❯ QuestionList src/features/curriculum/components/question-list.tsx:153:19
+    151|         onBulkStatusUpdate={handleBulkStatusUpdate}
+    152|         questions={questions as unknown as Record<string, unknown>[]}
+    153|         onImport={handleImport}
+       |                   ^
+    154|         isDeleting={isDeleting}
+    155|         isUpdating={isUpdating}
+ ❯ renderWithHooks node_modules/react-dom/cjs/react-dom.development.js:15486:18
+ ❯ mountIndeterminateComponent node_modules/react-dom/cjs/react-dom.development.js:20103:13
+ ❯ beginWork node_modules/react-dom/cjs/react-dom.development.js:21626:16
+ ❯ beginWork$1 node_modules/react-dom/cjs/react-dom.development.js:27465:14
+ ❯ performUnitOfWork node_modules/react-dom/cjs/react-dom.development.js:26599:12
+ ❯ workLoopSync node_modules/react-dom/cjs/react-dom.development.js:26505:5
+ ❯ renderRootSync node_modules/react-dom/cjs/react-dom.development.js:26473:7
+ ❯ recoverFromConcurrentError node_modules/react-dom/cjs/react-dom.development.js:25889:20
+ ❯ performConcurrentWorkOnRoot node_modules/react-dom/cjs/react-dom.development.js:25789:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 13:23:28
+[2m   Duration [22m 6.47s[2m (transform 824ms, setup 1.12s, import 2.27s, tests 220ms, environment 2.53s)[22m
+

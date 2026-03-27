@@ -14,7 +14,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Database } from '@/lib/database.types';
+import type { Database } from '@questerix/core/types/database';
 import {
   useBulkCreateQuestions,
   useBulkDeleteQuestions,
@@ -204,12 +204,14 @@ describe('useBulkCreateQuestions — AP-CURR-021', () => {
     const { result } = renderHook(() => useBulkCreateQuestions(), { wrapper });
     await result.current.mutateAsync([{ question_text: 'Q1', type: 'multiple_choice' } as any]);
 
-    const invalidatedKeys = invalidateSpy.mock.calls.map((call) => (call[0] as any)?.queryKey);
-    expect(invalidatedKeys).toContainEqual(['questions']);
-    expect(invalidatedKeys).toContainEqual(['questions-paginated']);
-    expect(invalidatedKeys).toContainEqual(['dashboard-stats']);
+    const predicates = invalidateSpy.mock.calls.map((call) => (call[0] as any)?.predicate);
+    const isInvalidated = (key: string) => predicates.some((p) => p({ queryKey: [key] }));
+
+    expect(isInvalidated('questions')).toBe(true);
+    expect(isInvalidated('questions-paginated')).toBe(true);
+    expect(isInvalidated('dashboard-stats')).toBe(true);
     // publish-preview must NOT be invalidated by useBulkCreateQuestions
-    expect(invalidatedKeys).not.toContainEqual(['publish-preview']);
+    expect(isInvalidated('publish-preview')).toBe(false);
   });
 });
 
@@ -309,12 +311,14 @@ describe('useBulkDeleteQuestions — AP-CURR-022', () => {
     const { result } = renderHook(() => useBulkDeleteQuestions(), { wrapper });
     await result.current.mutateAsync(QUESTION_IDS);
 
-    const invalidatedKeys = invalidateSpy.mock.calls.map((call) => (call[0] as any)?.queryKey);
-    expect(invalidatedKeys).toContainEqual(['questions']);
-    expect(invalidatedKeys).toContainEqual(['questions-paginated']);
-    expect(invalidatedKeys).toContainEqual(['dashboard-stats']);
+    const predicates = invalidateSpy.mock.calls.map((call) => (call[0] as any)?.predicate);
+    const isInvalidated = (key: string) => predicates.some((p) => p({ queryKey: [key] }));
+
+    expect(isInvalidated('questions')).toBe(true);
+    expect(isInvalidated('questions-paginated')).toBe(true);
+    expect(isInvalidated('dashboard-stats')).toBe(true);
     // useBulkDeleteQuestions does NOT invalidate publish-preview
-    expect(invalidatedKeys).not.toContainEqual(['publish-preview']);
+    expect(isInvalidated('publish-preview')).toBe(false);
   });
 });
 
@@ -448,10 +452,12 @@ describe('useBulkUpdateQuestionsStatus — AP-CURR-023', () => {
     const { result } = renderHook(() => useBulkUpdateQuestionsStatus(), { wrapper });
     await result.current.mutateAsync({ question_ids: QUESTION_IDS, status: 'live' });
 
-    const invalidatedKeys = invalidateSpy.mock.calls.map((call) => (call[0] as any)?.queryKey);
-    expect(invalidatedKeys).toContainEqual(['questions']);
-    expect(invalidatedKeys).toContainEqual(['questions-paginated']);
-    expect(invalidatedKeys).toContainEqual(['dashboard-stats']);
-    expect(invalidatedKeys).toContainEqual(['publish-preview']);
+    const predicates = invalidateSpy.mock.calls.map((call) => (call[0] as any)?.predicate);
+    const isInvalidated = (key: string) => predicates.some((p) => p({ queryKey: [key] }));
+
+    expect(isInvalidated('questions')).toBe(true);
+    expect(isInvalidated('questions-paginated')).toBe(true);
+    expect(isInvalidated('dashboard-stats')).toBe(true);
+    expect(isInvalidated('publish-preview')).toBe(true);
   });
 });

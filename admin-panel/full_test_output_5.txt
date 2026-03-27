@@ -1,0 +1,19 @@
+
+> admin-panel@0.0.0 test
+> vitest run src/features/curriculum/components/__tests__/question-list.test.tsx
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mC:/dev/Important Projects/Questerix/admin-panel[39m
+
+stderr | src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > renders loading state
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [32m✓[39m src/features/curriculum/components/__tests__/question-list.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 1032[2mms[22m[39m
+     [33m[2m✓[22m[39m calls handleSelectAll when select all button is clicked [33m 492[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 13:25:08
+[2m   Duration [22m 6.48s[2m (transform 900ms, setup 582ms, import 1.54s, tests 1.03s, environment 2.34s)[22m
+

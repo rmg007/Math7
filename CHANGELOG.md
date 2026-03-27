@@ -5,7 +5,22 @@ All notable changes to the Questerix project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.3.3] - 2026-03-22 (Production Deployment)
+## [2.3.4] - 2026-03-25 (AI Studio Hardening & Production Deployment)
+
+### Added
+
+- **AI Studio**: Hardened E2E test suite with robust locators for Shadcn UI components and mandatory "Review" checkbox verification.
+- **AI Studio**: Modernized generation pipeline by standardizing question type identifiers (`multiple_choice` replaces legacy `mcq` across the stack).
+- **Deployment**: Successfully promoted Admin Panel to production using the unified `orchestrator.ps1` pipeline.
+- **Environment**: Centralized frontend environment validation in `src/config/env.ts` with fail-fast initialization.
+
+### Fixed
+
+- **Testing**: Resolved intermittent timeouts in `ai-studio-workers.e2e.spec.ts` by improving stable `canGenerate` state detection.
+- **Database**: Synchronized local migration history with production via `supabase migration repair`, resolving deployment drift.
+- **Edge Functions**: Hardened `generate-questions` Edge Function with updated AI prompts for the modernized schema.
+
+---
 
 ### Deployed
 

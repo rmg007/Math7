@@ -1,4 +1,4 @@
-import type { Tables } from '@/lib/database.types';
+import type { Tables } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { castJson } from '@/lib/type-utils';
 import { isValidUUID } from '@/lib/utils';

@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Database } from '@/lib/database.types';
+import { Database } from '@questerix/core/types/database';
 import { normalizeFormData } from '@/lib/normalization';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FileText, Globe, Layers, ListOrdered, Loader2, ShieldCheck, Zap } from 'lucide-react';

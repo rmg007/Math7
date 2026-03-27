@@ -1,14 +1,14 @@
-import { TablesInsert, TablesUpdate } from '@/lib/database.types';
+import { TablesInsert, TablesUpdate } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-    useCreateLandingPage,
-    useLandingPage,
-    useLandingPages,
-    useUpdateLandingPage,
+  useCreateLandingPage,
+  useLandingPage,
+  useLandingPages,
+  useUpdateLandingPage,
 } from '../use-landings';
 
 import { createMockSupabase } from '@/__tests__/mocks/supabase-factory';
@@ -44,14 +44,16 @@ describe('useLandings hooks', () => {
 
     // Fresh mock for every test
     mockSupabase = createMockSupabase();
-    vi.mocked(supabase.from).mockReturnValue(mockSupabase.queryBuilder as unknown as ReturnType<typeof supabase.from>);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockSupabase.queryBuilder as unknown as ReturnType<typeof supabase.from>
+    );
   });
 
   describe('useLandingPages', () => {
-
     it('fetches all landing pages', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: mockLandings, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: mockLandings, error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useLandingPages(), { wrapper });
@@ -64,8 +66,9 @@ describe('useLandings hooks', () => {
 
   describe('useLandingPage', () => {
     it('fetches a single landing page by app_id', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: mockLandings[0], error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: mockLandings[0], error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useLandingPage(APP_ID), { wrapper });
@@ -84,8 +87,9 @@ describe('useLandings hooks', () => {
 
   describe('useUpdateLandingPage', () => {
     it('updates a landing page', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: mockLandings[0], error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: mockLandings[0], error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useUpdateLandingPage(), { wrapper });
@@ -94,15 +98,18 @@ describe('useLandings hooks', () => {
         meta_title: 'Updated Title',
       } as TablesUpdate<'app_landing_pages'> & { id: string });
 
-      expect(mockSupabase.queryBuilder.update).toHaveBeenCalledWith({ meta_title: 'Updated Title' });
+      expect(mockSupabase.queryBuilder.update).toHaveBeenCalledWith({
+        meta_title: 'Updated Title',
+      });
       expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith('landing_page_id', VALID_UUID);
     });
   });
 
   describe('useCreateLandingPage', () => {
     it('creates a landing page', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: mockLandings[0], error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: mockLandings[0], error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useCreateLandingPage(), { wrapper });

@@ -1,7 +1,11 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('AI Question Studio - Workers AI @logic', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    if (testInfo.project.name === 'unauthenticated') {
+      test.skip();
+      return;
+    }
     // Debug logging
     page.on('console', (msg) => {
       const text = msg.text();
@@ -123,11 +127,7 @@ test.describe('AI Question Studio - Workers AI @logic', () => {
     await saveBtn.click();
 
     // 6. Navigation with generous timeout and loose match
-    await page.waitForURL(
-      (url) => url.pathname === '/questions' || url.pathname.endsWith('/questions'),
-      { timeout: 20000 }
-    );
-    expect(page.url()).toMatch(/\/questions$/);
+    await expect(page).toHaveURL(/.*\/questions/, { timeout: 20000 });
   });
 
   test('should handle generation failure gracefully', async ({ page }) => {

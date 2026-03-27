@@ -7,14 +7,13 @@
 #>
  
 param(
-    [string]$DefinesFile
+    [string]$DefinesFile,
+    [string]$StudentAppDir = (Join-Path (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)) '..\questerix-student-app')
 )
  
 $ErrorActionPreference = 'Stop'
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RootDir = Split-Path -Parent (Split-Path -Parent $ScriptDir)
-$SiblingDir = Split-Path -Parent $RootDir
-$StudentAppDir = Join-Path $SiblingDir 'questerix-student-app'
  
 if (-not $DefinesFile) {
     $DefinesFile = Join-Path $RootDir '.flutter-defines.tmp'

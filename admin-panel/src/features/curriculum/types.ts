@@ -1,4 +1,4 @@
-import { Database } from '@/lib/database.types';
+import { Database } from '@questerix/core/types/database';
 
 export type CurriculumStatus = Database['public']['Enums']['curriculum_status'];
 

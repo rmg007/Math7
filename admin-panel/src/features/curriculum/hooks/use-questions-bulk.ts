@@ -1,5 +1,5 @@
 import { useApp } from '@/hooks/use-app';
-import { Database } from '@/lib/database.types';
+import { Database } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -24,9 +24,12 @@ export function useBulkCreateQuestions() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['questions', 'questions-paginated', 'dashboard-stats'].includes(
+            query.queryKey[0] as string
+          ),
+      });
     },
   });
 }
@@ -52,9 +55,12 @@ export function useBulkDeleteQuestions() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['questions', 'questions-paginated', 'dashboard-stats'].includes(
+            query.queryKey[0] as string
+          ),
+      });
     },
   });
 }
@@ -83,10 +89,12 @@ export function useBulkUpdateQuestionsStatus() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['questions'] });
-      queryClient.invalidateQueries({ queryKey: ['questions-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['publish-preview'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['questions', 'questions-paginated', 'dashboard-stats', 'publish-preview'].includes(
+            query.queryKey[0] as string
+          ),
+      });
     },
   });
 }

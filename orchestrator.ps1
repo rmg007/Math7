@@ -14,7 +14,9 @@ param(
     [switch]$SkipTesting,
     [switch]$SkipSupabase,
     [switch]$SkipSmoke,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$Fast,
+    [string]$StudentAppPath = (Join-Path (Split-Path -Parent $ScriptDir) 'questerix-student-app')
 )
  
 $SkipLanding = $true # Hard skip for development
@@ -103,69 +105,13 @@ function Invoke-PhasePreflight {
 function Invoke-PhaseSupabase {
     Write-Phase "PHASE 2: SUPABASE SCHEMA & EDGE FUNCTIONS"
     if ($SkipSupabase) { Write-Warn "Skipping Supabase phase"; return }
-    
     if ($DryRun) { Write-Warn "Dry run - skipping actual sync"; return }
     
-    # Check for secrets
-    if (-not $script:Secrets.ContainsKey('SUPABASE_SERVICE_KEY')) {
-        throw "SUPABASE_SERVICE_KEY not found in .secrets!"
-    }
-    
-    $projectRef = $script:Config.supabase.project_ref
-    $region = $script:Config.supabase.region
-    if (-not $projectRef) { throw "supabase.project_ref not found in master-config.json!" }
-    if (-not $region) { throw "supabase.region not found in master-config.json!" }
-
     Start-Timer "SupabaseSync"
-
-    # 1. Apply Migrations (using npx supabase with pooler)
-    Write-Info "Pushing migrations to project: $projectRef ($region)"
-    
-    if ($script:Secrets.ContainsKey('SUPABASE_DB_PASSWORD')) {
-        $dbPass = $script:Secrets['SUPABASE_DB_PASSWORD']
-        Write-Info "Linking to project: $projectRef"
-        $OldEAP = $ErrorActionPreference
-        $ErrorActionPreference = 'Continue'
-        
-        # 1. Link project
-        $linkOutput = npx supabase link --project-ref $projectRef --password "$dbPass" 2>&1
-        $linkOutput | ForEach-Object { Write-Info $_ }
-        
-        # 2. Push migrations
-        Write-Info "Pushing migrations..."
-        $pushOutput = npx supabase db push --password "$dbPass" --yes 2>&1
-        $pushOutput | ForEach-Object { Write-Info $_ }
-        
-        $ErrorActionPreference = $OldEAP
-        if ($LASTEXITCODE -ne 0) { throw "Supabase migration push failed" }
-    } else {
-        Write-Warn "SUPABASE_DB_PASSWORD not found. Skipping migration push (manual check required)."
-    }
-
-    # 2. Generate Types
-    Write-Info "Generating TypeScript types..."
-    $typePath = Join-Path $ScriptDir "admin-panel\src\lib\database.types.ts"
-    $OldEAP = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
-    $output = npx supabase gen types typescript --project-id $projectRef 2>&1
-    $ErrorActionPreference = $OldEAP
-    if ($LASTEXITCODE -eq 0) {
-        # Filter out CLI advisory/warning lines (update notices etc.) to avoid corrupting the TS file
-        $cleanOutput = $output | Where-Object {
-            $_ -notmatch "^A new version of Supabase CLI" -and
-            $_ -notmatch "^We recommend updating" -and
-            $_ -notmatch "^https://supabase.com/docs" -and
-            $_ -notmatch "^\[WARN\]" -and
-            $_ -notmatch "^\[INFO\]"
-        }
-        $cleanOutput | Out-File $typePath -Encoding utf8
-    } else {
-        $output | ForEach-Object { Write-Err $_ }
-        throw "Supabase type generation failed"
-    }
-    
-    # 3. Deploy Edge Functions (Optional - if any changed)
-    # [Placeholder for selective edge function deployment]
+    $syncScript = Join-Path $ScriptDir 'scripts\deploy\sync-schema.ps1'
+    $secretsPath = Join-Path $ScriptDir '.secrets'
+    & $syncScript -ConfigFile $script:ConfigFile -SecretsFile $secretsPath
+    if ($LASTEXITCODE -ne 0) { throw "Supabase sync failed" }
     
     Stop-Timer "SupabaseSync"
     Write-Success "Supabase synchronized"
@@ -186,8 +132,7 @@ function Invoke-PhaseBuild {
     # Clean previous builds
     Write-Info "Cleaning previous build artifacts..."
     $adminDist = Join-Path $ScriptDir 'admin-panel\dist'
-    $siblingRootDir = Split-Path -Parent $ScriptDir
-    $studentBuild = Join-Path $siblingRootDir 'questerix-student-app\build\web'
+    $studentBuild = Join-Path $StudentAppPath 'build\web'
     
     if (Test-Path $adminDist) { Remove-Item -Recurse -Force $adminDist }
     if (Test-Path $studentBuild) { Remove-Item -Recurse -Force $studentBuild }
@@ -204,7 +149,7 @@ function Invoke-PhaseBuild {
     # Build Student App
     if ($Target -eq 'all' -or $Target -eq 'questerix-student-app') {
         Write-Host "[BUILD] Building Student App..." -ForegroundColor Cyan
-        & (Join-Path $ScriptDir 'scripts\deploy\build-student.ps1')
+        & (Join-Path $ScriptDir 'scripts\deploy\build-student.ps1') -StudentAppDir $StudentAppPath
         if ($LASTEXITCODE -ne 0) { throw "Student App build failed" }
     }
     
@@ -225,9 +170,9 @@ function Invoke-PhaseDeploy {
     }
     
     if ($SkipLanding) {
-        & (Join-Path $ScriptDir 'scripts\deploy\deploy-all.ps1') -ConfigFile $script:ConfigFile -Target $Target -Branch $Branch -SkipLanding
+        & (Join-Path $ScriptDir 'scripts\deploy\deploy-all.ps1') -ConfigFile $script:ConfigFile -Target $Target -Branch $Branch -SkipLanding -StudentAppDir $StudentAppPath
     } else {
-        & (Join-Path $ScriptDir 'scripts\deploy\deploy-all.ps1') -ConfigFile $script:ConfigFile -Target $Target -Branch $Branch
+        & (Join-Path $ScriptDir 'scripts\deploy\deploy-all.ps1') -ConfigFile $script:ConfigFile -Target $Target -Branch $Branch -StudentAppDir $StudentAppPath
     }
     
     Write-Success "Deployment to $Branch complete"

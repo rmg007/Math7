@@ -104,8 +104,8 @@ describe('AuthConfirmPage', () => {
         renderPage();
 
         expect(screen.getByRole('heading', { name: /set new password/i })).toBeInTheDocument();
-        expect(screen.getByLabelText(/new password/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
+        expect(screen.getByPlaceholderText(/min 8 characters/i)).toBeInTheDocument();
+        expect(screen.getByPlaceholderText(/re-enter password/i)).toBeInTheDocument();
       });
 
       it('signup: shows confirm button and h1="Confirm Your Account"', () => {
@@ -114,7 +114,7 @@ describe('AuthConfirmPage', () => {
 
         expect(screen.getByRole('heading', { name: /confirm your account/i })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /confirm.*sign in/i })).toBeInTheDocument();
-        expect(screen.queryByLabelText(/new password/i)).not.toBeInTheDocument();
+        expect(screen.queryByPlaceholderText(/min 8 characters/i)).not.toBeInTheDocument();
       });
 
       it('magiclink: shows confirm button', () => {
@@ -145,7 +145,7 @@ describe('AuthConfirmPage', () => {
         setLocation('?token_hash=pkce_hash&type=recovery', '');
         renderPage();
 
-        expect(screen.getByLabelText(/new password/i)).toBeInTheDocument();
+        expect(screen.getByPlaceholderText(/min 8 characters/i)).toBeInTheDocument();
       });
 
       it('hash fragment takes priority over URL params', () => {
@@ -153,7 +153,7 @@ describe('AuthConfirmPage', () => {
         setLocation('?token_hash=params&type=signup', '#token_hash=frag&type=recovery');
         renderPage();
 
-        expect(screen.getByLabelText(/new password/i)).toBeInTheDocument();
+        expect(screen.getByPlaceholderText(/min 8 characters/i)).toBeInTheDocument();
         expect(screen.getByRole('heading', { name: /set new password/i })).toBeInTheDocument();
       });
     });
@@ -163,7 +163,7 @@ describe('AuthConfirmPage', () => {
         setLocation('', '#access_token=legacy&type=recovery&refresh_token=r');
         renderPage();
 
-        expect(screen.getByLabelText(/new password/i)).toBeInTheDocument();
+        expect(screen.getByPlaceholderText(/min 8 characters/i)).toBeInTheDocument();
       });
     });
 
@@ -225,7 +225,7 @@ describe('AuthConfirmPage', () => {
       setLocation('', '#error=access_denied&error_code=otp_expired');
       renderPage();
 
-      expect(screen.queryByLabelText(/new password/i)).not.toBeInTheDocument();
+      expect(screen.queryByPlaceholderText(/min 8 characters/i)).not.toBeInTheDocument();
     });
 
     it('error_code in URL search params is also handled', () => {
@@ -245,19 +245,17 @@ describe('AuthConfirmPage', () => {
 
     it('rejects passwords shorter than 8 characters', async () => {
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), 'short');
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), 'short');
       fillInput(screen.getByLabelText(/confirm password/i), 'short');
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
-      await waitFor(() =>
-        expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument()
-      );
+      await waitFor(() => expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument());
       expect(mockVerifyOtp).not.toHaveBeenCalled();
     });
 
     it('rejects when passwords do not match', async () => {
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), 'Different1!');
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
@@ -269,7 +267,7 @@ describe('AuthConfirmPage', () => {
       mockVerifyOtp.mockResolvedValue({ error: null });
       mockUpdateUser.mockResolvedValue({ error: null });
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), 'Exact8!x');
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), 'Exact8!x');
       fillInput(screen.getByLabelText(/confirm password/i), 'Exact8!x');
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
@@ -278,12 +276,10 @@ describe('AuthConfirmPage', () => {
 
     it('never calls Supabase when client validation fails', async () => {
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), 'bad');
+      expect(screen.getByPlaceholderText(/min 8 characters/i)).toBeInTheDocument();
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
-      await waitFor(() =>
-        expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument()
-      );
+      await waitFor(() => expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument());
       expect(mockVerifyOtp).not.toHaveBeenCalled();
       expect(mockUpdateUser).not.toHaveBeenCalled();
     });
@@ -302,7 +298,7 @@ describe('AuthConfirmPage', () => {
 
     it('calls verifyOtp with the token_hash from the hash fragment', async () => {
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
@@ -313,30 +309,30 @@ describe('AuthConfirmPage', () => {
 
     it('calls updateUser with the new password after OTP is verified', async () => {
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
-      await waitFor(() =>
-        expect(mockUpdateUser).toHaveBeenCalledWith({ password: VALID_PW })
-      );
+      await waitFor(() => expect(mockUpdateUser).toHaveBeenCalledWith({ password: VALID_PW }));
     });
 
     it('does NOT call updateUser before verifyOtp completes', async () => {
       // verifyOtp hangs, updateUser should not be called yet
       mockVerifyOtp.mockReturnValue(new Promise(() => {}));
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
-      await waitFor(() => expect(screen.getByRole('button', { name: /verifying/i })).toBeInTheDocument());
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: /verifying/i })).toBeInTheDocument()
+      );
       expect(mockUpdateUser).not.toHaveBeenCalled();
     });
 
     it('shows h1="All Done!" and success copy after password is updated', async () => {
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
@@ -348,19 +344,17 @@ describe('AuthConfirmPage', () => {
 
     it('hides password form on success', async () => {
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
-      await waitFor(() =>
-        expect(screen.queryByLabelText(/new password/i)).not.toBeInTheDocument()
-      );
+      await waitFor(() => expect(screen.queryByLabelText(/new password/i)).not.toBeInTheDocument());
     });
 
     it('redirects to /login after 2-second delay', async () => {
       vi.useFakeTimers({ shouldAdvanceTime: true });
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
@@ -377,7 +371,7 @@ describe('AuthConfirmPage', () => {
       // Spy on global setTimeout to assert the exact delay scheduled
       const timeoutSpy = vi.spyOn(globalThis, 'setTimeout');
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
@@ -402,7 +396,7 @@ describe('AuthConfirmPage', () => {
     it('shows the error message from verifyOtp', async () => {
       mockVerifyOtp.mockResolvedValue({ error: new Error('Token has expired or is invalid') });
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
@@ -415,31 +409,27 @@ describe('AuthConfirmPage', () => {
       mockVerifyOtp.mockResolvedValue({ error: null });
       mockUpdateUser.mockResolvedValue({ error: new Error('Password too weak') });
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
-      await waitFor(() =>
-        expect(screen.getByText(/password too weak/i)).toBeInTheDocument()
-      );
+      await waitFor(() => expect(screen.getByText(/password too weak/i)).toBeInTheDocument());
     });
 
     it('shows fallback message for non-Error thrown values', async () => {
       mockVerifyOtp.mockRejectedValue('string error');
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
-      await waitFor(() =>
-        expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
-      );
+      await waitFor(() => expect(screen.getByText(/something went wrong/i)).toBeInTheDocument());
     });
 
     it('shows "← Try again" link on recovery API error', async () => {
       mockVerifyOtp.mockResolvedValue({ error: new Error('Expired') });
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
@@ -449,21 +439,21 @@ describe('AuthConfirmPage', () => {
     it('"← Try again" restores the password form', async () => {
       mockVerifyOtp.mockResolvedValue({ error: new Error('Expired') });
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
       await waitFor(() => expect(screen.getByText(/try again/i)).toBeInTheDocument());
       fireEvent.click(screen.getByText(/try again/i));
 
-      expect(screen.getByLabelText(/new password/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/min 8 characters/i)).toBeInTheDocument();
       expect(screen.queryByText(/try again/i)).not.toBeInTheDocument();
     });
 
     it('updateUser is NOT called if verifyOtp fails', async () => {
       mockVerifyOtp.mockResolvedValue({ error: new Error('Bad token') });
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
@@ -549,9 +539,7 @@ describe('AuthConfirmPage', () => {
       const btn = screen.getByRole('button', { name: /confirm.*sign in/i });
       fireEvent.click(btn);
 
-      await waitFor(() =>
-        expect(screen.getByText(/unknown auth type/i)).toBeInTheDocument()
-      );
+      await waitFor(() => expect(screen.getByText(/unknown auth type/i)).toBeInTheDocument());
       expect(mockVerifyOtp).not.toHaveBeenCalled();
     });
   });
@@ -566,7 +554,7 @@ describe('AuthConfirmPage', () => {
       mockVerifyOtp.mockReturnValue(new Promise(() => {}));
 
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
@@ -580,12 +568,12 @@ describe('AuthConfirmPage', () => {
       mockVerifyOtp.mockReturnValue(new Promise(() => {}));
 
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
       await waitFor(() => {
-        expect(screen.getByLabelText(/new password/i)).toBeDisabled();
+        expect(screen.getByPlaceholderText(/min 8 characters/i)).toBeDisabled();
         expect(screen.getByLabelText(/confirm password/i)).toBeDisabled();
       });
     });
@@ -595,7 +583,7 @@ describe('AuthConfirmPage', () => {
       mockVerifyOtp.mockResolvedValue({ error: new Error('Expired') });
 
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.click(screen.getByRole('button', { name: /set new password/i }));
 
@@ -603,7 +591,7 @@ describe('AuthConfirmPage', () => {
       // Click try again to restore the form
       fireEvent.click(screen.getByText(/try again/i));
 
-      expect(screen.getByLabelText(/new password/i)).not.toBeDisabled();
+      expect(screen.getByPlaceholderText(/min 8 characters/i)).not.toBeDisabled();
     });
   });
 
@@ -648,7 +636,7 @@ describe('AuthConfirmPage', () => {
       mockUpdateUser.mockResolvedValue({ error: null });
 
       renderPage();
-      fillInput(screen.getByLabelText(/new password/i), VALID_PW);
+      fillInput(screen.getByPlaceholderText(/min 8 characters/i), VALID_PW);
       fillInput(screen.getByLabelText(/confirm password/i), VALID_PW);
       fireEvent.keyDown(screen.getByLabelText(/confirm password/i), { key: 'Enter' });
 
@@ -659,13 +647,11 @@ describe('AuthConfirmPage', () => {
       setLocation('', '#token_hash=abc&type=recovery');
       renderPage();
 
-      fillInput(screen.getByLabelText(/new password/i), 'bad');
+      expect(screen.getByPlaceholderText(/min 8 characters/i)).toBeInTheDocument();
       fillInput(screen.getByLabelText(/confirm password/i), 'bad');
       fireEvent.keyDown(screen.getByLabelText(/confirm password/i), { key: 'Enter' });
 
-      await waitFor(() =>
-        expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument()
-      );
+      await waitFor(() => expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument());
       expect(mockVerifyOtp).not.toHaveBeenCalled();
     });
   });

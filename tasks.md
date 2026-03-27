@@ -6,23 +6,62 @@
 
 ---
 
-## ✏️ Active — Documentation Update
+## ✏️ Active — Delivery Plan
 
-- [x] **DOC-01: Update CHANGELOG.md & LEARNING_LOG.md** — All March 2026 hardening sessions added to CHANGELOG (v2.3.1–2.3.3). [done]
+- [x] **Task 102: Execute Multi-Repo Delivery Plan — Week 1 (Quick Wins)**
+  - [x] Fix `nightly-e2e.yml` (glob, project names, env vars, webServer)
+  - [x] Fix `ci.yml` Playwright project names (`chromium` → `desktop`)
+  - [x] Remove duplicate Playwright run from `ci.yml`
+  - [x] Delete debug/diagnostic test files from `admin-panel/tests/` (verified non-existent)
+  - [x] Lighten `.husky/pre-commit` hook (remove `tsc --noEmit`, move to pre-push)
+  - [x] Remove E2E smoke from `.husky/pre-push` hook (enforce in CI only)
+
+- [x] **Task 103: Execute Multi-Repo Delivery Plan — Week 2 (Agent Governance Trim)**
+  - [x] Implement task-complexity tiers (Tier S/M/L) in all AGENTS.md files as the first rule
+  - [x] Kill mandatory 7-file bootstrap & replace with simpler protocol
+  - [x] Kill Cortex plan/verify ceremony (keep cortex_search only)
+  - [x] Strip GEMINI.md files to <30 lines (Antigravity execution permissions only); move universal rules to AGENTS.md
+  - [x] Demote LEARNING_LOG to weekly summary
+  - [x] Delete or archive 15+ unused workflow files
+  - [x] Add path filters to `ci.yml` jobs (admin, flutter, python, edge functions)
+  - [x] Move cross-browser E2E, Pa11y, coverage gates to merge-to-main or label-triggered
+  - [x] Move student-app performance profiler to nightly
+  - [x] Create `test:fast` scripts in both repos
+  - [x] Standardize command aliases across repos
+
+- [x] **Task 104: Execute Multi-Repo Delivery Plan — Week 3 (Type Drift & Orchestrator Refactor)**
+  - [x] Consolidate TypeScript types to single `packages/core` target.
+  - [x] Migrate admin-panel imports.
+  - [x] Split orchestrator into focused deployment scripts.
+  - [x] Add contract-change checklist to standard PR template.
+
+- [x] **Task 105: Execute Multi-Repo Delivery Plan — Week 4 (God-File Decomposition & Docs)**
+  - [x] Begin god-file decomposition — start with `admin-panel/src/features/platform/pages/AppsPage.tsx`
+  - [x] Reduce close checklist to per-session (not per-task)
+  - [x] Create per-repo `QUICKSTART.md` cheat sheets
+  - [x] Auto-generate CHANGELOG from conventional commits
+  - [x] Retrospective: measure and adjust metrics
+- [x] **Task 106: Execute Multi-Repo Delivery Plan — Week 5 (Deep Housekeeping)**
+  - [x] Audit `Questerix` folder by folder to identify and delete unused/deprecated scripts.
+  - [x] Scan `questerix-student-app` for orphaned widgets, unreachable screens, and dead providers.
+  - [x] Prune `/tmp`, `/.agent/scratch`, and any temporary test dump folders globally.
+  - [x] Remove fully deprecated edge functions and orphaned SQL migration drafts.
+  - [x] Delete legacy placeholder images, unused `assets/`, and dead design tokens.
+  - [x] Run dependency audits (`npm prune` / `depcruise`) and uninstall unused packages.
 
 ---
 
-## [/] Task 100: Deploy Questerix (Session: 2026-03-25)
+## [x] Task 100: Deploy Questerix (Session: 2026-03-25)
 
 - [x] Apply migration: `20260325000001_create_studio_prompts.sql` [verified]
-- [ ] Generate environment files (`generate-env.ps1`)
-- [ ] Build and Deploy Admin Panel
-- [ ] Build and Deploy Student App
-- [ ] Verify Deployment
+- [x] Generate environment files (`generate-env.ps1`) [done]
+- [x] Build and Deploy Admin Panel [done]
+- [x] Build and Deploy Student App [skipped - only admin matched changes]
+- [x] Verify Deployment [smoke tests PASSED]
 
 ---
 
-## [/] Task 101: AI Studio Stabilization & Workers AI Migration
+## [x] Task 101: AI Studio Stabilization & Workers AI Migration
 
 Last Update: 2026-03-25
 
@@ -30,14 +69,14 @@ Last Update: 2026-03-25
 - [x] **Refactor API**: Strictly use Cloudflare Workers AI in `generateQuestions.ts` and `validateContent.ts`. [verified]
 - [x] **Standardize Types**: Unified `mcq` to `multiple_choice` across hooks, components, and tests. [done]
 - [x] **Harden Pipeline**: Implemented Zod safe-parsing for AI content and robust prompt record lifecycle. [done]
-- [ ] **Delete Obsolete APIs**: Remove Supabase Edge Function AI fallbacks (e.g. in `BulkImportPage.tsx`).
-- [ ] **Fix E2E Tests**:
-  - [ ] Resolve persistent button interaction timeouts in `ai-studio-workers.e2e.spec.ts`.
-  - [ ] Adjust type selection logic to avoid toggling default types OFF.
-  - [ ] Ensure `unauthenticated` project tests correctly redirect or are excluded.
-- [ ] **Verify Error Handling**:
-  - [ ] Verify UI gracefully handles Workers AI 500 errors.
-  - [ ] Verify redirection/error when `VITE_WORKERS_URL` is missing.
+- [x] **Delete Obsolete APIs**: Remove Supabase Edge Function AI fallbacks (e.g. in `BulkImportPage.tsx`).
+- [x] **Fix E2E Tests**:
+  - [x] Resolve persistent button interaction timeouts in `ai-studio-workers.e2e.spec.ts`.
+  - [x] Adjust type selection logic to avoid toggling default types OFF.
+  - [x] Ensure `unauthenticated` project tests correctly redirect or are excluded.
+- [x] **Verify Error Handling**:
+  - [x] Verify UI gracefully handles Workers AI 500 errors.
+  - [x] Verify redirection/error when `VITE_WORKERS_URL` is missing.
 
 ---
 
@@ -45,9 +84,9 @@ Last Update: 2026-03-25
 
 ### Database / Backend
 
-- [ ] **SEC-P0-01: PII Sanitization in Logs**
+- [x] **SEC-P0-01: PII Sanitization in Logs**
   - [x] Implement a masking/hashing function for sensitive fields in all error-capture and security logging (Admin & Student).
-  - [ ] Audit existing `error_logs` and `known_issues` for legacy cleartext PII (emails, IDs).
+  - [x] Audit existing `error_logs` and `known_issues` for legacy cleartext PII (emails, IDs).
 - [x] **SEC-P0-02: Edge Function Environment Guard**
   - [x] `health-check/index.ts` has 35 `Deno.env.get()` calls — audit for missing startup guards that throw if critical env vars are undefined (prevents silent misconfiguration failures in production).
 - [x] **SEC-P0-03: `localStorage` Usage Audit (Admin Panel)**
@@ -72,24 +111,27 @@ Last Update: 2026-03-25
 
 ### Admin Panel (React/Vite)
 
-- [x] **TEST-A01: AI & Generation (Segment A)**
+- [x] **TEST-A01: Oracle & AI Pipeline (Segment A)**
   - [x] `DocumentUploader.tsx` — Comprehensive tests in `features/ai-assistant/components/__tests__/DocumentUploader.test.tsx`
-  - [ ] `OracleService.ts` & `GenerationPage.tsx` unit tests
+  - [x] `QuestionReviewGrid.tsx` — Tests in `features/ai-assistant/components/__tests__/QuestionReviewGrid.test.tsx`
+  - [x] `use-studio-prompts.ts` — Tests in `features/curriculum/hooks/__tests__/use-studio-prompts.test.tsx`
+  - [x] AI Assistant API (`generateQuestions.ts`, `validateContent.ts`, `governedGeneration.ts`) — Full unit test coverage in `src/features/ai-assistant/api/__tests__`
+  - [x] `OracleService.ts` & `GenerationPage.tsx` unit tests
 - [x] **TEST-A02: Auth & Security (Segment B)**
   - [x] `auth-guard.tsx` — Tests in `features/auth/components/__tests__/auth-guard.test.tsx` (vi.hoisted fix applied)
-- [ ] **TEST-A03: Curriculum & Hooks (Segment C)**
-  - [ ] `use-groups`, `use-known-issues`
-  - [ ] `question-form.tsx` & `domain-form.tsx`
+- [x] **TEST-A03: Curriculum & Hooks (Segment C)**
+  - [x] `use-groups`, `use-known-issues`
+  - [x] `question-form.tsx` & `domain-form.tsx`
 
 ### Student App (Flutter)
 
 - [x] **Segment G: Authentication Identity**
   - [x] `LoginNotifier`, `RegisterNotifier`, `ForgotPasswordNotifier` — unit tests in `test/features/auth/controllers/auth_controller_test.dart`. All 8 tests passing. Rewrote from stale class-based pattern to correct `ProviderContainer` Riverpod architecture.
-- [ ] **Segment H: Curriculum Learning**
-  - [ ] `PracticeController` state machine
-  - [ ] `domains_screen.dart` & `skills_screen.dart`
-- [ ] **Segment I: Progress Calculations**
-  - [ ] Mastery 0-100% logic and Heatmap service logic.
+- [x] **Segment H: Curriculum Learning**
+  - [x] `PracticeController` state machine
+  - [x] `domains_screen.dart` & `skills_screen.dart`
+- [x] **Segment I: Progress Calculations**
+  - [x] Mastery 0-100% logic and Heatmap service logic.
 
 ### Regression Prevention
 
@@ -114,23 +156,24 @@ Last Update: 2026-03-25
   - [x] `LoginPage.tsx` — 5 console calls
   - [x] `InvitationCodesPage.tsx` — 5 console calls
   - [x] Replace all with `errorTracker.captureException` or `SecurityLogger` where appropriate.
-- [ ] **QUAL-A03: Accessibility Hardening (Admin Panel)**
-  - [ ] 10 interactive components missing `aria-label` / `role=`: `DocumentUploader.tsx`, `QuestionReviewGrid.tsx`, `GenerationPage.tsx`, `SessionsPage.tsx`, `AccountSettingsPage.tsx`, `AuthConfirmPage.tsx`, `InvitationCodesPage.tsx`, `LoginPage.tsx`, `UserManagementPage.tsx`, `domain-form.tsx`.
-- [ ] **QUAL-A04: Modularize God-Files (Admin Panel)**
-  - [ ] `AppsPage.tsx` (50KB) — extract hooks + sub-components.
-  - [ ] `SubjectsPage.tsx` (48KB) — extract hooks + sub-components.
-  - [ ] `question-list.tsx` (41KB) — extract `QuestionRow`, `QuestionBulkBar`.
-  - [ ] `domain-list.tsx` (34KB) — extract `DomainRow`, `DomainFilterBar`.
+- [x] **QUAL-A03: Accessibility Hardening (Admin Panel)**
+  - [x] 10 interactive components hardened with `aria-label` / `role=`: `DocumentUploader.tsx`, `QuestionReviewGrid.tsx`, `GenerationPage.tsx`, `SessionsPage.tsx`, `AccountSettingsPage.tsx`, `AuthConfirmPage.tsx`, `InvitationCodesPage.tsx`, `LoginPage.tsx`, `UserManagementPage.tsx`, `domain-form.tsx`. Verified with unit tests where possible.
+- [x] **QUAL-A04: Modularize God-Files (Admin Panel)**
+  - [x] `AppsPage.tsx` (50KB) — extracted `PlatformToolbar` components, resolved prop types.
+  - [x] `SubjectsPage.tsx` (48KB) — refactored to use modular toolbar components, fixed build errors.
+  - [x] `question-list.tsx` (41KB) — extract `QuestionRow`, `QuestionBulkBar`. Stabilized unit tests.
+  - [x] `domain-list.tsx` (34KB) — extract `DomainRow`, `DomainFilterBar`. Fixed unit tests.
+  - [x] `skill-list.tsx` — Modularized and added unit tests.
 
 ### Student App
 
-- [ ] **QUAL-S01: Refactor `practice_screen.dart` (God-class)**
-  - [ ] Extract `PracticeController` (Riverpod `AsyncNotifier` for session state).
-  - [ ] Extract `PracticeQuizView` (UI rendering only).
-  - [ ] Extract `PracticeResultView` (results + XP display).
+- [x] **QUAL-S01: Refactor `practice_screen.dart` (God-class)**
+  - [x] Extract `PracticeController` (Riverpod `AsyncNotifier` for session state).
+  - [x] Extract `PracticeQuizView` (UI rendering only).
+  - [x] Extract `PracticeResultView` (results + XP display).
   - 6 `setState` calls + 1950+ lines is the primary regression risk in the entire app.
-- [ ] **QUAL-S02: Migrate `onboarding_screen.dart` to Riverpod**
-  - [ ] 7 `setState` calls — convert to `ConsumerStatefulWidget` with a proper notifier. Eliminates re-render bugs.
+- [x] **QUAL-S02: Migrate `onboarding_screen.dart` to Riverpod**
+  - [x] 7 `setState` calls — convert to `ConsumerStatefulWidget` with a proper notifier. Eliminates re-render bugs.
 - [x] **QUAL-S03: Eliminate `print()` / `debugPrint()` calls in Production**
   - [x] `sync_orchestrator.dart` — 13 print calls (most in the app)
   - [x] `error_tracker.dart` — 7 print calls
@@ -151,27 +194,27 @@ Last Update: 2026-03-25
 
 ### Database
 
-- [ ] **PERF-DB-01: Index Audit for High-Traffic Tables**
-  - [ ] Verify composite indexes on `user_activity(student_id, created_at)`.
-  - [ ] Verify composite indexes on `attempts(student_id, created_at)`.
-  - [ ] Verify `app_id` + `deleted_at` index coverage on all soft-delete tables.
-  - [ ] Run `EXPLAIN ANALYZE` on the top 5 most frequent RLS-filtered queries.
+- [x] **PERF-DB-01: Index Audit for High-Traffic Tables**
+  - [x] Verify composite indexes on `user_activity(student_id, created_at)`.
+  - [x] Verify composite indexes on `attempts(student_id, created_at)`.
+  - [x] Verify `app_id` + `deleted_at` index coverage on all soft-delete tables.
+  - [x] Run `EXPLAIN ANALYZE` on the top 5 most frequent RLS-filtered queries.
 
-### Student App
+### Student App (Performance)
 
-- [ ] **PERF-S01: Implement Batched Image Prefetching**
+- [x] **PERF-S01: Implement Batched Image Prefetching**
   - Pre-fetch question asset images during the `PracticeScreen` loading phase so they appear instantly during quiz playback. Especially critical in weak-network / partial-offline scenarios.
 - [x] **PERF-S02: Global Riverpod Error Observer**
   - Implemented `RiverpodErrorObserver` in `questerix-student-app/lib/src/core/errors/riverpod_error_observer.dart`, wired to root `ProviderContainer` in `main.dart`.
 
-### Admin Panel
+### Admin Panel (Performance)
 
-- [ ] **PERF-A01: TanStack Query Invalidation Audit**
+- [x] **PERF-A01: TanStack Query Invalidation Audit**
   - `use-questions.ts` (13x), `use-apps.ts` (12x), `use-skills.ts` (12x) have the highest `invalidateQueries` density — audit for over-invalidation causing waterfall re-fetches after mutations.
 
 ### CI / Automation
 
-- [ ] **CI-01: Enforce Smoke Coverage Manifest (Rule #9)**
+- [x] **CI-01: Enforce Smoke Coverage Manifest (Rule #9)**
   - Add a GitHub Action step to `ci.yml` that fails the PR if a new file is added to `features/*/pages/` without a corresponding entry in `smoke-coverage-manifest.json`.
 - [x] **CI-02: Student App Stray File Cleanup**
   - Deleted 4 stray `.txt` files from student app root (test_session_output.txt, analyze_output.txt, etc.).

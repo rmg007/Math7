@@ -1,5 +1,5 @@
 import { useApp } from '@/hooks/use-app';
-import { Database } from '@/lib/database.types';
+import { Database } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 

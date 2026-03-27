@@ -1,5 +1,36 @@
 # Questerix Learning Log
 
+## [2026-03-26] — Admin Panel Modularization & Type-Safety (Multi-Repo Delivery Plan)
+
+- **What was done**: Focused on decomposing common UI logic in the "Platform" feature set. Specifically, refactored `AppsPage.tsx` and `SubjectsPage.tsx` to utilize a new modular `PlatformToolbar` system (Search, Filter, Status). Converted the `StatusFilter` into a generic TypeScript component to eliminate `any` type casting in `onChange` handlers, achieving 100% type safety for status-based filtering across both pages.
+- **Key Design Decision**: Implemented `StatusFilter<T extends string>` instead of using a string-only interface. This allows the compiler to enforce that the `onChange` value matches the specific union types (e.g., `'all' | 'active' | 'inactive'`) defined in the parent page's state hook, preventing runtime filter mismatches.
+- **Prevention Rules Discovered**:
+  - **MANDATORY**: When building reusable filter components that wrap standard HTML `<select>` or Radix `Select`, always use generics for the `value` and `onChange` props. This prevents the "type-bleeding" effect where specific page-level enums are lost to generic `string` types.
+  - **Component Composition**: Shared UI patterns (like the "Search + Filter + Count" toolbar) should be extracted as a cohesive feature-level component (`PlatformToolbar`) rather than being duplicated across pages. This ensures consistent layout and reduces the maintenance surface for a11y and styling updates.
+- **Verification Result**: `npx tsc --noEmit` passed with 0 errors across the entire `admin-panel`.
+
+---
+
+## [2026-03-25] — Performance Indexing & App Hardening (Multi-Repo Delivery Plan)
+
+- **What was done**: Concluded the final P1 stabilization tasks for the Student App and Admin Panel. Delivered `PERF-DB-01` by adding explicitly defined composite indexes for `user_activity` and `attempts` (tied to `created_at` and `activity_date`), plus comprehensive soft-delete index coverage across 9 core tables. Verified the migration of `onboarding_screen.dart` to a Riverpod-backed `ConsumerStatefulWidget` approach, finally eliminating the long-standing risk of ephemeral re-render bugs during the age-gate step.
+- **Key Design Decision**: Ensured soft-delete scopes (`deleted_at IS NULL`) are baked directly into the PostgreSQL partial index definitions. This keeps query planners fast for live data without bloating the B-Tree with deleted records.
+- **Prevention Rules Discovered**:
+  - **MANDATORY**: Always accompany soft-delete (`deleted_at`) architectures with matching partial indexes (e.g., `WHERE deleted_at IS NULL`). Otherwise, as databases scale out, full table scans become unavoidable for routine RLS fetches.
+  - **Riverpod Architecture**: Simple localized `setState` is acceptable within small component widgets of a larger Riverpod-driven screen, provided the global context is immutably managed by Notifiers.
+- **Blockers / Next Steps**: Await the final execution of the `20260325224756_audit_performance_indexes.sql` migration on remote Supabase clusters.
+
+---
+
+## [2026-03-25] — Multi-Repo Delivery Plan: Week 1 CI Workflow Fixes
+
+- **What was done**: Executed Week 1 (Quick Wins) of the Multi-Repo Delivery Plan for CI stability. Fixed the `nightly-e2e.yml` test glob and Playwright project names (changed `chromium` to `desktop`) to correctly target E2E environments, and added required auth environment variables (`TEST_ADMIN_EMAIL`, etc.). Cleaned `ci.yml` of duplicate E2E playwright execution. Finally, optimized local git hooks: removed the slow `tsc --noEmit` from `.husky/pre-commit` and moved it to `.husky/pre-push`, replacing the heavy local E2E smoke tests which are now enforced strictly in CI.
+- **Key Design Decision**: Shifted heavy execution (like Playwright smoke tests and full TypeScript typechecks) to later in the lifecycle (pre-push and CI) rather than pre-commit. This significantly reduces developer friction and "ceremony" delay during frequent local commits.
+- **Prevention Rules Discovered**:
+  - **MANDATORY**: Always align the Playwright project name inside GitHub Actions with the valid projects defined in `playwright.config.ts`. In Questerix, `desktop` is the correct identifier, not `chromium`.
+  - **Git Hook Performance**: Never place heavy operations like `npm run test:e2e:smoke` or full `tsc --noEmit` in `pre-commit`. Fast feedback (lint-staged, secrets check) belongs in `pre-commit`; heavier blocking feedback belongs in `pre-push` or CI.
+- **Blockers / Next Steps**: The repositories are still situated in a OneDrive directory, which continues to risk lock-file collision and spurious EBUSY errors. The next major phase is relocating the repositories to a non-syncing local directory.
+
 ## [2026-03-25] — AI Studio E2E Hardening & Environment Synchronization
 
 - **What was done**: Stabilized the AI Studio E2E test suite by resolving environment configuration blockers and refining locator strategies. Centralized environment variable access in `src/config/env.ts` and configured `VITE_WORKERS_URL` for the test environment. Hardened `ai-studio-workers.e2e.spec.ts` with robust locators for Shadcn `Select` and the mandatory "Review" checkbox, ensuring valid persistence cycles in CI and local runs.
@@ -3173,3 +3204,48 @@ Added `question-studio-bulk-actions.tsx` and `question-studio-filter-panel.tsx` 
 - **Work Type**: devops
 - **Summary**: Automated AI Question Studio infrastructure: migration verified, types synced, and session-close automation script created.
 - **Learning**: Automated the documentation tax to reduce session-close friction.
+
+### Session: 2026-03-25 (Multi-Repo Delivery Plan: Week 2)
+
+- **App(s)**: All (Core, Student, Landing, Help Docs)
+- **Work Type**: ops
+- **Summary**: Implemented Agent Governance trims, Tier S/M/L system, stripped GEMINI limits, and optimized test lanes.
+- **Learning**: Shift to Task Tier system (S/M/L) efficiently eliminates Cortex bootstrap and sign-off ceremony for routine/quick PRs, drastically reducing agent "thrashing". Redundant Pa11y/Coverage gates were deferred to nightly.
+
+### 2026-03-25: Multi-Repo Delivery Plan — Week 3 (Type Drift & Orchestrator Refactor)
+
+**Context**:
+The \dmin-panel\ previously imported Supabase generated types directly from \src/lib/database.types.ts\. This was decentralized, brittle, and caused duplicated effort since other apps needed the exact same definitions. Also, the \orchestrator.ps1\ script was becoming a monolith.
+
+**Actions**:
+
+1. **Type Consolidation**: Configured \supabase gen types\ to output directly to \packages/core/src/types/database.ts\ instead of \database.types.ts\ to improve \@questerix/core\ alias mapping capabilities when compiling down.
+2. **Import Migration**: Replaced 50+ localized imports of \@/lib/database.types\ directly to \@questerix/core/types/database\ across the entire admin app.
+3. **CI Guards**: Updated \ci.yml\ to actively enforce and reject PRs if \dmin-panel/src/lib/database.types.ts\ reappears in the file tree.
+4. **Orchestrator Refactor**: Extracted the Supabase syncing logic from \orchestrator.ps1\ into a dedicated \scripts/deploy/sync-schema.ps1\ to break monolithic deployment into decoupled stages, mapping parameters intelligently (\StudentAppDir\).
+
+**Learnings & Guidelines**:
+
+- When extracting types to a workspace package (\packages/core\), simplify the generated filename (\database.ts\ vs \database.types.ts\) because explicit module resolution with extensions in a \ sconfig.json\ mappings configuration (\@questerix/core/types/database\) can silently fail with \TS2307\ or \TS2339\ if alias mapping is imperfect.
+- Mocking Supabase \insert/delete/update\ patterns in Vitest via \mockReturnThis()\ works but strictly requires \s any\ casting onto the mock query builder since Supabase JS strictly expects the full signature of \PostgrestQueryBuilder\ (url, headers, cloneRequestState, etc.) that manual mocks omit.
+
+### 2026-03-25: Multi-Repo Delivery Plan — Week 4 (God-File Decomposition & Docs)
+
+**Context**:
+The `AppsPage.tsx` file inside the `admin-panel` had ballooned into a 1290+ line monolith containing multiple distinct UI sub-components (`AppRow`, `AppCard`), massive Zod schemas, and complex local state, complicating future development and violating our UI architecture bounds.
+
+**Actions**:
+
+1. **Vertical UI Decomposition**: Split `AppsPage.tsx` into logical, decoupled module files stored inside a feature-specific cohesive folder (`features/platform/components/apps/`):
+   - `schema.ts`: Holds generic interfaces (`APP_COLUMNS`, `appSchema`, type inferences)
+   - `types.ts`: Interface boundaries (`AppRowProps`)
+   - `app-row.tsx`: The main `<TableRow>` functional subset
+   - `app-card.tsx`: The `<AppCard>` subset for mobile responsiveness
+2. **Docs**: Updated `AGENTS.md` and `tasks.md` to reflect our improved checklist flow ("Per-Session" close) to cut down prompt bloat. Added `QUICKSTART.md` files for all four repositories.
+3. **Change Tracking**: Dropped in `standard-version` globally for standardizing the changelog through conventional commits automatically.
+
+**Learnings & Guidelines**:
+
+- When extracting heavily-coupled inline components from a local "God-File", ensure that prop definitions (`AppRowProps`) are hoisted to a shared `types.ts` first rather than directly placing them alongside the Zod form schemas, preventing circular dependency issues.
+- `standard-version` helps avoid manual changelog generation but generates tags natively. This helps shift standard documentation generation over to `npm run release` to auto-parse standard atomic commits.
+- **React Query Over-Invalidation (PERF-A01):** Replace stacked queryClient.invalidateQueries statements with a single unified predicate invalidator to ensure Tanstack groups identical triggers and prevents overlapping API waterfall renders.

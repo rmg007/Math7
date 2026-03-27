@@ -1,4 +1,4 @@
-import type { Database, Json, Tables } from '@/lib/database.types';
+import type { Database, Json, Tables } from '@questerix/core/types/database';
 
 // --- Shared Constants & Types (from common) ---
 export interface PaginationParams {

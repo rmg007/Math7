@@ -96,6 +96,6 @@ export function isValidUUID(uuid: string | undefined | null): uuid is string {
  * Roundtrips through JSON serialization to strip non-serializable properties
  * and satisfy TypeScript's structural type check without `as unknown as Json`.
  */
-export function toJson<T>(value: T): import('@/lib/database.types').Json {
+export function toJson<T>(value: T): import('@questerix/core/types/database').Json {
   return JSON.parse(JSON.stringify(value));
 }

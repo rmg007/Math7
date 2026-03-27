@@ -1,6 +1,6 @@
 import { isDevMode } from '@/config/env';
 import { supabase } from '@/lib/supabase';
-import type { Json } from '@/lib/database.types';
+import type { Json } from '@questerix/core/types/database';
 import { hashString, sanitizeData } from '@/lib/error-tracker';
 
 export type SecurityEventSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical';

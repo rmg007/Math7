@@ -1,6 +1,6 @@
 import { env } from '@/config/env';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from './database.types';
+import type { Database } from '@questerix/core/types/database';
 
 export const supabaseUrl = env.supabaseUrl;
 export const supabaseKey = env.supabaseAnonKey;

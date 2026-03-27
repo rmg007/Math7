@@ -19,8 +19,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useApp } from '@/hooks/use-app';
-import type { Json } from '@/lib/database.types';
-import { Database } from '@/lib/database.types';
+import type { Json } from '@questerix/core/types/database';
+import { Database } from '@questerix/core/types/database';
 import { normalizeFormData } from '@/lib/normalization';
 import { castJson } from '@/lib/type-utils';
 import { zodResolver } from '@hookform/resolvers/zod';

@@ -1,7 +1,7 @@
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import type { Tables } from '@/lib/database.types';
+import type { Tables } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { formatIdentifier } from '@/lib/utils';
 import {

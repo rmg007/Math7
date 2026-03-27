@@ -15,7 +15,7 @@ import {
   type StudioConfig,
 } from '@/hooks/use-studio-generator';
 import { useToast } from '@/hooks/use-toast';
-import { Database, Json } from '@/lib/database.types';
+import { Database, Json } from '@questerix/core/types/database';
 import { cn, toJson } from '@/lib/utils';
 import { AlertCircle, Layers, RefreshCw, Save, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';

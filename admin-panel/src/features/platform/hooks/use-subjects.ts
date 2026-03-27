@@ -1,4 +1,4 @@
-import { Tables, TablesInsert, TablesUpdate } from '@/lib/database.types';
+import { Tables, TablesInsert, TablesUpdate } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 

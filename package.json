@@ -14,7 +14,8 @@
     "deps:graph": "depcruise admin-panel/src --config .dependency-cruiser.cjs --output-type dot > dependency-graph.dot",
     "deps:archi": "depcruise admin-panel/src --config .dependency-cruiser.cjs --output-type archi > architecture-graph.dot",
     "deps:report": "depcruise admin-panel/src --config .dependency-cruiser.cjs --output-type html > dependency-report.html",
-    "prepare": "husky || true"
+    "prepare": "husky || true",
+    "release": "standard-version"
   },
   "keywords": [],
   "author": "",
@@ -35,9 +36,9 @@
     "tailwindcss": "^3.4.0"
   },
   "devDependencies": {
+    "@types/node": "^25.2.2",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
-    "@types/node": "^25.2.2",
     "dependency-cruiser": "^17.3.7",
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
@@ -45,6 +46,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
+    "standard-version": "^9.5.0",
     "supabase": "^2.76.6",
     "tsx": "^4.21.0"
   }

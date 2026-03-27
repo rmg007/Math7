@@ -1,4 +1,4 @@
-import { Database } from '@/lib/database.types';
+import { Database } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { QueuedQuestionSchema } from '@/lib/validation/import-schema';
 import { addBreadcrumb, captureException } from '@/lib/error-tracker';

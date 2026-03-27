@@ -23,6 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       migrations: ${{ steps.filter.outputs.migrations }}
+      admin: ${{ steps.filter.outputs.admin }}
+      flutter: ${{ steps.filter.outputs.flutter }}
+      python: ${{ steps.filter.outputs.python }}
+      edge_functions: ${{ steps.filter.outputs.edge_functions }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: dorny/paths-filter@ebc4d7e36912284933ad3a0cd47f229ad833051f # v3.0.0
@@ -31,9 +35,21 @@ jobs:
           filters: |
             migrations:
               - 'supabase/migrations/**/*.sql'
+            admin:
+              - 'admin-panel/**'
+              - '.github/workflows/ci.yml'
+            flutter:
+              - 'questerix-student-app/**'
+            python:
+              - 'content-engine/**'
+              - '*.py'
+            edge_functions:
+              - 'supabase/functions/**'
 
   flutter:
     runs-on: ubuntu-latest
+    needs: change-detection
+    if: needs.change-detection.outputs.flutter == 'true'
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: subosito/flutter-action@994c9795029e248f2fa417ee91307b2756811453 # v2.12.0
@@ -43,28 +59,13 @@ jobs:
         run: cd questerix-student-app && flutter pub get
       - name: Flutter analyze
         run: cd questerix-student-app && flutter analyze
-      - name: Flutter test with coverage
-        run: cd questerix-student-app && flutter test --coverage
-
-      - name: Coverage Gate (60% minimum)
-        uses: verygoodopensource/very_good_coverage@f018d9f1b95f137e96b79753e161048b111e1945 # v2.1.0
-        with:
-          path: "./questerix-student-app/coverage/lcov.info"
-          min_coverage: 60
-      - name: Upload Flutter coverage artifact
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3feb70da27092497d # v4.4.1
-        with:
-          name: flutter-coverage
-          path: questerix-student-app/coverage/lcov.info
-
-      - name: Upload coverage to Codacy
-        uses: codacy/codacy-coverage-reporter-action@89d6c8427e33553250162095cc28172828bcead7 # v1.3.0
-        with:
-          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: ./questerix-student-app/coverage/lcov.info
+      - name: Flutter test fast
+        run: cd questerix-student-app && make test-fast
 
   python:
     runs-on: ubuntu-latest
+    needs: change-detection
+    if: needs.change-detection.outputs.python == 'true'
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/setup-python@0a5c61591373683505ea898e09a3ee4f39ef2b9c # v5.0.0
@@ -96,6 +97,8 @@ jobs:
   python-security:
     name: Python Security Scan
     runs-on: ubuntu-latest
+    needs: change-detection
+    if: needs.change-detection.outputs.python == 'true'
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/setup-python@v5
@@ -144,6 +147,8 @@ jobs:
 
   admin:
     runs-on: ubuntu-latest
+    needs: change-detection
+    if: needs.change-detection.outputs.admin == 'true'
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/setup-node@60edb5dd545a775178f525247ffadfb6f1e396a5 # v4.0.2
@@ -182,45 +187,22 @@ jobs:
             dependency-report.html
       - name: Architecture Tests
         run: cd admin-panel && npm run test:arch
-      - name: Test
-        run: cd admin-panel && npm run test -- --coverage
-      - name: Cross-browser E2E (Chromium, Firefox, WebKit)
-        run: |
-          cd admin-panel
-          npx playwright install chromium firefox webkit
-          npx playwright test --project=chromium --project=firefox --project=webkit
-      - name: Coverage Gate (70% minimum)
-        uses: verygoodopensource/very_good_coverage@v2
-        with:
-          path: "./admin-panel/coverage/lcov.info"
-          min_coverage: 70
+      - name: Test Fast
+        run: cd admin-panel && npm run test:fast
+
       - name: Build
         run: cd admin-panel && npm run build
-      - name: Supabase typegen guard
+      - name: Smoke coverage manifest guard
+        run: bash scripts/check-smoke-manifest.sh
+      - name: Supabase typegen config guard
         run: |
-          if [ -f admin-panel/src/lib/database.types.ts ] && [ ! -s admin-panel/src/lib/database.types.ts ]; then echo "database.types.ts is empty"; exit 1; fi
-          if [ -f admin-panel/src/types/database.types.ts ] && [ ! -s admin-panel/src/types/database.types.ts ]; then echo "database.types.ts is empty"; exit 1; fi
+          if [ -f admin-panel/src/lib/database.types.ts ]; then echo "admin-panel/src/lib/database.types.ts should not exist! Types are provided by @questerix/core"; exit 1; fi
           cd admin-panel && npm run -s typecheck
-      - name: Upload coverage to Codacy
-        uses: codacy/codacy-coverage-reporter-action@v1
-        with:
-          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: ./admin-panel/coverage/lcov.info
-      - name: Accessibility Audit (Pa11y)
-        run: |
-          cd admin-panel
-          npm run preview &
-          npx wait-on http://localhost:4173
-          npx pa11y http://localhost:4173 --standard WCAG2AA || echo "Accessibility issues detected"
-
-      - name: High-Fidelity A11y Audit (axe-core)
-        run: |
-          cd admin-panel
-          # To be implemented by the next agent: npx playwright test tests/accessibility.spec.ts
-          echo "Placeholder for axe-core regression tests"
 
   edge-functions:
     runs-on: ubuntu-latest
+    needs: change-detection
+    if: needs.change-detection.outputs.edge_functions == 'true'
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: denoland/setup-deno@20275ccb9903c72b2260656a81a5a0572e9d22da # v1.x

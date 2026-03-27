@@ -27,21 +27,29 @@ jobs:
 
       - name: Run Full Regression Suite
         id: e2e
-        run: cd admin-panel && npx playwright test tests/*.e2e.spec.ts --project=chromium --reporter=json > ../playwright-results.json 2>&1 || true
+        run: cd admin-panel && npx playwright test tests/mutating/ tests/read-only/ --project=desktop --reporter=json > ../playwright-results.json 2>&1 || true
         env:
           VITE_SUPABASE_URL: ${{ secrets.TEST_VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.TEST_VITE_SUPABASE_ANON_KEY }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+          TEST_SUPER_ADMIN_EMAIL: ${{ secrets.TEST_SUPER_ADMIN_EMAIL }}
+          TEST_SUPER_ADMIN_PASSWORD: ${{ secrets.TEST_SUPER_ADMIN_PASSWORD }}
 
       - name: Check test results
         id: check
         run: |
           cd admin-panel
           # Re-run with standard reporter to get exit code
-          npx playwright test tests/*.e2e.spec.ts --project=chromium 2>&1 | tee ../e2e-output.txt
+          npx playwright test tests/mutating/ tests/read-only/ --project=desktop 2>&1 | tee ../e2e-output.txt
           echo "exit_code=$?" >> $GITHUB_OUTPUT
         env:
           VITE_SUPABASE_URL: ${{ secrets.TEST_VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.TEST_VITE_SUPABASE_ANON_KEY }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+          TEST_SUPER_ADMIN_EMAIL: ${{ secrets.TEST_SUPER_ADMIN_EMAIL }}
+          TEST_SUPER_ADMIN_PASSWORD: ${{ secrets.TEST_SUPER_ADMIN_PASSWORD }}
         continue-on-error: true
 
       - name: Upload Test Results

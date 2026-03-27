@@ -16,7 +16,7 @@ import {
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from '@/hooks/use-toast';
 import { DataColumn } from '@/lib/data-utils';
-import type { Tables } from '@/lib/database.types';
+import type { Tables } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import {

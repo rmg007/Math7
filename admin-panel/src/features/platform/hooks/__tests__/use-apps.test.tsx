@@ -1,17 +1,17 @@
-import { TablesInsert, TablesUpdate } from '@/lib/database.types';
+import { TablesInsert, TablesUpdate } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-    useApps,
-    useBulkCreateApps,
-    useBulkDeleteApps,
-    useBulkUpdateAppsStatus,
-    useCreateApp,
-    useDeleteApp,
-    useUpdateApp,
+  useApps,
+  useBulkCreateApps,
+  useBulkDeleteApps,
+  useBulkUpdateAppsStatus,
+  useCreateApp,
+  useDeleteApp,
+  useUpdateApp,
 } from '../use-apps';
 
 import { createMockSupabase } from '@/__tests__/mocks/supabase-factory';
@@ -58,14 +58,17 @@ describe('useApps hooks', () => {
 
     // Fresh mock for every test
     mockSupabase = createMockSupabase();
-    vi.mocked(supabase.from).mockReturnValue(mockSupabase.queryBuilder as unknown as ReturnType<typeof supabase.from>);
+    vi.mocked(supabase.from).mockReturnValue(
+      mockSupabase.queryBuilder as unknown as ReturnType<typeof supabase.from>
+    );
   });
 
   // ── useApps ───────────────────────────────────────────────────────────────────
   describe('useApps', () => {
     it('fetches apps sorted by display_name', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: mockApps, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: mockApps, error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useApps(), { wrapper });
@@ -77,8 +80,9 @@ describe('useApps hooks', () => {
     });
 
     it('propagates Supabase error to isError state', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: { message: 'network error' } }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: { message: 'network error' } }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useApps(), { wrapper });
@@ -110,7 +114,9 @@ describe('useApps hooks', () => {
       };
       await result.current.mutateAsync(newApp);
 
-      expect(mockSupabase.queryBuilder.insert).toHaveBeenCalledWith(expect.objectContaining(newApp));
+      expect(mockSupabase.queryBuilder.insert).toHaveBeenCalledWith(
+        expect.objectContaining(newApp)
+      );
       expect(supabase.from).toHaveBeenCalledWith('app_landing_pages');
     });
 
@@ -139,8 +145,9 @@ describe('useApps hooks', () => {
     it('throws when Supabase app insert returns error', async () => {
       const { wrapper } = makeWrapper();
 
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: { message: 'unique_violation' } }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: { message: 'unique_violation' } }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useCreateApp(), { wrapper });
@@ -156,8 +163,9 @@ describe('useApps hooks', () => {
     it('throws "Failed to create app" when insert returns null data', async () => {
       const { wrapper } = makeWrapper();
 
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useCreateApp(), { wrapper });
@@ -174,8 +182,9 @@ describe('useApps hooks', () => {
   // ── useUpdateApp ──────────────────────────────────────────────────────────────
   describe('useUpdateApp', () => {
     it('updates an existing app by app_id', async () => {
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: mockApps[0], error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: mockApps[0], error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useUpdateApp(), { wrapper });
@@ -184,7 +193,9 @@ describe('useApps hooks', () => {
         display_name: 'Updated Name',
       } as TablesUpdate<'apps'> & { id: string });
 
-      expect(mockSupabase.queryBuilder.update).toHaveBeenCalledWith({ display_name: 'Updated Name' });
+      expect(mockSupabase.queryBuilder.update).toHaveBeenCalledWith({
+        display_name: 'Updated Name',
+      });
       expect(mockSupabase.queryBuilder.eq).toHaveBeenCalledWith('app_id', VALID_UUID);
     });
 
@@ -192,29 +203,31 @@ describe('useApps hooks', () => {
       const { wrapper: w } = makeWrapper();
       const { result } = renderHook(() => useUpdateApp(), { wrapper: w });
 
-      await expect(result.current.mutateAsync({ id: INVALID_ID, display_name: 'X' })).rejects.toThrow(
-        `Invalid app ID format: ${INVALID_ID}`
-      );
+      await expect(
+        result.current.mutateAsync({ id: INVALID_ID, display_name: 'X' })
+      ).rejects.toThrow(`Invalid app ID format: ${INVALID_ID}`);
     });
 
     it('throws when app is not found (null data, no error)', async () => {
       const { wrapper: w } = makeWrapper();
 
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useUpdateApp(), { wrapper: w });
-      await expect(result.current.mutateAsync({ id: VALID_UUID, display_name: 'X' })).rejects.toThrow(
-        `App with ID ${VALID_UUID} not found for update.`
-      );
+      await expect(
+        result.current.mutateAsync({ id: VALID_UUID, display_name: 'X' })
+      ).rejects.toThrow(`App with ID ${VALID_UUID} not found for update.`);
     });
 
     it('propagates Supabase error', async () => {
       const { wrapper: w } = makeWrapper();
 
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: { message: 'rls denied' } }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: { message: 'rls denied' } }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useUpdateApp(), { wrapper: w });
@@ -229,8 +242,9 @@ describe('useApps hooks', () => {
     it('deletes an app by app_id', async () => {
       const { wrapper } = makeWrapper();
 
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useDeleteApp(), { wrapper });
@@ -253,8 +267,11 @@ describe('useApps hooks', () => {
     it('propagates Supabase error', async () => {
       const { wrapper } = makeWrapper();
 
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: { message: 'foreign key violation' } }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: { message: 'foreign key violation' } }).then(
+            onFulfilled
+          )
       );
 
       const { result } = renderHook(() => useDeleteApp(), { wrapper });
@@ -269,22 +286,27 @@ describe('useApps hooks', () => {
     it('sets is_active = true for multiple apps', async () => {
       const { wrapper } = makeWrapper();
 
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useBulkUpdateAppsStatus(), { wrapper });
       await result.current.mutateAsync({ ids: [VALID_UUID, VALID_UUID_2], is_active: true });
 
       expect(mockSupabase.queryBuilder.update).toHaveBeenCalledWith({ is_active: true });
-      expect(mockSupabase.queryBuilder.in).toHaveBeenCalledWith('app_id', [VALID_UUID, VALID_UUID_2]);
+      expect(mockSupabase.queryBuilder.in).toHaveBeenCalledWith('app_id', [
+        VALID_UUID,
+        VALID_UUID_2,
+      ]);
     });
 
     it('sets is_active = false (deactivate)', async () => {
       const { wrapper } = makeWrapper();
 
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useBulkUpdateAppsStatus(), { wrapper });
@@ -296,8 +318,9 @@ describe('useApps hooks', () => {
     it('propagates error on failure', async () => {
       const { wrapper } = makeWrapper();
 
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: { message: 'rls blocked' } }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: { message: 'rls blocked' } }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useBulkUpdateAppsStatus(), { wrapper });
@@ -312,8 +335,9 @@ describe('useApps hooks', () => {
     it('deletes multiple apps by app_id list', async () => {
       const { wrapper } = makeWrapper();
 
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: null }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: null }).then(onFulfilled)
       );
 
       const { result } = renderHook(() => useBulkDeleteApps(), { wrapper });
@@ -321,16 +345,20 @@ describe('useApps hooks', () => {
 
       expect(supabase.from).toHaveBeenCalledWith('apps');
       expect(mockSupabase.queryBuilder.delete).toHaveBeenCalled();
-      expect(mockSupabase.queryBuilder.in).toHaveBeenCalledWith('app_id', [VALID_UUID, VALID_UUID_2]);
+      expect(mockSupabase.queryBuilder.in).toHaveBeenCalledWith('app_id', [
+        VALID_UUID,
+        VALID_UUID_2,
+      ]);
     });
 
     it('propagates Supabase error', async () => {
       const { wrapper } = makeWrapper();
 
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: { message: 'cannot delete active app' } }).then(
-          onFulfilled
-        )
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: { message: 'cannot delete active app' } }).then(
+            onFulfilled
+          )
       );
 
       const { result } = renderHook(() => useBulkDeleteApps(), { wrapper });
@@ -363,10 +391,9 @@ describe('useApps hooks', () => {
       // Two insert calls: one for apps, one for landing pages
       expect(mockSupabase.queryBuilder.insert).toHaveBeenCalledTimes(2);
       expect(mockSupabase.queryBuilder.insert).toHaveBeenNthCalledWith(1, payload);
-      const lpPayload = (mockSupabase.queryBuilder.insert.mock.calls as unknown[][])[1][0] as Record<
-        string,
-        unknown
-      >[];
+      const lpPayload = (
+        mockSupabase.queryBuilder.insert.mock.calls as unknown[][]
+      )[1][0] as Record<string, unknown>[];
       expect(lpPayload).toHaveLength(2);
       expect(lpPayload[0].app_id).toBe(VALID_UUID);
       expect(lpPayload[0].meta_title).toContain('App 1');
@@ -395,8 +422,11 @@ describe('useApps hooks', () => {
     it('propagates error when app insert fails', async () => {
       const { wrapper } = makeWrapper();
 
-      mockSupabase.queryBuilder.then.mockImplementationOnce((onFulfilled: (value: unknown) => unknown) =>
-        Promise.resolve({ data: null, error: { message: 'bulk insert failed' } }).then(onFulfilled)
+      mockSupabase.queryBuilder.then.mockImplementationOnce(
+        (onFulfilled: (value: unknown) => unknown) =>
+          Promise.resolve({ data: null, error: { message: 'bulk insert failed' } }).then(
+            onFulfilled
+          )
       );
 
       const { result } = renderHook(() => useBulkCreateApps(), { wrapper });
@@ -408,5 +438,3 @@ describe('useApps hooks', () => {
     });
   });
 });
-
-

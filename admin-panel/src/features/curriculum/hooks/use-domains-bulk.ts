@@ -1,5 +1,5 @@
 import { useApp } from '@/hooks/use-app';
-import { Database } from '@/lib/database.types';
+import { Database } from '@questerix/core/types/database';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CurriculumStatus } from '../types';
@@ -25,9 +25,10 @@ export function useBulkDeleteDomains() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['domains'] });
-      queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['domains', 'domains-paginated', 'dashboard-stats'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }
@@ -50,10 +51,12 @@ export function useBulkUpdateDomainsStatus() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['domains'] });
-      queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['publish-preview'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['domains', 'domains-paginated', 'dashboard-stats', 'publish-preview'].includes(
+            query.queryKey[0] as string
+          ),
+      });
     },
   });
 }
@@ -80,8 +83,10 @@ export function useBulkCreateDomains() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['domains'] });
-      queryClient.invalidateQueries({ queryKey: ['domains-paginated'] });
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          ['domains', 'domains-paginated'].includes(query.queryKey[0] as string),
+      });
     },
   });
 }

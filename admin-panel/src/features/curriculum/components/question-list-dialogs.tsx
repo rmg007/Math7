@@ -8,11 +8,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Loader2 } from 'lucide-react';
 
 interface QuestionDeleteDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  isOpen: boolean;
+  onClose: () => void;
   deleteType: 'single' | 'bulk';
   selectedCount: number;
   isDeleting: boolean;
@@ -20,28 +19,28 @@ interface QuestionDeleteDialogProps {
 }
 
 export function QuestionDeleteDialog({
-  open,
-  onOpenChange,
+  isOpen,
+  onClose,
   deleteType,
   selectedCount,
   isDeleting,
   onConfirm,
 }: QuestionDeleteDialogProps) {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <AlertDialogContent className="rounded-lg border border-gray-200 bg-white shadow-lg max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-base font-semibold text-gray-900">
-            Delete {deleteType === 'bulk' ? `${selectedCount} questions` : 'question'}?
+            Delete {deleteType === 'bulk' ? `${selectedCount} units` : 'unit'}?
           </AlertDialogTitle>
           <AlertDialogDescription className="text-sm text-gray-500">
             {deleteType === 'bulk'
-              ? `This will permanently delete ${selectedCount} selected question(s). This action cannot be undone.`
-              : 'This action cannot be undone. This will permanently delete the question.'}
+              ? `This will permanently delete ${selectedCount} selected unit(s).`
+              : 'Are you sure you want to delete this unit? This action is permanent.'}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2">
-          <AlertDialogCancel className="h-9 px-4 rounded text-sm font-medium">
+          <AlertDialogCancel onClick={onClose} className="h-9 px-4 rounded text-sm font-medium">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
@@ -49,7 +48,6 @@ export function QuestionDeleteDialog({
             disabled={isDeleting}
             className="h-9 px-5 rounded bg-red-600 hover:bg-red-700 text-white font-semibold text-sm shadow-sm"
           >
-            {isDeleting && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>

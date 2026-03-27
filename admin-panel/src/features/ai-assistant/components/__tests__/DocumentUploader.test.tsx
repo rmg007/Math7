@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocumentUploader } from '../DocumentUploader';
 
@@ -112,7 +112,9 @@ describe('DocumentUploader', () => {
     // Create a 2MB file (exceeds 1MB limit)
     const largeFile = createFile('big.pdf', 'application/pdf', 2 * 1024 * 1024);
 
-    triggerDrop([largeFile]);
+    act(() => {
+      triggerDrop([largeFile]);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Upload Failed')).toBeInTheDocument();
@@ -140,7 +142,9 @@ describe('DocumentUploader', () => {
     render(<DocumentUploader onTextExtracted={onTextExtracted} />);
 
     const pdfFile = createFile('test.pdf', 'application/pdf');
-    triggerDrop([pdfFile]);
+    act(() => {
+      triggerDrop([pdfFile]);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/Successfully extracted/)).toBeInTheDocument();
@@ -162,7 +166,9 @@ describe('DocumentUploader', () => {
       'test.docx',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     );
-    triggerDrop([docxFile]);
+    act(() => {
+      triggerDrop([docxFile]);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/Successfully extracted/)).toBeInTheDocument();
@@ -177,7 +183,9 @@ describe('DocumentUploader', () => {
     render(<DocumentUploader onTextExtracted={onTextExtracted} />);
 
     const imageFile = createFile('photo.png', 'image/png');
-    triggerDrop([imageFile]);
+    act(() => {
+      triggerDrop([imageFile]);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/Successfully extracted/)).toBeInTheDocument();
@@ -198,7 +206,9 @@ describe('DocumentUploader', () => {
     render(<DocumentUploader onTextExtracted={onTextExtracted} />);
 
     const pdfFile = createFile('broken.pdf', 'application/pdf');
-    triggerDrop([pdfFile]);
+    act(() => {
+      triggerDrop([pdfFile]);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Upload Failed')).toBeInTheDocument();
@@ -214,7 +224,9 @@ describe('DocumentUploader', () => {
     render(<DocumentUploader onTextExtracted={onTextExtracted} />);
 
     const unsupportedFile = createFile('data.csv', 'text/csv');
-    triggerDrop([unsupportedFile]);
+    act(() => {
+      triggerDrop([unsupportedFile]);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Upload Failed')).toBeInTheDocument();
@@ -233,13 +245,17 @@ describe('DocumentUploader', () => {
     render(<DocumentUploader onTextExtracted={onTextExtracted} />);
 
     const pdfFile = createFile('fail.pdf', 'application/pdf');
-    triggerDrop([pdfFile]);
+    act(() => {
+      triggerDrop([pdfFile]);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Try again')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Try again'));
+    act(() => {
+      fireEvent.click(screen.getByText('Try again'));
+    });
 
     expect(screen.getByText('Upload Source Document')).toBeInTheDocument();
   });
@@ -254,13 +270,17 @@ describe('DocumentUploader', () => {
       'document.docx',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     );
-    triggerDrop([docxFile]);
+    act(() => {
+      triggerDrop([docxFile]);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Upload another document')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Upload another document'));
+    act(() => {
+      fireEvent.click(screen.getByText('Upload another document'));
+    });
 
     expect(screen.getByText('Upload Source Document')).toBeInTheDocument();
   });
@@ -289,7 +309,9 @@ describe('DocumentUploader', () => {
       'slow.docx',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     );
-    triggerDrop([docxFile]);
+    act(() => {
+      triggerDrop([docxFile]);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/Processing slow.docx/)).toBeInTheDocument();
@@ -308,7 +330,9 @@ describe('DocumentUploader', () => {
       'long.docx',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     );
-    triggerDrop([docxFile]);
+    act(() => {
+      triggerDrop([docxFile]);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/\.\.\./)).toBeInTheDocument();

@@ -1,0 +1,976 @@
+
+> admin-panel@0.0.0 test
+> vitest run src/features/curriculum/components/__tests__/question-list.test.tsx
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mC:/dev/Important Projects/Questerix/admin-panel[39m
+
+stderr | src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > renders loading state
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ [31m❯[39m src/features/curriculum/components/__tests__/question-list.test.tsx [2m([22m[2m6 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 2162[2mms[22m[39m
+     [32m✓[39m renders loading state[32m 56[2mms[22m[39m
+[31m     [31m×[31m renders empty state when no questions found[39m[32m 97[2mms[22m[39m
+[31m     [31m×[31m renders question rows when data is present[39m[32m 65[2mms[22m[39m
+[31m     [31m×[31m calls handleSelectAll when select all button is clicked[39m[33m 1644[2mms[22m[39m
+     [32m✓[39m shows delete dialog when deleteConfirmation is set[32m 93[2mms[22m[39m
+     [32m✓[39m calls confirmDelete when confirm is clicked in delete dialog[32m 202[2mms[22m[39m
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > renders empty state when no questions found
+TestingLibraryElementError: Found multiple elements with the text: The reservoir is dry
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+<div
+  data-testid="mock-empty-state"
+>
+  The reservoir is dry
+</div>
+
+Ignored nodes: comments, script, style
+<div
+  data-testid="mock-empty-state"
+>
+  The reservoir is dry
+</div>
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="max-w-7xl mx-auto space-y-10 pb-12"
+      data-hydration-complete="true"
+      data-testid="questions-list"
+    >
+      <div
+        data-testid="mock-toolbar"
+      >
+        Toolbar
+      </div>
+      <div
+        class="space-y-6"
+      >
+        <div
+          class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-1.5"
+        >
+          <div
+            data-testid="mock-filter-bar"
+          >
+            Filter Bar
+          </div>
+        </div>
+        <div
+          class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
+        >
+          <div
+            class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/30"
+          >
+            <div
+              class="flex items-center gap-4"
+            >
+              <div
+                class="hidden sm:flex items-center px-3 py-1 bg-white border border-gray-200 rounded-lg shadow-sm"
+              >
+                <span
+                  class="text-[10px] font-black uppercase tracking-widest text-gray-400 mr-2"
+                >
+                  Pool Size
+                </span>
+                <span
+                  class="text-sm font-bold text-teal-600 tabular-nums"
+                >
+                  0
+                </span>
+              </div>
+            </div>
+            <div
+              class="flex items-center gap-2"
+            >
+              <button
+                aria-expanded="false"
+                aria-haspopup="menu"
+                class="inline-flex items-center justify-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 rounded-md h-9 px-3 gap-2 text-xs font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 shadow-sm"
+                data-state="closed"
+                id="radix-:r0:"
+                type="button"
+              >
+                <svg
+                  class="lucide lucide-settings2 h-3.5 w-3.5"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M20 7h-9"
+                  />
+                  <path
+                    d="M14 17H5"
+                  />
+                  <circle
+                    cx="17"
+                    cy="17"
+                    r="3"
+                  />
+                  <circle
+                    cx="7"
+                    cy="7"
+                    r="3"
+                  />
+                </svg>
+                Columns
+              </button>
+            </div>
+          </div>
+          <div
+            class="hidden md:block"
+          >
+            <div
+              class="relative w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            >
+              <table
+                class="w-full caption-bottom text-sm"
+              >
+                <thead
+                  class="[&_tr]:border-b"
+                >
+                  <tr
+                    class="border-b border-gray-200 data-[state=selected]:bg-muted hover:bg-transparent"
+                  >
+                    <th
+                      class="h-auto py-2 text-left align-middle font-semibold text-[11px] uppercase tracking-wider text-gray-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] w-8 px-2"
+                    />
+                    <th
+                      class="h-auto py-2 text-left align-middle font-semibold text-[11px] uppercase tracking-wider text-gray-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] w-8 px-2"
+                    >
+                      <button
+                        class="text-gray-300 hover:text-teal-600 transition-colors"
+                      >
+                        <svg
+                          class="lucide lucide-square h-4 w-4"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <rect
+                            height="18"
+                            rx="2"
+                            width="18"
+                            x="3"
+                            y="3"
+                          />
+                        </svg>
+        ...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/curriculum/components/__tests__/question-list.test.tsx:130:19
+    128| 
+    129|     renderComponent();
+    130|     expect(screen.getByText('The reservoir is dry')).toBeTruthy();
+       |                   ^
+    131|   });
+    132| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > renders question rows when data is present
+TestingLibraryElementError: Found multiple elements with the text: Question 1
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+<div
+  class="font-medium text-gray-900 text-xs line-clamp-1 prose-sm"
+>
+  Question 1
+</div>
+
+Ignored nodes: comments, script, style
+<div
+  class="font-medium text-gray-900 text-xs line-clamp-2 prose-sm mb-1"
+>
+  Question 1
+</div>
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="max-w-7xl mx-auto space-y-10 pb-12"
+      data-hydration-complete="true"
+      data-testid="questions-list"
+    >
+      <div
+        data-testid="mock-toolbar"
+      >
+        Toolbar
+      </div>
+      <div
+        class="space-y-6"
+      >
+        <div
+          class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-1.5"
+        >
+          <div
+            data-testid="mock-filter-bar"
+          >
+            Filter Bar
+          </div>
+        </div>
+        <div
+          class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
+        >
+          <div
+            class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/30"
+          >
+            <div
+              class="flex items-center gap-4"
+            >
+              <div
+                class="hidden sm:flex items-center px-3 py-1 bg-white border border-gray-200 rounded-lg shadow-sm"
+              >
+                <span
+                  class="text-[10px] font-black uppercase tracking-widest text-gray-400 mr-2"
+                >
+                  Pool Size
+                </span>
+                <span
+                  class="text-sm font-bold text-teal-600 tabular-nums"
+                >
+                  2
+                </span>
+              </div>
+            </div>
+            <div
+              class="flex items-center gap-2"
+            >
+              <button
+                aria-expanded="false"
+                aria-haspopup="menu"
+                class="inline-flex items-center justify-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 rounded-md h-9 px-3 gap-2 text-xs font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 shadow-sm"
+                data-state="closed"
+                id="radix-:r5:"
+                type="button"
+              >
+                <svg
+                  class="lucide lucide-settings2 h-3.5 w-3.5"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M20 7h-9"
+                  />
+                  <path
+                    d="M14 17H5"
+                  />
+                  <circle
+                    cx="17"
+                    cy="17"
+                    r="3"
+                  />
+                  <circle
+                    cx="7"
+                    cy="7"
+                    r="3"
+                  />
+                </svg>
+                Columns
+              </button>
+            </div>
+          </div>
+          <div
+            class="hidden md:block"
+          >
+            <div
+              class="relative w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            >
+              <table
+                class="w-full caption-bottom text-sm"
+              >
+                <thead
+                  class="[&_tr]:border-b"
+                >
+                  <tr
+                    class="border-b border-gray-200 data-[state=selected]:bg-muted hover:bg-transparent"
+                  >
+                    <th
+                      class="h-auto py-2 text-left align-middle font-semibold text-[11px] uppercase tracking-wider text-gray-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] w-8 px-2"
+                    />
+                    <th
+                      class="h-auto py-2 text-left align-middle font-semibold text-[11px] uppercase tracking-wider text-gray-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] w-8 px-2"
+                    >
+                      <button
+                        class="text-gray-300 hover:text-teal-600 transition-colors"
+                      >
+                        <svg
+                          class="lucide lucide-square h-4 w-4"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <rect
+                            height="18"
+                            rx="2"
+                            width="18"
+                            x="3"
+                            y="3"
+                          />
+                        </svg>
+        ...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/curriculum/components/__tests__/question-list.test.tsx:137:19
+    135| 
+    136|     renderComponent();
+    137|     expect(screen.getByText('Question 1')).toBeTruthy();
+       |                   ^
+    138|     expect(screen.getByText('Question 2')).toBeTruthy();
+    139|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/features/curriculum/components/__tests__/question-list.test.tsx > QuestionList > calls handleSelectAll when select all button is clicked
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/select all/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "Columns":
+  <button
+    aria-expanded="false"
+    aria-haspopup="menu"
+    class="inline-flex items-center justify-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 rounded-md h-9 px-3 gap-2 text-xs font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 shadow-sm"
+    data-state="closed"
+    id="radix-:ra:"
+    type="button"
+  />
+
+  Name "":
+  <button
+    class="text-gray-300 hover:text-teal-600 transition-colors"
+  />
+
+  Name "Content":
+  <button
+    class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 "
+  />
+
+  Name "Type":
+  <button
+    class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 "
+  />
+
+  Name "Points":
+  <button
+    class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 "
+  />
+
+  Name "Status":
+  <button
+    class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-teal-600 focus:ring-offset-1 rounded text-gray-600 hover:text-teal-600 "
+  />
+
+  Name "Drag to reorder":
+  <button
+    aria-describedby="DndDescribedBy-2"
+    aria-disabled="false"
+    aria-label="Drag to reorder"
+    aria-roledescription="sortable"
+    class="p-1 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing touch-none"
+    role="button"
+    tabindex="0"
+  />
+
+  Name "Select question":
+  <button
+    aria-label="Select question"
+    class="text-gray-300 hover:text-gray-500"
+    title="Select"
+  />
+
+  Name "Duplicate question":
+  <button
+    aria-label="Duplicate question"
+    class="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+    title="Duplicate"
+  />
+
+  Name "Delete question":
+  <button
+    aria-label="Delete question"
+    class="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-red-600 hover:bg-red-50"
+    title="Delete"
+  />
+
+  Name "Drag to reorder":
+  <button
+    aria-describedby="DndDescribedBy-2"
+    aria-disabled="false"
+    aria-label="Drag to reorder"
+    aria-roledescription="sortable"
+    class="p-1 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing touch-none"
+    role="button"
+    tabindex="0"
+  />
+
+  Name "Select question":
+  <button
+    aria-label="Select question"
+    class="text-gray-300 hover:text-gray-500"
+    title="Select"
+  />
+
+  Name "Duplicate question":
+  <button
+    aria-label="Duplicate question"
+    class="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+    title="Duplicate"
+  />
+
+  Name "Delete question":
+  <button
+    aria-label="Delete question"
+    class="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-red-600 hover:bg-red-50"
+    title="Delete"
+  />
+
+  Name "Drag to reorder":
+  <button
+    aria-describedby="DndDescribedBy-2"
+    aria-disabled="false"
+    aria-label="Drag to reorder"
+    aria-roledescription="sortable"
+    class="p-1 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing touch-none shrink-0"
+    role="button"
+    tabindex="0"
+  />
+
+  Name "Select":
+  <button
+    class="p-1 text-gray-300 hover:text-gray-500 shrink-0"
+    title="Select"
+  />
+
+  Name "Duplicate":
+  <button
+    class="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+    title="Duplicate"
+  />
+
+  Name "Delete":
+  <button
+    class="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-red-600 hover:bg-red-50"
+    title="Delete"
+  />
+
+  Name "Drag to reorder":
+  <button
+    aria-describedby="DndDescribedBy-2"
+    aria-disabled="false"
+    aria-label="Drag to reorder"
+    aria-roledescription="sortable"
+    class="p-1 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing touch-none shrink-0"
+    role="button"
+    tabindex="0"
+  />
+
+  Name "Select":
+  <button
+    class="p-1 text-gray-300 hover:text-gray-500 shrink-0"
+    title="Select"
+  />
+
+  Name "Duplicate":
+  <button
+    class="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+    title="Duplicate"
+  />
+
+  Name "Delete":
+  <button
+    class="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-red-600 hover:bg-red-50"
+    title="Delete"
+  />
+
+  Name "First page":
+  <button
+    aria-label="First page"
+    class="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+    disabled=""
+    title="First page"
+  />
+
+  Name "Previous page":
+  <button
+    aria-label="Previous page"
+    class="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+    disabled=""
+    title="Previous page"
+  />
+
+  Name "Page 1":
+  <button
+    aria-current="page"
+    aria-label="Page 1"
+    class="min-w-[24px] h-6 px-1.5 rounded text-xs font-medium bg-teal-600 text-white"
+  />
+
+  Name "Next page":
+  <button
+    aria-label="Next page"
+    class="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+    disabled=""
+    title="Next page"
+  />
+
+  Name "Last page":
+  <button
+    aria-label="Last page"
+    class="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+    disabled=""
+    title="Last page"
+  />
+
+  --------------------------------------------------
+  table:
+
+  Name "":
+  <table
+    class="w-full caption-bottom text-sm"
+  />
+
+  --------------------------------------------------
+  rowgroup:
+
+  Name "":
+  <thead
+    class="[&_tr]:border-b"
+  />
+
+  Name "":
+  <tbody
+    class="[&_tr:last-child]:border-0"
+  />
+
+  --------------------------------------------------
+  row:
+
+  Name "Content Type Skill Points Status Actions":
+  <tr
+    class="border-b border-gray-200 data-[state=selected]:bg-muted hover:bg-transparent"
+  />
+
+  Name "Question 1 Multiple Choice Skill 1 1 Draft Edit question":
+  <tr
+    class="border-b border-gray-200 hover:bg-teal-50/60 data-[state=selected]:bg-muted even:bg-gray-50/40 relative"
+    data-testid="question-row"
+  />
+
+  Name "Question 2 Multiple Choice Skill 2 2 Live Edit question":
+  <tr
+    class="border-b border-gray-200 hover:bg-teal-50/60 data-[state=selected]:bg-muted even:bg-gray-50/40 relative"
+    data-testid="question-row"
+  />
+
+  --------------------------------------------------
+  columnheader:
+
+  Name "":
+  <th
+    class="h-auto py-2 text-left align-middle font-semibold text-[11px] uppercase tracking-wider text-gray-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] w-8 px-2"
+  />
+
+  Name "":
+  <th
+    class="h-auto py-2 text-left align-middle font-semibold text-[11px] uppercase tracking-wider text-gray-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] w-8 px-2"
+  />
+
+  Name "Content":
+  <th
+    class="h-auto py-2 text-left align-middle font-semibold text-[11px] uppercase tracking-wider text-gray-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] px-4"
+  />
+
+  Name "Type":
+  <th
+    class="h-auto px-3 py-2 text-left align-middle font-semibold text-[11px] uppercase tracking-wider text-gray-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+  />
+
+  Name "Skill":
+  <th
+    class="h-auto px-3 py-2 text-left align-middle font-semibold text-[11px] uppercase tracking-wider text-gray-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+  />
+
+  Name "Points":
+  <th
+    class="h-auto px-3 py-2 align-middle font-semibold text-[11px] uppercase tracking-wider text-gray-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] text-center"
+  />
+
+  Name "Status":
+  <th
+    class="h-auto px-3 py-2 text-left align-middle font-semibold text-[11px] uppercase tracking-wider text-gray-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+  />
+
+  Name "Actions":
+  <th
+    class="h-auto py-2 align-middle font-semibold text-[11px] uppercase tracking-wider text-gray-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] text-right px-4 border-l border-gray-100"
+  />
+
+  --------------------------------------------------
+  cell:
+
+  Name "":
+  <td
+    class="py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] w-8 px-2"
+  />
+
+  Name "":
+  <td
+    class="py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] w-8 px-2"
+  />
+
+  Name "Question 1":
+  <td
+    class="py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] px-4 max-w-[350px]"
+  />
+
+  Name "Multiple Choice":
+  <td
+    class="px-3 py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] whitespace-nowrap"
+  />
+
+  Name "Skill 1":
+  <td
+    class="px-3 py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] whitespace-nowrap"
+  />
+
+  Name "1":
+  <td
+    class="px-3 py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] text-center"
+  />
+
+  Name "Draft":
+  <td
+    class="px-3 py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] whitespace-nowrap"
+  />
+
+  Name "Edit question":
+  <td
+    class="py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] px-4 text-right border-l border-gray-100"
+  />
+
+  Name "":
+  <td
+    class="py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] w-8 px-2"
+  />
+
+  Name "":
+  <td
+    class="py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] w-8 px-2"
+  />
+
+  Name "Question 2":
+  <td
+    class="py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] px-4 max-w-[350px]"
+  />
+
+  Name "Multiple Choice":
+  <td
+    class="px-3 py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] whitespace-nowrap"
+  />
+
+  Name "Skill 2":
+  <td
+    class="px-3 py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] whitespace-nowrap"
+  />
+
+  Name "2":
+  <td
+    class="px-3 py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] text-center"
+  />
+
+  Name "Live":
+  <td
+    class="px-3 py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] whitespace-nowrap"
+  />
+
+  Name "Edit question":
+  <td
+    class="py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] px-4 text-right border-l border-gray-100"
+  />
+
+  --------------------------------------------------
+  link:
+
+  Name "Edit question":
+  <a
+    aria-label="Edit question"
+    class="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50"
+    href="/questions/q-1/edit"
+    title="Edit"
+  />
+
+  Name "Edit question":
+  <a
+    aria-label="Edit question"
+    class="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50"
+    href="/questions/q-2/edit"
+    title="Edit"
+  />
+
+  Name "Edit":
+  <a
+    class="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50"
+    href="/questions/q-1/edit"
+    title="Edit"
+  />
+
+  Name "Edit":
+  <a
+    class="inline-flex items-center justify-center h-7 w-7 rounded text-gray-500 hover:text-teal-600 hover:bg-teal-50"
+    href="/questions/q-2/edit"
+    title="Edit"
+  />
+
+  --------------------------------------------------
+  status:
+
+  Name "":
+  <div
+    aria-atomic="true"
+    aria-live="assertive"
+    id="DndLiveRegion-2"
+    role="status"
+    style="position: fixed; top: 0px; left: 0px; width: 1px; height: 1px; margin: -1px; border: 0px; padding: 0px; overflow: hidden; clip: rect(0px); clip-path: inset(100%); white-space: nowrap;"
+  />
+
+  --------------------------------------------------
+  combobox:
+
+  Name "Items per page":
+  <select
+    aria-label="Items per page"
+    class="px-1.5 py-1 rounded border border-gray-300 bg-white text-gray-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 focus-visible:outline-none text-[11px]"
+  />
+
+  --------------------------------------------------
+  option:
+
+  Name "10":
+  <option
+    value="10"
+  />
+
+  Name "25":
+  <option
+    value="25"
+  />
+
+  Name "50":
+  <option
+    value="50"
+  />
+
+  Name "100":
+  <option
+    value="100"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="max-w-7xl mx-auto space-y-10 pb-12"
+      data-hydration-complete="true"
+      data-testid="questions-list"
+    >
+      <div
+        data-testid="mock-toolbar"
+      >
+        Toolbar
+      </div>
+      <div
+        class="space-y-6"
+      >
+        <div
+          class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-1.5"
+        >
+          <div
+            data-testid="mock-filter-bar"
+          >
+            Filter Bar
+          </div>
+        </div>
+        <div
+          class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
+        >
+          <div
+            class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/30"
+          >
+            <div
+              class="flex items-center gap-4"
+            >
+              <div
+                class="hidden sm:flex items-center px-3 py-1 bg-white border border-gray-200 rounded-lg shadow-sm"
+              >
+                <span
+                  class="text-[10px] font-black uppercase tracking-widest text-gray-400 mr-2"
+                >
+                  Pool Size
+                </span>
+                <span
+                  class="text-sm font-bold text-teal-600 tabular-nums"
+                >
+                  2
+                </span>
+              </div>
+            </div>
+            <div
+              class="flex items-center gap-2"
+            >
+              <button
+                aria-expanded="false"
+                aria-haspopup="menu"
+                class="inline-flex items-center justify-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 rounded-md h-9 px-3 gap-2 text-xs font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 shadow-sm"
+                data-state="closed"
+                id="radix-:ra:"
+                type="button"
+              >
+                <svg
+                  class="lucide lucide-settings2 h-3.5 w-3.5"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M20 7h-9"
+                  />
+                  <path
+                    d="M14 17H5"
+                  />
+                  <circle
+                    cx="17"
+                    cy="17"
+                    r="3"
+                  />
+                  <circle
+                    cx="7"
+                    cy="7"
+                    r="3"
+                  />
+                </svg>
+                Columns
+              </button>
+            </div>
+          </div>
+          <div
+            class="hidden md:block"
+          >
+            <div
+              class="relative w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            >
+              <table
+                class="w-full caption-bottom text-sm"
+              >
+                <thead
+                  class="[&_tr]:border-b"
+                >
+                  <tr
+                    class="border-b border-gray-200 data-[state=selected]:bg-muted hover:bg-transparent"
+                  >
+                    <th
+                      class="h-auto py-2 text-left align-middle font-semibold text-[11px] uppercase tracking-wider text-gray-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] w-8 px-2"
+                    />
+                    <th
+                      class="h-auto py-2 text-left align-middle font-semibold text-[11px] uppercase tracking-wider text-gray-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] w-8 px-2"
+                    >
+                      <button
+                        class="text-gray-300 hover:text-teal-600 transition-colors"
+                      >
+                        <svg
+                          class="lucide lucide-square h-4 w-4"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <rect
+                            height="18"
+                            rx="2"
+                            width="18"
+                            x="3"
+                            y="3"
+                          />
+                        </svg>
+        ...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/curriculum/components/__tests__/question-list.test.tsx:145:33
+    143| 
+    144|     renderComponent();
+    145|     const selectAllBtn = screen.getByRole('button', { name: /select al…
+       |                                 ^
+    146|     fireEvent.click(selectAllBtn);
+    147|     expect(defaultMockState.handleSelectAll).toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 13:24:19
+[2m   Duration [22m 5.50s[2m (transform 384ms, setup 473ms, import 948ms, tests 2.16s, environment 1.67s)[22m
+

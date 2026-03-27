@@ -1,4 +1,4 @@
-import { Tables, TablesInsert, TablesUpdate } from '@/lib/database.types';
+import { Tables, TablesInsert, TablesUpdate } from '@questerix/core/types/database';
 
 export type App = Tables<'apps'>;
 export interface CompiledApp extends App {

@@ -805,3 +805,53 @@
 [2026-03-25 04:03:08] Space recovered: 0 B
 [2026-03-25 04:03:08] Final size: 43.51 MB
 [2026-03-25 04:03:08] 
+[2026-03-25 12:52:23] 
+[2026-03-25 12:52:23] AGENT MEMORY CLEANUP STARTED
+[2026-03-25 12:52:24] Mode: LIVE
+[2026-03-25 12:52:24] Retain: 3 days / 15 sessions
+[2026-03-25 12:52:24] Before: 338.72 MB | 1988 files | 43 sessions
+[2026-03-25 12:52:24] 
+[2026-03-25 12:52:24] Phase 1: Stripping media artifacts...
+[2026-03-25 12:52:24]   Stripped .tempmediaStorage from 2a95ecbf-6d56-45c9-8037-4d36a4dd5efd (135.26 KB)
+[2026-03-25 12:52:24]   Stripped .tempmediaStorage from 55ea3ddd-79b6-4f1d-917c-1db466c1c420 (661.94 KB)
+[2026-03-25 12:52:25]   Stripped .tempmediaStorage from 7042f361-5fbe-4ddc-9fc4-c6cf31a1f0c2 (105.81 MB)
+[2026-03-25 12:52:26]   Stripped .tempmediaStorage from b1cda6ca-38b9-4055-97fa-4c89a723b044 (134.28 KB)
+[2026-03-25 12:52:26] Phase 2: Pruning resolved state snapshots...
+[2026-03-25 12:52:27] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-25 12:52:27]   Deleting session 7dfe518c-cbae-4b6b-a10f-5cbe29a616d5 (0 B, last used: 03/22/2026 12:04:20)
+[2026-03-25 12:52:27]   Deleting session 47ec3581-e891-4f45-a2be-553a8f3329cc (0 B, last used: 03/22/2026 10:04:59)
+[2026-03-25 12:52:27]   Deleting session 4575d355-5954-4dfc-9a72-b60339e05be4 (0 B, last used: 03/22/2026 09:21:02)
+[2026-03-25 12:52:27]   Deleting session 684babfb-1101-4e42-80a6-3b810c8482d9 (0 B, last used: 03/22/2026 09:14:15)
+[2026-03-25 12:52:27]   Deleting session 30081456-1d95-4819-b0f0-5dc977a14e71 (0 B, last used: 03/22/2026 09:10:43)
+[2026-03-25 12:52:27]   Deleting session 68016f6f-3385-4401-a2ca-1fe70af8367a (0 B, last used: 03/22/2026 09:06:35)
+[2026-03-25 12:52:27]   Deleting session 887583ac-c3b9-4bba-97c9-2af5bfc0dc85 (0 B, last used: 03/22/2026 08:56:48)
+[2026-03-25 12:52:27]   Deleting session ca163dd7-3d17-4084-a418-39a2379e673f (0 B, last used: 03/22/2026 08:07:25)
+[2026-03-25 12:52:27] Phase 4: Cleaning project root temp files...
+[2026-03-25 12:52:27]   Removed: tasks.json (422 B)
+[2026-03-25 12:52:27]   Removed: tasks.status.json (29.23 KB)
+[2026-03-25 12:52:27] Phase 5: Pruning indexed artifacts...
+[2026-03-25 12:52:27] 
+[2026-03-25 12:52:27] CLEANUP COMPLETE
+[2026-03-25 12:52:27] Sessions: 43 -> 35 (-8)
+[2026-03-25 12:52:27] Files removed: 42
+[2026-03-25 12:52:27] Space recovered: 218.78 MB
+[2026-03-25 12:52:27] Final size: 119.97 MB
+[2026-03-25 12:52:27] 
+[2026-03-25 12:57:26] 
+[2026-03-25 12:57:26] AGENT MEMORY CLEANUP STARTED
+[2026-03-25 12:57:26] Mode: LIVE
+[2026-03-25 12:57:26] Retain: 3 days / 15 sessions
+[2026-03-25 12:57:26] Before: 119.97 MB | 676 files | 35 sessions
+[2026-03-25 12:57:26] 
+[2026-03-25 12:57:26] Phase 1: Stripping media artifacts...
+[2026-03-25 12:57:27] Phase 2: Pruning resolved state snapshots...
+[2026-03-25 12:57:27] Phase 3: Pruning stale sessions (older than 3 days)...
+[2026-03-25 12:57:27] Phase 4: Cleaning project root temp files...
+[2026-03-25 12:57:27] Phase 5: Pruning indexed artifacts...
+[2026-03-25 12:57:27] 
+[2026-03-25 12:57:27] CLEANUP COMPLETE
+[2026-03-25 12:57:27] Sessions: 35 -> 35 (-0)
+[2026-03-25 12:57:27] Files removed: 0
+[2026-03-25 12:57:27] Space recovered: 0 B
+[2026-03-25 12:57:27] Final size: 119.97 MB
+[2026-03-25 12:57:27] 

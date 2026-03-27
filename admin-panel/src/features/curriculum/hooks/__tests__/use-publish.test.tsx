@@ -113,7 +113,7 @@ describe('usePublish', () => {
           is: vi.fn().mockReturnThis(),
           maybeSingle: vi.fn().mockReturnThis(),
           then: vi.fn((onFulfilled) => Promise.resolve(mockResponses[index]).then(onFulfilled)),
-        };
+        } as any;
       });
 
       const { result } = renderHook(() => usePublishPreview(), { wrapper });
