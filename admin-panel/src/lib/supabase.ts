@@ -20,6 +20,33 @@ function getSupabaseClient(): SupabaseClient<Database> {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
+      // Enhanced storage handling with fallback
+      storage: {
+        getItem: (key: string) => {
+          try {
+            return localStorage.getItem(key);
+          } catch (e) {
+            console.warn(`Storage access failed for key ${key}:`, e);
+            return null;
+          }
+        },
+        setItem: (key: string, value: string) => {
+          try {
+            localStorage.setItem(key, value);
+          } catch (e) {
+            console.warn(`Storage write failed for key ${key}:`, e);
+            // Fail silently - session will be lost but app continues to work
+          }
+        },
+        removeItem: (key: string) => {
+          try {
+            localStorage.removeItem(key);
+          } catch (e) {
+            console.warn(`Storage removal failed for key ${key}:`, e);
+            // Fail silently
+          }
+        },
+      },
     },
     global: {
       fetch: (url, options) => {
