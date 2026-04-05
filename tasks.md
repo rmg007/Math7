@@ -62,20 +62,20 @@
   - [x] Accessibility: Implemented `role="main"` and `aria-label` enhancements for the dashboard.
   - [x] Clean Build: Resolved all modularization-induced regressions and lint warnings (Verified with `tsc --noEmit`).
 
-- [ ] **Task 109: Student App Structural & Performance Hardening (Phase 18-20)**
+- [x] **Task 109: Student App Structural & Performance Hardening (Phase 18-20)**
   - [x] **DB-P0-01: Fix Drift Migration Drift** (SQLite `appId` Column Conflict) — Resolve blocker in `attempts` table migration. (Self-healing implemented and verified).
   - [x] **PERF-S01: Implement Batched Image Prefetching** — Add pre-fetcher to `PracticeNotifier` to eliminate question asset pop-in. (Verified with nested traversal for options/help/solution).
   - [x] **QUAL-S06.2: Deep-link Verification** — Verify routing from push notifications across all platforms. (Verified via `app_router_test.dart`).
   - [x] **Regression Fix**: Stabilized `app_router_test.dart` and resolved `user_metadata_repository.dart` compilation drift.
 
-- [ ] **Task 110: Admin Panel AI Studio Loop & Final Modularization**
+- [x] **Task 110: Admin Panel AI Studio Loop & Final Modularization**
   - [x] **Phase 12 Integration**: Connected the Review Grid "Approve" action directly to the Bulk Import engine (Nexus buffer) in `GenerationPage.tsx` and `RefinePersistActionHeader.tsx`.
-  - [ ] **God-File Deconstruction**:
-    - [ ] `KnownIssuesPage.tsx` (40KB) -> Extracted sub-components.
-    - [ ] `question-form.tsx` (33KB) -> Extracted `QuestionTypes` sub-forms.
-    - [ ] `GenerationPage.tsx` (28KB) -> Modularized AI orchestration.
+  - [x] **God-File Deconstruction**:
+    - [x] `KnownIssuesPage.tsx` (40KB) -> Extracted sub-components.
+    - [x] `question-form.tsx` (33KB) -> Extracted `QuestionTypes` sub-forms.
+    - [x] `GenerationPage.tsx` (28KB) -> Modularized AI orchestration.
   - [x] **Zero-Any Audit**: Performed final audit of `features/monitoring` and `features/curriculum`. Verified 100% type safety in `GenerationPage.tsx`, `question-form.tsx`, and `ErrorLogsPage.tsx`.
-  - [ ] **Final Smoke Pass**: Run Playwright suite on the modularized components to ensure interaction stability.
+  - [x] **Final Smoke Pass**: Run Playwright suite on the modularized components to ensure interaction stability.
 
 ---
 
@@ -214,7 +214,7 @@ Last Update: 2026-03-25
   - Resolved: Stale TODO removed; screen is fully implemented for MVP. Design decision documented in comment.
 - [x] **QUAL-S06: Adopt GoRouter (AUDIT-NAV-001)**
   - [x] QUAL-S06.1: `go_router 17.1.0` added; `app_router.dart` created with full route hierarchy, auth guard, and typed params.
-  - [ ] QUAL-S06.2: Deep-link verification from push notifications (future sprint).
+  - [x] QUAL-S06.2: Deep-link verification from push notifications (Verified via integration tests).
 
 ---
 

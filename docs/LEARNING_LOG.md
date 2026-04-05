@@ -3261,3 +3261,23 @@ The `AppsPage.tsx` file inside the `admin-panel` had ballooned into a 1290+ line
 - When extracting heavily-coupled inline components from a local "God-File", ensure that prop definitions (`AppRowProps`) are hoisted to a shared `types.ts` first rather than directly placing them alongside the Zod form schemas, preventing circular dependency issues.
 - `standard-version` helps avoid manual changelog generation but generates tags natively. This helps shift standard documentation generation over to `npm run release` to auto-parse standard atomic commits.
 - **React Query Over-Invalidation (PERF-A01):** Replace stacked queryClient.invalidateQueries statements with a single unified predicate invalidator to ensure Tanstack groups identical triggers and prevents overlapping API waterfall renders.
+
+---
+
+## 2026-04-05: Phase 19 Test Hardening & Admin Panel Final Smoke Pass [verified]
+
+### [2026-04-05] Session Context
+
+- **Trigger**: Completion of Phase 19 (Study Workbook) enhancements and Task 110 (Admin Panel Modularization) final verification.
+- **Scope**: \SelfRatingDialog.dart\, \pp_router_test.dart\, \GenerationPage.tsx\, \KnownIssuesPage.tsx\.
+- **Outcome**: Achieved 11/11 Playwright pass on Admin Panel; achieved 30+ passing widget tests in Student App; verified mistake classification logic and deep-link routing.
+
+### Technical Hardening
+
+- **Flutter Widget Tests**: Replaced simple \ ap()\ with \nsureVisible() + tap()\ for tall dialog content. This prevents non-deterministic failures where buttons are clipped by the viewport in small-form-factor test setups.
+- **Admin Panel Modularization**: Successfully decomposed 3 god-files (>20KB) into focused sub-components. Used Playwright \@smoke\ tagged suite to verify that interaction paths (form submission, navigation, bulk actions) remained stable across the refactor.
+
+### Prevention Rules
+
+- **Rule of Tall Dialogs (Flutter)**: Always use \wait tester.ensureVisible(finder);\ before \ ester.tap()\ for any element inside a scrollable container or dialog.
+- **Rule of Smoke Regression (React)**: Any structural modularization of a Page-level component MUST be followed by a Playwright smoke pass covering all primary user actions on that page.

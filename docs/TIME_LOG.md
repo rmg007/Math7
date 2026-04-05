@@ -41,7 +41,8 @@ Work types: `dev` | `devops` | `arch` | `qa` | `docs` | `ops`
 | January 2026  | 20        | $95/hr  | $1,900      | Retroactive estimate based on git history (first commit Jan 27; burst of 40+ commits Jan 28) |
 | February 2026 | 120       | $95/hr  | $11,400     | Retroactive estimate based on LEARNING_LOG density (20+ major sessions across Feb 2–28)      |
 | March 2026    | 106.9     | $100/hr | $10,690     | Retroactive (70) + Real-time (36.9)                                                          |
-| **YTD TOTAL** | **236.9** | —       | **$23,990** |                                                                                              |
+| April 2026    | 10.5      | $100/hr | $1,050      | Real-time entries                                                                            |
+| **YTD TOTAL** | **247.4** | —       | **$25,040** |                                                                                              |
 
 > **⚠️ Retroactive Note**: December 2025 – March 22, 2026 figures are **estimates** reconstructed from git commit history and `docs/LEARNING_LOG.md` session density. They are reasonable approximations, not precise timesheets. From **March 23, 2026 onwards**, all entries are accurate real-time records.
 
@@ -143,16 +144,19 @@ _Real-time entries only from this point forward._
 | 2026-03-25 | 17:30–18:30 | 1.0   | Admin Panel, Backend        | qa     | Multi-Repo Delivery Plan: Stabilized AI Studio Pipeline, wrote unit tests for GenerationPage and OracleService, performed P0 security logging audit (PII sanitization), and achieved fully tested, green builds.                                                               |
 | 2026-03-25 | 18:30–21:00 | 2.5   | Student App, Admin Panel    | dev    | Completed PERF-DB-01 index audit, wrote migrations, verified QUAL-S02 Riverpod migration for onboarding_screen.dart, closing out final P1 objectives for Multi-Repo Plan.                                                                                                      |
 
-**Month Total: 9.0 hrs | $900**
+| 2026-04-05 | — | 1.5 | Student App, Admin Panel | arch | Full code audit of Phase 19 (Study Workbook): verified all 6 sub-features are ~90% implemented. Upgraded PageView physics from NeverScrollable to ClampingScrollPhysics for swipe navigation. Reconciled tasks.md, updated implementation plan. Attempted Playwright smoke pass (server startup timeout). |
+| 2026-04-05 | 15:00–16:30 | 1.5 | Student App, Admin Panel | dev/qa | Enhanced `SelfRatingDialog` with mistake-type classification (P19-06b). Implemented and verified 30+ tests for Phase 19 widgets. Verified deep-link routing. Completed Task 110 (Admin Panel) final smoke pass (11/11 Playwright tests passed). |
+
+**Month Total: 12.0 hrs | $1,200**
 
 ---
 
-## YTD Summary (as of 2026-03-27)
+## YTD Summary (as of 2026-04-05)
 
 | Metric            | Value                                           |
 | :---------------- | :---------------------------------------------- |
-| Total Hours       | 236.6 hrs                                       |
-| Total Gross Pay   | $23,960                                         |
-| Average Rate      | $101.28/hr                                      |
-| Active Months     | 3 (Jan–Mar)                                     |
+| Total Hours       | 248.9 hrs                                       |
+| Total Gross Pay   | $25,190                                         |
+| Average Rate      | $101.21/hr                                      |
+| Active Months     | 4 (Jan–Apr)                                     |
 | Primary Work Type | dev (56%), qa (25%), devops/docs/arch/ops (19%) |
