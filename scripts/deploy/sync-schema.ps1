@@ -35,6 +35,40 @@ if ($Secrets.ContainsKey('SUPABASE_DB_PASSWORD')) {
     $ErrorActionPreference = 'Continue'
     
     npx supabase link --project-ref $projectRef --password "$dbPass" 2>&1 | Write-Host
+
+    # P0: Migration Divergence Gate
+    Write-Host "Checking migration status..." -ForegroundColor Gray
+    $migrationList = npx supabase migration list --password "$dbPass" 2>&1
+    
+    $hasDivergence = $false
+    $divergedVersions = @()
+    
+    foreach ($line in $migrationList) {
+        # Look for lines that have a Remote version but no Local version
+        # Format is:  [Local] | [Remote] | [Time]
+        if ($line -match '^\s{3,}\d*\s+\|\s+(\d{14})\s+\|') {
+            $localPart = $line.Split('|')[0].Trim()
+            $remoteVersion = $Matches[1]
+            if ([string]::IsNullOrWhiteSpace($localPart)) {
+                $hasDivergence = $true
+                $divergedVersions += $remoteVersion
+            }
+        }
+    }
+
+    if ($hasDivergence) {
+        Write-Host "[FAIL] Migration divergence detected!" -ForegroundColor Red
+        Write-Host "Remote database has migrations not present in your local 'supabase/migrations' directory:" -ForegroundColor Yellow
+        foreach ($v in $divergedVersions) { Write-Host "  - $v" -ForegroundColor Yellow }
+        Write-Host "`nTo fix this, you must either:" -ForegroundColor Cyan
+        Write-Host "1. Repair the remote history (if those migrations were deleted/renamed):" -ForegroundColor White
+        Write-Host "   npx supabase migration repair --status reverted $($divergedVersions -join ' ')" -ForegroundColor Gray
+        Write-Host "2. Pull the missing migrations from the remote database:" -ForegroundColor White
+        Write-Host "   npx supabase db pull" -ForegroundColor Gray
+        throw "Supabase migration divergence gate failed. Please resolve history mismatch before deploying."
+    }
+
+    Write-Host "Pushing migrations..." -ForegroundColor Gray
     npx supabase db push --password "$dbPass" --yes 2>&1 | Write-Host
     
     $ErrorActionPreference = $OldEAP

@@ -3,7 +3,7 @@ name: Flutter Builds (CI)
 on:
   pull_request:
     paths:
-      - "student-app/**"
+      - "questerix-student-app/**"
   workflow_dispatch:
 
 jobs:
@@ -26,18 +26,18 @@ jobs:
           channel: "stable"
 
       - name: Get dependencies
-        run: cd student-app && flutter pub get
+        run: cd questerix-student-app && flutter pub get
 
       - name: Build APK
         run: |
-          cd student-app
+          cd questerix-student-app
           flutter build apk --debug # Use release build when keys are configured
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: questerix-android-debug
-          path: student-app/build/app/outputs/flutter-apk/app-debug.apk
+          path: questerix-student-app/build/app/outputs/flutter-apk/app-debug.apk
 
   build-ios:
     name: Build iOS (Check)
@@ -52,15 +52,15 @@ jobs:
           channel: "stable"
 
       - name: Get dependencies
-        run: cd student-app && flutter pub get
+        run: cd questerix-student-app && flutter pub get
 
       - name: Build iOS (No codesign)
         run: |
-          cd student-app
+          cd questerix-student-app
           flutter build ios --debug --no-codesign
 
       - name: Upload iOS Build
         uses: actions/upload-artifact@v4
         with:
           name: questerix-ios-debug
-          path: student-app/build/ios/iphoneos/Runner.app
+          path: questerix-student-app/build/ios/iphoneos/Runner.app

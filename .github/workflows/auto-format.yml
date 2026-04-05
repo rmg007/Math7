@@ -26,7 +26,6 @@ jobs:
           cache: "npm"
           cache-dependency-path: |
             admin-panel/package-lock.json
-            landing-pages/package-lock.json
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -44,16 +43,10 @@ jobs:
           npm ci --legacy-peer-deps
           npm run format || true
 
-      - name: Format Landing Pages
-        run: |
-          cd landing-pages
-          npm ci --legacy-peer-deps
-          npm run format || true
-
       - name: Format Student App
         run: |
-          cd student-app
-          flutter format .
+          cd questerix-student-app
+          dart format .
 
       - name: Format Python
         run: |

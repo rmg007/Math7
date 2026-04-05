@@ -8,8 +8,10 @@
  * Schema aligned with: admin-panel/src/lib/database.types.ts
  */
 
-export type QuestionType = 'mcq' | 'boolean' | 'short_answer' | 'fill_in_blank' | 'ordering';
-export type DifficultyLevel = 'beginner' | 'easy' | 'medium' | 'hard' | 'expert';
+import { CanonicalQuestionType } from '@questerix/core/constants/question-types';
+
+export type QuestionType = CanonicalQuestionType;
+export type DifficultyLevel = 'easy' | 'medium' | 'hard'; // Simplified to match canonical difficulty
 
 export interface QuestionFixture {
   text: string;
@@ -22,7 +24,7 @@ export interface QuestionFixture {
 /** A simple MCQ with a clear correct answer — baseline fixture */
 export const MCQ_BASIC: QuestionFixture = {
   text: 'What is 2 + 2?',
-  question_type: 'mcq',
+  question_type: 'multiple_choice',
   difficulty: 'easy',
   skill_id: null,
   metadata: {
@@ -36,7 +38,7 @@ export const MCQ_BASIC: QuestionFixture = {
 export const BOOLEAN_BASIC: QuestionFixture = {
   text: 'The Earth orbits the Sun.',
   question_type: 'boolean',
-  difficulty: 'beginner',
+  difficulty: 'easy',
   skill_id: null,
   metadata: {
     options: ['True', 'False'],
@@ -48,7 +50,7 @@ export const BOOLEAN_BASIC: QuestionFixture = {
 /** Medium-difficulty MCQ testing deeper domain knowledge */
 export const MCQ_MEDIUM: QuestionFixture = {
   text: 'Which sorting algorithm has the best average-case time complexity?',
-  question_type: 'mcq',
+  question_type: 'multiple_choice',
   difficulty: 'medium',
   skill_id: null,
   metadata: {
@@ -62,7 +64,7 @@ export const MCQ_MEDIUM: QuestionFixture = {
 /** Short answer — no choices, expects free text */
 export const SHORT_ANSWER: QuestionFixture = {
   text: 'In one sentence, explain what a pointer is in C.',
-  question_type: 'short_answer',
+  question_type: 'text_input',
   difficulty: 'hard',
   skill_id: null,
   metadata: {
@@ -74,7 +76,7 @@ export const SHORT_ANSWER: QuestionFixture = {
 /** Hard MCQ with a plausible distractor pattern */
 export const MCQ_HARD: QuestionFixture = {
   text: 'Which HTTP status code indicates a request has been accepted but not yet processed?',
-  question_type: 'mcq',
+  question_type: 'multiple_choice',
   difficulty: 'hard',
   skill_id: null,
   metadata: {

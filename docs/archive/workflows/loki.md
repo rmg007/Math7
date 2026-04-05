@@ -101,7 +101,7 @@ python ops_runner.py tasks.json # executes: ./scripts/code-hygiene-scan.ps1
 
 # Quick checks (use during REFLECT phase)
 cd admin-panel && npx tsc --noEmit && npm run lint
-cd student-app && flutter analyze && flutter test
+cd questerix-student-app && flutter analyze && flutter test
 ```
 
 ## State Persistence

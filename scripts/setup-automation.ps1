@@ -22,10 +22,11 @@ $prePushContent = @"
 echo " Running pre-push quality gates..."
 
 echo " Checking admin-panel Types..."
-cd admin-panel && npm run typecheck || exit 1
+(cd admin-panel && npm run typecheck) || exit 1
 
-echo " Analyzing student-app Flutter..."
-cd ../student-app && flutter analyze || exit 1
+echo " Analyzing Flutter student app..."
+if [ -d questerix-student-app ]; then cd questerix-student-app; elif [ -d student-app ]; then cd student-app; else echo "No questerix-student-app or student-app directory"; exit 1; fi
+flutter analyze || exit 1
 
 echo " All quality gates passed!"
 "@

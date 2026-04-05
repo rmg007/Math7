@@ -10,10 +10,6 @@ param(
     [string]$Target = 'all',
  
     [string]$Branch = 'main',
- 
-    [switch]$IncludeLanding,
-    
-    [switch]$SkipLanding,
     
     [string]$StudentAppDir = (Join-Path (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)) '..\questerix-student-app')
 )
@@ -25,7 +21,6 @@ $RootDir = Split-Path -Parent (Split-Path -Parent $ScriptDir)
 # Load configuration
 $config = Get-Content $ConfigFile -Raw | ConvertFrom-Json
  
-$cfLanding = $config.cloudflare.landing_project
 $cfAdmin = $config.cloudflare.admin_project
 $cfStudent = $config.cloudflare.student_project
  
@@ -36,19 +31,7 @@ if ($env:CLOUDFLARE_API_TOKEN) {
     Write-Host "[INFO] Using CLOUDFLARE_API_TOKEN from environment." -ForegroundColor Gray
 }
  
-# 1. Landing Pages (Optional)
-if ($IncludeLanding -and $cfLanding -and ($Target -eq 'all')) {
-    Write-Host "[DEPLOY] Deploying Landing Pages..." -ForegroundColor Cyan
-    $landingDir = Join-Path $RootDir 'landing-pages\dist'
-    npx.cmd -y wrangler pages deploy $landingDir --project-name $cfLanding --commit-dirty --branch $Branch
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "[PASS] Landing Pages deployed successfully" -ForegroundColor Green
-    } else {
-        Write-Error "Landing Pages deployment FAILED"
-    }
-}
- 
-# 2. Admin Panel
+# 1. Admin Panel (Allowed deploy target)
 if ($Target -eq 'all' -or $Target -eq 'admin-panel') {
     Write-Host "[DEPLOY] Deploying Admin Panel..." -ForegroundColor Cyan
     $adminDist = Join-Path $RootDir 'admin-panel\dist'
@@ -60,7 +43,7 @@ if ($Target -eq 'all' -or $Target -eq 'admin-panel') {
     }
 }
  
-# 3. Student App
+# 2. Student App (Allowed deploy target)
 if ($Target -eq 'all' -or $Target -eq 'questerix-student-app') {
     Write-Host "[DEPLOY] Deploying Student App..." -ForegroundColor Cyan
     # Student App is a sibling by default, can be passed in

@@ -13,8 +13,12 @@ Write-Host "=========================================" -ForegroundColor Cyan
 # Check Flutter student app hardening
 Write-Host ""
 Write-Host "Validating Flutter Student App..."
-if (Test-Path "student-app") {
-    Set-Location "student-app"
+$studentDir = $null
+if (Test-Path "questerix-student-app") { $studentDir = "questerix-student-app" }
+elseif (Test-Path "student-app") { $studentDir = "student-app" }
+
+if ($studentDir) {
+    Set-Location $studentDir
     
     # Check Sentry
     Write-Host "  Checking Sentry integration..."
@@ -57,7 +61,7 @@ if (Test-Path "student-app") {
     
     Set-Location $originalLocation
 } else {
-    Write-Host "  ERROR: student-app not found" -ForegroundColor Red
+    Write-Host "  ERROR: questerix-student-app / student-app not found" -ForegroundColor Red
     $errors++
 }
 
@@ -132,8 +136,8 @@ if ($ciFile) {
 # Check for retry logic
 Write-Host ""
 Write-Host "Checking retry/backoff logic..."
-if (Test-Path "student-app/lib") {
-    $studentLibContent = Get-ChildItem -Path "student-app/lib" -Recurse -Filter "*.dart" -ErrorAction SilentlyContinue | Get-Content -Raw -ErrorAction SilentlyContinue
+if ($studentDir -and (Test-Path "$studentDir/lib")) {
+    $studentLibContent = Get-ChildItem -Path "$studentDir/lib" -Recurse -Filter "*.dart" -ErrorAction SilentlyContinue | Get-Content -Raw -ErrorAction SilentlyContinue
     if ($studentLibContent -match "exponential|backoff|retry") {
         Write-Host "  OK: Retry logic found in student app" -ForegroundColor Green
     } else {

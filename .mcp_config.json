@@ -12,7 +12,7 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-playwright"],
       "env": {
-        "PLAYWRIGHT_CONFIG_PATH": "c:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix\\admin-panel\\playwright.config.ts"
+        "PLAYWRIGHT_CONFIG_PATH": "c:\\dev\\QuesterixFull\\Questerix\\admin-panel\\playwright.config.ts"
       }
     },
     "sequential-thinking": {
@@ -23,7 +23,7 @@
       "command": "C:\\Users\\mhali\\AppData\\Roaming\\Python\\Python313\\Scripts\\uvx.exe",
       "args": ["code-scalpel", "mcp"],
       "env": {
-        "CODE_SCALPEL_ROOT": "c:\\Users\\mhali\\OneDrive\\Desktop\\Important Projects\\Questerix"
+        "CODE_SCALPEL_ROOT": "c:\\dev\\QuesterixFull\\Questerix"
       }
     },
     "codescene": {
@@ -35,6 +35,28 @@
     "browser": {
       "command": "npx",
       "args": ["-y", "@browsermcp/mcp@latest"]
+    },
+    "supermemory": {
+      "url": "https://mcp.supermemory.ai/mcp",
+      "headers": {
+        "Authorization": "Bearer sm_CgG5QDcvgwgL4tecVjDo5h_HCylfugrTBTbIwuuuOhytZqUJqnESpYkZZnGsaCKZWKekgGxSWhmLIlfNnTVHTDv"
+      }
+    },
+    "pare-git": {
+      "command": "npx",
+      "args": ["-y", "@paretools/git"]
+    },
+    "pare-npm": {
+      "command": "npx",
+      "args": ["-y", "@paretools/npm"]
+    },
+    "pare-test": {
+      "command": "npx",
+      "args": ["-y", "@paretools/test"]
+    },
+    "pare-typescript": {
+      "command": "npx",
+      "args": ["-y", "@paretools/typescript"]
     }
   }
 }

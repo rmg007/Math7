@@ -24,5 +24,5 @@ Every file under `src/features/**/pages/` **MUST** have at least one smoke test.
    ```
 4. Mock all Supabase write RPCs and Edge Functions with `page.route()`.
 5. Use `test.use({ storageState: { cookies: [], origins: [] } })` for any test touching Login or Registration forms.
-6. Run `npx tsc --noEmit` (zero errors) and `npx playwright test --list` (tests register) before committing.
+6. Run `pare-typescript_check` (zero errors) and `npx playwright test --list` (tests register) before committing.
 7. Log the new test file in `docs/LEARNING_LOG.md` with `[test created]` tag.

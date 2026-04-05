@@ -21,14 +21,21 @@ $report = @{
 }
 $rootDir = $PWD.Path
 
+# Prefer questerix-student-app; fall back to legacy student-app/
+$studentRoot = $null
+foreach ($c in @("questerix-student-app", "student-app")) {
+    if (Test-Path $c) { $studentRoot = $c; break }
+}
+
 #  SURGICAL TARGETS (Non-recursive discovery where possible)
 $targetPaths = @(
     "admin-panel/src",
-    "student-app/lib",
-    "student-app/test",
     "supabase/functions",
     "supabase/migrations"
 )
+if ($studentRoot) {
+    $targetPaths = @("admin-panel/src", "$studentRoot/lib", "$studentRoot/test", "supabase/functions", "supabase/migrations")
+}
 
 Write-Section "STEP 0: READINESS"
 Write-Host " Tools Ready (Surgical Mode)" -ForegroundColor Green
@@ -99,7 +106,8 @@ foreach ($file in $files) {
 }
 
 Write-Section "STEP 3: LOG AUTOPSY"
-$logs = @("student-app/test_output.txt", "admin-panel/e2e_failure_log.txt", "admin-panel/tsc_errors.txt", "build_log.txt")
+$studentLog = if ($studentRoot) { "$studentRoot/test_output.txt" } else { "questerix-student-app/test_output.txt" }
+$logs = @($studentLog, "admin-panel/e2e_failure_log.txt", "admin-panel/tsc_errors.txt", "build_log.txt")
 foreach ($log in $logs) {
     if (Test-Path $log) {
         $lines = Get-Content $log
@@ -124,7 +132,11 @@ foreach ($f in $relFiles) {
 }
 
 # REL-02: retryWithBackoff co-existing with manual retry loop
-$dartFiles = Get-ChildItem -Path "student-app/lib" -Recurse -File -Include *.dart -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch "\.dart_tool" }
+$dartLib = if ($studentRoot) { "$studentRoot/lib" } else { $null }
+$dartFiles = @()
+if ($dartLib -and (Test-Path $dartLib)) {
+    $dartFiles = Get-ChildItem -Path $dartLib -Recurse -File -Include *.dart -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch "\.dart_tool" }
+}
 foreach ($f in $dartFiles) {
     $content = Get-Content $f.FullName -Raw -ErrorAction SilentlyContinue
     $relPath = $f.FullName.Replace($PWD.Path, "").TrimStart("\")
@@ -216,9 +228,9 @@ foreach ($f in $allTs) {
 }
 
 # REL-10: BUG-04 - Naming drift
-$syncFile = "student-app/lib/src/core/sync/sync_service.dart"
-$dbFile = "student-app/lib/src/core/database/database.dart"
-if ((Test-Path $syncFile) -and (Test-Path $dbFile)) {
+$syncFile = if ($studentRoot) { "$studentRoot/lib/src/core/sync/sync_service.dart" } else { $null }
+$dbFile = if ($studentRoot) { "$studentRoot/lib/src/core/database/database.dart" } else { $null }
+if ($syncFile -and $dbFile -and (Test-Path $syncFile) -and (Test-Path $dbFile)) {
     $syncContent = Get-Content $syncFile -Raw -ErrorAction SilentlyContinue
     $dbContent   = Get-Content $dbFile -Raw -ErrorAction SilentlyContinue
     $knownDrifts = @(
@@ -233,7 +245,7 @@ if ((Test-Path $syncFile) -and (Test-Path $dbFile)) {
 }
 
 # REL-11: Missing tombstone check
-if (Test-Path $syncFile) {
+if ($syncFile -and (Test-Path $syncFile)) {
     $syncContent = Get-Content $syncFile -Raw -ErrorAction SilentlyContinue
     if ($syncContent -match "_performPull" -and $syncContent -notmatch "deleted_at") {
         $report.reliability_risks += "REL-11 / BUG-05 (Ghost Data): missing deleted_at check"
@@ -242,7 +254,10 @@ if (Test-Path $syncFile) {
 
 # REL-12: Hardcoded UUIDs
 $uuidPattern = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-$hardcodedDirs = @("student-app/lib", "admin-panel/src", "supabase/functions")
+$dartLibDir = if ($studentRoot) { "$studentRoot/lib" } else { $null }
+$hardcodedDirs = @()
+if ($dartLibDir) { $hardcodedDirs += $dartLibDir }
+$hardcodedDirs += @("admin-panel/src", "supabase/functions")
 foreach ($dir in $hardcodedDirs) {
     if (Test-Path $dir) {
         $uuidHits = Get-ChildItem -Path $dir -Recurse -File -Include *.dart,*.ts,*.tsx | Where-Object { $_.FullName -notmatch "node_modules|dist|\.dart_tool" } | Select-String -Pattern $uuidPattern -ErrorAction SilentlyContinue

@@ -23,7 +23,7 @@ graph TD
     SA_BUILD --> CF
 ```
 
-> **CRITICAL:** `landing-pages` are **EXCLUDED** by default. To deploy them, you must explicitly use the `-IncludeLanding` flag. This is a safety measure to prevent unauthorized changes to public-facing pages.
+> **CRITICAL:** Deployment allowlist is strict: only `questerix` and `questerix-student-app` are deployable. Never deploy `landing-pages` or any other app from this pipeline.
 
 ### 1. First-Time Setup
 
@@ -46,9 +46,6 @@ notepad master-config.json
 ```powershell
 # Full deployment (all apps)
 ./orchestrator.ps1
-
-# Deploy ALL apps (including landing pages - CAUTION)
-./orchestrator.ps1 -IncludeLanding
 
 # Staging deployment
 ./orchestrator.ps1 -Env staging
@@ -83,7 +80,7 @@ questerix/
 │   ├── src/config/env.ts       # Environment accessor (React)
 │   └── src/vite-env.d.ts       # TypeScript definitions
 │
-└── student-app/
+└── questerix-student-app/
     └── lib/src/core/config/
         └── env.dart            # Environment accessor (Flutter)
 ```
@@ -303,7 +300,7 @@ npm run dev
 ### Student App
 
 ```powershell
-cd student-app
+cd questerix-student-app
 # Run with dart-define flags:
 flutter run -d chrome --dart-define=SUPABASE_URL=https://... --dart-define=SUPABASE_ANON_KEY=...
 ```

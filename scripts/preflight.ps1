@@ -18,6 +18,20 @@ if (!(Test-Path $TempScripts)) { New-Item -ItemType Directory -Path $TempScripts
 
 Write-Host "Starting Preflight Validation Suite..." -ForegroundColor Cyan
 
+# Student app: nested under repo root (admin-panel sibling) or sibling of Questerix/ (split checkout)
+$StudentAppDir = $null
+$NestedStudent = Join-Path $ProjectRoot "questerix-student-app"
+$SiblingStudent = Join-Path (Split-Path $ProjectRoot -Parent) "questerix-student-app"
+if (Test-Path $NestedStudent) {
+    $StudentAppDir = (Resolve-Path $NestedStudent).Path
+    Write-Host "  Student app: $StudentAppDir (nested)" -ForegroundColor Gray
+} elseif (Test-Path $SiblingStudent) {
+    $StudentAppDir = (Resolve-Path $SiblingStudent).Path
+    Write-Host "  Student app: $StudentAppDir (sibling checkout)" -ForegroundColor Gray
+} else {
+    Write-Host "  [~] questerix-student-app not found — skipping Flutter jobs" -ForegroundColor Yellow
+}
+
 $Jobs = @()
 
 # Function to start a preflight job safely
@@ -59,8 +73,12 @@ $Jobs += Start-PreflightJob "admin-typecheck" "$ProjectRoot/admin-panel" "npx -y
 # 2. Admin Panel Linting
 $Jobs += Start-PreflightJob "admin-lint" "$ProjectRoot/admin-panel" "npm run lint"
 
-# 3. Student App Static Analysis
-$Jobs += Start-PreflightJob "student-analyze" "$ProjectRoot/questerix-student-app" "flutter analyze"
+# 3. Student App Static Analysis + unit tests (parallel with other preflight jobs)
+if ($null -ne $StudentAppDir) {
+    $pubThen = 'flutter pub get; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; '
+    $Jobs += Start-PreflightJob "student-analyze" $StudentAppDir ($pubThen + 'flutter analyze')
+    $Jobs += Start-PreflightJob "student-test" $StudentAppDir ($pubThen + 'flutter test --concurrency=4')
+}
 
 # 4. Dependency Validation
 $Jobs += Start-PreflightJob "deps-validate" "$ProjectRoot" "npm run deps:validate"

@@ -77,7 +77,7 @@ npm test -- --coverage                        # Unit tests
 npx playwright test tests/accessibility.spec.ts  # A11y
 
 # Student App (Flutter)
-cd student-app
+cd questerix-student-app
 flutter analyze                               # Static analysis
 flutter test                                  # Unit tests
 

@@ -7,6 +7,7 @@ import { isValidUUID } from '@/lib/utils';
 import type { QuestionListItem } from '@/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PaginatedResponse, PaginationParams } from '../types';
+import { useBulkDeleteQuestions } from './use-questions-bulk';
 
 type Question = Database['public']['Tables']['questions']['Row'];
 export type QuestionInsert = Database['public']['Tables']['questions']['Insert'];
@@ -256,31 +257,9 @@ export function useUpdateQuestion() {
 }
 
 export function useDeleteQuestion() {
-  const queryClient = useQueryClient();
-  const { currentApp, isSuperAdmin } = useApp();
-
+  const { mutateAsync } = useBulkDeleteQuestions();
   return useMutation({
-    mutationFn: async (question_id: string) => {
-      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
-
-      let query = supabase
-        .from('questions')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('question_id', question_id);
-
-      if (!isSuperAdmin && currentApp?.app_id) {
-        query = query.eq('app_id', currentApp.app_id);
-      }
-
-      const { error } = await query;
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        predicate: (query) =>
-          ['questions', 'questions-paginated'].includes(query.queryKey[0] as string),
-      });
-    },
+    mutationFn: (question_id: string) => mutateAsync([question_id]),
   });
 }
 

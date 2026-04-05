@@ -26,13 +26,13 @@ $config = Get-Content $ConfigFile -Raw | ConvertFrom-Json
 $registryItems = @(
     # Apps from Cloudflare Config
     @{ name = $config.cloudflare.admin_project; type = "app"; platform = "cloudflare-pages"; path = "admin-panel"; stack = @{ framework = "react"; build = "vite" } }
-    @{ name = $config.cloudflare.student_project; type = "app"; platform = "cloudflare-pages"; path = "student-app"; stack = @{ framework = "flutter"; target = "web" } }
+    @{ name = $config.cloudflare.student_project; type = "app"; platform = "cloudflare-pages"; path = "questerix-student-app"; stack = @{ framework = "flutter"; target = "web" } }
     @{ name = $config.cloudflare.landing_project; type = "app"; platform = "cloudflare-pages"; path = "landing-pages"; stack = @{ framework = "react"; build = "vite" } }
     
     # Core Infrastructure
     @{ name = "questerix-backend"; type = "service"; platform = "supabase"; path = "supabase"; stack = @{ database = "postgresql"; rls = "enabled" } }
     @{ name = "project-oracle"; type = "service"; platform = "local-psh"; path = "scripts/knowledge-base"; stack = @{ engine = "pgvector"; model = "text-embedding-3-small" } }
-    @{ name = "questerix-domain"; type = "library"; platform = "dart-package"; path = "questerix_domain"; stack = @{ framework = "dart"; codegen = "freezed" } }
+    @{ name = "questerix-domain"; type = "library"; platform = "dart-package"; path = "questerix-student-app/packages/questerix_domain"; stack = @{ framework = "dart"; codegen = "freezed" } }
 )
 
 Write-Host " Syncing Knowledge Registry to Supabase..." -ForegroundColor Cyan

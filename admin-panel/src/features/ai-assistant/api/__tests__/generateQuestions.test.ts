@@ -1,4 +1,3 @@
-import { env } from '@/config/env';
 import { supabase } from '@/lib/supabase';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { generateQuestions } from '../generateQuestions';

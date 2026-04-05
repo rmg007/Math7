@@ -58,7 +58,16 @@
     "**/.gemini/antigravity/knowledge": true,
     "**/*.min.js": true,
     "**/*.map": true,
-    "**/questerix-cortex/outputs": true
+    "**/questerix-cortex/outputs": true,
+    "**/package-lock.json": true,
+    "**/database.types.utf8.ts": true,
+    "**/database.types.ts": true,
+    "**/*.chunk.js": true,
+    "**/*.min.css": true,
+    "**/*.chunk.css": true,
+    "**/.idea": true,
+    "**/landing-pages": true,
+    "**/student-app": true
   },
 
   // ── File Watcher Exclusions (reduces CPU/disk I/O dramatically) ───────────

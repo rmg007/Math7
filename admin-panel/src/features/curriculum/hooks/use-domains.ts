@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { escapePostgrestSearch } from '@/lib/postgrest-utils';
 import { isValidUUID } from '@/lib/utils';
 import { CurriculumStatus, PaginatedResponse, PaginationParams } from '../types';
+import { useBulkDeleteDomains } from './use-domains-bulk';
 
 type Domain = Database['public']['Tables']['domains']['Row'];
 
@@ -208,33 +209,9 @@ export function useUpdateDomain() {
 }
 
 export function useDeleteDomain() {
-  const queryClient = useQueryClient();
-  const { currentApp, isSuperAdmin } = useApp();
-
+  const { mutateAsync } = useBulkDeleteDomains();
   return useMutation({
-    mutationFn: async (domain_id: string) => {
-      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
-
-      // Super Admins can delete any domain (RLS will enforce perms)
-      // Tenant Admins are restricted to their current app via RLS and this extra check
-      let query = supabase
-        .from('domains')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('domain_id', domain_id);
-
-      if (!isSuperAdmin && currentApp?.app_id) {
-        query = query.eq('app_id', currentApp.app_id);
-      }
-
-      const { error } = await query;
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        predicate: (query) =>
-          ['domains', 'domains-paginated'].includes(query.queryKey[0] as string),
-      });
-    },
+    mutationFn: (domain_id: string) => mutateAsync([domain_id]),
   });
 }
 

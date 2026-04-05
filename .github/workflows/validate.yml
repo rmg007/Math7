@@ -17,52 +17,54 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
-      - name: Make scripts executable
-        run: chmod +x scripts/*.sh
-
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Test Edge rate limiter (Deno)
+        working-directory: supabase/functions
+        run: deno test --allow-env _shared/rate-limiter.test.ts
+
       - name: Install dependencies
         run: |
-          cd admin-panel && npm ci --legacy-peer-deps --legacy-peer-deps
-          cd ../student-app && flutter pub get
-
-          # Pre-download web sdk for flutter to avoid timeout in Phase 2
+          cd admin-panel && npm ci --legacy-peer-deps
+          cd ../questerix-student-app && flutter pub get
           flutter precache --web
 
-      - name: Validate Phase -1
-        run: ./scripts/validate-phase--1.sh
+      - name: Check design token sync
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/check-tokens-freshness.ps1
 
       - name: Validate Phase 0
-        run: ./scripts/validate-phase-0.sh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/validate-phase-0.ps1
 
       - name: Validate Phase 1
-        # Expects Supabase CLI and Docker (present in ubuntu-latest)
-        run: ./scripts/validate-phase-1.sh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/validate-phase-1.ps1
 
       - name: Validate Phase 2
-        # Tries web-server since no android device
-        run: ./scripts/validate-phase-2.sh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/validate-phase-2.ps1
 
       - name: Validate Phase 3
-        run: ./scripts/validate-phase-3.sh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/validate-phase-3.ps1
 
       - name: Upload Logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: logs-phases-0-3
-          path: artifacts/validation/*.log
+          path: questerix-cortex/outputs/logs/preflight/*.log
 
   validate-phase-4-android:
     runs-on: ubuntu-latest
@@ -81,33 +83,26 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Make scripts executable
-        run: chmod +x scripts/*.sh
-
       - name: Setup Android SDK
         run: |
-          # Use sdkmanager from ANDROID_HOME
           SDK_MANAGER=$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
           if [ ! -f "$SDK_MANAGER" ]; then
             SDK_MANAGER=$(find $ANDROID_HOME -name sdkmanager | head -n 1)
           fi
           echo "Using sdkmanager at: $SDK_MANAGER"
           yes | $SDK_MANAGER --licenses
-          $SDK_MANAGER "platforms;android-36" "build-tools;36.0.0"
-          # Phase 4 validation checks for API 36 packages.
+          $SDK_MANAGER "platforms;android-34" "build-tools;34.0.0"
 
       - name: Install Dependencies
         run: |
-          # Sentry needs to be present for checks
-          cd student-app && flutter pub get
+          cd questerix-student-app && flutter pub get
 
       - name: Validate Phase 4
-        # Requires Android SDK and builds APK with dummy Sentry tokens
-        run: ./scripts/validate-phase-4.sh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/validate-phase-4.ps1
 
       - name: Upload Logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: logs-phase-4
-          path: artifacts/validation/*.log
+          path: questerix-cortex/outputs/logs/preflight/*.log

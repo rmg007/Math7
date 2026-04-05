@@ -1,6 +1,18 @@
 # Questerix Learning Log
 
-## [2026-03-26] — Admin Panel Modularization & Type-Safety (Multi-Repo Delivery Plan)
+## [2026-03-27] � Student App SQLite Migration Hardening & Self-Healing (Phase 18)
+
+- **What was done**: Resolved persistent SQLite migration drift by implementing a "Phase 0: Foundation Check" at the start of all schema upgrades. This self-healing pass ensures core columns added in earlier versions (v1-10) are present in major tables (`attempts`, `sessions`, `skill_progress`) before any dependent operations (like index creation) are run. Also hardened the schema by enforcing `withDefault(currentDateAndTime)` across all timestamp columns in `tables.dart`, preventing `NOT NULL` constraint violations for existing rows during column additions.
+- **Key Design Decision**: Put the self-healing checks _outside_ of version-gated blocks but _inside_ the migration transaction. This guarantees that any user on _any_ version will have their core schema verified and repaired before proceeding to the specific version-range migrations.
+- **Prevention Rules Discovered**:
+  - **MANDATORY**: When adding columns to existing SQLite tables via Drift, always provide a `withDefault` value if the column is non-nullable. This handles existing rows gracefully.
+  - **MANDATORY**: Migration logic that creates indices MUST be preceded by a check (via `addSafe`) that the indexed columns actually exist. Never assume a user's local database matches the expected schema version perfectly due to potential interrupted upgrades.
+  - **Drift Tip**: When using `Companion` classes for updates, non-nullable columns with defaults in the schema still require explicit `Value()` wrappers if they are being updated or if the companion is used for partial updates.
+- **Verification Result**: `flutter test test/src/core/database/database_test.dart` passed for full migration sequence (v1 -> v15).
+
+---
+
+## [2026-03-26] � Admin Panel Modularization & Type-Safety (Multi-Repo Delivery Plan)
 
 - **What was done**: Focused on decomposing common UI logic in the "Platform" feature set. Specifically, refactored `AppsPage.tsx` and `SubjectsPage.tsx` to utilize a new modular `PlatformToolbar` system (Search, Filter, Status). Converted the `StatusFilter` into a generic TypeScript component to eliminate `any` type casting in `onChange` handlers, achieving 100% type safety for status-based filtering across both pages.
 - **Key Design Decision**: Implemented `StatusFilter<T extends string>` instead of using a string-only interface. This allows the compiler to enforce that the `onChange` value matches the specific union types (e.g., `'all' | 'active' | 'inactive'`) defined in the parent page's state hook, preventing runtime filter mismatches.
@@ -11,7 +23,7 @@
 
 ---
 
-## [2026-03-25] — Performance Indexing & App Hardening (Multi-Repo Delivery Plan)
+## [2026-03-25] � Performance Indexing & App Hardening (Multi-Repo Delivery Plan)
 
 - **What was done**: Concluded the final P1 stabilization tasks for the Student App and Admin Panel. Delivered `PERF-DB-01` by adding explicitly defined composite indexes for `user_activity` and `attempts` (tied to `created_at` and `activity_date`), plus comprehensive soft-delete index coverage across 9 core tables. Verified the migration of `onboarding_screen.dart` to a Riverpod-backed `ConsumerStatefulWidget` approach, finally eliminating the long-standing risk of ephemeral re-render bugs during the age-gate step.
 - **Key Design Decision**: Ensured soft-delete scopes (`deleted_at IS NULL`) are baked directly into the PostgreSQL partial index definitions. This keeps query planners fast for live data without bloating the B-Tree with deleted records.
@@ -22,7 +34,7 @@
 
 ---
 
-## [2026-03-25] — Multi-Repo Delivery Plan: Week 1 CI Workflow Fixes
+## [2026-03-25] � Multi-Repo Delivery Plan: Week 1 CI Workflow Fixes
 
 - **What was done**: Executed Week 1 (Quick Wins) of the Multi-Repo Delivery Plan for CI stability. Fixed the `nightly-e2e.yml` test glob and Playwright project names (changed `chromium` to `desktop`) to correctly target E2E environments, and added required auth environment variables (`TEST_ADMIN_EMAIL`, etc.). Cleaned `ci.yml` of duplicate E2E playwright execution. Finally, optimized local git hooks: removed the slow `tsc --noEmit` from `.husky/pre-commit` and moved it to `.husky/pre-push`, replacing the heavy local E2E smoke tests which are now enforced strictly in CI.
 - **Key Design Decision**: Shifted heavy execution (like Playwright smoke tests and full TypeScript typechecks) to later in the lifecycle (pre-push and CI) rather than pre-commit. This significantly reduces developer friction and "ceremony" delay during frequent local commits.
@@ -31,7 +43,7 @@
   - **Git Hook Performance**: Never place heavy operations like `npm run test:e2e:smoke` or full `tsc --noEmit` in `pre-commit`. Fast feedback (lint-staged, secrets check) belongs in `pre-commit`; heavier blocking feedback belongs in `pre-push` or CI.
 - **Blockers / Next Steps**: The repositories are still situated in a OneDrive directory, which continues to risk lock-file collision and spurious EBUSY errors. The next major phase is relocating the repositories to a non-syncing local directory.
 
-## [2026-03-25] — AI Studio E2E Hardening & Environment Synchronization
+## [2026-03-25] � AI Studio E2E Hardening & Environment Synchronization
 
 - **What was done**: Stabilized the AI Studio E2E test suite by resolving environment configuration blockers and refining locator strategies. Centralized environment variable access in `src/config/env.ts` and configured `VITE_WORKERS_URL` for the test environment. Hardened `ai-studio-workers.e2e.spec.ts` with robust locators for Shadcn `Select` and the mandatory "Review" checkbox, ensuring valid persistence cycles in CI and local runs.
 - **Key Design Decision**: Centralized environment validation in the core config layer (`env.ts`). This ensures the application "fails fast" with a clear error if critical variables like `VITE_WORKERS_URL` are missing, rather than failing silently or with cryptic network errors during runtime.
@@ -43,19 +55,19 @@
 
 ---
 
-## [2026-03-25] — AI Studio Modernization: Dynamic Dropdowns, Prompt Persistence & History
+## [2026-03-25] � AI Studio Modernization: Dynamic Dropdowns, Prompt Persistence & History
 
-- **What was done**: Full AI Studio overhaul — replaced hardcoded domain buttons and static config with dynamic dropdowns, added tag-based topic input, prompt preview/editor panel, generation history page with master-detail layout, and navigation link. Created `use-studio-prompts.ts` hook for CRUD operations, refactored `use-studio-generator.ts` for dynamic domains/multi-topic support, wrote migration SQL for `studio_prompts` table with FK on `questions`.
+- **What was done**: Full AI Studio overhaul � replaced hardcoded domain buttons and static config with dynamic dropdowns, added tag-based topic input, prompt preview/editor panel, generation history page with master-detail layout, and navigation link. Created `use-studio-prompts.ts` hook for CRUD operations, refactored `use-studio-generator.ts` for dynamic domains/multi-topic support, wrote migration SQL for `studio_prompts` table with FK on `questions`.
 - **Key Design Decision**: Used `const db = supabase as any` type bridge in `use-studio-prompts.ts` because the database migration hasn't been applied yet. This avoids TypeScript errors while keeping the hook functional. Once `supabase gen types typescript` is run post-migration, the `as any` can be removed.
 - **Prevention Rules Discovered**:
-  - When refactoring hook signatures (e.g., `topic: string` → `topics: string[]`), ALL test files importing those types must be updated simultaneously — partial updates cause cascading TSC failures.
-  - For database tables that don't exist yet, use a clean `const db = supabase as any` pattern at the top of the hook file rather than scattering `as any` casts throughout — it's cleaner to audit and remove later.
+  - When refactoring hook signatures (e.g., `topic: string` ? `topics: string[]`), ALL test files importing those types must be updated simultaneously � partial updates cause cascading TSC failures.
+  - For database tables that don't exist yet, use a clean `const db = supabase as any` pattern at the top of the hook file rather than scattering `as any` casts throughout � it's cleaner to audit and remove later.
   - When adding `.map()` callbacks in TSX files under `strict` mode, always provide explicit type annotations for the callback parameter to avoid TS7006 implicit `any` errors.
 - **Blocker**: Migration `supabase/migrations/20260325000001_create_studio_prompts.sql` must be manually applied before the feature works at runtime.
 
 ---
 
-## [2026-03-22] — Production Deployment: Admin & Student Apps Live
+## [2026-03-22] � Production Deployment: Admin & Student Apps Live
 
 - **Root Cause**: Manual deployment requested by user to sync latest changes to production environment.
 - **Fix**: Executed the unified deployment pipeline:
@@ -67,10 +79,10 @@
   - Student App: `https://ec173809.questerix-student.pages.dev`
 - **Prevention Rule**: **ALWAYS** run `generate-env.ps1` before deployment to ensure environment variables are correctly synchronized from `master-config.json`. **MANDATORY**: Ensure `flutter build web` is run without `--tree-shake-icons` if the app uses dynamic icon names or the custom design system font.
 
-## [2026-03-20] — Hardening Session: TSC Zero, Vitest Green (607/607), Flutter Zero Issues
+## [2026-03-20] � Hardening Session: TSC Zero, Vitest Green (607/607), Flutter Zero Issues
 
 - **Root Cause**: Multiple overlapping issues discovered by running `tsc --noEmit` and `vitest run`:
-  1. **Auth guard test TSC2349 (`never`)**: TypeScript CFA does not track mutations of `let T | null` variables through callback closures — the type stays `null` in CFA's eyes even after assignment inside `mockImplementation`. Fix: wrap in a `const capture = { fn: null }` object — property mutations ARE tracked through CFA.
+  1. **Auth guard test TSC2349 (`never`)**: TypeScript CFA does not track mutations of `let T | null` variables through callback closures � the type stays `null` in CFA's eyes even after assignment inside `mockImplementation`. Fix: wrap in a `const capture = { fn: null }` object � property mutations ARE tracked through CFA.
   2. **DocumentUploader hoisting**: `vi.mock('mammoth', ...)` factories referenced `mockExtractRawText` declared as a bare `const` below them. Vitest hoists `vi.mock` so the bare `const` doesn't exist yet. Fix: `vi.hoisted()`.
   3. **DocumentUploader `file.arrayBuffer`**: JSDOM's `File` does not implement `arrayBuffer()`. The component calls it for PDF/DOCX. Fix: polyfill `arrayBuffer()` on each test `File` instance inside `createFile`.
   4. **DocumentUploader unhandled rejection**: `Promise.reject(new Error(...))` assigned to the mock without a `.catch()` handler fires Node's `unhandledRejection` event, which Vitest treats as a test error even if the component handles it. Fix: call `.catch(() => {})` on the rejected promise before passing it to the mock.
@@ -79,36 +91,36 @@
   7. **SEC-P0-03 localStorage Audit**: All five identified files store only boolean flags and opaque IDs. No PII. Closed as PASS.
 - **Prevention Rules**:
   - Always use `vi.hoisted(() => ({ fn: vi.fn() }))` for anything referenced inside `vi.mock` factories.
-  - When testing components that call `file.arrayBuffer()`, polyfill it in the test helper — JSDOM is missing it.
+  - When testing components that call `file.arrayBuffer()`, polyfill it in the test helper � JSDOM is missing it.
   - For rejected promises in mocks: always chain `.catch(() => {})` immediately after `Promise.reject(...)`.
-  - TypeScript CFA narrows `let T | null` set inside callbacks as "never called" — use object wrapper `{ fn: T | null }` to force property-level tracking.
+  - TypeScript CFA narrows `let T | null` set inside callbacks as "never called" � use object wrapper `{ fn: T | null }` to force property-level tracking.
 - **Tests Created / Fixed**:
-  - `test/features/auth/controllers/auth_controller_test.dart` — full rewrite, 8/8 passing [test created]
-  - `admin-panel/src/features/ai-assistant/components/__tests__/DocumentUploader.test.tsx` — vi.hoisted, arrayBuffer polyfill, unhandledRejection suppression, 13/13 passing [test created]
-  - `admin-panel/src/features/auth/components/__tests__/auth-guard.test.tsx` — TSC2349 fix, 8/8 passing
-  - `admin-panel/src/__tests__/integration/security/rls-bypass.test.ts` — status constraint + apps assertion fix
+  - `test/features/auth/controllers/auth_controller_test.dart` � full rewrite, 8/8 passing [test created]
+  - `admin-panel/src/features/ai-assistant/components/__tests__/DocumentUploader.test.tsx` � vi.hoisted, arrayBuffer polyfill, unhandledRejection suppression, 13/13 passing [test created]
+  - `admin-panel/src/features/auth/components/__tests__/auth-guard.test.tsx` � TSC2349 fix, 8/8 passing
+  - `admin-panel/src/__tests__/integration/security/rls-bypass.test.ts` � status constraint + apps assertion fix
 
 ---
 
 ## [2026-03-20] - GoRouter Integration, Riverpod Error Observer & Test Hoisting Fix
 
 - **Root Cause**: Three distinct issues in the same session:
-  1. **Student App** lacked declarative routing — `Navigator.push()` calls are brittle for deep links.
+  1. **Student App** lacked declarative routing � `Navigator.push()` calls are brittle for deep links.
   2. **Student App** had no global mechanism to capture unhandled async Riverpod provider failures; each screen required manual try/catch.
-  3. **Admin Panel** `auth-guard.test.tsx` crashed at load time with `ReferenceError: Cannot access 'mockGetSession' before initialization` — a classic `vi.mock` hoist trap.
+  3. **Admin Panel** `auth-guard.test.tsx` crashed at load time with `ReferenceError: Cannot access 'mockGetSession' before initialization` � a classic `vi.mock` hoist trap.
 - **Fix**:
   1. **GoRouter Setup (QUAL-S06.1)**: Added `go_router ^14.0.0` to `pubspec.yaml`. Created `lib/src/core/routing/app_router.dart` with: public/auth route separation, `ShellRoute` wrapping `MainShell` (which manages its own tab stack), typed `_SessionResultParams` for `SessionResultScreen`, and a `_AuthStateNotifier` ChangeNotifier bridging Supabase auth events to `refreshListenable`. Generated `app_router.g.dart` via `build_runner`.
   2. **Riverpod Error Observer (PERF-S02)**: Created `lib/src/core/errors/riverpod_error_observer.dart` implementing `ProviderObserver.providerDidFail`. Filters expected transient errors (auth, network) and routes unexpected ones to `errorTracker.captureException`. Wired into the root `ProviderContainer` in `main.dart`.
   3. **Vitest vi.hoisted fix**: `vi.mock()` is hoisted to the top of the file before any `const` declarations. Variables used inside the factory callback MUST be declared with `vi.hoisted(() => ({ ... }))` to ensure they exist at hoist time. Rewrote `auth-guard.test.tsx` accordingly.
   4. **use-domains-bulk.test.tsx fix**: `useUpdateDomainOrder` calls `supabase.rpc()`, not `supabase.from().update()`. The mock factory was missing a top-level `rpc: vi.fn()` entry. Added it and rewrote AP-CURR-013 tests to assert against `supabase.rpc` directly.
 - **Prevention Rule**:
-  - **NEVER** declare mock fn references as bare `const` when they are referenced inside `vi.mock()` factories — use `vi.hoisted()` instead. This is the #1 cause of "Cannot access X before initialization" in Vitest.
+  - **NEVER** declare mock fn references as bare `const` when they are referenced inside `vi.mock()` factories � use `vi.hoisted()` instead. This is the #1 cause of "Cannot access X before initialization" in Vitest.
   - **ALWAYS** check the actual implementation before writing Supabase mock assertions. `useUpdateDomainOrder` used `.rpc()` not `.from().update()`, so the mock needed a top-level `rpc` stubs.
-  - **GoRouter & MainShell**: `MainShell` uses `IndexedStack` for tab navigation internally — it does NOT accept a GoRouter `child` widget. Use `ShellRoute` to wrap it but provide a `_ShellPlaceholder` as the `/home` route body; tab changes happen via `currentTabProvider` state, not push-based navigation.
+  - **GoRouter & MainShell**: `MainShell` uses `IndexedStack` for tab navigation internally � it does NOT accept a GoRouter `child` widget. Use `ShellRoute` to wrap it but provide a `_ShellPlaceholder` as the `/home` route body; tab changes happen via `currentTabProvider` state, not push-based navigation.
   - **build_runner** must be re-run whenever `@riverpod`-annotated files change (generates `.g.dart`). Lock file conflicts resolve themselves on retry.
 - **Tests Created**:
-  - `admin-panel/src/features/auth/components/__tests__/auth-guard.test.tsx` — rewrote with `vi.hoisted()` [test created]
-  - `admin-panel/src/features/curriculum/hooks/__tests__/use-domains-bulk.test.tsx` — rewrote AP-CURR-013 block to use `rpc` mock [test created]
+  - `admin-panel/src/features/auth/components/__tests__/auth-guard.test.tsx` � rewrote with `vi.hoisted()` [test created]
+  - `admin-panel/src/features/curriculum/hooks/__tests__/use-domains-bulk.test.tsx` � rewrote AP-CURR-013 block to use `rpc` mock [test created]
 
 ---
 
@@ -240,7 +252,7 @@
 
 ## [2026-02-28] - Slot K-1: Security Gate (OWASP ZAP + Snyk)
 
-- **Root Cause**: Most K-1 sub-tasks were already partially implemented but had real gaps: (1) `security.yml` referenced `student-app` which was moved to a separate repo � would fail CI; (2) Snyk was not wired up at all; (3) `pip-audit` + `Bandit` didn't exist; (4) `dependabot.yml` listed `landing-pages`, `student-app`, and `content-engine` directories that don't exist in this repo.
+- **Root Cause**: Most K-1 sub-tasks were already partially implemented but had real gaps: (1) `security.yml` referenced the Flutter app under the old path `student-app` (canonical checkout/dir name is now `questerix-student-app`, often a sibling repo) — would fail CI; (2) Snyk was not wired up at all; (3) `pip-audit` + `Bandit` didn't exist; (4) `dependabot.yml` listed `landing-pages`, obsolete `student-app/`, and `content-engine` directories that don't exist in this repo.
 - **Fix**: Rewrote `security.yml` with 5 distinct jobs: CodeQL SAST, dependency-review (PR gate), npm audit (`--audit-level=high`), Snyk (gracefully skips if `SNYK_TOKEN` secret absent), and Python security (`pip-audit` + `Bandit` on all `scripts/*.py`). Cleaned `dependabot.yml` to only cover directories that actually exist (`admin-panel/`, `questerix-cortex/`, root, GitHub Actions). Created `docs/SECURITY_GATES.md` documenting all scanners, setup instructions, and known gaps.
 - **Bug caught during work**: GitHub Actions `if:` expressions cannot reference the `secrets` context � only `env`, `github`, `needs`, `vars`, `inputs`, `steps` contexts are available in `if:`. Fixed by removing the `secrets.SNYK_TOKEN` check from the `if:` condition (Snyk action handles missing token with its own error; `continue-on-error: true` keeps the job green).
 - **Prevention Rule**: Never reference `secrets.*` in `if:` conditions. Use a repository variable (`vars.FEATURE_FLAG`) to conditionally enable optional steps. Always verify `dependabot.yml` entries point to directories that actually exist.
@@ -1430,7 +1442,7 @@ All target test files for Supabase hook refactoring have been stabilized and sta
 ### [2026-02-22-Phase13] Session Context
 
 - **Trigger**: Tasks.md Phase 13 Step 2: Fix patterns that have bitten us multiple times (contract drift, missing imports, inconsistent test setups).
-- **Scope**: `admin-panel/__tests__`, `admin-panel/src/features`, `Husky pre-commit`, `student-app/test`.
+- **Scope**: `admin-panel/__tests__`, `admin-panel/src/features`, `Husky pre-commit`, `questerix-student-app/test`.
 - **Outcome**: Established automated contract guard between Dart/TS fixtures; hardened Admin Panel architecture with generalized isolation tests; integrated global type-checking in CI/CD pipeline; migrated 3 critical Flutter test files to standard helpers.
 
 ### Implementation Details
@@ -1467,13 +1479,13 @@ All target test files for Supabase hook refactoring have been stabilized and sta
 
 ### [2026-02-22-Phase13] Files Modified
 
-| Area              | Files                                                                                                                                                                                         |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Testing**       | `admin-panel/src/__tests__/contract-drift.test.ts` (new), `admin-panel/src/__tests__/architecture.test.ts`                                                                                    |
-| **Core**          | `admin-panel/src/types/platform.ts` (new), `admin-panel/src/features/platform/hooks/use-apps.ts`, `admin-panel/src/features/curriculum/components/skill-list.tsx`                             |
-| **Husky**         | `.husky/pre-commit`                                                                                                                                                                           |
-| **Student Tests** | `student-app/test/core/sync/sync_service_test.dart`, `student-app/test/features/progress/progress_screen_test.dart`, `student-app/test/features/curriculum/screens/practice_screen_test.dart` |
-| **Documentation** | `tasks.md`, `LEARNING_LOG.md`                                                                                                                                                                 |
+| Area              | Files                                                                                                                                                                                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Testing**       | `admin-panel/src/__tests__/contract-drift.test.ts` (new), `admin-panel/src/__tests__/architecture.test.ts`                                                                                                                  |
+| **Core**          | `admin-panel/src/types/platform.ts` (new), `admin-panel/src/features/platform/hooks/use-apps.ts`, `admin-panel/src/features/curriculum/components/skill-list.tsx`                                                           |
+| **Husky**         | `.husky/pre-commit`                                                                                                                                                                                                         |
+| **Student Tests** | `questerix-student-app/test/core/sync/sync_service_test.dart`, `questerix-student-app/test/features/progress/progress_screen_test.dart`, `questerix-student-app/test/features/curriculum/screens/practice_screen_test.dart` |
+| **Documentation** | `tasks.md`, `LEARNING_LOG.md`                                                                                                                                                                                               |
 
 ### [2026-02-22-Phase13] Verification
 
@@ -1520,7 +1532,7 @@ The following work was also completed as part of the Phase 10 & 11 security spri
 
 #### SQLCipher Local DB Encryption (Student App)
 
-- **Feature**: Migrated `student-app` local Drift database from unencrypted SQLite to SQLCipher for at-rest encryption.
+- **Feature**: Migrated the student Flutter app (`questerix-student-app`; formerly checked out as `student-app`) local Drift database from unencrypted SQLite to SQLCipher for at-rest encryption.
 - **Pattern**: `NativeDatabase` factory with key derivation from the device's secure storage. Key is generated on first launch (CSPRNG) and stored in `flutter_secure_storage`.
 - **Fallback**: If decryption fails (wrong key or corruption), app creates a fresh encrypted DB and re-syncs from server.
 - **Lesson**: Always test the "key rotation" codepath in CI � a wrong passphrase silently returns an unreadable DB, not an exception, in some SQLCipher builds.
@@ -1783,7 +1795,7 @@ The following work was also completed as part of the Phase 10 & 11 security spri
 
 #### BUG-STACK: Outer `catch(e)` in `main.dart` silently discarded stack trace [test created N/A � startup crash path]
 
-- **File**: `student-app/lib/main.dart` line 55
+- **File**: `questerix-student-app/lib/main.dart` line 55
 - **Issue**: The outer catch block that handles critical initialization failures (`Env.validate()` crash, Supabase init failure) only captured `e`, discarding the stack. The inner catch at line 30 correctly used `(e, stack)`. Production crashes from this path would show only the exception message with no stack.
 - **Fix**: Changed `catch (e)` ? `catch (e, stack)` and added `debugPrintStack(stackTrace: stack, label: 'main.dart critical init failure')`.
 - **Lesson**: Every catch block that handles app-critical failures must capture and report the stack. In Flutter, `debugPrintStack` is the correct API for this in non-release builds � it outputs to the debug console and is no-op in profile/release.
@@ -1796,10 +1808,10 @@ The following work was also completed as part of the Phase 10 & 11 security spri
 
 ### [2026-02-20-Security] Files Modified
 
-| File                        | Change                                                     |
-| --------------------------- | ---------------------------------------------------------- |
-| `student-app/lib/main.dart` | `catch (e)` ? `catch (e, stack)` + `debugPrintStack()`     |
-| `tasks.md`                  | Added Phase 8 triage table; marked main.dart task complete |
+| File                                  | Change                                                     |
+| ------------------------------------- | ---------------------------------------------------------- |
+| `questerix-student-app/lib/main.dart` | `catch (e)` ? `catch (e, stack)` + `debugPrintStack()`     |
+| `tasks.md`                            | Added Phase 8 triage table; marked main.dart task complete |
 
 ---
 
@@ -2043,7 +2055,7 @@ The following work was also completed as part of the Phase 10 & 11 security spri
 
 #### BUG-AUTH-TRAP: Student App Login Stays on Login Screen [test created]
 
-- **Issue**: `LoginScreen` in `student-app` successfully authenticated users but failed to `pop` itself, leaving users stuck on the login screen.
+- **Issue**: `LoginScreen` in `questerix-student-app` successfully authenticated users but failed to `pop` itself, leaving users stuck on the login screen.
 - **Fix**: Added `Navigator.pop(context)` and a success `SnackBar` in the `_handleLogin` method.
 - **Root Cause**: Manual navigation stack transitions were missing in the authentication success path.
 - **Prevention**: Created `login_screen_repro_test.dart` to verify that the screen is dismissed upon successful login. Added a new "Rule of Navigation" to prevention guidelines.
@@ -2737,7 +2749,7 @@ All `SessionsPage` and `GovernancePage` tests use `page.route('**/rest/v1/ai_gen
 
 1. **Path-relative resolution mismatch**: Workflow docs in `.agent/workflows/` use project-root-relative paths like `admin-panel/src/App.tsx`, but `resolveRef` resolved them relative to the doc's own directory, producing `.agent/workflows/admin-panel/src/App.tsx` (which doesn't exist).
 2. **Archive directory**: `.agent/archive/` historical docs with stale references to deleted/moved files were included in the scan.
-3. **Cross-repo references**: PLATFORM_MAP and workflow docs reference sibling repos (`questerix-student-app/`, `student-app/`, `landing-pages/`, etc.) that are intentionally absent from this monorepo.
+3. **Cross-repo references**: PLATFORM_MAP and workflow docs reference sibling repos (`questerix-student-app/` or legacy `student-app/`, `landing-pages/`, etc.) that are intentionally absent from this monorepo.
 4. **Miscellaneous false positives**: HTTP URLs in backtick code spans, date-placeholder filenames (`YYYY-MM-DD`), npm scoped package names (`@questerix/core`), line-number suffixes in link paths (`file.tsx:115`).
 
 **Fix** (`questerix-cortex/src/governance/index.ts`):
@@ -3212,7 +3224,7 @@ Added `question-studio-bulk-actions.tsx` and `question-studio-filter-panel.tsx` 
 - **Summary**: Implemented Agent Governance trims, Tier S/M/L system, stripped GEMINI limits, and optimized test lanes.
 - **Learning**: Shift to Task Tier system (S/M/L) efficiently eliminates Cortex bootstrap and sign-off ceremony for routine/quick PRs, drastically reducing agent "thrashing". Redundant Pa11y/Coverage gates were deferred to nightly.
 
-### 2026-03-25: Multi-Repo Delivery Plan — Week 3 (Type Drift & Orchestrator Refactor)
+### 2026-03-25: Multi-Repo Delivery Plan � Week 3 (Type Drift & Orchestrator Refactor)
 
 **Context**:
 The \dmin-panel\ previously imported Supabase generated types directly from \src/lib/database.types.ts\. This was decentralized, brittle, and caused duplicated effort since other apps needed the exact same definitions. Also, the \orchestrator.ps1\ script was becoming a monolith.
@@ -3229,7 +3241,7 @@ The \dmin-panel\ previously imported Supabase generated types directly from \sr
 - When extracting types to a workspace package (\packages/core\), simplify the generated filename (\database.ts\ vs \database.types.ts\) because explicit module resolution with extensions in a \ sconfig.json\ mappings configuration (\@questerix/core/types/database\) can silently fail with \TS2307\ or \TS2339\ if alias mapping is imperfect.
 - Mocking Supabase \insert/delete/update\ patterns in Vitest via \mockReturnThis()\ works but strictly requires \s any\ casting onto the mock query builder since Supabase JS strictly expects the full signature of \PostgrestQueryBuilder\ (url, headers, cloneRequestState, etc.) that manual mocks omit.
 
-### 2026-03-25: Multi-Repo Delivery Plan — Week 4 (God-File Decomposition & Docs)
+### 2026-03-25: Multi-Repo Delivery Plan � Week 4 (God-File Decomposition & Docs)
 
 **Context**:
 The `AppsPage.tsx` file inside the `admin-panel` had ballooned into a 1290+ line monolith containing multiple distinct UI sub-components (`AppRow`, `AppCard`), massive Zod schemas, and complex local state, complicating future development and violating our UI architecture bounds.

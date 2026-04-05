@@ -8,7 +8,7 @@ const CLOUDFLARE_ACCOUNT_ID = Deno.env.get("CLOUDFLARE_ACCOUNT_ID");
 const CLOUDFLARE_PROJECT_NAME = Deno.env.get("CLOUDFLARE_PROJECT_NAME") || "questerix-student";
 const BASE_DOMAIN = Deno.env.get("BASE_DOMAIN") || "questerix.com";
 
-const rateLimit = createRateLimitMiddleware(rateLimitConfigs.anonymous);
+const rateLimit = createRateLimitMiddleware(rateLimitConfigs.anonymous, 'manage-app-domains');
 
 interface AppRecord {
   subdomain: string;
@@ -36,7 +36,7 @@ function timingSafeEqual(a: string, b: string): boolean {
 export const manageAppDomainsHandler = withErrorSanitization(
   async (req: Request) => {
     // Rate limiting
-    const rateLimitResult = rateLimit.middleware(req);
+    const rateLimitResult = await rateLimit.middleware(req);
     if (!rateLimitResult.allowed) {
       return rateLimitResult.response!;
     }

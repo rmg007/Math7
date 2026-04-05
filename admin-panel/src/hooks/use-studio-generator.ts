@@ -1,7 +1,7 @@
+import { AIQuestionSchema, CanonicalQuestionType } from '@questerix/core/constants/question-types';
 import { generateQuestions } from '@/features/ai-assistant/api/generateQuestions';
 import { useToast } from '@/hooks/use-toast';
 import { useCallback, useState } from 'react';
-import { z } from 'zod';
 import { useApp } from './use-app';
 import { supabase } from '@/lib/supabase';
 import { toJson } from '@/lib/utils';
@@ -10,13 +10,7 @@ import { toJson } from '@/lib/utils';
 // Types (aligned with Database Enums)
 // ─────────────────────────────────────────────────────────
 
-export type QuestionType =
-  | 'multiple_choice'
-  | 'mcq_multi'
-  | 'text_input'
-  | 'boolean'
-  | 'reorder_steps'
-  | 'matching';
+export type QuestionType = CanonicalQuestionType;
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -31,21 +25,19 @@ export interface StudioConfig {
   topics: string[];
   count: number;
   difficultyMix: DifficultyMix;
-  questionTypes: QuestionType[];
+  questionTypes: CanonicalQuestionType[];
   customInstructions?: string;
 }
 
 export interface StagedQuestion {
-  /** Local-only key for React; not persisted */
   id: string;
   text: string;
-  question_type: QuestionType;
+  question_type: CanonicalQuestionType;
   difficulty: Difficulty;
   metadata: {
     options?: string[];
     correct_answer?: string | string[];
     explanation?: string;
-    /** For matching types */
     terms?: string[];
     definitions?: string[];
   };
@@ -54,30 +46,6 @@ export interface StagedQuestion {
 }
 
 export type StudioStatus = 'idle' | 'generating' | 'done' | 'error';
-
-// ─────────────────────────────────────────────────────────
-// Validation schema
-// ─────────────────────────────────────────────────────────
-
-const StagedQuestionSchema = z.object({
-  text: z.string(),
-  question_type: z.enum([
-    'multiple_choice',
-    'mcq_multi',
-    'text_input',
-    'boolean',
-    'reorder_steps',
-    'matching',
-  ]),
-  difficulty: z.enum(['easy', 'medium', 'hard']),
-  metadata: z.object({
-    options: z.array(z.string()).optional(),
-    correct_answer: z.union([z.string(), z.array(z.string())]).optional(),
-    explanation: z.string().optional(),
-    terms: z.array(z.string()).optional(),
-    definitions: z.array(z.string()).optional(),
-  }),
-});
 
 // ─────────────────────────────────────────────────────────
 // Domain-specific prompt instructions (Generic Builder)
@@ -111,7 +79,7 @@ function getDomainInstructions(domain: string): string {
   return 'Keep questions factual, unambiguous, and focused on core principles. Mix question types to challenge different cognitive skills. Ensure explanations clarify exactly why the correct answer is right.';
 }
 
-function getTypeInstructions(types: QuestionType[]): string {
+function getTypeInstructions(types: CanonicalQuestionType[]): string {
   const instructions: string[] = [];
 
   if (types.includes('multiple_choice')) {
@@ -260,9 +228,27 @@ export function useStudioGenerator() {
         });
         const duration = Date.now() - startTime;
 
-        const validationResult = z.array(StagedQuestionSchema).safeParse(response.questions);
+        const validationResult = AIQuestionSchema.array().safeParse(response.questions);
         if (!validationResult.success) {
           console.error('[Studio] Validation failed:', validationResult.error.format());
+
+          // Layer 5: Observability - log raw value for monitoring
+          const invalidType = validationResult.error.errors.find(
+            (e) => e.path[0] === 'question_type'
+          );
+          if (promptId && invalidType) {
+            await supabase
+              .from('studio_prompts')
+              .update({
+                status: 'failed',
+                error_details: {
+                  invalid_question_type: String(invalidType),
+                  raw_ai_response: response.questions,
+                },
+              })
+              .eq('id', promptId);
+          }
+
           throw new Error(
             `AI returned invalid question format: ${validationResult.error.errors[0]?.message || 'Unknown error'}`
           );
@@ -273,7 +259,7 @@ export function useStudioGenerator() {
           id: crypto.randomUUID(),
           kept: true,
           edited: false,
-          question_type: q.question_type as QuestionType,
+          question_type: q.question_type as CanonicalQuestionType,
           difficulty: q.difficulty as Difficulty,
         }));
 
@@ -336,7 +322,7 @@ export function useStudioGenerator() {
           difficulty_distribution: singleConfig.difficultyMix,
         });
 
-        const validationResult = z.array(StagedQuestionSchema).safeParse(response.questions);
+        const validationResult = AIQuestionSchema.array().safeParse(response.questions);
         if (!validationResult.success || validationResult.data.length === 0) {
           throw new Error('AI returned invalid format for replacement card.');
         }
@@ -346,7 +332,7 @@ export function useStudioGenerator() {
           id: crypto.randomUUID(),
           kept: true,
           edited: false,
-          question_type: validationResult.data[0].question_type as QuestionType,
+          question_type: validationResult.data[0].question_type as CanonicalQuestionType,
           difficulty: validationResult.data[0].difficulty as Difficulty,
         };
 

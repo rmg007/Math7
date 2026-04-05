@@ -57,7 +57,7 @@ npm install
 cd admin-panel && npm install && cd ..
 
 # Install student app dependencies
-cd student-app && flutter pub get && cd ..
+cd questerix-student-app && flutter pub get && cd ..
 
 # Install content engine dependencies
 cd content-engine && pip install -r requirements.txt && cd ..
@@ -150,11 +150,11 @@ npm run lint  # Verify fixed
 cd admin-panel && npm run dev
 
 # Start student app (Flutter web)
-cd student-app && flutter run -d web-server --web-port 3000
+cd questerix-student-app && flutter run -d web-server --web-port 3000
 
 # Run tests
 cd admin-panel && npm test
-cd student-app && flutter test
+cd questerix-student-app && flutter test
 cd content-engine && pytest
 ```
 

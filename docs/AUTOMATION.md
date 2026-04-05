@@ -32,7 +32,7 @@ This document catalogs all automated workflows in the Questerix project. Every a
 
 - **Trigger**: Every PR
 - **What it does**:
-  - Labels PRs by file paths (`admin-panel`, `student-app`, etc.)
+  - Labels PRs by file paths (`admin-panel`, `questerix-student-app`, etc.)
   - Sizes PRs (`size/xs` to `size/xl`)
   - Detects breaking changes
 - **Saves**: Manual triage time
@@ -69,7 +69,7 @@ This document catalogs all automated workflows in the Questerix project. Every a
 
 ### 8. **Flutter Builds** (`.github/workflows/flutter-builds.yml`)
 
-- **Trigger**: PRs affecting student-app
+- **Trigger**: PRs affecting questerix-student-app
 - **What it does**: Builds Android APK and iOS app bundle
 - **Saves**: "Does it still build?" anxiety
 

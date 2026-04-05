@@ -55,7 +55,8 @@ jobs:
         run: |
           # This would need a Dart type generator
           # For now, we'll create a placeholder
-          echo "// TODO: Auto-generate Dart types from Supabase schema" > student-app/lib/types/database.dart
+          mkdir -p questerix-student-app/lib/types
+          echo "// TODO: Auto-generate Dart types from Supabase schema" > questerix-student-app/lib/types/database.dart
 
       - name: Commit generated types
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -63,7 +64,7 @@ jobs:
           commit_message: "🔄 Auto-generate database types from schema changes [skip ci]"
           file_pattern: |
             admin-panel/src/lib/database.types.ts
-            student-app/lib/types/database.dart
+            questerix-student-app/lib/types/database.dart
 
       - name: Comment on PR
         if: github.event_name == 'pull_request'

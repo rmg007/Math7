@@ -25,9 +25,15 @@ if ($tsContent.Length -lt 100) {
 }
 
 # 4. Check Student App integration
-$studentPubspec = Get-Content "student-app/pubspec.yaml" -Raw
+$studentRoot = $null
+if (Test-Path "questerix-student-app/pubspec.yaml") { $studentRoot = "questerix-student-app" }
+elseif (Test-Path "student-app/pubspec.yaml") { $studentRoot = "student-app" }
+if (-not $studentRoot) {
+    Write-Error "questerix-student-app/pubspec.yaml or student-app/pubspec.yaml not found"
+}
+$studentPubspec = Get-Content "$studentRoot/pubspec.yaml" -Raw
 if ($studentPubspec -notmatch "math7_domain") {
-    Write-Error "student-app/pubspec.yaml does not reference math7_domain"
+    Write-Error "$studentRoot/pubspec.yaml does not reference math7_domain"
 }
 
 Write-Host "Phase 2 validation passed!" -ForegroundColor Green

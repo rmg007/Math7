@@ -37,14 +37,32 @@ foreach ($line in $definesContent) {
 Set-Location $StudentAppDir
  
 Write-Host "Cleaning previous Flutter build..." -ForegroundColor Cyan
-flutter clean
- 
+$maxRetries = 3
+$retryCount = 0
+$cleaned = $false
+
+while (-not $cleaned -and $retryCount -lt $maxRetries) {
+    try {
+        flutter clean 2>&1 | Out-Null
+        $cleaned = $true
+    } catch {
+        $retryCount++
+        Write-Host "Warning: Flutter clean failed (attempt $retryCount/$maxRetries). Likely file lock. Retrying in 2s..." -ForegroundColor Yellow
+        Start-Sleep -Seconds 2
+    }
+}
+
+if (-not $cleaned) {
+    Write-Host "Error: Flutter clean failed after $maxRetries attempts. Please close any processes (like Chrome) using the build/ folder and try again." -ForegroundColor Red
+    exit 1
+}
+
 Write-Host "Getting Flutter packages..." -ForegroundColor Cyan
 flutter pub get
  
 Write-Host "Building Flutter web with dart-define flags..." -ForegroundColor Cyan
-$buildCommand = "flutter build web --release --no-tree-shake-icons $dartDefineFlags"
-Write-Host "Command: flutter build web --release --no-tree-shake-icons [FLAGS_HIDDEN]" -ForegroundColor DarkGray
+$buildCommand = "flutter build web --release --no-tree-shake-icons --no-wasm-dry-run $dartDefineFlags"
+Write-Host "Command: flutter build web --release --no-tree-shake-icons --no-wasm-dry-run [FLAGS_HIDDEN]" -ForegroundColor DarkGray
 Invoke-Expression $buildCommand
  
 if (Test-Path (Join-Path $StudentAppDir 'build\web')) {

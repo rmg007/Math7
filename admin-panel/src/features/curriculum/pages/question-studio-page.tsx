@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { AdminHeader } from '@/components/ui/admin-header';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -314,31 +315,29 @@ export function QuestionStudioPage() {
   }
 
   return (
-    <div className="flex flex-col h-full min-h-screen">
-      {/* Page header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center shadow-md shadow-indigo-200">
-            <Sparkles className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 tracking-tight">AI Question Studio</h1>
-            <p className="text-xs text-gray-400">Generate, review, and save question batches</p>
-          </div>
-        </div>
-        {studio.stagedQuestions.length > 0 && (
-          <div className="flex items-center gap-2 text-sm">
-            <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 font-semibold border border-indigo-100">
-              {studio.keptCount} of {studio.stagedQuestions.length} kept
-            </span>
-            {studio.editedCount > 0 && (
-              <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 font-semibold border border-amber-100">
-                {studio.editedCount} edited
-              </span>
-            )}
-          </div>
-        )}
-      </div>
+    <main className="flex flex-col h-full min-h-screen" role="main" aria-label="AI Question Studio">
+      <AdminHeader
+        title="AI Question Studio"
+        description="Generate, review, and save question batches"
+        icon={Sparkles}
+        backTo="/questions"
+        actions={
+          studio.stagedQuestions.length > 0 && (
+            <div className="flex items-center gap-3" aria-label="Batch synchronization status">
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-700 font-black text-[10px] uppercase tracking-wider border border-indigo-100 shadow-sm">
+                  {studio.keptCount} of {studio.stagedQuestions.length} kept
+                </span>
+                {studio.editedCount > 0 && (
+                  <span className="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 font-black text-[10px] uppercase tracking-wider border border-amber-100 shadow-sm">
+                    {studio.editedCount} edited
+                  </span>
+                )}
+              </div>
+            </div>
+          )
+        }
+      />
 
       {/* Three-panel body */}
       <div className="flex flex-1 gap-0 overflow-hidden">
@@ -621,6 +620,6 @@ export function QuestionStudioPage() {
           )}
         </aside>
       </div>
-    </div>
+    </main>
   );
 }

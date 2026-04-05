@@ -12,6 +12,8 @@ interface BulkActionBarProps {
     icon?: React.ReactNode;
     variant?: 'ghost' | 'default' | 'outline';
     className?: string;
+    disabled?: boolean;
+    loading?: boolean;
   }[];
   isDeleting?: boolean;
 }
@@ -43,6 +45,7 @@ export function BulkActionBar({
             variant={action.variant || 'ghost'}
             size="sm"
             onClick={action.onClick}
+            disabled={action.disabled || action.loading}
             className={cn(
               'h-8 px-3 rounded-full text-xs font-bold transition-all active:scale-95',
               action.variant === 'ghost'

@@ -13,34 +13,36 @@ This document contains all test cases implemented to prevent recurrence of relia
 **Files**: `supabase/functions/generate-questions/index.ts`
 
 #### Test Case: AI API Timeout Enforcement
+
 ```typescript
-Deno.test('AI API calls should timeout after 30 seconds', async () => {
+Deno.test("AI API calls should timeout after 30 seconds", async () => {
   const startTime = Date.now();
-  
+
   // Mock slow AI API response
   const mockGeminiModel = {
     generateContent: async (prompt: string, options?: any) => {
       // Simulate slow response > 30s
-      await new Promise(resolve => setTimeout(resolve, 35000));
-      return { response: { text: () => 'slow response' } };
-    }
+      await new Promise((resolve) => setTimeout(resolve, 35000));
+      return { response: { text: () => "slow response" } };
+    },
   };
-  
+
   try {
     // This should timeout after 30s
-    await mockGeminiModel.generateContent('test prompt');
-    throw new Error('Expected timeout was not triggered');
+    await mockGeminiModel.generateContent("test prompt");
+    throw new Error("Expected timeout was not triggered");
   } catch (error) {
     const duration = Date.now() - startTime;
-    
+
     // Should timeout between 30-31 seconds
     assert(duration >= 30000 && duration <= 31000);
-    assertEquals(error.name, 'AbortError');
+    assertEquals(error.name, "AbortError");
   }
 });
 ```
 
 **Prevention Measures**:
+
 - ✅ All AI API calls must have AbortController timeout
 - ✅ Timeout value must be 30 seconds maximum
 - ✅ Proper cleanup in finally blocks
@@ -55,6 +57,7 @@ Deno.test('AI API calls should timeout after 30 seconds', async () => {
 **Files**: `content-engine/src/generators/question_generator.py`
 
 #### Test Case: Python Signal Timeout
+
 ```python
 import pytest
 import signal
@@ -64,42 +67,43 @@ from unittest.mock import Mock, patch
 def test_ai_api_timeout_protection():
     """Test that AI API calls timeout after 30 seconds"""
     generator = QuestionGenerator(api_key='test_key')
-    
+
     # Mock slow API call
     def slow_generate_content(*args, **kwargs):
         time.sleep(35)  # Simulate > 30s response
         return Mock(text='slow response')
-    
+
     with patch.object(generator.client, 'generate_content', slow_generate_content):
         start_time = time.time()
-        
+
         with pytest.raises(TimeoutError, match="timed out after 30 seconds"):
             generator._call_gemini('test prompt')
-        
+
         duration = time.time() - start_time
-        
+
         # Should timeout between 30-31 seconds
         assert 30 <= duration <= 31
 
 def test_timeout_cleanup():
     """Test that timeout is properly cleaned up"""
     generator = QuestionGenerator(api_key='test_key')
-    
+
     # Mock API call that raises exception
     def failing_generate_content(*args, **kwargs):
         raise Exception("API Error")
-    
+
     with patch.object(generator.client, 'generate_content', failing_generate_content):
         try:
             generator._call_gemini('test prompt')
         except Exception:
             pass  # Expected to fail
-        
+
         # Verify alarm is cancelled (no hanging timers)
         # This would require signal inspection in real implementation
 ```
 
 **Prevention Measures**:
+
 - ✅ All Python external calls have signal.timeout
 - ✅ 30-second maximum timeout enforced
 - ✅ Proper alarm cleanup in finally blocks
@@ -116,68 +120,73 @@ def test_timeout_cleanup():
 **Files**: `supabase/functions/_shared/rate-limiter.ts`
 
 #### Test Case: Circuit Breaker Opening
+
 ```typescript
-Deno.test('Circuit breaker opens after threshold violations', async () => {
+Deno.test("Circuit breaker opens after threshold violations", async () => {
   const rateLimit = createRateLimitMiddleware({
     windowMs: 1000,
     maxRequests: 2,
     circuitBreakerThreshold: 3, // Open after 3 violations
-    circuitBreakerResetMs: 500,  // Reset after 500ms
+    circuitBreakerResetMs: 500, // Reset after 500ms
   });
-  
-  const testRequest = new Request('http://localhost/test', {
-    headers: { 'x-forwarded-for': '192.168.1.1' }
+
+  const testRequest = new Request("http://localhost/test", {
+    headers: { "x-forwarded-for": "192.168.1.1" },
   });
-  
+
   // Use up rate limit (2 requests)
   assertEquals(rateLimit.middleware(testRequest).allowed, true);
   assertEquals(rateLimit.middleware(testRequest).allowed, true);
-  
+
   // Trigger violations to open circuit breaker
   for (let i = 0; i < 3; i++) {
     const result = rateLimit.middleware(testRequest);
     assertEquals(result.allowed, false);
     assertEquals(result.response?.status, 429); // Rate limited
   }
-  
+
   // Circuit breaker should now be open
   const circuitOpenResult = rateLimit.middleware(testRequest);
   assertEquals(circuitOpenResult.allowed, false);
   assertEquals(circuitOpenResult.response?.status, 503); // Service Unavailable
-  
+
   // Verify circuit breaker headers
-  assertEquals(circuitOpenResult.response?.headers.get('X-Circuit-Breaker'), 'open');
-  assertExists(circuitOpenResult.response?.headers.get('X-Circuit-Reset'));
+  assertEquals(
+    circuitOpenResult.response?.headers.get("X-Circuit-Breaker"),
+    "open",
+  );
+  assertExists(circuitOpenResult.response?.headers.get("X-Circuit-Reset"));
 });
 ```
 
 #### Test Case: Circuit Breaker Recovery
+
 ```typescript
-Deno.test('Circuit breaker resets after timeout', async () => {
+Deno.test("Circuit breaker resets after timeout", async () => {
   const rateLimit = createRateLimitMiddleware({
     windowMs: 1000,
     maxRequests: 1,
     circuitBreakerThreshold: 2,
     circuitBreakerResetMs: 300, // Short reset for testing
   });
-  
-  const testRequest = new Request('http://localhost/test', {
-    headers: { 'x-forwarded-for': '192.168.1.2' }
+
+  const testRequest = new Request("http://localhost/test", {
+    headers: { "x-forwarded-for": "192.168.1.2" },
   });
-  
+
   // Trigger circuit breaker
   rateLimit.middleware(testRequest); // Use up limit
   rateLimit.middleware(testRequest); // First violation
   rateLimit.middleware(testRequest); // Second violation - opens circuit
-  
+
   // Should be blocked by circuit breaker
   const blockedResult = rateLimit.middleware(testRequest);
   assertEquals(blockedResult.allowed, false);
   assertEquals(blockedResult.response?.status, 503);
-  
+
   // Wait for circuit breaker to reset
-  await new Promise(resolve => setTimeout(resolve, 350));
-  
+  await new Promise((resolve) => setTimeout(resolve, 350));
+
   // Should work again after reset
   const resetResult = rateLimit.middleware(testRequest);
   assertEquals(resetResult.allowed, true);
@@ -185,6 +194,7 @@ Deno.test('Circuit breaker resets after timeout', async () => {
 ```
 
 **Prevention Measures**:
+
 - ✅ Circuit breaker threshold ≤ 5 violations
 - ✅ Reset timeout between 1-5 minutes
 - ✅ Proper 503 Service Unavailable responses
@@ -196,18 +206,19 @@ Deno.test('Circuit breaker resets after timeout', async () => {
 
 **Purpose**: Validate circuit breaker in mobile sync operations  
 **Issue Prevented**: Infinite retries draining battery  
-**Files**: `student-app/lib/src/core/errors/retry_with_backoff.dart`
+**Files**: `questerix-student-app/lib/src/core/errors/retry_with_backoff.dart`
 
 #### Test Case: Mobile Circuit Breaker
+
 ```dart
 test('circuit breaker prevents infinite retries', () async {
   final circuitBreaker = CircuitBreaker(
     failureThreshold: 3,
     resetTimeout: const Duration(milliseconds: 500),
   );
-  
+
   final failingOperation = () => throw Exception('Service unavailable');
-  
+
   // Trigger circuit breaker opening
   for (int i = 0; i < 3; i++) {
     try {
@@ -220,10 +231,10 @@ test('circuit breaker prevents infinite retries', () async {
       // Expected to fail
     }
   }
-  
+
   // Circuit breaker should now be open
   expect(circuitBreaker.isOpen, true);
-  
+
   // Subsequent calls should fail immediately
   expect(
     () => retryWithBackoff(
@@ -241,6 +252,7 @@ test('circuit breaker prevents infinite retries', () async {
 ```
 
 **Prevention Measures**:
+
 - ✅ All retry logic uses circuit breaker
 - ✅ Circuit breaker respects mobile battery constraints
 - ✅ Immediate failure when circuit is open
@@ -254,9 +266,10 @@ test('circuit breaker prevents infinite retries', () async {
 
 **Purpose**: Ensure retry delays have jitter to prevent thundering herd  
 **Issue Prevented**: Synchronized retry storms  
-**Files**: `student-app/lib/src/core/errors/retry_with_backoff.dart`
+**Files**: `questerix-student-app/lib/src/core/errors/retry_with_backoff.dart`
 
 #### Test Case: Jitter Prevents Thundering Herd
+
 ```dart
 test('retry delays include jitter to prevent thundering herd', () async {
   final callTimes = <DateTime>[];
@@ -264,7 +277,7 @@ test('retry delays include jitter to prevent thundering herd', () async {
     callTimes.add(DateTime.now());
     throw Exception('Simulated failure');
   };
-  
+
   try {
     await retryWithBackoff(
       mockOperation,
@@ -275,19 +288,19 @@ test('retry delays include jitter to prevent thundering herd', () async {
   } catch (_) {
     // Expected to fail after retries
   }
-  
+
   // Calculate delays between attempts
   final delays = <Duration>[];
   for (int i = 1; i < callTimes.length; i++) {
     delays.add(callTimes[i].difference(callTimes[i - 1]));
   }
-  
+
   // Verify each delay has jitter (15-30% variation)
   for (int i = 0; i < delays.length; i++) {
     final expectedDelay = Duration(seconds: 1 << i); // 1s, 2s, 4s
     final minExpected = Duration(milliseconds: (expectedDelay.inMilliseconds * 0.85).round());
     final maxExpected = Duration(milliseconds: (expectedDelay.inMilliseconds * 1.15).round());
-    
+
     expect(
       delays[i].inMilliseconds,
       greaterThanOrEqualTo(minExpected.inMilliseconds),
@@ -303,6 +316,7 @@ test('retry delays include jitter to prevent thundering herd', () async {
 ```
 
 #### Test Case: Bounded Retry Limits
+
 ```dart
 test('retry logic respects maximum attempt limits', () async {
   int attemptCount = 0;
@@ -310,7 +324,7 @@ test('retry logic respects maximum attempt limits', () async {
     attemptCount++;
     throw Exception('Simulated failure');
   };
-  
+
   try {
     await retryWithBackoff(
       mockOperation,
@@ -320,13 +334,14 @@ test('retry logic respects maximum attempt limits', () async {
   } catch (_) {
     // Expected to fail
   }
-  
+
   // Should have attempted exactly 4 times (1 initial + 3 retries)
   expect(attemptCount, 4);
 });
 ```
 
 **Prevention Measures**:
+
 - ✅ All retry logic includes 15-30% jitter
 - ✅ Maximum retry limit of 3 attempts enforced
 - ✅ Exponential backoff with jitter
@@ -340,39 +355,41 @@ test('retry logic respects maximum attempt limits', () async {
 
 **Purpose**: Prevent concurrent sync operations  
 **Issue Prevented**: Resource waste and data corruption  
-**Files**: `student-app/lib/src/core/sync/sync_service.dart`
+**Files**: `questerix-student-app/lib/src/core/sync/sync_service.dart`
 
 #### Test Case: Concurrent Sync Prevention
+
 ```dart
 test('prevents concurrent sync operations', () async {
   final mockDatabase = MockAppDatabase();
   final mockSupabase = MockSupabaseClient();
   final mockCurriculumRepo = MockLocalCurriculumRepository();
-  
+
   final syncService = SyncService(mockDatabase, mockSupabase, mockCurriculumRepo);
-  
+
   // Mock slow sync operation
   when(() => mockDatabase.select(any())).thenAnswer((_) async {
     await Future.delayed(const Duration(milliseconds: 100));
     return [];
   });
-  
+
   // Start two sync operations concurrently
   final future1 = syncService.sync();
   final future2 = syncService.sync();
-  
+
   await Future.wait([future1, future2]);
-  
+
   // Only one should have completed successfully
   final successStates = [
     syncService.state.error == null,
   ];
-  
+
   expect(successStates.where((success) => success).length, 1);
 });
 ```
 
 **Prevention Measures**:
+
 - ✅ Critical operations have concurrency guards
 - ✅ State management prevents concurrent execution
 - ✅ Resource cleanup on concurrent attempts
@@ -389,38 +406,49 @@ test('prevents concurrent sync operations', () async {
 **Files**: `supabase/functions/health-check/index.ts`
 
 #### Test Case: Health Check Degradation Detection
+
 ```typescript
-Deno.test('health check detects service degradation', async () => {
+Deno.test("health check detects service degradation", async () => {
   // Mock slow database response
   const mockSupabase = {
     from: () => ({
       select: () => ({
         limit: () => ({
-          single: () => new Promise(resolve => {
-            setTimeout(() => resolve({ data: null, error: null }), 2000); // 2s delay
-          })
-        })
-      })
+          single: () =>
+            new Promise((resolve) => {
+              setTimeout(() => resolve({ data: null, error: null }), 2000); // 2s delay
+            }),
+        }),
+      }),
     }),
     auth: {
-      getUser: () => new Promise(resolve => {
-        setTimeout(() => resolve({ data: { user: null }, error: { message: 'Invalid token' } }), 100);
-      })
+      getUser: () =>
+        new Promise((resolve) => {
+          setTimeout(
+            () =>
+              resolve({
+                data: { user: null },
+                error: { message: "Invalid token" },
+              }),
+            100,
+          );
+        }),
     },
     storage: {
-      listBuckets: () => new Promise(resolve => {
-        setTimeout(() => resolve({ data: [], error: null }), 1500); // 1.5s delay
-      })
-    }
+      listBuckets: () =>
+        new Promise((resolve) => {
+          setTimeout(() => resolve({ data: [], error: null }), 1500); // 1.5s delay
+        }),
+    },
   };
-  
+
   const healthResult = await performHealthCheck(mockSupabase as any);
-  
+
   // Should detect degraded performance
-  assertEquals(healthResult.status, 'degraded');
-  assertEquals(healthResult.checks.database.status, 'warn');
-  assertEquals(healthResult.checks.storage.status, 'warn');
-  
+  assertEquals(healthResult.status, "degraded");
+  assertEquals(healthResult.checks.database.status, "warn");
+  assertEquals(healthResult.checks.storage.status, "warn");
+
   // Verify performance metrics included
   assertExists(healthResult.checks.database.latency);
   assertExists(healthResult.checks.storage.latency);
@@ -428,36 +456,38 @@ Deno.test('health check detects service degradation', async () => {
 ```
 
 #### Test Case: Health Check Complete Failure
+
 ```typescript
-Deno.test('health check detects complete service failure', async () => {
+Deno.test("health check detects complete service failure", async () => {
   // Mock complete service failure
   const mockSupabase = {
     from: () => ({
       select: () => ({
         limit: () => ({
-          single: () => Promise.reject(new Error('Database connection failed'))
-        })
-      })
+          single: () => Promise.reject(new Error("Database connection failed")),
+        }),
+      }),
     }),
     auth: {
-      getUser: () => Promise.reject(new Error('Auth service unavailable'))
+      getUser: () => Promise.reject(new Error("Auth service unavailable")),
     },
     storage: {
-      listBuckets: () => Promise.reject(new Error('Storage service down'))
-    }
+      listBuckets: () => Promise.reject(new Error("Storage service down")),
+    },
   };
-  
+
   const healthResult = await performHealthCheck(mockSupabase as any);
-  
+
   // Should detect complete failure
-  assertEquals(healthResult.status, 'unhealthy');
-  assertEquals(healthResult.checks.database.status, 'fail');
-  assertEquals(healthResult.checks.auth.status, 'fail');
-  assertEquals(healthResult.checks.storage.status, 'fail');
+  assertEquals(healthResult.status, "unhealthy");
+  assertEquals(healthResult.checks.database.status, "fail");
+  assertEquals(healthResult.checks.auth.status, "fail");
+  assertEquals(healthResult.checks.storage.status, "fail");
 });
 ```
 
 **Prevention Measures**:
+
 - ✅ All services have health endpoints
 - ✅ Performance thresholds monitored
 - ✅ Degraded status detection
@@ -470,52 +500,65 @@ Deno.test('health check detects complete service failure', async () => {
 ### 6.1 End-to-End Reliability Test
 
 **Purpose**: Validate complete reliability flow under failure  
-**Issue Prevented**: Integration failures between components  
+**Issue Prevented**: Integration failures between components
 
 #### Test Case: Complete Failure Recovery
+
 ```typescript
-Deno.test('end-to-end reliability under failure conditions', async () => {
+Deno.test("end-to-end reliability under failure conditions", async () => {
   // Test complete flow: Rate limiting → Circuit breaker → Retry → Health check
-  
-  const testRequests = Array(100).fill(null).map(() => 
-    new Request('http://localhost/test', {
-      headers: { 'x-forwarded-for': '192.168.1.100' }
-    })
-  );
-  
+
+  const testRequests = Array(100)
+    .fill(null)
+    .map(
+      () =>
+        new Request("http://localhost/test", {
+          headers: { "x-forwarded-for": "192.168.1.100" },
+        }),
+    );
+
   const rateLimit = createRateLimitMiddleware({
     windowMs: 1000,
     maxRequests: 10,
     circuitBreakerThreshold: 5,
     circuitBreakerResetMs: 2000,
   });
-  
+
   const results = await Promise.allSettled(
-    testRequests.map(req => rateLimit.middleware(req))
+    testRequests.map((req) => rateLimit.middleware(req)),
   );
-  
+
   // Verify reliability controls worked
-  const successful = results.filter(r => r.status === 'fulfilled' && r.value.allowed).length;
-  const rateLimited = results.filter(r => 
-    r.status === 'fulfilled' && !r.value.allowed && r.value.response?.status === 429
+  const successful = results.filter(
+    (r) => r.status === "fulfilled" && r.value.allowed,
   ).length;
-  const circuitBroken = results.filter(r => 
-    r.status === 'fulfilled' && !r.value.allowed && r.value.response?.status === 503
+  const rateLimited = results.filter(
+    (r) =>
+      r.status === "fulfilled" &&
+      !r.value.allowed &&
+      r.value.response?.status === 429,
   ).length;
-  
+  const circuitBroken = results.filter(
+    (r) =>
+      r.status === "fulfilled" &&
+      !r.value.allowed &&
+      r.value.response?.status === 503,
+  ).length;
+
   // Should have some successful requests
   assert(successful > 0);
   // Should have rate-limited excess requests
   assert(rateLimited > 0);
   // Should have opened circuit breaker after violations
   assert(circuitBroken > 0);
-  
+
   // Total should equal all requests
   assertEquals(successful + rateLimited + circuitBroken, testRequests.length);
 });
 ```
 
 **Prevention Measures**:
+
 - ✅ Integration tests cover failure scenarios
 - ✅ Multiple reliability controls work together
 - ✅ End-to-end flow validation
@@ -528,14 +571,15 @@ Deno.test('end-to-end reliability under failure conditions', async () => {
 ### 7.1 Thundering Herd Prevention Test
 
 **Purpose**: Validate system handles synchronized retry storms  
-**Issue Prevented**: System overload from synchronized retries  
+**Issue Prevented**: System overload from synchronized retries
 
 #### Test Case: Thundering Herd Load Test
+
 ```typescript
 Deno.test('thundering herd prevention under load', async () => {
   const concurrentClients = 50;
   const requestsPerClient = 5;
-  
+
   const mockSlowService = {
     // Simulate service that fails then recovers
     requestCount: 0,
@@ -547,11 +591,11 @@ Deno.test('thundering herd prevention under load', async () => {
       return 'success';
     }
   };
-  
+
   // Create concurrent clients with retry logic
   const clientPromises = Array(concurrentClients).fill(null).map(async (_, clientId) => {
     const results = [];
-    
+
     for (let i = 0; i < requestsPerClient; i++) {
       try {
         const result = await retryWithBackoff(
@@ -565,29 +609,30 @@ Deno.test('thundering herd prevention under load', async () => {
         results.push({ success: false, error, clientId, attempt: i });
       }
     }
-    
+
     return results;
   });
-  
+
   const clientResults = await Promise.all(clientPromises);
   const allResults = clientResults.flat();
-  
+
   // Analyze retry distribution (should be spread out due to jitter)
   const successResults = allResults.filter(r => r.success);
   const failureResults = allResults.filter(r => !r.success);
-  
+
   // Should have some successes after service recovers
   assert(successResults.length > 0);
-  
+
   // Failures should be distributed across time (not all at once)
   // This would require timestamp analysis in real implementation
-  
+
   console.log(`Success rate: ${successResults.length / allResults.length * 100}%`);
   console.log(`Failure rate: ${failureResults.length / allResults.length * 100}%`);
 });
 ```
 
 **Prevention Measures**:
+
 - ✅ Load tests validate jitter effectiveness
 - ✅ System handles synchronized failures
 - ✅ Performance under concurrent retry scenarios
@@ -600,19 +645,20 @@ Deno.test('thundering herd prevention under load', async () => {
 ### 8.1 Automated Test Execution
 
 **CI/CD Integration**:
+
 ```yaml
 # Run all reliability tests
 - name: Execute Reliability Test Suite
   run: |
     echo "Running timeout protection tests..."
     deno test --allow-net --allow-env tests/timeout-protection.test.ts
-    
+
     echo "Running circuit breaker tests..."
     deno test --allow-net --allow-env _shared/rate-limiter.test.ts --filter="circuit breaker"
-    
+
     echo "Running Flutter reliability tests..."
-    cd student-app && flutter test test/core/errors/retry_with_backoff_test.dart
-    
+    cd questerix-student-app && flutter test test/core/sync/reliability_repro_test.dart
+
     echo "Running load tests..."
     deno run --allow-net tests/load-test-thundering-herd.ts
 ```
@@ -620,6 +666,7 @@ Deno.test('thundering herd prevention under load', async () => {
 ### 8.2 Test Validation Criteria
 
 **Success Criteria**:
+
 - ✅ All timeout tests complete within specified limits
 - ✅ Circuit breakers open at correct thresholds
 - ✅ Retry delays demonstrate proper jitter distribution
@@ -628,6 +675,7 @@ Deno.test('thundering herd prevention under load', async () => {
 - ✅ Load tests maintain system stability
 
 **Failure Triggers**:
+
 - ❌ Any test exceeds timeout limits
 - ❌ Circuit breaker fails to open/reset
 - ❌ Retry delays lack jitter variation
@@ -642,16 +690,19 @@ Deno.test('thundering herd prevention under load', async () => {
 ### 9.1 Test Review Schedule
 
 **Monthly**:
+
 - Review test coverage metrics
 - Update test data and thresholds
 - Validate test environment stability
 
 **Quarterly**:
+
 - Add new failure scenarios based on production incidents
 - Update performance thresholds based on monitoring data
 - Enhance load testing scenarios
 
 **Annually**:
+
 - Complete reliability test framework review
 - Update testing tools and methodologies
 - Align with industry best practices
@@ -659,16 +710,19 @@ Deno.test('thundering herd prevention under load', async () => {
 ### 9.2 Test Evolution Plan
 
 **Phase 1** (Current): Basic reliability patterns
+
 - Timeout protection
 - Circuit breakers
 - Retry with jitter
 
 **Phase 2** (Next Quarter): Advanced patterns
+
 - Half-open circuit breaker state
 - Adaptive retry strategies
 - Predictive failure detection
 
 **Phase 3** (Next Year): AI-driven reliability
+
 - Machine learning-based threshold tuning
 - Automated failure pattern recognition
 - Self-healing capabilities
@@ -685,6 +739,7 @@ This comprehensive test suite ensures that reliability issues identified in the 
 4. **Prevention** - Measures ensuring issue doesn't recur
 
 The test suite provides:
+
 - **100% coverage** of identified reliability risks
 - **Automated validation** in CI/CD pipeline
 - **Load testing** for failure scenarios

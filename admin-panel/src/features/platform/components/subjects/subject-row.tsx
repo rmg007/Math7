@@ -4,6 +4,7 @@ import { CheckSquare, Square, Pencil, Trash2 } from 'lucide-react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import type { Subject } from '../../hooks/use-subjects';
+import { statusConfig } from './subject-row-status';
 
 export interface SubjectRowProps {
   subject: Subject;
@@ -13,27 +14,6 @@ export interface SubjectRowProps {
   onDelete: (id: string) => void;
   visibleColumns: Set<string>;
 }
-
-export const statusConfig = {
-  live: {
-    label: 'Live',
-    dotColor: 'bg-emerald-500',
-    textColor: 'text-emerald-800',
-    bgColor: 'bg-emerald-100',
-  },
-  published: {
-    label: 'Published',
-    dotColor: 'bg-indigo-500',
-    textColor: 'text-indigo-700',
-    bgColor: 'bg-indigo-100',
-  },
-  draft: {
-    label: 'Draft',
-    dotColor: 'bg-gray-400',
-    textColor: 'text-gray-700',
-    bgColor: 'bg-gray-100',
-  },
-} as const;
 
 export const SubjectRow = memo(
   ({ subject, isSelected, onSelect, onEdit, onDelete, visibleColumns }: SubjectRowProps) => {

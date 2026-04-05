@@ -4,7 +4,7 @@ This document explains how to set up and run the Math7 monorepo locally (Student
 
 ## Repository layout
 
-- `student-app/`: Flutter (tablet-first) student application (offline-first).
+- `questerix-student-app/`: Flutter (tablet-first) student application (offline-first). Same app if checked out as a sibling repo next to `Questerix/`.
 - `admin-panel/`: React + Vite + TypeScript admin dashboard.
 - `supabase/`: Supabase project (migrations, seed, RLS verification scripts).
 - `scripts/`: Phase validation scripts (cross-platform variants exist).
@@ -20,7 +20,7 @@ This document explains how to set up and run the Math7 monorepo locally (Student
 ## Environment files
 
 - **Admin Panel**: copy `admin-panel/.env.example` to `admin-panel/.env`.
-- **Student App**: copy `student-app/.env.example` to `student-app/.env`.
+- **Student App**: copy `questerix-student-app/.env.example` to `questerix-student-app/.env` (paths inside the student-app repository).
 
 The `*.env.example` files in this repo are the canonical examples.
 
@@ -34,6 +34,7 @@ In this project, **ALL terminal commands** must be executed via the `ops_runner.
 2.  **Execute**: Run `python ops_runner.py tasks.json`.
 
 **Example `tasks.json`**:
+
 ```json
 [
   {
@@ -45,6 +46,7 @@ In this project, **ALL terminal commands** must be executed via the `ops_runner.
 ```
 
 ### Admin Panel Commands
+
 Use `tasks.json` to run these:
 
 - **Setup**: `npm ci`
@@ -54,6 +56,7 @@ Use `tasks.json` to run these:
 - **E2E**: `npm run test:e2e:ui` (Interactive)
 
 ### Student App Commands
+
 Use `tasks.json` to run these:
 
 - **Setup**: `flutter pub get`
@@ -63,6 +66,7 @@ Use `tasks.json` to run these:
 - **Run (Web)**: `flutter run -d chrome --web-port 3000`
 
 ### Database Commands
+
 Use `tasks.json` to run these:
 
 - **Start**: `supabase start`
@@ -103,42 +107,45 @@ This project uses an **evidence-based workflow system** that forces the AI to pr
 
 ### Quick Reference
 
-| Command | Purpose | When to Use |
-|---------|---------|-------------|
-| `/help` | Show all workflows | When you forget commands |
-| `/intake` | Define problem + criteria | Start of any task |
-| `/plan` | Create implementation plan | Before complex work |
-| `/implement` | Execute code changes | The work phase |
-| `/verify` | Run tests + lint + analyze | **Required before commit** |
-| `/docs` | Update documentation | Only if needed |
-| `/pr` | Generate PR description | Before creating PR |
-| `/postmortem` | Learn from bugs | After any bug fix |
-| `/blocked` | Report blockers | When stuck |
-| `/resume` | Continue previous work | New session |
+| Command       | Purpose                    | When to Use                |
+| ------------- | -------------------------- | -------------------------- |
+| `/help`       | Show all workflows         | When you forget commands   |
+| `/intake`     | Define problem + criteria  | Start of any task          |
+| `/plan`       | Create implementation plan | Before complex work        |
+| `/implement`  | Execute code changes       | The work phase             |
+| `/verify`     | Run tests + lint + analyze | **Required before commit** |
+| `/docs`       | Update documentation       | Only if needed             |
+| `/pr`         | Generate PR description    | Before creating PR         |
+| `/postmortem` | Learn from bugs            | After any bug fix          |
+| `/blocked`    | Report blockers            | When stuck                 |
+| `/resume`     | Continue previous work     | New session                |
 
 ### Typical Workflow Patterns
 
 **Simple Bug Fix:**
+
 ```
 /implement → /verify → /pr
 ```
 
 **Standard Feature:**
+
 ```
 /intake → /plan → /implement → /verify → /docs → /pr
 ```
 
 **After Production Bug:**
+
 ```
 /postmortem (add regression test + lesson learned)
 ```
 
 ### Legacy Workflows (Still Available)
 
-| Command | Purpose |
-|---------|---------|
+| Command      | Purpose                        |
+| ------------ | ------------------------------ |
 | `/autopilot` | Full autonomous execution mode |
-| `/test` | Enterprise QA suite (7 phases) |
+| `/test`      | Enterprise QA suite (7 phases) |
 
 See `.agent/workflows/*.md` for detailed workflow instructions.
 
@@ -147,6 +154,7 @@ See `.agent/workflows/*.md` for detailed workflow instructions.
 This project uses **Husky** and **lint-staged** to enforce quality standards locally before code reaches the remote repository.
 
 ### Pre-commit Hooks (Fast Fixes)
+
 - **Timing**: < 5 seconds.
 - **Scope**: Changed files only.
 - **Actions**:
@@ -155,6 +163,7 @@ This project uses **Husky** and **lint-staged** to enforce quality standards loc
   - **Global**: Formats JSON, Markdown, and YAML.
 
 ### Pre-push Hooks (Safety Net)
+
 - **Timing**: 10-30 seconds.
 - **Scope**: Project-wide sanity check.
 - **Actions**:
@@ -163,7 +172,9 @@ This project uses **Husky** and **lint-staged** to enforce quality standards loc
 - **Bypass**: Use `git commit --no-verify` in emergencies.
 
 ### Local Setup
+
 To initialize the automation hooks on a new machine:
+
 ```bash
 # Bash
 bash scripts/setup-automation.sh
@@ -175,32 +186,35 @@ bash scripts/setup-automation.sh
 ## 🧪 Testing Strategy
 
 ### Mobile / Student App
+
 We use a **Hybrid Testing Approach** for speed and fidelity:
 
 1.  **Windows Desktop (Fast Logic):**
-    -   Used for rapid iteration of "Offline Sync" logic.
-    -   ~10x faster startup than emulators.
-    -   Verifies the exact same Drift/Supabase architecture as mobile.
+    - Used for rapid iteration of "Offline Sync" logic.
+    - ~10x faster startup than emulators.
+    - Verifies the exact same Drift/Supabase architecture as mobile.
 
 2.  **Android Emulator (High Fidelity):**
-    -   Used for final QA to verify **Feel**, **Animations**, and **Touch Inputs**.
-    -   Target AVD: `Medium_Phone_API_36.1` (or similar).
-    -   Required for validating "Offline" behavior in a realistic OS environment.
+    - Used for final QA to verify **Feel**, **Animations**, and **Touch Inputs**.
+    - Target AVD: `Medium_Phone_API_36.1` (or similar).
+    - Required for validating "Offline" behavior in a realistic OS environment.
 
 3.  **Authentication & Onboarding (Automated):**
-    -   Verified via Widget Tests (`flutter test test/ui/app_flow_test.dart`).
-    -   Tests the user journey in a controlled, mock-driven environment (no manual clicking required).
-    -   **Under 13**: Verify "Parent Approval" flow triggers when birth year implies < 13.
-    -   **Over 13**: Verify "Standard Signup" flow triggers when birth year implies >= 13.
-    -   See `student-app/ARCHITECTURE.md` for flow details.
+    - Verified via Widget Tests (`flutter test test/ui/app_flow_test.dart`).
+    - Tests the user journey in a controlled, mock-driven environment (no manual clicking required).
+    - **Under 13**: Verify "Parent Approval" flow triggers when birth year implies < 13.
+    - **Over 13**: Verify "Standard Signup" flow triggers when birth year implies >= 13.
+    - See `student-app/ARCHITECTURE.md` for flow details.
 
 ### Admin Panel
+
 - **Playwright** is the source of truth for all regression testing.
 - Tests are located in `admin-panel/tests/`.
 
 ## 🧩 Rules & Autonomy (.cursorrules)
 
 We use a `.cursorrules` file at the root to define:
+
 1.  **Command Whitelists**: Commands the agent can run without asking (e.g., `npm install`).
 2.  **Autonomous Protocol**: Steps the agent must take before labeling a task complete (Test -> Static Analysis -> Refactor -> Docs).
 

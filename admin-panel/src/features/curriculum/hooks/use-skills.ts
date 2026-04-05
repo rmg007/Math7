@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { castJson } from '@/lib/type-utils';
 import { isValidUUID } from '@/lib/utils';
 import { CurriculumStatus, PaginatedResponse, PaginationParams } from '../types';
+import { useBulkDeleteSkills } from './use-skills-bulk';
 
 type Skill = Database['public']['Tables']['skills']['Row'];
 
@@ -234,32 +235,9 @@ export function useUpdateSkill() {
 }
 
 export function useDeleteSkill() {
-  const queryClient = useQueryClient();
-  const { currentApp, isSuperAdmin } = useApp();
-
+  const { mutateAsync } = useBulkDeleteSkills();
   return useMutation({
-    mutationFn: async (skill_id: string) => {
-      if (!isSuperAdmin && !currentApp?.app_id) throw new Error('No app selected');
-
-      let query = supabase
-        .from('skills')
-        // checked app_id: conditional RLS
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('skill_id', skill_id);
-
-      if (!isSuperAdmin && currentApp?.app_id) {
-        query = query.eq('app_id', currentApp.app_id);
-      }
-
-      const { error } = await query;
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        predicate: (query) => ['skills', 'skills-paginated'].includes(query.queryKey[0] as string),
-      });
-    },
+    mutationFn: (skill_id: string) => mutateAsync([skill_id]),
   });
 }
 

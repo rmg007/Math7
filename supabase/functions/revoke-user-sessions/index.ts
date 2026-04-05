@@ -26,7 +26,7 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-const rateLimit = createRateLimitMiddleware(rateLimitConfigs.validateContent);
+const rateLimit = createRateLimitMiddleware(rateLimitConfigs.validateContent, 'revoke-user-sessions');
 
 import { checkEnvironmentGuard } from '../_shared/env-guard.ts';
 
@@ -38,7 +38,7 @@ export const revokeUserSessionsHandler = withErrorSanitization(
     }
 
     // Rate limiting
-    const rateLimitResult = rateLimit.middleware(req);
+    const rateLimitResult = await rateLimit.middleware(req);
     if (!rateLimitResult.allowed) {
       return rateLimitResult.response!;
     }

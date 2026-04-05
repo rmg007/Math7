@@ -62,7 +62,13 @@ describe('governedGenerateQuestions', () => {
       error: null,
     });
 
-    vi.mocked(supabase.rpc).mockResolvedValue({ data: { success: true }, error: null });
+    vi.mocked(supabase.rpc).mockResolvedValue({
+      data: { success: true },
+      error: null,
+      status: 200,
+      statusText: 'OK',
+      count: null,
+    } as any);
     vi.mocked(generateQuestions).mockResolvedValue(mockGenerationResult as any);
     vi.mocked(validateContent).mockResolvedValue(mockValidationResult as any);
 
@@ -104,7 +110,7 @@ describe('governedGenerateQuestions', () => {
     vi.mocked(supabase.auth.getUser).mockResolvedValue({
       data: { user: null },
       error: null,
-    });
+    } as any);
 
     await expect(governedGenerateQuestions(mockAppId, mockRequest as any)).rejects.toThrow(
       'Unauthorized'
@@ -120,7 +126,10 @@ describe('governedGenerateQuestions', () => {
     vi.mocked(supabase.rpc).mockResolvedValueOnce({
       data: null,
       error: { message: 'Quota exceeded', code: 'P0001' } as any,
-    });
+      status: 400,
+      statusText: 'Bad Request',
+      count: null,
+    } as any);
 
     await expect(governedGenerateQuestions(mockAppId, mockRequest as any)).rejects.toThrow(
       'Quota exceeded'
@@ -133,7 +142,13 @@ describe('governedGenerateQuestions', () => {
       error: null,
     });
 
-    vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: { success: true }, error: null }); // Pre-check
+    vi.mocked(supabase.rpc).mockResolvedValueOnce({
+      data: { success: true },
+      error: null,
+      status: 200,
+      statusText: 'OK',
+      count: null,
+    } as any); // Pre-check
     vi.mocked(generateQuestions).mockResolvedValue(mockGenerationResult as any);
     vi.mocked(validateContent).mockResolvedValue(mockValidationResult as any);
 
@@ -141,7 +156,10 @@ describe('governedGenerateQuestions', () => {
     vi.mocked(supabase.rpc).mockResolvedValueOnce({
       data: null,
       error: { message: 'Quota limit hit', code: 'P0002' } as any,
-    });
+      status: 400,
+      statusText: 'Bad Request',
+      count: null,
+    } as any);
 
     const result = await governedGenerateQuestions(mockAppId, mockRequest as any);
 

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Trash2, Edit2, Save, X, AlertCircle } from 'lucide-react';
 import { StatusBadge, StatusType } from '@/components/ui/status-badge';
+import { CanonicalQuestionType } from '@questerix/core/constants/question-types';
 
 export interface GeneratedQuestion {
   id: string;
   text: string;
-  question_type: 'multiple_choice' | 'mcq_multi' | 'text_input' | 'boolean' | 'reorder_steps';
+  question_type: CanonicalQuestionType;
   difficulty: 'easy' | 'medium' | 'hard';
   metadata: {
     options?: string[];

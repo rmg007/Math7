@@ -26,9 +26,9 @@ This repository contains the complete **Executive Specification** for **Questeri
 
 The project consists:
 
-1.  **Student App** (`student-app/`): A Flutter tablet app (offline-first, Drift DB).
+1.  **Student App** (`questerix-student-app/`): A Flutter tablet app (offline-first, Drift DB). Legacy folder name `student-app/` is deprecated.
 2.  **Admin Panel** (`admin-panel/`): A React dashboard (shadcn/ui, Supabase Auth).
-3.  **Domain Models** (`questerix_domain/`): Shared Dart models and validators.
+3.  **Domain Models** (`questerix-student-app/packages/questerix_domain/`): Shared Dart models and validators (also published from the student-app repo).
 4.  **Backend**: Supabase (PostgreSQL, Edge Functions, Realtime).
 5.  **Workers** (`workers/`): Cloudflare Worker for AI generation and email alerts.
 

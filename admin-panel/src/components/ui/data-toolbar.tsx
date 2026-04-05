@@ -104,9 +104,17 @@ export function DataToolbar<T extends object>({
     'w-full px-3 py-1.5 text-left text-xs text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center gap-2';
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div
+      className="relative"
+      ref={menuRef}
+      role="navigation"
+      aria-label="Data export and import operations"
+    >
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-label="Toggle data actions menu"
+        aria-haspopup="true"
+        aria-expanded={isOpen}
         className="inline-flex items-center h-9 px-3 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded shadow-sm hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 gap-1.5"
       >
         Actions
@@ -114,30 +122,50 @@ export function DataToolbar<T extends object>({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-50 w-44 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+        <div
+          className="absolute right-0 z-50 w-44 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1"
+          role="menu"
+        >
           {/* Import / Upload */}
           <button
             onClick={handleUploadClick}
             disabled={importing || importDisabled}
+            role="menuitem"
+            aria-label="Upload data file"
             className={itemClass + (importDisabled ? ' opacity-40 cursor-not-allowed' : '')}
           >
             <Upload className="h-3.5 w-3.5 text-gray-400" />
             {importing ? 'Importing...' : 'Upload Data'}
           </button>
-          <button onClick={handleDownloadTemplate} className={itemClass}>
+          <button
+            onClick={handleDownloadTemplate}
+            role="menuitem"
+            aria-label="Download template for data import"
+            className={itemClass}
+          >
             <FileText className="h-3.5 w-3.5 text-gray-400" />
             Download Template
           </button>
 
           {/* Divider */}
-          <div className="border-t border-gray-100 my-1" />
+          <div className="border-t border-gray-100 my-1" role="separator" />
 
           {/* Exports */}
-          <button onClick={handleExportCSV} className={itemClass}>
+          <button
+            onClick={handleExportCSV}
+            role="menuitem"
+            aria-label="Export data as CSV file"
+            className={itemClass}
+          >
             <Download className="h-3.5 w-3.5 text-gray-400" />
             Export as CSV
           </button>
-          <button onClick={handleExportJSON} className={itemClass}>
+          <button
+            onClick={handleExportJSON}
+            role="menuitem"
+            aria-label="Export data as JSON file"
+            className={itemClass}
+          >
             <Download className="h-3.5 w-3.5 text-gray-400" />
             Export as JSON
           </button>

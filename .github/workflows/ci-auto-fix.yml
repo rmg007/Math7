@@ -160,8 +160,8 @@ jobs:
         run: |
           echo "🔧 Running dart fix --apply..."
 
-          if [ -d student-app ]; then
-            cd student-app && dart fix --apply && cd ..
+          if [ -d questerix-student-app ]; then
+            cd questerix-student-app && dart fix --apply && cd ..
           fi
 
           echo "✅ Dart fixes applied."

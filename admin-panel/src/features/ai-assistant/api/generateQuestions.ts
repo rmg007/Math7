@@ -1,5 +1,6 @@
 import { env } from '@/config/env';
 import { supabase } from '@/lib/supabase';
+import { CanonicalQuestionType } from '@questerix/core/constants/question-types';
 
 export interface GenerateQuestionsRequest {
   text: string;
@@ -15,7 +16,7 @@ export interface GenerateQuestionsRequest {
 export interface GenerateQuestionsResponse {
   questions: Array<{
     text: string;
-    question_type: 'multiple_choice' | 'mcq_multi' | 'text_input' | 'boolean' | 'reorder_steps';
+    question_type: CanonicalQuestionType;
     difficulty: 'easy' | 'medium' | 'hard';
     metadata: {
       options?: string[];

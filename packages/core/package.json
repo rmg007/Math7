@@ -8,9 +8,13 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./types/database": "./src/types/database.ts"
+    "./types/database": "./src/types/database.ts",
+    "./constants/question-types": "./src/constants/question-types.ts"
   },
   "scripts": {
     "typegen": "supabase gen types typescript --project-id bkfhorslctqieetzqdtd > src/types/database.ts"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
   }
 }

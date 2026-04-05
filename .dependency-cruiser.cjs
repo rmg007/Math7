@@ -68,7 +68,7 @@ module.exports = {
       severity: 'error',
       comment: 'Production code should not import dev dependencies',
       from: {
-        path: '^(admin-panel|landing-pages)/src',
+        path: '^(admin-panel)/src',
         pathNot: [
           '\\.(spec|test)\\.(js|mjs|cjs|ts|tsx)$',
           'vitest\\.setup\\.ts$',
@@ -186,7 +186,7 @@ module.exports = {
 
       archi: {
         collapsePattern:
-          '^(admin-panel|landing-pages)/src/(components|hooks|pages|utils|features)/[^/]+',
+          '^(admin-panel)/src/(components|hooks|pages|utils|features)/[^/]+',
         theme: {
           modules: [
             {

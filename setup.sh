@@ -12,10 +12,10 @@ bash init_agent_env.sh
 echo ""
 echo "Verifying dependencies..."
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    pwsh -File scripts/validate-phase--1.ps1
+    pwsh -File scripts/validate-phase-1.ps1
 else
-    bash scripts/validate-phase--1.sh
+    bash scripts/validate-phase-1.sh
 fi
 
 echo ""
-echo "Setup complete! Refer to PORTABILITY.md for next steps."
+echo "Setup complete! Refer to docs/technical/PORTABILITY.md for next steps."

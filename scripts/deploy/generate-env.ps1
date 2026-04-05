@@ -95,30 +95,6 @@ $adminEnvPath = Join-Path $RootDir "admin-panel\.env.local"
 Set-Content -Path $adminEnvPath -Value $adminEnvContent
 Write-Host "   Created: $adminEnvPath" -ForegroundColor Green
 
-
-<# 
-# [DEPRECATED] DO NOT PUBLISH LANDING PAGES
-# Generate Landing Pages .env
-Write-Host "  Generating landing-pages/.env..." -ForegroundColor Cyan
-$landingEnvContent = @()
-$landingEnvContent += "# Generated from $ConfigFile on $(Get-Date)"
-$landingEnvContent += "# DO NOT EDIT MANUALLY"
-
-foreach ($prop in $configJson.landing.PSObject.Properties) {
-    if ($prop.Name -eq "_comment") { continue }
-    
-    $val = $prop.Value
-    $resolvedVal = Resolve-Value -val $val
-    
-    $landingEnvContent += "$($prop.Name)=$resolvedVal"
-}
-
-$landingEnvPath = Join-Path $RootDir "landing-pages\.env"
-Set-Content -Path $landingEnvPath -Value $landingEnvContent
-Write-Host "   Created: $landingEnvPath" -ForegroundColor Green
-#>
-
-
 # Generate Student App .flutter-defines.tmp
 Write-Host "  Generating .flutter-defines.tmp..." -ForegroundColor Cyan
 $flutterEnvContent = @()

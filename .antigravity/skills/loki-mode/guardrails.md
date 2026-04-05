@@ -85,7 +85,7 @@ SET search_path = 'public', 'auth'
 
 **Problem**: Using `thenReturn(Future.value(...))` with mocktail for Future-returning methods causes test failures.
 **Fix**: Always use `thenAnswer((_) => Future.value(...))` for async mock return values.
-**Applies to**: All mocktail mocks in student-app/test/
+**Applies to**: All mocktail mocks in questerix-student-app/test/
 
 ---
 

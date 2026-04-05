@@ -4,15 +4,15 @@
 
 .DESCRIPTION
     This script reads JSON token files from design-system/tokens/ and generates
-    corresponding Dart files for the Flutter student-app.
+    corresponding Dart files for the Flutter app (questerix-student-app).
 
 .OUTPUTS
-    - student-app/lib/src/core/theme/generated/app_colors.g.dart
-    - student-app/lib/src/core/theme/generated/app_typography.g.dart
-    - student-app/lib/src/core/theme/generated/app_spacing.g.dart
-    - student-app/lib/src/core/theme/generated/app_shadows.g.dart
-    - student-app/lib/src/core/theme/generated/app_borders.g.dart
-    - student-app/lib/src/core/theme/generated/breakpoints.g.dart
+    - questerix-student-app/lib/src/core/theme/generated/app_colors.g.dart
+    - questerix-student-app/lib/src/core/theme/generated/app_typography.g.dart
+    - questerix-student-app/lib/src/core/theme/generated/app_spacing.g.dart
+    - questerix-student-app/lib/src/core/theme/generated/app_shadows.g.dart
+    - questerix-student-app/lib/src/core/theme/generated/app_borders.g.dart
+    - questerix-student-app/lib/src/core/theme/generated/breakpoints.g.dart
 #>
 
 param(
@@ -23,7 +23,25 @@ $ErrorActionPreference = "Stop"
 
 # Paths
 $TokensDir = Join-Path $ProjectRoot "design-system/tokens"
-$OutputDir = Join-Path $ProjectRoot "questerix-student-app/lib/src/core/theme/generated"
+
+# Student app: nested under Questerix or sibling checkout (same order as preflight); legacy student-app last
+$StudentAppRoot = $null
+foreach ($c in @(
+        (Join-Path $ProjectRoot "questerix-student-app"),
+        (Join-Path (Split-Path $ProjectRoot -Parent) "questerix-student-app"),
+        (Join-Path $ProjectRoot "student-app"),
+        (Join-Path (Split-Path $ProjectRoot -Parent) "student-app")
+    )) {
+    if (Test-Path $c) {
+        $StudentAppRoot = (Resolve-Path $c).Path
+        break
+    }
+}
+if (-not $StudentAppRoot) {
+    throw "Flutter student app not found. Expected questerix-student-app or student-app next to or under ProjectRoot: $ProjectRoot"
+}
+$OutputDir = Join-Path $StudentAppRoot "lib/src/core/theme/generated"
+Write-Host "  Output app: $StudentAppRoot" -ForegroundColor Gray
 
 # Ensure output directory exists
 New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null

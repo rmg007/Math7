@@ -147,20 +147,17 @@ if ($ConfigFile -and (Test-Path $ConfigFile)) {
 # =============================================================================
 # CHECK BUILD DIRECTORIES EXIST
 # =============================================================================
-$landingDir = Join-Path $RootDir 'landing-pages'
 $adminDir = Join-Path $RootDir 'admin-panel'
-$studentDir = Join-Path $RootDir 'student-app'
+$studentDirLegacy = Join-Path $RootDir 'student-app'
+$studentDir = Join-Path $RootDir 'questerix-student-app'
+$studentDirSibling = Join-Path (Split-Path -Parent $RootDir) 'questerix-student-app'
 
-if (-not (Test-Path $landingDir)) {
-    Write-Host " Landing pages directory not found: $landingDir" -ForegroundColor Red
-    exit 1
-}
 if (-not (Test-Path $adminDir)) {
     Write-Host " Admin panel directory not found: $adminDir" -ForegroundColor Red
     exit 1
 }
-if (-not (Test-Path $studentDir)) {
-    Write-Host " Student app directory not found: $studentDir" -ForegroundColor Red
+if (-not (Test-Path $studentDir) -and -not (Test-Path $studentDirLegacy) -and -not (Test-Path $studentDirSibling)) {
+    Write-Host " Student app directory not found: checked $studentDir, $studentDirLegacy, and $studentDirSibling" -ForegroundColor Red
     exit 1
 }
 Write-Host " All application directories found" -ForegroundColor Green

@@ -67,6 +67,7 @@ jobs:
             // Map file paths to reviewers
             const reviewerMap = {
               'admin-panel': ['frontend-team'],
+              'questerix-student-app': ['mobile-team'],
               'student-app': ['mobile-team'],
               'content-engine': ['backend-team'],
               'supabase': ['database-team'],

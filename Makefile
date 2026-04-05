@@ -149,22 +149,22 @@ ci: web_setup web_lint web_test web_build
 .PHONY: validate_phase_0
 validate_phase_0:
 	@echo "Running Phase 0 validation..."
-	bash ./scripts/validate-phase-0.sh
+	pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/validate-phase-0.ps1
 
 .PHONY: validate_phase_1
 validate_phase_1:
 	@echo "Running Phase 1 validation..."
-	bash ./scripts/validate-phase-1.sh
+	pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/validate-phase-1.ps1
 
 .PHONY: validate_phase_2
 validate_phase_2:
 	@echo "Running Phase 2 validation..."
-	bash ./scripts/validate-phase-2.sh
+	pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/validate-phase-2.ps1
 
 .PHONY: validate_phase_3
 validate_phase_3:
 	@echo "Running Phase 3 validation..."
-	bash ./scripts/validate-phase-3.sh
+	pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/validate-phase-3.ps1
 
 .PHONY: setup
 setup:
@@ -174,7 +174,7 @@ setup:
 .PHONY: validate_phase_4
 validate_phase_4:
 	@echo "Running Phase 4 validation..."
-	bash ./scripts/validate-phase-4.sh
+	pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/validate-phase-4.ps1
 
 # ==========================================================================
 # Maintenance

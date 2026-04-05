@@ -25,7 +25,7 @@
   - [x] Delete or archive 15+ unused workflow files
   - [x] Add path filters to `ci.yml` jobs (admin, flutter, python, edge functions)
   - [x] Move cross-browser E2E, Pa11y, coverage gates to merge-to-main or label-triggered
-  - [x] Move student-app performance profiler to nightly
+  - [x] Move questerix-student-app performance profiler to nightly
   - [x] Create `test:fast` scripts in both repos
   - [x] Standardize command aliases across repos
 
@@ -48,6 +48,34 @@
   - [x] Remove fully deprecated edge functions and orphaned SQL migration drafts.
   - [x] Delete legacy placeholder images, unused `assets/`, and dead design tokens.
   - [x] Run dependency audits (`npm prune` / `depcruise`) and uninstall unused packages.
+
+- [x] **Task 107: Student App Router & Tab State Stabilization (2026-03-27)**
+  - [x] Synchronize `MainShell` tab state with GoRouter URLs (resolved deep-link visibility bugs)
+  - [x] Refactor `app_router_test.dart` for clean Drift database lifecycle (resolved pending timer assertions)
+  - [x] Resolve Admin Panel `governedGeneration` test type mismatches for Supabase mocks
+  - [x] Integrate and verify mono-repo health checks in `tasks.json` via `ops_runner.py`
+
+- [x] **Task 108: Modularize Monitoring Dashboard — ErrorLogsPage (2026-03-27)**
+  - [x] Decompose `ErrorLogsPage.tsx` (god-file) into isolated sub-components (`ErrorStats`, `ErrorLogTable`, `BulkActionBar`, `ErrorDetailDialog`, `PromoteIssueDialog`).
+  - [x] Strict Type Hardening: Reconciled internal `ErrorLog` interface with Supabase `Json` types, enforcing zero-any in the monitoring feature.
+  - [x] Mentorship Stabilization: Resolved `GroupDetailPage.tsx` type mismatch for `allow_anonymous_join`.
+  - [x] Accessibility: Implemented `role="main"` and `aria-label` enhancements for the dashboard.
+  - [x] Clean Build: Resolved all modularization-induced regressions and lint warnings (Verified with `tsc --noEmit`).
+
+- [ ] **Task 109: Student App Structural & Performance Hardening (Phase 18-20)**
+  - [x] **DB-P0-01: Fix Drift Migration Drift** (SQLite `appId` Column Conflict) — Resolve blocker in `attempts` table migration. (Self-healing implemented and verified).
+  - [x] **PERF-S01: Implement Batched Image Prefetching** — Add pre-fetcher to `PracticeNotifier` to eliminate question asset pop-in. (Verified with nested traversal for options/help/solution).
+  - [x] **QUAL-S06.2: Deep-link Verification** — Verify routing from push notifications across all platforms. (Verified via `app_router_test.dart`).
+  - [x] **Regression Fix**: Stabilized `app_router_test.dart` and resolved `user_metadata_repository.dart` compilation drift.
+
+- [ ] **Task 110: Admin Panel AI Studio Loop & Final Modularization**
+  - [x] **Phase 12 Integration**: Connected the Review Grid "Approve" action directly to the Bulk Import engine (Nexus buffer) in `GenerationPage.tsx` and `RefinePersistActionHeader.tsx`.
+  - [ ] **God-File Deconstruction**:
+    - [ ] `KnownIssuesPage.tsx` (40KB) -> Extracted sub-components.
+    - [ ] `question-form.tsx` (33KB) -> Extracted `QuestionTypes` sub-forms.
+    - [ ] `GenerationPage.tsx` (28KB) -> Modularized AI orchestration.
+  - [x] **Zero-Any Audit**: Performed final audit of `features/monitoring` and `features/curriculum`. Verified 100% type safety in `GenerationPage.tsx`, `question-form.tsx`, and `ErrorLogsPage.tsx`.
+  - [ ] **Final Smoke Pass**: Run Playwright suite on the modularized components to ensure interaction stability.
 
 ---
 

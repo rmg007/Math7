@@ -41,7 +41,7 @@ fi
 echo "🔍 Checking for forbidden secret patterns in source..."
 if grep -rn --include="*.ts" --include="*.tsx" --include="*.dart" \
    -E "(SUPABASE_SERVICE_ROLE_KEY|service_role|GEMINI_API_KEY)" \
-   admin-panel/src/ student-app/lib/ 2>/dev/null \
+   admin-panel/src/ questerix-student-app/lib/ student-app/lib/ 2>/dev/null \
    | grep -v "node_modules" \
    | grep -v ".example" \
    | grep -v "env.ts" \

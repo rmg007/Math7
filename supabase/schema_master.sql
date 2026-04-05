@@ -25,7 +25,7 @@ EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
-  CREATE TYPE question_type AS ENUM ('multiple_choice', 'mcq_multi', 'text_input', 'boolean', 'reorder_steps');
+  CREATE TYPE question_type AS ENUM ('multiple_choice', 'mcq_multi', 'text_input', 'boolean', 'reorder_steps', 'matching');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 

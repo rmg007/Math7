@@ -41,7 +41,7 @@ jobs:
 
       - name: Run Flutter tests
         run: |
-          cd student-app
+          cd questerix-student-app
           flutter pub get
           flutter test --coverage
 
@@ -78,9 +78,9 @@ jobs:
 
             // Flutter coverage (approximate from lcov)
             let flutterCoverage = 0;
-            if (fs.existsSync('student-app/coverage/lcov.info')) {
+            if (fs.existsSync('questerix-student-app/coverage/lcov.info')) {
               // Simplified calculation - in production use a proper lcov parser
-              const lcov = fs.readFileSync('student-app/coverage/lcov.info', 'utf8');
+              const lcov = fs.readFileSync('questerix-student-app/coverage/lcov.info', 'utf8');
               const lines = lcov.match(/LF:\d+/g) || [];
               const hit = lcov.match(/LH:\d+/g) || [];
               if (lines.length > 0 && hit.length > 0) {

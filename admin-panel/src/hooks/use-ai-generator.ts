@@ -1,19 +1,9 @@
+import { AIQuestionSchema } from '@questerix/core/constants/question-types';
 import { generateQuestions } from '@/features/ai-assistant/api/generateQuestions';
 import { useToast } from '@/hooks/use-toast';
 import { captureException } from '@/lib/error-tracker';
 import { useState } from 'react';
 import { z } from 'zod';
-
-const AIQuestionSchema = z.object({
-  text: z.string(),
-  question_type: z.enum(['multiple_choice', 'mcq_multi', 'text_input', 'boolean', 'reorder_steps']),
-  difficulty: z.enum(['easy', 'medium', 'hard']),
-  metadata: z.object({
-    options: z.array(z.string()).optional(),
-    correct_answer: z.union([z.string(), z.array(z.string())]).optional(),
-    explanation: z.string().optional(),
-  }),
-});
 
 export function useAIGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);

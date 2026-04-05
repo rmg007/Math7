@@ -26,6 +26,7 @@ export default defineConfig({
       // without requiring npm workspaces or npm link.
       '@questerix/core': path.resolve(__dirname, '../packages/core/src'),
     },
+    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
   },
   server: {
     host: '0.0.0.0',

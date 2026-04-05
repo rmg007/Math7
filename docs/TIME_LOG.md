@@ -7,7 +7,7 @@
 
 ---
 
-## ⚠️ Agent Instructions
+## ✏️ Agent Instructions
 
 At the **end of every session**, the AI agent MUST:
 
@@ -40,8 +40,8 @@ Work types: `dev` | `devops` | `arch` | `qa` | `docs` | `ops`
 | December 2025 | 0         | $95/hr  | $0          | No commits found; pre-project era (Math7 predecessor in separate repo)                       |
 | January 2026  | 20        | $95/hr  | $1,900      | Retroactive estimate based on git history (first commit Jan 27; burst of 40+ commits Jan 28) |
 | February 2026 | 120       | $95/hr  | $11,400     | Retroactive estimate based on LEARNING_LOG density (20+ major sessions across Feb 2–28)      |
-| March 2026    | 87.1      | $100/hr | $8,710      | Retroactive (70) + Real-time (17.1)                                                          |
-| **YTD TOTAL** | **227.1** | —       | **$22,010** |                                                                                              |
+| March 2026    | 106.9     | $100/hr | $10,690     | Retroactive (70) + Real-time (36.9)                                                          |
+| **YTD TOTAL** | **236.9** | —       | **$23,990** |                                                                                              |
 
 > **⚠️ Retroactive Note**: December 2025 – March 22, 2026 figures are **estimates** reconstructed from git commit history and `docs/LEARNING_LOG.md` session density. They are reasonable approximations, not precise timesheets. From **March 23, 2026 onwards**, all entries are accurate real-time records.
 
@@ -102,25 +102,29 @@ _Retroactive estimate based on LEARNING_LOG session density._
 
 _Retroactive Mar 1–22. Real-time from Mar 23._
 
-| Date       | Time        | Hours | App(s)                      | Type   | Description                                                                                                                                               |
-| :--------- | :---------- | :---- | :-------------------------- | :----- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-03-01 | —           | 8.0   | Admin Panel                 | qa     | AI Assistant E2E, post-deployment smoke, database integration tests, platform infra testing                                                               |
-| 2026-03-01 | —           | 4.0   | Admin Panel                 | devops | import.meta.env crash fix, ESLint rule, pre-push hook optimization                                                                                        |
-| 2026-03-11 | —           | 5.0   | Admin Panel                 | qa     | Smoke test resilience, deterministic mocking, global auth mocks                                                                                           |
-| 2026-03-12 | —           | 6.0   | Admin Panel, Backend        | dev    | Performance optimization (parallel fetching, useMemo), RLS tombstone hardening                                                                            |
-| 2026-03-14 | —           | 4.0   | Admin Panel, Student App    | qa     | Domain verification UI, onboarding controller tests                                                                                                       |
-| 2026-03-20 | —           | 8.0   | Student App, Admin Panel    | dev    | GoRouter integration, Riverpod error observer, TSC zero, Vitest green (607/607), Flutter zero issues                                                      |
-| 2026-03-22 | —           | 3.0   | All                         | devops | Production deployment (Admin + Student apps to Cloudflare)                                                                                                |
-| 2026-03-23 | 21:00–22:00 | 1.0   | All                         | docs   | Time log setup, rules update, compensation planning session                                                                                               |
-| 2026-03-24 | 07:23–08:00 | 0.6   | All                         | docs   | Governance enforcement: close-checklist added to top of all 4 AGENTS.md + GEMINI.md files; TIME_LOG and LEARNING_LOG rules propagated across all projects |
-| 2026-03-25 | 11:46–12:47 | 1.0   | Admin Panel, Infrastructure | devops | Hardened AI Studio E2E tests, fixed env config, and verified persistence flow.                                                                            |
+| Date       | Time        | Hours | App(s)                      | Type                                                                                                                                                                                        | Description                                                                                                                                                                                                         |
+| :--------- | :---------- | :---- | :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-03-01 | —           | 8.0   | Admin Panel                 | qa                                                                                                                                                                                          | AI Assistant E2E, post-deployment smoke, database integration tests, platform infra testing                                                                                                                         |
+| 2026-03-01 | —           | 4.0   | Admin Panel                 | devops                                                                                                                                                                                      | import.meta.env crash fix, ESLint rule, pre-push hook optimization                                                                                                                                                  |
+| 2026-03-11 | —           | 5.0   | Admin Panel                 | qa                                                                                                                                                                                          | Smoke test resilience, deterministic mocking, global auth mocks                                                                                                                                                     |
+| 2026-03-12 | —           | 6.0   | Admin Panel, Backend        | dev                                                                                                                                                                                         | Performance optimization (parallel fetching, useMemo), RLS tombstone hardening                                                                                                                                      |
+| 2026-03-14 | —           | 4.0   | Admin Panel, Student App    | qa                                                                                                                                                                                          | Domain verification UI, onboarding controller tests                                                                                                                                                                 |
+| 2026-03-20 | —           | 8.0   | Student App, Admin Panel    | dev                                                                                                                                                                                         | GoRouter integration, Riverpod error observer, TSC zero, Vitest green (607/607), Flutter zero issues                                                                                                                |
+| 2026-03-22 | —           | 3.0   | All                         | devops                                                                                                                                                                                      | Production deployment (Admin + Student apps to Cloudflare)                                                                                                                                                          |
+| 2026-03-23 | 21:00–22:00 | 1.0   | All                         | docs                                                                                                                                                                                        | Time log setup, rules update, compensation planning session                                                                                                                                                         |
+| 2026-03-24 | 07:23–08:00 | 0.6   | All                         | docs                                                                                                                                                                                        | Governance enforcement: close-checklist added to top of all 4 AGENTS.md + GEMINI.md files; TIME_LOG and LEARNING_LOG rules propagated across all projects                                                           |
+| 2026-03-25 | 11:46–12:47 | 1.0   | Admin Panel, Infrastructure | devops                                                                                                                                                                                      | Hardened AI Studio E2E tests, fixed env config, and verified persistence flow.                                                                                                                                      |
+| 2026-03-26 | 09:00–10:30 | 1.5   | Admin Panel                 | dev                                                                                                                                                                                         | Completed `QUAL-A04` decomposition for `AppsPage.tsx` and `SubjectsPage.tsx`; implemented generic `StatusFilter` to achieve 100% type-safety (0 any types) in status filtering logic.                               |
+| 2026-03-26 | 14:30–16:00 | 1.5   | Admin Panel                 | qa                                                                                                                                                                                          | Finalized stabilization of `DomainList`, `SkillList`, and `QuestionList` test suites; implemented robust `dnd-kit` mocking and standardized `data-testid` attributes; verified 100% pass rate in local environment. |
+| 2026-03-26 | 16:00–17:30 | 1.5   | Admin Panel                 | qa                                                                                                                                                                                          | Implemented comprehensive unit tests for AI Assistant components (`QuestionReviewGrid`) and APIs (`generateQuestions`, `validateContent`); reached 100% logic coverage for AI Studio.                               |
+| 2026-03-26 | 17:30–18:30 | 1.0   | Admin Panel                 | qa                                                                                                                                                                                          | Hardened curriculum hooks with complete unit test coverage for studio prompts and history management; verified all tests passing globally.                                                                          |
+| 2026-03-26 | 19:00-21:30 | 2.5   | Multi                       | Hardened Batched Prefetching (PERF-S01) and optimized TanStack Query density via unified invalidation predicates (PERF-A01) to eliminate waterfall API renders.                             |
+| 2026-03-27 | 10:00-13:30 | 3.5   | Student-App/Admin           | Stabilized Flutter router tests by fixing Drift lifecycle and synchronizing MainShell with GoRouter URLs. Resolved Admin Panel test type mismatches and integrated mono-repo health checks. |
+| 2026-03-27 | 14:30-17:00 | 2.5   | Admin Panel                 | arch                                                                                                                                                                                        | Modularized ErrorLogsPage into sub-components (ErrorStats, ErrorLogTable, etc); achieved 100% type-safety (0 any types) for Supabase Json types; synchronized tasks.md.                                             |
+| 2026-03-27 | 23:40-23:58 | 0.3   | Student App                 | dev                                                                                                                                                                                         | Hardened SQLite migration (Phase 0: Foundation Check) and enforced timestamp defaults in tables.dart. Added migration regression tests.                                                                             |
+| 2026-03-28 | 14:00–16:30 | 2.5   | Student App, Admin Panel    | dev                                                                                                                                                                                         | Phase 12: Unified Curriculum Nexus ingestion. Phase 18: Student App image prefetching & deep-link routing (QUAL-S06.2). Zero-Any type audit.                                                                        |
 
-| 2026-03-26 | 09:00–10:30 | 1.5 | Admin Panel | dev | Completed `QUAL-A04` decomposition for `AppsPage.tsx` and `SubjectsPage.tsx`; implemented generic `StatusFilter` to achieve 100% type-safety (0 any types) in status filtering logic. |
-| 2026-03-26 | 14:30–16:00 | 1.5 | Admin Panel | qa | Finalized stabilization of `DomainList`, `SkillList`, and `QuestionList` test suites; implemented robust `dnd-kit` mocking and standardized `data-testid` attributes; verified 100% pass rate in local environment. |
-| 2026-03-26 | 16:00–17:30 | 1.5 | Admin Panel | qa | Implemented comprehensive unit tests for AI Assistant components (`QuestionReviewGrid`) and APIs (`generateQuestions`, `validateContent`); reached 100% logic coverage for AI Studio. |
-| 2026-03-26 | 17:30–18:30 | 1.0 | Admin Panel | qa | Hardened curriculum hooks with complete unit test coverage for studio prompts and history management; verified all tests passing globally. |
-
-**Month Total (through Mar 26): 87.1 hrs | $8,710**
+**Month Total: 106.9 hrs | $10,690**
 
 ---
 
@@ -143,13 +147,12 @@ _Real-time entries only from this point forward._
 
 ---
 
-## YTD Summary (as of 2026-03-25)
+## YTD Summary (as of 2026-03-27)
 
 | Metric            | Value                                           |
-| :---------------- | :---------------------------------------------- | --- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Total Hours       | 227.6 hrs                                       |
-| Total Gross Pay   | $22,060                                         |
-| Average Rate      | $96.92/hr                                       |
+| :---------------- | :---------------------------------------------- |
+| Total Hours       | 236.6 hrs                                       |
+| Total Gross Pay   | $23,960                                         |
+| Average Rate      | $101.28/hr                                      |
 | Active Months     | 3 (Jan–Mar)                                     |
 | Primary Work Type | dev (56%), qa (25%), devops/docs/arch/ops (19%) |
-| 2026-03-26        | Antigravity                                     | 2.5 | Multi | Hardened Batched Prefetching (PERF-S01) and optimized TanStack Query density via unified invalidation predicates (PERF-A01) to eliminate waterfall API renders. |

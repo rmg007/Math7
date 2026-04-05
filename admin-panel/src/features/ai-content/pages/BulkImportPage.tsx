@@ -162,15 +162,21 @@ export default function BulkImportPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 pb-12" data-testid="bulk-import-page">
+    <main
+      className="max-w-7xl mx-auto space-y-10 pb-12"
+      role="main"
+      aria-label="Bulk Question Import Nexus"
+    >
       <AdminHeader
         title="Curriculum Nexus"
         description="High-velocity content ingestion via CSV matrices or intelligent AI prompt synthesis."
         icon={Terminal}
+        backTo="/questions"
         actions={
           <Button
             variant="outline"
             onClick={downloadTemplate}
+            aria-label="Download bulk import CSV template"
             data-testid="bulk-import-template-btn"
             className="group h-10 px-5 rounded-xl border-gray-200/50 bg-white/50 backdrop-blur-sm hover:bg-white hover:border-indigo-200 transition-all duration-300 gap-2"
           >
@@ -466,6 +472,6 @@ export default function BulkImportPage() {
           </Card>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

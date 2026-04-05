@@ -194,7 +194,7 @@ These patterns are **NEVER** acceptable in Questerix code:
 
 - Node: use "npm ci" at repo root and in admin-panel/ and landing-pages/
 - Python: python -m venv .venv && .venv/Scripts/Activate.ps1 && pip install -r content-engine/requirements.txt
-- Flutter: flutter pub get in student-app/
+- Flutter: flutter pub get in questerix-student-app/
 
 2. Run quality gates locally (fast path)
 
@@ -237,14 +237,14 @@ These patterns are **NEVER** acceptable in Questerix code:
 
 **Questerix** is a multi-tenant educational platform with:
 
-| Component          | Technology                                  | Location          |
-| ------------------ | ------------------------------------------- | ----------------- |
-| **Student App**    | Flutter, Riverpod, Drift                    | `student-app/`    |
-| **Admin Panel**    | React, TypeScript, Vite, Vitest, Playwright | `admin-panel/`    |
-| **Content Engine** | Python, Pydantic                            | `content-engine/` |
-| **Backend**        | Supabase (Postgres + Edge Functions + RLS)  | `supabase/`       |
-| **Design System**  | Tokens, Icons, Generators                   | `design-system/`  |
-| **Landing Pages**  | React, TypeScript, Vite                     | `landing-pages/`  |
+| Component          | Technology                                  | Location                 |
+| ------------------ | ------------------------------------------- | ------------------------ |
+| **Student App**    | Flutter, Riverpod, Drift                    | `questerix-student-app/` |
+| **Admin Panel**    | React, TypeScript, Vite, Vitest, Playwright | `admin-panel/`           |
+| **Content Engine** | Python, Pydantic                            | `content-engine/`        |
+| **Backend**        | Supabase (Postgres + Edge Functions + RLS)  | `supabase/`              |
+| **Design System**  | Tokens, Icons, Generators                   | `design-system/`         |
+| **Landing Pages**  | React, TypeScript, Vite                     | `landing-pages/`         |
 
 ### Architecture Principles
 
@@ -261,11 +261,11 @@ These patterns are **NEVER** acceptable in Questerix code:
 ### File Locations (MANDATORY)
 
 ```
-Source: student-app/lib/src/core/sync/sync_service.dart
-Test:   student-app/test/core/sync/sync_service_test.dart
+Source: questerix-student-app/lib/src/core/sync/sync_service.dart
+Test:   questerix-student-app/test/core/sync/sync_service_test.dart
         ↳ Mirror the source structure exactly
 
-Integration Tests: student-app/integration_test/
+Integration Tests: questerix-student-app/integration_test/
 ```
 
 ### Complete Test Template
@@ -957,7 +957,7 @@ Questerix Architecture Rules:
 **Detection**:
 
 ```bash
-grep -r "51f4" student-app/lib/  # Search for known test UUIDs
+grep -r "51f4" questerix-student-app/lib/  # Search for known test UUIDs
 ```
 
 ---
@@ -1530,7 +1530,7 @@ flutter pub get
 - Deterministic factories:
   - TS: Use faker with seeded RNG; isolate helpers under admin-panel/tests/test-utils.ts.
   - Python: Use pytest fixtures in content-engine/tests/conftest.py with tmp_path for isolation.
-  - Flutter: Keep golden assets under student-app/test/goldens; update via explicit approval only.
+  - Flutter: Keep golden assets under questerix-student-app/test/goldens; update via explicit approval only.
 - E2E: Use helpers/seed-test-data with idempotent clean/seed before suite and cleanup after.
 
 ### Error and Result Modeling
@@ -1714,7 +1714,7 @@ Questerix/
 │   │   └── types/              # TypeScript types (database.types.ts)
 │   └── tests/                  # Playwright E2E
 │
-├── student-app/
+├── questerix-student-app/
 │   ├── lib/src/
 │   │   ├── core/
 │   │   │   ├── database/       # Drift database
@@ -1825,7 +1825,7 @@ group('calculate', () {
 #### Golden Tests Process (Flutter) [Finished]
 
 - Update goldens explicitly: set UPDATE_GOLDENS=1 (env) or use flutter test --update-goldens
-- Store under student-app/test/goldens; review diffs visually in PR
+- Store under questerix-student-app/test/goldens; review diffs visually in PR
 - Require PR label visual-change-approved for golden updates
 - Gate visual changes in CI by failing unless label is present (optional policy)
 
@@ -1984,7 +1984,7 @@ Future<void> pushChanges() async {
 
 ### Before Committing
 
-- [ ] `flutter analyze` passes (student-app)
+- [ ] `flutter analyze` passes (questerix-student-app)
 - [ ] `npm run lint` passes (admin-panel)
 - [ ] `npm run test:arch` passes (admin-panel)
 - [ ] Database migrations are idempotent

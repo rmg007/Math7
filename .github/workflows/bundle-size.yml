@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "admin-panel/**"
-      - "student-app/**"
+      - "questerix-student-app/**"
   push:
     branches: [main]
 

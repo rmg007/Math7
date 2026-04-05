@@ -4,7 +4,6 @@ on:
   pull_request:
     paths:
       - "admin-panel/src/**"
-      - "landing-pages/src/**"
   schedule:
     - cron: "0 3 * * 0" # Weekly on Sunday at 3 AM
   workflow_dispatch:
@@ -36,14 +35,6 @@ jobs:
           cd admin-panel
           npm ci --legacy-peer-deps
           knip --reporter json > ../admin-dead-code.json || true
-
-      - name: Analyze landing pages
-        id: landing-analysis
-        continue-on-error: true
-        run: |
-          cd landing-pages
-          npm ci --legacy-peer-deps
-          knip --reporter json > ../landing-dead-code.json || true
 
       - name: Generate report
         uses: actions/github-script@v7
@@ -89,22 +80,6 @@ jobs:
               }
             }
 
-            // Landing Pages
-            if (fs.existsSync('landing-dead-code.json')) {
-              const landingData = JSON.parse(fs.readFileSync('landing-dead-code.json', 'utf8'));
-              const unusedFiles = landingData.files || [];
-              
-              report += '### Landing Pages\n\n';
-              
-              if (unusedFiles.length > 0) {
-                report += `**Unused Files (${unusedFiles.length}):**\n`;
-                unusedFiles.slice(0, 5).forEach(file => {
-                  report += `- \`${file}\`\n`;
-                });
-                if (unusedFiles.length > 5) report += `- ... and ${unusedFiles.length - 5} more\n`;
-              }
-            }
-
             report += '\n---\n*This analysis helps identify code that can be safely removed to reduce bundle size.*';
 
             if (context.eventName === 'pull_request') {
@@ -147,4 +122,3 @@ jobs:
           name: dead-code-analysis
           path: |
             admin-dead-code.json
-            landing-dead-code.json

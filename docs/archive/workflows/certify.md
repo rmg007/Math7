@@ -57,7 +57,7 @@ description: Independent post-implementation audit and certification
 
 - [ ] **Type Synchronization Verify**
   - **TypeScript**: Check `admin-panel/src/types/database.types.ts` matches schema
-  - **Dart**: Check `questerix_domain` or `student-app` models match schema
+  - **Dart**: Check `questerix_domain` / `questerix-student-app` models match schema
   - **Proof**: File timestamps and `git diff` output
 
 - [ ] **Constraint Stress Test**

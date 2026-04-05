@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Questerix Storage Protection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🛡️ Questerix Storage Protection Test</h1>
+    <div id="results"></div>
+    
+    <script src="flutter_bootstrap.js"></script>
+    <script>
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            document.getElementById('results').appendChild(div);
+        }
+
+        function testStorageProtection() {
+            addResult('🔄 Testing storage protection system...', 'info');
+            
+            // Test 1: Check if storage polyfill is active
+            try {
+                const config = window.flutterConfiguration;
+                if (config) {
+                    addResult(`✅ Flutter configuration found: ${JSON.stringify(config)}`, 'success');
+                } else {
+                    addResult('⚠️ Flutter configuration not found', 'warning');
+                }
+            } catch (e) {
+                addResult(`❌ Configuration test failed: ${e.message}`, 'error');
+            }
+
+            // Test 2: Test localStorage access
+            try {
+                localStorage.setItem('test_key', 'test_value');
+                const value = localStorage.getItem('test_key');
+                localStorage.removeItem('test_key');
+                addResult(`✅ localStorage working: ${value}`, 'success');
+            } catch (e) {
+                addResult(`⚠️ localStorage error (expected in restricted context): ${e.message}`, 'warning');
+            }
+
+            // Test 3: Test sessionStorage access
+            try {
+                sessionStorage.setItem('test_key', 'test_value');
+                const value = sessionStorage.getItem('test_key');
+                sessionStorage.removeItem('test_key');
+                addResult(`✅ sessionStorage working: ${value}`, 'success');
+            } catch (e) {
+                addResult(`⚠️ sessionStorage error (expected in restricted context): ${e.message}`, 'warning');
+            }
+
+            // Test 4: Trigger a storage error intentionally
+            try {
+                // This might trigger the "Access to storage is not allowed" error
+                const iframe = document.createElement('iframe');
+                iframe.src = 'data:text/html,<script>localStorage.setItem("test", "test")</script>';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                addResult('✅ Cross-origin storage test initiated', 'info');
+            } catch (e) {
+                addResult(`⚠️ Cross-origin test error: ${e.message}`, 'warning');
+            }
+
+            // Test 5: Check error handlers
+            setTimeout(() => {
+                addResult('✅ Storage protection test completed', 'success');
+                addResult('If you see this message without any "Access to storage is not allowed" errors in console, the protection is working!', 'success');
+            }, 1000);
+        }
+
+        // Run tests when page loads
+        window.addEventListener('load', testStorageProtection);
+    </script>
+</body>
+</html>

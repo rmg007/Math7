@@ -2,7 +2,8 @@ import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import { CheckSquare, Square, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { SubjectRowProps, statusConfig } from './subject-row';
+import type { SubjectRowProps } from './subject-row';
+import { statusConfig } from './subject-row-status';
 
 export const SubjectCard = memo(
   ({ subject, isSelected, onSelect, onEdit, onDelete, visibleColumns }: SubjectRowProps) => {

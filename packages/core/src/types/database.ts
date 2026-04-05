@@ -1265,6 +1265,42 @@ export type Database = {
           },
         ]
       }
+      rate_limit_buckets: {
+        Row: {
+          circuit_failure_count: number
+          circuit_open_until: string | null
+          created_at: string
+          id: string
+          key: string
+          request_count: number
+          route: string
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          circuit_failure_count?: number
+          circuit_open_until?: string | null
+          created_at?: string
+          id?: string
+          key: string
+          request_count?: number
+          route: string
+          updated_at?: string
+          window_start: string
+        }
+        Update: {
+          circuit_failure_count?: number
+          circuit_open_until?: string | null
+          created_at?: string
+          id?: string
+          key?: string
+          request_count?: number
+          route?: string
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       security_logs: {
         Row: {
           app_id: string | null
@@ -1916,10 +1952,22 @@ export type Database = {
         Args: { p_group_id: string; p_user_id: string }
         Returns: boolean
       }
+      check_rate_limit: {
+        Args: {
+          p_circuit_reset_ms?: number
+          p_circuit_threshold?: number
+          p_key: string
+          p_max_requests: number
+          p_route: string
+          p_window_ms: number
+        }
+        Returns: Json
+      }
       check_sync_health: {
         Args: { client_version: string; schema_version: number }
         Returns: Json
       }
+      cleanup_rate_limit_buckets: { Args: never; Returns: undefined }
       consume_tenant_tokens: {
         Args: { p_app_id: string; p_operation?: string; p_tokens_used: number }
         Returns: Json

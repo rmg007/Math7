@@ -10,13 +10,17 @@ Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host "Phase 0: Project Bootstrap Validation"
 Write-Host "=========================================" -ForegroundColor Cyan
 
-# Check student-app exists
+# Check questerix-student-app (or legacy student-app) exists
 Write-Host ""
 Write-Host "Checking Flutter Student App..."
-if (Test-Path "student-app") {
-    Write-Host "  Directory exists"
+$studentDir = $null
+if (Test-Path "questerix-student-app") { $studentDir = "questerix-student-app" }
+elseif (Test-Path "student-app") { $studentDir = "student-app" }
+
+if ($studentDir) {
+    Write-Host "  Using $studentDir"
     
-    Set-Location "student-app"
+    Set-Location $studentDir
     
     # Check pubspec.yaml
     if (Test-Path "pubspec.yaml") {
@@ -57,7 +61,7 @@ if (Test-Path "student-app") {
     
     Set-Location $originalLocation
 } else {
-    Write-Host "  ERROR: student-app directory not found" -ForegroundColor Red
+    Write-Host "  ERROR: questerix-student-app / student-app not found" -ForegroundColor Red
     $errors++
 }
 

@@ -29,7 +29,7 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-const rateLimit = createRateLimitMiddleware(rateLimitConfigs.generateQuestions);
+const rateLimit = createRateLimitMiddleware(rateLimitConfigs.generateQuestions, 'parse-import-prompt');
 
 interface ImportRequest {
   text: string;
@@ -48,7 +48,7 @@ export const parseImportHandler = withErrorSanitization(
     if (envError) return envError
 
     // Rate limiting
-    const rateLimitResult = rateLimit.middleware(req);
+    const rateLimitResult = await rateLimit.middleware(req);
     if (!rateLimitResult.allowed) {
       return rateLimitResult.response!;
     }

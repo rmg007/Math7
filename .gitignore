@@ -138,6 +138,7 @@ questerix-cortex/node_modules/
 # DEAD PROJECTS (DO NOT PUBLISH)
 # =============================================================================
 landing-pages/
+# student-app/ = legacy checkout name only; canonical app is questerix-student-app/
 student-app/
 
 # =============================================================================

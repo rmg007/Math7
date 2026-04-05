@@ -1,4 +1,4 @@
-import { getMetaEnv, isDevMode } from '@/config/env';
+import { getMetaEnv } from '@/config/env';
 import { supabase } from '@/lib/supabase';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { validateContent } from '../validateContent';

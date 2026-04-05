@@ -11,7 +11,7 @@ This package is the **canonical home** for all Supabase-generated TypeScript typ
 Without a shared type package, schema changes require simultaneous manual updates in every consumer:
 
 - `admin-panel/src/lib/database.types.ts` (React)
-- `student-app/lib/data/models/` (Flutter)
+- `questerix-student-app/lib/data/models/` (Flutter; path may vary in the student-app repo)
 
 With `@questerix/core`, there is one command to run after every Supabase migration, and TypeScript consumers automatically get the latest types via an import alias.
 
@@ -57,7 +57,7 @@ Flutter/Dart cannot directly consume TypeScript types. The bridging strategy is:
 
 ### Option A — Manual Dart Mirror (Current)
 
-The Flutter app maintains hand-written Dart models in `student-app/lib/data/models/`. After a schema change:
+The Flutter app maintains hand-written Dart models in `questerix-student-app/lib/` (e.g. `lib/data/models/`). After a schema change:
 
 1. **Review** the diff in `packages/core/src/types/database.types.ts`
 2. **Update** the corresponding Dart model in `student-app/lib/data/models/`
@@ -70,7 +70,7 @@ Consider [`supabase-codegen`](https://pub.dev/packages/supabase_codegen) or a cu
 **Pattern for schema drift detection:**
 
 ```dart
-// In your Drift schema (student-app/lib/data/local_database.dart),
+// In your Drift schema (questerix-student-app/lib/.../database.dart),
 // use the same column names as the Supabase schema.
 // Then the TypeScript types act as the contract specification.
 ```

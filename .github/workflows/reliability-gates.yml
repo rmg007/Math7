@@ -50,7 +50,7 @@ jobs:
           pip install pytest pytest-asyncio
 
       - name: Install Flutter dependencies
-        run: cd student-app && flutter pub get
+        run: cd questerix-student-app && flutter pub get
 
       # Run reliability tests
       - name: Run Edge Function reliability tests
@@ -68,8 +68,8 @@ jobs:
 
       - name: Run Flutter sync service reliability tests
         run: |
-          cd student-app
-          flutter test test/core/sync/sync_service_reliability_test.dart
+          cd questerix-student-app
+          flutter test test/core/sync/reliability_repro_test.dart
 
       - name: Run circuit breaker integration tests
         run: |

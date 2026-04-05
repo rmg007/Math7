@@ -1,3 +1,17 @@
+import {
+  ArrowLeft,
+  ClipboardList,
+  Home,
+  Layers,
+  LayoutDashboard,
+  Plus,
+  School,
+  Settings,
+  Users,
+} from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+
 import { AdminHeader } from '@/components/ui/admin-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,240 +31,11 @@ import { supabase } from '@/lib/supabase';
 import { castJson } from '@/lib/type-utils';
 import { cn, isValidUUID } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  ArrowLeft,
-  Check,
-  CheckCircle,
-  Circle,
-  ClipboardList,
-  Clock,
-  Copy,
-  Edit3,
-  Home,
-  Layers,
-  LayoutDashboard,
-  Plus,
-  School,
-  Settings,
-  Trash2,
-  UserPlus,
-  Users,
-} from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
 
-interface Assignment {
-  id: string;
-  completion_trigger?: unknown;
-  created_at: string;
-  due_date: string | null;
-  group_id: string | null;
-  scope: 'mandatory' | 'suggested' | null;
-  status: 'pending' | 'completed' | 'late' | null;
-  student_id: string | null;
-  target_id: string;
-  type: 'skill_mastery' | 'time_goal' | 'custom';
-  updated_at: string;
-}
-
-interface Member {
-  group_id: string;
-  is_anonymous: boolean | null;
-  joined_at: string;
-  nickname: string | null;
-  user_id: string;
-  profiles: {
-    id: string;
-    email: string;
-    full_name: string | null;
-  };
-}
-
-const MemberRow = memo(
-  ({
-    member,
-    onEdit,
-    onRemove,
-    isEditing,
-    editNickname,
-    onNicknameChange,
-    onSave,
-    onCancel,
-    isPending,
-  }: {
-    member: Member;
-    onEdit: (id: string, nickname: string) => void;
-    onRemove: (id: string) => void;
-    isEditing: boolean;
-    editNickname: string;
-    onNicknameChange: (val: string) => void;
-    onSave: (id: string) => void;
-    onCancel: () => void;
-    isPending: boolean;
-  }) => {
-    const displayName =
-      member.nickname || member.profiles?.full_name || member.profiles?.email || 'Anonymous User';
-    const isAnonymous = !member.user_id || !member.profiles?.email;
-
-    return (
-      <div className="flex items-center justify-between p-4 hover:bg-gray-50/50 transition-all group">
-        <div className="flex items-center gap-4 flex-1">
-          <div className="h-10 w-10 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-700 font-semibold text-sm">
-            {displayName.charAt(0).toUpperCase()}
-          </div>
-
-          <div className="flex-1">
-            {isEditing ? (
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={editNickname}
-                  onChange={(e) => onNicknameChange(e.target.value)}
-                  className="px-3 py-1.5 bg-white border border-gray-200 rounded text-gray-900 text-sm font-medium focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-600/20 w-full max-w-[200px]"
-                  placeholder="Enter nickname"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && member.user_id) onSave(member.user_id);
-                    if (e.key === 'Escape') onCancel();
-                  }}
-                  autoFocus
-                />
-                <Button
-                  size="sm"
-                  className="h-8 rounded-lg font-bold text-2xs uppercase tracking-widest"
-                  onClick={() => member.user_id && onSave(member.user_id)}
-                  disabled={isPending || !member.user_id}
-                >
-                  Save
-                </Button>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center gap-2">
-                  <Link
-                    to={`/students/${member.user_id}`}
-                    className="font-bold text-gray-900 text-sm leading-tight hover:text-teal-600 transition-colors"
-                  >
-                    {displayName}
-                  </Link>
-                  {isAnonymous && (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-semibold uppercase">
-                      Anon
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 mt-0.5">
-                  {member.profiles?.email && (
-                    <p className="text-xs text-gray-400 font-semibold">{member.profiles.email}</p>
-                  )}
-                  <span className="text-xs text-gray-300">•</span>
-                  <p className="text-xs text-gray-400 font-semibold">
-                    {member.joined_at ? new Date(member.joined_at).toLocaleDateString() : 'Active'}
-                  </p>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {!isEditing && (
-          <div className="flex items-center gap-1">
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => member.user_id && onEdit(member.user_id, member.nickname || '')}
-              className="h-7 w-7 rounded text-gray-400 hover:text-teal-600 hover:bg-teal-50"
-            >
-              <Edit3 className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => member.user_id && onRemove(member.user_id)}
-              className="h-7 w-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        )}
-      </div>
-    );
-  }
-);
-
-const AssignmentRow = memo(({ assignment }: { assignment: Assignment }) => {
-  return (
-    <div
-      key={assignment.id}
-      className="p-4 flex items-center justify-between hover:bg-gray-50/50 transition-all group"
-    >
-      <div className="flex items-center gap-4">
-        <div
-          className={cn(
-            'p-2.5 rounded-xl border',
-            assignment.type === 'skill_mastery'
-              ? 'bg-blue-500/10 border-blue-500/10 text-blue-600'
-              : 'bg-purple-500/10 border-purple-500/10 text-purple-600'
-          )}
-        >
-          <ClipboardList className="h-5 w-5" />
-        </div>
-        <div>
-          <h3 className="font-bold text-gray-900 text-sm leading-tight capitalize">
-            {assignment.type.replace('_', ' ')}
-          </h3>
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-2xs font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">
-              {assignment.scope}
-            </span>
-            {assignment.due_date && (
-              <div className="flex items-center gap-1">
-                <span className="text-2xs text-gray-300">•</span>
-                <Clock className="w-3 h-3 text-gray-300" />
-                <span className="text-xs text-gray-400 font-semibold">
-                  {new Date(assignment.due_date).toLocaleDateString()}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      <div
-        className={cn(
-          'px-3 py-1 rounded-full text-2xs font-black uppercase tracking-[0.1em] border',
-          assignment.status === 'pending'
-            ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
-            : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-        )}
-      >
-        {assignment.status}
-      </div>
-    </div>
-  );
-});
-
-const ProgressCell = memo(({ status }: { status: string }) => {
-  return (
-    <TableCell className="text-center py-4">
-      {status === 'mastered' ? (
-        <div className="flex justify-center">
-          <div className="p-1 bg-emerald-500/10 rounded-lg">
-            <CheckCircle className="h-4 w-4 text-emerald-600" />
-          </div>
-        </div>
-      ) : status === 'in_progress' ? (
-        <div className="flex justify-center">
-          <div className="p-1 bg-amber-500/10 rounded-lg">
-            <Clock className="h-4 w-4 text-amber-600 animate-pulse" />
-          </div>
-        </div>
-      ) : (
-        <div className="flex justify-center">
-          <Circle className="h-4 w-4 text-gray-100" />
-        </div>
-      )}
-    </TableCell>
-  );
-});
+import { AssignmentRow, type Assignment } from '../components/group-detail/assignment-row';
+import { GroupOverviewCards } from '../components/group-detail/group-overview-cards';
+import { MemberRow, type Member } from '../components/group-detail/member-row';
+import { ProgressCell } from '../components/group-detail/progress-cell';
 
 export function GroupDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -583,90 +368,13 @@ export function GroupDetailPage() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 outline-none">
-          <div className="grid gap-6 md:grid-cols-3">
-            <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/5 group hover:border-indigo-100/50 transition-all">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
-                    Cohort Size
-                  </span>
-                  <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-600">
-                    <Users className="w-5 h-5" />
-                  </div>
-                </div>
-                <p className="text-3xl font-black text-gray-900 tabular-nums tracking-tight">
-                  {memberCount}
-                </p>
-                <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">
-                  Active Members
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/5 group hover:border-indigo-100/50 transition-all">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
-                    Activation Code
-                  </span>
-                  <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600">
-                    <Copy className="w-5 h-5" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <code className="text-2xl font-mono font-black text-indigo-600 tracking-extra-wide">
-                    {group.join_code}
-                  </code>
-                  <Button
-                    onClick={() => copyJoinCode()}
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 rounded-xl text-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
-                  >
-                    {copiedCode ? (
-                      <Check className="h-5 w-5 text-emerald-500" />
-                    ) : (
-                      <Copy className="h-5 w-5" />
-                    )}
-                  </Button>
-                </div>
-                <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">
-                  Security Authorization
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/5 group hover:border-indigo-100/50 transition-all">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
-                    Anonymous Entry
-                  </span>
-                  <div
-                    className={cn(
-                      'p-2 rounded-xl',
-                      group.allow_anonymous_join
-                        ? 'bg-emerald-500/10 text-emerald-600'
-                        : 'bg-gray-100 text-gray-400'
-                    )}
-                  >
-                    <UserPlus className="w-5 h-5" />
-                  </div>
-                </div>
-                <p
-                  className={cn(
-                    'text-lg font-black uppercase tracking-tight',
-                    group.allow_anonymous_join ? 'text-emerald-600' : 'text-gray-400'
-                  )}
-                >
-                  {group.allow_anonymous_join ? 'ACTIVE PROTOCOL' : 'RESTRICTED'}
-                </p>
-                <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">
-                  Access Policy
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          <GroupOverviewCards
+            memberCount={memberCount}
+            joinCode={group.join_code}
+            copiedCode={copiedCode}
+            onCopyJoinCode={() => copyJoinCode()}
+            allowAnonymousJoin={Boolean(group.allow_anonymous_join)}
+          />
 
           <div className="grid gap-8 lg:grid-cols-2">
             <Card className="glass-card border-0 shadow-2xl shadow-indigo-500/5 overflow-hidden flex flex-col">

@@ -126,7 +126,7 @@ After proposing a fix:
 ### BUG-04: Naming Drift Between Supabase Schema and Drift ORM
 
 - **Signature**: Column name mismatch — e.g., `best_streak` (Supabase) vs `longest_streak` (Drift)
-- **Detection**: Compare `supabase/schema_master.sql` against `student-app/lib/src/core/database/database.dart`
+- **Detection**: Compare `supabase/schema_master.sql` against `questerix-student-app/lib/src/core/database/database.dart`
 - A single character difference means the field silently maps to `null`.
 
 ### BUG-05: Ghost Data from Missing Tombstone Propagation
@@ -137,7 +137,7 @@ After proposing a fix:
 ### BUG-06: Zombie Tenant from Hardcoded Test UUIDs
 
 - **Scan for**: UUID literals (strings starting with `51f4`), hardcoded `app_id` or `user_id`
-- **Detection**: `grep -r "51f4" student-app/lib/`
+- **Detection**: `grep -r "51f4" questerix-student-app/lib/`
 
 ### BUG-07: Blind Fire RPC (No Argument Validation)
 

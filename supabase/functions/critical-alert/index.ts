@@ -14,7 +14,7 @@ interface ErrorRecord {
   };
 }
 
-const rateLimit = createRateLimitMiddleware(rateLimitConfigs.anonymous);
+const rateLimit = createRateLimitMiddleware(rateLimitConfigs.anonymous, 'critical-alert');
 
 /**
  * Constant-time comparison for strings to prevent timing attacks.
@@ -33,7 +33,7 @@ import { checkEnvironmentGuard } from "../_shared/env-guard.ts";
 export const criticalAlertHandler = withErrorSanitization(
   async (req: Request) => {
     // Rate limiting
-    const rateLimitResult = rateLimit.middleware(req);
+    const rateLimitResult = await rateLimit.middleware(req);
     if (!rateLimitResult.allowed) {
       return rateLimitResult.response!;
     }

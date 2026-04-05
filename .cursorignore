@@ -1,0 +1,104 @@
+# =============================================================================
+# TOKEN-SAVING IGNORE - Questerix (Admin Panel + Supabase Backend)
+# =============================================================================
+
+# -- Dependencies -------------------------------------------------------------
+**/node_modules/
+
+# -- Lock files ---------------------------------------------------------------
+**/package-lock.json
+**/yarn.lock
+**/pnpm-lock.yaml
+
+# -- Build & dist output ------------------------------------------------------
+**/dist/
+**/build/
+admin-panel/dist/
+
+# -- Supabase generated types (large, auto-generated) ------------------------
+admin-panel/src/lib/database.types.utf8.ts
+admin-panel/src/lib/database.types.ts
+
+# -- Test artifacts & reports -------------------------------------------------
+**/playwright-report/
+**/test-results/
+**/coverage/
+**/__checks__/
+**/__snapshots__/
+tests/__screenshots__/
+**/lighthouse-*.json
+.auth/
+
+# -- Caches & tooling --------------------------------------------------------
+**/.wrangler/
+**/.supabase/
+**/.cache/
+**/.pytest_cache/
+**/.ruff_cache/
+**/__pycache__/
+**/*.pyc
+tools/bin/
+search.db
+
+# -- Cortex generated outputs ------------------------------------------------
+questerix-cortex/outputs/
+questerix-cortex/dist/
+questerix-cortex/node_modules/
+
+# -- Logs & temp files --------------------------------------------------------
+**/*.log
+**/*.tmp
+**/tmp/
+**/logs/
+**/*_output.txt
+**/*_error.txt
+tsc_errors*.txt
+diff.txt
+**/*.diagnostic.md
+_gh_failures/
+
+# -- Secrets & env (never index) ----------------------------------------------
+**/.env
+**/.env.*
+**/.secrets*
+temp-secrets-*.json
+.mcp_config.json
+
+# -- IDE & agent noise --------------------------------------------------------
+.agent/
+.session/
+.claude/
+.aider*
+.gemini/antigravity/knowledge/
+
+# -- OS junk ------------------------------------------------------------------
+**/.DS_Store
+**/Thumbs.db
+
+# -- Media & binary (no value to AI) ------------------------------------------
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.gif
+**/*.ico
+**/*.svg
+**/*.mp4
+**/*.webm
+**/*.woff
+**/*.woff2
+**/*.ttf
+**/*.eot
+
+# -- Minified bundles ---------------------------------------------------------
+**/*.min.js
+**/*.min.css
+**/*.chunk.js
+**/*.chunk.css
+
+# -- IntelliJ / JetBrains -----------------------------------------------------
+**/.idea/
+**/*.iml
+
+# -- Dead projects (legacy) ---------------------------------------------------
+landing-pages/
+student-app/

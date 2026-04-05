@@ -16,16 +16,18 @@ param(
     [switch]$SkipSmoke,
     [switch]$DryRun,
     [switch]$Fast,
-    [string]$StudentAppPath = (Join-Path (Split-Path -Parent $ScriptDir) 'questerix-student-app')
+    [string]$StudentAppPath = ''
 )
- 
-$SkipLanding = $true # Hard skip for development
  
 # =============================================================================
 # CONFIGURATION
 # =============================================================================
 $ErrorActionPreference = 'Stop'
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$WorkspaceDir = Split-Path -Parent $ScriptDir
+if ([string]::IsNullOrWhiteSpace($StudentAppPath)) {
+    $StudentAppPath = Join-Path $WorkspaceDir 'questerix-student-app'
+}
 $LogFile = Join-Path $ScriptDir "deploy-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
  
 # Standardized Colors & Logging
@@ -93,7 +95,48 @@ function Invoke-PhasePreflight {
         Write-Warn ".secrets file not found. Some phases may fail."
     }
 
-    # 4. Cloudflare Access Check
+    # 4. Contract Verification
+    Write-Info "Running question type contract verification..."
+    $contractTestCmd = "npx vitest run packages/core/src/constants/question-type-contract.test.ts --config admin-panel/vite.config.ts --root ."
+    $oldEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    Push-Location $ScriptDir
+    $contractResult = Invoke-Expression $contractTestCmd 2>&1
+    $exitCode = $LASTEXITCODE
+    Pop-Location
+    $ErrorActionPreference = $oldEap
+
+    if ($exitCode -ne 0) {
+        Write-Err "Contract verification FAILED! Your code enums do not match the database schema."
+        $contractResult | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
+        throw "Contract verification failed. See logs for details."
+    }
+    Write-Success "Contract verification passed"
+
+    # 5. Connectivity Pre-check
+    Write-Info "Checking connectivity to external services..."
+    $workerUrl = $script:Config.VITE_WORKERS_URL
+    if ($workerUrl) {
+        try {
+            # Try a HEAD request to the worker
+            $resp = Invoke-WebRequest -Uri $workerUrl -Method Head -TimeoutSec 5 -ErrorAction Stop -UseBasicParsing
+            Write-Success "Cloudflare Worker reachable: $workerUrl"
+        } catch {
+            Write-Warn "Could not reach Cloudflare Worker at $workerUrl. Ensure VITE_WORKERS_URL is correct."
+        }
+    }
+
+    $supabaseUrl = $script:Config.supabase.url
+    if ($supabaseUrl) {
+        try {
+            $resp = Invoke-WebRequest -Uri "$supabaseUrl/rest/v1/" -Method Head -TimeoutSec 5 -ErrorAction Stop -UseBasicParsing
+            Write-Success "Supabase API reachable: $supabaseUrl"
+        } catch {
+            Write-Warn "Could not reach Supabase API at $supabaseUrl. Check your network or project status."
+        }
+    }
+
+    # 6. Cloudflare Access Check
     # (npx wrangler whoami --config $null) | Out-Null
     
     Write-Success "Preflight passed"
@@ -129,13 +172,22 @@ function Invoke-PhaseBuild {
     Write-Info "Generating environment files..."
     & (Join-Path $ScriptDir 'scripts\deploy\generate-env.ps1') -ConfigFile $script:ConfigFile
     
-    # Clean previous builds
-    Write-Info "Cleaning previous build artifacts..."
+    # Clean and Archive previous builds
+    Write-Info "Archiving previous build artifacts..."
     $adminDist = Join-Path $ScriptDir 'admin-panel\dist'
     $studentBuild = Join-Path $StudentAppPath 'build\web'
+    $archiveDir = Join-Path $ScriptDir "dist-archive\$(Get-Date -Format 'yyyyMMdd-HHmmss')"
     
-    if (Test-Path $adminDist) { Remove-Item -Recurse -Force $adminDist }
-    if (Test-Path $studentBuild) { Remove-Item -Recurse -Force $studentBuild }
+    if (Test-Path $adminDist) { 
+        New-Item -ItemType Directory -Path (Join-Path $archiveDir "admin") -Force | Out-Null
+        Copy-Item -Path $adminDist -Destination (Join-Path $archiveDir "admin") -Recurse -Force
+        Remove-Item -Recurse -Force $adminDist
+    }
+    if (Test-Path $studentBuild) { 
+        New-Item -ItemType Directory -Path (Join-Path $archiveDir "student") -Force | Out-Null
+        Copy-Item -Path $studentBuild -Destination (Join-Path $archiveDir "student") -Recurse -Force
+        Remove-Item -Recurse -Force $studentBuild
+    }
  
     # Build Admin Panel
     if ($Target -eq 'all' -or $Target -eq 'admin-panel') {
@@ -169,11 +221,7 @@ function Invoke-PhaseDeploy {
         return
     }
     
-    if ($SkipLanding) {
-        & (Join-Path $ScriptDir 'scripts\deploy\deploy-all.ps1') -ConfigFile $script:ConfigFile -Target $Target -Branch $Branch -SkipLanding -StudentAppDir $StudentAppPath
-    } else {
-        & (Join-Path $ScriptDir 'scripts\deploy\deploy-all.ps1') -ConfigFile $script:ConfigFile -Target $Target -Branch $Branch -StudentAppDir $StudentAppPath
-    }
+    & (Join-Path $ScriptDir 'scripts\deploy\deploy-all.ps1') -ConfigFile $script:ConfigFile -Target $Target -Branch $Branch -StudentAppDir $StudentAppPath
     
     Write-Success "Deployment to $Branch complete"
 }

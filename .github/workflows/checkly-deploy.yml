@@ -43,7 +43,6 @@ env:
   MONITOR_USER_PASSWORD: ${{ secrets.MONITOR_USER_PASSWORD }}
   SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
   ADMIN_URL: https://questerix-admin.pages.dev
-  LANDING_URL: https://questerix-landing.pages.dev
   STUDENT_URL: https://questerix-student.pages.dev
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
 
@@ -90,7 +89,6 @@ jobs:
     if: always() && !cancelled()
     outputs:
       admin-status: ${{ steps.check-admin.outcome }}
-      landing-status: ${{ steps.check-landing.outcome }}
       student-status: ${{ steps.check-student.outcome }}
       supabase-api-status: ${{ steps.check-supabase-api.outcome }}
       supabase-auth-status: ${{ steps.check-supabase-auth.outcome }}
@@ -111,22 +109,6 @@ jobs:
             sleep 10
           done
           echo "❌ Admin Panel: FAILED after 3 attempts"
-          exit 1
-
-      - name: Check Landing Pages
-        id: check-landing
-        if: always()
-        run: |
-          for i in 1 2 3; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$LANDING_URL")
-            if [ "$STATUS" -eq 200 ]; then
-              echo "✅ Landing Pages: HTTP $STATUS (attempt $i)"
-              exit 0
-            fi
-            echo "⚠️ Landing Pages: HTTP $STATUS (attempt $i/3), retrying in 10s..."
-            sleep 10
-          done
-          echo "❌ Landing Pages: FAILED after 3 attempts"
           exit 1
 
       - name: Check Student App
@@ -209,7 +191,7 @@ jobs:
         id: check-ssl
         if: always()
         run: |
-          for DOMAIN in questerix-admin.pages.dev questerix-landing.pages.dev questerix-student.pages.dev; do
+          for DOMAIN in questerix-admin.pages.dev questerix-student.pages.dev; do
             EXPIRY=$(echo | openssl s_client -servername $DOMAIN -connect $DOMAIN:443 2>/dev/null | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
             if [ -z "$EXPIRY" ]; then
               echo "❌ SSL for $DOMAIN: Could not retrieve certificate"
@@ -230,7 +212,7 @@ jobs:
         if: always()
         run: |
           echo "=== Response Time Report ==="
-          for URL in "$ADMIN_URL/login" "$LANDING_URL" "$STUDENT_URL" "$SUPABASE_URL/auth/v1/health"; do
+          for URL in "$ADMIN_URL/login" "$STUDENT_URL" "$SUPABASE_URL/auth/v1/health"; do
             TIME=$(curl -s -o /dev/null -w "%{time_total}" --max-time 15 "$URL")
             TIME_MS=$(echo "$TIME * 1000" | bc | cut -d. -f1)
             if [ "$TIME_MS" -gt 5000 ]; then
@@ -252,13 +234,12 @@ jobs:
 
           declare -A CHECKS
           CHECKS[admin]="${{ steps.check-admin.outcome }}"
-          CHECKS[landing]="${{ steps.check-landing.outcome }}"
           CHECKS[student]="${{ steps.check-student.outcome }}"
           CHECKS[supabase-api]="${{ steps.check-supabase-api.outcome }}"
           CHECKS[supabase-auth]="${{ steps.check-supabase-auth.outcome }}"
           CHECKS[edge-functions]="${{ steps.check-edge-functions.outcome }}"
 
-          for SERVICE in admin landing student supabase-api supabase-auth edge-functions; do
+          for SERVICE in admin student supabase-api supabase-auth edge-functions; do
             STATUS=${CHECKS[$SERVICE]}
             if [ "$STATUS" == "success" ]; then
               echo "  ✅ $SERVICE: HEALTHY"
@@ -309,18 +290,6 @@ jobs:
           VITE_SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
-      - name: Redeploy Landing Pages (if down)
-        if: needs.health-check.outputs.landing-status == 'failure'
-        run: |
-          echo "🔧 Self-healing: Redeploying Landing Pages..."
-          cd landing-pages
-          npm ci --legacy-peer-deps
-          npm run build
-          npx wrangler pages deploy dist --project-name questerix-landing --branch main
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
       - name: Redeploy Edge Functions (if failing)
         if: needs.health-check.outputs.edge-functions-status == 'failure'
         run: |
@@ -348,16 +317,6 @@ jobs:
               STILL_BROKEN=1
             else
               echo "✅ Admin Panel recovered!"
-            fi
-          fi
-
-          if [ "${{ needs.health-check.outputs.landing-status }}" == "failure" ]; then
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$LANDING_URL")
-            if [ "$STATUS" -ne 200 ]; then
-              echo "❌ Landing Pages still down after redeploy (HTTP $STATUS)"
-              STILL_BROKEN=1
-            else
-              echo "✅ Landing Pages recovered!"
             fi
           fi
 
@@ -406,18 +365,6 @@ jobs:
           VITE_SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
-      - name: Rebuild and redeploy Landing Pages (previous version)
-        if: needs.health-check.outputs.landing-status == 'failure'
-        run: |
-          echo "🔄 Deploying previous version of Landing Pages..."
-          cd landing-pages
-          npm ci --legacy-peer-deps
-          npm run build
-          npx wrangler pages deploy dist --project-name questerix-landing --branch main
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
   # =========================================================================
   # PHASE 5: Incident reporting — create GitHub Issue for failures
   # =========================================================================
@@ -441,7 +388,6 @@ jobs:
 
             const services = {
               'Admin Panel': '${{ needs.health-check.outputs.admin-status }}',
-              'Landing Pages': '${{ needs.health-check.outputs.landing-status }}',
               'Student App': '${{ needs.health-check.outputs.student-status }}',
               'Supabase REST API': '${{ needs.health-check.outputs.supabase-api-status }}',
               'Supabase Auth': '${{ needs.health-check.outputs.supabase-auth-status }}',
@@ -488,7 +434,7 @@ jobs:
             - **Auto-rollback result**: ${rollbackResult}
 
             ### Response Runbook
-            ${failedServices.includes('Admin Panel') || failedServices.includes('Landing Pages') || failedServices.includes('Student App') ?
+            ${failedServices.includes('Admin Panel') || failedServices.includes('Student App') ?
               '**Frontend Down**: Check [Cloudflare Status](https://www.cloudflarestatus.com/). Verify DNS. Check \`wrangler pages deployment list\`.' : ''}
             ${failedServices.includes('Supabase REST API') || failedServices.includes('Supabase Auth') ?
               '**Supabase Down**: Check [Supabase Status](https://status.supabase.com/). Verify billing/quotas. Check dashboard logs.' : ''}
@@ -652,7 +598,6 @@ jobs:
           echo "╠══════════════════════════════════════════════════════╣"
           echo "║ SERVICE STATUS:                                      ║"
           echo "║  Admin Panel:     ${{ needs.health-check.outputs.admin-status || 'unknown' }}"
-          echo "║  Landing Pages:   ${{ needs.health-check.outputs.landing-status || 'unknown' }}"
           echo "║  Student App:     ${{ needs.health-check.outputs.student-status || 'unknown' }}"
           echo "║  Supabase API:    ${{ needs.health-check.outputs.supabase-api-status || 'unknown' }}"
           echo "║  Supabase Auth:   ${{ needs.health-check.outputs.supabase-auth-status || 'unknown' }}"

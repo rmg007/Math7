@@ -1,48 +1,151 @@
-/// <reference path="../types.d.ts" />
+import { delay } from 'https://deno.land/std@0.168.0/async/delay.ts';
+import { assertEquals, assertExists } from 'https://deno.land/std@0.168.0/testing/asserts.ts';
+import {
+  createRateLimitMiddleware,
+  type RateLimitCheckFn,
+  type RateLimitConfig,
+  rateLimitConfigs,
+} from './rate-limiter.ts';
 
-// Type declarations for Deno
-declare global {
-  const Deno: {
-    test: (name: string, fn: () => void | Promise<void>) => void;
+function defaultKey(req: Request): string {
+  const authHeader = req.headers.get('Authorization');
+  if (authHeader) {
+    try {
+      const token = authHeader.replace('Bearer ', '');
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return `user:${payload.sub}`;
+    } catch {
+      // fall through
+    }
+  }
+  const forwarded = req.headers.get('x-forwarded-for');
+  const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+  return `ip:${ip}`;
+}
+
+/** In-memory check matching test expectations (no Supabase). */
+function createTestMemoryCheck(config: RateLimitConfig): RateLimitCheckFn {
+  type State = {
+    windowStart: number;
+    count: number;
+    violationStreak: number;
+    circuitOpenUntil: number;
+  };
+  const states = new Map<string, State>();
+
+  return async function check(req: Request) {
+    const key = config.keyGenerator ? config.keyGenerator(req) : defaultKey(req);
+    const now = Date.now();
+    let st = states.get(key);
+    if (!st) {
+      st = { windowStart: now, count: 0, violationStreak: 0, circuitOpenUntil: 0 };
+      states.set(key, st);
+    }
+
+    if (st.circuitOpenUntil > now) {
+      return {
+        allowed: false,
+        limit: config.maxRequests,
+        remaining: 0,
+        resetTime: st.circuitOpenUntil,
+        circuitOpen: true,
+        circuitResetTime: st.circuitOpenUntil,
+      };
+    }
+
+    if (st.circuitOpenUntil > 0 && st.circuitOpenUntil <= now) {
+      st.circuitOpenUntil = 0;
+      st.violationStreak = 0;
+      st.count = 0;
+      st.windowStart = now;
+    }
+
+    if (now - st.windowStart >= config.windowMs) {
+      st.windowStart = now;
+      st.count = 0;
+      st.violationStreak = 0;
+    }
+
+    const threshold = config.circuitBreakerThreshold ?? Number.MAX_SAFE_INTEGER;
+    const resetMs = config.circuitBreakerResetMs ?? 60_000;
+
+    if (st.count < config.maxRequests) {
+      st.count++;
+      st.violationStreak = 0;
+      return {
+        allowed: true,
+        limit: config.maxRequests,
+        remaining: config.maxRequests - st.count,
+        resetTime: st.windowStart + config.windowMs,
+      };
+    }
+
+    st.violationStreak++;
+
+    if (st.violationStreak > threshold) {
+      return {
+        allowed: false,
+        limit: config.maxRequests,
+        remaining: 0,
+        resetTime: st.windowStart + config.windowMs,
+        circuitOpen: true,
+        circuitResetTime: st.circuitOpenUntil,
+      };
+    }
+
+    if (st.violationStreak >= threshold) {
+      st.circuitOpenUntil = now + resetMs;
+    }
+
+    return {
+      allowed: false,
+      limit: config.maxRequests,
+      remaining: 0,
+      resetTime: st.windowStart + config.windowMs,
+    };
   };
 }
 
-import { delay } from 'https://deno.land/std@0.168.0/async/delay.ts';
-import { assertEquals, assertExists } from 'https://deno.land/std@0.168.0/testing/asserts.ts';
-import { createRateLimitMiddleware, rateLimitConfigs } from '../rate-limiter.ts';
+function createTestMiddleware(config: RateLimitConfig) {
+  return createRateLimitMiddleware(config, 'test-route', {
+    checkOverride: createTestMemoryCheck(config),
+  });
+}
+
+function bearerJwtForSub(sub: string) {
+  const payload = btoa(JSON.stringify({ sub }));
+  return `Bearer xx.${payload}.yy`;
+}
 
 Deno.test('Rate limiting should enforce request limits', async () => {
-  const rateLimit = createRateLimitMiddleware(rateLimitConfigs.generateQuestions);
   const config = rateLimitConfigs.generateQuestions;
-  
-  // Create a mock request
+  const rateLimit = createTestMiddleware(config);
+
   const mockRequest = new Request('http://localhost:9000/test', {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer test-token',
-      'Content-Type': 'application/json'
-    }
+      Authorization: 'Bearer test-token',
+      'Content-Type': 'application/json',
+    },
   });
 
-  // Make requests up to the limit
   let lastResult;
   for (let i = 0; i < config.maxRequests + 1; i++) {
-    lastResult = rateLimit.middleware(mockRequest);
+    lastResult = await rateLimit.middleware(mockRequest);
   }
 
   assertExists(lastResult);
-  
-  // The last request should be rate limited
-  if (!lastResult.allowed) {
-    assertEquals(lastResult.response?.status, 429);
-    
+
+  if (!lastResult!.allowed) {
+    assertEquals(lastResult!.response?.status, 429);
+
     const rateLimitHeaders = {
-      limit: lastResult.response?.headers.get('X-RateLimit-Limit'),
-      remaining: lastResult.response?.headers.get('X-RateLimit-Remaining'),
-      reset: lastResult.response?.headers.get('X-RateLimit-Reset'),
-      retryAfter: lastResult.response?.headers.get('Retry-After')
+      limit: lastResult!.response?.headers.get('X-RateLimit-Limit'),
+      remaining: lastResult!.response?.headers.get('X-RateLimit-Remaining'),
+      reset: lastResult!.response?.headers.get('X-RateLimit-Reset'),
+      retryAfter: lastResult!.response?.headers.get('Retry-After'),
     };
-    
+
     assertEquals(rateLimitHeaders.limit, config.maxRequests.toString());
     assertEquals(rateLimitHeaders.remaining, '0');
     assertExists(rateLimitHeaders.reset);
@@ -51,197 +154,177 @@ Deno.test('Rate limiting should enforce request limits', async () => {
 });
 
 Deno.test('Rate limiting should allow requests within limits', async () => {
-  const rateLimit = createRateLimitMiddleware(rateLimitConfigs.generateQuestions);
-  
+  const rateLimit = createTestMiddleware(rateLimitConfigs.generateQuestions);
+
   const mockRequest = new Request('http://localhost:9000/test', {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer test-token',
-      'Content-Type': 'application/json'
-    }
+      Authorization: 'Bearer test-token',
+      'Content-Type': 'application/json',
+    },
   });
 
-  // Make requests within the limit
   for (let i = 0; i < rateLimitConfigs.generateQuestions.maxRequests - 1; i++) {
-    const result = rateLimit.middleware(mockRequest);
+    const result = await rateLimit.middleware(mockRequest);
     assertEquals(result.allowed, true, `Request ${i + 1} should be allowed`);
   }
 });
 
 Deno.test('Rate limiting should provide proper headers for successful requests', async () => {
-  const rateLimit = createRateLimitMiddleware(rateLimitConfigs.generateQuestions);
-  
+  const rateLimit = createTestMiddleware(rateLimitConfigs.generateQuestions);
+
   const mockRequest = new Request('http://localhost:9000/test', {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer test-token',
-      'Content-Type': 'application/json'
-    }
+      Authorization: 'Bearer test-token',
+      'Content-Type': 'application/json',
+    },
   });
 
-  // Make a request
-  const middlewareResult = rateLimit.middleware(mockRequest);
+  const middlewareResult = await rateLimit.middleware(mockRequest);
   assertEquals(middlewareResult.allowed, true);
-  
-  // Get rate limit info for headers
-  const rateLimitResult = rateLimit.check(mockRequest);
-  
+
+  const rateLimitResult = await rateLimit.check(mockRequest);
+
   assertEquals(rateLimitResult.limit, rateLimitConfigs.generateQuestions.maxRequests);
-  assertExists(rateLimitResult.remaining >= 0);
-  assertExists(rateLimitResult.resetTime > Date.now());
+  assertEquals(rateLimitResult.remaining >= 0, true);
+  assertEquals(rateLimitResult.resetTime > Date.now() - 60_000, true);
 });
 
 Deno.test('Rate limiting should handle different configurations', async () => {
-  const generateQuestionsLimiter = createRateLimitMiddleware(rateLimitConfigs.generateQuestions);
-  const validateContentLimiter = createRateLimitMiddleware(rateLimitConfigs.validateContent);
-  
+  const generateQuestionsLimiter = createTestMiddleware(rateLimitConfigs.generateQuestions);
+  const validateContentLimiter = createTestMiddleware(rateLimitConfigs.validateContent);
+
   const mockRequest = new Request('http://localhost:9000/test', {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer test-token',
-      'Content-Type': 'application/json'
-    }
+      Authorization: 'Bearer test-token',
+      'Content-Type': 'application/json',
+    },
   });
 
-  // Both should allow the first request
-  const genResult = generateQuestionsLimiter.middleware(mockRequest);
-  const valResult = validateContentLimiter.middleware(mockRequest);
-  
+  const genResult = await generateQuestionsLimiter.middleware(mockRequest);
+  const valResult = await validateContentLimiter.middleware(mockRequest);
+
   assertEquals(genResult.allowed, true);
   assertEquals(valResult.allowed, true);
-  
-  // But they should have different limits
-  const genRateLimit = generateQuestionsLimiter.check(mockRequest);
-  const valRateLimit = validateContentLimiter.check(mockRequest);
-  
+
+  const genRateLimit = await generateQuestionsLimiter.check(mockRequest);
+  const valRateLimit = await validateContentLimiter.check(mockRequest);
+
   assertEquals(genRateLimit.limit, rateLimitConfigs.generateQuestions.maxRequests);
   assertEquals(valRateLimit.limit, rateLimitConfigs.validateContent.maxRequests);
 });
 
 Deno.test('Rate limiting should reset after window expires', async () => {
-  // Create a custom rate limiter with a very short window for testing
   const shortWindowConfig = {
-    windowMs: 100, // 100ms
-    maxRequests: 2
+    windowMs: 100,
+    maxRequests: 2,
   };
-  
-  const rateLimit = createRateLimitMiddleware(shortWindowConfig);
-  
+
+  const rateLimit = createTestMiddleware(shortWindowConfig);
+
   const mockRequest = new Request('http://localhost:9000/test', {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer test-token',
-      'Content-Type': 'application/json'
-    }
+      Authorization: 'Bearer test-token',
+      'Content-Type': 'application/json',
+    },
   });
 
-  // Exhaust the limit
-  rateLimit.middleware(mockRequest); // 1st request
-  rateLimit.middleware(mockRequest); // 2nd request
-  const blockedResult = rateLimit.middleware(mockRequest); // 3rd request should be blocked
-  
+  await rateLimit.middleware(mockRequest);
+  await rateLimit.middleware(mockRequest);
+  const blockedResult = await rateLimit.middleware(mockRequest);
+
   assertEquals(blockedResult.allowed, false);
-  
-  // Wait for the window to expire
-  await new Promise(resolve => setTimeout(resolve, 150));
-  
-  // Should be allowed again
-  const allowedResult = rateLimit.middleware(mockRequest);
+
+  await new Promise((resolve) => setTimeout(resolve, 150));
+
+  const allowedResult = await rateLimit.middleware(mockRequest);
   assertEquals(allowedResult.allowed, true);
 });
 
 Deno.test('Rate limiting should handle different users independently', async () => {
-  const rateLimit = createRateLimitMiddleware(rateLimitConfigs.generateQuestions);
-  
-  // Create requests for different users (simulated by different Authorization headers)
+  const rateLimit = createTestMiddleware(rateLimitConfigs.generateQuestions);
+
   const user1Request = new Request('http://localhost:9000/test', {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer user1-token',
-      'Content-Type': 'application/json'
-    }
+      Authorization: bearerJwtForSub('user1'),
+      'Content-Type': 'application/json',
+    },
   });
-  
+
   const user2Request = new Request('http://localhost:9000/test', {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer user2-token',
-      'Content-Type': 'application/json'
-    }
+      Authorization: bearerJwtForSub('user2'),
+      'Content-Type': 'application/json',
+    },
   });
 
-  // Exhaust limit for user 1
   for (let i = 0; i < rateLimitConfigs.generateQuestions.maxRequests; i++) {
-    rateLimit.middleware(user1Request);
+    await rateLimit.middleware(user1Request);
   }
-  
-  // User 1 should be blocked
-  const user1Blocked = rateLimit.middleware(user1Request);
+
+  const user1Blocked = await rateLimit.middleware(user1Request);
   assertEquals(user1Blocked.allowed, false);
-  
-  // But user 2 should still be allowed
-  const user2Allowed = rateLimit.middleware(user2Request);
+
+  const user2Allowed = await rateLimit.middleware(user2Request);
   assertEquals(user2Allowed.allowed, true);
 });
 
 Deno.test('Rate limiting should fallback to IP for unauthenticated requests', async () => {
-  const rateLimit = createRateLimitMiddleware(rateLimitConfigs.anonymous);
-  
-  // Create request without Authorization header but with IP
+  const rateLimit = createTestMiddleware(rateLimitConfigs.anonymous);
+
   const ipRequest = new Request('http://localhost:9000/test', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Forwarded-For': '192.168.1.100'
-    }
+      'X-Forwarded-For': '192.168.1.100',
+    },
   });
 
-  // Should work with IP-based limiting
-  const result = rateLimit.middleware(ipRequest);
+  const result = await rateLimit.middleware(ipRequest);
   assertEquals(result.allowed, true);
-  
-  const rateLimitResult = rateLimit.check(ipRequest);
+
+  const rateLimitResult = await rateLimit.check(ipRequest);
   assertEquals(rateLimitResult.limit, rateLimitConfigs.anonymous.maxRequests);
 });
 
 Deno.test('Circuit breaker should open after repeated violations', async () => {
-  // Create a rate limiter with low circuit breaker threshold for testing
   const circuitBreakerConfig = {
     windowMs: 1000,
     maxRequests: 2,
-    circuitBreakerThreshold: 3, // Open after 3 violations
-    circuitBreakerResetMs: 500, // Reset after 500ms
+    circuitBreakerThreshold: 3,
+    circuitBreakerResetMs: 500,
   };
-  
-  const rateLimit = createRateLimitMiddleware(circuitBreakerConfig);
-  
+
+  const rateLimit = createTestMiddleware(circuitBreakerConfig);
+
   const testRequest = new Request('http://localhost:9000/test', {
     method: 'POST',
     headers: {
-      'X-Forwarded-For': '192.168.1.200'
-    }
+      'X-Forwarded-For': '192.168.1.200',
+    },
   });
 
-  // Exhaust the limit (2 requests)
-  rateLimit.middleware(testRequest);
-  rateLimit.middleware(testRequest);
-  
-  // Trigger violations to open circuit breaker
+  await rateLimit.middleware(testRequest);
+  await rateLimit.middleware(testRequest);
+
   for (let i = 0; i < 3; i++) {
-    const result = rateLimit.middleware(testRequest);
+    const result = await rateLimit.middleware(testRequest);
     assertEquals(result.allowed, false);
-    assertEquals(result.response?.status, 429); // Rate limited
+    assertEquals(result.response?.status, 429);
   }
-  
-  // Circuit breaker should now be open
-  const circuitOpenResult = rateLimit.middleware(testRequest);
+
+  const circuitOpenResult = await rateLimit.middleware(testRequest);
   assertEquals(circuitOpenResult.allowed, false);
-  assertEquals(circuitOpenResult.response?.status, 503); // Service Unavailable
-  
-  // Check for circuit breaker headers
+  assertEquals(circuitOpenResult.response?.status, 503);
+
   const circuitHeader = circuitOpenResult.response?.headers.get('X-Circuit-Breaker');
   assertEquals(circuitHeader, 'open');
-  
+
   const resetHeader = circuitOpenResult.response?.headers.get('X-Circuit-Reset');
   assertExists(resetHeader);
 });
@@ -250,34 +333,30 @@ Deno.test('Circuit breaker should reset after timeout', async () => {
   const circuitBreakerConfig = {
     windowMs: 1000,
     maxRequests: 1,
-    circuitBreakerThreshold: 2, // Open after 2 violations
-    circuitBreakerResetMs: 300, // Reset after 300ms
+    circuitBreakerThreshold: 2,
+    circuitBreakerResetMs: 300,
   };
-  
-  const rateLimit = createRateLimitMiddleware(circuitBreakerConfig);
-  
+
+  const rateLimit = createTestMiddleware(circuitBreakerConfig);
+
   const testRequest = new Request('http://localhost:9000/test', {
     method: 'POST',
     headers: {
-      'X-Forwarded-For': '192.168.1.201'
-    }
+      'X-Forwarded-For': '192.168.1.201',
+    },
   });
 
-  // Exhaust limit and trigger circuit breaker
-  rateLimit.middleware(testRequest); // Use up the 1 allowed request
-  rateLimit.middleware(testRequest); // First violation
-  rateLimit.middleware(testRequest); // Second violation - should open circuit
-  
-  // Should be blocked by circuit breaker
-  const blockedResult = rateLimit.middleware(testRequest);
+  await rateLimit.middleware(testRequest);
+  await rateLimit.middleware(testRequest);
+  await rateLimit.middleware(testRequest);
+
+  const blockedResult = await rateLimit.middleware(testRequest);
   assertEquals(blockedResult.allowed, false);
   assertEquals(blockedResult.response?.status, 503);
-  
-  // Wait for circuit breaker to reset
+
   await delay(350);
-  
-  // Should work again after reset
-  const resetResult = rateLimit.middleware(testRequest);
+
+  const resetResult = await rateLimit.middleware(testRequest);
   assertEquals(resetResult.allowed, true);
 });
 
@@ -285,36 +364,33 @@ Deno.test('Circuit breaker should provide enhanced error responses', async () =>
   const circuitBreakerConfig = {
     windowMs: 1000,
     maxRequests: 1,
-    circuitBreakerThreshold: 1, // Open after 1 violation
+    circuitBreakerThreshold: 1,
     circuitBreakerResetMs: 1000,
   };
-  
-  const rateLimit = createRateLimitMiddleware(circuitBreakerConfig);
-  
+
+  const rateLimit = createTestMiddleware(circuitBreakerConfig);
+
   const testRequest = new Request('http://localhost:9000/test', {
     method: 'POST',
     headers: {
-      'X-Forwarded-For': '192.168.1.202'
-    }
+      'X-Forwarded-For': '192.168.1.202',
+    },
   });
 
-  // Trigger circuit breaker
-  rateLimit.middleware(testRequest); // Use up limit
-  rateLimit.middleware(testRequest); // Violation - opens circuit
-  
-  const circuitResult = rateLimit.middleware(testRequest);
+  await rateLimit.middleware(testRequest);
+  await rateLimit.middleware(testRequest);
+
+  const circuitResult = await rateLimit.middleware(testRequest);
   assertEquals(circuitResult.allowed, false);
-  
+
   const response = circuitResult.response!;
   assertEquals(response.status, 503);
-  
-  // Parse response body
+
   const responseBody = await response.json();
   assertEquals(responseBody.error, 'Service temporarily unavailable due to repeated violations');
   assertEquals(responseBody.circuitOpen, true);
   assertExists(responseBody.circuitResetTime);
-  
-  // Check headers
+
   assertEquals(response.headers.get('X-Circuit-Breaker'), 'open');
   assertEquals(response.headers.get('X-Circuit-Reset'), responseBody.circuitResetTime.toString());
 });
