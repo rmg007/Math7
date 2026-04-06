@@ -20,6 +20,7 @@ useDefault = true
     '''\.dart_tool''',
     '''build/''',
     '''dist/''',
+    '''dist-archive/''',
 
     # Environment files (gitignored, but may exist locally)
     '''\.secrets$''',
@@ -61,6 +62,7 @@ useDefault = true
   # 0f237e7a — PROD_BOT_PASSWORD = os.getenv(...) misidentified as generic-api-key
   commits = [
     "0f237e7a6b3e31307e06572489bc78d9d7522659",
+    "02195a6290d07593e475bfeec9f59215ba7c5334",
   ]
 
   regexTarget = "line"
